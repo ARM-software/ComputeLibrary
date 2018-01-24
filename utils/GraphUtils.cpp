@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,13 +30,7 @@
 #include "arm_compute/runtime/CL/CLTensor.h"
 #endif /* ARM_COMPUTE_CL */
 
-#include "arm_compute/core/Error.h"
-#include "arm_compute/core/PixelValue.h"
-
-#include <algorithm>
 #include <iomanip>
-#include <ostream>
-#include <random>
 
 using namespace arm_compute::graph_utils;
 
@@ -80,8 +74,10 @@ bool DummyAccessor::access_tensor(ITensor &tensor)
     return ret;
 }
 
-PPMAccessor::PPMAccessor(const std::string &ppm_path, bool bgr, float mean_r, float mean_g, float mean_b)
-    : _ppm_path(ppm_path), _bgr(bgr), _mean_r(mean_r), _mean_g(mean_g), _mean_b(mean_b)
+PPMAccessor::PPMAccessor(std::string ppm_path, bool bgr,
+                         float mean_r, float mean_g, float mean_b,
+                         float std_r, float std_g, float std_b)
+    : _ppm_path(std::move(ppm_path)), _bgr(bgr), _mean_r(mean_r), _mean_g(mean_g), _mean_b(mean_b), _std_r(std_r), _std_g(std_g), _std_b(std_b)
 {
 }
 
@@ -93,6 +89,12 @@ bool PPMAccessor::access_tensor(ITensor &tensor)
         _bgr ? _mean_b : _mean_r,
         _mean_g,
         _bgr ? _mean_r : _mean_b
+    };
+    const float std[3] =
+    {
+        _bgr ? _std_b : _std_r,
+        _std_g,
+        _bgr ? _std_r : _std_b
     };
 
     // Open PPM file
@@ -111,7 +113,7 @@ bool PPMAccessor::access_tensor(ITensor &tensor)
     execute_window_loop(window, [&](const Coordinates & id)
     {
         const float value                                     = *reinterpret_cast<float *>(tensor.ptr_to_element(id)) - mean[id.z()];
-        *reinterpret_cast<float *>(tensor.ptr_to_element(id)) = value;
+        *reinterpret_cast<float *>(tensor.ptr_to_element(id)) = value / std[id.z()];
     });
 
     return true;
@@ -140,16 +142,14 @@ TopNPredictionsAccessor::TopNPredictionsAccessor(const std::string &labels_path,
     }
 }
 
-bool TopNPredictionsAccessor::access_tensor(ITensor &tensor)
+template <typename T>
+void TopNPredictionsAccessor::access_predictions_tensor(ITensor &tensor)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON(_labels.size() != tensor.info()->dimension(0));
-
     // Get the predicted class
-    std::vector<float>  classes_prob;
+    std::vector<T>      classes_prob;
     std::vector<size_t> index;
 
-    const auto   output_net  = reinterpret_cast<float *>(tensor.buffer() + tensor.info()->offset_first_element_in_bytes());
+    const auto   output_net  = reinterpret_cast<T *>(tensor.buffer() + tensor.info()->offset_first_element_in_bytes());
     const size_t num_classes = tensor.info()->dimension(0);
 
     classes_prob.resize(num_classes);
@@ -170,9 +170,27 @@ bool TopNPredictionsAccessor::access_tensor(ITensor &tensor)
     for(size_t i = 0; i < _top_n; ++i)
     {
         _output_stream << std::fixed << std::setprecision(4)
-                       << classes_prob[index.at(i)]
+                       << +classes_prob[index.at(i)]
                        << " - [id = " << index.at(i) << "]"
                        << ", " << _labels[index.at(i)] << std::endl;
+    }
+}
+
+bool TopNPredictionsAccessor::access_tensor(ITensor &tensor)
+{
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::F32, DataType::QASYMM8);
+    ARM_COMPUTE_ERROR_ON(_labels.size() != tensor.info()->dimension(0));
+
+    switch(tensor.info()->data_type())
+    {
+        case DataType::QASYMM8:
+            access_predictions_tensor<uint8_t>(tensor);
+            break;
+        case DataType::F32:
+            access_predictions_tensor<float>(tensor);
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT SUPPORTED!");
     }
 
     return false;
@@ -314,6 +332,7 @@ bool NumPyBinLoader::access_tensor(ITensor &tensor)
 
     // Validate tensor shape
     ARM_COMPUTE_ERROR_ON_MSG(shape.size() != tensor_shape.num_dimensions(), "Tensor ranks mismatch");
+
     if(fortran_order)
     {
         for(size_t i = 0; i < shape.size(); ++i)

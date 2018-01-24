@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -143,9 +143,9 @@ Data Structures</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:a9192abe0879f0aadca4e62be269295bd"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset.xhtml#a9192abe0879f0aadca4e62be269295bd">type</a> = typename T::type</td></tr>
-<tr class="memdesc:a9192abe0879f0aadca4e62be269295bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Type of the dataset.  <a href="#a9192abe0879f0aadca4e62be269295bd">More...</a><br /></td></tr>
-<tr class="separator:a9192abe0879f0aadca4e62be269295bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad4f1d01a0af9cf719345464b2c3821ca"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset.xhtml#ad4f1d01a0af9cf719345464b2c3821ca">type</a> = typename T_noref::type</td></tr>
+<tr class="memdesc:ad4f1d01a0af9cf719345464b2c3821ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Type of the dataset.  <a href="#ad4f1d01a0af9cf719345464b2c3821ca">More...</a><br /></td></tr>
+<tr class="separator:ad4f1d01a0af9cf719345464b2c3821ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -173,19 +173,19 @@ class arm_compute::test::framework::dataset::JoinDataset&lt; T, U &gt;</h3>
 
 <p>Definition at line <a class="el" href="_join_dataset_8h_source.xhtml#l00047">47</a> of file <a class="el" href="_join_dataset_8h_source.xhtml">JoinDataset.h</a>.</p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
-<a class="anchor" id="a9192abe0879f0aadca4e62be269295bd"></a>
+<a class="anchor" id="ad4f1d01a0af9cf719345464b2c3821ca"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">using <a class="el" href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset.xhtml#a9192abe0879f0aadca4e62be269295bd">type</a> =  typename T::type</td>
+          <td class="memname">using <a class="el" href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset.xhtml#ad4f1d01a0af9cf719345464b2c3821ca">type</a> =  typename T_noref::type</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 <p>Type of the dataset. </p>
 
-<p>Definition at line <a class="el" href="_join_dataset_8h_source.xhtml#l00068">68</a> of file <a class="el" href="_join_dataset_8h_source.xhtml">JoinDataset.h</a>.</p>
+<p>Definition at line <a class="el" href="_join_dataset_8h_source.xhtml#l00070">70</a> of file <a class="el" href="_join_dataset_8h_source.xhtml">JoinDataset.h</a>.</p>
 
 </div>
 </div>
@@ -231,10 +231,10 @@ class arm_compute::test::framework::dataset::JoinDataset&lt; T, U &gt;</h3>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_join_dataset_8h_source.xhtml#l00059">59</a> of file <a class="el" href="_join_dataset_8h_source.xhtml">JoinDataset.h</a>.</p>
+<p>Definition at line <a class="el" href="_join_dataset_8h_source.xhtml#l00061">61</a> of file <a class="el" href="_join_dataset_8h_source.xhtml">JoinDataset.h</a>.</p>
 
-<p>Referenced by <a class="el" href="_join_dataset_8h_source.xhtml#l00059">JoinDataset&lt; YOLOV2ActivationLayerRELUDataset, YOLOV2ActivationLayerLINEARDataset &gt;::JoinDataset()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        : _dataset1{ std::forward&lt;T&gt;(dataset1) },</div><div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;          _dataset2{ std::forward&lt;U&gt;(dataset2) }</div><div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    {</div><div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    }</div></div><!-- fragment -->
+<p>Referenced by <a class="el" href="_join_dataset_8h_source.xhtml#l00061">JoinDataset&lt; YOLOV2ActivationLayerRELUDataset, YOLOV2ActivationLayerLINEARDataset &gt;::JoinDataset()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        : _dataset1{ std::forward&lt;T&gt;(dataset1) },</div><div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;          _dataset2{ std::forward&lt;U&gt;(dataset2) }</div><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    {</div><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="ac2138992352383adbee46bd24b72729a"></a>
@@ -286,8 +286,8 @@ class arm_compute::test::framework::dataset::JoinDataset&lt; T, U &gt;</h3>
 <p><a class="el" href="classarm__compute_1_1_iterator.xhtml" title="Iterator updated by execute_window_loop for each window element. ">Iterator</a> pointing at the begin of the dataset. </p>
 <dl class="section return"><dt>Returns</dt><dd><a class="el" href="classarm__compute_1_1_iterator.xhtml" title="Iterator updated by execute_window_loop for each window element. ">Iterator</a> for the dataset. </dd></dl>
 
-<p>Definition at line <a class="el" href="_join_dataset_8h_source.xhtml#l00113">113</a> of file <a class="el" href="_join_dataset_8h_source.xhtml">JoinDataset.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;    {</div><div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;        <span class="keywordflow">return</span> iterator(&amp;_dataset1, &amp;_dataset2);</div><div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;    }</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="_join_dataset_8h_source.xhtml#l00115">115</a> of file <a class="el" href="_join_dataset_8h_source.xhtml">JoinDataset.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;    {</div><div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;        <span class="keywordflow">return</span> iterator(&amp;_dataset1, &amp;_dataset2);</div><div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="ab8e4e3e2a7bf18888b71bdf9dda0770b"></a>
@@ -300,7 +300,6 @@ class arm_compute::test::framework::dataset::JoinDataset&lt; T, U &gt;</h3>
         <tr>
           <td class="memname">int size </td>
           <td>(</td>
-          <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
         </tr>
@@ -315,8 +314,8 @@ class arm_compute::test::framework::dataset::JoinDataset&lt; T, U &gt;</h3>
 <p>Size of the dataset. </p>
 <dl class="section return"><dt>Returns</dt><dd>Number of values in the dataset. </dd></dl>
 
-<p>Definition at line <a class="el" href="_join_dataset_8h_source.xhtml#l00122">122</a> of file <a class="el" href="_join_dataset_8h_source.xhtml">JoinDataset.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;    {</div><div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;        <span class="keywordflow">return</span> _dataset1.size() + _dataset2.size();</div><div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;    }</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="_join_dataset_8h_source.xhtml#l00124">124</a> of file <a class="el" href="_join_dataset_8h_source.xhtml">JoinDataset.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;    {</div><div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;        <span class="keywordflow">return</span> _dataset1.size() + _dataset2.size();</div><div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
@@ -328,7 +327,7 @@ class arm_compute::test::framework::dataset::JoinDataset&lt; T, U &gt;</h3>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test.xhtml">test</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test_1_1framework.xhtml">framework</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test_1_1framework_1_1dataset.xhtml">dataset</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset.xhtml">JoinDataset</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:38 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:47 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

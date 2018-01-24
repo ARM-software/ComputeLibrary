@@ -14,6 +14,5 @@ var searchData=
   ['bordermodes',['BorderModes',['../classarm__compute_1_1test_1_1datasets_1_1_border_modes.xhtml',1,'arm_compute::test::datasets']]],
   ['bordersize',['BorderSize',['../structarm__compute_1_1_border_size.xhtml',1,'arm_compute']]],
   ['box3x3validationfixture',['Box3x3ValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_box3x3_validation_fixture.xhtml',1,'arm_compute::test::validation']]],
-  ['branchlayer',['BranchLayer',['../classarm__compute_1_1graph_1_1_branch_layer.xhtml',1,'arm_compute::graph']]],
-  ['bufferparam',['BufferParam',['../classarm__compute_1_1_i_g_c_kernel_1_1_buffer_param.xhtml',1,'arm_compute::IGCKernel']]]
+  ['branchlayer',['BranchLayer',['../classarm__compute_1_1graph_1_1_branch_layer.xhtml',1,'arm_compute::graph']]]
 ];

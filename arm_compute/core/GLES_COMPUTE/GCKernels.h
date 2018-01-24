@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,9 +27,11 @@
 /* Header regrouping all the GLES compute kernels */
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCAbsoluteDifferenceKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCActivationLayerKernel.h"
+#include "arm_compute/core/GLES_COMPUTE/kernels/GCArithmeticAdditionKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCBatchNormalizationLayerKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCCol2ImKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCDepthConcatenateLayerKernel.h"
+#include "arm_compute/core/GLES_COMPUTE/kernels/GCDepthwiseConvolutionLayer3x3Kernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCDirectConvolutionLayerKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCDropoutLayerKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCFillBorderKernel.h"
@@ -40,9 +42,12 @@
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCGEMMTranspose1xWKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCIm2ColKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCNormalizationLayerKernel.h"
+#include "arm_compute/core/GLES_COMPUTE/kernels/GCNormalizePlanarYUVLayerKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCPixelWiseMultiplicationKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCPoolingLayerKernel.h"
+#include "arm_compute/core/GLES_COMPUTE/kernels/GCScaleKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCSoftmaxLayerKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCTransposeKernel.h"
+#include "arm_compute/core/GLES_COMPUTE/kernels/GCWeightsReshapeKernel.h"
 
 #endif /* __ARM_COMPUTE_GCKERNELS_H__ */

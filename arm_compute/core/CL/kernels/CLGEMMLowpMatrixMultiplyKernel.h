@@ -61,6 +61,16 @@ public:
      * @param[in]  is_interleaved_transposed (Optional) True if input0 and input1 have been reshaped respectively using @ref CLGEMMInterleave4x4Kernel and @ref CLGEMMTranspose1xWKernel
      */
     void configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, bool is_interleaved_transposed = true);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpMatrixMultiplyKernel
+     *
+     * @param[in] input0                    Input tensor info containing the interleaved Matrix A. Data type supported: QASYMM8
+     * @param[in] input1                    Input tensor info containing the transposed Matrix B. Data type supported: same as @p input0
+     * @param[in] output                    Output tensor info to store the result of matrix multiplication. Data type supported: S32
+     * @param[in] is_interleaved_transposed (Optional) True if input0 and input1 have been reshaped respectively using @ref CLGEMMInterleave4x4Kernel and @ref CLGEMMTranspose1xWKernel
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output, bool is_interleaved_transposed = true);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

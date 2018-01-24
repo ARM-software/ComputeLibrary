@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -159,14 +159,14 @@ $(document).ready(function(){initNavTree('functions_func_r.xhtml','');});
 &#160;
 
 <h3><a class="anchor" id="index_r"></a>- r -</h3><ul>
-<li>Rand()
-: <a class="el" href="class_tensor4_d.xhtml#a79eb348abf0cb824ed3717aadc5d17b5">Tensor4D&lt; ShapeT, T &gt;</a>
-</li>
 <li>RandomAccessor()
 : <a class="el" href="classarm__compute_1_1graph__utils_1_1_random_accessor.xhtml#a47e2e3f731e842dde7baaf69634a9530">RandomAccessor</a>
 </li>
 <li>RandomBatchNormalizationLayerDataset()
 : <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_random_batch_normalization_layer_dataset.xhtml#a34a1071bfde7e9232990f70bdb5f7a75">RandomBatchNormalizationLayerDataset</a>
+</li>
+<li>RandomNormalizePlanarYUVLayerDataset()
+: <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_random_normalize_planar_y_u_v_layer_dataset.xhtml#afc4fd3607ac04fa4653e49523aa3e8e3">RandomNormalizePlanarYUVLayerDataset</a>
 </li>
 <li>range()
 : <a class="el" href="classarm__compute_1_1_i_distribution1_d.xhtml#ac548d0ee88978d0ba481323aab25e46a">IDistribution1D</a>
@@ -237,12 +237,6 @@ $(document).ready(function(){initNavTree('functions_func_r.xhtml','');});
 <li>reshape_b_only_on_first_run()
 : <a class="el" href="classarm__compute_1_1_g_e_m_m_info.xhtml#a8809341538b465964b81970388fc9ebc">GEMMInfo</a>
 </li>
-<li>reshape_input()
-: <a class="el" href="classarm__compute_1_1_winograd3x3_f32.xhtml#af6763033b37ded88efd49c438bb186de">Winograd3x3F32</a>
-</li>
-<li>reshape_output()
-: <a class="el" href="classarm__compute_1_1_winograd3x3_f32.xhtml#ae2fc9af73104a80d6c7064bcb1582da1">Winograd3x3F32</a>
-</li>
 <li>ReshapeLayer()
 : <a class="el" href="classarm__compute_1_1graph_1_1_reshape_layer.xhtml#a3db25ecf758583d633d08114b96406d5">ReshapeLayer</a>
 </li>
@@ -278,6 +272,9 @@ $(document).ready(function(){initNavTree('functions_func_r.xhtml','');});
 , <a class="el" href="classarm__compute_1_1_c_l_convolution_rectangle_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e">CLConvolutionRectangleKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_convolution_square.xhtml#ad1717410afd0be936c6213a63c8005fb">CLConvolutionSquare&lt; matrix_size &gt;</a>
 , <a class="el" href="classarm__compute_1_1_c_l_copy_to_array_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e">CLCopyToArrayKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer.xhtml#ad1717410afd0be936c6213a63c8005fb">CLDeconvolutionLayer</a>
+, <a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer_upsample.xhtml#ad1717410afd0be936c6213a63c8005fb">CLDeconvolutionLayerUpsample</a>
+, <a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e">CLDeconvolutionLayerUpsampleKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_depth_concatenate_layer.xhtml#ad1717410afd0be936c6213a63c8005fb">CLDepthConcatenateLayer</a>
 , <a class="el" href="classarm__compute_1_1_c_l_depth_concatenate_layer_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e">CLDepthConcatenateLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer3x3.xhtml#ad1717410afd0be936c6213a63c8005fb">CLDepthwiseConvolutionLayer3x3</a>
@@ -358,6 +355,7 @@ $(document).ready(function(){initNavTree('functions_func_r.xhtml','');});
 , <a class="el" href="classarm__compute_1_1_c_l_normalization_layer.xhtml#ad1717410afd0be936c6213a63c8005fb">CLNormalizationLayer</a>
 , <a class="el" href="classarm__compute_1_1_c_l_normalization_layer_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e">CLNormalizationLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_optical_flow.xhtml#ad1717410afd0be936c6213a63c8005fb">CLOpticalFlow</a>
+, <a class="el" href="classarm__compute_1_1_c_l_permute_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e">CLPermuteKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_pixel_wise_multiplication_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e">CLPixelWiseMultiplicationKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e">CLPoolingLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_quantization_layer.xhtml#ad1717410afd0be936c6213a63c8005fb">CLQuantizationLayer</a>
@@ -383,11 +381,15 @@ $(document).ready(function(){initNavTree('functions_func_r.xhtml','');});
 , <a class="el" href="classarm__compute_1_1_c_p_p_sort_euclidean_distance_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">CPPSortEuclideanDistanceKernel</a>
 , <a class="el" href="classarm__compute_1_1_g_c_absolute_difference_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCAbsoluteDifferenceKernel</a>
 , <a class="el" href="classarm__compute_1_1_g_c_activation_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCActivationLayerKernel</a>
+, <a class="el" href="classarm__compute_1_1_g_c_arithmetic_addition_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCArithmeticAdditionKernel</a>
 , <a class="el" href="classarm__compute_1_1_g_c_batch_normalization_layer.xhtml#ad1717410afd0be936c6213a63c8005fb">GCBatchNormalizationLayer</a>
 , <a class="el" href="classarm__compute_1_1_g_c_batch_normalization_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCBatchNormalizationLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_g_c_col2_im_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCCol2ImKernel</a>
+, <a class="el" href="classarm__compute_1_1_g_c_convolution_layer.xhtml#ad1717410afd0be936c6213a63c8005fb">GCConvolutionLayer</a>
+, <a class="el" href="classarm__compute_1_1_g_c_convolution_layer_reshape_weights.xhtml#ad1717410afd0be936c6213a63c8005fb">GCConvolutionLayerReshapeWeights</a>
 , <a class="el" href="classarm__compute_1_1_g_c_depth_concatenate_layer.xhtml#ad1717410afd0be936c6213a63c8005fb">GCDepthConcatenateLayer</a>
 , <a class="el" href="classarm__compute_1_1_g_c_depth_concatenate_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCDepthConcatenateLayerKernel</a>
+, <a class="el" href="classarm__compute_1_1_g_c_depthwise_convolution_layer3x3_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCDepthwiseConvolutionLayer3x3Kernel</a>
 , <a class="el" href="classarm__compute_1_1_g_c_direct_convolution_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCDirectConvolutionLayerKernel&lt; kernel_size &gt;</a>
 , <a class="el" href="classarm__compute_1_1_g_c_dropout_layer.xhtml#ad1717410afd0be936c6213a63c8005fb">GCDropoutLayer</a>
 , <a class="el" href="classarm__compute_1_1_g_c_dropout_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCDropoutLayerKernel</a>
@@ -404,10 +406,13 @@ $(document).ready(function(){initNavTree('functions_func_r.xhtml','');});
 , <a class="el" href="classarm__compute_1_1_g_c_logits1_d_shift_exp_sum_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCLogits1DShiftExpSumKernel</a>
 , <a class="el" href="classarm__compute_1_1_g_c_normalization_layer.xhtml#ad1717410afd0be936c6213a63c8005fb">GCNormalizationLayer</a>
 , <a class="el" href="classarm__compute_1_1_g_c_normalization_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCNormalizationLayerKernel</a>
+, <a class="el" href="classarm__compute_1_1_g_c_normalize_planar_y_u_v_layer.xhtml#ad1717410afd0be936c6213a63c8005fb">GCNormalizePlanarYUVLayer</a>
+, <a class="el" href="classarm__compute_1_1_g_c_normalize_planar_y_u_v_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCNormalizePlanarYUVLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_g_c_pixel_wise_multiplication_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCPixelWiseMultiplicationKernel</a>
 , <a class="el" href="classarm__compute_1_1_g_c_pooling_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCPoolingLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_g_c_softmax_layer.xhtml#ad1717410afd0be936c6213a63c8005fb">GCSoftmaxLayer</a>
 , <a class="el" href="classarm__compute_1_1_g_c_transpose_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCTransposeKernel</a>
+, <a class="el" href="classarm__compute_1_1_g_c_weights_reshape_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCWeightsReshapeKernel</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_c_l_map.xhtml#ad1717410afd0be936c6213a63c8005fb">CLMap</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_c_l_unmap.xhtml#ad1717410afd0be936c6213a63c8005fb">CLUnmap</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#a13a43e6d814de94978c515cb084873b1">Graph</a>
@@ -450,8 +455,6 @@ $(document).ready(function(){initNavTree('functions_func_r.xhtml','');});
 , <a class="el" href="classarm__compute_1_1_n_e_convolution_square.xhtml#ad1717410afd0be936c6213a63c8005fb">NEConvolutionSquare&lt; matrix_size &gt;</a>
 , <a class="el" href="classarm__compute_1_1_n_e_cumulative_distribution_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NECumulativeDistributionKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_deconvolution_layer.xhtml#ad1717410afd0be936c6213a63c8005fb">NEDeconvolutionLayer</a>
-, <a class="el" href="classarm__compute_1_1_n_e_deconvolution_layer_upsample.xhtml#ad1717410afd0be936c6213a63c8005fb">NEDeconvolutionLayerUpsample</a>
-, <a class="el" href="classarm__compute_1_1_n_e_deconvolution_layer_upsample_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEDeconvolutionLayerUpsampleKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_depth_concatenate_layer.xhtml#ad1717410afd0be936c6213a63c8005fb">NEDepthConcatenateLayer</a>
 , <a class="el" href="classarm__compute_1_1_n_e_depth_concatenate_layer_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEDepthConcatenateLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_depth_convert_layer_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEDepthConvertLayerKernel</a>
@@ -468,8 +471,8 @@ $(document).ready(function(){initNavTree('functions_func_r.xhtml','');});
 , <a class="el" href="classarm__compute_1_1_n_e_derivative_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEDerivativeKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_dilate_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEDilateKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_direct_convolution_layer.xhtml#ad1717410afd0be936c6213a63c8005fb">NEDirectConvolutionLayer</a>
-, <a class="el" href="classarm__compute_1_1_n_e_direct_convolution_layer_bias_accumulate_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEDirectConvolutionLayerBiasAccumulateKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_direct_convolution_layer_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEDirectConvolutionLayerKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_direct_convolution_layer_output_stage_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEDirectConvolutionLayerOutputStageKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_edge_non_max_suppression_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEEdgeNonMaxSuppressionKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_edge_trace_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEEdgeTraceKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_equalize_histogram.xhtml#ad1717410afd0be936c6213a63c8005fb">NEEqualizeHistogram</a>
@@ -582,6 +585,17 @@ $(document).ready(function(){initNavTree('functions_func_r.xhtml','');});
 , <a class="el" href="classarm__compute_1_1test_1_1_activation_layer_fixture.xhtml#a13a43e6d814de94978c515cb084873b1">ActivationLayerFixture&lt; TensorType, Function, Accessor &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_alex_net_fixture.xhtml#a13a43e6d814de94978c515cb084873b1">AlexNetFixture&lt; ITensorType, TensorType, SubTensorType, Accessor, ActivationLayerFunction, ConvolutionLayerFunction, DirectConvolutionLayerFunction, FullyConnectedLayerFunction, NormalizationLayerFunction, PoolingLayerFunction, SoftmaxLayerFunction &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_batch_normalization_layer_fixture.xhtml#a13a43e6d814de94978c515cb084873b1">BatchNormalizationLayerFixture&lt; TensorType, Function, Accessor &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1benchmark_1_1_depth_concatenate_layer_fixture.xhtml#a13a43e6d814de94978c515cb084873b1">DepthConcatenateLayerFixture&lt; TensorType, ITensorType, Function, AccessorType &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1benchmark_1_1_dequantization_layer_fixture.xhtml#a13a43e6d814de94978c515cb084873b1">DequantizationLayerFixture&lt; TensorType, Function, Accessor &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1benchmark_1_1_flatten_layer_fixture.xhtml#a13a43e6d814de94978c515cb084873b1">FlattenLayerFixture&lt; TensorType, Function, Accessor &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1benchmark_1_1_g_e_m_m_interleave4x4_fixture.xhtml#a13a43e6d814de94978c515cb084873b1">GEMMInterleave4x4Fixture&lt; TensorType, Function, Accessor &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1benchmark_1_1_harris_corners_fixture.xhtml#a13a43e6d814de94978c515cb084873b1">HarrisCornersFixture&lt; TensorType, Function, Accessor, ArrayType &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1benchmark_1_1_l2_normalize_layer_fixture.xhtml#a13a43e6d814de94978c515cb084873b1">L2NormalizeLayerFixture&lt; TensorType, Function, Accessor &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1benchmark_1_1_magnitude_fixture.xhtml#a13a43e6d814de94978c515cb084873b1">MagnitudeFixture&lt; TensorType, Function, Accessor &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1benchmark_1_1_quantization_layer_fixture.xhtml#a13a43e6d814de94978c515cb084873b1">QuantizationLayerFixture&lt; TensorType, Function, Accessor &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1benchmark_1_1_reshape_layer_fixture.xhtml#a13a43e6d814de94978c515cb084873b1">ReshapeLayerFixture&lt; TensorType, Function, Accessor &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1benchmark_1_1_scale_fixture.xhtml#a13a43e6d814de94978c515cb084873b1">ScaleFixture&lt; TensorType, Function, Accessor &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1benchmark_1_1_transpose_fixture.xhtml#a13a43e6d814de94978c515cb084873b1">TransposeFixture&lt; TensorType, Function, Accessor &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_convolution_layer_fixture.xhtml#a13a43e6d814de94978c515cb084873b1">ConvolutionLayerFixture&lt; TensorType, Function, Accessor &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_depthwise_convolution_layer_fixture.xhtml#a13a43e6d814de94978c515cb084873b1">DepthwiseConvolutionLayerFixture&lt; TensorType, Function, Accessor &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_depthwise_separable_convolution_layer_fixture.xhtml#a13a43e6d814de94978c515cb084873b1">DepthwiseSeparableConvolutionLayerFixture&lt; TensorType, Function, Accessor &gt;</a>
@@ -598,8 +612,10 @@ $(document).ready(function(){initNavTree('functions_func_r.xhtml','');});
 , <a class="el" href="classarm__compute_1_1test_1_1networks_1_1_mobile_net_network.xhtml#a13a43e6d814de94978c515cb084873b1">MobileNetNetwork&lt; TensorType, Accessor, ActivationLayerFunction, ConvolutionLayerFunction, DirectConvolutionLayerFunction, DepthwiseConvolutionLayerFunction, ReshapeFunction, PoolingLayerFunction &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1networks_1_1_mobile_net_v1_network.xhtml#a13a43e6d814de94978c515cb084873b1">MobileNetV1Network&lt; TensorType, Accessor, ActivationLayerFunction, BatchNormalizationLayerFunction, ConvolutionLayerFunction, DirectConvolutionLayerFunction, DepthwiseConvolutionFunction, ReshapeFunction, PoolingLayerFunction, SoftmaxLayerFunction &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_normalization_layer_fixture.xhtml#a13a43e6d814de94978c515cb084873b1">NormalizationLayerFixture&lt; TensorType, Function, Accessor &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1_normalize_planar_y_u_v_layer_fixture.xhtml#a13a43e6d814de94978c515cb084873b1">NormalizePlanarYUVLayerFixture&lt; TensorType, Function, Accessor &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_pooling_layer_fixture.xhtml#a13a43e6d814de94978c515cb084873b1">PoolingLayerFixture&lt; TensorType, Function, Accessor &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_r_o_i_pooling_layer_fixture.xhtml#a13a43e6d814de94978c515cb084873b1">ROIPoolingLayerFixture&lt; TensorType, Function, Accessor, Array_T, ArrayAccessor &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1_scale_layer_fixture.xhtml#a13a43e6d814de94978c515cb084873b1">ScaleLayerFixture&lt; TensorType, Function, Accessor, T &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_softmax_layer_fixture.xhtml#a13a43e6d814de94978c515cb084873b1">SoftmaxLayerFixture&lt; TensorType, Function, Accessor &gt;</a>
 </li>
 </ul>
@@ -608,7 +624,7 @@ $(document).ready(function(){initNavTree('functions_func_r.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:39 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:48 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

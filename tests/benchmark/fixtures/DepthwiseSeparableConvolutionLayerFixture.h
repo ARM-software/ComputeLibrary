@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,18 +69,17 @@ public:
         pointwise_weights.allocator()->allocate();
         pointwise_biases.allocator()->allocate();
         dst.allocator()->allocate();
-
-        // Fill tensors
-        library->fill_tensor_uniform(Accessor(src), 0);
-        library->fill_tensor_uniform(Accessor(depthwise_weights), 1);
-        library->fill_tensor_uniform(Accessor(depthwise_biases), 2);
-        library->fill_tensor_uniform(Accessor(pointwise_weights), 3);
-        library->fill_tensor_uniform(Accessor(pointwise_biases), 4);
     }
 
     void run()
     {
         depth_sep_conv_layer.run();
+    }
+
+    void sync()
+    {
+        sync_if_necessary<TensorType>();
+        sync_tensor_if_necessary<TensorType>(dst);
     }
 
     void teardown()

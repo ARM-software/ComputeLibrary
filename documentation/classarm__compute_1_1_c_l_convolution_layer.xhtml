@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -151,18 +151,21 @@ Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Basic function to compute the convolution layer. </p>
-<p>This function calls the following OpenCL kernels:</p>
+<p>This function calls the following OpenCL kernels/functions:</p>
+<p>Note: weights already reshaped for quantized asymmetric is not supported</p>
 <ol type="1">
-<li><a class="el" href="classarm__compute_1_1_c_l_weights_reshape_kernel.xhtml">CLWeightsReshapeKernel</a> (executed only once for each configuration)</li>
-<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_transpose1x_w_kernel.xhtml">CLGEMMTranspose1xWKernel</a> (executed only once for each configuration)</li>
 <li><a class="el" href="classarm__compute_1_1_c_l_im2_col_kernel.xhtml">CLIm2ColKernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel.xhtml">CLGEMMInterleave4x4Kernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml">CLGEMMMatrixMultiplyKernel</a> or <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_core.xhtml">CLGEMMLowpMatrixMultiplyCore</a> (if quantized asymmetric)</li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_core.xhtml">CLGEMMLowpMatrixMultiplyCore</a> (if quantized asymmetric)</li>
 <li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale.xhtml">CLGEMMLowpQuantizeDownInt32ToUint8Scale</a> (if quantized asymmetric)</li>
-<li><a class="el" href="classarm__compute_1_1_c_l_col2_im_kernel.xhtml">CLCol2ImKernel</a> </li>
+<li><a class="el" href="classarm__compute_1_1_c_l_col2_im_kernel.xhtml">CLCol2ImKernel</a></li>
+</ol>
+<p>if the weights are already reshaped:</p><ol type="1">
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel.xhtml">CLGEMMInterleave4x4Kernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml">CLGEMMMatrixMultiplyKernel</a> else</li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m.xhtml">CLGEMM</a> </li>
 </ol>
 
-<p>Definition at line <a class="el" href="_c_l_convolution_layer_8h_source.xhtml#l00089">89</a> of file <a class="el" href="_c_l_convolution_layer_8h_source.xhtml">CLConvolutionLayer.h</a>.</p>
+<p>Definition at line <a class="el" href="_c_l_convolution_layer_8h_source.xhtml#l00095">95</a> of file <a class="el" href="_c_l_convolution_layer_8h_source.xhtml">CLConvolutionLayer.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a3c3a42aeb64bcce1705ac4159fcf938e"></a>
 <div class="memitem">
@@ -294,7 +297,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_convolution_layer.xhtml">CLConvolutionLayer</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:35 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:44 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

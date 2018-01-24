@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,8 +27,11 @@
 /* Header regrouping all the GLES compute functions */
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCAbsoluteDifference.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCActivationLayer.h"
+#include "arm_compute/runtime/GLES_COMPUTE/functions/GCArithmeticAddition.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCBatchNormalizationLayer.h"
+#include "arm_compute/runtime/GLES_COMPUTE/functions/GCConvolutionLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCDepthConcatenateLayer.h"
+#include "arm_compute/runtime/GLES_COMPUTE/functions/GCDepthwiseConvolutionLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCDirectConvolutionLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCDropoutLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCFillBorder.h"
@@ -37,8 +40,10 @@
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCGEMMInterleave4x4.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCGEMMTranspose1xW.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCNormalizationLayer.h"
+#include "arm_compute/runtime/GLES_COMPUTE/functions/GCNormalizePlanarYUVLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCPixelWiseMultiplication.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCPoolingLayer.h"
+#include "arm_compute/runtime/GLES_COMPUTE/functions/GCScale.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCSoftmaxLayer.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCTranspose.h"
 

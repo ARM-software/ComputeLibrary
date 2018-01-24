@@ -75,11 +75,11 @@ public:
     void configure(const ITensor *a, const ITensor *b, ITensor *output, const GEMMInfo &gemm_info = GEMMInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMLowpMatrixMultiplyCore
      *
-     * @param[in]  a         First input tensor  (Matrix A). Data type supported: QASYMM8.
-     * @param[in]  b         Second input tensor (Matrix B). Data type supported: same as @p a
-     * @param[out] output    Output tensor. Data type supported: Data type supported: S32
-     * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
-     *                       if the reshape of matrix B should be executed only for the first run
+     * @param[in] a         First input tensor  (Matrix A). Data type supported: QASYMM8.
+     * @param[in] b         Second input tensor (Matrix B). Data type supported: same as @p a
+     * @param[in] output    Output tensor. Data type supported: Data type supported: S32
+     * @param[in] gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
+     *                      if the reshape of matrix B should be executed only for the first run
      *
      * @return a status
      */

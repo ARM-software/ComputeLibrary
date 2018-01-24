@@ -6,6 +6,9 @@ var dir_b19d819d13c0f52aff9af701145a9252 =
     [ "GCActivationLayerKernel.h", "_g_c_activation_layer_kernel_8h.xhtml", [
       [ "GCActivationLayerKernel", "classarm__compute_1_1_g_c_activation_layer_kernel.xhtml", "classarm__compute_1_1_g_c_activation_layer_kernel" ]
     ] ],
+    [ "GCArithmeticAdditionKernel.h", "_g_c_arithmetic_addition_kernel_8h.xhtml", [
+      [ "GCArithmeticAdditionKernel", "classarm__compute_1_1_g_c_arithmetic_addition_kernel.xhtml", "classarm__compute_1_1_g_c_arithmetic_addition_kernel" ]
+    ] ],
     [ "GCBatchNormalizationLayerKernel.h", "_g_c_batch_normalization_layer_kernel_8h.xhtml", [
       [ "GCBatchNormalizationLayerKernel", "classarm__compute_1_1_g_c_batch_normalization_layer_kernel.xhtml", "classarm__compute_1_1_g_c_batch_normalization_layer_kernel" ]
     ] ],
@@ -14,6 +17,9 @@ var dir_b19d819d13c0f52aff9af701145a9252 =
     ] ],
     [ "GCDepthConcatenateLayerKernel.h", "_g_c_depth_concatenate_layer_kernel_8h.xhtml", [
       [ "GCDepthConcatenateLayerKernel", "classarm__compute_1_1_g_c_depth_concatenate_layer_kernel.xhtml", "classarm__compute_1_1_g_c_depth_concatenate_layer_kernel" ]
+    ] ],
+    [ "GCDepthwiseConvolutionLayer3x3Kernel.h", "_g_c_depthwise_convolution_layer3x3_kernel_8h.xhtml", [
+      [ "GCDepthwiseConvolutionLayer3x3Kernel", "classarm__compute_1_1_g_c_depthwise_convolution_layer3x3_kernel.xhtml", "classarm__compute_1_1_g_c_depthwise_convolution_layer3x3_kernel" ]
     ] ],
     [ "GCDirectConvolutionLayerKernel.h", "_g_c_direct_convolution_layer_kernel_8h.xhtml", "_g_c_direct_convolution_layer_kernel_8h" ],
     [ "GCDropoutLayerKernel.h", "_g_c_dropout_layer_kernel_8h.xhtml", [
@@ -43,11 +49,15 @@ var dir_b19d819d13c0f52aff9af701145a9252 =
     [ "GCNormalizationLayerKernel.h", "_g_c_normalization_layer_kernel_8h.xhtml", [
       [ "GCNormalizationLayerKernel", "classarm__compute_1_1_g_c_normalization_layer_kernel.xhtml", "classarm__compute_1_1_g_c_normalization_layer_kernel" ]
     ] ],
+    [ "GCNormalizePlanarYUVLayerKernel.h", "_g_c_normalize_planar_y_u_v_layer_kernel_8h.xhtml", "_g_c_normalize_planar_y_u_v_layer_kernel_8h" ],
     [ "GCPixelWiseMultiplicationKernel.h", "_g_c_pixel_wise_multiplication_kernel_8h.xhtml", [
       [ "GCPixelWiseMultiplicationKernel", "classarm__compute_1_1_g_c_pixel_wise_multiplication_kernel.xhtml", "classarm__compute_1_1_g_c_pixel_wise_multiplication_kernel" ]
     ] ],
     [ "GCPoolingLayerKernel.h", "_g_c_pooling_layer_kernel_8h.xhtml", [
       [ "GCPoolingLayerKernel", "classarm__compute_1_1_g_c_pooling_layer_kernel.xhtml", "classarm__compute_1_1_g_c_pooling_layer_kernel" ]
+    ] ],
+    [ "GCScaleKernel.h", "_g_c_scale_kernel_8h.xhtml", [
+      [ "GCScaleKernel", "classarm__compute_1_1_g_c_scale_kernel.xhtml", "classarm__compute_1_1_g_c_scale_kernel" ]
     ] ],
     [ "GCSoftmaxLayerKernel.h", "_g_c_softmax_layer_kernel_8h.xhtml", [
       [ "GCLogits1DMaxKernel", "classarm__compute_1_1_g_c_logits1_d_max_kernel.xhtml", "classarm__compute_1_1_g_c_logits1_d_max_kernel" ],
@@ -56,5 +66,8 @@ var dir_b19d819d13c0f52aff9af701145a9252 =
     ] ],
     [ "GCTransposeKernel.h", "_g_c_transpose_kernel_8h.xhtml", [
       [ "GCTransposeKernel", "classarm__compute_1_1_g_c_transpose_kernel.xhtml", "classarm__compute_1_1_g_c_transpose_kernel" ]
+    ] ],
+    [ "GCWeightsReshapeKernel.h", "_g_c_weights_reshape_kernel_8h.xhtml", [
+      [ "GCWeightsReshapeKernel", "classarm__compute_1_1_g_c_weights_reshape_kernel.xhtml", "classarm__compute_1_1_g_c_weights_reshape_kernel" ]
     ] ]
 ];

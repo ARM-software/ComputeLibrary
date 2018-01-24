@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016, 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -261,29 +261,17 @@ TensorShape arm_compute::deconvolution_output_shape(const std::pair<unsigned int
 
 const std::pair<unsigned int, unsigned int> arm_compute::deconvolution_output_dimensions(
     unsigned int in_width, unsigned int in_height, unsigned int kernel_width, unsigned int kernel_height, unsigned int padx, unsigned int pady,
-    unsigned int ax, unsigned int ay, float upscalex, float upscaley, DimensionRoundingType round)
+    unsigned int inner_border_right, unsigned int inner_border_top, unsigned int stride_x, unsigned int stride_y)
 {
     ARM_COMPUTE_ERROR_ON(in_width < 1 || in_height < 1);
-    ARM_COMPUTE_ERROR_ON(((in_width - 1) * upscalex + kernel_width + ax) < 2.f * padx);
-    ARM_COMPUTE_ERROR_ON(((in_height - 1) * upscaley + kernel_height + ay) < 2.f * pady);
-    const float fw = (in_width - 1) * upscalex - 2.f * padx + kernel_width + ax;
-    const float fh = (in_height - 1) * upscaley - 2.f * pady + kernel_height + ay;
-    int         w  = 0;
-    int         h  = 0;
-    switch(round)
-    {
-        case DimensionRoundingType::FLOOR:
-            w = std::floor(fw);
-            h = std::floor(fh);
-            break;
-        case DimensionRoundingType::CEIL:
-            w = std::ceil(fw);
-            h = std::ceil(fh);
-            break;
-        default:
-            ARM_COMPUTE_ERROR("Not supported");
-            break;
-    }
+    ARM_COMPUTE_ERROR_ON(((in_width - 1) * stride_x + kernel_width + inner_border_right) < 2 * padx);
+    ARM_COMPUTE_ERROR_ON(((in_height - 1) * stride_y + kernel_height + inner_border_top) < 2 * pady);
+    const int padx_deconv = (kernel_width - padx - 1);
+    const int pady_deconv = (kernel_height - pady - 1);
+    ARM_COMPUTE_ERROR_ON(padx_deconv < 0);
+    ARM_COMPUTE_ERROR_ON(pady_deconv < 0);
+    const int w = stride_x * (in_width - 1) + kernel_width + inner_border_right - 2 * padx_deconv;
+    const int h = stride_y * (in_height - 1) + kernel_height + inner_border_top - 2 * pady_deconv;
     return std::make_pair<unsigned int, unsigned int>(w, h);
 }
 
@@ -332,6 +320,7 @@ void arm_compute::print_consecutive_elements(std::ostream &s, DataType dt, const
 {
     switch(dt)
     {
+        case DataType::QASYMM8:
         case DataType::U8:
             print_consecutive_elements_impl<uint8_t>(s, ptr, n, stream_width, element_delim);
             break;
@@ -367,6 +356,7 @@ int arm_compute::max_consecutive_elements_display_width(std::ostream &s, DataTyp
 {
     switch(dt)
     {
+        case DataType::QASYMM8:
         case DataType::U8:
             return max_consecutive_elements_display_width_impl<uint8_t>(s, ptr, n);
         case DataType::QS8:

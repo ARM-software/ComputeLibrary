@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -144,9 +144,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:adda387b61b237daaf8579249f84751a5"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classarm__compute_1_1_c_l_harris_corners.xhtml">CLHarrisCorners</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_harris_corners.xhtml#adda387b61b237daaf8579249f84751a5">operator=</a> (const <a class="el" href="classarm__compute_1_1_c_l_harris_corners.xhtml">CLHarrisCorners</a> &amp;)=delete</td></tr>
 <tr class="memdesc:adda387b61b237daaf8579249f84751a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prevent instances of this class from being copied (As this class contains pointers)  <a href="#adda387b61b237daaf8579249f84751a5">More...</a><br /></td></tr>
 <tr class="separator:adda387b61b237daaf8579249f84751a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aff26260c6e99700c52b6b23d048337a2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_harris_corners.xhtml#aff26260c6e99700c52b6b23d048337a2">configure</a> (<a class="el" href="namespacearm__compute.xhtml#aa80145f30ddae0c2ccbcaa910e3e71dd">ICLImage</a> *input, float threshold, float min_dist, float sensitivity, int32_t gradient_size, int32_t block_size, <a class="el" href="namespacearm__compute.xhtml#adb969f0e554bf563f2fa671399d59280">ICLKeyPointArray</a> *corners, <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327">BorderMode</a> border_mode, uint8_t constant_border_value=0)</td></tr>
-<tr class="memdesc:aff26260c6e99700c52b6b23d048337a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the function's source, destination, conv and border_mode.  <a href="#aff26260c6e99700c52b6b23d048337a2">More...</a><br /></td></tr>
-<tr class="separator:aff26260c6e99700c52b6b23d048337a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c35ef0fadb16911061a0a54be3c17af"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_harris_corners.xhtml#a1c35ef0fadb16911061a0a54be3c17af">configure</a> (<a class="el" href="namespacearm__compute.xhtml#aa80145f30ddae0c2ccbcaa910e3e71dd">ICLImage</a> *input, float threshold, float min_dist, float sensitivity, int32_t gradient_size, int32_t block_size, <a class="el" href="namespacearm__compute.xhtml#adb969f0e554bf563f2fa671399d59280">ICLKeyPointArray</a> *corners, <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327">BorderMode</a> border_mode, uint8_t constant_border_value=0, bool use_fp16=false)</td></tr>
+<tr class="memdesc:a1c35ef0fadb16911061a0a54be3c17af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the function's source, destination, conv and border_mode.  <a href="#a1c35ef0fadb16911061a0a54be3c17af">More...</a><br /></td></tr>
+<tr class="separator:a1c35ef0fadb16911061a0a54be3c17af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad1717410afd0be936c6213a63c8005fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_harris_corners.xhtml#ad1717410afd0be936c6213a63c8005fb">run</a> () override</td></tr>
 <tr class="memdesc:ad1717410afd0be936c6213a63c8005fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the kernels contained in the function.  <a href="#ad1717410afd0be936c6213a63c8005fb">More...</a><br /></td></tr>
 <tr class="separator:ad1717410afd0be936c6213a63c8005fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -217,7 +217,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="aff26260c6e99700c52b6b23d048337a2"></a>
+<a class="anchor" id="a1c35ef0fadb16911061a0a54be3c17af"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -273,7 +273,13 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>constant_border_value</em> = <code>0</code>&#160;</td>
+          <td class="paramname"><em>constant_border_value</em> = <code>0</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>use_fp16</em> = <code>false</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -295,11 +301,12 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">corners</td><td><a class="el" href="classarm__compute_1_1_array.xhtml" title="Basic implementation of the IArray interface which allocates a static number of T values...">Array</a> of keypoints to store the results. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">border_mode</td><td>Border mode to use </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">constant_border_value</td><td>(Optional) Constant value to use for borders if border_mode is set to CONSTANT. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">use_fp16</td><td>(Optional) If true the FP16 kernels will be used. If false F32 kernels are used. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Referenced by <a class="el" href="_c_l_2_harris_corners_8cpp_source.xhtml#l00057">arm_compute::test::validation::DATA_TEST_CASE()</a>.</p>
+<p>Referenced by <a class="el" href="validation_2_c_l_2_harris_corners_8cpp_source.xhtml#l00058">arm_compute::test::validation::DATA_TEST_CASE()</a>.</p>
 
 </div>
 </div>
@@ -375,7 +382,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_harris_corners.xhtml">CLHarrisCorners</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:35 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:44 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

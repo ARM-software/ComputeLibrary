@@ -8,7 +8,7 @@ var arm__compute_2core_2_utils_8h =
     [ "data_type_for_convolution", "arm__compute_2core_2_utils_8h.xhtml#a01adc12d8e07c06cdb0f03c56a455bf3", null ],
     [ "data_type_for_convolution_matrix", "arm__compute_2core_2_utils_8h.xhtml#a3992df9e8723140a53e49dc194d89ef5", null ],
     [ "data_type_from_format", "arm__compute_2core_2_utils_8h.xhtml#a59846ef5ca75cd81cdb7e8a1ce08f9db", null ],
-    [ "deconvolution_output_dimensions", "arm__compute_2core_2_utils_8h.xhtml#a29f1002e9a609eb71ee6b74a888de12a", null ],
+    [ "deconvolution_output_dimensions", "arm__compute_2core_2_utils_8h.xhtml#a5c7b26988083a67a91cd3e7962f38521", null ],
     [ "deconvolution_output_shape", "arm__compute_2core_2_utils_8h.xhtml#a7d57332eb91a8735f173556b3caf6236", null ],
     [ "DIV_CEIL", "arm__compute_2core_2_utils_8h.xhtml#a12705a88669cb9fb90451ebe0db53c41", null ],
     [ "element_size_from_data_type", "arm__compute_2core_2_utils_8h.xhtml#a34b06c0cd94808a77b697e79880b84b0", null ],

@@ -1,6 +1,7 @@
 var searchData=
 [
   ['l2normalizelayer',['L2NormalizeLayer',['../classarm__compute_1_1graph_1_1_l2_normalize_layer.xhtml',1,'arm_compute::graph']]],
+  ['l2normalizelayerfixture',['L2NormalizeLayerFixture',['../classarm__compute_1_1test_1_1benchmark_1_1_l2_normalize_layer_fixture.xhtml',1,'arm_compute::test::benchmark']]],
   ['l2normalizelayervalidationfixture',['L2NormalizeLayerValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_l2_normalize_layer_validation_fixture.xhtml',1,'arm_compute::test::validation']]],
   ['large1dshapes',['Large1DShapes',['../classarm__compute_1_1test_1_1datasets_1_1_large1_d_shapes.xhtml',1,'arm_compute::test::datasets']]],
   ['large2dshapes',['Large2DShapes',['../classarm__compute_1_1test_1_1datasets_1_1_large2_d_shapes.xhtml',1,'arm_compute::test::datasets']]],
@@ -12,6 +13,10 @@ var searchData=
   ['largefullyconnectedlayerdataset',['LargeFullyConnectedLayerDataset',['../classarm__compute_1_1test_1_1datasets_1_1_large_fully_connected_layer_dataset.xhtml',1,'arm_compute::test::datasets']]],
   ['largegemmdataset',['LargeGEMMDataset',['../classarm__compute_1_1test_1_1datasets_1_1_large_g_e_m_m_dataset.xhtml',1,'arm_compute::test::datasets']]],
   ['largegemmlowpdataset',['LargeGEMMLowpDataset',['../classarm__compute_1_1test_1_1datasets_1_1_large_g_e_m_m_lowp_dataset.xhtml',1,'arm_compute::test::datasets']]],
+  ['largehogdescriptordataset',['LargeHOGDescriptorDataset',['../classarm__compute_1_1test_1_1datasets_1_1_large_h_o_g_descriptor_dataset.xhtml',1,'arm_compute::test::datasets']]],
+  ['largeimagefiles',['LargeImageFiles',['../classarm__compute_1_1test_1_1datasets_1_1_large_image_files.xhtml',1,'arm_compute::test::datasets']]],
+  ['largeimageshapes',['LargeImageShapes',['../classarm__compute_1_1test_1_1datasets_1_1_large_image_shapes.xhtml',1,'arm_compute::test::datasets']]],
+  ['largescalelayershapes',['LargeScaleLayerShapes',['../classarm__compute_1_1test_1_1datasets_1_1_large_scale_layer_shapes.xhtml',1,'arm_compute::test::datasets']]],
   ['largeshapes',['LargeShapes',['../classarm__compute_1_1test_1_1datasets_1_1_large_shapes.xhtml',1,'arm_compute::test::datasets']]],
   ['lenet5activationlayerdataset',['LeNet5ActivationLayerDataset',['../classarm__compute_1_1test_1_1datasets_1_1_le_net5_activation_layer_dataset.xhtml',1,'arm_compute::test::datasets']]],
   ['lenet5convolutionlayerdataset',['LeNet5ConvolutionLayerDataset',['../classarm__compute_1_1test_1_1datasets_1_1_le_net5_convolution_layer_dataset.xhtml',1,'arm_compute::test::datasets']]],

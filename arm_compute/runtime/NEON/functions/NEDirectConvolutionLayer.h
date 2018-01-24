@@ -24,8 +24,8 @@
 #ifndef __ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYER_H__
 #define __ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYER_H__
 
-#include "arm_compute/core/NEON/kernels/NEDirectConvolutionLayerBiasAccumulateKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDirectConvolutionLayerKernel.h"
+#include "arm_compute/core/NEON/kernels/NEDirectConvolutionLayerOutputStageKernel.h"
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -42,7 +42,7 @@ namespace arm_compute
  *  This function calls the following NEON kernels:
  *
  * -# @ref NEFillBorderKernel for the input
- * -# @ref NEDirectConvolutionLayerBiasAccumulateKernel
+ * -# @ref NEDirectConvolutionLayerOutputStageKernel
  * -# @ref NEDirectConvolutionLayerKernel
  */
 class NEDirectConvolutionLayer : public IFunction
@@ -93,12 +93,13 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                                  _memory_group;
-    NEDirectConvolutionLayerBiasAccumulateKernel _accumulate_bias_kernel;
-    NEDirectConvolutionLayerKernel               _conv_kernel;
-    NEFillBorderKernel                           _input_border_handler;
-    Tensor                                       _accumulator;
-    bool                                         _has_bias;
+    MemoryGroup                               _memory_group;
+    NEDirectConvolutionLayerOutputStageKernel _output_stage_kernel;
+    NEDirectConvolutionLayerKernel            _conv_kernel;
+    NEFillBorderKernel                        _input_border_handler;
+    Tensor                                    _accumulator;
+    bool                                      _has_bias;
+    bool                                      _is_fixed_point;
 };
 }
 #endif /* __ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYER_H__ */

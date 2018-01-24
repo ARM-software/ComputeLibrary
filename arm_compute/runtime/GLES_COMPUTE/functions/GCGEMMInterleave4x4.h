@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,7 +40,7 @@ class GCGEMMInterleave4x4 : public IGCSimpleFunction
 public:
     /** Initialise the kernel's inputs, output
      *
-     * @param[in]  input  First input tensor. Data types supported: F32
+     * @param[in]  input  First input tensor. Data types supported: F32, F16
      * @param[out] output Output tensor. Data type supported: same as @p input
      */
     void configure(const IGCTensor *input, IGCTensor *output);

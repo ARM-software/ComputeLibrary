@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,7 @@
 #include "arm_compute/core/CL/kernels/CLCol2ImKernel.h"
 #include "arm_compute/core/CL/kernels/CLColorConvertKernel.h"
 #include "arm_compute/core/CL/kernels/CLConvolutionKernel.h"
+#include "arm_compute/core/CL/kernels/CLDeconvolutionLayerUpsampleKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthConcatenateLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthConvertLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayer3x3Kernel.h"
@@ -87,6 +88,7 @@
 #include "arm_compute/core/CL/kernels/CLNonLinearFilterKernel.h"
 #include "arm_compute/core/CL/kernels/CLNonMaximaSuppression3x3Kernel.h"
 #include "arm_compute/core/CL/kernels/CLNormalizationLayerKernel.h"
+#include "arm_compute/core/CL/kernels/CLPermuteKernel.h"
 #include "arm_compute/core/CL/kernels/CLPixelWiseMultiplicationKernel.h"
 #include "arm_compute/core/CL/kernels/CLPoolingLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLQuantizationLayerKernel.h"

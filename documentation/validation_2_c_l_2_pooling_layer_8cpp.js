@@ -3,7 +3,7 @@ var validation_2_c_l_2_pooling_layer_8cpp =
     [ "CLPoolingLayerFixedPointFixture", "validation_2_c_l_2_pooling_layer_8cpp.xhtml#a967e072360ea1486d0e6ad9196a16396", null ],
     [ "CLPoolingLayerFixture", "validation_2_c_l_2_pooling_layer_8cpp.xhtml#adcc3bdbd96fb09bd8bd54c9d9593c606", null ],
     [ "CLPoolingLayerQuantizedFixture", "validation_2_c_l_2_pooling_layer_8cpp.xhtml#a35bfaa761f3503a056e8270c149dd20e", null ],
-    [ "DATA_TEST_CASE", "validation_2_c_l_2_pooling_layer_8cpp.xhtml#a47e7a0c703e8e092534551b3a614f084", null ],
+    [ "DATA_TEST_CASE", "validation_2_c_l_2_pooling_layer_8cpp.xhtml#a28b6ae5a6b1dc7cb74933b61a6f5a21e", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_pooling_layer_8cpp.xhtml#a90ba555741cb446aa301a29cb758928e", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_pooling_layer_8cpp.xhtml#ad4927e3d6480eb237776f44840f16163", null ],
     [ "FIXTURE_DATA_TEST_CASE", "validation_2_c_l_2_pooling_layer_8cpp.xhtml#a35af172c88a179baee61c6541b62550f", null ],

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,10 +27,22 @@
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/FixedPoint.h"
+#include "arm_compute/core/HOGInfo.h"
+#include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "support/ToolchainSupport.h"
+
+#ifdef ARM_COMPUTE_CL
+#include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/runtime/CL/CLScheduler.h"
+#endif /* ARM_COMPUTE_CL */
+
+#ifdef ARM_COMPUTE_GC
+#include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
+#include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
+#endif /* ARM_COMPUTE_GC */
 
 #include <cmath>
 #include <cstddef>
@@ -44,6 +56,9 @@
 
 namespace arm_compute
 {
+#ifdef ARM_COMPUTE_CL
+class CLTensor;
+#endif /* ARM_COMPUTE_CL */
 namespace test
 {
 /** Round floating-point value with half value rounding to positive infinity.
@@ -187,17 +202,19 @@ inline I foldl(F &&func, I &&initial, T &&value, Vs &&... values)
 
 /** Create a valid region based on tensor shape, border mode and border size
  *
- * @param[in] shape            Shape used as size of the valid region.
+ * @param[in] a_shape          Shape used as size of the valid region.
  * @param[in] border_undefined (Optional) Boolean indicating if the border mode is undefined.
  * @param[in] border_size      (Optional) Border size used to specify the region to exclude.
  *
  * @return A valid region starting at (0, 0, ...) with size of @p shape if @p border_undefined is false; otherwise
  *  return A valid region starting at (@p border_size.left, @p border_size.top, ...) with reduced size of @p shape.
  */
-inline ValidRegion shape_to_valid_region(TensorShape shape, bool border_undefined = false, BorderSize border_size = BorderSize(0))
+inline ValidRegion shape_to_valid_region(const TensorShape &a_shape, bool border_undefined = false, BorderSize border_size = BorderSize(0))
 {
-    Coordinates anchor;
-    anchor.set_num_dimensions(shape.num_dimensions());
+    ValidRegion valid_region{ Coordinates(), a_shape };
+
+    Coordinates &anchor = valid_region.anchor;
+    TensorShape &shape  = valid_region.shape;
 
     if(border_undefined)
     {
@@ -213,43 +230,45 @@ inline ValidRegion shape_to_valid_region(TensorShape shape, bool border_undefine
         shape.set(1, valid_shape_y);
     }
 
-    return ValidRegion(std::move(anchor), std::move(shape));
+    return valid_region;
 }
 
 /** Create a valid region for Gaussian Pyramid Half based on tensor shape and valid region at level "i - 1" and border mode
  *
  * @note The border size is 2 in case of Gaussian Pyramid Half
  *
- * @param[in] shape            Shape used at level "i - 1" of Gaussian Pyramid Half
- * @param[in] valid_region     Valid region used at level "i - 1" of Gaussian Pyramid Half
+ * @param[in] a_shape          Shape used at level "i - 1" of Gaussian Pyramid Half
+ * @param[in] a_valid_region   Valid region used at level "i - 1" of Gaussian Pyramid Half
  * @param[in] border_undefined (Optional) Boolean indicating if the border mode is undefined.
  *
  *  return The valid region for the level "i" of Gaussian Pyramid Half
  */
-inline ValidRegion shape_to_valid_region_gaussian_pyramid_half(TensorShape shape, ValidRegion valid_region, bool border_undefined = false)
+inline ValidRegion shape_to_valid_region_gaussian_pyramid_half(const TensorShape &a_shape, const ValidRegion &a_valid_region, bool border_undefined = false)
 {
     constexpr int border_size = 2;
-    Coordinates   anchor;
-    anchor.set_num_dimensions(shape.num_dimensions());
+
+    ValidRegion valid_region{ Coordinates(), a_shape };
+
+    Coordinates &anchor = valid_region.anchor;
+    TensorShape &shape  = valid_region.shape;
 
     // Compute tensor shape for level "i" of Gaussian Pyramid Half
     // dst_width  = (src_width + 1) * 0.5f
     // dst_height = (src_height + 1) * 0.5f
-    TensorShape dst_shape = shape;
-    dst_shape.set(0, (shape[0] + 1) * 0.5f);
-    dst_shape.set(1, (shape[1] + 1) * 0.5f);
+    shape.set(0, (shape[0] + 1) * 0.5f);
+    shape.set(1, (shape[1] + 1) * 0.5f);
 
     if(border_undefined)
     {
         ARM_COMPUTE_ERROR_ON(shape.num_dimensions() < 2);
 
         // Compute the left and top invalid borders
-        float invalid_border_left = static_cast<float>(valid_region.anchor.x() + border_size) / 2.0f;
-        float invalid_border_top  = static_cast<float>(valid_region.anchor.y() + border_size) / 2.0f;
+        float invalid_border_left = static_cast<float>(a_valid_region.anchor.x() + border_size) / 2.0f;
+        float invalid_border_top  = static_cast<float>(a_valid_region.anchor.y() + border_size) / 2.0f;
 
         // For the new anchor point we can have 2 cases:
-        // 1) If the width/height of the tensor shape is odd, we have to take the ceil value of (valid_region.anchor.x() + border_size) / 2.0f or (valid_region.anchor.y() + border_size / 2.0f
-        // 2) If the width/height of the tensor shape is even, we have to take the floor value of (valid_region.anchor.x() + border_size) / 2.0f or (valid_region.anchor.y() + border_size) / 2.0f
+        // 1) If the width/height of the tensor shape is odd, we have to take the ceil value of (a_valid_region.anchor.x() + border_size) / 2.0f or (a_valid_region.anchor.y() + border_size / 2.0f
+        // 2) If the width/height of the tensor shape is even, we have to take the floor value of (a_valid_region.anchor.x() + border_size) / 2.0f or (a_valid_region.anchor.y() + border_size) / 2.0f
         // In this manner we should be able to propagate correctly the valid region along all levels of the pyramid
         invalid_border_left = (shape[0] % 2) ? std::ceil(invalid_border_left) : std::floor(invalid_border_left);
         invalid_border_top  = (shape[1] % 2) ? std::ceil(invalid_border_top) : std::floor(invalid_border_top);
@@ -260,21 +279,21 @@ inline ValidRegion shape_to_valid_region_gaussian_pyramid_half(TensorShape shape
 
         // Compute shape
         // Calculate the right and bottom invalid borders at the previous level of the pyramid
-        const float prev_invalid_border_right  = static_cast<float>(shape[0] - (valid_region.anchor.x() + valid_region.shape[0]));
-        const float prev_invalid_border_bottom = static_cast<float>(shape[1] - (valid_region.anchor.y() + valid_region.shape[1]));
+        const float prev_invalid_border_right  = static_cast<float>(shape[0] - (a_valid_region.anchor.x() + a_valid_region.shape[0]));
+        const float prev_invalid_border_bottom = static_cast<float>(shape[1] - (a_valid_region.anchor.y() + a_valid_region.shape[1]));
 
         // Calculate the right and bottom invalid borders at the current level of the pyramid
         const float invalid_border_right  = std::ceil((prev_invalid_border_right + static_cast<float>(border_size)) / 2.0f);
         const float invalid_border_bottom = std::ceil((prev_invalid_border_bottom + static_cast<float>(border_size)) / 2.0f);
 
-        const int valid_shape_x = std::max(0, static_cast<int>(dst_shape.x()) - static_cast<int>(invalid_border_left) - static_cast<int>(invalid_border_right));
-        const int valid_shape_y = std::max(0, static_cast<int>(dst_shape.y()) - static_cast<int>(invalid_border_top) - static_cast<int>(invalid_border_bottom));
+        const int valid_shape_x = std::max(0, static_cast<int>(shape.x()) - static_cast<int>(invalid_border_left) - static_cast<int>(invalid_border_right));
+        const int valid_shape_y = std::max(0, static_cast<int>(shape.y()) - static_cast<int>(invalid_border_top) - static_cast<int>(invalid_border_bottom));
 
-        dst_shape.set(0, valid_shape_x);
-        dst_shape.set(1, valid_shape_y);
+        shape.set(0, valid_shape_x);
+        shape.set(1, valid_shape_y);
     }
 
-    return ValidRegion(std::move(anchor), std::move(dst_shape));
+    return valid_region;
 }
 
 /** Write the value after casting the pointer according to @p data_type.
@@ -463,6 +482,48 @@ inline T create_tensor(const TensorShape &shape, DataType data_type, int num_cha
     return tensor;
 }
 
+/** Create and initialize a tensor of the given type.
+ *
+ * @param[in] shape  Tensor shape.
+ * @param[in] format Format type.
+ *
+ * @return Initialized tensor of given type.
+ */
+template <typename T>
+inline T create_tensor(const TensorShape &shape, Format format)
+{
+    TensorInfo info(shape, format);
+
+    T tensor;
+    tensor.allocator()->init(info);
+
+    return tensor;
+}
+
+/** Create and initialize a HOG (Histogram of Oriented Gradients) of the given type.
+ *
+ * @param[in] cell_size             Cell size in pixels
+ * @param[in] block_size            Block size in pixels. Must be a multiple of cell_size.
+ * @param[in] detection_window_size Detection window size in pixels. Must be a multiple of block_size and block_stride.
+ * @param[in] block_stride          Distance in pixels between 2 consecutive blocks along the x and y direction. Must be a multiple of cell size
+ * @param[in] num_bins              Number of histogram bins for each cell
+ * @param[in] normalization_type    (Optional) Normalization type to use for each block
+ * @param[in] l2_hyst_threshold     (Optional) Threshold used for L2HYS_NORM normalization method
+ * @param[in] phase_type            (Optional) Type of @ref PhaseType
+ *
+ * @return Initialized HOG of given type.
+ */
+template <typename T>
+inline T create_HOG(const Size2D &cell_size, const Size2D &block_size, const Size2D &detection_window_size, const Size2D &block_stride, size_t num_bins,
+                    HOGNormType normalization_type = HOGNormType::L2HYS_NORM, float l2_hyst_threshold = 0.2f, PhaseType phase_type = PhaseType::UNSIGNED)
+{
+    T       hog;
+    HOGInfo hog_info(cell_size, block_size, block_size, block_stride, num_bins, normalization_type, l2_hyst_threshold, phase_type);
+    hog.init(hog_info);
+
+    return hog;
+}
+
 /** Create a vector of random ROIs.
  *
  * @param[in] shape     The shape of the input tensor.
@@ -565,6 +626,39 @@ inline std::string get_typestring(DataType data_type)
         default:
             ARM_COMPUTE_ERROR("NOT SUPPORTED!");
     }
+}
+
+/** Sync if necessary.
+ */
+template <typename TensorType>
+inline void sync_if_necessary()
+{
+#ifdef ARM_COMPUTE_CL
+    if(opencl_is_available() && std::is_same<typename std::decay<TensorType>::type, arm_compute::CLTensor>::value)
+    {
+        CLScheduler::get().sync();
+    }
+#endif /* ARM_COMPUTE_CL */
+}
+
+/** Sync tensor if necessary.
+ *
+ * @note: If the destination tensor not being used on OpenGL ES, GPU will optimize out the operation.
+ *
+ * @param[in] tensor Tensor to be sync.
+ */
+template <typename TensorType>
+inline void sync_tensor_if_necessary(TensorType &tensor)
+{
+#ifdef ARM_COMPUTE_GC
+    if(opengles31_is_available() && std::is_same<typename std::decay<TensorType>::type, arm_compute::GCTensor>::value)
+    {
+        // Force sync the tensor by calling map and unmap.
+        IGCTensor &t = dynamic_cast<IGCTensor &>(tensor);
+        t.map();
+        t.unmap();
+    }
+#endif /* ARM_COMPUTE_GC */
 }
 } // namespace test
 } // namespace arm_compute

@@ -1,6 +1,7 @@
 var classarm__compute_1_1_c_l_kernel_library =
 [
     [ "CLKernelLibrary", "classarm__compute_1_1_c_l_kernel_library.xhtml#a670869004281695200784de4648a4e1b", null ],
+    [ "clear_programs_cache", "classarm__compute_1_1_c_l_kernel_library.xhtml#a0ad613086cc79a2e32d5b87bcefc7488", null ],
     [ "create_kernel", "classarm__compute_1_1_c_l_kernel_library.xhtml#a07b37240bd1f09e36cf119dced79f9c4", null ],
     [ "default_ndrange", "classarm__compute_1_1_c_l_kernel_library.xhtml#a6dc2398a934f02224ad3743185f27699", null ],
     [ "get_kernel_path", "classarm__compute_1_1_c_l_kernel_library.xhtml#ad7395c158d8e31b9af211b9bc1f65a08", null ],

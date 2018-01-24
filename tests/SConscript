@@ -50,6 +50,9 @@ vars.Update(test_env)
 
 Help(new_options.GenerateHelpText(test_env))
 
+Import("arm_compute_test_framework")
+test_env.Append(LIBS = arm_compute_test_framework)
+
 if env['os'] in ['android', 'bare_metal'] or env['standalone']:
     Import("arm_compute_a")
     Import("arm_compute_core_a")
@@ -64,9 +67,6 @@ test_env.Append(CPPPATH = ["#3rdparty/include"])
 test_env.Append(LIBPATH = ["#3rdparty/%s/%s" % (env['os'], env['arch'])])
 test_env.Append(LIBPATH = ["#build/%s" % env['build_dir']])
 test_env.Append(LIBPATH = ["#build/%s/opencl-1.2-stubs" % env['build_dir']])
-
-Import("arm_compute_test_framework")
-test_env.Append(LIBS = arm_compute_test_framework)
 
 common_files = Glob('*.cpp')
 common_objects = [test_env.StaticObject(f) for f in common_files]

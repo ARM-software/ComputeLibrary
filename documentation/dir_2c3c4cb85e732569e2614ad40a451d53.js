@@ -2,9 +2,7 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
 [
     [ "arm32", "dir_c26a7e526887430ce25a4d0cc5a3865b.xhtml", "dir_c26a7e526887430ce25a4d0cc5a3865b" ],
     [ "arm64", "dir_03f3c81b7006d2ea95b3332b67d1fe9e.xhtml", "dir_03f3c81b7006d2ea95b3332b67d1fe9e" ],
-    [ "assembly", "dir_1528feb24a69b98c734f0fefcf3a82e1.xhtml", "dir_1528feb24a69b98c734f0fefcf3a82e1" ],
     [ "convolution", "dir_0e0f32791a0a83efc50a36fd47fb0641.xhtml", "dir_0e0f32791a0a83efc50a36fd47fb0641" ],
-    [ "winograd", "dir_69c697bf42756a8f749f966b74064d1d.xhtml", "dir_69c697bf42756a8f749f966b74064d1d" ],
     [ "NEAbsoluteDifferenceKernel.h", "_n_e_absolute_difference_kernel_8h.xhtml", [
       [ "NEAbsoluteDifferenceKernel", "classarm__compute_1_1_n_e_absolute_difference_kernel.xhtml", "classarm__compute_1_1_n_e_absolute_difference_kernel" ]
     ] ],
@@ -51,9 +49,6 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     [ "NECumulativeDistributionKernel.h", "_n_e_cumulative_distribution_kernel_8h.xhtml", [
       [ "NECumulativeDistributionKernel", "classarm__compute_1_1_n_e_cumulative_distribution_kernel.xhtml", "classarm__compute_1_1_n_e_cumulative_distribution_kernel" ]
     ] ],
-    [ "NEDeconvolutionLayerUpsampleKernel.h", "_n_e_deconvolution_layer_upsample_kernel_8h.xhtml", [
-      [ "NEDeconvolutionLayerUpsampleKernel", "classarm__compute_1_1_n_e_deconvolution_layer_upsample_kernel.xhtml", "classarm__compute_1_1_n_e_deconvolution_layer_upsample_kernel" ]
-    ] ],
     [ "NEDepthConcatenateLayerKernel.h", "_n_e_depth_concatenate_layer_kernel_8h.xhtml", [
       [ "NEDepthConcatenateLayerKernel", "classarm__compute_1_1_n_e_depth_concatenate_layer_kernel.xhtml", "classarm__compute_1_1_n_e_depth_concatenate_layer_kernel" ]
     ] ],
@@ -81,11 +76,11 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     [ "NEDilateKernel.h", "_n_e_dilate_kernel_8h.xhtml", [
       [ "NEDilateKernel", "classarm__compute_1_1_n_e_dilate_kernel.xhtml", "classarm__compute_1_1_n_e_dilate_kernel" ]
     ] ],
-    [ "NEDirectConvolutionLayerBiasAccumulateKernel.h", "_n_e_direct_convolution_layer_bias_accumulate_kernel_8h.xhtml", [
-      [ "NEDirectConvolutionLayerBiasAccumulateKernel", "classarm__compute_1_1_n_e_direct_convolution_layer_bias_accumulate_kernel.xhtml", "classarm__compute_1_1_n_e_direct_convolution_layer_bias_accumulate_kernel" ]
-    ] ],
     [ "NEDirectConvolutionLayerKernel.h", "_n_e_direct_convolution_layer_kernel_8h.xhtml", [
       [ "NEDirectConvolutionLayerKernel", "classarm__compute_1_1_n_e_direct_convolution_layer_kernel.xhtml", "classarm__compute_1_1_n_e_direct_convolution_layer_kernel" ]
+    ] ],
+    [ "NEDirectConvolutionLayerOutputStageKernel.h", "_n_e_direct_convolution_layer_output_stage_kernel_8h.xhtml", [
+      [ "NEDirectConvolutionLayerOutputStageKernel", "classarm__compute_1_1_n_e_direct_convolution_layer_output_stage_kernel.xhtml", "classarm__compute_1_1_n_e_direct_convolution_layer_output_stage_kernel" ]
     ] ],
     [ "NEErodeKernel.h", "_n_e_erode_kernel_8h.xhtml", [
       [ "NEErodeKernel", "classarm__compute_1_1_n_e_erode_kernel.xhtml", "classarm__compute_1_1_n_e_erode_kernel" ]

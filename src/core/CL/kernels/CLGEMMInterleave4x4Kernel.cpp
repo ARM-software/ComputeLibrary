@@ -33,8 +33,55 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 using namespace arm_compute;
+using namespace arm_compute::misc::shape_calculator;
+
+namespace
+{
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::U8, DataType::S8,
+                                                         DataType::QS16, DataType::U16, DataType::S16, DataType::U32, DataType::S32,
+                                                         DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), compute_interleaved_shape(*input));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    }
+
+    return Status{};
+}
+
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
+{
+    unsigned int           num_elems_processed_per_iteration_x = max_cl_vector_width / data_size_from_type(input->data_type());
+    constexpr unsigned int num_elems_processed_per_iteration_y = 4;
+    const unsigned int     num_elems_written_per_iteration     = num_elems_processed_per_iteration_x * num_elems_processed_per_iteration_y;
+    bool                   window_changed                      = false;
+
+    // Configure kernel window
+    Window                win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
+    AccessWindowRectangle input_access(input, 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
+    window_changed = window_changed || update_window_and_padding(win, input_access);
+
+    // Configure window in case of configured output
+    if(output->total_size() != 0)
+    {
+        AccessWindowRectangle output_access(output, 0, 0, num_elems_written_per_iteration, 1, 4.f, 0.25f);
+        window_changed = window_changed || update_window_and_padding(win, output_access);
+        output_access.set_valid_region(win, input->valid_region());
+    }
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+} // namespace
 
 CLGEMMInterleave4x4Kernel::CLGEMMInterleave4x4Kernel()
     : _input(nullptr), _output(nullptr)
@@ -43,22 +90,13 @@ CLGEMMInterleave4x4Kernel::CLGEMMInterleave4x4Kernel()
 
 void CLGEMMInterleave4x4Kernel::configure(const ICLTensor *input, ICLTensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QS8, DataType::QASYMM8,
-                                                  DataType::U16, DataType::S16, DataType::QS16,
-                                                  DataType::U32, DataType::S32,
-                                                  DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
-
-    TensorShape output_shape = input->info()->tensor_shape();
-    output_shape.set(0, input->info()->dimension(0) * 4);
-    output_shape.set(1, std::ceil(input->info()->dimension(1) / 4.0f));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(compute_interleaved_shape(*input->info())));
 
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    // Perform validate step
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
 
     _input  = input;
     _output = output;
@@ -68,20 +106,9 @@ void CLGEMMInterleave4x4Kernel::configure(const ICLTensor *input, ICLTensor *out
     _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
 
     // Configure kernel window
-    const unsigned int     num_elems_processed_per_iteration_x = max_cl_vector_width / data_size_from_type(input->info()->data_type());
-    constexpr unsigned int num_elems_processed_per_iteration_y = 4;
-    const unsigned int     num_elems_written_per_iteration     = num_elems_processed_per_iteration_x * num_elems_processed_per_iteration_y;
-
-    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
-
-    AccessWindowRectangle input_access(input->info(), 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
-    AccessWindowRectangle output_access(output->info(), 0, 0, num_elems_written_per_iteration, 1, 4.f, 0.25f);
-
-    update_window_and_padding(win, input_access, output_access);
-
-    output_access.set_valid_region(win, input->info()->valid_region());
-
-    ICLKernel::configure(win);
+    auto win_config = validate_and_configure_window(input->info(), output->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    ICLKernel::configure(win_config.second);
 
     // Set config_id for enabling LWS tuning
     _config_id = "interleave4x4_";
@@ -90,6 +117,14 @@ void CLGEMMInterleave4x4Kernel::configure(const ICLTensor *input, ICLTensor *out
     _config_id += support::cpp11::to_string(output->info()->dimension(0));
     _config_id += "_";
     _config_id += support::cpp11::to_string(output->info()->dimension(1));
+}
+
+Status CLGEMMInterleave4x4Kernel::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
+
+    return Status{};
 }
 
 void CLGEMMInterleave4x4Kernel::run(const Window &window, cl::CommandQueue &queue)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,46 +36,6 @@
 #include <vector>
 
 using namespace arm_compute::graph;
-
-namespace
-{
-void depth_concatenate_output_info(ITensorInfo *info, ITensorInfo *sub_tensor_info)
-{
-    ARM_COMPUTE_ERROR_ON(info == nullptr);
-    ARM_COMPUTE_ERROR_ON(sub_tensor_info == nullptr);
-
-    TensorShape        info_shape            = info->tensor_shape();
-    const TensorShape &sub_tensor_info_shape = sub_tensor_info->tensor_shape();
-
-    // Update parent info and valid region
-    if(info_shape.total_size() == 0)
-    {
-        arm_compute::auto_init_if_empty(*info,
-                                        sub_tensor_info->tensor_shape(),
-                                        sub_tensor_info->num_channels(),
-                                        sub_tensor_info->data_type(), sub_tensor_info->fixed_point_position());
-        info->set_valid_region(sub_tensor_info->valid_region());
-    }
-    else
-    {
-        ARM_COMPUTE_ERROR_ON(info->num_channels() != sub_tensor_info->num_channels());
-        ARM_COMPUTE_ERROR_ON(info->data_type() != sub_tensor_info->data_type());
-        ARM_COMPUTE_ERROR_ON(info->fixed_point_position() != sub_tensor_info->fixed_point_position());
-
-        // Concatenate depth
-        ARM_COMPUTE_ERROR_ON(info_shape.x() != sub_tensor_info_shape.x());
-        ARM_COMPUTE_ERROR_ON(info_shape.y() != sub_tensor_info_shape.y());
-        info_shape.set(2, info_shape.z() + sub_tensor_info_shape.z());
-        info->set_tensor_shape(info_shape);
-
-        // Update valid region
-        arm_compute::ValidRegion info_valid_region = info->valid_region();
-        info_valid_region.shape.set(2, info_shape.z());
-        arm_compute::ValidRegion updated_region = arm_compute::intersect_valid_regions(info_valid_region, sub_tensor_info->valid_region());
-        info->set_valid_region(updated_region);
-    }
-}
-} // namespace
 
 /** Branch function */
 class BranchFunction final : public arm_compute::IFunction
@@ -117,9 +77,8 @@ std::unique_ptr<arm_compute::IFunction> BranchLayer::instantiate_node(GraphConte
     // Create branch function
     auto func = arm_compute::support::cpp14::make_unique<BranchFunction>();
 
-    // Track output SubTensorInfo and depth
-    TensorInfo out_info;
-    int        depth = 0;
+    // Track output depth
+    int depth = 0;
 
     // Constuct all sub-graphs given the input/output
     for(auto &sg : _sub_graphs)
@@ -143,15 +102,18 @@ std::unique_ptr<arm_compute::IFunction> BranchLayer::instantiate_node(GraphConte
         // Create output sub-tensor
         if(!sg->has_output())
         {
-            ARM_COMPUTE_ERROR_ON(dynamic_cast<Tensor *>(output) == nullptr);
-            out = arm_compute::support::cpp14::make_unique<SubTensor>(*dynamic_cast<Tensor *>(output),
-                                                                      output->tensor()->info()->tensor_shape(),
-                                                                      Coordinates(0, 0, depth));
+            ARM_COMPUTE_ERROR_ON((dynamic_cast<Tensor *>(output) == nullptr) && (dynamic_cast<SubTensor *>(output) == nullptr));
+
+            out = arm_compute::support::cpp14::make_unique<SubTensor>(output->tensor(),
+                                                                      TensorShape(),
+                                                                      Coordinates(0, 0, depth),
+                                                                      output->target(),
+                                                                      true);
             out_sub_tensor = dynamic_cast<SubTensor *>(out.get());
         }
 
         // Construct sub_graph
-        auto g = sg->construct(ctx.hints().target_hint(), std::move(in), std::move(out));
+        auto g = sg->construct(ctx, std::move(in), std::move(out));
 
         // Register graph to function
         func->register_graph(std::move(g));
@@ -161,16 +123,8 @@ std::unique_ptr<arm_compute::IFunction> BranchLayer::instantiate_node(GraphConte
         {
             ARM_COMPUTE_ERROR_ON(out_sub_tensor->tensor() == nullptr);
             depth += out_sub_tensor->tensor()->info()->tensor_shape()[2];
-            depth_concatenate_output_info(&out_info, out_sub_tensor->tensor()->info());
         }
     }
-
-    // Auto-init output
-    arm_compute::auto_init_if_empty(*output->tensor()->info(),
-                                    out_info.tensor_shape(),
-                                    out_info.num_channels(),
-                                    out_info.data_type(),
-                                    out_info.fixed_point_position());
 
     return std::move(func);
 }

@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -135,9 +135,9 @@ Collaboration diagram for CLSubTensor:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a540d7bd8347a48df011f5eee0d847bf7"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_sub_tensor.xhtml#a540d7bd8347a48df011f5eee0d847bf7">CLSubTensor</a> (<a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *<a class="el" href="classarm__compute_1_1_c_l_sub_tensor.xhtml#a47e6fa052a1d4a5db6dbf14126faa7ab">parent</a>, const <a class="el" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a> &amp;tensor_shape, const <a class="el" href="classarm__compute_1_1_coordinates.xhtml">Coordinates</a> &amp;coords)</td></tr>
-<tr class="memdesc:a540d7bd8347a48df011f5eee0d847bf7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#a540d7bd8347a48df011f5eee0d847bf7">More...</a><br /></td></tr>
-<tr class="separator:a540d7bd8347a48df011f5eee0d847bf7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65fe9103d114c8677b9c62844f9d9b22"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_sub_tensor.xhtml#a65fe9103d114c8677b9c62844f9d9b22">CLSubTensor</a> (<a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *<a class="el" href="classarm__compute_1_1_c_l_sub_tensor.xhtml#a47e6fa052a1d4a5db6dbf14126faa7ab">parent</a>, const <a class="el" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a> &amp;tensor_shape, const <a class="el" href="classarm__compute_1_1_coordinates.xhtml">Coordinates</a> &amp;coords, bool extend_parent=false)</td></tr>
+<tr class="memdesc:a65fe9103d114c8677b9c62844f9d9b22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#a65fe9103d114c8677b9c62844f9d9b22">More...</a><br /></td></tr>
+<tr class="separator:a65fe9103d114c8677b9c62844f9d9b22"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3f3d38e602db0a6af8ac5e932d798617"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_sub_tensor.xhtml#a3f3d38e602db0a6af8ac5e932d798617">~CLSubTensor</a> ()=default</td></tr>
 <tr class="memdesc:a3f3d38e602db0a6af8ac5e932d798617"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor: free the tensor's memory.  <a href="#a3f3d38e602db0a6af8ac5e932d798617">More...</a><br /></td></tr>
 <tr class="separator:a3f3d38e602db0a6af8ac5e932d798617"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -215,7 +215,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_c_l_sub_tensor_8h_source.xhtml#l00037">37</a> of file <a class="el" href="_c_l_sub_tensor_8h_source.xhtml">CLSubTensor.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a540d7bd8347a48df011f5eee0d847bf7"></a>
+<a class="anchor" id="a65fe9103d114c8677b9c62844f9d9b22"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -235,7 +235,13 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="classarm__compute_1_1_coordinates.xhtml">Coordinates</a> &amp;&#160;</td>
-          <td class="paramname"><em>coords</em>&#160;</td>
+          <td class="paramname"><em>coords</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>extend_parent</em> = <code>false</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -251,6 +257,7 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">parent</td><td>Parent tensor </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">tensor_shape</td><td>Shape of the subtensor </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">coords</td><td><a class="el" href="classarm__compute_1_1_coordinates.xhtml" title="Coordinates of an item. ">Coordinates</a> of the first subtensor element inside the parent tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">extend_parent</td><td>(Optional) Extend parent with subtensor shape if subtensor indexes out of bounds </td></tr>
   </table>
   </dd>
 </dl>
@@ -543,7 +550,7 @@ This method simply enqueues the unmap operation, it is the caller's responsibili
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_sub_tensor.xhtml">CLSubTensor</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:36 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:45 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

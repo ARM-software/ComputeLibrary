@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -793,7 +793,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_tensor_info_8h_source.xhtml#l00259">259</a> of file <a class="el" href="_tensor_info_8h_source.xhtml">TensorInfo.h</a>.</p>
 
-<p>Referenced by <a class="el" href="_c_l_accessor_8h_source.xhtml#l00105">CLAccessor::data_type()</a>, <a class="el" href="_g_c_accessor_8h_source.xhtml#l00103">GCAccessor::data_type()</a>, <a class="el" href="_tensor_info_8cpp_source.xhtml#l00087">arm_compute::test::validation::TEST_CASE()</a>, and <a class="el" href="_type_printer_8h_source.xhtml#l00595">arm_compute::to_string()</a>.</p>
+<p>Referenced by <a class="el" href="_c_l_accessor_8h_source.xhtml#l00105">CLAccessor::data_type()</a>, <a class="el" href="_g_c_accessor_8h_source.xhtml#l00103">GCAccessor::data_type()</a>, <a class="el" href="_tensor_info_8cpp_source.xhtml#l00087">arm_compute::test::validation::TEST_CASE()</a>, and <a class="el" href="_type_printer_8h_source.xhtml#l00597">arm_compute::to_string()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;    {</div><div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;        <span class="keywordflow">return</span> _data_type;</div><div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
@@ -831,8 +831,6 @@ Public Member Functions</h2></td></tr>
 <p>Implements <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a178f0d3d87f959e00a743328d95359d2">ITensorInfo</a>.</p>
 
 <p>Definition at line <a class="el" href="_tensor_info_8h_source.xhtml#l00226">226</a> of file <a class="el" href="_tensor_info_8h_source.xhtml">TensorInfo.h</a>.</p>
-
-<p>Referenced by <a class="el" href="cl__events_8cpp_source.xhtml#l00036">main_cl_events()</a>, and <a class="el" href="neoncl__scale__median__gaussian_8cpp_source.xhtml#l00042">main_neoncl_scale_median_gaussian()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;    {</div><div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;        <span class="keywordflow">return</span> _tensor_shape[index];</div><div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
@@ -937,7 +935,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_tensor_info_8h_source.xhtml#l00239">239</a> of file <a class="el" href="_tensor_info_8h_source.xhtml">TensorInfo.h</a>.</p>
 
-<p>Referenced by <a class="el" href="_c_l_accessor_8h_source.xhtml#l00125">CLAccessor::fixed_point_position()</a>, <a class="el" href="_g_c_accessor_8h_source.xhtml#l00123">GCAccessor::fixed_point_position()</a>, <a class="el" href="_tensor_info_8cpp_source.xhtml#l00103">arm_compute::test::validation::TEST_CASE()</a>, and <a class="el" href="_type_printer_8h_source.xhtml#l00595">arm_compute::to_string()</a>.</p>
+<p>Referenced by <a class="el" href="_c_l_accessor_8h_source.xhtml#l00125">CLAccessor::fixed_point_position()</a>, <a class="el" href="_g_c_accessor_8h_source.xhtml#l00123">GCAccessor::fixed_point_position()</a>, <a class="el" href="_tensor_info_8cpp_source.xhtml#l00103">arm_compute::test::validation::TEST_CASE()</a>, and <a class="el" href="_type_printer_8h_source.xhtml#l00597">arm_compute::to_string()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;    {</div><div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;        <span class="keywordflow">return</span> _fixed_point_position;</div><div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
@@ -1001,8 +999,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_tensor_info_8h_source.xhtml#l00275">275</a> of file <a class="el" href="_tensor_info_8h_source.xhtml">TensorInfo.h</a>.</p>
 
-<p>References <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00225">BorderSize::empty()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;    {</div><div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;        <span class="keywordflow">return</span> !_padding.<a class="code" href="structarm__compute_1_1_border_size.xhtml#adffbf97e7b8b64e7cf32f0254cddf3c4">empty</a>();</div><div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;    }</div><div class="ttc" id="structarm__compute_1_1_border_size_xhtml_adffbf97e7b8b64e7cf32f0254cddf3c4"><div class="ttname"><a href="structarm__compute_1_1_border_size.xhtml#adffbf97e7b8b64e7cf32f0254cddf3c4">arm_compute::BorderSize::empty</a></div><div class="ttdeci">constexpr bool empty() const </div><div class="ttdoc">Check if the entire border is zero. </div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00225">Types.h:225</a></div></div>
+<p>References <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00233">BorderSize::empty()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;    {</div><div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;        <span class="keywordflow">return</span> !_padding.<a class="code" href="structarm__compute_1_1_border_size.xhtml#adffbf97e7b8b64e7cf32f0254cddf3c4">empty</a>();</div><div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;    }</div><div class="ttc" id="structarm__compute_1_1_border_size_xhtml_adffbf97e7b8b64e7cf32f0254cddf3c4"><div class="ttname"><a href="structarm__compute_1_1_border_size.xhtml#adffbf97e7b8b64e7cf32f0254cddf3c4">arm_compute::BorderSize::empty</a></div><div class="ttdeci">constexpr bool empty() const </div><div class="ttdoc">Check if the entire border is zero. </div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00233">Types.h:233</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -1486,7 +1484,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_tensor_info_8h_source.xhtml#l00279">279</a> of file <a class="el" href="_tensor_info_8h_source.xhtml">TensorInfo.h</a>.</p>
 
-<p>Referenced by <a class="el" href="validation_2_c_l_2_activation_layer_8cpp_source.xhtml#l00114">arm_compute::test::validation::DATA_TEST_CASE()</a>, and <a class="el" href="_tensor_info_8h_source.xhtml#l00283">TensorInfo::set_is_resizable()</a>.</p>
+<p>Referenced by <a class="el" href="validation_2_c_l_2_activation_layer_8cpp_source.xhtml#l00114">arm_compute::test::validation::DATA_TEST_CASE()</a>, <a class="el" href="_c_l_2_convolution_8cpp_source.xhtml#l00166">arm_compute::test::validation::FIXTURE_DATA_TEST_CASE()</a>, and <a class="el" href="_tensor_info_8h_source.xhtml#l00283">TensorInfo::set_is_resizable()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;    {</div><div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;        <span class="keywordflow">return</span> _is_resizable;</div><div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
@@ -1518,7 +1516,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_tensor_info_8h_source.xhtml#l00251">251</a> of file <a class="el" href="_tensor_info_8h_source.xhtml">TensorInfo.h</a>.</p>
 
-<p>Referenced by <a class="el" href="_c_l_accessor_8h_source.xhtml#l00110">CLAccessor::num_channels()</a>, <a class="el" href="_g_c_accessor_8h_source.xhtml#l00108">GCAccessor::num_channels()</a>, <a class="el" href="_tensor_info_8cpp_source.xhtml#l00087">arm_compute::test::validation::TEST_CASE()</a>, and <a class="el" href="_type_printer_8h_source.xhtml#l00595">arm_compute::to_string()</a>.</p>
+<p>Referenced by <a class="el" href="_c_l_accessor_8h_source.xhtml#l00110">CLAccessor::num_channels()</a>, <a class="el" href="_g_c_accessor_8h_source.xhtml#l00108">GCAccessor::num_channels()</a>, <a class="el" href="_tensor_info_8cpp_source.xhtml#l00087">arm_compute::test::validation::TEST_CASE()</a>, and <a class="el" href="_type_printer_8h_source.xhtml#l00597">arm_compute::to_string()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;    {</div><div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;        <span class="keywordflow">return</span> _num_channels;</div><div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
@@ -1877,7 +1875,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a17394f0f7aea22d9b2d4c6f33bfa69ca">ITensorInfo</a>.</p>
 
-<p>Referenced by <a class="el" href="_c_l_2_harris_corners_8cpp_source.xhtml#l00057">arm_compute::test::validation::DATA_TEST_CASE()</a>, <a class="el" href="_c_l_2_min_max_location_8cpp_source.xhtml#l00104">arm_compute::test::validation::FIXTURE_DATA_TEST_CASE()</a>, and <a class="el" href="_c_l_2_min_max_location_8cpp_source.xhtml#l00045">arm_compute::test::validation::validate_configuration()</a>.</p>
+<p>Referenced by <a class="el" href="validation_2_c_l_2_harris_corners_8cpp_source.xhtml#l00058">arm_compute::test::validation::DATA_TEST_CASE()</a>, <a class="el" href="_c_l_2_min_max_location_8cpp_source.xhtml#l00080">arm_compute::test::validation::FIXTURE_DATA_TEST_CASE()</a>, <a class="el" href="validation_2fixtures_2_magnitude_fixture_8h_source.xhtml#l00046">MagnitudeValidationFixture&lt; TensorType, AccessorType, FunctionType, T &gt;::setup()</a>, <a class="el" href="_phase_fixture_8h_source.xhtml#l00046">PhaseValidationFixture&lt; TensorType, AccessorType, FunctionType, T &gt;::setup()</a>, and <a class="el" href="_c_l_2_min_max_location_8cpp_source.xhtml#l00045">arm_compute::test::validation::validate_configuration()</a>.</p>
 
 </div>
 </div>
@@ -1990,7 +1988,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#ab64a0374b9e2292ed2b55f4f18c98423">ITensorInfo</a>.</p>
 
-<p>Referenced by <a class="el" href="tests_2_utils_8h_source.xhtml#l00455">arm_compute::test::create_tensor()</a>, and <a class="el" href="validation_2_c_l_2_g_e_m_m_lowp_8cpp_source.xhtml#l00052">arm_compute::test::validation::DATA_TEST_CASE()</a>.</p>
+<p>Referenced by <a class="el" href="tests_2_utils_8h_source.xhtml#l00474">arm_compute::test::create_tensor()</a>, <a class="el" href="validation_2_c_l_2_g_e_m_m_lowp_8cpp_source.xhtml#l00052">arm_compute::test::validation::DATA_TEST_CASE()</a>, and <a class="el" href="validation_2fixtures_2_g_e_m_m_lowp_fixture_8h_source.xhtml#l00050">GEMMLowpMatrixMultiplyCoreValidationFixture&lt; TensorType, AccessorType, FunctionType &gt;::setup()</a>.</p>
 
 </div>
 </div>
@@ -2127,7 +2125,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_tensor_info_8h_source.xhtml#l00255">255</a> of file <a class="el" href="_tensor_info_8h_source.xhtml">TensorInfo.h</a>.</p>
 
-<p>Referenced by <a class="el" href="_c_l_accessor_8h_source.xhtml#l00115">CLAccessor::num_elements()</a>, <a class="el" href="_g_c_accessor_8h_source.xhtml#l00113">GCAccessor::num_elements()</a>, <a class="el" href="_c_l_accessor_8h_source.xhtml#l00085">CLAccessor::shape()</a>, <a class="el" href="_g_c_accessor_8h_source.xhtml#l00083">GCAccessor::shape()</a>, <a class="el" href="_tensor_info_8cpp_source.xhtml#l00103">arm_compute::test::validation::TEST_CASE()</a>, and <a class="el" href="_type_printer_8h_source.xhtml#l00595">arm_compute::to_string()</a>.</p>
+<p>Referenced by <a class="el" href="_c_l_accessor_8h_source.xhtml#l00115">CLAccessor::num_elements()</a>, <a class="el" href="_g_c_accessor_8h_source.xhtml#l00113">GCAccessor::num_elements()</a>, <a class="el" href="_c_l_accessor_8h_source.xhtml#l00085">CLAccessor::shape()</a>, <a class="el" href="_g_c_accessor_8h_source.xhtml#l00083">GCAccessor::shape()</a>, <a class="el" href="_tensor_info_8cpp_source.xhtml#l00103">arm_compute::test::validation::TEST_CASE()</a>, and <a class="el" href="_type_printer_8h_source.xhtml#l00597">arm_compute::to_string()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;    {</div><div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;        <span class="keywordflow">return</span> _tensor_shape;</div><div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
@@ -2159,7 +2157,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_tensor_info_8h_source.xhtml#l00267">267</a> of file <a class="el" href="_tensor_info_8h_source.xhtml">TensorInfo.h</a>.</p>
 
-<p>Referenced by <a class="el" href="cl__sgemm_8cpp_source.xhtml#l00039">main_cl_sgemm()</a>, <a class="el" href="_c_l_accessor_8h_source.xhtml#l00095">CLAccessor::size()</a>, <a class="el" href="_g_c_accessor_8h_source.xhtml#l00093">GCAccessor::size()</a>, and <a class="el" href="_tensor_allocator_8cpp_source.xhtml#l00042">arm_compute::test::validation::TEST_CASE()</a>.</p>
+<p>Referenced by <a class="el" href="_c_l_accessor_8h_source.xhtml#l00095">CLAccessor::size()</a>, <a class="el" href="_g_c_accessor_8h_source.xhtml#l00093">GCAccessor::size()</a>, and <a class="el" href="_tensor_allocator_8cpp_source.xhtml#l00042">arm_compute::test::validation::TEST_CASE()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;    {</div><div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;        <span class="keywordflow">return</span> _total_size;</div><div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
@@ -2205,7 +2203,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_tensor_info.xhtml">TensorInfo</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:37 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:46 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

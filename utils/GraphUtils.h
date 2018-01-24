@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -90,8 +90,13 @@ public:
      * @param[in] mean_r   (Optional) Red mean value to be subtracted from red channel
      * @param[in] mean_g   (Optional) Green mean value to be subtracted from green channel
      * @param[in] mean_b   (Optional) Blue mean value to be subtracted from blue channel
+     * @param[in] std_r    (Optional) Red standard deviation value to be divided from red channel
+     * @param[in] std_g    (Optional) Green standard deviation value to be divided from green channel
+     * @param[in] std_b    (Optional) Blue standard deviation value to be divided from blue channel
      */
-    PPMAccessor(const std::string &ppm_path, bool bgr = true, float mean_r = 0.0f, float mean_g = 0.0f, float mean_b = 0.0f);
+    PPMAccessor(std::string ppm_path, bool bgr = true,
+                float mean_r = 0.0f, float mean_g = 0.0f, float mean_b = 0.0f,
+                float std_r = 1.f, float std_g = 1.f, float std_b = 1.f);
     /** Allow instances of this class to be move constructed */
     PPMAccessor(PPMAccessor &&) = default;
 
@@ -99,11 +104,14 @@ public:
     bool access_tensor(ITensor &tensor) override;
 
 private:
-    const std::string &_ppm_path;
-    const bool         _bgr;
-    const float        _mean_r;
-    const float        _mean_g;
-    const float        _mean_b;
+    const std::string _ppm_path;
+    const bool        _bgr;
+    const float       _mean_r;
+    const float       _mean_g;
+    const float       _mean_b;
+    const float       _std_r;
+    const float       _std_g;
+    const float       _std_b;
 };
 
 /** Result accessor class */
@@ -128,6 +136,9 @@ public:
     bool access_tensor(ITensor &tensor) override;
 
 private:
+    template <typename T>
+    void access_predictions_tensor(ITensor &tensor);
+
     std::vector<std::string> _labels;
     std::ostream            &_output_stream;
     size_t                   _top_n;
@@ -177,6 +188,19 @@ private:
     const std::string _filename;
 };
 
+/** Generates appropriate random accessor
+ *
+ * @param[in] lower Lower random values bound
+ * @param[in] upper Upper random values bound
+ * @param[in] seed  Random generator seed
+ *
+ * @return A ramdom accessor
+ */
+inline std::unique_ptr<graph::ITensorAccessor> get_random_accessor(PixelValue lower, PixelValue upper, const std::random_device::result_type seed = 0)
+{
+    return arm_compute::support::cpp14::make_unique<RandomAccessor>(lower, upper, seed);
+}
+
 /** Generates appropriate weights accessor according to the specified path
  *
  * @note If path is empty will generate a DummyAccessor else will generate a NumPyBinLoader
@@ -206,10 +230,17 @@ inline std::unique_ptr<graph::ITensorAccessor> get_weights_accessor(const std::s
  * @param[in] mean_r   Red mean value to be subtracted from red channel
  * @param[in] mean_g   Green mean value to be subtracted from green channel
  * @param[in] mean_b   Blue mean value to be subtracted from blue channel
+ * @param[in] std_r    (Optional) Red standard deviation value to be divided from red channel
+ * @param[in] std_g    (Optional) Green standard deviation value to be divided from green channel
+ * @param[in] std_b    (Optional) Blue standard deviation value to be divided from blue channel
+ * @param[in] bgr      (Optional) Fill the first plane with blue channel (default = true)
  *
  * @return An appropriate tensor accessor
  */
-inline std::unique_ptr<graph::ITensorAccessor> get_input_accessor(const std::string &ppm_path, float mean_r, float mean_g, float mean_b)
+inline std::unique_ptr<graph::ITensorAccessor> get_input_accessor(const std::string &ppm_path,
+                                                                  float mean_r = 0.f, float mean_g = 0.f, float mean_b = 0.f,
+                                                                  float std_r = 1.f, float std_g = 1.f, float std_b = 1.f,
+                                                                  bool bgr = true)
 {
     if(ppm_path.empty())
     {
@@ -217,7 +248,9 @@ inline std::unique_ptr<graph::ITensorAccessor> get_input_accessor(const std::str
     }
     else
     {
-        return arm_compute::support::cpp14::make_unique<PPMAccessor>(ppm_path, true, mean_r, mean_g, mean_b);
+        return arm_compute::support::cpp14::make_unique<PPMAccessor>(ppm_path, bgr,
+                                                                     mean_r, mean_g, mean_b,
+                                                                     std_r, std_g, std_b);
     }
 }
 
@@ -255,7 +288,7 @@ inline std::unique_ptr<graph::ITensorAccessor> get_output_accessor(const std::st
 {
     if(labels_path.empty())
     {
-        return arm_compute::support::cpp14::make_unique<DummyAccessor>();
+        return arm_compute::support::cpp14::make_unique<DummyAccessor>(0);
     }
     else
     {

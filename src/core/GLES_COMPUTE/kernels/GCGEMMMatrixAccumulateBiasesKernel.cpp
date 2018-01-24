@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -117,26 +117,9 @@ void GCGEMMMatrixAccumulateBiasesKernel::run(const Window &window)
     {
         // Set arguments
         unsigned int idx = 0;
-        if(_accum->info()->data_type() == DataType::F32)
-        {
-            add_2D_tensor_argument(idx, _accum, 1, accum_slice);
-            add_1D_tensor_argument(idx, _biases, 2, biases_slice);
-        }
-        else if(_accum->info()->data_type() == DataType::F16)
-        {
-#if defined(ACCUM_PROCESS_4X)
-            BufferParam param = { 1, 3 };
-            add_2D_tensor_argument(idx, _accum, param, accum_slice);
-            param.binding_point = 2;
-            add_1D_tensor_argument(idx, _biases, param, biases_slice);
-#elif defined(ACCUM_PROCESS_8X) /* ACCUM_PROCESS_4X */
-            BufferParam param             = { 1, 4 };
-            add_2D_tensor_argument(idx, _accum, param, accum_slice);
-            param.binding_point = 2;
-            add_1D_tensor_argument(idx, _biases, param, biases_slice);
-#endif                          /* ACCUM_PROCESS_4X */
-        }
 
+        add_2D_tensor_argument(idx, _accum, 1, accum_slice);
+        add_1D_tensor_argument(idx, _biases, 2, biases_slice);
         _kernel.update_shader_params();
 
         enqueue(*this, accum_slice, _lws);

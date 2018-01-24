@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 #include "tests/CL/CLArrayAccessor.h"
 #include "tests/PaddingCalculator.h"
 #include "tests/datasets/BorderModeDataset.h"
+#include "tests/datasets/ImageFileDatasets.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
@@ -101,14 +102,15 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(conca
 template <typename T>
 using CLHarrisCornersFixture = HarrisCornersValidationFixture<CLTensor, CLAccessor, CLKeyPointArray, CLHarrisCorners, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLHarrisCornersFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::Small2DShapes(), data), framework::dataset::make("Format", Format::U8)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLHarrisCornersFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallImageFiles(), data), framework::dataset::make("Format",
+                                                                                                             Format::U8)))
 {
     // Validate output
     CLArrayAccessor<KeyPoint> array(_target);
     validate_keypoints(array.buffer(), array.buffer() + array.num_values(), _reference.begin(), _reference.end(), RelativeTolerance<float>(0.0001f));
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLHarrisCornersFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::Large2DShapes(), data), framework::dataset::make("Format", Format::U8)))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLHarrisCornersFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeImageFiles(), data), framework::dataset::make("Format", Format::U8)))
 {
     // Validate output
     CLArrayAccessor<KeyPoint> array(_target);

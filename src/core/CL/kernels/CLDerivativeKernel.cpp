@@ -96,11 +96,11 @@ void CLDerivativeKernel::configure(const ICLTensor *input, ICLTensor *output_x, 
     AccessWindowHorizontal output_y_access(output_y == nullptr ? nullptr : output_y->info(), 0, num_elems_processed_per_iteration);
     if(_run_derivative_x && _run_derivative_y)
     {
-        input_access = AccessWindowRectangle(input->info(), -border_size().left, -border_size().top, num_elems_processed_per_iteration, num_read_rows_per_iteration);
+        input_access = AccessWindowRectangle(input->info(), -border_size().left, -border_size().top, num_elems_processed_per_iteration + 2, num_read_rows_per_iteration);
     }
     else if(_run_derivative_x)
     {
-        input_access = AccessWindowHorizontal(input->info(), -border_size().left, num_elems_processed_per_iteration);
+        input_access = AccessWindowHorizontal(input->info(), -border_size().left, num_elems_processed_per_iteration + 2);
     }
     else if(_run_derivative_y)
     {

@@ -36,7 +36,7 @@ var _n_e_o_n_2_fixed_point_pixel_wise_multiplication_8cpp =
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_fixed_point_pixel_wise_multiplication_8cpp.xhtml#a0826f752be41390b95f92fbb5964525c", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_fixed_point_pixel_wise_multiplication_8cpp.xhtml#aed3d933c839f7313133fd4102a10c4c1", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_fixed_point_pixel_wise_multiplication_8cpp.xhtml#a64b04abb39cc9f03c077da8f980d3678", null ],
-    [ "TEST_SUITE_END", "_n_e_o_n_2_fixed_point_pixel_wise_multiplication_8cpp.xhtml#af77b34bd2ffc2b5b0b87daa9b5e63ea8", null ],
+    [ "TEST_SUITE_END", "_n_e_o_n_2_fixed_point_pixel_wise_multiplication_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
     [ "NEFixedPointPixelWiseMultiplicationFixture< qint16_t >", "_n_e_o_n_2_fixed_point_pixel_wise_multiplication_8cpp.xhtml#a6c9f6c7580368d1bcbfa2496d2ecdc2a", null ],
     [ "NEFixedPointPixelWiseMultiplicationFixture< qint8_t >", "_n_e_o_n_2_fixed_point_pixel_wise_multiplication_8cpp.xhtml#a5aed71d767e6e9e32c343a64d3403c36", null ]
 ];

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,8 +66,18 @@ void HOGInfo::init(const Size2D &cell_size, const Size2D &block_size, const Size
 
 Size2D HOGInfo::num_cells_per_block() const
 {
+    ARM_COMPUTE_ERROR_ON(_cell_size.width == 0 || _cell_size.height == 0);
+
     return Size2D(_block_size.width / _cell_size.width,
                   _block_size.height / _cell_size.height);
+}
+
+Size2D HOGInfo::num_cells_per_block_stride() const
+{
+    ARM_COMPUTE_ERROR_ON(_cell_size.width == 0 || _cell_size.height == 0);
+
+    return Size2D(_block_stride.width / _cell_size.width,
+                  _block_stride.height / _cell_size.height);
 }
 
 Size2D HOGInfo::num_blocks_per_image(const Size2D &image_size) const

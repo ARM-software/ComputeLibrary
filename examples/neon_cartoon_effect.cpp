@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,74 +30,83 @@
 using namespace arm_compute;
 using namespace utils;
 
-void main_neon_cartoon_effect(int argc, const char **argv)
+class NEONCartoonEffectExample : public Example
 {
-    // Open PPM file
-    PPMLoader ppm;
-    Image     src_img;
-    Image     dst_img;
-    Image     gaus5x5_img;
-    Image     canny_edge_img;
-
-    if(argc < 2)
+public:
+    void do_setup(int argc, char **argv) override
     {
-        // Print help
-        std::cout << "Usage: ./build/neon_cartoon_effect [input_image.ppm]\n\n";
-        std::cout << "No input_image provided, creating a dummy 640x480 image\n";
-        // Create an empty grayscale 640x480 image
-        src_img.allocator()->init(TensorInfo(640, 480, Format::U8));
-    }
-    else
-    {
-        ppm.open(argv[1]);
-        ppm.init_image(src_img, Format::U8);
-    }
+        // Open PPM file
+        PPMLoader ppm;
 
-    // Initialize just the dimensions and format of the images:
-    gaus5x5_img.allocator()->init(*src_img.info());
-    canny_edge_img.allocator()->init(*src_img.info());
-    dst_img.allocator()->init(*src_img.info());
+        if(argc < 2)
+        {
+            // Print help
+            std::cout << "Usage: ./build/neon_cartoon_effect [input_image.ppm]\n\n";
+            std::cout << "No input_image provided, creating a dummy 640x480 image\n";
+            // Create an empty grayscale 640x480 image
+            src_img.allocator()->init(TensorInfo(640, 480, Format::U8));
+        }
+        else
+        {
+            ppm.open(argv[1]);
+            ppm.init_image(src_img, Format::U8);
+        }
 
-    NEGaussian5x5           gaus5x5;
-    NECannyEdge             canny_edge;
-    NEArithmeticSubtraction sub;
+        // Initialize just the dimensions and format of the images:
+        gaus5x5_img.allocator()->init(*src_img.info());
+        canny_edge_img.allocator()->init(*src_img.info());
+        dst_img.allocator()->init(*src_img.info());
 
-    // Configure the functions to call
-    gaus5x5.configure(&src_img, &gaus5x5_img, BorderMode::REPLICATE);
-    canny_edge.configure(&src_img, &canny_edge_img, 100, 80, 3, 1, BorderMode::REPLICATE);
-    sub.configure(&gaus5x5_img, &canny_edge_img, &dst_img, ConvertPolicy::SATURATE);
+        // Configure the functions to call
+        gaus5x5.configure(&src_img, &gaus5x5_img, BorderMode::REPLICATE);
+        canny_edge.configure(&src_img, &canny_edge_img, 100, 80, 3, 1, BorderMode::REPLICATE);
+        sub.configure(&gaus5x5_img, &canny_edge_img, &dst_img, ConvertPolicy::SATURATE);
 
-    // Now that the padding requirements are known we can allocate the images:
-    src_img.allocator()->allocate();
-    dst_img.allocator()->allocate();
-    gaus5x5_img.allocator()->allocate();
-    canny_edge_img.allocator()->allocate();
+        // Now that the padding requirements are known we can allocate the images:
+        src_img.allocator()->allocate();
+        dst_img.allocator()->allocate();
+        gaus5x5_img.allocator()->allocate();
+        canny_edge_img.allocator()->allocate();
 
-    // Fill the input image with the content of the PPM image if a filename was provided:
-    if(ppm.is_open())
-    {
-        ppm.fill_image(src_img);
+        // Fill the input image with the content of the PPM image if a filename was provided:
+        if(ppm.is_open())
+        {
+            ppm.fill_image(src_img);
+            output_filename = std::string(argv[1]) + "_out.ppm";
+        }
     }
 
-    // Execute the functions:
-    gaus5x5.run();
-    canny_edge.run();
-    sub.run();
-
-    // Save the result to file:
-    if(ppm.is_open())
+    void do_run() override
     {
-        const std::string output_filename = std::string(argv[1]) + "_out.ppm";
-        save_to_ppm(dst_img, output_filename);
+        // Execute the functions:
+        gaus5x5.run();
+        canny_edge.run();
+        sub.run();
     }
-}
+
+    void do_teardown() override
+    {
+        // Save the result to file:
+        if(!output_filename.empty())
+        {
+            save_to_ppm(dst_img, output_filename); // save_to_ppm maps and unmaps the image to store as PPM
+        }
+    }
+
+private:
+    Image                   src_img{}, dst_img{}, gaus5x5_img{}, canny_edge_img{};
+    NEGaussian5x5           gaus5x5{};
+    NECannyEdge             canny_edge{};
+    NEArithmeticSubtraction sub{};
+    std::string             output_filename{};
+};
 
 /** Main program for cartoon effect test
  *
  * @param[in] argc Number of arguments
  * @param[in] argv Arguments ( [optional] Path to PPM image to process )
  */
-int main(int argc, const char **argv)
+int main(int argc, char **argv)
 {
-    return utils::run_example(argc, argv, main_neon_cartoon_effect);
+    return utils::run_example<NEONCartoonEffectExample>(argc, argv);
 }

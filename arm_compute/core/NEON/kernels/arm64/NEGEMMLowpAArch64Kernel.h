@@ -44,10 +44,11 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
 protected:
-    void internal_configure(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool transform_0, bool transform_1) override;
+    void internal_configure(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool is_transposed_0, bool is_transposed_1) override;
 
 private:
-    using NEGEMMLowpAArch64 = void(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool transform_0, bool transform_1, const Window &window,
+    using NEGEMMLowpAArch64 = void(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool is_transposed_0,
+                                   bool is_transposed_1, const Window &window,
                                    const ThreadInfo &info);
     NEGEMMLowpAArch64 *_func;
 };

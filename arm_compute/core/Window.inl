@@ -72,6 +72,22 @@ inline Window Window::collapse_if_possible(const Window &full_window, size_t fir
     return collapsed;
 }
 
+inline Window Window::collapse(const Window &full_window, size_t first) const
+{
+    Window collapsed = collapse_if_possible(full_window, first);
+    // Make sure that the window has collapsed
+    int end   = _dims[first].end();
+    int start = 0;
+    ARM_COMPUTE_UNUSED(start);
+    for(size_t d = first + 1; d < Coordinates::num_max_dimensions; ++d)
+    {
+        start = end * _dims[d].start();
+        end *= _dims[d].end();
+    }
+    ARM_COMPUTE_ERROR_ON((collapsed[first].end() != end) || (collapsed[first].start() != start));
+    return collapsed;
+}
+
 inline void Window::shift(size_t dimension, int shift_value)
 {
     ARM_COMPUTE_ERROR_ON(dimension >= Coordinates::num_max_dimensions);

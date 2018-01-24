@@ -46,5 +46,5 @@ void GCDropoutLayer::configure(const IGCTensor *input, IGCTensor *mask, IGCTenso
 
 void GCDropoutLayer::run()
 {
-    GCScheduler::get().enqueue(_dropout_kernel);
+    GCScheduler::get().dispatch(_dropout_kernel);
 }

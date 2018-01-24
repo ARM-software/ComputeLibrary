@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -371,7 +371,7 @@ struct arm_compute::test::fixed_point_arithmetic::detail::constant_expr&lt; T &g
 
 <p>Definition at line <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00337">337</a> of file <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml">FixedPoint.h</a>.</p>
 
-<p>References <a class="el" href="tests_2_utils_8h_source.xhtml#l00344">arm_compute::test::saturate_cast()</a>.</p>
+<p>References <a class="el" href="tests_2_utils_8h_source.xhtml#l00363">arm_compute::test::saturate_cast()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;    {</div><div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;        <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>T<span class="keyword">&gt;</span>(<a class="code" href="structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_1_1constant__expr.xhtml#a59cfd98dfc03fbc5540092aa196d7187">saturate_cast</a>&lt;<span class="keywordtype">float</span>&gt;(val * <a class="code" href="structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_1_1constant__expr.xhtml#a9c4b593f19fb9053fd52697eaa30c5d7">fixed_one</a>(p) + ((val &gt;= 0) ? 0.5 : -0.5)));</div><div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;    }</div><div class="ttc" id="structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_1_1constant__expr_xhtml_a9c4b593f19fb9053fd52697eaa30c5d7"><div class="ttname"><a href="structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_1_1constant__expr.xhtml#a9c4b593f19fb9053fd52697eaa30c5d7">arm_compute::test::fixed_point_arithmetic::detail::constant_expr::fixed_one</a></div><div class="ttdeci">static constexpr T fixed_one(uint8_t p)</div><div class="ttdoc">Calculate representation of 1 in fixed point given a fixed point precision. </div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00293">FixedPoint.h:293</a></div></div>
 <div class="ttc" id="structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_1_1constant__expr_xhtml_a59cfd98dfc03fbc5540092aa196d7187"><div class="ttname"><a href="structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_1_1constant__expr.xhtml#a59cfd98dfc03fbc5540092aa196d7187">arm_compute::test::fixed_point_arithmetic::detail::constant_expr::saturate_cast</a></div><div class="ttdeci">static constexpr T saturate_cast(U val)</div><div class="ttdoc">Saturate given number. </div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00360">FixedPoint.h:360</a></div></div>
 </div><!-- fragment -->
@@ -483,7 +483,7 @@ struct arm_compute::test::fixed_point_arithmetic::detail::constant_expr&lt; T &g
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test.xhtml">test</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic.xhtml">fixed_point_arithmetic</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml">detail</a></li><li class="navelem"><a class="el" href="structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_1_1constant__expr.xhtml">constant_expr</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:38 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:47 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

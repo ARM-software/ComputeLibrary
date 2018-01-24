@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,19 +44,21 @@ public:
     SubTensor();
     /** Constructor
      *
-     * @param[in] parent       Parent to create sub-tensor from
-     * @param[in] tensor_shape Sub-tensor shape
-     * @param[in] coords       Starting coordinates of the sub-tensor in the parent tensor
+     * @param[in] parent        Parent to create sub-tensor from
+     * @param[in] tensor_shape  Sub-tensor shape
+     * @param[in] coords        Starting coordinates of the sub-tensor in the parent tensor
+     * @param[in] extend_parent (Optional) Extend parent with subtensor shape if subtensor indexes out of bounds
      */
-    SubTensor(Tensor &parent, TensorShape tensor_shape, Coordinates coords);
+    SubTensor(Tensor &parent, TensorShape tensor_shape, Coordinates coords, bool extend_parent = false);
     /** Constructor
      *
-     * @param[in] parent       Parent to create sub-tensor from
-     * @param[in] tensor_shape Sub-tensor shape
-     * @param[in] coords       Starting coordinates of the sub-tensor in the parent tensor
-     * @param[in] target       Execution target
+     * @param[in] parent        Parent to create sub-tensor from
+     * @param[in] tensor_shape  Sub-tensor shape
+     * @param[in] coords        Starting coordinates of the sub-tensor in the parent tensor
+     * @param[in] target        Execution target
+     * @param[in] extend_parent (Optional) Extend parent with subtensor shape if subtensor indexes out of bounds
      */
-    SubTensor(arm_compute::ITensor *parent, TensorShape tensor_shape, Coordinates coords, TargetHint target);
+    SubTensor(arm_compute::ITensor *parent, TensorShape tensor_shape, Coordinates coords, TargetHint target, bool extend_parent = false);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     SubTensor(const SubTensor &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -82,11 +84,12 @@ private:
     void instantiate_subtensor();
 
 private:
-    TargetHint                            _target;       /**< Target that this tensor is pinned on */
-    TensorShape                           _tensor_shape; /**< SubTensor shape */
-    Coordinates                           _coords;       /**< SubTensor Coordinates */
-    arm_compute::ITensor                 *_parent;       /**< Parent tensor */
-    std::unique_ptr<arm_compute::ITensor> _subtensor;    /**< SubTensor */
+    TargetHint                            _target;        /**< Target that this tensor is pinned on */
+    TensorShape                           _tensor_shape;  /**< SubTensor shape */
+    Coordinates                           _coords;        /**< SubTensor Coordinates */
+    arm_compute::ITensor                 *_parent;        /**< Parent tensor */
+    std::unique_ptr<arm_compute::ITensor> _subtensor;     /**< SubTensor */
+    bool                                  _extend_parent; /**< Parent extension flag */
 };
 } // namespace graph
 } // namespace arm_compute

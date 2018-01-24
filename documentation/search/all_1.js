@@ -1,9 +1,8 @@
 var searchData=
 [
+  ['_5f_5farm_5fcompute_5fgcnormalizeplanaryuvlayerkernel_5fh_5f_5f',['__ARM_COMPUTE_GCNORMALIZEPLANARYUVLAYERKERNEL_H__',['../_g_c_normalize_planar_y_u_v_layer_kernel_8h.xhtml#ad3f75bcf86b2136eddd259ebfd476d5f',1,'GCNormalizePlanarYUVLayerKernel.h']]],
   ['_5fallowed_5fvalues',['_allowed_values',['../namespacearm__compute_1_1test_1_1framework.xhtml#a813cd3ddc61ff2066016e023927cced0',1,'arm_compute::test::framework']]],
   ['_5falpha',['_alpha',['../classarm__compute_1_1test_1_1validation_1_1_accumulate_weighted_validation_fixture.xhtml#ae80bfae04338955af4de0333b2e0732d',1,'arm_compute::test::validation::AccumulateWeightedValidationFixture']]],
-  ['_5fdeclare_5fsdot',['_DECLARE_SDOT',['../a64__gemm__s8__12x8_2dot__toolchain__support_8h.xhtml#ae8ab8cc04d6d47c4096b9b0075d55db3',1,'dot_toolchain_support.h']]],
-  ['_5fdeclare_5fudot',['_DECLARE_UDOT',['../a64__gemm__u8__12x8_2dot__toolchain__support_8h.xhtml#a8b51979aa2be3bd793c4e0d873909015',1,'dot_toolchain_support.h']]],
   ['_5fend_5fx',['_end_x',['../classarm__compute_1_1_access_window_static.xhtml#a1cd2ac1bcf5024756e4c48ac8d43ed97',1,'arm_compute::AccessWindowStatic']]],
   ['_5fend_5fy',['_end_y',['../classarm__compute_1_1_access_window_static.xhtml#a85980789df8ce8a43eed2535663e5eca',1,'arm_compute::AccessWindowStatic']]],
   ['_5finfo',['_info',['../classarm__compute_1_1_access_window_static.xhtml#acea88797992fa16318f75073ff478f45',1,'arm_compute::AccessWindowStatic']]],

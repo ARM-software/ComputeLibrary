@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -119,7 +119,7 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_winograd3x3_f32.
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#friends">Friends</a>  </div>
   <div class="headertitle">
-<div class="title">Winograd3x3F32 Class Reference</div>  </div>
+<div class="title">Winograd3x3F32 Class Reference<span class="mlabels"><span class="mlabel">final</span></span></div>  </div>
 </div><!--header-->
 <div class="contents">
 
@@ -127,59 +127,102 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_winograd3x3_f32.
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a8c76db128675ee18c2f652f44614a3c1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_winograd3x3_f32.xhtml#a8c76db128675ee18c2f652f44614a3c1">Winograd3x3F32</a> (const <a class="el" href="struct_kernel_shape.xhtml">KernelShape</a> &amp;kernel_shape, const <a class="el" href="struct_tensor4_d_shape.xhtml">Tensor4DShape</a> input_shape, const <a class="el" href="tensor_8hpp.xhtml#a0277d10fdc0f1bb28dbec03e10941727">PaddingType</a> padding_type, void *kernel_storage)</td></tr>
-<tr class="separator:a8c76db128675ee18c2f652f44614a3c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad95a08fe675ee862b2bd0f378c492297"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_winograd3x3_f32.xhtml#ad95a08fe675ee862b2bd0f378c492297">Winograd3x3F32</a> (const int n_batches, const int n_input_channels, const int n_input_rows, const int n_input_cols, const int n_output_channels, const bool same_padding, const float *const weights, float *const weights_storage, const float *const input, float *const winograd_input, float *const output, float *const winograd_output)</td></tr>
+<tr class="separator:ad95a08fe675ee862b2bd0f378c492297"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a39afe97f3489074b5eabfb447011edce"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_winograd3x3_f32.xhtml#a39afe97f3489074b5eabfb447011edce">~Winograd3x3F32</a> ()</td></tr>
 <tr class="separator:a39afe97f3489074b5eabfb447011edce"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abbf8c87fd8dffe614302613350fd58a6"><td class="memItemLeft" align="right" valign="top">std::pair&lt; void *, void * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_winograd3x3_f32.xhtml#abbf8c87fd8dffe614302613350fd58a6">get_nhwc_ptrs</a> (const <a class="el" href="struct_tensor4_d_shape.xhtml">Tensor4DShape</a> &amp;input_shape, const <a class="el" href="tensor_8hpp.xhtml#a0277d10fdc0f1bb28dbec03e10941727">PaddingType</a> padding_type, void *working_space)</td></tr>
-<tr class="separator:abbf8c87fd8dffe614302613350fd58a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeada170e9e70bec7f2d2e978bf5c9a04"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_winograd3x3_f32.xhtml#aeada170e9e70bec7f2d2e978bf5c9a04">transform_weights</a> (const void *const kernel, void *transform_working_space)</td></tr>
-<tr class="separator:aeada170e9e70bec7f2d2e978bf5c9a04"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af6763033b37ded88efd49c438bb186de"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_winograd3x3_f32.xhtml#af6763033b37ded88efd49c438bb186de">reshape_input</a> (const <a class="el" href="struct_tensor4_d_shape.xhtml">Tensor4DShape</a> &amp;input_shape, const <a class="el" href="tensor_8hpp.xhtml#a0277d10fdc0f1bb28dbec03e10941727">PaddingType</a> padding_type, const void *const input, void *working_space)</td></tr>
-<tr class="separator:af6763033b37ded88efd49c438bb186de"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae2fc9af73104a80d6c7064bcb1582da1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_winograd3x3_f32.xhtml#ae2fc9af73104a80d6c7064bcb1582da1">reshape_output</a> (const <a class="el" href="struct_tensor4_d_shape.xhtml">Tensor4DShape</a> &amp;input_shape, const <a class="el" href="tensor_8hpp.xhtml#a0277d10fdc0f1bb28dbec03e10941727">PaddingType</a> padding_type, void *const output)</td></tr>
-<tr class="separator:ae2fc9af73104a80d6c7064bcb1582da1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a44b4d2790e2656605ce79ab4936246e0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_winograd3x3_f32.xhtml#a44b4d2790e2656605ce79ab4936246e0">nchw2nhwc</a> (const <a class="el" href="struct_tensor4_d_shape.xhtml">Tensor4DShape</a> &amp;input_shape, const <a class="el" href="tensor_8hpp.xhtml#a0277d10fdc0f1bb28dbec03e10941727">PaddingType</a> padding_type, void *working_space, const void *const input)</td></tr>
-<tr class="separator:a44b4d2790e2656605ce79ab4936246e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a119907a5def34cd392a034e5a600a977"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_winograd3x3_f32.xhtml#a119907a5def34cd392a034e5a600a977">nhwc2nchw</a> (const <a class="el" href="struct_tensor4_d_shape.xhtml">Tensor4DShape</a> &amp;input_shape, const <a class="el" href="tensor_8hpp.xhtml#a0277d10fdc0f1bb28dbec03e10941727">PaddingType</a> padding_type, void *working_space, void *const output)</td></tr>
-<tr class="separator:a119907a5def34cd392a034e5a600a977"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb88084e7ba971a01cb89654b48a077f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_winograd3x3_f32.xhtml#afb88084e7ba971a01cb89654b48a077f">transform_weights</a> ()</td></tr>
+<tr class="separator:afb88084e7ba971a01cb89654b48a077f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1b74c5a552d468e90f2a32b36950b6ad"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_winograd3x3_f32.xhtml#a1b74c5a552d468e90f2a32b36950b6ad">transform_input</a> ()</td></tr>
+<tr class="separator:a1b74c5a552d468e90f2a32b36950b6ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9450a57c8bbf78ebaa0f69d2d718772e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_winograd3x3_f32.xhtml#a9450a57c8bbf78ebaa0f69d2d718772e">transform_output</a> ()</td></tr>
+<tr class="separator:a9450a57c8bbf78ebaa0f69d2d718772e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="friends"></a>
 Friends</h2></td></tr>
 <tr class="memitem:a20382f2c4f5f8cfd34896c7efe2506b1"><td class="memItemLeft" align="right" valign="top">class&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_winograd3x3_f32.xhtml#a20382f2c4f5f8cfd34896c7efe2506b1">NEWinogradLayerKernel</a></td></tr>
+<tr class="memdesc:a20382f2c4f5f8cfd34896c7efe2506b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a new Winograd convolution layer.  <a href="#a20382f2c4f5f8cfd34896c7efe2506b1">More...</a><br /></td></tr>
 <tr class="separator:a20382f2c4f5f8cfd34896c7efe2506b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p>Definition at line <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml#l00034">34</a> of file <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml">NEWinogradLayerKernel.h</a>.</p>
+<p>Definition at line <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml#l00036">36</a> of file <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml">NEWinogradLayerKernel.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a8c76db128675ee18c2f652f44614a3c1"></a>
+<a class="anchor" id="ad95a08fe675ee862b2bd0f378c492297"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname"><a class="el" href="classarm__compute_1_1_winograd3x3_f32.xhtml">Winograd3x3F32</a> </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="struct_kernel_shape.xhtml">KernelShape</a> &amp;&#160;</td>
-          <td class="paramname"><em>kernel_shape</em>, </td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>n_batches</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="struct_tensor4_d_shape.xhtml">Tensor4DShape</a>&#160;</td>
-          <td class="paramname"><em>input_shape</em>, </td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>n_input_channels</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="tensor_8hpp.xhtml#a0277d10fdc0f1bb28dbec03e10941727">PaddingType</a>&#160;</td>
-          <td class="paramname"><em>padding_type</em>, </td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>n_input_rows</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname"><em>kernel_storage</em>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>n_input_cols</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>n_output_channels</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>same_padding</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *const&#160;</td>
+          <td class="paramname"><em>weights</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *const&#160;</td>
+          <td class="paramname"><em>weights_storage</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *const&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *const&#160;</td>
+          <td class="paramname"><em>winograd_input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *const&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *const&#160;</td>
+          <td class="paramname"><em>winograd_output</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -207,204 +250,45 @@ Friends</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="abbf8c87fd8dffe614302613350fd58a6"></a>
+<a class="anchor" id="a1b74c5a552d468e90f2a32b36950b6ad"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">std::pair&lt;void *, void *&gt; get_nhwc_ptrs </td>
+          <td class="memname">void transform_input </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="struct_tensor4_d_shape.xhtml">Tensor4DShape</a> &amp;&#160;</td>
-          <td class="paramname"><em>input_shape</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="tensor_8hpp.xhtml#a0277d10fdc0f1bb28dbec03e10941727">PaddingType</a>&#160;</td>
-          <td class="paramname"><em>padding_type</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname"><em>working_space</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a class="anchor" id="a44b4d2790e2656605ce79ab4936246e0"></a>
+<a class="anchor" id="a9450a57c8bbf78ebaa0f69d2d718772e"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void nchw2nhwc </td>
+          <td class="memname">void transform_output </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="struct_tensor4_d_shape.xhtml">Tensor4DShape</a> &amp;&#160;</td>
-          <td class="paramname"><em>input_shape</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="tensor_8hpp.xhtml#a0277d10fdc0f1bb28dbec03e10941727">PaddingType</a>&#160;</td>
-          <td class="paramname"><em>padding_type</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname"><em>working_space</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const void *const&#160;</td>
-          <td class="paramname"><em>input</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a class="anchor" id="a119907a5def34cd392a034e5a600a977"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void nhwc2nchw </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="struct_tensor4_d_shape.xhtml">Tensor4DShape</a> &amp;&#160;</td>
-          <td class="paramname"><em>input_shape</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="tensor_8hpp.xhtml#a0277d10fdc0f1bb28dbec03e10941727">PaddingType</a>&#160;</td>
-          <td class="paramname"><em>padding_type</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname"><em>working_space</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">void *const&#160;</td>
-          <td class="paramname"><em>output</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="af6763033b37ded88efd49c438bb186de"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void reshape_input </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="struct_tensor4_d_shape.xhtml">Tensor4DShape</a> &amp;&#160;</td>
-          <td class="paramname"><em>input_shape</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="tensor_8hpp.xhtml#a0277d10fdc0f1bb28dbec03e10941727">PaddingType</a>&#160;</td>
-          <td class="paramname"><em>padding_type</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const void *const&#160;</td>
-          <td class="paramname"><em>input</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname"><em>working_space</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="ae2fc9af73104a80d6c7064bcb1582da1"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void reshape_output </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="struct_tensor4_d_shape.xhtml">Tensor4DShape</a> &amp;&#160;</td>
-          <td class="paramname"><em>input_shape</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const <a class="el" href="tensor_8hpp.xhtml#a0277d10fdc0f1bb28dbec03e10941727">PaddingType</a>&#160;</td>
-          <td class="paramname"><em>padding_type</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">void *const&#160;</td>
-          <td class="paramname"><em>output</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="aeada170e9e70bec7f2d2e978bf5c9a04"></a>
+<a class="anchor" id="afb88084e7ba971a01cb89654b48a077f"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">void transform_weights </td>
           <td>(</td>
-          <td class="paramtype">const void *const&#160;</td>
-          <td class="paramname"><em>kernel</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname"><em>transform_working_space</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -430,7 +314,26 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml#l00037">37</a> of file <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml">NEWinogradLayerKernel.h</a>.</p>
+<p>Create a new Winograd convolution layer. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">n_batches</td><td>Number of batches in the input and output tensors. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">n_input_channels</td><td>Number of feature maps in a batch of the input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">n_input_rows</td><td>Number of rows in a feature map of the input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">n_input_cols</td><td>Number of columns in a feature map of the input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">n_output_channels</td><td>Number of feature maps in the output tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">same_padding</td><td>Use "SAME" padding, otherwise use "VALID". </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">weights</td><td>Pointer to weight tensor in spatial domain. Must be ordered as "Height x Rows x Input Feature Maps x Output Feature Maps. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">weights_storage</td><td>Pointer to storage for weight tensor in the Winograd domain. Must be at least the size returned by `get_weight_storage_size </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Pointer to NHWC ordered input tensor, in the spatial domain. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">winograd_input</td><td>Pointer to working space for the input tensor in the Winograd domain. Must be at least the size returned by <code>get_input_storage_size</code>. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Pointer to NHWC ordered output tensor, in the spatial domain. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">winograd_output</td><td>Pointer to working space for the output tensor in the Winograd domain. Must be at least the size returned by <code>get_output_storage_size</code>. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Definition at line <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml#l00054">54</a> of file <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml">NEWinogradLayerKernel.h</a>.</p>
 
 </div>
 </div>
@@ -443,7 +346,7 @@ Friends</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_winograd3x3_f32.xhtml">Winograd3x3F32</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:37 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:46 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -291,7 +291,7 @@ Public Member Functions</h2></td></tr>
 <p>Help message for the option. </p>
 <dl class="section return"><dt>Returns</dt><dd>String representing the help message for the specific subclass. </dd></dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_enum_list_option.xhtml#ae6038fe1a77c4b08a678530410f41efa">EnumListOption&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_enum_option.xhtml#ae6038fe1a77c4b08a678530410f41efa">EnumOption&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_list_option.xhtml#ae6038fe1a77c4b08a678530410f41efa">ListOption&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml#ae6038fe1a77c4b08a678530410f41efa">SimpleOption&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml#ae6038fe1a77c4b08a678530410f41efa">SimpleOption&lt; bool &gt;</a>, and <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_toggle_option.xhtml#ae6038fe1a77c4b08a678530410f41efa">ToggleOption</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_enum_list_option.xhtml#ae6038fe1a77c4b08a678530410f41efa">EnumListOption&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_enum_list_option.xhtml#ae6038fe1a77c4b08a678530410f41efa">EnumListOption&lt; InstrumentsDescription &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_enum_option.xhtml#ae6038fe1a77c4b08a678530410f41efa">EnumOption&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_enum_option.xhtml#ae6038fe1a77c4b08a678530410f41efa">EnumOption&lt; LogFormat &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_enum_option.xhtml#ae6038fe1a77c4b08a678530410f41efa">EnumOption&lt; LogLevel &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_list_option.xhtml#ae6038fe1a77c4b08a678530410f41efa">ListOption&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml#ae6038fe1a77c4b08a678530410f41efa">SimpleOption&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml#ae6038fe1a77c4b08a678530410f41efa">SimpleOption&lt; LogFormat &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml#ae6038fe1a77c4b08a678530410f41efa">SimpleOption&lt; std::string &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml#ae6038fe1a77c4b08a678530410f41efa">SimpleOption&lt; int &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml#ae6038fe1a77c4b08a678530410f41efa">SimpleOption&lt; LogLevel &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml#ae6038fe1a77c4b08a678530410f41efa">SimpleOption&lt; bool &gt;</a>, and <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_toggle_option.xhtml#ae6038fe1a77c4b08a678530410f41efa">ToggleOption</a>.</p>
 
 </div>
 </div>
@@ -335,7 +335,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_option_8cpp_source.xhtml#l00062">62</a> of file <a class="el" href="_option_8cpp_source.xhtml">Option.cpp</a>.</p>
 
-<p>Referenced by <a class="el" href="_option_8cpp_source.xhtml#l00037">Option::Option()</a>.</p>
+<p>Referenced by <a class="el" href="_common_options_8cpp_source.xhtml#l00098">CommonOptions::create_printers()</a>, <a class="el" href="main_8cpp_source.xhtml#l00063">main()</a>, and <a class="el" href="_option_8cpp_source.xhtml#l00037">Option::Option()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;{</div><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    <span class="keywordflow">return</span> _is_set;</div><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
@@ -392,7 +392,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if the value could be parsed by the specific subclass. </dd></dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml#afeee88c6cc79c347f803741da7f325f0">SimpleOption&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_enum_list_option.xhtml#aba9622f1f4bc66fcba246f30d4175a4f">EnumListOption&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_enum_option.xhtml#aba9622f1f4bc66fcba246f30d4175a4f">EnumOption&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_list_option.xhtml#aba9622f1f4bc66fcba246f30d4175a4f">ListOption&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml#aba9622f1f4bc66fcba246f30d4175a4f">SimpleOption&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml#aba9622f1f4bc66fcba246f30d4175a4f">SimpleOption&lt; bool &gt;</a>, and <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_toggle_option.xhtml#aba9622f1f4bc66fcba246f30d4175a4f">ToggleOption</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml#afeee88c6cc79c347f803741da7f325f0">SimpleOption&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_enum_list_option.xhtml#aba9622f1f4bc66fcba246f30d4175a4f">EnumListOption&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_enum_list_option.xhtml#aba9622f1f4bc66fcba246f30d4175a4f">EnumListOption&lt; InstrumentsDescription &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_enum_option.xhtml#aba9622f1f4bc66fcba246f30d4175a4f">EnumOption&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_enum_option.xhtml#aba9622f1f4bc66fcba246f30d4175a4f">EnumOption&lt; LogFormat &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_enum_option.xhtml#aba9622f1f4bc66fcba246f30d4175a4f">EnumOption&lt; LogLevel &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_list_option.xhtml#aba9622f1f4bc66fcba246f30d4175a4f">ListOption&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml#aba9622f1f4bc66fcba246f30d4175a4f">SimpleOption&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml#aba9622f1f4bc66fcba246f30d4175a4f">SimpleOption&lt; LogFormat &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml#aba9622f1f4bc66fcba246f30d4175a4f">SimpleOption&lt; std::string &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml#aba9622f1f4bc66fcba246f30d4175a4f">SimpleOption&lt; int &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml#aba9622f1f4bc66fcba246f30d4175a4f">SimpleOption&lt; LogLevel &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml#aba9622f1f4bc66fcba246f30d4175a4f">SimpleOption&lt; bool &gt;</a>, and <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_toggle_option.xhtml#aba9622f1f4bc66fcba246f30d4175a4f">ToggleOption</a>.</p>
 
 </div>
 </div>
@@ -420,7 +420,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_option_8cpp_source.xhtml#l00052">52</a> of file <a class="el" href="_option_8cpp_source.xhtml">Option.cpp</a>.</p>
 
-<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00062">main()</a>.</p>
+<p>Referenced by <a class="el" href="_common_options_8cpp_source.xhtml#l00036">CommonOptions::CommonOptions()</a>, and <a class="el" href="main_8cpp_source.xhtml#l00063">main()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;{</div><div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    _help = std::move(<a class="code" href="classarm__compute_1_1test_1_1framework_1_1_option.xhtml#a6d472b4309f5558f94258fabeff3474e">help</a>);</div><div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_option_xhtml_a6d472b4309f5558f94258fabeff3474e"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_option.xhtml#a6d472b4309f5558f94258fabeff3474e">arm_compute::test::framework::Option::help</a></div><div class="ttdeci">virtual std::string help() const =0</div><div class="ttdoc">Help message for the option. </div></div>
 </div><!-- fragment -->
 </div>
@@ -464,7 +464,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test.xhtml">test</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test_1_1framework.xhtml">framework</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1test_1_1framework_1_1_option.xhtml">Option</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:38 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:47 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

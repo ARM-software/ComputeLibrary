@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,8 +46,7 @@ const auto data_types = framework::dataset::make("DataType",
 #if __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
     DataType::F16,
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-    DataType::F32,
-    DataType::QS8
+    DataType::F32
 });
 } // namespace
 

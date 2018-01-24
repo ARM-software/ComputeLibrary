@@ -1,5 +1,6 @@
 var namespacearm__compute_1_1test =
 [
+    [ "benchmark", "namespacearm__compute_1_1test_1_1benchmark.xhtml", "namespacearm__compute_1_1test_1_1benchmark" ],
     [ "CLSuite", "namespacearm__compute_1_1test_1_1_c_l_suite.xhtml", null ],
     [ "datasets", "namespacearm__compute_1_1test_1_1datasets.xhtml", "namespacearm__compute_1_1test_1_1datasets" ],
     [ "fixed_point_arithmetic", "namespacearm__compute_1_1test_1_1fixed__point__arithmetic.xhtml", "namespacearm__compute_1_1test_1_1fixed__point__arithmetic" ],
@@ -16,6 +17,8 @@ var namespacearm__compute_1_1test =
     [ "CLAccessor", "classarm__compute_1_1test_1_1_c_l_accessor.xhtml", "classarm__compute_1_1test_1_1_c_l_accessor" ],
     [ "CLArrayAccessor", "classarm__compute_1_1test_1_1_c_l_array_accessor.xhtml", "classarm__compute_1_1test_1_1_c_l_array_accessor" ],
     [ "CLLutAccessor", "classarm__compute_1_1test_1_1_c_l_lut_accessor.xhtml", "classarm__compute_1_1test_1_1_c_l_lut_accessor" ],
+    [ "CLSynthetizeFunction", "classarm__compute_1_1test_1_1_c_l_synthetize_function.xhtml", "classarm__compute_1_1test_1_1_c_l_synthetize_function" ],
+    [ "CLSynthetizeFunctionWithZeroConstantBorder", "classarm__compute_1_1test_1_1_c_l_synthetize_function_with_zero_constant_border.xhtml", "classarm__compute_1_1test_1_1_c_l_synthetize_function_with_zero_constant_border" ],
     [ "common_promoted_signed_type", "structarm__compute_1_1test_1_1common__promoted__signed__type.xhtml", "structarm__compute_1_1test_1_1common__promoted__signed__type" ],
     [ "common_promoted_unsigned_type", "structarm__compute_1_1test_1_1common__promoted__unsigned__type.xhtml", "structarm__compute_1_1test_1_1common__promoted__unsigned__type" ],
     [ "ConvolutionLayerFixture", "classarm__compute_1_1test_1_1_convolution_layer_fixture.xhtml", "classarm__compute_1_1test_1_1_convolution_layer_fixture" ],
@@ -36,11 +39,13 @@ var namespacearm__compute_1_1test =
     [ "NESynthetizeFunction", "classarm__compute_1_1test_1_1_n_e_synthetize_function.xhtml", "classarm__compute_1_1test_1_1_n_e_synthetize_function" ],
     [ "NESynthetizeFunctionWithZeroConstantBorder", "classarm__compute_1_1test_1_1_n_e_synthetize_function_with_zero_constant_border.xhtml", "classarm__compute_1_1test_1_1_n_e_synthetize_function_with_zero_constant_border" ],
     [ "NormalizationLayerFixture", "classarm__compute_1_1test_1_1_normalization_layer_fixture.xhtml", "classarm__compute_1_1test_1_1_normalization_layer_fixture" ],
+    [ "NormalizePlanarYUVLayerFixture", "classarm__compute_1_1test_1_1_normalize_planar_y_u_v_layer_fixture.xhtml", "classarm__compute_1_1test_1_1_normalize_planar_y_u_v_layer_fixture" ],
     [ "PaddingCalculator", "classarm__compute_1_1test_1_1_padding_calculator.xhtml", "classarm__compute_1_1test_1_1_padding_calculator" ],
     [ "PoolingLayerFixture", "classarm__compute_1_1test_1_1_pooling_layer_fixture.xhtml", "classarm__compute_1_1test_1_1_pooling_layer_fixture" ],
     [ "RawLutAccessor", "classarm__compute_1_1test_1_1_raw_lut_accessor.xhtml", "classarm__compute_1_1test_1_1_raw_lut_accessor" ],
     [ "RawTensor", "classarm__compute_1_1test_1_1_raw_tensor.xhtml", "classarm__compute_1_1test_1_1_raw_tensor" ],
     [ "ROIPoolingLayerFixture", "classarm__compute_1_1test_1_1_r_o_i_pooling_layer_fixture.xhtml", "classarm__compute_1_1test_1_1_r_o_i_pooling_layer_fixture" ],
+    [ "ScaleLayerFixture", "classarm__compute_1_1test_1_1_scale_layer_fixture.xhtml", "classarm__compute_1_1test_1_1_scale_layer_fixture" ],
     [ "SimpleTensor", "classarm__compute_1_1test_1_1_simple_tensor.xhtml", "classarm__compute_1_1test_1_1_simple_tensor" ],
     [ "SoftmaxLayerFixture", "classarm__compute_1_1test_1_1_softmax_layer_fixture.xhtml", "classarm__compute_1_1test_1_1_softmax_layer_fixture" ],
     [ "TensorCache", "classarm__compute_1_1test_1_1_tensor_cache.xhtml", "classarm__compute_1_1test_1_1_tensor_cache" ]

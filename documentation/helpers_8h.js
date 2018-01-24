@@ -3,7 +3,7 @@ var helpers_8h =
     [ "Vector", "struct_vector.xhtml", "struct_vector" ],
     [ "Image", "struct_image.xhtml", "struct_image" ],
     [ "Tensor3D", "struct_tensor3_d.xhtml", "struct_tensor3_d" ],
-    [ "Tensor4D", "class_tensor4_d.xhtml", "class_tensor4_d" ],
+    [ "Tensor4D", "struct_tensor4_d.xhtml", "struct_tensor4_d" ],
     [ "CL_VEC_DATA_TYPE", "helpers_8h.xhtml#a0f6ad555d097377151003a5119ccee45", null ],
     [ "CL_VEC_DATA_TYPE_STR", "helpers_8h.xhtml#aa38f54499d4724c4ab01f6da100b603b", null ],
     [ "CLAMP", "helpers_8h.xhtml#aabdbe431f2713c5c2604cb9872b66aab", null ],

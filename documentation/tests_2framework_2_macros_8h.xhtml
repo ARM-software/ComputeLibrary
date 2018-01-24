@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -177,6 +177,8 @@ Macros</h2></td></tr>
 <tr class="separator:ab10b1385f1891ea74430f2e623b09961"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a67ff67e5a2343bc8d05b1b02290c9fde"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#a67ff67e5a2343bc8d05b1b02290c9fde">FIXTURE_RUN</a>(FIXTURE)</td></tr>
 <tr class="separator:a67ff67e5a2343bc8d05b1b02290c9fde"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afc8f808405401fbb9528d36b15127f5b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#afc8f808405401fbb9528d36b15127f5b">FIXTURE_SYNC</a>(FIXTURE)</td></tr>
+<tr class="separator:afc8f808405401fbb9528d36b15127f5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae4ff555702946b1f9dddd59f2bff3a2b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b">FIXTURE_TEARDOWN</a>(FIXTURE)</td></tr>
 <tr class="separator:ae4ff555702946b1f9dddd59f2bff3a2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a31357313a6bdb0dc09a7cae7d7f91377"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="tests_2framework_2_macros_8h.xhtml#a31357313a6bdb0dc09a7cae7d7f91377">TEST_REGISTRAR</a>(TEST_NAME,  MODE,  STATUS)</td></tr>
@@ -297,7 +299,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00170">170</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00175">175</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -370,13 +372,13 @@ Macros</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;                                                                                           \</div><div class="line">    class TEST_NAME;                                                                                                \</div><div class="line">    template &lt;<span class="keyword">typename</span>... As&gt;                                                                                       \</div><div class="line">    class TEST_NAME&lt;std::tuple&lt;As...&gt;&gt; : <span class="keyword">public</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml">arm_compute::test::framework::DataTestCase&lt;decltype(DATASET)::type&gt;</a> \</div><div class="line">    {                                                                                                               \</div><div class="line">    public:                                                                                                     <a class="code" href="tests_2framework_2_macros_8h.xhtml#adbd9bcfdb4c52d5acf73ce39c232b5c8">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#adbd9bcfdb4c52d5acf73ce39c232b5c8">        DATA_TEST_CASE_CONSTRUCTOR</a>(TEST_NAME, DATASET)                                                              \</div><div class="line">        void do_run() override                                                                                      \</div><div class="line">        {                                                                                                           <a class="code" href="namespacearm__compute_1_1test.xhtml#ab3a61953b0f41e932f8a2ce8918e7aec">\</a></div><div class="line"><a class="code" href="namespacearm__compute_1_1test.xhtml#ab3a61953b0f41e932f8a2ce8918e7aec">            arm_compute::test::framework::apply</a>(<span class="keyword">this</span>, &amp;TEST_NAME::run&lt;As...&gt;, _data);                               \</div><div class="line">        }                                                                                                           \</div><div class="line">        template &lt;MAKE_TYPE_PARAMS(__VA_ARGS__)&gt;                                                                    \</div><div class="line">        void run(<a class="code" href="tests_2framework_2_macros_8h.xhtml#a0c93732f08a32d6e390c3fae98325931">MAKE_ARG_PARAMS</a>(__VA_ARGS__));                                                                     \</div><div class="line">    };                                                                                                              <a class="code" href="tests_2framework_2_macros_8h.xhtml#aa4df8c1af6041bc017bd9fb943d5e5d6">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#aa4df8c1af6041bc017bd9fb943d5e5d6">    DATA_TEST_REGISTRAR</a>(TEST_NAME, MODE, STATUS, DATASET);                                                          \</div><div class="line">    template &lt;<span class="keyword">typename</span>... As&gt;                                                                                       \</div><div class="line">    template &lt;MAKE_TYPE_PARAMS(__VA_ARGS__)&gt;                                                                        \</div><div class="line">    void TEST_NAME&lt;std::tuple&lt;As...&gt;&gt;::run(<a class="code" href="tests_2framework_2_macros_8h.xhtml#a0c93732f08a32d6e390c3fae98325931">MAKE_ARG_PARAMS</a>(__VA_ARGS__))</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_aa4df8c1af6041bc017bd9fb943d5e5d6"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#aa4df8c1af6041bc017bd9fb943d5e5d6">DATA_TEST_REGISTRAR</a></div><div class="ttdeci">#define DATA_TEST_REGISTRAR(TEST_NAME, MODE, STATUS, DATASET)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00127">Macros.h:127</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;                                                                                           \</div><div class="line">    class TEST_NAME;                                                                                                \</div><div class="line">    template &lt;<span class="keyword">typename</span>... As&gt;                                                                                       \</div><div class="line">    class TEST_NAME&lt;std::tuple&lt;As...&gt;&gt; : <span class="keyword">public</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml">arm_compute::test::framework::DataTestCase&lt;decltype(DATASET)::type&gt;</a> \</div><div class="line">    {                                                                                                               \</div><div class="line">    public:                                                                                                     <a class="code" href="tests_2framework_2_macros_8h.xhtml#adbd9bcfdb4c52d5acf73ce39c232b5c8">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#adbd9bcfdb4c52d5acf73ce39c232b5c8">        DATA_TEST_CASE_CONSTRUCTOR</a>(TEST_NAME, DATASET)                                                              \</div><div class="line">        void do_run() override                                                                                      \</div><div class="line">        {                                                                                                           <a class="code" href="namespacearm__compute_1_1test.xhtml#ab3a61953b0f41e932f8a2ce8918e7aec">\</a></div><div class="line"><a class="code" href="namespacearm__compute_1_1test.xhtml#ab3a61953b0f41e932f8a2ce8918e7aec">            arm_compute::test::framework::apply</a>(<span class="keyword">this</span>, &amp;TEST_NAME::run&lt;As...&gt;, _data);                               \</div><div class="line">        }                                                                                                           \</div><div class="line">        template &lt;MAKE_TYPE_PARAMS(__VA_ARGS__)&gt;                                                                    \</div><div class="line">        void run(<a class="code" href="tests_2framework_2_macros_8h.xhtml#a0c93732f08a32d6e390c3fae98325931">MAKE_ARG_PARAMS</a>(__VA_ARGS__));                                                                     \</div><div class="line">    };                                                                                                              <a class="code" href="tests_2framework_2_macros_8h.xhtml#aa4df8c1af6041bc017bd9fb943d5e5d6">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#aa4df8c1af6041bc017bd9fb943d5e5d6">    DATA_TEST_REGISTRAR</a>(TEST_NAME, MODE, STATUS, DATASET);                                                          \</div><div class="line">    template &lt;<span class="keyword">typename</span>... As&gt;                                                                                       \</div><div class="line">    template &lt;MAKE_TYPE_PARAMS(__VA_ARGS__)&gt;                                                                        \</div><div class="line">    void TEST_NAME&lt;std::tuple&lt;As...&gt;&gt;::run(<a class="code" href="tests_2framework_2_macros_8h.xhtml#a0c93732f08a32d6e390c3fae98325931">MAKE_ARG_PARAMS</a>(__VA_ARGS__))</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_aa4df8c1af6041bc017bd9fb943d5e5d6"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#aa4df8c1af6041bc017bd9fb943d5e5d6">DATA_TEST_REGISTRAR</a></div><div class="ttdeci">#define DATA_TEST_REGISTRAR(TEST_NAME, MODE, STATUS, DATASET)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00132">Macros.h:132</a></div></div>
 <div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a0c93732f08a32d6e390c3fae98325931"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a0c93732f08a32d6e390c3fae98325931">MAKE_ARG_PARAMS</a></div><div class="ttdeci">#define MAKE_ARG_PARAMS(...)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00090">Macros.h:90</a></div></div>
 <div class="ttc" id="namespacearm__compute_1_1test_xhtml_ab3a61953b0f41e932f8a2ce8918e7aec"><div class="ttname"><a href="namespacearm__compute_1_1test.xhtml#ab3a61953b0f41e932f8a2ce8918e7aec">arm_compute::test::apply</a></div><div class="ttdeci">void apply(O *obj, F &amp;&amp;func, const std::tuple&lt; As... &gt; &amp;args)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_utils_8h_source.xhtml#l00079">Utils.h:79</a></div></div>
 <div class="ttc" id="tests_2framework_2_macros_8h_xhtml_adbd9bcfdb4c52d5acf73ce39c232b5c8"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#adbd9bcfdb4c52d5acf73ce39c232b5c8">DATA_TEST_CASE_CONSTRUCTOR</a></div><div class="ttdeci">#define DATA_TEST_CASE_CONSTRUCTOR(TEST_NAME, DATASET)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00097">Macros.h:97</a></div></div>
-<div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_data_test_case_xhtml"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml">arm_compute::test::framework::DataTestCase</a></div><div class="ttdef"><b>Definition:</b> <a href="_test_case_8h_source.xhtml#l00057">TestCase.h:57</a></div></div>
+<div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_data_test_case_xhtml"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml">arm_compute::test::framework::DataTestCase</a></div><div class="ttdef"><b>Definition:</b> <a href="_test_case_8h_source.xhtml#l00058">TestCase.h:58</a></div></div>
 </div><!-- fragment -->
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00150">150</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00155">155</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -417,7 +419,7 @@ Macros</h2></td></tr>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line"><span class="keyword">static</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1detail_1_1_test_case_registrar.xhtml">arm_compute::test::framework::detail::TestCaseRegistrar&lt;TEST_NAME&lt;decltype(DATASET)::type&gt;</a>&gt; TEST_NAME##_reg \</div><div class="line">    {                                                                                                                  \</div><div class="line"><span class="preprocessor">        #TEST_NAME, MODE, STATUS, DATASET                                                                              \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1detail_1_1_test_case_registrar_xhtml"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1detail_1_1_test_case_registrar.xhtml">arm_compute::test::framework::detail::TestCaseRegistrar</a></div><div class="ttdoc">Helper class to statically register a test case. </div><div class="ttdef"><b>Definition:</b> <a href="_registrars_8h_source.xhtml#l00043">Registrars.h:43</a></div></div>
 </div><!-- fragment -->
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00127">127</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00132">132</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -457,7 +459,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00174">174</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00179">179</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -497,7 +499,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00216">216</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00221">221</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -531,7 +533,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00193">193</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00198">198</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -571,7 +573,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00255">255</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00262">262</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -605,7 +607,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00234">234</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00240">240</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -633,7 +635,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00147">147</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00152">152</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -673,7 +675,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00172">172</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00177">177</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -713,7 +715,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00214">214</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00219">219</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -747,7 +749,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00191">191</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00196">196</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -787,7 +789,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00253">253</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00260">260</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -821,7 +823,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00232">232</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00238">238</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -849,7 +851,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00145">145</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00150">150</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -908,7 +910,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00212">212</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00217">217</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -953,13 +955,13 @@ Macros</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;                                                                                                           \</div><div class="line">    class TEST_NAME;                                                                                                                \</div><div class="line">    template &lt;<span class="keyword">typename</span>... As&gt;                                                                                                       \</div><div class="line">    class TEST_NAME&lt;std::tuple&lt;As...&gt;&gt; : <span class="keyword">public</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml">arm_compute::test::framework::DataTestCase&lt;decltype(DATASET)::type&gt;</a>, <span class="keyword">public</span> FIXTURE \</div><div class="line">    {                                                                                                                               \</div><div class="line">    public:                                                                                                                     <a class="code" href="tests_2framework_2_macros_8h.xhtml#adbd9bcfdb4c52d5acf73ce39c232b5c8">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#adbd9bcfdb4c52d5acf73ce39c232b5c8">        DATA_TEST_CASE_CONSTRUCTOR</a>(TEST_NAME, DATASET)                                                                              <a class="code" href="tests_2framework_2_macros_8h.xhtml#ab10b1385f1891ea74430f2e623b09961">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#ab10b1385f1891ea74430f2e623b09961">        FIXTURE_DATA_SETUP</a>(FIXTURE)                                                                                                 \</div><div class="line">        void do_run() <span class="keyword">override</span>;                                                                                                     <a class="code" href="tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b">        FIXTURE_TEARDOWN</a>(FIXTURE)                                                                                                   \</div><div class="line">    };                                                                                                                              <a class="code" href="tests_2framework_2_macros_8h.xhtml#aa4df8c1af6041bc017bd9fb943d5e5d6">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#aa4df8c1af6041bc017bd9fb943d5e5d6">    DATA_TEST_REGISTRAR</a>(TEST_NAME, MODE, STATUS, DATASET);                                                                          \</div><div class="line">    template &lt;<span class="keyword">typename</span>... As&gt;                                                                                                       \</div><div class="line">    void TEST_NAME&lt;std::tuple&lt;As...&gt;&gt;::do_run()</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_ae4ff555702946b1f9dddd59f2bff3a2b"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b">FIXTURE_TEARDOWN</a></div><div class="ttdeci">#define FIXTURE_TEARDOWN(FIXTURE)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00117">Macros.h:117</a></div></div>
-<div class="ttc" id="tests_2framework_2_macros_8h_xhtml_aa4df8c1af6041bc017bd9fb943d5e5d6"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#aa4df8c1af6041bc017bd9fb943d5e5d6">DATA_TEST_REGISTRAR</a></div><div class="ttdeci">#define DATA_TEST_REGISTRAR(TEST_NAME, MODE, STATUS, DATASET)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00127">Macros.h:127</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;                                                                                                           \</div><div class="line">    class TEST_NAME;                                                                                                                \</div><div class="line">    template &lt;<span class="keyword">typename</span>... As&gt;                                                                                                       \</div><div class="line">    class TEST_NAME&lt;std::tuple&lt;As...&gt;&gt; : <span class="keyword">public</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml">arm_compute::test::framework::DataTestCase&lt;decltype(DATASET)::type&gt;</a>, <span class="keyword">public</span> FIXTURE \</div><div class="line">    {                                                                                                                               \</div><div class="line">    public:                                                                                                                     <a class="code" href="tests_2framework_2_macros_8h.xhtml#adbd9bcfdb4c52d5acf73ce39c232b5c8">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#adbd9bcfdb4c52d5acf73ce39c232b5c8">        DATA_TEST_CASE_CONSTRUCTOR</a>(TEST_NAME, DATASET)                                                                              <a class="code" href="tests_2framework_2_macros_8h.xhtml#ab10b1385f1891ea74430f2e623b09961">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#ab10b1385f1891ea74430f2e623b09961">        FIXTURE_DATA_SETUP</a>(FIXTURE)                                                                                                 \</div><div class="line">        void do_run() <span class="keyword">override</span>;                                                                                                     <a class="code" href="tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b">        FIXTURE_TEARDOWN</a>(FIXTURE)                                                                                                   \</div><div class="line">    };                                                                                                                              <a class="code" href="tests_2framework_2_macros_8h.xhtml#aa4df8c1af6041bc017bd9fb943d5e5d6">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#aa4df8c1af6041bc017bd9fb943d5e5d6">    DATA_TEST_REGISTRAR</a>(TEST_NAME, MODE, STATUS, DATASET);                                                                          \</div><div class="line">    template &lt;<span class="keyword">typename</span>... As&gt;                                                                                                       \</div><div class="line">    void TEST_NAME&lt;std::tuple&lt;As...&gt;&gt;::do_run()</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_ae4ff555702946b1f9dddd59f2bff3a2b"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b">FIXTURE_TEARDOWN</a></div><div class="ttdeci">#define FIXTURE_TEARDOWN(FIXTURE)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00122">Macros.h:122</a></div></div>
+<div class="ttc" id="tests_2framework_2_macros_8h_xhtml_aa4df8c1af6041bc017bd9fb943d5e5d6"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#aa4df8c1af6041bc017bd9fb943d5e5d6">DATA_TEST_REGISTRAR</a></div><div class="ttdeci">#define DATA_TEST_REGISTRAR(TEST_NAME, MODE, STATUS, DATASET)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00132">Macros.h:132</a></div></div>
 <div class="ttc" id="tests_2framework_2_macros_8h_xhtml_ab10b1385f1891ea74430f2e623b09961"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#ab10b1385f1891ea74430f2e623b09961">FIXTURE_DATA_SETUP</a></div><div class="ttdeci">#define FIXTURE_DATA_SETUP(FIXTURE)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00107">Macros.h:107</a></div></div>
 <div class="ttc" id="tests_2framework_2_macros_8h_xhtml_adbd9bcfdb4c52d5acf73ce39c232b5c8"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#adbd9bcfdb4c52d5acf73ce39c232b5c8">DATA_TEST_CASE_CONSTRUCTOR</a></div><div class="ttdeci">#define DATA_TEST_CASE_CONSTRUCTOR(TEST_NAME, DATASET)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00097">Macros.h:97</a></div></div>
-<div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_data_test_case_xhtml"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml">arm_compute::test::framework::DataTestCase</a></div><div class="ttdef"><b>Definition:</b> <a href="_test_case_8h_source.xhtml#l00057">TestCase.h:57</a></div></div>
+<div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_data_test_case_xhtml"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml">arm_compute::test::framework::DataTestCase</a></div><div class="ttdef"><b>Definition:</b> <a href="_test_case_8h_source.xhtml#l00058">TestCase.h:58</a></div></div>
 </div><!-- fragment -->
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00196">196</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00201">201</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -999,6 +1001,24 @@ Macros</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="afc8f808405401fbb9528d36b15127f5b"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FIXTURE_SYNC</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">FIXTURE</td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line"><span class="keywordtype">void</span> do_sync() override   \</div><div class="line">    {                         \</div><div class="line">        FIXTURE::sync();      \</div><div class="line">    }</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00117">117</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="ae4ff555702946b1f9dddd59f2bff3a2b"></a>
 <div class="memitem">
 <div class="memproto">
@@ -1013,7 +1033,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line"><span class="keywordtype">void</span> do_teardown() override   \</div><div class="line">    {                             \</div><div class="line">        FIXTURE::teardown();      \</div><div class="line">    }</div></div><!-- fragment -->
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00117">117</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00122">122</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1047,7 +1067,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00189">189</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00194">194</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1086,14 +1106,14 @@ Macros</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">class </span>TEST_NAME : <span class="keyword">public</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml">arm_compute::test::framework::TestCase</a>, <span class="keyword">public</span> FIXTURE \</div><div class="line">    {                                                                               \</div><div class="line">    public:                                                                     <a class="code" href="tests_2framework_2_macros_8h.xhtml#a8716f830d34bff577c8687183231b952">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#a8716f830d34bff577c8687183231b952">        TEST_CASE_CONSTRUCTOR</a>(TEST_NAME)                                            <a class="code" href="tests_2framework_2_macros_8h.xhtml#af26a9a440f7ae0444624a5ff4392ea2e">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#af26a9a440f7ae0444624a5ff4392ea2e">        FIXTURE_SETUP</a>(FIXTURE)                                                      \</div><div class="line">        void <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml#a90b4bc2c4bae857bc3536f4a18e29772">do_run</a>() <span class="keyword">override</span>;                                                     <a class="code" href="tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b">        FIXTURE_TEARDOWN</a>(FIXTURE)                                                   \</div><div class="line">    };                                                                              <a class="code" href="tests_2framework_2_macros_8h.xhtml#a31357313a6bdb0dc09a7cae7d7f91377">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#a31357313a6bdb0dc09a7cae7d7f91377">    TEST_REGISTRAR</a>(TEST_NAME, MODE, STATUS);                                        \</div><div class="line">    void TEST_NAME::do_run()</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_ae4ff555702946b1f9dddd59f2bff3a2b"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b">FIXTURE_TEARDOWN</a></div><div class="ttdeci">#define FIXTURE_TEARDOWN(FIXTURE)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00117">Macros.h:117</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">class </span>TEST_NAME : <span class="keyword">public</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml">arm_compute::test::framework::TestCase</a>, <span class="keyword">public</span> FIXTURE \</div><div class="line">    {                                                                               \</div><div class="line">    public:                                                                     <a class="code" href="tests_2framework_2_macros_8h.xhtml#a8716f830d34bff577c8687183231b952">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#a8716f830d34bff577c8687183231b952">        TEST_CASE_CONSTRUCTOR</a>(TEST_NAME)                                            <a class="code" href="tests_2framework_2_macros_8h.xhtml#af26a9a440f7ae0444624a5ff4392ea2e">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#af26a9a440f7ae0444624a5ff4392ea2e">        FIXTURE_SETUP</a>(FIXTURE)                                                      \</div><div class="line">        void <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml#a90b4bc2c4bae857bc3536f4a18e29772">do_run</a>() <span class="keyword">override</span>;                                                     <a class="code" href="tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b">        FIXTURE_TEARDOWN</a>(FIXTURE)                                                   \</div><div class="line">    };                                                                              <a class="code" href="tests_2framework_2_macros_8h.xhtml#a31357313a6bdb0dc09a7cae7d7f91377">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#a31357313a6bdb0dc09a7cae7d7f91377">    TEST_REGISTRAR</a>(TEST_NAME, MODE, STATUS);                                        \</div><div class="line">    void TEST_NAME::do_run()</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_ae4ff555702946b1f9dddd59f2bff3a2b"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b">FIXTURE_TEARDOWN</a></div><div class="ttdeci">#define FIXTURE_TEARDOWN(FIXTURE)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00122">Macros.h:122</a></div></div>
 <div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a8716f830d34bff577c8687183231b952"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a8716f830d34bff577c8687183231b952">TEST_CASE_CONSTRUCTOR</a></div><div class="ttdeci">#define TEST_CASE_CONSTRUCTOR(TEST_NAME)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00095">Macros.h:95</a></div></div>
-<div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a31357313a6bdb0dc09a7cae7d7f91377"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a31357313a6bdb0dc09a7cae7d7f91377">TEST_REGISTRAR</a></div><div class="ttdeci">#define TEST_REGISTRAR(TEST_NAME, MODE, STATUS)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00122">Macros.h:122</a></div></div>
+<div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a31357313a6bdb0dc09a7cae7d7f91377"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a31357313a6bdb0dc09a7cae7d7f91377">TEST_REGISTRAR</a></div><div class="ttdeci">#define TEST_REGISTRAR(TEST_NAME, MODE, STATUS)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00127">Macros.h:127</a></div></div>
 <div class="ttc" id="tests_2framework_2_macros_8h_xhtml_af26a9a440f7ae0444624a5ff4392ea2e"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#af26a9a440f7ae0444624a5ff4392ea2e">FIXTURE_SETUP</a></div><div class="ttdeci">#define FIXTURE_SETUP(FIXTURE)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00102">Macros.h:102</a></div></div>
 <div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_test_case_xhtml"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml">arm_compute::test::framework::TestCase</a></div><div class="ttdoc">Abstract test case class. </div><div class="ttdef"><b>Definition:</b> <a href="_test_case_8h_source.xhtml#l00040">TestCase.h:40</a></div></div>
 <div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_test_case_xhtml_a90b4bc2c4bae857bc3536f4a18e29772"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml#a90b4bc2c4bae857bc3536f4a18e29772">arm_compute::test::framework::TestCase::do_run</a></div><div class="ttdeci">virtual void do_run()</div><div class="ttdef"><b>Definition:</b> <a href="_test_case_8h_source.xhtml#l00044">TestCase.h:44</a></div></div>
 </div><!-- fragment -->
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00177">177</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00182">182</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1604,7 +1624,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00251">251</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00258">258</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1649,14 +1669,15 @@ Macros</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;                                                                                                           \</div><div class="line">    class TEST_NAME;                                                                                                                \</div><div class="line">    template &lt;<span class="keyword">typename</span>... As&gt;                                                                                                       \</div><div class="line">    class TEST_NAME&lt;std::tuple&lt;As...&gt;&gt; : <span class="keyword">public</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml">arm_compute::test::framework::DataTestCase&lt;decltype(DATASET)::type&gt;</a>, <span class="keyword">public</span> FIXTURE \</div><div class="line">    {                                                                                                                               \</div><div class="line">    public:                                                                                                                     <a class="code" href="tests_2framework_2_macros_8h.xhtml#adbd9bcfdb4c52d5acf73ce39c232b5c8">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#adbd9bcfdb4c52d5acf73ce39c232b5c8">        DATA_TEST_CASE_CONSTRUCTOR</a>(TEST_NAME, DATASET)                                                                              <a class="code" href="tests_2framework_2_macros_8h.xhtml#ab10b1385f1891ea74430f2e623b09961">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#ab10b1385f1891ea74430f2e623b09961">        FIXTURE_DATA_SETUP</a>(FIXTURE)                                                                                                 <a class="code" href="tests_2framework_2_macros_8h.xhtml#a67ff67e5a2343bc8d05b1b02290c9fde">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#a67ff67e5a2343bc8d05b1b02290c9fde">        FIXTURE_RUN</a>(FIXTURE)                                                                                                        <a class="code" href="tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b">        FIXTURE_TEARDOWN</a>(FIXTURE)                                                                                                   \</div><div class="line">    };                                                                                                                              <a class="code" href="tests_2framework_2_macros_8h.xhtml#aa4df8c1af6041bc017bd9fb943d5e5d6">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#aa4df8c1af6041bc017bd9fb943d5e5d6">    DATA_TEST_REGISTRAR</a>(TEST_NAME, MODE, STATUS, DATASET)</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_ae4ff555702946b1f9dddd59f2bff3a2b"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b">FIXTURE_TEARDOWN</a></div><div class="ttdeci">#define FIXTURE_TEARDOWN(FIXTURE)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00117">Macros.h:117</a></div></div>
-<div class="ttc" id="tests_2framework_2_macros_8h_xhtml_aa4df8c1af6041bc017bd9fb943d5e5d6"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#aa4df8c1af6041bc017bd9fb943d5e5d6">DATA_TEST_REGISTRAR</a></div><div class="ttdeci">#define DATA_TEST_REGISTRAR(TEST_NAME, MODE, STATUS, DATASET)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00127">Macros.h:127</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;                                                                                                           \</div><div class="line">    class TEST_NAME;                                                                                                                \</div><div class="line">    template &lt;<span class="keyword">typename</span>... As&gt;                                                                                                       \</div><div class="line">    class TEST_NAME&lt;std::tuple&lt;As...&gt;&gt; : <span class="keyword">public</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml">arm_compute::test::framework::DataTestCase&lt;decltype(DATASET)::type&gt;</a>, <span class="keyword">public</span> FIXTURE \</div><div class="line">    {                                                                                                                               \</div><div class="line">    public:                                                                                                                     <a class="code" href="tests_2framework_2_macros_8h.xhtml#adbd9bcfdb4c52d5acf73ce39c232b5c8">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#adbd9bcfdb4c52d5acf73ce39c232b5c8">        DATA_TEST_CASE_CONSTRUCTOR</a>(TEST_NAME, DATASET)                                                                              <a class="code" href="tests_2framework_2_macros_8h.xhtml#ab10b1385f1891ea74430f2e623b09961">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#ab10b1385f1891ea74430f2e623b09961">        FIXTURE_DATA_SETUP</a>(FIXTURE)                                                                                                 <a class="code" href="tests_2framework_2_macros_8h.xhtml#a67ff67e5a2343bc8d05b1b02290c9fde">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#a67ff67e5a2343bc8d05b1b02290c9fde">        FIXTURE_RUN</a>(FIXTURE)                                                                                                        <a class="code" href="tests_2framework_2_macros_8h.xhtml#afc8f808405401fbb9528d36b15127f5b">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#afc8f808405401fbb9528d36b15127f5b">        FIXTURE_SYNC</a>(FIXTURE)                                                                                                       <a class="code" href="tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b">        FIXTURE_TEARDOWN</a>(FIXTURE)                                                                                                   \</div><div class="line">    };                                                                                                                              <a class="code" href="tests_2framework_2_macros_8h.xhtml#aa4df8c1af6041bc017bd9fb943d5e5d6">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#aa4df8c1af6041bc017bd9fb943d5e5d6">    DATA_TEST_REGISTRAR</a>(TEST_NAME, MODE, STATUS, DATASET)</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_ae4ff555702946b1f9dddd59f2bff3a2b"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b">FIXTURE_TEARDOWN</a></div><div class="ttdeci">#define FIXTURE_TEARDOWN(FIXTURE)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00122">Macros.h:122</a></div></div>
+<div class="ttc" id="tests_2framework_2_macros_8h_xhtml_aa4df8c1af6041bc017bd9fb943d5e5d6"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#aa4df8c1af6041bc017bd9fb943d5e5d6">DATA_TEST_REGISTRAR</a></div><div class="ttdeci">#define DATA_TEST_REGISTRAR(TEST_NAME, MODE, STATUS, DATASET)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00132">Macros.h:132</a></div></div>
 <div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a67ff67e5a2343bc8d05b1b02290c9fde"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a67ff67e5a2343bc8d05b1b02290c9fde">FIXTURE_RUN</a></div><div class="ttdeci">#define FIXTURE_RUN(FIXTURE)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00112">Macros.h:112</a></div></div>
 <div class="ttc" id="tests_2framework_2_macros_8h_xhtml_ab10b1385f1891ea74430f2e623b09961"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#ab10b1385f1891ea74430f2e623b09961">FIXTURE_DATA_SETUP</a></div><div class="ttdeci">#define FIXTURE_DATA_SETUP(FIXTURE)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00107">Macros.h:107</a></div></div>
 <div class="ttc" id="tests_2framework_2_macros_8h_xhtml_adbd9bcfdb4c52d5acf73ce39c232b5c8"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#adbd9bcfdb4c52d5acf73ce39c232b5c8">DATA_TEST_CASE_CONSTRUCTOR</a></div><div class="ttdeci">#define DATA_TEST_CASE_CONSTRUCTOR(TEST_NAME, DATASET)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00097">Macros.h:97</a></div></div>
-<div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_data_test_case_xhtml"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml">arm_compute::test::framework::DataTestCase</a></div><div class="ttdef"><b>Definition:</b> <a href="_test_case_8h_source.xhtml#l00057">TestCase.h:57</a></div></div>
+<div class="ttc" id="tests_2framework_2_macros_8h_xhtml_afc8f808405401fbb9528d36b15127f5b"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#afc8f808405401fbb9528d36b15127f5b">FIXTURE_SYNC</a></div><div class="ttdeci">#define FIXTURE_SYNC(FIXTURE)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00117">Macros.h:117</a></div></div>
+<div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_data_test_case_xhtml"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml">arm_compute::test::framework::DataTestCase</a></div><div class="ttdef"><b>Definition:</b> <a href="_test_case_8h_source.xhtml#l00058">TestCase.h:58</a></div></div>
 </div><!-- fragment -->
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00237">237</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00243">243</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1690,7 +1711,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00230">230</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00236">236</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1729,14 +1750,15 @@ Macros</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">class </span>TEST_NAME : <span class="keyword">public</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml">arm_compute::test::framework::TestCase</a>, <span class="keyword">public</span> FIXTURE \</div><div class="line">    {                                                                               \</div><div class="line">    public:                                                                     <a class="code" href="tests_2framework_2_macros_8h.xhtml#a8716f830d34bff577c8687183231b952">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#a8716f830d34bff577c8687183231b952">        TEST_CASE_CONSTRUCTOR</a>(TEST_NAME)                                            <a class="code" href="tests_2framework_2_macros_8h.xhtml#af26a9a440f7ae0444624a5ff4392ea2e">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#af26a9a440f7ae0444624a5ff4392ea2e">        FIXTURE_SETUP</a>(FIXTURE)                                                      <a class="code" href="tests_2framework_2_macros_8h.xhtml#a67ff67e5a2343bc8d05b1b02290c9fde">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#a67ff67e5a2343bc8d05b1b02290c9fde">        FIXTURE_RUN</a>(FIXTURE)                                                        <a class="code" href="tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b">        FIXTURE_TEARDOWN</a>(FIXTURE)                                                   \</div><div class="line">    };                                                                              <a class="code" href="tests_2framework_2_macros_8h.xhtml#a31357313a6bdb0dc09a7cae7d7f91377">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#a31357313a6bdb0dc09a7cae7d7f91377">    TEST_REGISTRAR</a>(TEST_NAME, MODE, STATUS)</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_ae4ff555702946b1f9dddd59f2bff3a2b"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b">FIXTURE_TEARDOWN</a></div><div class="ttdeci">#define FIXTURE_TEARDOWN(FIXTURE)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00117">Macros.h:117</a></div></div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keyword">class </span>TEST_NAME : <span class="keyword">public</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml">arm_compute::test::framework::TestCase</a>, <span class="keyword">public</span> FIXTURE \</div><div class="line">    {                                                                               \</div><div class="line">    public:                                                                     <a class="code" href="tests_2framework_2_macros_8h.xhtml#a8716f830d34bff577c8687183231b952">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#a8716f830d34bff577c8687183231b952">        TEST_CASE_CONSTRUCTOR</a>(TEST_NAME)                                            <a class="code" href="tests_2framework_2_macros_8h.xhtml#af26a9a440f7ae0444624a5ff4392ea2e">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#af26a9a440f7ae0444624a5ff4392ea2e">        FIXTURE_SETUP</a>(FIXTURE)                                                      <a class="code" href="tests_2framework_2_macros_8h.xhtml#a67ff67e5a2343bc8d05b1b02290c9fde">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#a67ff67e5a2343bc8d05b1b02290c9fde">        FIXTURE_RUN</a>(FIXTURE)                                                        <a class="code" href="tests_2framework_2_macros_8h.xhtml#afc8f808405401fbb9528d36b15127f5b">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#afc8f808405401fbb9528d36b15127f5b">        FIXTURE_SYNC</a>(FIXTURE)                                                       <a class="code" href="tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b">        FIXTURE_TEARDOWN</a>(FIXTURE)                                                   \</div><div class="line">    };                                                                              <a class="code" href="tests_2framework_2_macros_8h.xhtml#a31357313a6bdb0dc09a7cae7d7f91377">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#a31357313a6bdb0dc09a7cae7d7f91377">    TEST_REGISTRAR</a>(TEST_NAME, MODE, STATUS)</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_ae4ff555702946b1f9dddd59f2bff3a2b"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b">FIXTURE_TEARDOWN</a></div><div class="ttdeci">#define FIXTURE_TEARDOWN(FIXTURE)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00122">Macros.h:122</a></div></div>
 <div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a8716f830d34bff577c8687183231b952"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a8716f830d34bff577c8687183231b952">TEST_CASE_CONSTRUCTOR</a></div><div class="ttdeci">#define TEST_CASE_CONSTRUCTOR(TEST_NAME)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00095">Macros.h:95</a></div></div>
-<div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a31357313a6bdb0dc09a7cae7d7f91377"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a31357313a6bdb0dc09a7cae7d7f91377">TEST_REGISTRAR</a></div><div class="ttdeci">#define TEST_REGISTRAR(TEST_NAME, MODE, STATUS)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00122">Macros.h:122</a></div></div>
+<div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a31357313a6bdb0dc09a7cae7d7f91377"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a31357313a6bdb0dc09a7cae7d7f91377">TEST_REGISTRAR</a></div><div class="ttdeci">#define TEST_REGISTRAR(TEST_NAME, MODE, STATUS)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00127">Macros.h:127</a></div></div>
 <div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a67ff67e5a2343bc8d05b1b02290c9fde"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a67ff67e5a2343bc8d05b1b02290c9fde">FIXTURE_RUN</a></div><div class="ttdeci">#define FIXTURE_RUN(FIXTURE)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00112">Macros.h:112</a></div></div>
 <div class="ttc" id="tests_2framework_2_macros_8h_xhtml_af26a9a440f7ae0444624a5ff4392ea2e"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#af26a9a440f7ae0444624a5ff4392ea2e">FIXTURE_SETUP</a></div><div class="ttdeci">#define FIXTURE_SETUP(FIXTURE)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00102">Macros.h:102</a></div></div>
 <div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_test_case_xhtml"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml">arm_compute::test::framework::TestCase</a></div><div class="ttdoc">Abstract test case class. </div><div class="ttdef"><b>Definition:</b> <a href="_test_case_8h_source.xhtml#l00040">TestCase.h:40</a></div></div>
+<div class="ttc" id="tests_2framework_2_macros_8h_xhtml_afc8f808405401fbb9528d36b15127f5b"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#afc8f808405401fbb9528d36b15127f5b">FIXTURE_SYNC</a></div><div class="ttdeci">#define FIXTURE_SYNC(FIXTURE)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00117">Macros.h:117</a></div></div>
 </div><!-- fragment -->
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00219">219</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00224">224</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1764,7 +1786,7 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00143">143</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00148">148</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1816,11 +1838,11 @@ Macros</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line"><span class="keyword">class </span>TEST_NAME : <span class="keyword">public</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml">arm_compute::test::framework::TestCase</a> \</div><div class="line">    {                                                               \</div><div class="line">    public:                                                     <a class="code" href="tests_2framework_2_macros_8h.xhtml#a8716f830d34bff577c8687183231b952">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#a8716f830d34bff577c8687183231b952">        TEST_CASE_CONSTRUCTOR</a>(TEST_NAME)                            \</div><div class="line">        void <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml#a90b4bc2c4bae857bc3536f4a18e29772">do_run</a>() <span class="keyword">override</span>;                                     \</div><div class="line">    };                                                              <a class="code" href="tests_2framework_2_macros_8h.xhtml#a31357313a6bdb0dc09a7cae7d7f91377">\</a></div><div class="line"><a class="code" href="tests_2framework_2_macros_8h.xhtml#a31357313a6bdb0dc09a7cae7d7f91377">    TEST_REGISTRAR</a>(TEST_NAME, MODE, STATUS);                        \</div><div class="line">    void TEST_NAME::do_run()</div><div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a8716f830d34bff577c8687183231b952"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a8716f830d34bff577c8687183231b952">TEST_CASE_CONSTRUCTOR</a></div><div class="ttdeci">#define TEST_CASE_CONSTRUCTOR(TEST_NAME)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00095">Macros.h:95</a></div></div>
-<div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a31357313a6bdb0dc09a7cae7d7f91377"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a31357313a6bdb0dc09a7cae7d7f91377">TEST_REGISTRAR</a></div><div class="ttdeci">#define TEST_REGISTRAR(TEST_NAME, MODE, STATUS)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00122">Macros.h:122</a></div></div>
+<div class="ttc" id="tests_2framework_2_macros_8h_xhtml_a31357313a6bdb0dc09a7cae7d7f91377"><div class="ttname"><a href="tests_2framework_2_macros_8h.xhtml#a31357313a6bdb0dc09a7cae7d7f91377">TEST_REGISTRAR</a></div><div class="ttdeci">#define TEST_REGISTRAR(TEST_NAME, MODE, STATUS)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2framework_2_macros_8h_source.xhtml#l00127">Macros.h:127</a></div></div>
 <div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_test_case_xhtml"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml">arm_compute::test::framework::TestCase</a></div><div class="ttdoc">Abstract test case class. </div><div class="ttdef"><b>Definition:</b> <a href="_test_case_8h_source.xhtml#l00040">TestCase.h:40</a></div></div>
 <div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_test_case_xhtml_a90b4bc2c4bae857bc3536f4a18e29772"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml#a90b4bc2c4bae857bc3536f4a18e29772">arm_compute::test::framework::TestCase::do_run</a></div><div class="ttdeci">virtual void do_run()</div><div class="ttdef"><b>Definition:</b> <a href="_test_case_8h_source.xhtml#l00044">TestCase.h:44</a></div></div>
 </div><!-- fragment -->
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00133">133</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00138">138</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -1855,7 +1877,7 @@ Macros</h2></td></tr>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line"><span class="keyword">static</span> <a class="code" href="classarm__compute_1_1test_1_1framework_1_1detail_1_1_test_case_registrar.xhtml">arm_compute::test::framework::detail::TestCaseRegistrar&lt;TEST_NAME&gt;</a> TEST_NAME##_reg \</div><div class="line">    {                                                                                         \</div><div class="line"><span class="preprocessor">        #TEST_NAME, MODE, STATUS                                                              \</span></div><div class="line"><span class="preprocessor">    }</span></div><div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1detail_1_1_test_case_registrar_xhtml"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1detail_1_1_test_case_registrar.xhtml">arm_compute::test::framework::detail::TestCaseRegistrar</a></div><div class="ttdoc">Helper class to statically register a test case. </div><div class="ttdef"><b>Definition:</b> <a href="_registrars_8h_source.xhtml#l00043">Registrars.h:43</a></div></div>
 </div><!-- fragment -->
-<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00122">122</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
+<p>Definition at line <a class="el" href="tests_2framework_2_macros_8h_source.xhtml#l00127">127</a> of file <a class="el" href="tests_2framework_2_macros_8h_source.xhtml">Macros.h</a>.</p>
 
 </div>
 </div>
@@ -2010,7 +2032,7 @@ Macros</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_9e71e2da941d3cafc4d98a9f6ae3de4f.xhtml">framework</a></li><li class="navelem"><a class="el" href="tests_2framework_2_macros_8h.xhtml">Macros.h</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:33 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:42 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -52,6 +52,12 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
       [ "CLConvolutionLayerReshapeWeights", "classarm__compute_1_1_c_l_convolution_layer_reshape_weights.xhtml", "classarm__compute_1_1_c_l_convolution_layer_reshape_weights" ],
       [ "CLConvolutionLayer", "classarm__compute_1_1_c_l_convolution_layer.xhtml", "classarm__compute_1_1_c_l_convolution_layer" ]
     ] ],
+    [ "CLDeconvolutionLayer.h", "_c_l_deconvolution_layer_8h.xhtml", [
+      [ "CLDeconvolutionLayer", "classarm__compute_1_1_c_l_deconvolution_layer.xhtml", "classarm__compute_1_1_c_l_deconvolution_layer" ]
+    ] ],
+    [ "CLDeconvolutionLayerUpsample.h", "_c_l_deconvolution_layer_upsample_8h.xhtml", [
+      [ "CLDeconvolutionLayerUpsample", "classarm__compute_1_1_c_l_deconvolution_layer_upsample.xhtml", "classarm__compute_1_1_c_l_deconvolution_layer_upsample" ]
+    ] ],
     [ "CLDepthConcatenateLayer.h", "_c_l_depth_concatenate_layer_8h.xhtml", [
       [ "CLDepthConcatenateLayer", "classarm__compute_1_1_c_l_depth_concatenate_layer.xhtml", "classarm__compute_1_1_c_l_depth_concatenate_layer" ]
     ] ],
@@ -179,6 +185,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
       [ "CLNormalizationLayer", "classarm__compute_1_1_c_l_normalization_layer.xhtml", "classarm__compute_1_1_c_l_normalization_layer" ]
     ] ],
     [ "CLOpticalFlow.h", "_c_l_optical_flow_8h.xhtml", "_c_l_optical_flow_8h" ],
+    [ "CLPermute.h", "_c_l_permute_8h.xhtml", [
+      [ "CLPermute", "classarm__compute_1_1_c_l_permute.xhtml", "classarm__compute_1_1_c_l_permute" ]
+    ] ],
     [ "CLPhase.h", "_c_l_phase_8h.xhtml", [
       [ "CLPhase", "classarm__compute_1_1_c_l_phase.xhtml", "classarm__compute_1_1_c_l_phase" ]
     ] ],

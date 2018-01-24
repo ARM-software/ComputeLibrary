@@ -9,10 +9,6 @@ var searchData=
   ['pooling3x3_5fstride3',['POOLING3x3_STRIDE3',['../pooling__layer_8cl.xhtml#aba30215e4df370ff8935f83046e696ea',1,'pooling_layer.cl']]],
   ['pow2_5fop',['POW2_OP',['../pooling__layer_8cl.xhtml#a03898439d164d74f8c35bafb67262d95',1,'pooling_layer.cl']]],
   ['pow_5fop',['POW_OP',['../normalization__layer_8cl.xhtml#a09724da1a9e5ba54260905829ec27db4',1,'normalization_layer.cl']]],
-  ['profile_5fkernel',['PROFILE_KERNEL',['../profiler_8hpp.xhtml#a97f4e398174b5e094f5262e5d785ac20',1,'profiler.hpp']]],
-  ['profile_5fmerge',['PROFILE_MERGE',['../profiler_8hpp.xhtml#a2f7c3e65a9ccab509d7776832f562dd0',1,'profiler.hpp']]],
-  ['profile_5fprepa',['PROFILE_PREPA',['../profiler_8hpp.xhtml#ac19bf2c5c388b9fb21cd0668475b2cf7',1,'profiler.hpp']]],
-  ['profile_5fprepb',['PROFILE_PREPB',['../profiler_8hpp.xhtml#af0477dfaa86fc08825cb3f31212f423c',1,'profiler.hpp']]],
   ['prop',['PROP',['../hwc_8hpp.xhtml#a0c5fe5b36339324ca08e6830aeb39b93',1,'hwc.hpp']]],
   ['prop2',['PROP2',['../hwc_8hpp.xhtml#a306fbdafa56b11c9c8c31aadd4e5aaff',1,'hwc.hpp']]]
 ];

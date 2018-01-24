@@ -26,6 +26,8 @@
 
 #include "arm_compute/core/GLES_COMPUTE/IGCKernel.h"
 
+#include "arm_compute/core/Error.h"
+
 namespace arm_compute
 {
 class IGCTensor;
@@ -54,6 +56,16 @@ public:
      * @param[in]  pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      */
     void configure(const IGCTensor *input, IGCTensor *output, const PoolingLayerInfo &pool_info);
+
+    /** Static function to check if given info will lead to a valid configuration of @ref GCPoolingLayerKernel
+     *
+     * @param[in] input     Source tensor info. Data types supported: F16/F32.
+     * @param[in] output    Destination tensor info. Data types supported: Same as @p input.
+     * @param[in] pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info);
 
     // Inherited methods overridden:
     void run(const Window &window) override;

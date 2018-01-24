@@ -84,7 +84,7 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
 
         // Configure matrix multiplication kernel
         auto k = arm_compute::support::cpp14::make_unique<NEGEMMLowpAArch64V8P4Kernel>();
-        k->configure(a, b, output, &_workspace, 1.f, 1.f);
+        k->configure(a, b, output, &_workspace, 1.f, 1.f, false, false);
         _mm_kernel = std::move(k);
     }
     else

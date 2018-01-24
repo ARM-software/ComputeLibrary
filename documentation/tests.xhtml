@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -133,6 +133,7 @@ $(document).ready(function(){initNavTree('tests.xhtml','');});
 <li class="level3"><a href="#tests_running_tests_benchmarking_output">Output</a></li>
 <li class="level3"><a href="#tests_running_tests_benchmarking_mode">Mode</a></li>
 <li class="level3"><a href="#tests_running_tests_benchmarking_instruments">Instruments</a></li>
+<li class="level3"><a href="#tests_running_examples">Examples</a></li>
 </ul>
 </li>
 </ul>
@@ -142,6 +143,9 @@ $(document).ready(function(){initNavTree('tests.xhtml','');});
 <div class="textblock"><h1><a class="anchor" id="tests_overview"></a>
 Overview</h1>
 <p>Benchmark and validation tests are based on the same framework to setup and run the tests. In addition to running simple, self-contained test functions the framework supports fixtures and data test cases. The former allows to share common setup routines between various backends thus reducing the amount of duplicated code. The latter can be used to parameterize tests or fixtures with different inputs, e.g. different tensor shapes. One limitation is that tests/fixtures cannot be parameterized based on the data type if static type information is needed within the test (e.g. to validate the results).</p>
+<dl class="section note"><dt>Note</dt><dd>By default tests are not built. To enable them you need to add validation_tests=1 and / or benchmark_tests=1 to your SCons line.</dd>
+<dd>
+Tests are not included in the pre-built binary archive, you have to build them from sources.</dd></dl>
 <h2><a class="anchor" id="tests_overview_structure"></a>
 Directory structure</h2>
 <pre class="fragment">.
@@ -365,8 +369,9 @@ Benchmarking</h2>
 Filter tests</h3>
 <p>All tests can be run by invoking </p><pre class="fragment">./arm_compute_benchmark ./data
 </pre><p>where <code>./data</code> contains the assets needed by the tests.</p>
-<p>If only a subset of the tests has to be executed the <code>--filter</code> option takes a regular expression to select matching tests. </p><pre class="fragment">./arm_compute_benchmark --filter='NEON/.*AlexNet' ./data
-</pre><p>Additionally each test has a test id which can be used as a filter, too. However, the test id is not guaranteed to be stable when new tests are added. Only for a specific build the same the test will keep its id. </p><pre class="fragment">./arm_compute_benchmark --filter-id=10 ./data
+<p>If only a subset of the tests has to be executed the <code>--filter</code> option takes a regular expression to select matching tests. </p><pre class="fragment">./arm_compute_benchmark --filter='^NEON/.*AlexNet' ./data
+</pre><dl class="section note"><dt>Note</dt><dd>Filtering will be much faster if the regular expression starts from the start ("^") or end ("$") of the line.</dd></dl>
+<p>Additionally each test has a test id which can be used as a filter, too. However, the test id is not guaranteed to be stable when new tests are added. Only for a specific build the same the test will keep its id. </p><pre class="fragment">./arm_compute_benchmark --filter-id=10 ./data
 </pre><p>All available tests can be displayed with the <code>--list-tests</code> switch. </p><pre class="fragment">./arm_compute_benchmark --list-tests
 </pre><p>More options can be found in the <code>--help</code> message.</p>
 <h3><a class="anchor" id="tests_running_tests_benchmarking_runtime"></a>
@@ -383,15 +388,20 @@ Instruments</h3>
 <p>You can use the <code>--instruments</code> option to select one or more instruments to measure the execution time of the benchmark tests.</p>
 <p><code>PMU</code> will try to read the CPU PMU events from the kernel (They need to be enabled on your platform)</p>
 <p><code>MALI</code> will try to collect Mali hardware performance counters. (You need to have a recent enough Mali driver)</p>
-<p><code>WALL_CLOCK</code> will measure time using <code>gettimeofday</code>: this should work on all platforms.</p>
-<p>You can pass a combinations of these instruments: <code>--instruments=PMU,MALI,WALL_CLOCK</code></p>
-<dl class="section note"><dt>Note</dt><dd>You need to make sure the instruments have been selected at compile time using the <code>pmu=1</code> or <code>mali=1</code> scons options. </dd></dl>
-</div></div><!-- contents -->
+<p><code>WALL_CLOCK_TIMER</code> will measure time using <code>gettimeofday</code>: this should work on all platforms.</p>
+<p>You can pass a combinations of these instruments: <code>--instruments=PMU,MALI,WALL_CLOCK_TIMER</code></p>
+<dl class="section note"><dt>Note</dt><dd>You need to make sure the instruments have been selected at compile time using the <code>pmu=1</code> or <code>mali=1</code> scons options.</dd></dl>
+<h3><a class="anchor" id="tests_running_examples"></a>
+Examples</h3>
+<p>To run all the precommit validation tests: </p><pre class="fragment">LD_LIBRARY_PATH=. ./arm_compute_validation --mode=precommit
+</pre><p>To run the OpenCL precommit validation tests: </p><pre class="fragment">LD_LIBRARY_PATH=. ./arm_compute_validation --mode=precommit --filter="^CL.*"
+</pre><p>To run the NEON precommit benchmark tests with PMU and Wall Clock timer in miliseconds instruments enabled: </p><pre class="fragment">LD_LIBRARY_PATH=. ./arm_compute_benchmark --mode=precommit --filter="^NEON.*" --instruments="pmu,wall_clock_timer_ms" --iterations=10
+</pre><p>To run the OpenCL precommit benchmark tests with OpenCL kernel timers in miliseconds enabled: </p><pre class="fragment">LD_LIBRARY_PATH=. ./arm_compute_benchmark --mode=precommit --filter="^CL.*" --instruments="opencl_timer_ms" --iterations=10</pre> </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:34 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:43 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

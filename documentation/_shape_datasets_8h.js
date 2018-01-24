@@ -18,5 +18,7 @@ var _shape_datasets_8h =
     [ "GlobalPoolingShapes", "classarm__compute_1_1test_1_1datasets_1_1_global_pooling_shapes.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_global_pooling_shapes" ],
     [ "SoftmaxLayerSmallShapes", "classarm__compute_1_1test_1_1datasets_1_1_softmax_layer_small_shapes.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_softmax_layer_small_shapes" ],
     [ "SoftmaxLayerLargeShapes", "classarm__compute_1_1test_1_1datasets_1_1_softmax_layer_large_shapes.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_softmax_layer_large_shapes" ],
+    [ "SmallImageShapes", "classarm__compute_1_1test_1_1datasets_1_1_small_image_shapes.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_small_image_shapes" ],
+    [ "LargeImageShapes", "classarm__compute_1_1test_1_1datasets_1_1_large_image_shapes.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_large_image_shapes" ],
     [ "ShapeDataset", "_shape_datasets_8h.xhtml#ae6b0d1adb193102aad304e0765655a3a", null ]
 ];

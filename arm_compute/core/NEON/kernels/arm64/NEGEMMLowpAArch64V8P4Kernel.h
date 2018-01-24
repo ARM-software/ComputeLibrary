@@ -51,7 +51,7 @@ public:
     static Status validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output);
 
 protected:
-    void internal_configure(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool transform_0, bool transform_1) override;
+    void internal_configure(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool is_transposed_0, bool is_transposed_1) override;
 };
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_AARCH64_V8_2 */

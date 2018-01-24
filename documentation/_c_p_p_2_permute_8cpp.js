@@ -1,7 +1,7 @@
 var _c_p_p_2_permute_8cpp =
 [
     [ "CPPPermuteFixture", "_c_p_p_2_permute_8cpp.xhtml#a71110c6b6b5d2b8f7f0da672a37aa7c3", null ],
-    [ "DATA_TEST_CASE", "_c_p_p_2_permute_8cpp.xhtml#a5d54025a1b408a3adec2d1bff6e08a2f", null ],
+    [ "DATA_TEST_CASE", "_c_p_p_2_permute_8cpp.xhtml#ab1b781bfa8aede873549ccc651f6bcf8", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_p_p_2_permute_8cpp.xhtml#a2366bfee5018b818194637035931d236", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_p_p_2_permute_8cpp.xhtml#ad71f8e94d4918be2710133e8b6d45a84", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_p_p_2_permute_8cpp.xhtml#a20a63bbfb4c6406c18b92d1937ebad2c", null ],

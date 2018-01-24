@@ -42,6 +42,7 @@ class TestCase
 public:
     virtual void do_setup() {};
     virtual void do_run() {};
+    virtual void do_sync() {};
     virtual void do_teardown() {};
 
     /** Default destructor. */

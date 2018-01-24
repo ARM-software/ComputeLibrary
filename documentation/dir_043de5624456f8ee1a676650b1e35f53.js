@@ -42,6 +42,12 @@ var dir_043de5624456f8ee1a676650b1e35f53 =
     [ "Box3x3Fixture.h", "_box3x3_fixture_8h.xhtml", [
       [ "Box3x3ValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_box3x3_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_box3x3_validation_fixture" ]
     ] ],
+    [ "ConvolutionFixture.h", "_convolution_fixture_8h.xhtml", [
+      [ "ConvolutionValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_convolution_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_convolution_validation_fixture" ],
+      [ "ConvolutionSquareValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_convolution_square_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_convolution_square_validation_fixture" ],
+      [ "ConvolutionSeparableValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_convolution_separable_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_convolution_separable_validation_fixture" ],
+      [ "ConvolutionRectangleValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_convolution_rectangle_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_convolution_rectangle_validation_fixture" ]
+    ] ],
     [ "ConvolutionLayerFixture.h", "validation_2fixtures_2_convolution_layer_fixture_8h.xhtml", [
       [ "ConvolutionValidationGenericFixture", "classarm__compute_1_1test_1_1validation_1_1_convolution_validation_generic_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_convolution_validation_generic_fixture" ],
       [ "ConvolutionValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_convolution_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_convolution_validation_fixture" ],
@@ -52,7 +58,7 @@ var dir_043de5624456f8ee1a676650b1e35f53 =
       [ "DeconvolutionLayerFixtureBase", "classarm__compute_1_1test_1_1validation_1_1_deconvolution_layer_fixture_base.xhtml", "classarm__compute_1_1test_1_1validation_1_1_deconvolution_layer_fixture_base" ],
       [ "DeconvolutionValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_deconvolution_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_deconvolution_validation_fixture" ]
     ] ],
-    [ "DepthConcatenateLayerFixture.h", "_depth_concatenate_layer_fixture_8h.xhtml", [
+    [ "DepthConcatenateLayerFixture.h", "validation_2fixtures_2_depth_concatenate_layer_fixture_8h.xhtml", [
       [ "DepthConcatenateLayerValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_depth_concatenate_layer_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_depth_concatenate_layer_validation_fixture" ]
     ] ],
     [ "DepthConvertLayerFixture.h", "_depth_convert_layer_fixture_8h.xhtml", [
@@ -68,9 +74,12 @@ var dir_043de5624456f8ee1a676650b1e35f53 =
     [ "DepthwiseSeparableConvolutionLayerFixture.h", "validation_2fixtures_2_depthwise_separable_convolution_layer_fixture_8h.xhtml", [
       [ "DepthwiseSeparableConvolutionValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_depthwise_separable_convolution_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_depthwise_separable_convolution_validation_fixture" ]
     ] ],
-    [ "DequantizationLayerFixture.h", "_dequantization_layer_fixture_8h.xhtml", [
+    [ "DequantizationLayerFixture.h", "validation_2fixtures_2_dequantization_layer_fixture_8h.xhtml", [
       [ "DequantizationValidationFixedPointFixture", "classarm__compute_1_1test_1_1validation_1_1_dequantization_validation_fixed_point_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_dequantization_validation_fixed_point_fixture" ],
       [ "DequantizationValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_dequantization_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_dequantization_validation_fixture" ]
+    ] ],
+    [ "DerivativeFixture.h", "_derivative_fixture_8h.xhtml", [
+      [ "DerivativeValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_derivative_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_derivative_validation_fixture" ]
     ] ],
     [ "DilateFixture.h", "_dilate_fixture_8h.xhtml", [
       [ "DilateValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_dilate_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_dilate_validation_fixture" ]
@@ -95,7 +104,7 @@ var dir_043de5624456f8ee1a676650b1e35f53 =
     [ "FixedPointPixelWiseMultiplicationFixture.h", "_fixed_point_pixel_wise_multiplication_fixture_8h.xhtml", [
       [ "FixedPointPixelWiseMultiplicationValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_fixed_point_pixel_wise_multiplication_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_fixed_point_pixel_wise_multiplication_validation_fixture" ]
     ] ],
-    [ "FlattenLayerFixture.h", "_flatten_layer_fixture_8h.xhtml", [
+    [ "FlattenLayerFixture.h", "validation_2fixtures_2_flatten_layer_fixture_8h.xhtml", [
       [ "FlattenLayerValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_flatten_layer_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_flatten_layer_validation_fixture" ]
     ] ],
     [ "FloorFixture.h", "validation_2fixtures_2_floor_fixture_8h.xhtml", [
@@ -120,7 +129,7 @@ var dir_043de5624456f8ee1a676650b1e35f53 =
       [ "GEMMValidationFixedPointFixture", "classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_validation_fixed_point_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_validation_fixed_point_fixture" ],
       [ "GEMMValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_validation_fixture" ]
     ] ],
-    [ "GEMMInterleave4x4Fixture.h", "_g_e_m_m_interleave4x4_fixture_8h.xhtml", [
+    [ "GEMMInterleave4x4Fixture.h", "validation_2fixtures_2_g_e_m_m_interleave4x4_fixture_8h.xhtml", [
       [ "GEMMInterleave4x4ValidationFixedPointFixture", "classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_interleave4x4_validation_fixed_point_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_interleave4x4_validation_fixed_point_fixture" ],
       [ "GEMMInterleave4x4ValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_interleave4x4_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_interleave4x4_validation_fixture" ]
     ] ],
@@ -135,19 +144,26 @@ var dir_043de5624456f8ee1a676650b1e35f53 =
       [ "GEMMLowpQuantizeDownInt32ToUint8ScaleValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_validation_fixture" ],
       [ "GEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_validation_fixture" ]
     ] ],
-    [ "HarrisCornersFixture.h", "_harris_corners_fixture_8h.xhtml", [
+    [ "GEMMTranspose1xWFixture.h", "_g_e_m_m_transpose1x_w_fixture_8h.xhtml", [
+      [ "GEMMTranspose1xWValidationFixedPointFixture", "classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_transpose1x_w_validation_fixed_point_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_transpose1x_w_validation_fixed_point_fixture" ],
+      [ "GEMMTranspose1xWValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_transpose1x_w_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_transpose1x_w_validation_fixture" ]
+    ] ],
+    [ "HarrisCornersFixture.h", "validation_2fixtures_2_harris_corners_fixture_8h.xhtml", [
       [ "HarrisCornersValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_harris_corners_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_harris_corners_validation_fixture" ]
     ] ],
     [ "HistogramFixture.h", "_histogram_fixture_8h.xhtml", [
       [ "HistogramValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_histogram_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_histogram_validation_fixture" ]
     ] ],
+    [ "HOGDescriptorFixture.h", "_h_o_g_descriptor_fixture_8h.xhtml", [
+      [ "HOGDescriptorValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_h_o_g_descriptor_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_h_o_g_descriptor_validation_fixture" ]
+    ] ],
     [ "IntegralImageFixture.h", "_integral_image_fixture_8h.xhtml", [
       [ "IntegralImageValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_integral_image_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_integral_image_validation_fixture" ]
     ] ],
-    [ "L2NormalizeLayerFixture.h", "_l2_normalize_layer_fixture_8h.xhtml", [
+    [ "L2NormalizeLayerFixture.h", "validation_2fixtures_2_l2_normalize_layer_fixture_8h.xhtml", [
       [ "L2NormalizeLayerValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_l2_normalize_layer_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_l2_normalize_layer_validation_fixture" ]
     ] ],
-    [ "MagnitudeFixture.h", "_magnitude_fixture_8h.xhtml", [
+    [ "MagnitudeFixture.h", "validation_2fixtures_2_magnitude_fixture_8h.xhtml", [
       [ "MagnitudeValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_magnitude_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_magnitude_validation_fixture" ]
     ] ],
     [ "MeanStdDevFixture.h", "_mean_std_dev_fixture_8h.xhtml", [
@@ -166,6 +182,10 @@ var dir_043de5624456f8ee1a676650b1e35f53 =
       [ "NormalizationValidationFixedPointFixture", "classarm__compute_1_1test_1_1validation_1_1_normalization_validation_fixed_point_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_normalization_validation_fixed_point_fixture" ],
       [ "NormalizationValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_normalization_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_normalization_validation_fixture" ]
     ] ],
+    [ "NormalizePlanarYUVLayerFixture.h", "validation_2fixtures_2_normalize_planar_y_u_v_layer_fixture_8h.xhtml", [
+      [ "NormalizePlanarYUVLayerValidationFixedPointFixture", "classarm__compute_1_1test_1_1validation_1_1_normalize_planar_y_u_v_layer_validation_fixed_point_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_normalize_planar_y_u_v_layer_validation_fixed_point_fixture" ],
+      [ "NormalizePlanarYUVLayerValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_normalize_planar_y_u_v_layer_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_normalize_planar_y_u_v_layer_validation_fixture" ]
+    ] ],
     [ "PermuteFixture.h", "_permute_fixture_8h.xhtml", [
       [ "PermuteValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_permute_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_permute_validation_fixture" ]
     ] ],
@@ -182,7 +202,7 @@ var dir_043de5624456f8ee1a676650b1e35f53 =
       [ "PoolingLayerValidationQuantizedFixture", "classarm__compute_1_1test_1_1validation_1_1_pooling_layer_validation_quantized_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_pooling_layer_validation_quantized_fixture" ],
       [ "GlobalPoolingLayerValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_global_pooling_layer_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_global_pooling_layer_validation_fixture" ]
     ] ],
-    [ "QuantizationLayerFixture.h", "_quantization_layer_fixture_8h.xhtml", [
+    [ "QuantizationLayerFixture.h", "validation_2fixtures_2_quantization_layer_fixture_8h.xhtml", [
       [ "QuantizationValidationFixedPointFixture", "classarm__compute_1_1test_1_1validation_1_1_quantization_validation_fixed_point_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_quantization_validation_fixed_point_fixture" ],
       [ "QuantizationValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_quantization_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_quantization_validation_fixture" ]
     ] ],
@@ -192,10 +212,10 @@ var dir_043de5624456f8ee1a676650b1e35f53 =
     [ "RemapFixture.h", "_remap_fixture_8h.xhtml", [
       [ "RemapValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_remap_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_remap_validation_fixture" ]
     ] ],
-    [ "ReshapeLayerFixture.h", "_reshape_layer_fixture_8h.xhtml", [
+    [ "ReshapeLayerFixture.h", "validation_2fixtures_2_reshape_layer_fixture_8h.xhtml", [
       [ "ReshapeLayerValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_reshape_layer_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_reshape_layer_validation_fixture" ]
     ] ],
-    [ "ScaleFixture.h", "_scale_fixture_8h.xhtml", [
+    [ "ScaleFixture.h", "validation_2fixtures_2_scale_fixture_8h.xhtml", [
       [ "ScaleValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_scale_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_scale_validation_fixture" ]
     ] ],
     [ "ScharrFixture.h", "_scharr_fixture_8h.xhtml", "_scharr_fixture_8h" ],
@@ -212,7 +232,7 @@ var dir_043de5624456f8ee1a676650b1e35f53 =
     [ "ThresholdFixture.h", "_threshold_fixture_8h.xhtml", [
       [ "ThresholdValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_threshold_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_threshold_validation_fixture" ]
     ] ],
-    [ "TransposeFixture.h", "_transpose_fixture_8h.xhtml", [
+    [ "TransposeFixture.h", "validation_2fixtures_2_transpose_fixture_8h.xhtml", [
       [ "TransposeValidationFixture", "classarm__compute_1_1test_1_1validation_1_1_transpose_validation_fixture.xhtml", "classarm__compute_1_1test_1_1validation_1_1_transpose_validation_fixture" ]
     ] ],
     [ "WarpAffineFixture.h", "_warp_affine_fixture_8h.xhtml", [

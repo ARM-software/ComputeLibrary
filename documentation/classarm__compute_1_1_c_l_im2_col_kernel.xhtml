@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -116,7 +116,8 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_c_l_im2_col_kern
 
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a>  </div>
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a>  </div>
   <div class="headertitle">
 <div class="title">CLIm2ColKernel Class Reference</div>  </div>
 </div><!--header-->
@@ -236,8 +237,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a3f5646133956f06348b310ccc3d36353 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">The maximum window the kernel can be executed on.  <a href="#a3f5646133956f06348b310ccc3d36353">More...</a><br /></td></tr>
 <tr class="separator:a3f5646133956f06348b310ccc3d36353 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
-Additional Inherited Members</h2></td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:a1eaf36a65da0e1f3ef5a89516f91193a"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_im2_col_kernel.xhtml#a1eaf36a65da0e1f3ef5a89516f91193a">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output, const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;kernel_dims, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;conv_info, bool has_bias)</td></tr>
+<tr class="memdesc:a1eaf36a65da0e1f3ef5a89516f91193a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_im2_col_kernel.xhtml">CLIm2ColKernel</a>.  <a href="#a1eaf36a65da0e1f3ef5a89516f91193a">More...</a><br /></td></tr>
+<tr class="separator:a1eaf36a65da0e1f3ef5a89516f91193a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td colspan="2" onclick="javascript:toggleInherit('pub_static_methods_classarm__compute_1_1_i_c_l_kernel')"><img src="closed.png" alt="-"/>&#160;Static Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml">ICLKernel</a></td></tr>
 <tr class="memitem:a4b4a20e518c04e657839280cd486a85d inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memItemLeft" align="right" valign="top">static cl::NDRange&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a4b4a20e518c04e657839280cd486a85d">gws_from_window</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;<a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>)</td></tr>
 <tr class="memdesc:a4b4a20e518c04e657839280cd486a85d inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the global work size given an execution window.  <a href="#a4b4a20e518c04e657839280cd486a85d">More...</a><br /></td></tr>
@@ -367,7 +371,7 @@ Additional Inherited Members</h2></td></tr>
 <p>Set the input and output of the kernel. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM], while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/QS16/QASYMM8/F16/F32 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM], while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/QASYMM8/QS16/F16/F32 </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>The output tensor. First 2 lower dimensions represent a transform of each 3D input, while every dimension above represents a batch. Data types supported: Same as <code>input</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">kernel_dims</td><td>The kernel dimensions (width and height). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">conv_info</td><td>Contains padding and stride information described in <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a>. </td></tr>
@@ -476,6 +480,71 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a1eaf36a65da0e1f3ef5a89516f91193a"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a> validate </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;&#160;</td>
+          <td class="paramname"><em>kernel_dims</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;&#160;</td>
+          <td class="paramname"><em>conv_info</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>has_bias</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_im2_col_kernel.xhtml">CLIm2ColKernel</a>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM], while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QS8/QASYMM8/QS16/F16/F32 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>The output tensor. First 2 lower dimensions represent a transform of each 3D input, while every dimension above represents a batch. Data types supported: Same as <code>input</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">kernel_dims</td><td>The kernel dimensions (width and height). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">conv_info</td><td>Contains padding and stride information described in <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">has_bias</td><td>In case biases are provided expands the matrix with 1.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>arm_compute/core/CL/kernels/<a class="el" href="_c_l_im2_col_kernel_8h_source.xhtml">CLIm2ColKernel.h</a></li>
 </ul>
@@ -485,7 +554,7 @@ Additional Inherited Members</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_im2_col_kernel.xhtml">CLIm2ColKernel</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:35 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:44 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

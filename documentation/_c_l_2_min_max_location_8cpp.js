@@ -11,9 +11,7 @@ var _c_l_2_min_max_location_8cpp =
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_min_max_location_8cpp.xhtml#a112374c662e4c050d9dbf1691b1d9e2f", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_min_max_location_8cpp.xhtml#a36e35666744a3808363928fe7858b807", null ],
     [ "info", "_c_l_2_min_max_location_8cpp.xhtml#a096668313a9a819d54a2e65ec21ff0cc", null ],
-    [ "TEST_SUITE_END", "_c_l_2_min_max_location_8cpp.xhtml#af77b34bd2ffc2b5b0b87daa9b5e63ea8", null ],
+    [ "TEST_SUITE_END", "_c_l_2_min_max_location_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
     [ "validate_configuration", "_c_l_2_min_max_location_8cpp.xhtml#a4773668d05f0071ef209f3b19e2938af", null ],
-    [ "validate_configuration", "_c_l_2_min_max_location_8cpp.xhtml#a8b99c68730dc9d3b6f5d856864c1888a", null ],
-    [ "data_type", "_c_l_2_min_max_location_8cpp.xhtml#ac2ad7f431e3446fddcd9b6b9f93c4c14", null ],
-    [ "shape", "_c_l_2_min_max_location_8cpp.xhtml#a45cde9abb508c62d67c3bb2b9bf566a5", null ]
+    [ "validate_configuration", "_c_l_2_min_max_location_8cpp.xhtml#a8b99c68730dc9d3b6f5d856864c1888a", null ]
 ];

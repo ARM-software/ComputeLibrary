@@ -9,6 +9,7 @@ var classarm__compute_1_1test_1_1_assets_library =
     [ "fill", "classarm__compute_1_1test_1_1_assets_library.xhtml#a8fca830911339dca1cefcd78763063cf", null ],
     [ "fill", "classarm__compute_1_1test_1_1_assets_library.xhtml#a36a9ddc6792949fb561cd788e6e31208", null ],
     [ "fill", "classarm__compute_1_1test_1_1_assets_library.xhtml#a32621ba3c7498c558f27e61606af85f4", null ],
+    [ "fill", "classarm__compute_1_1test_1_1_assets_library.xhtml#a7eb916e4bf718e682ae89cb99aa348f9", null ],
     [ "fill_borders_with_garbage", "classarm__compute_1_1test_1_1_assets_library.xhtml#a9a6d9b68649fb7444ca36b5c651dfdda", null ],
     [ "fill_layer_data", "classarm__compute_1_1test_1_1_assets_library.xhtml#ad85dc4c57a27c44d114c573b9a80bad6", null ],
     [ "fill_tensor_uniform", "classarm__compute_1_1test_1_1_assets_library.xhtml#abb6f25295592e886976520216187eed7", null ],

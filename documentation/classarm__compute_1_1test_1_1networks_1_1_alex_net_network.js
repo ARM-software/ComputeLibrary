@@ -8,5 +8,6 @@ var classarm__compute_1_1test_1_1networks_1_1_alex_net_network =
     [ "fill_random", "classarm__compute_1_1test_1_1networks_1_1_alex_net_network.xhtml#a3b778cda9ac3fad08e7217edbcb942e0", null ],
     [ "get_classifications", "classarm__compute_1_1test_1_1networks_1_1_alex_net_network.xhtml#a1466ef70729f3c8b5da5ebfec3f53f26", null ],
     [ "init", "classarm__compute_1_1test_1_1networks_1_1_alex_net_network.xhtml#ab4d5b5821653f1eeabef922fbe3b9a91", null ],
-    [ "run", "classarm__compute_1_1test_1_1networks_1_1_alex_net_network.xhtml#a13a43e6d814de94978c515cb084873b1", null ]
+    [ "run", "classarm__compute_1_1test_1_1networks_1_1_alex_net_network.xhtml#a13a43e6d814de94978c515cb084873b1", null ],
+    [ "sync", "classarm__compute_1_1test_1_1networks_1_1_alex_net_network.xhtml#ad55f80ed3cd8b6c4f247763b747016af", null ]
 ];

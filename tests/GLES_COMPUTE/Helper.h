@@ -91,23 +91,6 @@ inline void print_tensor(ITensor &tensor, const std::string &name, IOFormatInfo 
     std::cout << name << ":" << std::endl;
     std::cout << s.str().c_str();
     t.unmap();
-
-    return;
-}
-
-/** Helper to sync tensor, if tensor is not used, GPU have optimized the operation.
- *
- * @param[in] tensor Tensor to be sync.
- *
- * @return Empty @ref GCTensor with the specified shape and data type.
- */
-inline void force_sync_tensor(ITensor &tensor)
-{
-    IGCTensor &t = dynamic_cast<IGCTensor &>(tensor);
-    t.map();
-    t.unmap();
-
-    return;
 }
 } // namespace gles_compute
 } // namespace test

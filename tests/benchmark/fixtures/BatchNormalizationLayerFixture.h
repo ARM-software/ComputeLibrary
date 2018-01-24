@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,12 +29,6 @@
 #include "tests/Globals.h"
 #include "tests/Utils.h"
 #include "tests/framework/Fixture.h"
-#ifdef ARM_COMPUTE_GC
-#include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
-#include "tests/GLES_COMPUTE/Helper.h"
-
-using namespace arm_compute::test::gles_compute;
-#endif /* ARM_COMPUTE_GC */
 
 namespace arm_compute
 {
@@ -70,24 +64,17 @@ public:
         variance.allocator()->allocate();
         beta.allocator()->allocate();
         gamma.allocator()->allocate();
-
-        // Fill tensors
-        library->fill_tensor_uniform(Accessor(src), 0);
-        library->fill_tensor_uniform(Accessor(mean), 1);
-        library->fill_tensor_uniform(Accessor(variance), 2);
-        library->fill_tensor_uniform(Accessor(beta), 3);
-        library->fill_tensor_uniform(Accessor(gamma), 4);
     }
 
     void run()
     {
         batch_norm_layer.run();
-#ifdef ARM_COMPUTE_GC
-        if(opengles31_is_available() && std::is_same<typename std::decay<TensorType>::type, arm_compute::GCTensor>::value)
-        {
-            force_sync_tensor(dst);
-        }
-#endif /* ARM_COMPUTE_GC */
+    }
+
+    void sync()
+    {
+        sync_if_necessary<TensorType>();
+        sync_tensor_if_necessary<TensorType>(dst);
     }
 
     void teardown()

@@ -114,6 +114,11 @@
     {                        \
         FIXTURE::run();      \
     }
+#define FIXTURE_SYNC(FIXTURE) \
+    void do_sync() override   \
+    {                         \
+        FIXTURE::sync();      \
+    }
 #define FIXTURE_TEARDOWN(FIXTURE) \
     void do_teardown() override   \
     {                             \
@@ -223,6 +228,7 @@
         TEST_CASE_CONSTRUCTOR(TEST_NAME)                                            \
         FIXTURE_SETUP(FIXTURE)                                                      \
         FIXTURE_RUN(FIXTURE)                                                        \
+        FIXTURE_SYNC(FIXTURE)                                                       \
         FIXTURE_TEARDOWN(FIXTURE)                                                   \
     };                                                                              \
     TEST_REGISTRAR(TEST_NAME, MODE, STATUS)
@@ -244,6 +250,7 @@
         DATA_TEST_CASE_CONSTRUCTOR(TEST_NAME, DATASET)                                                                              \
         FIXTURE_DATA_SETUP(FIXTURE)                                                                                                 \
         FIXTURE_RUN(FIXTURE)                                                                                                        \
+        FIXTURE_SYNC(FIXTURE)                                                                                                       \
         FIXTURE_TEARDOWN(FIXTURE)                                                                                                   \
     };                                                                                                                              \
     DATA_TEST_REGISTRAR(TEST_NAME, MODE, STATUS, DATASET)

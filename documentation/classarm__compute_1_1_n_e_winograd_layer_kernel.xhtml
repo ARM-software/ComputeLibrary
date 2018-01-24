@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -150,9 +150,9 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a1d51916b2aa07ed2f79b3cc7a85cbd83"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac9989decbb2c46d1f4246dcdcfe4ed1e"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_kernel.xhtml#ac9989decbb2c46d1f4246dcdcfe4ed1e">~NEWinogradLayerKernel</a> ()=default</td></tr>
 <tr class="separator:ac9989decbb2c46d1f4246dcdcfe4ed1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a17164a49c4aaed20654e04f4106f05ed"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_kernel.xhtml#a17164a49c4aaed20654e04f4106f05ed">configure</a> (<a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, <a class="el" href="classarm__compute_1_1_winograd3x3_f32.xhtml">Winograd3x3F32</a> *convolver)</td></tr>
-<tr class="memdesc:a17164a49c4aaed20654e04f4106f05ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialise the kernel.  <a href="#a17164a49c4aaed20654e04f4106f05ed">More...</a><br /></td></tr>
-<tr class="separator:a17164a49c4aaed20654e04f4106f05ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a28a14f42b211986c047de4d6bba8e4ed"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_kernel.xhtml#a28a14f42b211986c047de4d6bba8e4ed">configure</a> (<a class="el" href="classarm__compute_1_1_winograd3x3_f32.xhtml">Winograd3x3F32</a> *convolver)</td></tr>
+<tr class="memdesc:a28a14f42b211986c047de4d6bba8e4ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialise the kernel.  <a href="#a28a14f42b211986c047de4d6bba8e4ed">More...</a><br /></td></tr>
+<tr class="separator:a28a14f42b211986c047de4d6bba8e4ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a112b35dd205c62ea6ed1447ef226da82"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">run</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;<a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>, const <a class="el" href="structarm__compute_1_1_thread_info.xhtml">ThreadInfo</a> &amp;info) override</td></tr>
 <tr class="memdesc:a112b35dd205c62ea6ed1447ef226da82"><td class="mdescLeft">&#160;</td><td class="mdescRight">Execute the kernel on the passed window.  <a href="#a112b35dd205c62ea6ed1447ef226da82">More...</a><br /></td></tr>
 <tr class="separator:a112b35dd205c62ea6ed1447ef226da82"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -179,16 +179,19 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a8e09a3273f0c1e1c3abbf43bb4fa1bda"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_kernel.xhtml#a8e09a3273f0c1e1c3abbf43bb4fa1bda">get_kernel_storage_size</a> (const <a class="el" href="struct_kernel_shape.xhtml">KernelShape</a> &amp;shape)</td></tr>
-<tr class="separator:a8e09a3273f0c1e1c3abbf43bb4fa1bda"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aec8ed754d1a231c08c6a61b4d7c69fcc"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_kernel.xhtml#aec8ed754d1a231c08c6a61b4d7c69fcc">get_working_space_size</a> (const <a class="el" href="struct_tensor4_d_shape.xhtml">Tensor4DShape</a> &amp;input_shape, const <a class="el" href="struct_kernel_shape.xhtml">KernelShape</a> &amp;k_shape, const <a class="el" href="tensor_8hpp.xhtml#a0277d10fdc0f1bb28dbec03e10941727">PaddingType</a> <a class="el" href="hwc_8hpp.xhtml#ad487ce76e40f524a7f5e350763b91ae5">padding</a>)</td></tr>
-<tr class="separator:aec8ed754d1a231c08c6a61b4d7c69fcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab1743ad31c8bf4f6e5389aa7970c9e3c"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_kernel.xhtml#ab1743ad31c8bf4f6e5389aa7970c9e3c">get_kernel_transform_working_size</a> (const <a class="el" href="struct_kernel_shape.xhtml">KernelShape</a> &amp;shape)</td></tr>
-<tr class="separator:ab1743ad31c8bf4f6e5389aa7970c9e3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d663c8f7f808c143fe2d575fcfcafdb"><td class="memItemLeft" align="right" valign="top">static unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_kernel.xhtml#a2d663c8f7f808c143fe2d575fcfcafdb">get_weight_storage_size</a> (const int n_output_channels, const int n_input_channels)</td></tr>
+<tr class="memdesc:a2d663c8f7f808c143fe2d575fcfcafdb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determine how much memory (in units of TIn) to allocate for the transformed weights.  <a href="#a2d663c8f7f808c143fe2d575fcfcafdb">More...</a><br /></td></tr>
+<tr class="separator:a2d663c8f7f808c143fe2d575fcfcafdb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae649097234f8eeb6bf3504720a60b574"><td class="memItemLeft" align="right" valign="top">static unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_kernel.xhtml#ae649097234f8eeb6bf3504720a60b574">get_input_storage_size</a> (const int n_batches, const int n_channels, const int n_rows, const int n_cols, const bool same_padding)</td></tr>
+<tr class="memdesc:ae649097234f8eeb6bf3504720a60b574"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determine how much memory (in units of TIn) to allocate for the transformed input.  <a href="#ae649097234f8eeb6bf3504720a60b574">More...</a><br /></td></tr>
+<tr class="separator:ae649097234f8eeb6bf3504720a60b574"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a487d0811fefbd14a0d1bc7a11049bcba"><td class="memItemLeft" align="right" valign="top">static unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_kernel.xhtml#a487d0811fefbd14a0d1bc7a11049bcba">get_output_storage_size</a> (const int n_batches, const int n_rows, const int n_cols, const int n_output_channels, const bool same_padding)</td></tr>
+<tr class="memdesc:a487d0811fefbd14a0d1bc7a11049bcba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determine how much memory (in units of TOut) to allocate for the (Winograd domain) output.  <a href="#a487d0811fefbd14a0d1bc7a11049bcba">More...</a><br /></td></tr>
+<tr class="separator:a487d0811fefbd14a0d1bc7a11049bcba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p>Definition at line <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml#l00052">52</a> of file <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml">NEWinogradLayerKernel.h</a>.</p>
+<p>Definition at line <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml#l00079">79</a> of file <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml">NEWinogradLayerKernel.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a8023793c80e0f49d35b15e81373ca42b"></a>
 <div class="memitem">
@@ -283,26 +286,16 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a17164a49c4aaed20654e04f4106f05ed"></a>
+<a class="anchor" id="a28a14f42b211986c047de4d6bba8e4ed"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">void configure </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *&#160;</td>
-          <td class="paramname"><em>output</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype"><a class="el" href="classarm__compute_1_1_winograd3x3_f32.xhtml">Winograd3x3F32</a> *&#160;</td>
-          <td class="paramname"><em>convolver</em>&#160;</td>
-        </tr>
-        <tr>
+          <td class="paramname"><em>convolver</em></td><td>)</td>
           <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -310,7 +303,6 @@ Static Public Member Functions</h2></td></tr>
 <p>Initialise the kernel. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">output</td><td>Output tensor to store the result of matrix multiplication. Data type supported: F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">convolver</td><td>A pointer to the winograd convolver, this object must have been configured and is ready to execute 16 GEMMS . </td></tr>
   </table>
   </dd>
@@ -318,7 +310,7 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a8e09a3273f0c1e1c3abbf43bb4fa1bda"></a>
+<a class="anchor" id="ae649097234f8eeb6bf3504720a60b574"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -326,70 +318,34 @@ Static Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static size_t get_kernel_storage_size </td>
+          <td class="memname">static unsigned int get_input_storage_size </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="struct_kernel_shape.xhtml">KernelShape</a> &amp;&#160;</td>
-          <td class="paramname"><em>shape</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="ab1743ad31c8bf4f6e5389aa7970c9e3c"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">static size_t get_kernel_transform_working_size </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="struct_kernel_shape.xhtml">KernelShape</a> &amp;&#160;</td>
-          <td class="paramname"><em>shape</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a class="anchor" id="aec8ed754d1a231c08c6a61b4d7c69fcc"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">static size_t get_working_space_size </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="struct_tensor4_d_shape.xhtml">Tensor4DShape</a> &amp;&#160;</td>
-          <td class="paramname"><em>input_shape</em>, </td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>n_batches</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="struct_kernel_shape.xhtml">KernelShape</a> &amp;&#160;</td>
-          <td class="paramname"><em>k_shape</em>, </td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>n_channels</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="tensor_8hpp.xhtml#a0277d10fdc0f1bb28dbec03e10941727">PaddingType</a>&#160;</td>
-          <td class="paramname"><em>padding</em>&#160;</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>n_rows</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>n_cols</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>same_padding</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -403,6 +359,125 @@ Static Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Determine how much memory (in units of TIn) to allocate for the transformed input. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">n_batches</td><td>Number of batches in the input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">n_channels</td><td>Number of feature maps in the input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">n_rows</td><td>Number of rows in each feature map. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">n_cols</td><td>Number of columns in each feature map. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">same_padding</td><td>Use "SAME" padding, otherwise use "VALID". </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a487d0811fefbd14a0d1bc7a11049bcba"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static unsigned int get_output_storage_size </td>
+          <td>(</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>n_batches</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>n_rows</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>n_cols</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>n_output_channels</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>same_padding</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Determine how much memory (in units of TOut) to allocate for the (Winograd domain) output. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">n_batches</td><td>Number of batches in the output tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">n_rows</td><td>Number of rows in each feature map of the input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">n_cols</td><td>Number of columns in each feature map of the input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">n_output_channels</td><td>Number of feature maps in the output tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">same_padding</td><td>Use "SAME" padding, otherwise use "VALID". </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a2d663c8f7f808c143fe2d575fcfcafdb"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static unsigned int get_weight_storage_size </td>
+          <td>(</td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>n_output_channels</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>n_input_channels</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Determine how much memory (in units of TIn) to allocate for the transformed weights. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">n_output_channels</td><td>Number of output feature maps. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">n_input_channels</td><td>Number of input feature maps. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -516,7 +591,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_kernel.xhtml">NEWinogradLayerKernel</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:37 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:46 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

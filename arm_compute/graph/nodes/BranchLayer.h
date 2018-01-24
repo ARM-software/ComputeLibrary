@@ -31,7 +31,7 @@
 #include "arm_compute/graph/SubTensor.h"
 #include "arm_compute/graph/Types.h"
 
-#include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/utils/misc/utility.h"
 
 #include <vector>
 
@@ -57,7 +57,7 @@ public:
         _sub_graphs.push_back(arm_compute::support::cpp14::make_unique<SubGraph>(std::move(sub_graph1)));
         _sub_graphs.push_back(arm_compute::support::cpp14::make_unique<SubGraph>(std::move(sub_graph2)));
 
-        for_each([&](SubGraph & sub_graph)
+        utility::for_each([&](SubGraph && sub_graph)
         {
             _sub_graphs.push_back(arm_compute::support::cpp14::make_unique<SubGraph>(std::move(sub_graph)));
         },

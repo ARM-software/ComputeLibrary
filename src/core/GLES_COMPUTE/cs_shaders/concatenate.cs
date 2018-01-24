@@ -22,85 +22,51 @@
  * SOFTWARE.
  */
 layout(local_size_x = LOCAL_SIZE_X, local_size_y = LOCAL_SIZE_Y, local_size_z = LOCAL_SIZE_Z) in;
-#include "helpers.h"
 
-#ifdef DATA_TYPE_FP32
-precision highp float;
+#include "helpers_cs.h"
 
-layout(std140) uniform shader_params
-{
-    TENSOR3D_PARAM_DECLARATION(src);
-    TENSOR3D_PARAM_DECLARATION(dst);
-};
-
-BUFFER_DECLARATION(src, 1, float, readonly);
-BUFFER_DECLARATION(dst, 2, float, writeonly);
+#if defined(DATA_TYPE_FP16)
+precision mediump float;
+#endif /*DATA_TYPE_FP16*/
 
 /** This kernel concatenates the input tensor into the output tensor along the third dimension
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F32
- * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @note The data type must be passed at compile time using "#define DATA_TYPE_NAME". e.g. "#define DATA_TYPE_FP32"
+ *
+ * @param[in]  src_ptr   Pointer to the source tensor. Supported data types: F16/F32
+ * @param[in]  src_attrs The attributes of the source tensor
+ * @param[out] dst_ptr   Pointer to the destination tensor. Supported data types: same as @p src_ptr
+ * @param[in]  dst_attrs The attributes of the destination tensor
  */
+SHADER_PARAMS_DECLARATION
+{
+    Tensor3DAttributes src_attrs;
+    Tensor3DAttributes dst_attrs;
+};
+
+#ifdef DATA_TYPE_FP32
+TENSOR_DECLARATION(1, srcBuffer, float, src_ptr, src_shift, 2, readonly);
+TENSOR_DECLARATION(2, dstBuffer, float, dst_ptr, dst_shift, 2, writeonly);
+
 void main(void)
 {
-    Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
-    Tensor3D dst = CONVERT_TO_TENSOR3D_STRUCT(dst);
+    Tensor3DIterator src_iter = CONVERT_TO_TENSOR3D_ITERATOR(src_attrs, src_shift);
+    Tensor3DIterator dst_iter = CONVERT_TO_TENSOR3D_ITERATOR(dst_attrs, dst_shift);
 
-    dst_ptr[dst.current_offset + uint(OFFSETS_Z >> 2)] = src_ptr[tensor3D_offset(src, -OFFSETS_X, -OFFSETS_Y, 0)];
+    float tmp = LOAD(src_ptr, TENSOR3D_OFFSET(src_iter, -OFFSETS_X, -OFFSETS_Y, 0));
+    STORE(dst_ptr, TENSOR_OFFSET_ADVANCE_IN_BYTES(dst_iter, OFFSETS_Z), tmp);
 }
 
 #elif defined(DATA_TYPE_FP16)
-precision mediump float;
+TENSOR_DECLARATION(1, srcBuffer, uvec2, src_ptr, src_shift, 3, readonly);
+TENSOR_DECLARATION(2, dstBuffer, uvec2, dst_ptr, dst_shift, 3, writeonly);
 
-layout(std140) uniform shader_params
-{
-    TENSOR3D_PARAM_DECLARATION(src);
-    TENSOR3D_PARAM_DECLARATION(dst);
-};
-
-BUFFER_DECLARATION(src, 1, uvec2, readonly);
-BUFFER_DECLARATION(dst, 2, uvec2, writeonly);
-
-/** This kernel concatenates the input tensor into the output tensor along the third dimension
- *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16
- * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
- * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
- * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
- * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
- */
 void main(void)
 {
-    Tensor3D src = GC_CONVERT_TO_TENSOR3D_STRUCT(src);
-    Tensor3D dst = GC_CONVERT_TO_TENSOR3D_STRUCT(dst);
+    Tensor3DIterator src_iter = CONVERT_TO_TENSOR3D_ITERATOR(src_attrs, src_shift);
+    Tensor3DIterator dst_iter = CONVERT_TO_TENSOR3D_ITERATOR(dst_attrs, dst_shift);
 
-    uvec2 packed_s;
-    GC_LOAD1_3D_OFFSET(packed_s, src, -OFFSETS_X, -OFFSETS_Y, 0);
-    dst_ptr[(dst.current_offset + uint(OFFSETS_Z)) >> 3] = packed_s;
+    uvec2 tmp = LOAD(src_ptr, TENSOR3D_OFFSET(src_iter, -OFFSETS_X, -OFFSETS_Y, 0));
+    STORE(dst_ptr, TENSOR_OFFSET_ADVANCE_IN_BYTES(dst_iter, OFFSETS_Z), tmp);
 }
-#endif /*DATA_TYPE_FP32*/
+#endif /*DATA_TYPE_FP16*/

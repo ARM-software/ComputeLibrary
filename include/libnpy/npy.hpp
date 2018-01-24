@@ -347,6 +347,7 @@ inline void parse_header(std::string header, std::string& descr, bool& fortran_o
   std::string fortran_s = dict_map["fortran_order"];
   std::string shape_s = dict_map["shape"];
 
+  // TODO: extract info from typestring
   parse_typestring(descr_s);
   // remove 
   descr = npy::pyparse::parse_str(descr_s);
@@ -429,6 +430,7 @@ inline std::string read_header(std::istream& istream) {
       header_length = (header_len_le16[0] << 0) | (header_len_le16[1] << 8);
 
       if((magic_string_length + 2 + 2 + header_length) % 16 != 0) {
+          // TODO: display warning
       }
     }else if(v_major == 2 && v_minor == 0) {
       char header_len_le32[4];
@@ -438,6 +440,7 @@ inline std::string read_header(std::istream& istream) {
                     | (header_len_le32[2] << 16) | (header_len_le32[3] <<  24);
 
       if((magic_string_length + 2 + 4 + header_length) % 16 != 0) {
+        // TODO: display warning
       }
     }else{
        throw std::runtime_error("unsupported file format version");

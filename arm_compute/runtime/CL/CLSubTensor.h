@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,11 +39,12 @@ class CLSubTensor : public ICLTensor
 public:
     /** Constructor
      *
-     * @param[in] parent       Parent tensor
-     * @param[in] tensor_shape Shape of the subtensor
-     * @param[in] coords       Coordinates of the first subtensor element inside the parent tensor.
+     * @param[in] parent        Parent tensor
+     * @param[in] tensor_shape  Shape of the subtensor
+     * @param[in] coords        Coordinates of the first subtensor element inside the parent tensor.
+     * @param[in] extend_parent (Optional) Extend parent with subtensor shape if subtensor indexes out of bounds
      */
-    CLSubTensor(ICLTensor *parent, const TensorShape &tensor_shape, const Coordinates &coords);
+    CLSubTensor(ICLTensor *parent, const TensorShape &tensor_shape, const Coordinates &coords, bool extend_parent = false);
     /** Destructor: free the tensor's memory */
     ~CLSubTensor() = default;
     /** Restrict instances of this class to be copy constructed */

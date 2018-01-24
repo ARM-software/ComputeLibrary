@@ -24,57 +24,38 @@
 
 layout(local_size_x = LOCAL_SIZE_X, local_size_y = LOCAL_SIZE_Y, local_size_z = LOCAL_SIZE_Z) in;
 
-#include "helpers.h"
+#include "helpers_cs.h"
 
-layout(std140) uniform shader_params
-{
-    TENSOR3D_PARAM_DECLARATION(src1);
-    TENSOR3D_PARAM_DECLARATION(src2);
-    TENSOR3D_PARAM_DECLARATION(dst);
-};
-
-BUFFER_DECLARATION(src1, 1, float, readonly);
-BUFFER_DECLARATION(src2, 2, float, readonly);
-BUFFER_DECLARATION(dst, 3, float, writeonly);
-
-#ifdef CROSS_MAP
-/** Apply cross map normalization.
+/** Apply cross map normalization and in map normalization
  *
  * @note Alpha parameter / norm_size should be given as a preprocessor argument using "#define COEFF x"
  * @note BETA parameter in the normalization equation should be given as a preprocessor argument using "#define BETA x"
  * @note KAPPA parameter in the normalization equation should be given as a preprocessor argument using "#define KAPPA x"
  * @note Number of elements on the right or left side to normalize across should be given as a preprocessor argument using "#define RADIUS x"
  *
- * @param[in]  src1_ptr                           Pointer to the first source tensor. Supported data types: F32
- * @param[in]  src1_stride_x                      Stride of the first source tensor in X dimension (in bytes)
- * @param[in]  src1_step_x                        src1_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src1_stride_y                      Stride of the first source tensor in Y dimension (in bytes)
- * @param[in]  src1_step_y                        src1_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src1_stride_z                      Stride of the first source tensor in Z dimension (in bytes)
- * @param[in]  src1_step_z                        src1_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the first source tensor
- * @param[in]  src2_ptr                           Pointer to the second source tensor. Supported data types: Same as @p src1_ptr
- * @param[in]  src2_stride_x                      Stride of the second source tensor in X dimension (in bytes)
- * @param[in]  src2_step_x                        src2_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src2_stride_y                      Stride of the second source tensor in Y dimension (in bytes)
- * @param[in]  src2_step_y                        src2_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src2_stride_z                      Stride of the second source tensor in Z dimension (in bytes)
- * @param[in]  src2_step_z                        src2_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src2_offset_first_element_in_bytes The offset of the second element in the second source tensor
- * @param[out] dst_ptr                            Pointer to the destination tensor. Supported data types: Same as @p src1_ptr
- * @param[in]  dst_stride_x                       Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                         dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                       Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                         dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_stride_z                       Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                         dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination tensor
+ * @param[in]  src1_ptr   Pointer to the first source tensor. Supported data types: F32
+ * @param[in]  src1_attrs The attributes of the first source tensor
+ * @param[in]  src2_ptr   Pointer to the second source tensor. Supported data types: Same as @p src1_ptr
+ * @param[in]  src2_attrs The attributes of the second source tensor
+ * @param[out] dst_ptr    Pointer to the destination tensor. Supported data types: Same as @p src1_ptr
+ * @param[in]  dst_attrs  The attributes of the destination tensor
  */
+SHADER_PARAMS_DECLARATION
+{
+    Tensor3DAttributes src1_attrs;
+    Tensor3DAttributes src2_attrs;
+    Tensor3DAttributes dst_attrs;
+};
+TENSOR_DECLARATION(1, src1Buffer, float, src1_ptr, src1_shift, 2, readonly);
+TENSOR_DECLARATION(2, src2Buffer, float, src2_ptr, src2_shift, 2, readonly);
+TENSOR_DECLARATION(3, dstBuffer, float, dst_ptr, dst_shift, 2, writeonly);
+
+#ifdef CROSS_MAP
 void main(void)
 {
-    Tensor3D src1 = CONVERT_TO_TENSOR3D_STRUCT(src1);
-    Tensor3D src2 = CONVERT_TO_TENSOR3D_STRUCT(src2);
-    Tensor3D dst  = CONVERT_TO_TENSOR3D_STRUCT(dst);
+    Tensor3DIterator src1_iter = CONVERT_TO_TENSOR3D_ITERATOR(src1_attrs, src1_shift);
+    Tensor3DIterator src2_iter = CONVERT_TO_TENSOR3D_ITERATOR(src2_attrs, src2_shift);
+    Tensor3DIterator dst_iter  = CONVERT_TO_TENSOR3D_ITERATOR(dst_attrs, dst_shift);
 
     float acc = 0.0;
 
@@ -86,54 +67,22 @@ void main(void)
 
     for(int i = left_slice; i <= right_slice; i++)
     {
-        acc += src2_ptr[tensor3D_offset(src2, 0, 0, i - current_slice)];
+        acc += LOAD(src2_ptr, TENSOR3D_OFFSET(src2_iter, 0, 0, i - current_slice));
     }
 
     float normalized = pow(float(KAPPA) + float(COEFF) * acc, float(BETA));
 
-    float normalized_pixel = (src1_ptr[src1.current_offset]) / normalized;
+    float normalized_pixel = (LOAD_CURRENT_ITEM(src1_ptr, src1_iter)) / normalized;
 
-    dst_ptr[dst.current_offset] = normalized_pixel;
+    STORE_CURRENT_ITEM(dst_ptr, dst_iter, normalized_pixel);
 }
 
 #elif defined(IN_MAP_1D)
-/** Apply in map normalization.
- *
- * @note Alpha parameter / norm_size should be given as a preprocessor argument using "#define COEFF x"
- * @note BETA parameter in the normalization equation should be given as a preprocessor argument using "#define BETA x"
- * @note KAPPA parameter in the normalization equation should be given as a preprocessor argument using "#define KAPPA x"
- * @note Number of elements on the right or left side to normalize across should be given as a preprocessor argument using "#define RADIUS x"
- *
- * @param[in]  src1_ptr                           Pointer to the first source tensor. Supported data types: F32
- * @param[in]  src1_stride_x                      Stride of the first source tensor in X dimension (in bytes)
- * @param[in]  src1_step_x                        src1_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src1_stride_y                      Stride of the first source tensor in Y dimension (in bytes)
- * @param[in]  src1_step_y                        src1_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src1_stride_z                      Stride of the first source tensor in Z dimension (in bytes)
- * @param[in]  src1_step_z                        src1_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the first source tensor
- * @param[in]  src2_ptr                           Pointer to the second source tensor. Supported data types: Same as @p src1_ptr
- * @param[in]  src2_stride_x                      Stride of the second source tensor in X dimension (in bytes)
- * @param[in]  src2_step_x                        src2_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  src2_stride_y                      Stride of the second source tensor in Y dimension (in bytes)
- * @param[in]  src2_step_y                        src2_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src2_stride_z                      Stride of the second source tensor in Z dimension (in bytes)
- * @param[in]  src2_step_z                        src2_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  src2_offset_first_element_in_bytes The offset of the second element in the second source tensor
- * @param[out] dst_ptr                            Pointer to the destination tensor. Supported data types: Same as @p src1_ptr
- * @param[in]  dst_stride_x                       Stride of the destination tensor in X dimension (in bytes)
- * @param[in]  dst_step_x                         dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in]  dst_stride_y                       Stride of the destination tensor in Y dimension (in bytes)
- * @param[in]  dst_step_y                         dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  dst_stride_z                       Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  dst_step_z                         dst_stride_z * number of elements along Z processed per workitem(in bytes)
- * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination tensor
- */
 void main(void)
 {
-    Tensor3D src1 = CONVERT_TO_TENSOR3D_STRUCT(src1);
-    Tensor3D src2 = CONVERT_TO_TENSOR3D_STRUCT(src2);
-    Tensor3D dst  = CONVERT_TO_TENSOR3D_STRUCT(dst);
+    Tensor3DIterator src1_iter = CONVERT_TO_TENSOR3D_ITERATOR(src1_attrs, src1_shift);
+    Tensor3DIterator src2_iter = CONVERT_TO_TENSOR3D_ITERATOR(src2_attrs, src2_shift);
+    Tensor3DIterator dst_iter  = CONVERT_TO_TENSOR3D_ITERATOR(dst_attrs, dst_shift);
 
     float acc = 0.0;
 
@@ -145,13 +94,13 @@ void main(void)
 
     for(int i = left_pos; i <= right_pos; i++)
     {
-        acc += src2_ptr[tensor3D_offset(src2, i - current_pos, 0, 0)];
+        acc += LOAD(src2_ptr, TENSOR3D_OFFSET(src2_iter, i - current_pos, 0, 0));
     }
 
     float normalized = pow(float(KAPPA) + float(COEFF) * acc, float(BETA));
 
-    float normalized_pixel = (src1_ptr[src1.current_offset]) / normalized;
+    float normalized_pixel = (LOAD_CURRENT_ITEM(src1_ptr, src1_iter)) / normalized;
 
-    dst_ptr[dst.current_offset] = normalized_pixel;
+    STORE_CURRENT_ITEM(dst_ptr, dst_iter, normalized_pixel);
 }
 #endif /*CROSS_MAP*/

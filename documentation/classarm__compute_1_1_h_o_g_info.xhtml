@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -183,6 +183,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:adb20b5249eedf180a461ea097622fe7f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_h_o_g_info.xhtml#adb20b5249eedf180a461ea097622fe7f">num_cells_per_block</a> () const </td></tr>
 <tr class="memdesc:adb20b5249eedf180a461ea097622fe7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the number of cells for each block.  <a href="#adb20b5249eedf180a461ea097622fe7f">More...</a><br /></td></tr>
 <tr class="separator:adb20b5249eedf180a461ea097622fe7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a932db6ec1490ede3ff23e8c0ce80865c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_h_o_g_info.xhtml#a932db6ec1490ede3ff23e8c0ce80865c">num_cells_per_block_stride</a> () const </td></tr>
+<tr class="memdesc:a932db6ec1490ede3ff23e8c0ce80865c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the number of cells per block stride.  <a href="#a932db6ec1490ede3ff23e8c0ce80865c">More...</a><br /></td></tr>
+<tr class="separator:a932db6ec1490ede3ff23e8c0ce80865c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a649a86d58ff88cfd8523d6cb71d64332"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_h_o_g_info.xhtml#a649a86d58ff88cfd8523d6cb71d64332">num_blocks_per_image</a> (const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;image_size) const </td></tr>
 <tr class="memdesc:a649a86d58ff88cfd8523d6cb71d64332"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the number of blocks for the given image size.  <a href="#a649a86d58ff88cfd8523d6cb71d64332">More...</a><br /></td></tr>
 <tr class="separator:a649a86d58ff88cfd8523d6cb71d64332"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -380,6 +383,8 @@ Public Member Functions</h2></td></tr>
 <p>The block size in pixels. </p>
 <dl class="section return"><dt>Returns</dt><dd>The block size in pixels </dd></dl>
 
+<p>Referenced by <a class="el" href="reference_2_h_o_g_descriptor_8cpp_source.xhtml#l00173">arm_compute::test::validation::reference::hog_block_normalization()</a>, <a class="el" href="_type_printer_8h_source.xhtml#l00905">arm_compute::operator&lt;&lt;()</a>, and <a class="el" href="_h_o_g_descriptor_fixture_8h_source.xhtml#l00048">HOGDescriptorValidationFixture&lt; TensorType, HOGType, AccessorType, FunctionType, T, U &gt;::setup()</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="aa9a69eade27460f843fcfba5abb7ae52"></a>
@@ -399,6 +404,8 @@ Public Member Functions</h2></td></tr>
 <p>The block stride is the distance between 2 consecutive blocks</p>
 <dl class="section return"><dt>Returns</dt><dd>The block stride in pixels </dd></dl>
 
+<p>Referenced by <a class="el" href="reference_2_h_o_g_descriptor_8cpp_source.xhtml#l00173">arm_compute::test::validation::reference::hog_block_normalization()</a>, <a class="el" href="_type_printer_8h_source.xhtml#l00905">arm_compute::operator&lt;&lt;()</a>, and <a class="el" href="_h_o_g_descriptor_fixture_8h_source.xhtml#l00048">HOGDescriptorValidationFixture&lt; TensorType, HOGType, AccessorType, FunctionType, T, U &gt;::setup()</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a4b7434680a85c2ac14df737ac7cca91e"></a>
@@ -416,6 +423,8 @@ Public Member Functions</h2></td></tr>
 
 <p>The cell size in pixels. </p>
 <dl class="section return"><dt>Returns</dt><dd>The cell size in pixels </dd></dl>
+
+<p>Referenced by <a class="el" href="reference_2_h_o_g_descriptor_8cpp_source.xhtml#l00173">arm_compute::test::validation::reference::hog_block_normalization()</a>, <a class="el" href="reference_2_h_o_g_descriptor_8cpp_source.xhtml#l00233">arm_compute::test::validation::reference::hog_descriptor()</a>, <a class="el" href="reference_2_h_o_g_descriptor_8cpp_source.xhtml#l00118">arm_compute::test::validation::reference::hog_orientation_binning()</a>, <a class="el" href="_type_printer_8h_source.xhtml#l00905">arm_compute::operator&lt;&lt;()</a>, and <a class="el" href="_h_o_g_descriptor_fixture_8h_source.xhtml#l00048">HOGDescriptorValidationFixture&lt; TensorType, HOGType, AccessorType, FunctionType, T, U &gt;::setup()</a>.</p>
 
 </div>
 </div>
@@ -452,6 +461,8 @@ Public Member Functions</h2></td></tr>
 
 <p>The detection window size in pixels. </p>
 <dl class="section return"><dt>Returns</dt><dd>The detection window size in pixels </dd></dl>
+
+<p>Referenced by <a class="el" href="_type_printer_8h_source.xhtml#l00905">arm_compute::operator&lt;&lt;()</a>, and <a class="el" href="_h_o_g_descriptor_fixture_8h_source.xhtml#l00048">HOGDescriptorValidationFixture&lt; TensorType, HOGType, AccessorType, FunctionType, T, U &gt;::setup()</a>.</p>
 
 </div>
 </div>
@@ -548,6 +559,8 @@ Public Member Functions</h2></td></tr>
 <p>Threshold used for L2HYS_NORM normalization type. </p>
 <dl class="section return"><dt>Returns</dt><dd>Threshold used for L2HYS_NORM normalization type </dd></dl>
 
+<p>Referenced by <a class="el" href="_type_printer_8h_source.xhtml#l00905">arm_compute::operator&lt;&lt;()</a>, and <a class="el" href="_h_o_g_descriptor_fixture_8h_source.xhtml#l00048">HOGDescriptorValidationFixture&lt; TensorType, HOGType, AccessorType, FunctionType, T, U &gt;::setup()</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="aed90de2ef57929727bb2159b66d04487"></a>
@@ -566,6 +579,8 @@ Public Member Functions</h2></td></tr>
 <p>The normalization type. </p>
 <dl class="section return"><dt>Returns</dt><dd>The normalization type </dd></dl>
 
+<p>Referenced by <a class="el" href="_type_printer_8h_source.xhtml#l00905">arm_compute::operator&lt;&lt;()</a>, and <a class="el" href="_h_o_g_descriptor_fixture_8h_source.xhtml#l00048">HOGDescriptorValidationFixture&lt; TensorType, HOGType, AccessorType, FunctionType, T, U &gt;::setup()</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="ae3664b841732a09d7749953ca5b81373"></a>
@@ -583,6 +598,8 @@ Public Member Functions</h2></td></tr>
 
 <p>The number of histogram bins for each cell. </p>
 <dl class="section return"><dt>Returns</dt><dd>The number of histogram bins for each cell </dd></dl>
+
+<p>Referenced by <a class="el" href="reference_2_h_o_g_descriptor_8cpp_source.xhtml#l00173">arm_compute::test::validation::reference::hog_block_normalization()</a>, <a class="el" href="reference_2_h_o_g_descriptor_8cpp_source.xhtml#l00233">arm_compute::test::validation::reference::hog_descriptor()</a>, <a class="el" href="reference_2_h_o_g_descriptor_8cpp_source.xhtml#l00118">arm_compute::test::validation::reference::hog_orientation_binning()</a>, <a class="el" href="_type_printer_8h_source.xhtml#l00905">arm_compute::operator&lt;&lt;()</a>, and <a class="el" href="_h_o_g_descriptor_fixture_8h_source.xhtml#l00048">HOGDescriptorValidationFixture&lt; TensorType, HOGType, AccessorType, FunctionType, T, U &gt;::setup()</a>.</p>
 
 </div>
 </div>
@@ -626,6 +643,28 @@ Public Member Functions</h2></td></tr>
 
 <p>Calculates the number of cells for each block. </p>
 <dl class="section return"><dt>Returns</dt><dd>The <a class="el" href="classarm__compute_1_1_size2_d.xhtml" title="Class for specifying the size of an image or rectangle. ">Size2D</a> data object which stores the number of cells along the x and y directions </dd></dl>
+
+<p>Referenced by <a class="el" href="reference_2_h_o_g_descriptor_8cpp_source.xhtml#l00173">arm_compute::test::validation::reference::hog_block_normalization()</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a932db6ec1490ede3ff23e8c0ce80865c"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> num_cells_per_block_stride </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculates the number of cells per block stride. </p>
+<dl class="section return"><dt>Returns</dt><dd>The <a class="el" href="classarm__compute_1_1_size2_d.xhtml" title="Class for specifying the size of an image or rectangle. ">Size2D</a> data object which stores the number of cells per block stride along the x and y directions </dd></dl>
+
+<p>Referenced by <a class="el" href="reference_2_h_o_g_descriptor_8cpp_source.xhtml#l00173">arm_compute::test::validation::reference::hog_block_normalization()</a>.</p>
 
 </div>
 </div>
@@ -697,6 +736,8 @@ Public Member Functions</h2></td></tr>
 <p>The type of <a class="el" href="namespacearm__compute.xhtml#af00a42ecad444bbda75cde1b64bd7e72">PhaseType</a>. </p>
 <dl class="section return"><dt>Returns</dt><dd>The type of <a class="el" href="namespacearm__compute.xhtml#af00a42ecad444bbda75cde1b64bd7e72">PhaseType</a> </dd></dl>
 
+<p>Referenced by <a class="el" href="reference_2_h_o_g_descriptor_8cpp_source.xhtml#l00233">arm_compute::test::validation::reference::hog_descriptor()</a>, <a class="el" href="_type_printer_8h_source.xhtml#l00905">arm_compute::operator&lt;&lt;()</a>, and <a class="el" href="_h_o_g_descriptor_fixture_8h_source.xhtml#l00048">HOGDescriptorValidationFixture&lt; TensorType, HOGType, AccessorType, FunctionType, T, U &gt;::setup()</a>.</p>
+
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
@@ -708,7 +749,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_h_o_g_info.xhtml">HOGInfo</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:36 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:45 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

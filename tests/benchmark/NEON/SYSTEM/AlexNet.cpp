@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,9 +46,9 @@ namespace test
 namespace
 {
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-const auto alex_net_data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32, DataType::QS8 });
+const auto alex_net_data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32 });
 #else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-const auto alex_net_data_types = framework::dataset::make("DataType", { DataType::F32, DataType::QS8 });
+const auto alex_net_data_types = framework::dataset::make("DataType", { DataType::F32 });
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace
 
@@ -69,7 +69,7 @@ TEST_SUITE(SYSTEM_TEST)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNet, NEAlexNetFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(alex_net_data_types,
-                                                            framework::dataset::make("Batches", { 1, 4, 8 })));
+                                                            framework::dataset::make("Batches", { 1, 2, 4 })));
 
 TEST_SUITE_END()
 TEST_SUITE_END()

@@ -68,6 +68,19 @@ public:
      * @param[in]      b_offset       Offset to be added to each element of the matrix B.
      */
     void configure(ICLTensor *mm_result, const ICLTensor *vector_sum_col, const ICLTensor *vector_sum_row, int32_t k, int32_t a_offset, int32_t b_offset);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMLowpOffsetContributionKernel
+     *
+     * @param[in] mm_result      Input tensor containing the result of @ref CLGEMMLowpOffsetContributionKernel. Data type supported: S32
+     * @param[in] vector_sum_col Input row-vector of sums of all the entries in each column of matrix B.
+     *                           Note: vector_sum_col can be a nullptr in case a_offset = 0. Data type supported: same as @p mm_result
+     * @param[in] vector_sum_row Input row-vector of sums of all the entries in each row of matrix A.
+     *                           Note: vector_sum_row can be a nullptr in case b_offset = 0. Data type supported: same as @p mm_result
+     * @param[in] a_offset       Offset to be added to each element of the matrix A.
+     * @param[in] b_offset       Offset to be added to each element of the matrix B.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row, int32_t a_offset, int32_t b_offset);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

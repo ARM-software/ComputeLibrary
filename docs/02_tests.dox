@@ -18,6 +18,10 @@ different inputs, e.g. different tensor shapes. One limitation is that
 tests/fixtures cannot be parameterized based on the data type if static type
 information is needed within the test (e.g. to validate the results).
 
+@note By default tests are not built. To enable them you need to add validation_tests=1 and / or benchmark_tests=1 to your SCons line.
+
+@note Tests are not included in the pre-built binary archive, you have to build them from sources.
+
 @subsection tests_overview_structure Directory structure
 
     .
@@ -311,7 +315,9 @@ where `./data` contains the assets needed by the tests.
 If only a subset of the tests has to be executed the `--filter` option takes a
 regular expression to select matching tests.
 
-    ./arm_compute_benchmark --filter='NEON/.*AlexNet' ./data
+    ./arm_compute_benchmark --filter='^NEON/.*AlexNet' ./data
+
+@note Filtering will be much faster if the regular expression starts from the start ("^") or end ("$") of the line.
 
 Additionally each test has a test id which can be used as a filter, too.
 However, the test id is not guaranteed to be stable when new tests are added.
@@ -348,12 +354,29 @@ You can use the `--instruments` option to select one or more instruments to meas
 
 `MALI` will try to collect Mali hardware performance counters. (You need to have a recent enough Mali driver)
 
-`WALL_CLOCK` will measure time using `gettimeofday`: this should work on all platforms.
+`WALL_CLOCK_TIMER` will measure time using `gettimeofday`: this should work on all platforms.
 
-You can pass a combinations of these instruments: `--instruments=PMU,MALI,WALL_CLOCK`
+You can pass a combinations of these instruments: `--instruments=PMU,MALI,WALL_CLOCK_TIMER`
 
 @note You need to make sure the instruments have been selected at compile time using the `pmu=1` or `mali=1` scons options.
 
+@subsubsection tests_running_examples Examples
+
+To run all the precommit validation tests:
+
+	LD_LIBRARY_PATH=. ./arm_compute_validation --mode=precommit
+
+To run the OpenCL precommit validation tests:
+
+	LD_LIBRARY_PATH=. ./arm_compute_validation --mode=precommit --filter="^CL.*"
+
+To run the NEON precommit benchmark tests with PMU and Wall Clock timer in miliseconds instruments enabled:
+
+	LD_LIBRARY_PATH=. ./arm_compute_benchmark --mode=precommit --filter="^NEON.*" --instruments="pmu,wall_clock_timer_ms" --iterations=10
+
+To run the OpenCL precommit benchmark tests with OpenCL kernel timers in miliseconds enabled:
+
+	LD_LIBRARY_PATH=. ./arm_compute_benchmark --mode=precommit --filter="^CL.*" --instruments="opencl_timer_ms" --iterations=10
 */
 } // namespace test
 } // namespace arm_compute

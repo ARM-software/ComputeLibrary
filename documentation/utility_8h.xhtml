@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -142,6 +142,26 @@ Functions</h2></td></tr>
 <tr class="memitem:ab7c665e19081aef1a68ec0090b4c7be6"><td class="memTemplParams" colspan="2">template&lt;std::size_t N, typename Iterator &gt; </td></tr>
 <tr class="memitem:ab7c665e19081aef1a68ec0090b4c7be6"><td class="memTemplItemLeft" align="right" valign="top">std::array&lt; typename std::iterator_traits&lt; Iterator &gt;::value_type, N &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1utility.xhtml#ab7c665e19081aef1a68ec0090b4c7be6">make_array</a> (Iterator first, Iterator last)</td></tr>
 <tr class="separator:ab7c665e19081aef1a68ec0090b4c7be6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12c3c62f510452805c289e180ec78bb7"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a12c3c62f510452805c289e180ec78bb7"><td class="memTemplItemLeft" align="right" valign="top">T&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1utility.xhtml#a12c3c62f510452805c289e180ec78bb7">clamp</a> (const T &amp;n, const T &amp;lower, const T &amp;upper)</td></tr>
+<tr class="memdesc:a12c3c62f510452805c289e180ec78bb7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs clamping among a lower and upper value.  <a href="namespacearm__compute_1_1utility.xhtml#a12c3c62f510452805c289e180ec78bb7">More...</a><br /></td></tr>
+<tr class="separator:a12c3c62f510452805c289e180ec78bb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a067ebd28103d827b6ec17032e2344064"><td class="memTemplParams" colspan="2">template&lt;typename F &gt; </td></tr>
+<tr class="memitem:a067ebd28103d827b6ec17032e2344064"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1utility.xhtml#a067ebd28103d827b6ec17032e2344064">for_each</a> (F &amp;&amp;)</td></tr>
+<tr class="memdesc:a067ebd28103d827b6ec17032e2344064"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base case of for_each.  <a href="namespacearm__compute_1_1utility.xhtml#a067ebd28103d827b6ec17032e2344064">More...</a><br /></td></tr>
+<tr class="separator:a067ebd28103d827b6ec17032e2344064"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9abd222389b46fd918cd07673c1d836d"><td class="memTemplParams" colspan="2">template&lt;typename F , typename T , typename... Ts&gt; </td></tr>
+<tr class="memitem:a9abd222389b46fd918cd07673c1d836d"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1utility.xhtml#a9abd222389b46fd918cd07673c1d836d">for_each</a> (F &amp;&amp;func, T &amp;&amp;arg, Ts &amp;&amp;...args)</td></tr>
+<tr class="memdesc:a9abd222389b46fd918cd07673c1d836d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Call the function for each of the arguments.  <a href="namespacearm__compute_1_1utility.xhtml#a9abd222389b46fd918cd07673c1d836d">More...</a><br /></td></tr>
+<tr class="separator:a9abd222389b46fd918cd07673c1d836d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a043270c1f50c73bf9f91fcc4570ccf0c"><td class="memTemplParams" colspan="2">template&lt;typename F , typename T &gt; </td></tr>
+<tr class="memitem:a043270c1f50c73bf9f91fcc4570ccf0c"><td class="memTemplItemLeft" align="right" valign="top">T &amp;&amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1utility.xhtml#a043270c1f50c73bf9f91fcc4570ccf0c">foldl</a> (F &amp;&amp;, T &amp;&amp;<a class="el" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>)</td></tr>
+<tr class="memdesc:a043270c1f50c73bf9f91fcc4570ccf0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Base case of foldl.  <a href="namespacearm__compute_1_1utility.xhtml#a043270c1f50c73bf9f91fcc4570ccf0c">More...</a><br /></td></tr>
+<tr class="separator:a043270c1f50c73bf9f91fcc4570ccf0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af9092f01a5deb8985e310f346ea81774"><td class="memTemplParams" colspan="2">template&lt;typename F , typename T , typename U , typename... Us&gt; </td></tr>
+<tr class="memitem:af9092f01a5deb8985e310f346ea81774"><td class="memTemplItemLeft" align="right" valign="top">auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1utility.xhtml#af9092f01a5deb8985e310f346ea81774">foldl</a> (F &amp;&amp;func, T &amp;&amp;initial, U &amp;&amp;<a class="el" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>, Us &amp;&amp;...values) -&gt; decltype(func(std::forward&lt; T &gt;(initial), std::forward&lt; U &gt;(<a class="el" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>)))</td></tr>
+<tr class="memdesc:af9092f01a5deb8985e310f346ea81774"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fold left.  <a href="namespacearm__compute_1_1utility.xhtml#af9092f01a5deb8985e310f346ea81774">More...</a><br /></td></tr>
+<tr class="separator:af9092f01a5deb8985e310f346ea81774"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -149,7 +169,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_7b0825b7536eda12b63e5d87347b1c7d.xhtml">utils</a></li><li class="navelem"><a class="el" href="dir_cab437ca4f6ec1fbc573ae83f91b2654.xhtml">misc</a></li><li class="navelem"><a class="el" href="utility_8h.xhtml">utility.h</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:33 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:42 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

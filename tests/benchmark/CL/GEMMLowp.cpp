@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/benchmark/fixtures/GEMMLowpFixture.h"
+#include "tests/datasets/AlexNetGEMMDataset.h"
 #include "tests/datasets/GoogleNetGEMMDataset.h"
 #include "tests/datasets/MatrixMultiplyGEMMDataset.h"
 #include "tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1GEMMDataset.h"
@@ -46,6 +47,7 @@ TEST_SUITE(CL)
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1GEMMLowp, CLGEMMLowpFixture, framework::DatasetMode::ALL, datasets::GoogLeNetInceptionV1GEMMDataset());
 REGISTER_FIXTURE_DATA_TEST_CASE(MatrixMultiplyGEMMLowp, CLGEMMLowpFixture, framework::DatasetMode::ALL, datasets::MatrixMultiplyGEMMDataset());
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogleNetGEMMLowp, CLGEMMLowpFixture, framework::DatasetMode::NIGHTLY, datasets::GoogleNetGEMMDataset());
+REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetGEMMLowp, CLGEMMLowpFixture, framework::DatasetMode::NIGHTLY, datasets::AlexNetGEMMDataset());
 
 TEST_SUITE_END()
 } // namespace test

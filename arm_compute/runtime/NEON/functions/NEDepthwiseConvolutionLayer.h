@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,7 +28,7 @@
 #include "arm_compute/core/NEON/kernels/NEDepthwiseIm2ColKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDepthwiseVectorToTensorKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDepthwiseWeightsReshapeKernel.h"
-#include "arm_compute/core/NEON/kernels/NEDirectConvolutionLayerBiasAccumulateKernel.h"
+#include "arm_compute/core/NEON/kernels/NEDirectConvolutionLayerOutputStageKernel.h"
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMMatrixVectorMultiplyKernel.h"
 #include "arm_compute/core/Types.h"
@@ -54,7 +54,7 @@ public:
     NEDepthwiseConvolutionLayer3x3();
     /** Initialize the function's source, destination, kernels and border_size.
      *
-     * @param[in, out] input     Source tensor. Data type supported: F32. (Written to only for border filling).
+     * @param[in, out] input     Source tensor. Data type supported: QASYMM8, F32. (Written to only for border filling).
      * @param[in]      weights   Weights tensor. These are 3D tensors with shape [3, 3, IFM]. Data type supported: Same as @p input.
      * @param[in]      biases    (Optional) Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
      *                           Data type supported: Same as @p input.
@@ -67,10 +67,12 @@ public:
     void run() override;
 
 private:
-    NEDepthwiseConvolutionLayer3x3Kernel         _kernel;
-    NEDirectConvolutionLayerBiasAccumulateKernel _bias_kernel;
-    NEFillBorderKernel                           _border_handler;
-    bool                                         _has_bias;
+    NEDepthwiseConvolutionLayer3x3Kernel      _kernel;
+    NEDirectConvolutionLayerOutputStageKernel _output_stage_kernel;
+    NEFillBorderKernel                        _border_handler;
+    Tensor                                    _accumulator;
+    bool                                      _has_bias;
+    bool                                      _is_quantized;
 };
 
 /** Basic function to execute a generic depthwise convolution. This function calls the following NEON kernels:

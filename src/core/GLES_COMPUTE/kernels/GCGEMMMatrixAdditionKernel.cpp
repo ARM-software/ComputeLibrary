@@ -34,6 +34,7 @@
 #include "arm_compute/core/Window.h"
 
 using namespace arm_compute;
+using namespace arm_compute::gles_compute;
 
 GCGEMMMatrixAdditionKernel::GCGEMMMatrixAdditionKernel()
     : _input(nullptr), _output(nullptr)

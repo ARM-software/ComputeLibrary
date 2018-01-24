@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -132,6 +132,7 @@ $(document).ready(function(){initNavTree('benchmark_2_n_e_o_n_2_activation_layer
 <code>#include &quot;<a class="el" href="_goog_le_net_inception_v1_activation_layer_dataset_8h_source.xhtml">tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1ActivationLayerDataset.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_goog_le_net_inception_v4_activation_layer_dataset_8h_source.xhtml">tests/datasets/system_tests/googlenet/inceptionv4/GoogLeNetInceptionV4ActivationLayerDataset.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_le_net5_activation_layer_dataset_8h_source.xhtml">tests/datasets/system_tests/lenet5/LeNet5ActivationLayerDataset.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_mobile_net_activation_layer_dataset_8h_source.xhtml">tests/datasets/system_tests/mobilenet/MobileNetActivationLayerDataset.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_squeeze_net_activation_layer_dataset_8h_source.xhtml">tests/datasets/system_tests/squeezenet/SqueezeNetActivationLayerDataset.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_v_g_g16_activation_layer_dataset_8h_source.xhtml">tests/datasets/system_tests/vgg/vgg16/VGG16ActivationLayerDataset.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_y_o_l_o_v2_activation_layer_dataset_8h_source.xhtml">tests/datasets/system_tests/yolo/v2/YOLOV2ActivationLayerDataset.h</a>&quot;</code><br />
@@ -160,6 +161,8 @@ Functions</h2></td></tr>
 <tr class="separator:abfd4fd028574ac46a9d056e7a1ead6f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a70381b263268259b4b6fbff88a0526c4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a70381b263268259b4b6fbff88a0526c4">REGISTER_FIXTURE_DATA_TEST_CASE</a> (LeNet5ActivationLayer, NEActivationLayerFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(datasets::LeNet5ActivationLayerDataset(), data_types), framework::dataset::make(&quot;Batches&quot;, 1)))</td></tr>
 <tr class="separator:a70381b263268259b4b6fbff88a0526c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d05eab966b092d2537006605147eeb6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a6d05eab966b092d2537006605147eeb6">REGISTER_FIXTURE_DATA_TEST_CASE</a> (MobileNetActivationLayer, NEActivationLayerFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(datasets::MobileNetActivationLayerDataset(), data_types_mobilenet), framework::dataset::make(&quot;Batches&quot;, 1)))</td></tr>
+<tr class="separator:a6d05eab966b092d2537006605147eeb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:add697a0c19a1638874c37d5d15fc2d83"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#add697a0c19a1638874c37d5d15fc2d83">REGISTER_FIXTURE_DATA_TEST_CASE</a> (GoogLeNetInceptionV1ActivationLayer, NEActivationLayerFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1ActivationLayerDataset(), data_types), framework::dataset::make(&quot;Batches&quot;, 1)))</td></tr>
 <tr class="separator:add697a0c19a1638874c37d5d15fc2d83"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a117bc733390c845f7493e6dad0b75191"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a117bc733390c845f7493e6dad0b75191">REGISTER_FIXTURE_DATA_TEST_CASE</a> (GoogLeNetInceptionV4ActivationLayer, NEActivationLayerFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4ActivationLayerDataset(), data_types), framework::dataset::make(&quot;Batches&quot;, 1)))</td></tr>
@@ -174,6 +177,8 @@ Functions</h2></td></tr>
 <tr class="separator:a7677396611ac11166c6f7344f9e0ef12"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1afabd3008ddf541288b01fe746ab284"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a1afabd3008ddf541288b01fe746ab284">REGISTER_FIXTURE_DATA_TEST_CASE</a> (LeNet5ActivationLayer, NEActivationLayerFixture, framework::DatasetMode::NIGHTLY, framework::dataset::combine(framework::dataset::combine(datasets::LeNet5ActivationLayerDataset(), data_types), framework::dataset::make(&quot;Batches&quot;,{4, 8})))</td></tr>
 <tr class="separator:a1afabd3008ddf541288b01fe746ab284"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a206d3b77bed8d6966cd97aff7627fed5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a206d3b77bed8d6966cd97aff7627fed5">REGISTER_FIXTURE_DATA_TEST_CASE</a> (MobileNetActivationLayer, NEActivationLayerFixture, framework::DatasetMode::NIGHTLY, framework::dataset::combine(framework::dataset::combine(datasets::MobileNetActivationLayerDataset(), data_types_mobilenet), framework::dataset::make(&quot;Batches&quot;,{4, 8})))</td></tr>
+<tr class="separator:a206d3b77bed8d6966cd97aff7627fed5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a164c7e1e8e2e4de0ce6282d2b0835dd0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a164c7e1e8e2e4de0ce6282d2b0835dd0">REGISTER_FIXTURE_DATA_TEST_CASE</a> (GoogLeNetInceptionV1ActivationLayer, NEActivationLayerFixture, framework::DatasetMode::NIGHTLY, framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1ActivationLayerDataset(), data_types), framework::dataset::make(&quot;Batches&quot;,{4, 8})))</td></tr>
 <tr class="separator:a164c7e1e8e2e4de0ce6282d2b0835dd0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6ada452bc1053385b8574f38d341ffc9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a6ada452bc1053385b8574f38d341ffc9">REGISTER_FIXTURE_DATA_TEST_CASE</a> (GoogLeNetInceptionV4ActivationLayer, NEActivationLayerFixture, framework::DatasetMode::NIGHTLY, framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4ActivationLayerDataset(), data_types), framework::dataset::make(&quot;Batches&quot;,{4, 8})))</td></tr>
@@ -191,7 +196,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_4f2df8950dc650bf7cf9176fae02facc.xhtml">benchmark</a></li><li class="navelem"><a class="el" href="dir_ec05701f68bea22653d08da5856c9ffc.xhtml">NEON</a></li><li class="navelem"><a class="el" href="benchmark_2_n_e_o_n_2_activation_layer_8cpp.xhtml">ActivationLayer.cpp</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:34 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:43 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

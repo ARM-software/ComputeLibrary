@@ -23,8 +23,8 @@
  */
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCPoolingLayer.h"
 
+#include "arm_compute/core/GLES_COMPUTE/IGCTensor.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCPoolingLayerKernel.h"
-#include "arm_compute/core/PixelValue.h"
 #include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
@@ -39,4 +39,9 @@ void GCPoolingLayer::configure(IGCTensor *input, IGCTensor *output, const Poolin
     // Configure border depending on operation required
     BorderMode border_mode = (PoolingType::MAX == pool_info.pool_type()) ? BorderMode::REPLICATE : BorderMode::CONSTANT;
     _border_handler.configure(input, _kernel->border_size(), border_mode, PixelValue(0.0f));
+}
+
+Status GCPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
+{
+    return GCPoolingLayerKernel::validate(input, output, pool_info);
 }

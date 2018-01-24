@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -253,72 +253,6 @@ inline uint8_t pixel_bilinear_c1_clamp(const T *first_pixel_ptr, size_t stride, 
  */
 inline uint8_t pixel_area_c1u8_clamp(const uint8_t *first_pixel_ptr, size_t stride, size_t width, size_t height, float wr, float hr, int x, int y);
 
-/** Performs clamping among a lower and upper value.
- *
- * @param[in] n     Value to clamp.
- * @param[in] lower Lower threshold.
- * @param[in] upper Upper threshold.
- *
- *  @return Clamped value.
- */
-template <typename T>
-inline T clamp(const T &n, const T &lower, const T &upper)
-{
-    return std::max(lower, std::min(n, upper));
-}
-
-/** Base case of for_each. Does nothing. */
-template <typename F>
-inline void for_each(F &&)
-{
-}
-
-/** Call the function for each of the arguments
- *
- * @param[in] func Function to be called
- * @param[in] arg  Argument passed to the function
- * @param[in] args Remaining arguments
- */
-template <typename F, typename T, typename... Ts>
-inline void for_each(F &&func, T &&arg, Ts &&... args)
-{
-    func(arg);
-    for_each(func, args...);
-}
-
-/** Base case of foldl.
- *
- * @return value.
- */
-template <typename F, typename T>
-inline T foldl(F &&, const T &value)
-{
-    return value;
-}
-
-/** Base case of foldl.
- *
- * @return Function evaluation for value1 and value2
- */
-template <typename F, typename T, typename U>
-inline auto foldl(F &&func, T &&value1, U &&value2) -> decltype(func(value1, value2))
-{
-    return func(value1, value2);
-}
-
-/** Fold left.
- *
- * @param[in] func    Function to be called
- * @param[in] initial Initial value
- * @param[in] value   Argument passed to the function
- * @param[in] values  Remaining arguments
- */
-template <typename F, typename I, typename T, typename... Vs>
-inline I foldl(F &&func, I &&initial, T &&value, Vs &&... values)
-{
-    return foldl(std::forward<F>(func), func(std::forward<I>(initial), std::forward<T>(value)), std::forward<Vs>(values)...);
-}
-
 /** Iterator updated by @ref execute_window_loop for each window element */
 class Iterator
 {
@@ -408,7 +342,7 @@ bool update_window_and_padding(Window &win, Ts &&... patterns)
 {
     bool window_changed = false;
 
-    for_each([&](const IAccessWindow & w)
+    utility::for_each([&](const IAccessWindow & w)
     {
         window_changed |= w.update_window_if_needed(win);
     },
@@ -416,7 +350,7 @@ bool update_window_and_padding(Window &win, Ts &&... patterns)
 
     bool padding_changed = false;
 
-    for_each([&](const IAccessWindow & w)
+    utility::for_each([&](const IAccessWindow & w)
     {
         padding_changed |= w.update_padding_if_needed(win);
     },
@@ -427,6 +361,17 @@ bool update_window_and_padding(Window &win, Ts &&... patterns)
 
 /** Calculate the maximum window for a given tensor shape and border setting
  *
+ * @param[in] valid_region Valid region object defining the shape of the tensor space for which the window is created.
+ * @param[in] steps        (Optional) Number of elements processed for each step.
+ * @param[in] skip_border  (Optional) If true exclude the border region from the window.
+ * @param[in] border_size  (Optional) Border size.
+ *
+ * @return The maximum window the kernel can be executed on.
+ */
+Window calculate_max_window(const ValidRegion &valid_region, const Steps &steps = Steps(), bool skip_border = false, BorderSize border_size = BorderSize());
+
+/** Calculate the maximum window for a given tensor shape and border setting
+ *
  * @param[in] info        Tensor info object defining the shape of the object for which the window is created.
  * @param[in] steps       (Optional) Number of elements processed for each step.
  * @param[in] skip_border (Optional) If true exclude the border region from the window.
@@ -434,18 +379,45 @@ bool update_window_and_padding(Window &win, Ts &&... patterns)
  *
  * @return The maximum window the kernel can be executed on.
  */
-Window calculate_max_window(const ITensorInfo &info, const Steps &steps = Steps(), bool skip_border = false, BorderSize border_size = BorderSize());
+inline Window calculate_max_window(const ITensorInfo &info, const Steps &steps = Steps(), bool skip_border = false, BorderSize border_size = BorderSize())
+{
+    return calculate_max_window(info.valid_region(), steps, skip_border, border_size);
+}
+
+/** Calculate the maximum window used by a horizontal kernel for a given tensor shape and border setting
+ *
+ * @param[in] valid_region Valid region object defining the shape of the tensor space for which the window is created.
+ * @param[in] steps        (Optional) Number of elements processed for each step.
+ * @param[in] skip_border  (Optional) If true exclude the border region from the window.
+ * @param[in] border_size  (Optional) Border size. The border region will be excluded from the window.
+ *
+ * @return The maximum window the kernel can be executed on.
+ */
+Window calculate_max_window_horizontal(const ValidRegion &valid_region, const Steps &steps = Steps(), bool skip_border = false, BorderSize border_size = BorderSize());
 
 /** Calculate the maximum window used by a horizontal kernel for a given tensor shape and border setting
  *
  * @param[in] info        Tensor info object defining the shape of the object for which the window is created.
  * @param[in] steps       (Optional) Number of elements processed for each step.
  * @param[in] skip_border (Optional) If true exclude the border region from the window.
- * @param[in] border_size (Optional) Border size. The border region will be excluded from the window.
+ * @param[in] border_size (Optional) Border size.
  *
  * @return The maximum window the kernel can be executed on.
  */
-Window calculate_max_window_horizontal(const ITensorInfo &info, const Steps &steps = Steps(), bool skip_border = false, BorderSize border_size = BorderSize());
+inline Window calculate_max_window_horizontal(const ITensorInfo &info, const Steps &steps = Steps(), bool skip_border = false, BorderSize border_size = BorderSize())
+{
+    return calculate_max_window_horizontal(info.valid_region(), steps, skip_border, border_size);
+}
+
+/** Calculate the maximum window for a given tensor shape and border setting. The window will also includes the border.
+ *
+ * @param[in] valid_region Valid region object defining the shape of the tensor space for which the window is created.
+ * @param[in] steps        (Optional) Number of elements processed for each step.
+ * @param[in] border_size  (Optional) Border size. The border region will be included in the window.
+ *
+ * @return The maximum window the kernel can be executed on.
+ */
+Window calculate_max_enlarged_window(const ValidRegion &valid_region, const Steps &steps = Steps(), BorderSize border_size = BorderSize());
 
 /** Calculate the maximum window for a given tensor shape and border setting. The window will also includes the border.
  *
@@ -455,7 +427,10 @@ Window calculate_max_window_horizontal(const ITensorInfo &info, const Steps &ste
  *
  * @return The maximum window the kernel can be executed on.
  */
-Window calculate_max_enlarged_window(const ITensorInfo &info, const Steps &steps = Steps(), BorderSize border_size = BorderSize());
+inline Window calculate_max_enlarged_window(const ITensorInfo &info, const Steps &steps = Steps(), BorderSize border_size = BorderSize())
+{
+    return calculate_max_enlarged_window(info.valid_region(), steps, border_size);
+}
 
 /** Intersect multiple valid regions.
  *
@@ -464,7 +439,7 @@ Window calculate_max_enlarged_window(const ITensorInfo &info, const Steps &steps
  * @return Intersection of all regions.
  */
 template <typename... Ts>
-ValidRegion intersect_valid_regions(Ts &&... regions)
+ValidRegion intersect_valid_regions(const Ts &... regions)
 {
     auto intersect = [](const ValidRegion & r1, const ValidRegion & r2) -> ValidRegion
     {
@@ -483,7 +458,7 @@ ValidRegion intersect_valid_regions(Ts &&... regions)
         return region;
     };
 
-    return foldl(intersect, std::forward<Ts>(regions)...);
+    return utility::foldl(intersect, regions...);
 }
 
 /** Create a strides object based on the provided strides and the tensor dimensions.

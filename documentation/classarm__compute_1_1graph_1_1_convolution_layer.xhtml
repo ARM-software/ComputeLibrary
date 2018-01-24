@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -135,10 +135,10 @@ Collaboration diagram for ConvolutionLayer:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a9bf6dd334d26f10ded77eba9408fac67"><td class="memTemplParams" colspan="2">template&lt;typename AccessorTypeWeights , typename AccessorTypeBiases &gt; </td></tr>
-<tr class="memitem:a9bf6dd334d26f10ded77eba9408fac67"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_convolution_layer.xhtml#a9bf6dd334d26f10ded77eba9408fac67">ConvolutionLayer</a> (unsigned int conv_width, unsigned int conv_height, unsigned int ofm, AccessorTypeWeights &amp;&amp;weights, AccessorTypeBiases &amp;&amp;biases, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> conv_info, unsigned int num_groups=1, const <a class="el" href="classarm__compute_1_1_weights_info.xhtml">WeightsInfo</a> weights_info=<a class="el" href="classarm__compute_1_1_weights_info.xhtml">WeightsInfo</a>())</td></tr>
-<tr class="memdesc:a9bf6dd334d26f10ded77eba9408fac67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default Constructor.  <a href="#a9bf6dd334d26f10ded77eba9408fac67">More...</a><br /></td></tr>
-<tr class="separator:a9bf6dd334d26f10ded77eba9408fac67"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae2772dd2e626fe02e7d2dd75949c5ec2"><td class="memTemplParams" colspan="2">template&lt;typename AccessorTypeWeights , typename AccessorTypeBiases &gt; </td></tr>
+<tr class="memitem:ae2772dd2e626fe02e7d2dd75949c5ec2"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_convolution_layer.xhtml#ae2772dd2e626fe02e7d2dd75949c5ec2">ConvolutionLayer</a> (unsigned int conv_width, unsigned int conv_height, unsigned int ofm, AccessorTypeWeights &amp;&amp;weights, AccessorTypeBiases &amp;&amp;biases, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> conv_info, unsigned int num_groups=1, const <a class="el" href="classarm__compute_1_1_weights_info.xhtml">WeightsInfo</a> weights_info=<a class="el" href="classarm__compute_1_1_weights_info.xhtml">WeightsInfo</a>(), const <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a> weights_quant_info=<a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>(), const <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a> out_quant_info=<a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>())</td></tr>
+<tr class="memdesc:ae2772dd2e626fe02e7d2dd75949c5ec2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default Constructor.  <a href="#ae2772dd2e626fe02e7d2dd75949c5ec2">More...</a><br /></td></tr>
+<tr class="separator:ae2772dd2e626fe02e7d2dd75949c5ec2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aefee70b3377d4ece56de05e1dff00dd8"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classarm__compute_1_1_i_function.xhtml">arm_compute::IFunction</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_convolution_layer.xhtml#aefee70b3377d4ece56de05e1dff00dd8">instantiate_node</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph_context.xhtml">GraphContext</a> &amp;ctx, <a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_object.xhtml">ITensorObject</a> *input, <a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_object.xhtml">ITensorObject</a> *output) override</td></tr>
 <tr class="memdesc:aefee70b3377d4ece56de05e1dff00dd8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface to be implemented that instantiates the node.  <a href="#aefee70b3377d4ece56de05e1dff00dd8">More...</a><br /></td></tr>
 <tr class="separator:aefee70b3377d4ece56de05e1dff00dd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -155,7 +155,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="arm__compute_2graph_2nodes_2_convolution_layer_8h_source.xhtml#l00042">42</a> of file <a class="el" href="arm__compute_2graph_2nodes_2_convolution_layer_8h_source.xhtml">ConvolutionLayer.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a9bf6dd334d26f10ded77eba9408fac67"></a>
+<a class="anchor" id="ae2772dd2e626fe02e7d2dd75949c5ec2"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -208,7 +208,19 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="classarm__compute_1_1_weights_info.xhtml">WeightsInfo</a>&#160;</td>
-          <td class="paramname"><em>weights_info</em> = <code><a class="el" href="classarm__compute_1_1_weights_info.xhtml">WeightsInfo</a>()</code>&#160;</td>
+          <td class="paramname"><em>weights_info</em> = <code><a class="el" href="classarm__compute_1_1_weights_info.xhtml">WeightsInfo</a>()</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>&#160;</td>
+          <td class="paramname"><em>weights_quant_info</em> = <code><a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>()</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>&#160;</td>
+          <td class="paramname"><em>out_quant_info</em> = <code><a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>()</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -234,14 +246,16 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">conv_info</td><td>Convolution information </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">num_groups</td><td>(Optional) Number of groups, default = 1 </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">weights_info</td><td>(Optional) Weights information </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">weights_quant_info</td><td>(Optional) Weights quantization information </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">out_quant_info</td><td>(Optional) Output quantization info </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="arm__compute_2graph_2nodes_2_convolution_layer_8h_source.xhtml#l00057">57</a> of file <a class="el" href="arm__compute_2graph_2nodes_2_convolution_layer_8h_source.xhtml">ConvolutionLayer.h</a>.</p>
+<p>Definition at line <a class="el" href="arm__compute_2graph_2nodes_2_convolution_layer_8h_source.xhtml#l00059">59</a> of file <a class="el" href="arm__compute_2graph_2nodes_2_convolution_layer_8h_source.xhtml">ConvolutionLayer.h</a>.</p>
 
 <p>References <a class="el" href="classarm__compute_1_1graph_1_1_convolution_layer.xhtml#aefee70b3377d4ece56de05e1dff00dd8">ConvolutionLayer::instantiate_node()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        : _conv_width(conv_width),</div><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;          _conv_height(conv_height),</div><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;          _ofm(ofm),</div><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;          _weights(std::move(weights)),</div><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;          _biases(std::move(biases)),</div><div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;          _conv_info(std::move(conv_info)),</div><div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;          _num_groups(num_groups),</div><div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;          _weights_info(std::move(weights_info)),</div><div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;          _is(<span class="keyword">nullptr</span>),</div><div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;          _os(<span class="keyword">nullptr</span>),</div><div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;          _ws(<span class="keyword">nullptr</span>),</div><div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;          _bs(<span class="keyword">nullptr</span>)</div><div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    {</div><div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    }</div></div><!-- fragment -->
+<div class="fragment"><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        : _conv_width(conv_width),</div><div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;          _conv_height(conv_height),</div><div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;          _ofm(ofm),</div><div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;          _weights(std::move(weights)),</div><div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;          _biases(std::move(biases)),</div><div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;          _conv_info(std::move(conv_info)),</div><div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;          _num_groups(num_groups),</div><div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;          _weights_info(std::move(weights_info)),</div><div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;          _weights_quant_info(std::move(weights_quant_info)),</div><div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;          _out_quant_info(std::move(out_quant_info)),</div><div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;          _is(<span class="keyword">nullptr</span>),</div><div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;          _os(<span class="keyword">nullptr</span>),</div><div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;          _ws(<span class="keyword">nullptr</span>),</div><div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;          _bs(<span class="keyword">nullptr</span>)</div><div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    {</div><div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -295,7 +309,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#aff59544b2bab30c9a3ce1876515e48df">INode</a>.</p>
 
-<p>Referenced by <a class="el" href="arm__compute_2graph_2nodes_2_convolution_layer_8h_source.xhtml#l00057">ConvolutionLayer::ConvolutionLayer()</a>.</p>
+<p>Referenced by <a class="el" href="arm__compute_2graph_2nodes_2_convolution_layer_8h_source.xhtml#l00059">ConvolutionLayer::ConvolutionLayer()</a>.</p>
 
 </div>
 </div>
@@ -308,7 +322,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1_convolution_layer.xhtml">ConvolutionLayer</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:37 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:46 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -285,6 +285,14 @@ public:
      *
      */
     cl::NDRange default_ndrange() const;
+
+    /** Clear the library's cache of binary programs
+     */
+    void clear_programs_cache()
+    {
+        _programs_map.clear();
+        _built_programs_map.clear();
+    }
 
 private:
     /** Load program and its dependencies.

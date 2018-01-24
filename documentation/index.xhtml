@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -313,6 +313,40 @@ v17.04 (First release of April 2017)
 </pre><dl class="section note"><dt>Note</dt><dd>We're aiming at releasing one major public release with new features per quarter. All releases in between will only contain bug fixes.</dd></dl>
 <h2><a class="anchor" id="S2_2_changelog"></a>
 Changelog</h2>
+<p>v18.01 Public maintenance release</p><ul>
+<li>Various bug fixes</li>
+<li>Added some of the missing <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a6813132c943295888972727864ea5c2f">validate()</a> methods</li>
+<li>Added <a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel.xhtml">arm_compute::CLDeconvolutionLayerUpsampleKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer.xhtml">arm_compute::CLDeconvolutionLayer</a> <a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer_upsample.xhtml">arm_compute::CLDeconvolutionLayerUpsample</a></li>
+<li>Added <a class="el" href="classarm__compute_1_1_c_l_permute_kernel.xhtml">arm_compute::CLPermuteKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_permute.xhtml">arm_compute::CLPermute</a></li>
+<li>Added method to clean the programs cache in the CL Kernel library.</li>
+<li>Added <a class="el" href="classarm__compute_1_1_g_c_arithmetic_addition_kernel.xhtml">arm_compute::GCArithmeticAdditionKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_arithmetic_addition.xhtml">arm_compute::GCArithmeticAddition</a></li>
+<li>Added <a class="el" href="classarm__compute_1_1_g_c_depthwise_convolution_layer3x3_kernel.xhtml">arm_compute::GCDepthwiseConvolutionLayer3x3Kernel</a> / <a class="el" href="classarm__compute_1_1_g_c_depthwise_convolution_layer3x3.xhtml">arm_compute::GCDepthwiseConvolutionLayer3x3</a></li>
+<li>Added <a class="el" href="classarm__compute_1_1_g_c_normalize_planar_y_u_v_layer_kernel.xhtml">arm_compute::GCNormalizePlanarYUVLayerKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_normalize_planar_y_u_v_layer.xhtml">arm_compute::GCNormalizePlanarYUVLayer</a></li>
+<li>Added <a class="el" href="classarm__compute_1_1_g_c_scale_kernel.xhtml">arm_compute::GCScaleKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_scale.xhtml">arm_compute::GCScale</a></li>
+<li>Added <a class="el" href="classarm__compute_1_1_g_c_weights_reshape_kernel.xhtml">arm_compute::GCWeightsReshapeKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_convolution_layer.xhtml">arm_compute::GCConvolutionLayer</a></li>
+<li>Added FP16 support to the following GLES compute kernels:<ul>
+<li><a class="el" href="classarm__compute_1_1_g_c_col2_im_kernel.xhtml">arm_compute::GCCol2ImKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_interleave4x4_kernel.xhtml">arm_compute::GCGEMMInterleave4x4Kernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_transpose1x_w_kernel.xhtml">arm_compute::GCGEMMTranspose1xWKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_g_c_im2_col_kernel.xhtml">arm_compute::GCIm2ColKernel</a></li>
+</ul>
+</li>
+<li>Refactored NEON Winograd (<a class="el" href="classarm__compute_1_1_n_e_winograd_layer_kernel.xhtml">arm_compute::NEWinogradLayerKernel</a>)</li>
+<li>Added <a class="el" href="classarm__compute_1_1_n_e_direct_convolution_layer_output_stage_kernel.xhtml">arm_compute::NEDirectConvolutionLayerOutputStageKernel</a></li>
+<li>Added QASYMM8 support to the following NEON kernels:<ul>
+<li><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml">arm_compute::NEDepthwiseConvolutionLayer3x3Kernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_fill_border_kernel.xhtml">arm_compute::NEFillBorderKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_pooling_layer_kernel.xhtml">arm_compute::NEPoolingLayerKernel</a></li>
+</ul>
+</li>
+<li>Added new examples:<ul>
+<li><a class="el" href="graph__cl__mobilenet__qasymm8_8cpp.xhtml">graph_cl_mobilenet_qasymm8.cpp</a></li>
+<li><a class="el" href="graph__inception__v3_8cpp.xhtml">graph_inception_v3.cpp</a></li>
+<li><a class="el" href="gc__dc_8cpp.xhtml">gc_dc.cpp</a></li>
+</ul>
+</li>
+<li>More tests added to both validation and benchmarking suites.</li>
+</ul>
 <p>v17.12 Public major release</p><ul>
 <li>Most machine learning functions on OpenCL support the new data type QASYMM8</li>
 <li>Introduced logging interface</li>
@@ -595,8 +629,8 @@ gles_compute: Enable OpenGL ES Compute Shader support (yes|no)
     actual: False
 
 embed_kernels: Embed OpenCL kernels and OpenGL ES compute shader in library binary (yes|no)
-    default: False
-    actual: False
+    default: True
+    actual: True
 
 set_soname: Set the library's soname and shlibversion (requires SCons 2.4 or above) (yes|no)
     default: False
@@ -749,8 +783,11 @@ aarch64-linux-android-clang++ examples/neon_convolution.cpp utils/Utils.cpp -I. 
 arm-linux-androideabi-clang++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o cl_convolution_arm -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
 #64 bit:
 aarch64-linux-android-clang++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o cl_convolution_aarch64 -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
-</pre><p>To cross compile a GLES example: #32 bit: arm-linux-androideabi-clang++ <a class="el" href="gc__absdiff_8cpp.xhtml">examples/gc_absdiff.cpp</a> <a class="el" href="utils_2_utils_8cpp.xhtml">utils/Utils.cpp</a> -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o gc_absdiff_arm -static-libstdc++ -pie -DARM_COMPUTE_GC #64 bit: aarch64-linux-android-clang++ <a class="el" href="gc__absdiff_8cpp.xhtml">examples/gc_absdiff.cpp</a> <a class="el" href="utils_2_utils_8cpp.xhtml">utils/Utils.cpp</a> -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o gc_absdiff_aarch64 -static-libstdc++ -pie -DARM_COMPUTE_GC</p>
-<p>To cross compile the examples with the Graph API, such as <a class="el" href="graph__lenet_8cpp.xhtml">graph_lenet.cpp</a>, you need to link the library arm_compute_graph also. (notice the compute library has to be built with both neon and opencl enabled - neon=1 and opencl=1) </p><pre class="fragment">#32 bit:
+</pre><p>To cross compile a GLES example: </p><pre class="fragment">#32 bit:
+arm-linux-androideabi-clang++ examples/gc_absdiff.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o gc_absdiff_arm -static-libstdc++ -pie -DARM_COMPUTE_GC
+#64 bit:
+aarch64-linux-android-clang++ examples/gc_absdiff.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o gc_absdiff_aarch64 -static-libstdc++ -pie -DARM_COMPUTE_GC
+</pre><p>To cross compile the examples with the Graph API, such as <a class="el" href="graph__lenet_8cpp.xhtml">graph_lenet.cpp</a>, you need to link the library arm_compute_graph also. (notice the compute library has to be built with both neon and opencl enabled - neon=1 and opencl=1) </p><pre class="fragment">#32 bit:
 arm-linux-androideabi-clang++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 -Wl,--whole-archive -larm_compute_graph-static -Wl,--no-whole-archive -larm_compute-static -larm_compute_core-static -L. -o graph_lenet_arm -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
 #64 bit:
 aarch64-linux-android-clang++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 -Wl,--whole-archive -larm_compute_graph-static -Wl,--no-whole-archive -larm_compute-static -larm_compute_core-static -L. -o graph_lenet_aarch64 -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
@@ -826,7 +863,7 @@ aarch64-linux-gnu-gcc -o libGLESv2.so -Iinclude/linux opengles-3.1-stubs/GLESv2.
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:39 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:48 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -196,7 +196,7 @@ Static Public Member Functions</h2></td></tr>
 </p>
 <p>Following an example of how the transposition1xW works when the input data type is F16</p>
 <p class="formulaDsp">
-\[ \left( \begin{array}{cccccccc} a00 &amp; a01 &amp; a02 &amp; a03 &amp; a04 &amp; a05 &amp; a06 &amp; a7 \\ a10 &amp; a11 &amp; a12 &amp; a13 &amp; a14 &amp; a15 &amp; a16 &amp; 17 \\ a20 &amp; a21 &amp; a22 &amp; a23 &amp; a24 &amp; a25 &amp; a26 &amp; 27 \\ a30 &amp; a31 &amp; a32 &amp; a33 &amp; a34 &amp; a35 &amp; a36 &amp; 37 \\ \end{array} \right) \rightarrow \left( \begin{array}{cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc} a00 &amp; a01 &amp; a02 &amp; a03 &amp; a04 &amp; a05 &amp; a06 &amp; a07 &amp; a10 &amp; a11 &amp; a12 &amp; a13 &amp; a14 &amp; a15 &amp; a16 &amp; a17 &amp; a20 &amp; a21 &amp; a22 &amp; a23 &amp; a24 &amp; a25 &amp; a26 &amp; a27 &amp; a30 &amp; a31 &amp; a32 &amp; a33 &amp; a34 &amp; a35 &amp; a36 &amp; a37\\ \end{array} \right) \]
+\[ \left( \begin{array}{cccccccc} a00 &amp; a01 &amp; a02 &amp; a03 &amp; a04 &amp; a05 &amp; a06 &amp; a07 \\ a10 &amp; a11 &amp; a12 &amp; a13 &amp; a14 &amp; a15 &amp; a16 &amp; a17 \\ a20 &amp; a21 &amp; a22 &amp; a23 &amp; a24 &amp; a25 &amp; a26 &amp; a27 \\ a30 &amp; a31 &amp; a32 &amp; a33 &amp; a34 &amp; a35 &amp; a36 &amp; a37 \\ \end{array} \right) \rightarrow \left( \begin{array}{cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc} a00 &amp; a01 &amp; a02 &amp; a03 &amp; a04 &amp; a05 &amp; a06 &amp; a07 &amp; a10 &amp; a11 &amp; a12 &amp; a13 &amp; a14 &amp; a15 &amp; a16 &amp; a17 &amp; a20 &amp; a21 &amp; a22 &amp; a23 &amp; a24 &amp; a25 &amp; a26 &amp; a27 &amp; a30 &amp; a31 &amp; a32 &amp; a33 &amp; a34 &amp; a35 &amp; a36 &amp; a37\\ \end{array} \right) \]
 </p>
 <dl class="section note"><dt>Note</dt><dd>The output matrix will have the following shape: [ height * W, ceil(width / W) ], where W = (16 / element size of the tensor) </dd></dl>
 
@@ -339,7 +339,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w_kernel.xhtml">NEGEMMTranspose1xWKernel</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:36 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:46 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

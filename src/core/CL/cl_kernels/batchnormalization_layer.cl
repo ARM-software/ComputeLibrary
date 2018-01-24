@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -123,7 +123,7 @@ __kernel void batchnormalization_layer(TENSOR3D_DECLARATION(input),
     numerator = SUB_OP(data, numerator);
     x_bar     = MUL_OP(numerator, denominator);
 
-    gamma_vec = *((__global DATA_TYPE *)(gamma.ptr + current_slice * beta.stride_x));
+    gamma_vec = *((__global DATA_TYPE *)(gamma.ptr + current_slice * gamma.stride_x));
     beta_vec  = *((__global DATA_TYPE *)(beta.ptr + current_slice * beta.stride_x));
 
     VSTORE(VEC_SIZE)

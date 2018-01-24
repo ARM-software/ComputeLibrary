@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -116,7 +116,8 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_c_l_g_e_m_m_lowp
 
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a>  </div>
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a>  </div>
   <div class="headertitle">
 <div class="title">CLGEMMLowpOffsetContributionKernel Class Reference</div>  </div>
 </div><!--header-->
@@ -236,8 +237,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a3f5646133956f06348b310ccc3d36353 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">The maximum window the kernel can be executed on.  <a href="#a3f5646133956f06348b310ccc3d36353">More...</a><br /></td></tr>
 <tr class="separator:a3f5646133956f06348b310ccc3d36353 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
-Additional Inherited Members</h2></td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:a7817643d5836b21d4bc01aa3d3d9370e"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_offset_contribution_kernel.xhtml#a7817643d5836b21d4bc01aa3d3d9370e">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *mm_result, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *vector_sum_col, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *vector_sum_row, int32_t a_offset, int32_t b_offset)</td></tr>
+<tr class="memdesc:a7817643d5836b21d4bc01aa3d3d9370e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_offset_contribution_kernel.xhtml">CLGEMMLowpOffsetContributionKernel</a>.  <a href="#a7817643d5836b21d4bc01aa3d3d9370e">More...</a><br /></td></tr>
+<tr class="separator:a7817643d5836b21d4bc01aa3d3d9370e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td colspan="2" onclick="javascript:toggleInherit('pub_static_methods_classarm__compute_1_1_i_c_l_kernel')"><img src="closed.png" alt="-"/>&#160;Static Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml">ICLKernel</a></td></tr>
 <tr class="memitem:a4b4a20e518c04e657839280cd486a85d inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memItemLeft" align="right" valign="top">static cl::NDRange&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a4b4a20e518c04e657839280cd486a85d">gws_from_window</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;<a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>)</td></tr>
 <tr class="memdesc:a4b4a20e518c04e657839280cd486a85d inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the global work size given an execution window.  <a href="#a4b4a20e518c04e657839280cd486a85d">More...</a><br /></td></tr>
@@ -483,6 +487,71 @@ Additional Inherited Members</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a7817643d5836b21d4bc01aa3d3d9370e"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a> validate </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>mm_result</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>vector_sum_col</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>vector_sum_row</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>a_offset</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>b_offset</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_offset_contribution_kernel.xhtml">CLGEMMLowpOffsetContributionKernel</a>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">mm_result</td><td>Input tensor containing the result of <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_offset_contribution_kernel.xhtml">CLGEMMLowpOffsetContributionKernel</a>. Data type supported: S32 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">vector_sum_col</td><td>Input row-vector of sums of all the entries in each column of matrix B. Note: vector_sum_col can be a nullptr in case a_offset = 0. Data type supported: same as <code>mm_result</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">vector_sum_row</td><td>Input row-vector of sums of all the entries in each row of matrix A. Note: vector_sum_row can be a nullptr in case b_offset = 0. Data type supported: same as <code>mm_result</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">a_offset</td><td>Offset to be added to each element of the matrix A. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">b_offset</td><td>Offset to be added to each element of the matrix B.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>arm_compute/core/CL/kernels/<a class="el" href="_c_l_g_e_m_m_lowp_offset_contribution_kernel_8h_source.xhtml">CLGEMMLowpOffsetContributionKernel.h</a></li>
 </ul>
@@ -492,7 +561,7 @@ Additional Inherited Members</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_offset_contribution_kernel.xhtml">CLGEMMLowpOffsetContributionKernel</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:35 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:44 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,8 +63,9 @@ CLHarrisCorners::CLHarrisCorners(std::shared_ptr<IMemoryManager> memory_manager)
 
 void CLHarrisCorners::configure(ICLImage *input, float threshold, float min_dist,
                                 float sensitivity, int32_t gradient_size, int32_t block_size, ICLKeyPointArray *corners,
-                                BorderMode border_mode, uint8_t constant_border_value)
+                                BorderMode border_mode, uint8_t constant_border_value, bool use_fp16)
 {
+    ARM_COMPUTE_UNUSED(use_fp16);
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON(!(block_size == 3 || block_size == 5 || block_size == 7));

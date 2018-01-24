@@ -24,8 +24,8 @@ import os.path
 import re
 import subprocess
 
-VERSION = "v17.12"
-SONAME_VERSION="6.0.0"
+VERSION = "v18.01"
+SONAME_VERSION="7.0.0"
 
 Import('env')
 Import('vars')
@@ -175,6 +175,11 @@ if env['neon']:
     core_files += Glob('src/core/NEON/*.cpp')
     core_files += Glob('src/core/NEON/kernels/*.cpp')
 
+    # build winograd sources for either v7a / v8a
+    core_files += Glob('src/core/NEON/kernels/winograd/*.cpp')
+    core_files += Glob('src/core/NEON/kernels/winograd/transforms/*.cpp')
+    arm_compute_env.Append(CPPPATH = ["arm_compute/core/NEON/kernels/winograd/"])
+
     if env['arch'] == "armv7a":
         core_files += Glob('src/core/NEON/kernels/arm32/*.cpp')
 
@@ -235,7 +240,7 @@ if env['neon'] and env['opencl']:
     Export('arm_compute_graph_a')
 
     arm_compute_env.Append(LIBPATH = ["#build/%s/opencl-1.2-stubs" % env['build_dir']])
-    arm_compute_graph_so = build_library('arm_compute_graph', shared_graph_objects, static=False, libs = [ "arm_compute", "arm_compute_core", "OpenCL" ])
+    arm_compute_graph_so = build_library('arm_compute_graph', shared_graph_objects, static=False, libs = [ "arm_compute", "arm_compute_core"])
     Depends(arm_compute_graph_so, arm_compute_so)
     Depends(arm_compute_graph_so, opencl)
     Export('arm_compute_graph_so')

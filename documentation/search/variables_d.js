@@ -1,11 +1,5 @@
 var searchData=
 [
-  ['n_5fbatches',['n_batches',['../struct_tensor4_d_shape.xhtml#a587d540c8ce15c4c92fb938d8a0d73eb',1,'Tensor4DShape']]],
-  ['n_5fchannels',['n_channels',['../struct_tensor4_d_shape.xhtml#a97637737075924b9ed723edf11223c6a',1,'Tensor4DShape']]],
-  ['n_5fcols',['n_cols',['../struct_kernel_shape.xhtml#a0efeeb6a59360fdf976f6a9f2018edb3',1,'KernelShape::n_cols()'],['../struct_tensor4_d_shape.xhtml#a0efeeb6a59360fdf976f6a9f2018edb3',1,'Tensor4DShape::n_cols()']]],
-  ['n_5finput_5fchannels',['n_input_channels',['../struct_kernel_shape.xhtml#a457c06ffe7a95c7d8d8a8400d35dd1ba',1,'KernelShape']]],
-  ['n_5foutput_5fchannels',['n_output_channels',['../struct_kernel_shape.xhtml#aefcb19b0c2c6aa0c389e35abefbb9c18',1,'KernelShape']]],
-  ['n_5frows',['n_rows',['../struct_kernel_shape.xhtml#a00116d46e13f5082d5a720a08c3047cc',1,'KernelShape::n_rows()'],['../struct_tensor4_d_shape.xhtml#a00116d46e13f5082d5a720a08c3047cc',1,'Tensor4DShape::n_rows()']]],
   ['name',['name',['../structarm__compute_1_1test_1_1framework_1_1_test_info.xhtml#a9b45b3e13bd9167aab02e17e08916231',1,'arm_compute::test::framework::TestInfo']]],
   ['names_5flut',['names_lut',['../structmali__userspace_1_1_counter_mapping.xhtml#a7c6807ec6b2dfbe3ff361f848ad395ee',1,'mali_userspace::CounterMapping']]],
   ['nefixedpointpixelwisemultiplicationfixture_3c_20qint16_5ft_20_3e',['NEFixedPointPixelWiseMultiplicationFixture&lt; qint16_t &gt;',['../namespacearm__compute_1_1test_1_1validation.xhtml#a6c9f6c7580368d1bcbfa2496d2ecdc2a',1,'arm_compute::test::validation']]],

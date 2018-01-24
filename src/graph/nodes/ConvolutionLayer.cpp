@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -106,13 +106,16 @@ std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::OPENCL>(arm_comp
                                                                         const WeightsInfo    &weights_info,
                                                                         ConvolutionMethodHint conv_method)
 {
-    if(conv_method == ConvolutionMethodHint::GEMM)
+    if((conv_method == ConvolutionMethodHint::DIRECT)
+       && arm_compute::CLDirectConvolutionLayer::validate(input->info(), weights->info(), biases != nullptr ? biases->info() : nullptr, output->info(), conv_info)) // NOLINT
     {
-        return instantiate_function<arm_compute::CLConvolutionLayer, arm_compute::ICLTensor, TargetHint::OPENCL>(input, weights, biases, output, conv_info, weights_info);
+        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLDirectConvolutionLayer");
+        return instantiate_direct_function<arm_compute::CLDirectConvolutionLayer, arm_compute::ICLTensor, TargetHint::OPENCL>(input, weights, biases, output, conv_info);
     }
     else
     {
-        return instantiate_direct_function<arm_compute::CLDirectConvolutionLayer, arm_compute::ICLTensor, TargetHint::OPENCL>(input, weights, biases, output, conv_info);
+        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLConvolutionLayer");
+        return instantiate_function<arm_compute::CLConvolutionLayer, arm_compute::ICLTensor, TargetHint::OPENCL>(input, weights, biases, output, conv_info, weights_info);
     }
 }
 
@@ -122,13 +125,16 @@ std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::NEON>(arm_comput
                                                                       const WeightsInfo    &weights_info,
                                                                       ConvolutionMethodHint conv_method)
 {
-    if(conv_method == ConvolutionMethodHint::GEMM)
+    if((conv_method == ConvolutionMethodHint::DIRECT)
+       && arm_compute::NEDirectConvolutionLayer::validate(input->info(), weights->info(), biases != nullptr ? biases->info() : nullptr, output->info(), conv_info)) // NOLINT
     {
-        return instantiate_function<arm_compute::NEConvolutionLayer, arm_compute::ITensor, TargetHint::NEON>(input, weights, biases, output, conv_info, weights_info);
+        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEDirectConvolutionLayer");
+        return instantiate_direct_function<arm_compute::NEDirectConvolutionLayer, arm_compute::ITensor, TargetHint::NEON>(input, weights, biases, output, conv_info);
     }
     else
     {
-        return instantiate_direct_function<arm_compute::NEDirectConvolutionLayer, arm_compute::ITensor, TargetHint::NEON>(input, weights, biases, output, conv_info);
+        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEConvolutionLayer");
+        return instantiate_function<arm_compute::NEConvolutionLayer, arm_compute::ITensor, TargetHint::NEON>(input, weights, biases, output, conv_info, weights_info);
     }
 }
 } // namespace
@@ -184,14 +190,17 @@ std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_node(Graph
     // Set weights and biases info
     if(_weights.tensor() == nullptr)
     {
-        _weights.set_info(TensorInfo(TensorShape(_conv_width, _conv_height, in->info()->dimension(2) / _num_groups, _ofm),
+        TensorInfo info = TensorInfo(TensorShape(_conv_width, _conv_height, in->info()->dimension(2) / _num_groups, _ofm),
                                      in->info()->num_channels(),
                                      in->info()->data_type(),
-                                     in->info()->fixed_point_position()));
+                                     in->info()->fixed_point_position());
+        info.set_quantization_info(_weights_quant_info);
+        _weights.set_info(std::move(info));
     }
     if(_biases.has_accessor() && _biases.tensor() == nullptr)
     {
-        _biases.set_info(TensorInfo(TensorShape(_ofm), in->info()->num_channels(), in->info()->data_type(), in->info()->fixed_point_position()));
+        DataType dt = in->info()->data_type();
+        _biases.set_info(TensorInfo(TensorShape(_ofm), in->info()->num_channels(), is_data_type_quantized_asymmetric(dt) ? DataType::S32 : dt, in->info()->fixed_point_position()));
     }
 
     std::unique_ptr<arm_compute::IFunction> func;
@@ -213,7 +222,8 @@ std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_node(Graph
     TensorShape output_shape = calculate_convolution_layer_output_shape(in->info()->tensor_shape(), _weights.info().tensor_shape(), _conv_info);
 
     // Output auto inizialitation if not yet initialized
-    arm_compute::auto_init_if_empty(*out->info(), output_shape, 1, in->info()->data_type(), in->info()->fixed_point_position());
+    arm_compute::auto_init_if_empty(*out->info(), output_shape, 1, in->info()->data_type(), in->info()->fixed_point_position(),
+                                    (_out_quant_info.empty()) ? in->info()->quantization_info() : _out_quant_info);
 
     // Create appropriate convolution function
     if(_num_groups == 1)
@@ -254,12 +264,10 @@ std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_convolutio
     std::unique_ptr<arm_compute::IFunction> func;
     if(_target_hint == TargetHint::OPENCL)
     {
-        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLConvolutionLayer");
         func = instantiate<TargetHint::OPENCL>(input, _weights.tensor(), _biases.tensor(), output, _conv_info, _weights_info, conv_method_hint);
     }
     else
     {
-        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEConvolutionLayer");
         func = instantiate<TargetHint::NEON>(input, _weights.tensor(), _biases.tensor(), output, _conv_info, _weights_info, conv_method_hint);
     }
     return func;
@@ -321,12 +329,10 @@ std::unique_ptr<arm_compute::IFunction> ConvolutionLayer::instantiate_grouped_co
         // Instantiate convolution function
         if(_target_hint == TargetHint::OPENCL)
         {
-            ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLConvolutionLayer");
             func = instantiate<TargetHint::OPENCL>(_is[i].tensor(), _ws[i].tensor(), _bs[i].tensor(), _os[i].tensor(), _conv_info, _weights_info, conv_method_hint);
         }
         else
         {
-            ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEConvolutionLayer");
             func = instantiate<TargetHint::NEON>(_is[i].tensor(), _ws[i].tensor(), _bs[i].tensor(), _os[i].tensor(), _conv_info, _weights_info, conv_method_hint);
         }
 

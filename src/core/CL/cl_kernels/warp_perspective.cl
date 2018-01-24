@@ -48,7 +48,7 @@ inline const float8 apply_perspective_transform(const float2 coord, const float1
     const float4 in_x_coords = (float4)(coord.s0, 1 + coord.s0, 2 + coord.s0, 3 + coord.s0);
     // transform [z,z+1,z+2,z+3]
     const float4 z = (float4)mad(in_x_coords, (float4)(mtx.s2), mad((float4)(coord.s1), (float4)(mtx.s5), (float4)(mtx.s8)));
-    // NOTE: Do not multiply x&y by 1.f/Z as this will result in loss of accuracy and mismatches with reference implementation
+    // NOTE: Do not multiply x&y by 1.f/Z as this will result in loss of accuracy and mismatches with VX reference implementation
     // transform [x,x+1,x+2,x+3]
     const float4 new_x = (float4)mad(in_x_coords, (float4)(mtx.s0), mad((float4)(coord.s1), (float4)(mtx.s3), (float4)(mtx.s6))) / z;
     // transform [y,y+1,y+2,y+3]

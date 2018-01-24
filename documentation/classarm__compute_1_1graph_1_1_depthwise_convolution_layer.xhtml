@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -135,10 +135,10 @@ Collaboration diagram for DepthwiseConvolutionLayer:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a9c21da5d60512a0926ac04b1cf31adfa"><td class="memTemplParams" colspan="2">template&lt;typename AccessorType &gt; </td></tr>
-<tr class="memitem:a9c21da5d60512a0926ac04b1cf31adfa"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_depthwise_convolution_layer.xhtml#a9c21da5d60512a0926ac04b1cf31adfa">DepthwiseConvolutionLayer</a> (unsigned int conv_width, unsigned int conv_height, AccessorType &amp;&amp;weights, AccessorType &amp;&amp;biases, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> conv_info, bool opt3x3=true)</td></tr>
-<tr class="memdesc:a9c21da5d60512a0926ac04b1cf31adfa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <a href="#a9c21da5d60512a0926ac04b1cf31adfa">More...</a><br /></td></tr>
-<tr class="separator:a9c21da5d60512a0926ac04b1cf31adfa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a05b24637e46bb00e60e6e4c4efdf8054"><td class="memTemplParams" colspan="2">template&lt;typename AccessorType &gt; </td></tr>
+<tr class="memitem:a05b24637e46bb00e60e6e4c4efdf8054"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_depthwise_convolution_layer.xhtml#a05b24637e46bb00e60e6e4c4efdf8054">DepthwiseConvolutionLayer</a> (unsigned int conv_width, unsigned int conv_height, AccessorType &amp;&amp;weights, AccessorType &amp;&amp;biases, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> conv_info, bool opt3x3=true, const <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a> quant_info=<a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>())</td></tr>
+<tr class="memdesc:a05b24637e46bb00e60e6e4c4efdf8054"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <a href="#a05b24637e46bb00e60e6e4c4efdf8054">More...</a><br /></td></tr>
+<tr class="separator:a05b24637e46bb00e60e6e4c4efdf8054"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aefee70b3377d4ece56de05e1dff00dd8"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classarm__compute_1_1_i_function.xhtml">arm_compute::IFunction</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_depthwise_convolution_layer.xhtml#aefee70b3377d4ece56de05e1dff00dd8">instantiate_node</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph_context.xhtml">GraphContext</a> &amp;ctx, <a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_object.xhtml">ITensorObject</a> *input, <a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_object.xhtml">ITensorObject</a> *output) override</td></tr>
 <tr class="memdesc:aefee70b3377d4ece56de05e1dff00dd8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface to be implemented that instantiates the node.  <a href="#aefee70b3377d4ece56de05e1dff00dd8">More...</a><br /></td></tr>
 <tr class="separator:aefee70b3377d4ece56de05e1dff00dd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -155,7 +155,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="arm__compute_2graph_2nodes_2_depthwise_convolution_layer_8h_source.xhtml#l00042">42</a> of file <a class="el" href="arm__compute_2graph_2nodes_2_depthwise_convolution_layer_8h_source.xhtml">DepthwiseConvolutionLayer.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a9c21da5d60512a0926ac04b1cf31adfa"></a>
+<a class="anchor" id="a05b24637e46bb00e60e6e4c4efdf8054"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -196,7 +196,13 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>opt3x3</em> = <code>true</code>&#160;</td>
+          <td class="paramname"><em>opt3x3</em> = <code>true</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>&#160;</td>
+          <td class="paramname"><em>quant_info</em> = <code><a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>()</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -220,14 +226,15 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">biases</td><td>Biases values tensor </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">conv_info</td><td>Convolution info </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">opt3x3</td><td>(Optional) If true executes DepthwiseConvolutionLayer3x3 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">quant_info</td><td>(Optional) Quantization info used for weights </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="arm__compute_2graph_2nodes_2_depthwise_convolution_layer_8h_source.xhtml#l00055">55</a> of file <a class="el" href="arm__compute_2graph_2nodes_2_depthwise_convolution_layer_8h_source.xhtml">DepthwiseConvolutionLayer.h</a>.</p>
+<p>Definition at line <a class="el" href="arm__compute_2graph_2nodes_2_depthwise_convolution_layer_8h_source.xhtml#l00056">56</a> of file <a class="el" href="arm__compute_2graph_2nodes_2_depthwise_convolution_layer_8h_source.xhtml">DepthwiseConvolutionLayer.h</a>.</p>
 
 <p>References <a class="el" href="classarm__compute_1_1graph_1_1_depthwise_convolution_layer.xhtml#aefee70b3377d4ece56de05e1dff00dd8">DepthwiseConvolutionLayer::instantiate_node()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        : _conv_width(conv_width), _conv_height(conv_height), _weights(std::move(weights)), _biases(std::move(biases)), _conv_info(conv_info), _opt3x3(opt3x3)</div><div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    {</div><div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    }</div></div><!-- fragment -->
+<div class="fragment"><div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        : _conv_width(conv_width), _conv_height(conv_height), _weights(std::move(weights)), _biases(std::move(biases)), _conv_info(conv_info), _opt3x3(opt3x3), _quant_info(std::move(quant_info))</div><div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    {</div><div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -281,7 +288,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#aff59544b2bab30c9a3ce1876515e48df">INode</a>.</p>
 
-<p>Referenced by <a class="el" href="arm__compute_2graph_2nodes_2_depthwise_convolution_layer_8h_source.xhtml#l00055">DepthwiseConvolutionLayer::DepthwiseConvolutionLayer()</a>.</p>
+<p>Referenced by <a class="el" href="arm__compute_2graph_2nodes_2_depthwise_convolution_layer_8h_source.xhtml#l00056">DepthwiseConvolutionLayer::DepthwiseConvolutionLayer()</a>.</p>
 
 </div>
 </div>
@@ -294,7 +301,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1_depthwise_convolution_layer.xhtml">DepthwiseConvolutionLayer</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:37 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:46 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

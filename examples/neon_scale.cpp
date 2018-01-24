@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,62 +29,75 @@
 using namespace arm_compute;
 using namespace utils;
 
-void main_neon_scale(int argc, const char **argv)
+class NEONScaleExample : public Example
 {
-    PPMLoader ppm;
-    Image     src, dst;
-
-    if(argc < 2)
+public:
+    void do_setup(int argc, char **argv) override
     {
-        // Print help
-        std::cout << "Usage: ./build/neon_scale[input_image.ppm]\n\n";
-        std::cout << "No input_image provided, creating a dummy 640x480 image\n";
-        // Create an empty grayscale 640x480 image
-        src.allocator()->init(TensorInfo(640, 480, Format::U8));
+        PPMLoader ppm;
+
+        if(argc < 2)
+        {
+            // Print help
+            std::cout << "Usage: ./build/neon_scale[input_image.ppm]\n\n";
+            std::cout << "No input_image provided, creating a dummy 640x480 image\n";
+            // Create an empty grayscale 640x480 image
+            src.allocator()->init(TensorInfo(640, 480, Format::U8));
+        }
+        else
+        {
+            ppm.open(argv[1]);
+            ppm.init_image(src, Format::U8);
+        }
+
+        constexpr int scale_factor = 2;
+
+        TensorInfo dst_tensor_info(src.info()->dimension(0) / scale_factor, src.info()->dimension(1) / scale_factor,
+                                   Format::U8);
+
+        // Configure the destination image
+        dst.allocator()->init(dst_tensor_info);
+
+        // Configure Scale function object:
+        scale.configure(&src, &dst, InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED);
+
+        // Allocate all the images
+        src.allocator()->allocate();
+        dst.allocator()->allocate();
+
+        // Fill the input image with the content of the PPM image if a filename was provided:
+        if(ppm.is_open())
+        {
+            ppm.fill_image(src);
+            output_filename = std::string(argv[1]) + "_out.ppm";
+        }
     }
-    else
+    void do_run() override
     {
-        ppm.open(argv[1]);
-        ppm.init_image(src, Format::U8);
+        // Run the scale operation:
+        scale.run();
     }
-
-    constexpr int scale_factor = 2;
-
-    TensorInfo dst_tensor_info(src.info()->dimension(0) / scale_factor, src.info()->dimension(1) / scale_factor, Format::U8);
-
-    // Configure the destination image
-    dst.allocator()->init(dst_tensor_info);
-
-    // Create and initialize a Scale function object:
-    NEScale scale;
-    scale.configure(&src, &dst, InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::UNDEFINED);
-
-    // Allocate all the images
-    src.allocator()->allocate();
-    dst.allocator()->allocate();
-    // Fill the input image with the content of the PPM image if a filename was provided:
-    if(ppm.is_open())
+    void do_teardown() override
     {
-        ppm.fill_image(src);
+        // Save the result to file:
+        if(!output_filename.empty())
+        {
+            save_to_ppm(dst, output_filename); // save_to_ppm maps and unmaps the image to store as PPM
+        }
     }
 
-    // Run the scale operation:
-    scale.run();
-
-    // Save the result to file:
-    if(ppm.is_open())
-    {
-        const std::string output_filename = std::string(argv[1]) + "_out.ppm";
-        save_to_ppm(dst, output_filename);
-    }
-}
+private:
+    Image       src{}, dst{};
+    NEScale     scale{};
+    std::string output_filename{};
+};
 
 /** Main program for convolution test
  *
  * @param[in] argc Number of arguments
  * @param[in] argv Arguments ( [optional] Path to PPM image to process )
  */
-int main(int argc, const char **argv)
+int main(int argc, char **argv)
 {
-    return utils::run_example(argc, argv, main_neon_scale);
+    return utils::run_example<NEONScaleExample>(argc, argv);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -159,9 +159,7 @@ void TensorInfo::init(const TensorShape &tensor_shape, size_t num_channels, Data
     _strides_in_bytes              = strides_in_bytes;
     _total_size                    = total_size_in_bytes;
 
-    Coordinates coordinates;
-    coordinates.set_num_dimensions(_tensor_shape.num_dimensions());
-    _valid_region = ValidRegion{ coordinates, _tensor_shape };
+    _valid_region = ValidRegion{ Coordinates(), _tensor_shape };
 }
 
 void TensorInfo::init(const HOGInfo &hog_info, unsigned int width, unsigned int height)
@@ -201,9 +199,7 @@ size_t TensorInfo::init_auto_padding(const TensorShape &tensor_shape, size_t num
     _format               = Format::UNKNOWN;
     _tensor_shape         = tensor_shape;
 
-    Coordinates coordinates;
-    coordinates.set_num_dimensions(_tensor_shape.num_dimensions());
-    _valid_region = ValidRegion{ coordinates, _tensor_shape };
+    _valid_region = ValidRegion{ Coordinates(), _tensor_shape };
 
     auto_padding();
 
@@ -368,9 +364,9 @@ ITensorInfo &TensorInfo::set_tensor_shape(TensorShape shape)
         _total_size                           = _tensor_shape[idx_last_dimension] * _strides_in_bytes[idx_last_dimension];
     }
 
-    Coordinates coordinates;
-    coordinates.set_num_dimensions(_tensor_shape.num_dimensions());
-    _valid_region = ValidRegion{ coordinates, _tensor_shape };
+    std::tie(_strides_in_bytes, _offset_first_element_in_bytes, _total_size) = calculate_padding_requirements(_padding);
+
+    _valid_region = ValidRegion{ Coordinates(), _tensor_shape };
     return *this;
 }
 

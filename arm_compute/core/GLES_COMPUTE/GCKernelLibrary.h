@@ -191,14 +191,13 @@ class GCKernelLibrary
 private:
     /** Default Constructor. */
     GCKernelLibrary();
+    ~GCKernelLibrary();
 
 public:
     /** Prevent instances of this class from being copied. */
     GCKernelLibrary(const GCKernelLibrary &) = delete;
     /** Prevent instances of this class from being copied. */
     const GCKernelLibrary &operator=(const GCKernelLibrary &) = delete;
-    /** Default Destructor. */
-    ~GCKernelLibrary();
 
     static GCKernelLibrary &get();
     /** Initialises the kernel library.
@@ -213,13 +212,6 @@ public:
 
         _display = dpy;
         _context = ctx;
-
-        if(_display == EGL_NO_DISPLAY || _context == EGL_NO_CONTEXT)
-        {
-            setup_context();
-
-            _own_context = true;
-        }
 
         eglMakeCurrent(_display, EGL_NO_SURFACE, EGL_NO_SURFACE, _context);
         setup_dummy_fbo();
@@ -287,15 +279,11 @@ private:
      * @return Concatenated string.
      */
     std::string stringify_set(const StringSet &s) const;
-    /** Set up EGL context.
-     */
-    void setup_context();
 
     EGLDisplay  _display;                                                /**< Underlying EGL Display. */
     EGLContext  _context;                                                /**< Underlying EGL Context. */
     GLuint      _frame_buffer;                                           /**< Dummy fbo */
     GLuint      _tex_rt;                                                 /**< Dummy texture for render target */
-    bool        _own_context;                                            /**< Self created context or not. */
     std::string _shader_path;                                            /**< Path to the shaders folder. */
     mutable std::map<std::string, const GCProgram>  _programs_map;       /**< Map with all already loaded program data. */
     mutable std::map<std::string, const GCKernel>   _built_programs_map; /**< Map with all already built program data. */

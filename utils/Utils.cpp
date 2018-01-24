@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,14 +66,17 @@ void discard_comments_and_spaces(std::ifstream &fs)
 }
 } // namespace
 
-int run_example(int argc, const char **argv, example &func)
+#ifndef BENCHMARK_EXAMPLES
+int run_example(int argc, char **argv, Example &example)
 {
     std::cout << "\n"
               << argv[0] << "\n\n";
 
     try
     {
-        func(argc, argv);
+        example.do_setup(argc, argv);
+        example.do_run();
+        example.do_teardown();
 
         std::cout << "\nTest passed\n";
         return 0;
@@ -99,6 +102,7 @@ int run_example(int argc, const char **argv, example &func)
 
     return -1;
 }
+#endif /* BENCHMARK_EXAMPLES */
 
 void draw_detection_rectangle(ITensor *tensor, const DetectionWindow &rect, uint8_t r, uint8_t g, uint8_t b)
 {

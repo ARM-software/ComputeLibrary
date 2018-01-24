@@ -28,6 +28,9 @@ var _type_printer_8h =
     [ "operator<<", "_type_printer_8h.xhtml#abe52a76af2aa88876d54ce8a5969e509", null ],
     [ "operator<<", "_type_printer_8h.xhtml#a530d86eec3dbd22cab6336ffdceb0d37", null ],
     [ "operator<<", "_type_printer_8h.xhtml#af3985189d478b45014e7dead9d002e2a", null ],
+    [ "operator<<", "_type_printer_8h.xhtml#a5e7a61df2b926347b42ecadf8bcc8969", null ],
+    [ "operator<<", "_type_printer_8h.xhtml#ab91d110e020f6ed987e05e82df3e350b", null ],
+    [ "operator<<", "_type_printer_8h.xhtml#a4228b490e13b79a60737929d9d9e5957", null ],
     [ "to_string", "_type_printer_8h.xhtml#aabe16be22edb41656e66ed9eae3b69e6", null ],
     [ "to_string", "_type_printer_8h.xhtml#a27f0ebddef1b83e0ac31c7a7a23a8d36", null ],
     [ "to_string", "_type_printer_8h.xhtml#ad9fd48b3c01116b217a684aaeaf8b24f", null ],
@@ -55,5 +58,8 @@ var _type_printer_8h =
     [ "to_string", "_type_printer_8h.xhtml#acef515348c5f7f73c89aa4b8a47a02bc", null ],
     [ "to_string", "_type_printer_8h.xhtml#ae4ead564f3c96ea5f1ec7fe035b941f3", null ],
     [ "to_string", "_type_printer_8h.xhtml#a42e6f8761f01b5846f56c3b8025c8c0a", null ],
-    [ "to_string", "_type_printer_8h.xhtml#ab75d8ff29ba9b398d5740b3efd156e71", null ]
+    [ "to_string", "_type_printer_8h.xhtml#ab75d8ff29ba9b398d5740b3efd156e71", null ],
+    [ "to_string", "_type_printer_8h.xhtml#a950ba288e8136db4bf52f7c51dea20eb", null ],
+    [ "to_string", "_type_printer_8h.xhtml#aee88a2c259879eb9dc18cb5965e87c29", null ],
+    [ "to_string", "_type_printer_8h.xhtml#a3cf43a216912b361eaffc3c71452a31e", null ]
 ];

@@ -40,6 +40,176 @@
 
 using namespace arm_compute;
 
+namespace
+{
+// Internal window config info
+using GCPoolingConfig = std::pair<unsigned int, BorderSize>; //num_elems_processed_per_iteration, border_size
+
+void auto_init(const ITensorInfo *input, ITensorInfo *output, unsigned int pooled_w, unsigned int pooled_h)
+{
+    TensorShape output_shape{ input->tensor_shape() };
+    output_shape.set(0, pooled_w);
+    output_shape.set(1, pooled_h);
+
+    auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape));
+}
+
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((is_data_type_quantized_asymmetric(input->data_type()) && pool_info.pool_type() == PoolingType::L2),
+                                    "Unsupported combination of parameters!");
+
+    const bool         is_global_pooling = pool_info.is_global_pooling();
+    const unsigned int pool_size         = is_global_pooling ? input->tensor_shape().x() : pool_info.pool_size();
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_global_pooling && (input->tensor_shape().x() != input->tensor_shape().y()),
+                                    "Global pooling is supported only with rectangular inputs!");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_global_pooling && ((pool_info.pad_stride_info().pad().first >= pool_size) || (pool_info.pad_stride_info().pad().second >= pool_size)),
+                                    "Invalid pool size and pool pad combination!");
+
+    // Checks performed when output is configured
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+
+        unsigned int pooled_w = 0;
+        unsigned int pooled_h = 0;
+        std::tie(pooled_w, pooled_h) = scaled_dimensions(input->dimension(0),
+                                                         input->dimension(1),
+                                                         pool_size,
+                                                         pool_size,
+                                                         pool_info.pad_stride_info());
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG((output->dimension(0) != pooled_w) || (output->dimension(1) != pooled_h),
+                                        "Invalid output pooling dimensions!");
+    }
+
+    return Status{};
+}
+
+std::tuple<Status, Window, GCPoolingConfig> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, const PoolingLayerInfo &pool_info)
+{
+    int                 pool_pad_x      = 0;
+    int                 pool_pad_y      = 0;
+    int                 pool_stride_x   = 0;
+    int                 pool_stride_y   = 0;
+    unsigned int        pooled_w        = 0;
+    unsigned int        pooled_h        = 0;
+    int                 pool_size       = pool_info.pool_size();
+    const PadStrideInfo pad_stride_info = pool_info.pad_stride_info();
+    std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
+    std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
+
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+
+    // Update pool size in case of global pooling
+    pool_size = pool_info.is_global_pooling() ? input->dimension(0) : pool_size;
+
+    // Check output dimensions
+    std::tie(pooled_w, pooled_h) = scaled_dimensions(input->dimension(0),
+                                                     input->dimension(1),
+                                                     pool_size,
+                                                     pool_size,
+                                                     pad_stride_info);
+
+    auto_init(input, output, pooled_w, pooled_h);
+
+    BorderSize     border_size = BorderSize(pool_pad_y, pool_pad_x);
+    const DataType data_type   = input->data_type();
+
+    const int input_width  = input->dimension(0);
+    const int input_height = input->dimension(1);
+
+    unsigned int num_elems_processed_per_iteration = 1;
+
+    // Create kernel
+    if(pool_size == 3)
+    {
+        // Check if we have pool3x3 with stride_x less equal than 3. In these cases, run an optimized OpenGLES kernel where
+        // each thread computes 4 output elements
+        const bool is_pool3x3_stride_le3 = (pool_size == 3) && (pool_stride_x <= 3) && !is_data_type_fixed_point(data_type);
+
+        int num_elems_read_per_iteration = pool_size;
+
+        if(input->data_type() == DataType::F32)
+        {
+            if(is_pool3x3_stride_le3)
+            {
+                // Change the number of elements processed and number of elements read per iteration for pooling 3x3 with stride less equal than 3
+                num_elems_processed_per_iteration = 4;
+                num_elems_read_per_iteration      = pool_size * (pool_stride_x + 1);
+            }
+        }
+        else
+        {
+            if(is_pool3x3_stride_le3)
+            {
+                num_elems_processed_per_iteration = 4;
+            }
+            else
+            {
+                num_elems_processed_per_iteration = 2;
+            }
+        }
+
+        const int upper_bound_w = ((pooled_w - 1) * pool_stride_x - pool_pad_x + num_elems_read_per_iteration) - input_width;
+        const int upper_bound_h = ((pooled_h - 1) * pool_stride_y - pool_pad_y + pool_size) - input_height;
+
+        border_size.right  = std::max(upper_bound_w, pool_pad_x);
+        border_size.bottom = std::max(upper_bound_h, pool_pad_y);
+    }
+    else // Run general case
+    {
+        if(input->data_type() == DataType::F32)
+        {
+            num_elems_processed_per_iteration = 1;
+        }
+        else
+        {
+            num_elems_processed_per_iteration = 2;
+        }
+
+        const int upper_bound_w = ((pooled_w - 1) * pool_stride_x - pool_pad_x + pool_size) - input_width;
+        const int upper_bound_h = ((pooled_h - 1) * pool_stride_y - pool_pad_y + pool_size) - input_height;
+
+        border_size.right  = std::max(upper_bound_w, pool_pad_x);
+        border_size.bottom = std::max(upper_bound_h, pool_pad_y);
+    }
+    // Configure kernel window
+    Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
+
+    if(input->data_type() == DataType::F32)
+    {
+        AccessWindowStatic     input_access(input, -pool_pad_x, -pool_pad_y, input_width + border_size.right, input_height + border_size.bottom);
+        AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+        bool                   window_changed = update_window_and_padding(win, input_access, output_access);
+        output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
+        Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+        return std::make_tuple(err, win, GCPoolingConfig(num_elems_processed_per_iteration, border_size));
+    }
+    else
+    {
+        // Calculate output right and bottom border
+        const int output_width          = output->dimension(0);
+        const int output_height         = output->dimension(1);
+        const int output_padding_right  = ceil_to_multiple(output_width, num_elems_processed_per_iteration) - output_width;
+        const int output_padding_bottom = ceil_to_multiple(output_height, 1) - output_height;
+        const int input_padding_right   = ceil_to_multiple(input_width + 2 * border_size.right, num_elems_processed_per_iteration) - (input_width + 2 * border_size.right);
+        const int input_padding_bottom  = ceil_to_multiple(input_height + 2 * border_size.bottom, 1) - (input_height + 2 * border_size.bottom);
+
+        // Configure kernel window
+        AccessWindowStatic input_access(input, -pool_pad_x, -pool_pad_y, input_width + border_size.right + input_padding_right, input_height + border_size.bottom + input_padding_bottom);
+        AccessWindowStatic output_access(output, 0, 0, output_width + output_padding_right, output_height + output_padding_bottom);
+        bool               window_changed = update_window_and_padding(win, input_access, output_access);
+        output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
+        Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+        return std::make_tuple(err, win, GCPoolingConfig(num_elems_processed_per_iteration, border_size));
+    }
+}
+} // namespace
+
 GCPoolingLayerKernel::GCPoolingLayerKernel()
     : _input(nullptr), _output(nullptr), _pool_info(), _border_size(0), _num_elems_processed_per_iteration(1)
 {
@@ -52,54 +222,41 @@ BorderSize GCPoolingLayerKernel::border_size() const
 
 void GCPoolingLayerKernel::configure(const IGCTensor *input, IGCTensor *output, const PoolingLayerInfo &pool_info)
 {
-    int                 pool_pad_x        = 0;
-    int                 pool_pad_y        = 0;
-    int                 pool_stride_x     = 0;
-    int                 pool_stride_y     = 0;
-    unsigned int        pooled_w          = 0;
-    unsigned int        pooled_h          = 0;
-    const PoolingType   pool_type         = pool_info.pool_type();
-    int                 pool_size         = pool_info.pool_size();
-    const PadStrideInfo pad_stride_info   = pool_info.pad_stride_info();
-    const bool          is_global_pooling = pool_info.is_global_pooling();
+    int                 pool_pad_x      = 0;
+    int                 pool_pad_y      = 0;
+    int                 pool_stride_x   = 0;
+    int                 pool_stride_y   = 0;
+    unsigned int        pooled_w        = 0;
+    unsigned int        pooled_h        = 0;
+    const PoolingType   pool_type       = pool_info.pool_type();
+    int                 pool_size       = pool_info.pool_size();
+    const PadStrideInfo pad_stride_info = pool_info.pad_stride_info();
+    const bool          exclude_padding = pool_info.exclude_padding();
     std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
 
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
-    ARM_COMPUTE_ERROR_ON(!is_global_pooling && (pool_pad_x >= pool_size || pool_pad_y >= pool_size));
-    ARM_COMPUTE_ERROR_ON(is_global_pooling && (input->info()->tensor_shape().x() != input->info()->tensor_shape().y()));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Update pool size in case of global pooling
-    pool_size = is_global_pooling ? input->info()->dimension(0) : pool_size;
+    pool_size = pool_info.is_global_pooling() ? input->info()->dimension(0) : pool_size;
 
     // Check output dimensions
     std::tie(pooled_w, pooled_h) = scaled_dimensions(input->info()->dimension(0),
                                                      input->info()->dimension(1),
                                                      pool_size,
                                                      pool_size,
-                                                     pool_info.pad_stride_info());
+                                                     pad_stride_info);
 
-    // Output auto initialization if not yet initialized
-    {
-        TensorShape output_shape{ input->info()->tensor_shape() };
-        output_shape.set(0, pooled_w);
-        output_shape.set(1, pooled_h);
+    auto_init(input->info(), output->info(), pooled_w, pooled_h);
 
-        auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
-    }
-
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON((output->info()->dimension(0) != pooled_w) || (output->info()->dimension(1) != pooled_h));
-
-    const int input_width  = input->info()->dimension(0);
-    const int input_height = input->info()->dimension(1);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), pool_info));
 
     // Set instance variables
-    _input       = input;
-    _output      = output;
-    _pool_info   = pool_info;
-    _border_size = BorderSize(pool_pad_y, pool_pad_x);
+    _input     = input;
+    _output    = output;
+    _pool_info = pool_info;
+
+    const DataType data_type = input->info()->data_type();
 
     // Set build options
     std::set<std::string> build_opts;
@@ -114,10 +271,14 @@ void GCPoolingLayerKernel::configure(const IGCTensor *input, IGCTensor *output, 
     {
         build_opts.insert("#define DATA_TYPE_FP16");
     }
+    if(exclude_padding)
+    {
+        build_opts.emplace("#define EXCLUDE_PADDING");
+    }
     build_opts.emplace(("#define POOL_" + string_from_pooling_type(pool_type)));
     build_opts.emplace(("#define STRIDE_X " + support::cpp11::to_string(pool_stride_x)));
-    build_opts.emplace(("#define MAX_WIDTH " + support::cpp11::to_string(input->info()->dimension(0) + pool_pad_x)));
-    build_opts.emplace(("#define MAX_HEIGHT " + support::cpp11::to_string(input->info()->dimension(1) + pool_pad_y)));
+    build_opts.emplace(("#define MAX_WIDTH " + support::cpp11::to_string(input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_x))));
+    build_opts.emplace(("#define MAX_HEIGHT " + support::cpp11::to_string(input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_y))));
     build_opts.emplace(("#define STRIDE_Y " + support::cpp11::to_string(pool_stride_y)));
     build_opts.emplace(("#define PAD_X " + support::cpp11::to_string(pool_pad_x)));
     build_opts.emplace(("#define PAD_Y " + support::cpp11::to_string(pool_pad_y)));
@@ -127,37 +288,7 @@ void GCPoolingLayerKernel::configure(const IGCTensor *input, IGCTensor *output, 
     {
         // Check if we have pool3x3 with stride_x less equal than 3. In these cases, run an optimized OpenGLES kernel where
         // each thread computes 4 output elements
-        const bool is_pool3x3_stride_le3 = (pool_size == 3) && (pool_stride_x <= 3) && !is_data_type_fixed_point(input->info()->data_type());
-
-        int num_elements_read_per_iteration = (pool_size == 7) ? 8 : pool_size;
-
-        if(input->info()->data_type() == DataType::F32)
-        {
-            if(is_pool3x3_stride_le3)
-            {
-                // Change the number of elements processed and number of elements read per iteration for pooling 3x3 with stride less equal than 3
-                _num_elems_processed_per_iteration = 4;
-                num_elements_read_per_iteration    = pool_size * (pool_stride_x + 1);
-            }
-        }
-        else
-        {
-            num_elements_read_per_iteration = pool_size;
-            if(is_pool3x3_stride_le3)
-            {
-                _num_elems_processed_per_iteration = 4;
-            }
-            else
-            {
-                _num_elems_processed_per_iteration = 2;
-            }
-        }
-
-        const int upper_bound_w = ((pooled_w - 1) * pool_stride_x - pool_pad_x + num_elements_read_per_iteration) - input_width;
-        const int upper_bound_h = ((pooled_h - 1) * pool_stride_y - pool_pad_y + pool_size) - input_height;
-
-        _border_size.right  = std::max(upper_bound_w, pool_pad_x);
-        _border_size.bottom = std::max(upper_bound_h, pool_pad_y);
+        const bool is_pool3x3_stride_le3 = (pool_size == 3) && (pool_stride_x <= 3) && !is_data_type_fixed_point(data_type);
 
         std::string kernel_name = "pooling_layer_" + support::cpp11::to_string(pool_size);
         if(is_pool3x3_stride_le3)
@@ -173,53 +304,27 @@ void GCPoolingLayerKernel::configure(const IGCTensor *input, IGCTensor *output, 
     }
     else // Run general case
     {
-        if(input->info()->data_type() == DataType::F32)
-        {
-            _num_elems_processed_per_iteration = 1;
-        }
-        else
-        {
-            _num_elems_processed_per_iteration = 2;
-        }
-        const int upper_bound_w = ((pooled_w - 1) * pool_stride_x - pool_pad_x + pool_size) - input_width;
-        const int upper_bound_h = ((pooled_h - 1) * pool_stride_y - pool_pad_y + pool_size) - input_height;
-
-        _border_size.right  = std::max(upper_bound_w, pool_pad_x);
-        _border_size.bottom = std::max(upper_bound_h, pool_pad_y);
-
         build_opts.emplace(("#define POOL_SIZE " + support::cpp11::to_string(pool_size)));
 
         build_opts.insert("#define POOLING_LAYER_N");
         _kernel = static_cast<GCKernel>(GCKernelLibrary::get().create_kernel("pooling_layer_n", build_opts));
     }
+    // Configure kernel window
+    auto win_config = validate_and_configure_window(input->info(), output->info(), pool_info);
+    ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
-    Window win = calculate_max_window(*output->info(), Steps(_num_elems_processed_per_iteration));
+    IGCKernel::configure(std::get<1>(win_config));
+    GCPoolingConfig pooling_config     = std::get<2>(win_config);
+    _num_elems_processed_per_iteration = pooling_config.first;
+    _border_size                       = pooling_config.second;
+}
 
-    if(input->info()->data_type() == DataType::F32)
-    {
-        AccessWindowStatic     input_access(input->info(), -pool_pad_x, -pool_pad_y, input_width + _border_size.right, input_height + _border_size.bottom);
-        AccessWindowHorizontal output_access(output->info(), 0, _num_elems_processed_per_iteration);
-        update_window_and_padding(win, input_access, output_access);
-        output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
-    }
-    else
-    {
-        // Calculate output right and bottom border
-        const int output_width          = output->info()->dimension(0);
-        const int output_height         = output->info()->dimension(1);
-        const int output_padding_right  = ceil_to_multiple(output_width, _num_elems_processed_per_iteration) - output_width;
-        const int output_padding_bottom = ceil_to_multiple(output_height, 1) - output_height;
-        const int input_padding_right   = ceil_to_multiple(input_width + 2 * _border_size.right, _num_elems_processed_per_iteration) - (input_width + 2 * _border_size.right);
-        const int input_padding_bottom  = ceil_to_multiple(input_height + 2 * _border_size.bottom, 1) - (input_height + 2 * _border_size.bottom);
+Status GCPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, pool_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(std::get<0>(validate_and_configure_window(input->clone().get(), output->clone().get(), pool_info)));
 
-        // Configure kernel window
-        AccessWindowStatic input_access(input->info(), -pool_pad_x, -pool_pad_y, input_width + _border_size.right + input_padding_right, input_height + _border_size.bottom + input_padding_bottom);
-        AccessWindowStatic output_access(output->info(), 0, 0, output_width + output_padding_right, output_height + output_padding_bottom);
-        update_window_and_padding(win, input_access, output_access);
-        output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
-    }
-
-    IGCKernel::configure(win);
+    return Status{};
 }
 
 void GCPoolingLayerKernel::run(const Window &window)
@@ -239,7 +344,7 @@ void GCPoolingLayerKernel::run(const Window &window)
     do
     {
         // Upsample input by pool size
-        Window in_slice(slice);
+        Window in_slice(slice); // NOLINT
         in_slice.set(Window::DimX, Window::Dimension(in_slice.x().start() - pool_pad_x, in_slice.x().end() * pool_stride_x, pool_stride_x * _num_elems_processed_per_iteration));
         in_slice.set(Window::DimY, Window::Dimension(in_slice.y().start() - pool_pad_y, in_slice.y().end() * pool_stride_y, pool_stride_y));
 

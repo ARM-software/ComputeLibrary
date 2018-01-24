@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -155,6 +155,9 @@ Typedefs</h2></td></tr>
 <tr class="memitem:a9038937296dc0c7f82e43f75cd770421"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a9038937296dc0c7f82e43f75cd770421"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a9038937296dc0c7f82e43f75cd770421">NEPoolingLayerFixedPointFixture</a> = PoolingLayerValidationFixedPointFixture&lt; Tensor, Accessor, NEPoolingLayer, T &gt;</td></tr>
 <tr class="separator:a9038937296dc0c7f82e43f75cd770421"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad3469010a2d342f8ef3cce917008bf6c"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ad3469010a2d342f8ef3cce917008bf6c"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad3469010a2d342f8ef3cce917008bf6c">NEPoolingLayerQuantizedFixture</a> = PoolingLayerValidationQuantizedFixture&lt; Tensor, Accessor, NEPoolingLayer, T &gt;</td></tr>
+<tr class="separator:ad3469010a2d342f8ef3cce917008bf6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
@@ -172,6 +175,10 @@ Functions</h2></td></tr>
 <tr class="separator:aeed10bbcb877a14736f4d77426a66176"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6f12268fb12d7dea1b11e0f426f1a0c7"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a6f12268fb12d7dea1b11e0f426f1a0c7">FIXTURE_DATA_TEST_CASE</a> (RunLarge, NEPoolingLayerFixedPointFixture&lt; int16_t &gt;, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), combine(PoolingLayerDatasetQS, framework::dataset::make(&quot;DataType&quot;, DataType::QS16))), framework::dataset::make(&quot;FractionalBits&quot;, 1, 13)))</td></tr>
 <tr class="separator:a6f12268fb12d7dea1b11e0f426f1a0c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed58fa375abf77db8c2a57cf9e01781a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aed58fa375abf77db8c2a57cf9e01781a">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NEPoolingLayerQuantizedFixture&lt; uint8_t &gt;, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetQASYMM8, framework::dataset::make(&quot;DataType&quot;, DataType::QASYMM8))), framework::dataset::make(&quot;QuantizationInfo&quot;,{QuantizationInfo(2.f/255, 127), QuantizationInfo(7.f/255, 123)})))</td></tr>
+<tr class="separator:aed58fa375abf77db8c2a57cf9e01781a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad07d006299b0ce3930bcd66fb366aebc"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad07d006299b0ce3930bcd66fb366aebc">FIXTURE_DATA_TEST_CASE</a> (RunLarge, NEPoolingLayerQuantizedFixture&lt; uint8_t &gt;, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), combine(PoolingLayerDatasetQASYMM8, framework::dataset::make(&quot;DataType&quot;, DataType::QASYMM8))), framework::dataset::make(&quot;QuantizationInfo&quot;,{QuantizationInfo(1.f/255, 0)})))</td></tr>
+<tr class="separator:ad07d006299b0ce3930bcd66fb366aebc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -179,7 +186,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_0538a82dae0483a21d0f1e9d7e0a45c6.xhtml">NEON</a></li><li class="navelem"><a class="el" href="validation_2_n_e_o_n_2_pooling_layer_8cpp.xhtml">PoolingLayer.cpp</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:34 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:43 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

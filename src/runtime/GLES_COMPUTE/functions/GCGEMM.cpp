@@ -38,6 +38,7 @@
 #include "arm_compute/runtime/ITensorAllocator.h"
 
 using namespace arm_compute;
+using namespace arm_compute::gles_compute;
 
 GCGEMM::GCGEMM()
     : _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _ma_kernel(), _tmp_a(), _tmp_b(), _is_interleaved_transposed(false), _run_addition(false)
@@ -116,18 +117,20 @@ void GCGEMM::run()
     if(_is_interleaved_transposed)
     {
         // Run interleave kernel
-        GCScheduler::get().enqueue(_interleave_kernel, false);
+        GCScheduler::get().dispatch(_interleave_kernel, false);
 
         // Run transpose kernel
-        GCScheduler::get().enqueue(_transpose_kernel, false);
+        GCScheduler::get().dispatch(_transpose_kernel, false);
+        GCScheduler::get().memory_barrier();
     }
 
     // Run matrix multiply kernel
-    GCScheduler::get().enqueue(_mm_kernel, !_run_addition);
+    GCScheduler::get().dispatch(_mm_kernel, !_run_addition);
 
     // Run matrix addition kernel
     if(_run_addition)
     {
-        GCScheduler::get().enqueue(_ma_kernel);
+        GCScheduler::get().memory_barrier();
+        GCScheduler::get().dispatch(_ma_kernel);
     }
 }

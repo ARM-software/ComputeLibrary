@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -129,7 +129,7 @@ $(document).ready(function(){initNavTree('benchmark_2_c_l_2_depthwise_convolutio
 <code>#include &quot;<a class="el" href="_c_l_depthwise_convolution_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLDepthwiseConvolutionLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_accessor_8h_source.xhtml">tests/CL/CLAccessor.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="benchmark_2fixtures_2_depthwise_convolution_layer_fixture_8h_source.xhtml">tests/benchmark/fixtures/DepthwiseConvolutionLayerFixture.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_mobile_net_depthwise_convolution_layer_dataset_8h_source.xhtml">tests/datasets/MobileNetDepthwiseConvolutionLayerDataset.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_mobile_net_depthwise_convolution_layer_dataset_8h_source.xhtml">tests/datasets/system_tests/mobilenet/MobileNetDepthwiseConvolutionLayerDataset.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="tests_2framework_2_macros_8h_source.xhtml">tests/framework/Macros.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_datasets_8h_source.xhtml">tests/framework/datasets/Datasets.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_type_printer_8h_source.xhtml">utils/TypePrinter.h</a>&quot;</code><br />
@@ -146,17 +146,17 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:ad40ce68156a5d070d24869036ed41080"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#ad40ce68156a5d070d24869036ed41080">CLDepthwiseConvolutionLayerFixture</a> = DepthwiseConvolutionLayerFixture&lt; CLTensor, CLDepthwiseConvolutionLayer, CLAccessor &gt;</td></tr>
-<tr class="separator:ad40ce68156a5d070d24869036ed41080"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b4fdd4e87ff1c0b97c9844a26307eb9"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a3b4fdd4e87ff1c0b97c9844a26307eb9">CLDepthwiseConvolutionLayerFixture</a> = DepthwiseConvolutionLayerFixture&lt; CLTensor, CLDepthwiseConvolutionLayer3x3, CLAccessor &gt;</td></tr>
+<tr class="separator:a3b4fdd4e87ff1c0b97c9844a26307eb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ad92059e16a67ed784198e950dda2902b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#ad92059e16a67ed784198e950dda2902b">REGISTER_FIXTURE_DATA_TEST_CASE</a> (MobileNetDepthwiseConvolutionLayer, CLDepthwiseConvolutionLayerFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(datasets::MobileNetDepthwiseConvolutionLayerDataset(), data_types), framework::dataset::make(&quot;Batches&quot;,{1})))</td></tr>
-<tr class="separator:ad92059e16a67ed784198e950dda2902b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a906bace54d653e059ed85e32470ce969"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a906bace54d653e059ed85e32470ce969">REGISTER_FIXTURE_DATA_TEST_CASE</a> (MobileNetDepthwiseConvLayer, CLDepthwiseConvolutionLayerFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(datasets::MobileNetDepthwiseConvolutionLayerDataset(), data_types), framework::dataset::make(&quot;Batches&quot;,{1})))</td></tr>
+<tr class="separator:a906bace54d653e059ed85e32470ce969"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:aab9a2ff74a27ae837d32a79a38952228"><td class="memItemLeft" align="right" valign="top">const auto&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#aab9a2ff74a27ae837d32a79a38952228">data_types</a> = framework::dataset::make(&quot;DataType&quot;, { DataType::F32 })</td></tr>
+<tr class="memitem:aab9a2ff74a27ae837d32a79a38952228"><td class="memItemLeft" align="right" valign="top">const auto&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#aab9a2ff74a27ae837d32a79a38952228">data_types</a> = framework::dataset::make(&quot;DataType&quot;, { DataType::F32, DataType::QASYMM8 })</td></tr>
 <tr class="separator:aab9a2ff74a27ae837d32a79a38952228"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
@@ -165,7 +165,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_4f2df8950dc650bf7cf9176fae02facc.xhtml">benchmark</a></li><li class="navelem"><a class="el" href="dir_4da487531dc5bdc76b523c9e82b781b1.xhtml">CL</a></li><li class="navelem"><a class="el" href="benchmark_2_c_l_2_depthwise_convolution_layer_8cpp.xhtml">DepthwiseConvolutionLayer.cpp</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:34 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:43 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

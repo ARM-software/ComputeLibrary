@@ -15,7 +15,6 @@ var hierarchy =
       [ "YOLOV2BatchNormalizationLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_y_o_l_o_v2_batch_normalization_layer_dataset.xhtml", null ]
     ] ],
     [ "BorderSize", "structarm__compute_1_1_border_size.xhtml", null ],
-    [ "IGCKernel::BufferParam", "classarm__compute_1_1_i_g_c_kernel_1_1_buffer_param.xhtml", null ],
     [ "CLBuildOptions", "classarm__compute_1_1_c_l_build_options.xhtml", null ],
     [ "CLCoefficientTable", "structarm__compute_1_1_c_l_coefficient_table.xhtml", null ],
     [ "CLKernelLibrary", "classarm__compute_1_1_c_l_kernel_library.xhtml", null ],
@@ -26,6 +25,7 @@ var hierarchy =
     [ "CommandLineParser", "classarm__compute_1_1test_1_1framework_1_1_command_line_parser.xhtml", null ],
     [ "common_promoted_signed_type< T >", "structarm__compute_1_1test_1_1common__promoted__signed__type.xhtml", null ],
     [ "common_promoted_unsigned_type< T >", "structarm__compute_1_1test_1_1common__promoted__unsigned__type.xhtml", null ],
+    [ "CommonOptions", "classarm__compute_1_1test_1_1framework_1_1_common_options.xhtml", null ],
     [ "compare< T >", "structarm__compute_1_1test_1_1validation_1_1compare.xhtml", null ],
     [ "compare_base< T >", "structarm__compute_1_1test_1_1validation_1_1compare__base.xhtml", null ],
     [ "compare_base< AbsoluteTolerance< U > >", "structarm__compute_1_1test_1_1validation_1_1compare__base.xhtml", [
@@ -57,8 +57,8 @@ var hierarchy =
       [ "VGG16DirectConvolutionLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_v_g_g16_direct_convolution_layer_dataset.xhtml", null ],
       [ "YOLOV2ConvolutionLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_y_o_l_o_v2_convolution_layer_dataset.xhtml", null ]
     ] ],
-    [ "Coordinates2D", "struct_coordinates2_d.xhtml", null ],
     [ "Coordinates2D", "structarm__compute_1_1_coordinates2_d.xhtml", null ],
+    [ "Coordinates2D", "struct_coordinates2_d.xhtml", null ],
     [ "Coordinates3D", "structarm__compute_1_1_coordinates3_d.xhtml", null ],
     [ "CounterMapping", "structmali__userspace_1_1_counter_mapping.xhtml", null ],
     [ "CPUInfo", "structarm__compute_1_1_c_p_u_info.xhtml", null ],
@@ -73,6 +73,7 @@ var hierarchy =
           [ "Large2DShapes", "classarm__compute_1_1test_1_1datasets_1_1_large2_d_shapes.xhtml", null ],
           [ "Large3DShapes", "classarm__compute_1_1test_1_1datasets_1_1_large3_d_shapes.xhtml", null ],
           [ "Large4DShapes", "classarm__compute_1_1test_1_1datasets_1_1_large4_d_shapes.xhtml", null ],
+          [ "LargeImageShapes", "classarm__compute_1_1test_1_1datasets_1_1_large_image_shapes.xhtml", null ],
           [ "LargeShapes", "classarm__compute_1_1test_1_1datasets_1_1_large_shapes.xhtml", null ],
           [ "Medium2DShapes", "classarm__compute_1_1test_1_1datasets_1_1_medium2_d_shapes.xhtml", null ],
           [ "MediumShapes", "classarm__compute_1_1test_1_1datasets_1_1_medium_shapes.xhtml", null ],
@@ -82,6 +83,7 @@ var hierarchy =
           [ "Small4DShapes", "classarm__compute_1_1test_1_1datasets_1_1_small4_d_shapes.xhtml", null ],
           [ "SmallDeconvolutionShapes", "classarm__compute_1_1test_1_1datasets_1_1_small_deconvolution_shapes.xhtml", null ],
           [ "SmallDirectConvolutionShapes", "classarm__compute_1_1test_1_1datasets_1_1_small_direct_convolution_shapes.xhtml", null ],
+          [ "SmallImageShapes", "classarm__compute_1_1test_1_1datasets_1_1_small_image_shapes.xhtml", null ],
           [ "SmallShapes", "classarm__compute_1_1test_1_1datasets_1_1_small_shapes.xhtml", null ],
           [ "SoftmaxLayerLargeShapes", "classarm__compute_1_1test_1_1datasets_1_1_softmax_layer_large_shapes.xhtml", null ],
           [ "SoftmaxLayerSmallShapes", "classarm__compute_1_1test_1_1datasets_1_1_softmax_layer_small_shapes.xhtml", null ]
@@ -132,6 +134,7 @@ var hierarchy =
         [ "AlexNetActivationLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_alex_net_activation_layer_dataset.xhtml", null ],
         [ "GoogLeNetInceptionV1ActivationLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_goog_le_net_inception_v1_activation_layer_dataset.xhtml", null ],
         [ "GoogLeNetInceptionV4ActivationLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_goog_le_net_inception_v4_activation_layer_dataset.xhtml", null ],
+        [ "MobileNetActivationLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_mobile_net_activation_layer_dataset.xhtml", null ],
         [ "SqueezeNetActivationLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_squeeze_net_activation_layer_dataset.xhtml", null ],
         [ "VGG16ActivationLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_v_g_g16_activation_layer_dataset.xhtml", null ],
         [ "YOLOV2ActivationLayerLINEARDataset", "classarm__compute_1_1test_1_1datasets_1_1_y_o_l_o_v2_activation_layer_l_i_n_e_a_r_dataset.xhtml", null ],
@@ -174,6 +177,7 @@ var hierarchy =
     ] ],
     [ "enable_bitwise_ops< T >", "structarm__compute_1_1enable__bitwise__ops.xhtml", null ],
     [ "enable_bitwise_ops< arm_compute::GPUTarget >", "structarm__compute_1_1enable__bitwise__ops_3_01arm__compute_1_1_g_p_u_target_01_4.xhtml", null ],
+    [ "Example", "classarm__compute_1_1utils_1_1_example.xhtml", null ],
     [ "false_type", null, [
       [ "is_container< T >", "structarm__compute_1_1test_1_1framework_1_1dataset_1_1is__container.xhtml", null ],
       [ "is_contained< T, std::tuple<> >", "structarm__compute_1_1traits_1_1is__contained_3_01_t_00_01std_1_1tuple_3_4_01_4.xhtml", null ]
@@ -184,6 +188,17 @@ var hierarchy =
       [ "ActivationLayerFixture< TensorType, Function, Accessor >", "classarm__compute_1_1test_1_1_activation_layer_fixture.xhtml", null ],
       [ "AlexNetFixture< ITensorType, TensorType, SubTensorType, Accessor, ActivationLayerFunction, ConvolutionLayerFunction, DirectConvolutionLayerFunction, FullyConnectedLayerFunction, NormalizationLayerFunction, PoolingLayerFunction, SoftmaxLayerFunction >", "classarm__compute_1_1test_1_1_alex_net_fixture.xhtml", null ],
       [ "BatchNormalizationLayerFixture< TensorType, Function, Accessor >", "classarm__compute_1_1test_1_1_batch_normalization_layer_fixture.xhtml", null ],
+      [ "DepthConcatenateLayerFixture< TensorType, ITensorType, Function, AccessorType >", "classarm__compute_1_1test_1_1benchmark_1_1_depth_concatenate_layer_fixture.xhtml", null ],
+      [ "DequantizationLayerFixture< TensorType, Function, Accessor >", "classarm__compute_1_1test_1_1benchmark_1_1_dequantization_layer_fixture.xhtml", null ],
+      [ "FlattenLayerFixture< TensorType, Function, Accessor >", "classarm__compute_1_1test_1_1benchmark_1_1_flatten_layer_fixture.xhtml", null ],
+      [ "GEMMInterleave4x4Fixture< TensorType, Function, Accessor >", "classarm__compute_1_1test_1_1benchmark_1_1_g_e_m_m_interleave4x4_fixture.xhtml", null ],
+      [ "HarrisCornersFixture< TensorType, Function, Accessor, ArrayType >", "classarm__compute_1_1test_1_1benchmark_1_1_harris_corners_fixture.xhtml", null ],
+      [ "L2NormalizeLayerFixture< TensorType, Function, Accessor >", "classarm__compute_1_1test_1_1benchmark_1_1_l2_normalize_layer_fixture.xhtml", null ],
+      [ "MagnitudeFixture< TensorType, Function, Accessor >", "classarm__compute_1_1test_1_1benchmark_1_1_magnitude_fixture.xhtml", null ],
+      [ "QuantizationLayerFixture< TensorType, Function, Accessor >", "classarm__compute_1_1test_1_1benchmark_1_1_quantization_layer_fixture.xhtml", null ],
+      [ "ReshapeLayerFixture< TensorType, Function, Accessor >", "classarm__compute_1_1test_1_1benchmark_1_1_reshape_layer_fixture.xhtml", null ],
+      [ "ScaleFixture< TensorType, Function, Accessor >", "classarm__compute_1_1test_1_1benchmark_1_1_scale_fixture.xhtml", null ],
+      [ "TransposeFixture< TensorType, Function, Accessor >", "classarm__compute_1_1test_1_1benchmark_1_1_transpose_fixture.xhtml", null ],
       [ "ConvolutionLayerFixture< TensorType, Function, Accessor >", "classarm__compute_1_1test_1_1_convolution_layer_fixture.xhtml", null ],
       [ "DepthwiseConvolutionLayerFixture< TensorType, Function, Accessor >", "classarm__compute_1_1test_1_1_depthwise_convolution_layer_fixture.xhtml", null ],
       [ "DepthwiseSeparableConvolutionLayerFixture< TensorType, Function, Accessor >", "classarm__compute_1_1test_1_1_depthwise_separable_convolution_layer_fixture.xhtml", null ],
@@ -195,8 +210,10 @@ var hierarchy =
       [ "MobileNetFixture< TensorType, Accessor, ActivationLayerFunction, ConvolutionLayerFunction, DirectConvolutionLayerFunction, DepthwiseConvolutionLayerFunction, ReshapeFunction, PoolingLayerFunction >", "classarm__compute_1_1test_1_1_mobile_net_fixture.xhtml", null ],
       [ "MobileNetV1Fixture< TensorType, Accessor, ActivationLayerFunction, BatchNormalizationLayerFunction, ConvolutionLayerFunction, DirectConvolutionLayerFunction, DepthwiseConvolutionFunction, ReshapeFunction, PoolingLayerFunction, SoftmaxLayerFunction, InputSize >", "classarm__compute_1_1test_1_1_mobile_net_v1_fixture.xhtml", null ],
       [ "NormalizationLayerFixture< TensorType, Function, Accessor >", "classarm__compute_1_1test_1_1_normalization_layer_fixture.xhtml", null ],
+      [ "NormalizePlanarYUVLayerFixture< TensorType, Function, Accessor >", "classarm__compute_1_1test_1_1_normalize_planar_y_u_v_layer_fixture.xhtml", null ],
       [ "PoolingLayerFixture< TensorType, Function, Accessor >", "classarm__compute_1_1test_1_1_pooling_layer_fixture.xhtml", null ],
       [ "ROIPoolingLayerFixture< TensorType, Function, Accessor, Array_T, ArrayAccessor >", "classarm__compute_1_1test_1_1_r_o_i_pooling_layer_fixture.xhtml", null ],
+      [ "ScaleLayerFixture< TensorType, Function, Accessor, T >", "classarm__compute_1_1test_1_1_scale_layer_fixture.xhtml", null ],
       [ "SoftmaxLayerFixture< TensorType, Function, Accessor >", "classarm__compute_1_1test_1_1_softmax_layer_fixture.xhtml", null ],
       [ "AbsoluteDifferenceValidationFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_absolute_difference_validation_fixture.xhtml", null ],
       [ "AccumulateBaseValidationFixture< TensorType, AccessorType, FunctionType, T1, T2 >", "classarm__compute_1_1test_1_1validation_1_1_accumulate_base_validation_fixture.xhtml", [
@@ -223,6 +240,11 @@ var hierarchy =
       [ "BitwiseOrValidationFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_bitwise_or_validation_fixture.xhtml", null ],
       [ "BitwiseXorValidationFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_bitwise_xor_validation_fixture.xhtml", null ],
       [ "Box3x3ValidationFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_box3x3_validation_fixture.xhtml", null ],
+      [ "ConvolutionValidationFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_convolution_validation_fixture.xhtml", [
+        [ "ConvolutionRectangleValidationFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_convolution_rectangle_validation_fixture.xhtml", null ],
+        [ "ConvolutionSeparableValidationFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_convolution_separable_validation_fixture.xhtml", null ],
+        [ "ConvolutionSquareValidationFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_convolution_square_validation_fixture.xhtml", null ]
+      ] ],
       [ "ConvolutionValidationGenericFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_convolution_validation_generic_fixture.xhtml", [
         [ "ConvolutionValidationFixedPointFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_convolution_validation_fixed_point_fixture.xhtml", null ],
         [ "ConvolutionValidationFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_convolution_validation_fixture.xhtml", null ],
@@ -244,6 +266,7 @@ var hierarchy =
       [ "DequantizationValidationFixedPointFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_dequantization_validation_fixed_point_fixture.xhtml", [
         [ "DequantizationValidationFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_dequantization_validation_fixture.xhtml", null ]
       ] ],
+      [ "DerivativeValidationFixture< TensorType, AccessorType, FunctionType, T, U >", "classarm__compute_1_1test_1_1validation_1_1_derivative_validation_fixture.xhtml", null ],
       [ "DilateValidationFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_dilate_validation_fixture.xhtml", null ],
       [ "DirectConvolutionValidationGenericFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_direct_convolution_validation_generic_fixture.xhtml", [
         [ "DirectConvolutionValidationFixedPointFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_direct_convolution_validation_fixed_point_fixture.xhtml", null ],
@@ -274,11 +297,15 @@ var hierarchy =
       [ "GEMMLowpMatrixMultiplyCoreValidationFixture< TensorType, AccessorType, FunctionType >", "classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_lowp_matrix_multiply_core_validation_fixture.xhtml", null ],
       [ "GEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointValidationFixture< TensorType, AccessorType, FunctionType >", "classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_validation_fixture.xhtml", null ],
       [ "GEMMLowpQuantizeDownInt32ToUint8ScaleValidationFixture< TensorType, AccessorType, FunctionType >", "classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_validation_fixture.xhtml", null ],
+      [ "GEMMTranspose1xWValidationFixedPointFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_transpose1x_w_validation_fixed_point_fixture.xhtml", [
+        [ "GEMMTranspose1xWValidationFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_transpose1x_w_validation_fixture.xhtml", null ]
+      ] ],
       [ "GEMMValidationFixedPointFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_validation_fixed_point_fixture.xhtml", [
         [ "GEMMValidationFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_validation_fixture.xhtml", null ]
       ] ],
       [ "HarrisCornersValidationFixture< TensorType, AccessorType, ArrayType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_harris_corners_validation_fixture.xhtml", null ],
       [ "HistogramValidationFixture< TensorType, AccessorType, FunctionType, T, DistributionType >", "classarm__compute_1_1test_1_1validation_1_1_histogram_validation_fixture.xhtml", null ],
+      [ "HOGDescriptorValidationFixture< TensorType, HOGType, AccessorType, FunctionType, T, U >", "classarm__compute_1_1test_1_1validation_1_1_h_o_g_descriptor_validation_fixture.xhtml", null ],
       [ "IntegralImageValidationFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_integral_image_validation_fixture.xhtml", null ],
       [ "L2NormalizeLayerValidationFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_l2_normalize_layer_validation_fixture.xhtml", null ],
       [ "MagnitudeValidationFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_magnitude_validation_fixture.xhtml", null ],
@@ -288,6 +315,9 @@ var hierarchy =
       [ "NonLinearFilterValidationFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_non_linear_filter_validation_fixture.xhtml", null ],
       [ "NormalizationValidationFixedPointFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_normalization_validation_fixed_point_fixture.xhtml", [
         [ "NormalizationValidationFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_normalization_validation_fixture.xhtml", null ]
+      ] ],
+      [ "NormalizePlanarYUVLayerValidationFixedPointFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_normalize_planar_y_u_v_layer_validation_fixed_point_fixture.xhtml", [
+        [ "NormalizePlanarYUVLayerValidationFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_normalize_planar_y_u_v_layer_validation_fixture.xhtml", null ]
       ] ],
       [ "PermuteValidationFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_permute_validation_fixture.xhtml", null ],
       [ "PhaseValidationFixture< TensorType, AccessorType, FunctionType, T >", "classarm__compute_1_1test_1_1validation_1_1_phase_validation_fixture.xhtml", null ],
@@ -334,10 +364,8 @@ var hierarchy =
     [ "GCKernelLibrary", "classarm__compute_1_1_g_c_kernel_library.xhtml", null ],
     [ "GCProgram", "classarm__compute_1_1_g_c_program.xhtml", null ],
     [ "GCScheduler", "classarm__compute_1_1_g_c_scheduler.xhtml", null ],
-    [ "GemmCommon< To, Tr >", "class_gemm_common.xhtml", [
-      [ "GemmInterleaved< strategy, To, Tr >", "class_gemm_interleaved.xhtml", null ]
-    ] ],
     [ "GEMMDataset", "classarm__compute_1_1test_1_1datasets_1_1_g_e_m_m_dataset.xhtml", [
+      [ "AlexNetGEMMDataset", "classarm__compute_1_1test_1_1datasets_1_1_alex_net_g_e_m_m_dataset.xhtml", null ],
       [ "GoogleNetGEMMDataset", "classarm__compute_1_1test_1_1datasets_1_1_google_net_g_e_m_m_dataset.xhtml", null ],
       [ "GoogLeNetInceptionV1GEMMDataset", "classarm__compute_1_1test_1_1datasets_1_1_goog_le_net_inception_v1_g_e_m_m_dataset.xhtml", null ],
       [ "LargeGEMMDataset", "classarm__compute_1_1test_1_1datasets_1_1_large_g_e_m_m_dataset.xhtml", null ],
@@ -357,6 +385,10 @@ var hierarchy =
     [ "GraphContext", "classarm__compute_1_1graph_1_1_graph_context.xhtml", null ],
     [ "GraphHints", "classarm__compute_1_1graph_1_1_graph_hints.xhtml", null ],
     [ "HarrisCornersParameters", "structarm__compute_1_1test_1_1validation_1_1_harris_corners_parameters.xhtml", null ],
+    [ "HOGDescriptorDataset", "classarm__compute_1_1test_1_1datasets_1_1_h_o_g_descriptor_dataset.xhtml", [
+      [ "LargeHOGDescriptorDataset", "classarm__compute_1_1test_1_1datasets_1_1_large_h_o_g_descriptor_dataset.xhtml", null ],
+      [ "SmallHOGDescriptorDataset", "classarm__compute_1_1test_1_1datasets_1_1_small_h_o_g_descriptor_dataset.xhtml", null ]
+    ] ],
     [ "HOGInfo", "classarm__compute_1_1_h_o_g_info.xhtml", null ],
     [ "IAccessor", "classarm__compute_1_1test_1_1_i_accessor.xhtml", [
       [ "Accessor", "classarm__compute_1_1test_1_1_accessor.xhtml", null ],
@@ -367,6 +399,7 @@ var hierarchy =
       [ "SimpleTensor< int32_t >", "classarm__compute_1_1test_1_1_simple_tensor.xhtml", null ],
       [ "SimpleTensor< T2 >", "classarm__compute_1_1test_1_1_simple_tensor.xhtml", null ],
       [ "SimpleTensor< T3 >", "classarm__compute_1_1test_1_1_simple_tensor.xhtml", null ],
+      [ "SimpleTensor< U >", "classarm__compute_1_1test_1_1_simple_tensor.xhtml", null ],
       [ "SimpleTensor< uint32_t >", "classarm__compute_1_1test_1_1_simple_tensor.xhtml", null ],
       [ "SimpleTensor< uint8_t >", "classarm__compute_1_1test_1_1_simple_tensor.xhtml", [
         [ "RawTensor", "classarm__compute_1_1test_1_1_raw_tensor.xhtml", null ]
@@ -428,6 +461,8 @@ var hierarchy =
       [ "CLConvolutionLayer", "classarm__compute_1_1_c_l_convolution_layer.xhtml", null ],
       [ "CLConvolutionLayerReshapeWeights", "classarm__compute_1_1_c_l_convolution_layer_reshape_weights.xhtml", null ],
       [ "CLConvolutionSquare< matrix_size >", "classarm__compute_1_1_c_l_convolution_square.xhtml", null ],
+      [ "CLDeconvolutionLayer", "classarm__compute_1_1_c_l_deconvolution_layer.xhtml", null ],
+      [ "CLDeconvolutionLayerUpsample", "classarm__compute_1_1_c_l_deconvolution_layer_upsample.xhtml", null ],
       [ "CLDepthConcatenateLayer", "classarm__compute_1_1_c_l_depth_concatenate_layer.xhtml", null ],
       [ "CLDepthwiseConvolutionLayer", "classarm__compute_1_1_c_l_depthwise_convolution_layer.xhtml", null ],
       [ "CLDepthwiseConvolutionLayer3x3", "classarm__compute_1_1_c_l_depthwise_convolution_layer3x3.xhtml", null ],
@@ -465,11 +500,14 @@ var hierarchy =
       [ "CLSobel7x7", "classarm__compute_1_1_c_l_sobel7x7.xhtml", null ],
       [ "CLSoftmaxLayer", "classarm__compute_1_1_c_l_softmax_layer.xhtml", null ],
       [ "GCBatchNormalizationLayer", "classarm__compute_1_1_g_c_batch_normalization_layer.xhtml", null ],
+      [ "GCConvolutionLayer", "classarm__compute_1_1_g_c_convolution_layer.xhtml", null ],
+      [ "GCConvolutionLayerReshapeWeights", "classarm__compute_1_1_g_c_convolution_layer_reshape_weights.xhtml", null ],
       [ "GCDepthConcatenateLayer", "classarm__compute_1_1_g_c_depth_concatenate_layer.xhtml", null ],
       [ "GCDropoutLayer", "classarm__compute_1_1_g_c_dropout_layer.xhtml", null ],
       [ "GCFullyConnectedLayer", "classarm__compute_1_1_g_c_fully_connected_layer.xhtml", null ],
       [ "GCGEMM", "classarm__compute_1_1_g_c_g_e_m_m.xhtml", null ],
       [ "GCNormalizationLayer", "classarm__compute_1_1_g_c_normalization_layer.xhtml", null ],
+      [ "GCNormalizePlanarYUVLayer", "classarm__compute_1_1_g_c_normalize_planar_y_u_v_layer.xhtml", null ],
       [ "GCSoftmaxLayer", "classarm__compute_1_1_g_c_softmax_layer.xhtml", null ],
       [ "CLMap", "classarm__compute_1_1graph_1_1_c_l_map.xhtml", null ],
       [ "CLUnmap", "classarm__compute_1_1graph_1_1_c_l_unmap.xhtml", null ],
@@ -508,6 +546,7 @@ var hierarchy =
         [ "CLMedian3x3", "classarm__compute_1_1_c_l_median3x3.xhtml", null ],
         [ "CLNonLinearFilter", "classarm__compute_1_1_c_l_non_linear_filter.xhtml", null ],
         [ "CLNonMaximaSuppression3x3", "classarm__compute_1_1_c_l_non_maxima_suppression3x3.xhtml", null ],
+        [ "CLPermute", "classarm__compute_1_1_c_l_permute.xhtml", null ],
         [ "CLPhase", "classarm__compute_1_1_c_l_phase.xhtml", null ],
         [ "CLPixelWiseMultiplication", "classarm__compute_1_1_c_l_pixel_wise_multiplication.xhtml", null ],
         [ "CLPoolingLayer", "classarm__compute_1_1_c_l_pooling_layer.xhtml", null ],
@@ -521,7 +560,9 @@ var hierarchy =
         [ "CLThreshold", "classarm__compute_1_1_c_l_threshold.xhtml", null ],
         [ "CLTranspose", "classarm__compute_1_1_c_l_transpose.xhtml", null ],
         [ "CLWarpAffine", "classarm__compute_1_1_c_l_warp_affine.xhtml", null ],
-        [ "CLWarpPerspective", "classarm__compute_1_1_c_l_warp_perspective.xhtml", null ]
+        [ "CLWarpPerspective", "classarm__compute_1_1_c_l_warp_perspective.xhtml", null ],
+        [ "CLSynthetizeFunction< K >", "classarm__compute_1_1test_1_1_c_l_synthetize_function.xhtml", null ],
+        [ "CLSynthetizeFunctionWithZeroConstantBorder< K, bordersize >", "classarm__compute_1_1test_1_1_c_l_synthetize_function_with_zero_constant_border.xhtml", null ]
       ] ],
       [ "ICPPSimpleFunction", "classarm__compute_1_1_i_c_p_p_simple_function.xhtml", [
         [ "CPPPermute", "classarm__compute_1_1_c_p_p_permute.xhtml", null ]
@@ -529,6 +570,8 @@ var hierarchy =
       [ "IGCSimpleFunction", "classarm__compute_1_1_i_g_c_simple_function.xhtml", [
         [ "GCAbsoluteDifference", "classarm__compute_1_1_g_c_absolute_difference.xhtml", null ],
         [ "GCActivationLayer", "classarm__compute_1_1_g_c_activation_layer.xhtml", null ],
+        [ "GCArithmeticAddition", "classarm__compute_1_1_g_c_arithmetic_addition.xhtml", null ],
+        [ "GCDepthwiseConvolutionLayer3x3", "classarm__compute_1_1_g_c_depthwise_convolution_layer3x3.xhtml", null ],
         [ "GCDirectConvolutionLayer", "classarm__compute_1_1_g_c_direct_convolution_layer.xhtml", null ],
         [ "GCFillBorder", "classarm__compute_1_1_g_c_fill_border.xhtml", null ],
         [ "GCFullyConnectedLayerReshapeWeights", "classarm__compute_1_1_g_c_fully_connected_layer_reshape_weights.xhtml", null ],
@@ -536,6 +579,7 @@ var hierarchy =
         [ "GCGEMMTranspose1xW", "classarm__compute_1_1_g_c_g_e_m_m_transpose1x_w.xhtml", null ],
         [ "GCPixelWiseMultiplication", "classarm__compute_1_1_g_c_pixel_wise_multiplication.xhtml", null ],
         [ "GCPoolingLayer", "classarm__compute_1_1_g_c_pooling_layer.xhtml", null ],
+        [ "GCScale", "classarm__compute_1_1_g_c_scale.xhtml", null ],
         [ "GCTranspose", "classarm__compute_1_1_g_c_transpose.xhtml", null ]
       ] ],
       [ "INESimpleFunction", "classarm__compute_1_1_i_n_e_simple_function.xhtml", [
@@ -594,7 +638,6 @@ var hierarchy =
       [ "NEConvolutionLayerReshapeWeights", "classarm__compute_1_1_n_e_convolution_layer_reshape_weights.xhtml", null ],
       [ "NEConvolutionSquare< matrix_size >", "classarm__compute_1_1_n_e_convolution_square.xhtml", null ],
       [ "NEDeconvolutionLayer", "classarm__compute_1_1_n_e_deconvolution_layer.xhtml", null ],
-      [ "NEDeconvolutionLayerUpsample", "classarm__compute_1_1_n_e_deconvolution_layer_upsample.xhtml", null ],
       [ "NEDepthConcatenateLayer", "classarm__compute_1_1_n_e_depth_concatenate_layer.xhtml", null ],
       [ "NEDepthwiseConvolutionLayer", "classarm__compute_1_1_n_e_depthwise_convolution_layer.xhtml", null ],
       [ "NEDepthwiseConvolutionLayer3x3", "classarm__compute_1_1_n_e_depthwise_convolution_layer3x3.xhtml", null ],
@@ -660,6 +703,7 @@ var hierarchy =
         [ "CLColorConvertKernel", "classarm__compute_1_1_c_l_color_convert_kernel.xhtml", null ],
         [ "CLConvolutionRectangleKernel", "classarm__compute_1_1_c_l_convolution_rectangle_kernel.xhtml", null ],
         [ "CLCopyToArrayKernel", "classarm__compute_1_1_c_l_copy_to_array_kernel.xhtml", null ],
+        [ "CLDeconvolutionLayerUpsampleKernel", "classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel.xhtml", null ],
         [ "CLDepthConcatenateLayerKernel", "classarm__compute_1_1_c_l_depth_concatenate_layer_kernel.xhtml", null ],
         [ "CLDepthwiseConvolutionLayer3x3Kernel", "classarm__compute_1_1_c_l_depthwise_convolution_layer3x3_kernel.xhtml", null ],
         [ "CLDepthwiseIm2ColKernel", "classarm__compute_1_1_c_l_depthwise_im2_col_kernel.xhtml", null ],
@@ -706,6 +750,7 @@ var hierarchy =
         [ "CLMinMaxLayerKernel", "classarm__compute_1_1_c_l_min_max_layer_kernel.xhtml", null ],
         [ "CLMinMaxLocationKernel", "classarm__compute_1_1_c_l_min_max_location_kernel.xhtml", null ],
         [ "CLNormalizationLayerKernel", "classarm__compute_1_1_c_l_normalization_layer_kernel.xhtml", null ],
+        [ "CLPermuteKernel", "classarm__compute_1_1_c_l_permute_kernel.xhtml", null ],
         [ "CLPixelWiseMultiplicationKernel", "classarm__compute_1_1_c_l_pixel_wise_multiplication_kernel.xhtml", null ],
         [ "CLPoolingLayerKernel", "classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml", null ],
         [ "CLQuantizationLayerKernel", "classarm__compute_1_1_c_l_quantization_layer_kernel.xhtml", null ],
@@ -819,7 +864,6 @@ var hierarchy =
         [ "NEColorConvertKernel", "classarm__compute_1_1_n_e_color_convert_kernel.xhtml", null ],
         [ "NEConvolutionRectangleKernel", "classarm__compute_1_1_n_e_convolution_rectangle_kernel.xhtml", null ],
         [ "NECumulativeDistributionKernel", "classarm__compute_1_1_n_e_cumulative_distribution_kernel.xhtml", null ],
-        [ "NEDeconvolutionLayerUpsampleKernel", "classarm__compute_1_1_n_e_deconvolution_layer_upsample_kernel.xhtml", null ],
         [ "NEDepthConcatenateLayerKernel", "classarm__compute_1_1_n_e_depth_concatenate_layer_kernel.xhtml", null ],
         [ "NEDepthConvertLayerKernel", "classarm__compute_1_1_n_e_depth_convert_layer_kernel.xhtml", null ],
         [ "NEDepthwiseConvolutionLayer3x3Kernel", "classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml", null ],
@@ -828,8 +872,8 @@ var hierarchy =
         [ "NEDepthwiseWeightsReshapeKernel", "classarm__compute_1_1_n_e_depthwise_weights_reshape_kernel.xhtml", null ],
         [ "NEDequantizationLayerKernel", "classarm__compute_1_1_n_e_dequantization_layer_kernel.xhtml", null ],
         [ "NEDerivativeKernel", "classarm__compute_1_1_n_e_derivative_kernel.xhtml", null ],
-        [ "NEDirectConvolutionLayerBiasAccumulateKernel", "classarm__compute_1_1_n_e_direct_convolution_layer_bias_accumulate_kernel.xhtml", null ],
         [ "NEDirectConvolutionLayerKernel", "classarm__compute_1_1_n_e_direct_convolution_layer_kernel.xhtml", null ],
+        [ "NEDirectConvolutionLayerOutputStageKernel", "classarm__compute_1_1_n_e_direct_convolution_layer_output_stage_kernel.xhtml", null ],
         [ "NEEdgeNonMaxSuppressionKernel", "classarm__compute_1_1_n_e_edge_non_max_suppression_kernel.xhtml", null ],
         [ "NEEdgeTraceKernel", "classarm__compute_1_1_n_e_edge_trace_kernel.xhtml", null ],
         [ "NEFastCornersKernel", "classarm__compute_1_1_n_e_fast_corners_kernel.xhtml", null ],
@@ -890,9 +934,11 @@ var hierarchy =
       [ "IGCKernel", "classarm__compute_1_1_i_g_c_kernel.xhtml", [
         [ "GCAbsoluteDifferenceKernel", "classarm__compute_1_1_g_c_absolute_difference_kernel.xhtml", null ],
         [ "GCActivationLayerKernel", "classarm__compute_1_1_g_c_activation_layer_kernel.xhtml", null ],
+        [ "GCArithmeticAdditionKernel", "classarm__compute_1_1_g_c_arithmetic_addition_kernel.xhtml", null ],
         [ "GCBatchNormalizationLayerKernel", "classarm__compute_1_1_g_c_batch_normalization_layer_kernel.xhtml", null ],
         [ "GCCol2ImKernel", "classarm__compute_1_1_g_c_col2_im_kernel.xhtml", null ],
         [ "GCDepthConcatenateLayerKernel", "classarm__compute_1_1_g_c_depth_concatenate_layer_kernel.xhtml", null ],
+        [ "GCDepthwiseConvolutionLayer3x3Kernel", "classarm__compute_1_1_g_c_depthwise_convolution_layer3x3_kernel.xhtml", null ],
         [ "GCDirectConvolutionLayerKernel< kernel_size >", "classarm__compute_1_1_g_c_direct_convolution_layer_kernel.xhtml", null ],
         [ "GCDropoutLayerKernel", "classarm__compute_1_1_g_c_dropout_layer_kernel.xhtml", null ],
         [ "GCFillBorderKernel", "classarm__compute_1_1_g_c_fill_border_kernel.xhtml", null ],
@@ -904,11 +950,14 @@ var hierarchy =
         [ "GCLogits1DNormKernel", "classarm__compute_1_1_g_c_logits1_d_norm_kernel.xhtml", null ],
         [ "GCLogits1DShiftExpSumKernel", "classarm__compute_1_1_g_c_logits1_d_shift_exp_sum_kernel.xhtml", null ],
         [ "GCNormalizationLayerKernel", "classarm__compute_1_1_g_c_normalization_layer_kernel.xhtml", null ],
+        [ "GCNormalizePlanarYUVLayerKernel", "classarm__compute_1_1_g_c_normalize_planar_y_u_v_layer_kernel.xhtml", null ],
         [ "GCPixelWiseMultiplicationKernel", "classarm__compute_1_1_g_c_pixel_wise_multiplication_kernel.xhtml", null ],
         [ "GCPoolingLayerKernel", "classarm__compute_1_1_g_c_pooling_layer_kernel.xhtml", null ],
+        [ "GCWeightsReshapeKernel", "classarm__compute_1_1_g_c_weights_reshape_kernel.xhtml", null ],
         [ "IGCSimpleKernel", "classarm__compute_1_1_i_g_c_simple_kernel.xhtml", [
           [ "IGCSimple2DKernel", "classarm__compute_1_1_i_g_c_simple2_d_kernel.xhtml", [
             [ "GCGEMMTranspose1xWKernel", "classarm__compute_1_1_g_c_g_e_m_m_transpose1x_w_kernel.xhtml", null ],
+            [ "GCScaleKernel", "classarm__compute_1_1_g_c_scale_kernel.xhtml", null ],
             [ "GCTransposeKernel", "classarm__compute_1_1_g_c_transpose_kernel.xhtml", null ],
             [ "IGCSimple3DKernel", "classarm__compute_1_1_i_g_c_simple3_d_kernel.xhtml", [
               [ "GCLogits1DMaxKernel", "classarm__compute_1_1_g_c_logits1_d_max_kernel.xhtml", null ]
@@ -939,6 +988,10 @@ var hierarchy =
       [ "LutAllocator", "classarm__compute_1_1_lut_allocator.xhtml", null ]
     ] ],
     [ "Image", "struct_image.xhtml", null ],
+    [ "ImageFileDataset", "classarm__compute_1_1test_1_1datasets_1_1_image_file_dataset.xhtml", [
+      [ "LargeImageFiles", "classarm__compute_1_1test_1_1datasets_1_1_large_image_files.xhtml", null ],
+      [ "SmallImageFiles", "classarm__compute_1_1test_1_1datasets_1_1_small_image_files.xhtml", null ]
+    ] ],
     [ "IMemoryGroup", "classarm__compute_1_1_i_memory_group.xhtml", [
       [ "MemoryGroupBase< TensorType >", "classarm__compute_1_1_memory_group_base.xhtml", null ],
       [ "MemoryGroupBase< CLTensor >", "classarm__compute_1_1_memory_group_base.xhtml", null ],
@@ -1041,12 +1094,17 @@ var hierarchy =
     [ "BatchNormalizationLayerDataset::iterator", "structarm__compute_1_1test_1_1datasets_1_1_batch_normalization_layer_dataset_1_1iterator.xhtml", null ],
     [ "ConvolutionLayerDataset::iterator", "structarm__compute_1_1test_1_1datasets_1_1_convolution_layer_dataset_1_1iterator.xhtml", null ],
     [ "DepthwiseConvolutionLayerDataset::iterator", "structarm__compute_1_1test_1_1datasets_1_1_depthwise_convolution_layer_dataset_1_1iterator.xhtml", null ],
+    [ "DepthwiseSeparableConvolutionLayerDataset::iterator", "structarm__compute_1_1test_1_1datasets_1_1_depthwise_separable_convolution_layer_dataset_1_1iterator.xhtml", null ],
     [ "FullyConnectedLayerDataset::iterator", "structarm__compute_1_1test_1_1datasets_1_1_fully_connected_layer_dataset_1_1iterator.xhtml", null ],
     [ "GEMMDataset::iterator", "structarm__compute_1_1test_1_1datasets_1_1_g_e_m_m_dataset_1_1iterator.xhtml", null ],
     [ "GEMMLowpDataset::iterator", "structarm__compute_1_1test_1_1datasets_1_1_g_e_m_m_lowp_dataset_1_1iterator.xhtml", null ],
+    [ "HOGDescriptorDataset::iterator", "structarm__compute_1_1test_1_1datasets_1_1_h_o_g_descriptor_dataset_1_1iterator.xhtml", null ],
+    [ "ImageFileDataset::iterator", "structarm__compute_1_1test_1_1datasets_1_1_image_file_dataset_1_1iterator.xhtml", null ],
+    [ "NormalizePlanarYUVLayerDataset::iterator", "structarm__compute_1_1test_1_1datasets_1_1_normalize_planar_y_u_v_layer_dataset_1_1iterator.xhtml", null ],
     [ "PoolingLayerDataset::iterator", "structarm__compute_1_1test_1_1datasets_1_1_pooling_layer_dataset_1_1iterator.xhtml", null ],
     [ "ReshapeLayerDataset::iterator", "structarm__compute_1_1test_1_1datasets_1_1_reshape_layer_dataset_1_1iterator.xhtml", null ],
     [ "ROIPoolingLayerDataset::iterator", "structarm__compute_1_1test_1_1datasets_1_1_r_o_i_pooling_layer_dataset_1_1iterator.xhtml", null ],
+    [ "ScaleLayerDataset::iterator", "structarm__compute_1_1test_1_1datasets_1_1_scale_layer_dataset_1_1iterator.xhtml", null ],
     [ "ThresholdDataset::iterator", "structarm__compute_1_1test_1_1datasets_1_1_threshold_dataset_1_1iterator.xhtml", null ],
     [ "CartesianProductDataset< T, U >::iterator", "structarm__compute_1_1test_1_1framework_1_1dataset_1_1_cartesian_product_dataset_1_1iterator.xhtml", null ],
     [ "ContainerDataset< T >::iterator", "structarm__compute_1_1test_1_1framework_1_1dataset_1_1_container_dataset_1_1iterator.xhtml", null ],
@@ -1055,13 +1113,11 @@ var hierarchy =
     [ "RangeDataset< T >::iterator", "structarm__compute_1_1test_1_1framework_1_1dataset_1_1_range_dataset_1_1iterator.xhtml", null ],
     [ "SingletonDataset< T >::iterator", "structarm__compute_1_1test_1_1framework_1_1dataset_1_1_singleton_dataset_1_1iterator.xhtml", null ],
     [ "ZipDataset< T, U >::iterator", "structarm__compute_1_1test_1_1framework_1_1dataset_1_1_zip_dataset_1_1iterator.xhtml", null ],
-    [ "DepthwiseSeparableConvolutionLayerDataset::iterator", "structarm__compute_1_1test_1_1datasets_1_1_depthwise_separable_convolution_layer_dataset_1_1iterator.xhtml", null ],
     [ "kbase_hwcnt_reader_metadata", "structmali__userspace_1_1kbase__hwcnt__reader__metadata.xhtml", null ],
     [ "kbase_uk_gpuprops", "structmali__userspace_1_1kbase__uk__gpuprops.xhtml", null ],
     [ "Kernel", "classarm__compute_1_1_kernel.xhtml", null ],
-    [ "KernelShape", "struct_kernel_shape.xhtml", null ],
-    [ "Keypoint", "struct_keypoint.xhtml", null ],
     [ "KeyPoint", "structarm__compute_1_1_key_point.xhtml", null ],
+    [ "Keypoint", "struct_keypoint.xhtml", null ],
     [ "LeNet5Network< TensorType, Accessor, ActivationLayerFunction, ConvolutionLayerFunction, FullyConnectedLayerFunction, PoolingLayerFunction, SoftmaxLayerFunction >", "classarm__compute_1_1test_1_1networks_1_1_le_net5_network.xhtml", null ],
     [ "LeNet5Network< TensorType, arm_compute::test::Accessor, ActivationLayerFunction, ConvolutionLayerFunction, FullyConnectedLayerFunction, PoolingLayerFunction, SoftmaxLayerFunction >", "classarm__compute_1_1test_1_1networks_1_1_le_net5_network.xhtml", null ],
     [ "Logger", "classarm__compute_1_1logging_1_1_logger.xhtml", null ],
@@ -1091,6 +1147,10 @@ var hierarchy =
       [ "NodeParameter< T >", "classarm__compute_1_1graph_1_1_node_parameter.xhtml", null ]
     ] ],
     [ "NormalizationLayerInfo", "classarm__compute_1_1_normalization_layer_info.xhtml", null ],
+    [ "NormalizePlanarYUVLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_normalize_planar_y_u_v_layer_dataset.xhtml", [
+      [ "GoogLeNetInceptionV4NormalizePlanarYUVLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_goog_le_net_inception_v4_normalize_planar_y_u_v_layer_dataset.xhtml", null ],
+      [ "RandomNormalizePlanarYUVLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_random_normalize_planar_y_u_v_layer_dataset.xhtml", null ]
+    ] ],
     [ "NPYLoader", "classarm__compute_1_1utils_1_1_n_p_y_loader.xhtml", null ],
     [ "OperationRegistrar< T >", "classarm__compute_1_1graph_1_1detail_1_1_operation_registrar.xhtml", null ],
     [ "OperationRegistry", "classarm__compute_1_1graph_1_1_operation_registry.xhtml", null ],
@@ -1100,9 +1160,18 @@ var hierarchy =
       [ "SimpleOption< T >", "classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml", [
         [ "EnumOption< T >", "classarm__compute_1_1test_1_1framework_1_1_enum_option.xhtml", null ]
       ] ],
+      [ "EnumListOption< InstrumentsDescription >", "classarm__compute_1_1test_1_1framework_1_1_enum_list_option.xhtml", null ],
       [ "SimpleOption< bool >", "classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml", [
         [ "ToggleOption", "classarm__compute_1_1test_1_1framework_1_1_toggle_option.xhtml", null ]
-      ] ]
+      ] ],
+      [ "SimpleOption< int >", "classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml", null ],
+      [ "SimpleOption< LogFormat >", "classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml", [
+        [ "EnumOption< LogFormat >", "classarm__compute_1_1test_1_1framework_1_1_enum_option.xhtml", null ]
+      ] ],
+      [ "SimpleOption< LogLevel >", "classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml", [
+        [ "EnumOption< LogLevel >", "classarm__compute_1_1test_1_1framework_1_1_enum_option.xhtml", null ]
+      ] ],
+      [ "SimpleOption< std::string >", "classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml", null ]
     ] ],
     [ "PaddingCalculator", "classarm__compute_1_1test_1_1_padding_calculator.xhtml", null ],
     [ "PadStrideInfo", "classarm__compute_1_1_pad_stride_info.xhtml", null ],
@@ -1119,32 +1188,31 @@ var hierarchy =
     ] ],
     [ "PoolingLayerInfo", "classarm__compute_1_1_pooling_layer_info.xhtml", null ],
     [ "PPMLoader", "classarm__compute_1_1utils_1_1_p_p_m_loader.xhtml", null ],
-    [ "Printer", "classarm__compute_1_1test_1_1framework_1_1_printer.xhtml", [
-      [ "JSONPrinter", "classarm__compute_1_1test_1_1framework_1_1_j_s_o_n_printer.xhtml", null ],
-      [ "PrettyPrinter", "classarm__compute_1_1test_1_1framework_1_1_pretty_printer.xhtml", null ]
-    ] ],
     [ "Printer", "classarm__compute_1_1logging_1_1_printer.xhtml", [
       [ "FilePrinter", "classarm__compute_1_1logging_1_1_file_printer.xhtml", null ],
       [ "StdPrinter", "classarm__compute_1_1logging_1_1_std_printer.xhtml", null ]
     ] ],
+    [ "Printer", "classarm__compute_1_1test_1_1framework_1_1_printer.xhtml", [
+      [ "JSONPrinter", "classarm__compute_1_1test_1_1framework_1_1_j_s_o_n_printer.xhtml", null ],
+      [ "PrettyPrinter", "classarm__compute_1_1test_1_1framework_1_1_pretty_printer.xhtml", null ]
+    ] ],
     [ "Profiler", "classarm__compute_1_1test_1_1framework_1_1_profiler.xhtml", null ],
-    [ "profiler", "classprofiler.xhtml", null ],
     [ "Program", "classarm__compute_1_1_program.xhtml", null ],
     [ "promote< T >", "structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote.xhtml", null ],
     [ "promote< T >", "structarm__compute_1_1test_1_1traits_1_1promote.xhtml", null ],
     [ "promote< float >", "structarm__compute_1_1test_1_1traits_1_1promote_3_01float_01_4.xhtml", null ],
     [ "promote< half >", "structarm__compute_1_1test_1_1traits_1_1promote_3_01half_01_4.xhtml", null ],
-    [ "promote< int16_t >", "structarm__compute_1_1test_1_1traits_1_1promote_3_01int16__t_01_4.xhtml", null ],
     [ "promote< int16_t >", "structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote_3_01int16__t_01_4.xhtml", null ],
-    [ "promote< int32_t >", "structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote_3_01int32__t_01_4.xhtml", null ],
+    [ "promote< int16_t >", "structarm__compute_1_1test_1_1traits_1_1promote_3_01int16__t_01_4.xhtml", null ],
     [ "promote< int32_t >", "structarm__compute_1_1test_1_1traits_1_1promote_3_01int32__t_01_4.xhtml", null ],
+    [ "promote< int32_t >", "structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote_3_01int32__t_01_4.xhtml", null ],
     [ "promote< int64_t >", "structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote_3_01int64__t_01_4.xhtml", null ],
     [ "promote< int8_t >", "structarm__compute_1_1test_1_1traits_1_1promote_3_01int8__t_01_4.xhtml", null ],
     [ "promote< int8_t >", "structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote_3_01int8__t_01_4.xhtml", null ],
-    [ "promote< uint16_t >", "structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote_3_01uint16__t_01_4.xhtml", null ],
     [ "promote< uint16_t >", "structarm__compute_1_1test_1_1traits_1_1promote_3_01uint16__t_01_4.xhtml", null ],
-    [ "promote< uint32_t >", "structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote_3_01uint32__t_01_4.xhtml", null ],
+    [ "promote< uint16_t >", "structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote_3_01uint16__t_01_4.xhtml", null ],
     [ "promote< uint32_t >", "structarm__compute_1_1test_1_1traits_1_1promote_3_01uint32__t_01_4.xhtml", null ],
+    [ "promote< uint32_t >", "structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote_3_01uint32__t_01_4.xhtml", null ],
     [ "promote< uint64_t >", "structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote_3_01uint64__t_01_4.xhtml", null ],
     [ "promote< uint8_t >", "structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote_3_01uint8__t_01_4.xhtml", null ],
     [ "promote< uint8_t >", "structarm__compute_1_1test_1_1traits_1_1promote_3_01uint8__t_01_4.xhtml", null ],
@@ -1165,14 +1233,17 @@ var hierarchy =
       [ "FileNotFound", "classarm__compute_1_1test_1_1framework_1_1_file_not_found.xhtml", null ],
       [ "TestError", "classarm__compute_1_1test_1_1framework_1_1_test_error.xhtml", null ]
     ] ],
+    [ "ScaleLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_scale_layer_dataset.xhtml", [
+      [ "LargeScaleLayerShapes", "classarm__compute_1_1test_1_1datasets_1_1_large_scale_layer_shapes.xhtml", null ],
+      [ "SmallScaleLayerShapes", "classarm__compute_1_1test_1_1datasets_1_1_small_scale_layer_shapes.xhtml", null ]
+    ] ],
     [ "Scheduler", "classarm__compute_1_1_scheduler.xhtml", null ],
     [ "Semaphore", "classarm__compute_1_1_semaphore.xhtml", null ],
     [ "Size2D", "classarm__compute_1_1_size2_d.xhtml", null ],
     [ "Status", "classarm__compute_1_1_status.xhtml", null ],
     [ "SubGraph", "classarm__compute_1_1graph_1_1_sub_graph.xhtml", null ],
     [ "Tensor3D", "struct_tensor3_d.xhtml", null ],
-    [ "Tensor4D< ShapeT, T >", "class_tensor4_d.xhtml", null ],
-    [ "Tensor4DShape", "struct_tensor4_d_shape.xhtml", null ],
+    [ "Tensor4D", "struct_tensor4_d.xhtml", null ],
     [ "TensorCache", "classarm__compute_1_1test_1_1_tensor_cache.xhtml", null ],
     [ "TestCase", "classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml", [
       [ "DataTestCase< T >", "classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml", null ],
@@ -1184,6 +1255,8 @@ var hierarchy =
       [ "DataTestCase< decltype(framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4ActivationLayerDataset(), data_types), framework::dataset::make(\"Batches\",{4, 8})))::type >", "classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml", null ],
       [ "DataTestCase< decltype(framework::dataset::combine(framework::dataset::combine(datasets::LeNet5ActivationLayerDataset(), data_types), framework::dataset::make(\"Batches\", 1)))::type >", "classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml", null ],
       [ "DataTestCase< decltype(framework::dataset::combine(framework::dataset::combine(datasets::LeNet5ActivationLayerDataset(), data_types), framework::dataset::make(\"Batches\",{4, 8})))::type >", "classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml", null ],
+      [ "DataTestCase< decltype(framework::dataset::combine(framework::dataset::combine(datasets::MobileNetActivationLayerDataset(), data_types_mobilenet), framework::dataset::make(\"Batches\", 1)))::type >", "classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml", null ],
+      [ "DataTestCase< decltype(framework::dataset::combine(framework::dataset::combine(datasets::MobileNetActivationLayerDataset(), data_types_mobilenet), framework::dataset::make(\"Batches\",{4, 8})))::type >", "classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml", null ],
       [ "DataTestCase< decltype(framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetActivationLayerDataset(), data_types), framework::dataset::make(\"Batches\", 1)))::type >", "classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml", null ],
       [ "DataTestCase< decltype(framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetActivationLayerDataset(), data_types), framework::dataset::make(\"Batches\",{4, 8})))::type >", "classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml", null ],
       [ "DataTestCase< decltype(framework::dataset::combine(framework::dataset::combine(datasets::VGG16ActivationLayerDataset(), data_types), framework::dataset::make(\"Batches\", 1)))::type >", "classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml", null ],
@@ -1204,8 +1277,6 @@ var hierarchy =
     [ "ThresholdDataset", "classarm__compute_1_1test_1_1datasets_1_1_threshold_dataset.xhtml", [
       [ "MixedThresholdDataset", "classarm__compute_1_1test_1_1datasets_1_1_mixed_threshold_dataset.xhtml", null ]
     ] ],
-    [ "TransformImpl< IntBy, BlockBy, Transposed, TOutSize, TInSize >", "struct_transform_impl.xhtml", null ],
-    [ "TransposeInterleaveCommon< IntBy, TIn, TOut >", "struct_transpose_interleave_common.xhtml", null ],
     [ "true_type", null, [
       [ "is_container< std::vector< V, A > >", "structarm__compute_1_1test_1_1framework_1_1dataset_1_1is__container_3_01std_1_1vector_3_01_v_00_01_a_01_4_01_4.xhtml", null ],
       [ "is_floating_point< half >", "structarm__compute_1_1test_1_1validation_1_1is__floating__point_3_01half_01_4.xhtml", null ],

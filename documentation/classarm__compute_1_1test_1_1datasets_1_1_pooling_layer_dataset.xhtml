@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -205,8 +205,9 @@ Public Member Functions</h2></td></tr>
 <p>Definition at line <a class="el" href="_pooling_layer_dataset_8h_source.xhtml#l00092">92</a> of file <a class="el" href="_pooling_layer_dataset_8h_source.xhtml">PoolingLayerDataset.h</a>.</p>
 
 <p>Referenced by <a class="el" href="_alex_net_pooling_layer_dataset_8h_source.xhtml#l00043">AlexNetPoolingLayerDataset::AlexNetPoolingLayerDataset()</a>, <a class="el" href="_goog_le_net_inception_v1_pooling_layer_dataset_8h_source.xhtml#l00043">GoogLeNetInceptionV1PoolingLayerDataset::GoogLeNetInceptionV1PoolingLayerDataset()</a>, <a class="el" href="_goog_le_net_inception_v4_pooling_layer_dataset_8h_source.xhtml#l00043">GoogLeNetInceptionV4PoolingLayerDataset::GoogLeNetInceptionV4PoolingLayerDataset()</a>, <a class="el" href="_le_net5_pooling_layer_dataset_8h_source.xhtml#l00043">LeNet5PoolingLayerDataset::LeNet5PoolingLayerDataset()</a>, <a class="el" href="_squeeze_net_pooling_layer_dataset_8h_source.xhtml#l00043">SqueezeNetPoolingLayerDataset::SqueezeNetPoolingLayerDataset()</a>, <a class="el" href="_v_g_g16_pooling_layer_dataset_8h_source.xhtml#l00043">VGG16PoolingLayerDataset::VGG16PoolingLayerDataset()</a>, and <a class="el" href="_y_o_l_o_v2_pooling_layer_dataset_8h_source.xhtml#l00043">YOLOV2PoolingLayerDataset::YOLOV2PoolingLayerDataset()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    {</div><div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;        _src_shapes.emplace_back(std::move(src));</div><div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;        _dst_shapes.emplace_back(std::move(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#adbf67dcee294e673cf796f1ed8aeb6a4">dst</a>));</div><div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;        _infos.emplace_back(std::move(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">info</a>));</div><div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a096668313a9a819d54a2e65ec21ff0cc"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">arm_compute::test::validation::info</a></div><div class="ttdeci">src info() -&gt; set_format(Format::S16)</div></div>
-<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_adbf67dcee294e673cf796f1ed8aeb6a4"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#adbf67dcee294e673cf796f1ed8aeb6a4">arm_compute::test::validation::dst</a></div><div class="ttdeci">Tensor dst</div><div class="ttdef"><b>Definition:</b> <a href="validation_2_n_e_o_n_2_g_e_m_m_8cpp_source.xhtml#l00118">GEMM.cpp:118</a></div></div>
+<div class="fragment"><div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    {</div><div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;        _src_shapes.emplace_back(std::move(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a6743f0a130e8311e6f5b1a23df102472">src</a>));</div><div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;        _dst_shapes.emplace_back(std::move(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#adbf67dcee294e673cf796f1ed8aeb6a4">dst</a>));</div><div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;        _infos.emplace_back(std::move(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">info</a>));</div><div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a096668313a9a819d54a2e65ec21ff0cc"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">arm_compute::test::validation::info</a></div><div class="ttdeci">src info() -&gt; set_format(Format::S16)</div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_adbf67dcee294e673cf796f1ed8aeb6a4"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#adbf67dcee294e673cf796f1ed8aeb6a4">arm_compute::test::validation::dst</a></div><div class="ttdeci">CLTensor dst</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_2_convolution_8cpp_source.xhtml#l00123">Convolution.cpp:123</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a6743f0a130e8311e6f5b1a23df102472"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a6743f0a130e8311e6f5b1a23df102472">arm_compute::test::validation::src</a></div><div class="ttdeci">convolution configure &amp; src</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_2_convolution_8cpp_source.xhtml#l00133">Convolution.cpp:133</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -247,7 +248,6 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">int size </td>
           <td>(</td>
-          <td class="paramtype">void&#160;</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
         </tr>
@@ -275,7 +275,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test.xhtml">test</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test_1_1datasets.xhtml">datasets</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_pooling_layer_dataset.xhtml">PoolingLayerDataset</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:37 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:47 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

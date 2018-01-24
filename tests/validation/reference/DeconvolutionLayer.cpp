@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,26 +39,27 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
                                     const PadStrideInfo &info, const std::pair<unsigned int, unsigned int> &a)
 {
     // Create reference
+    const int   stride_x     = info.stride().first;
+    const int   stride_y     = info.stride().second;
     TensorShape scaled_shape = src.shape();
-    scaled_shape.set(0, output_shape.x());
-    scaled_shape.set(1, output_shape.y());
+    int         out_x        = src.shape().x() + (src.shape().x() - 1) * (stride_x - 1) + a.first + 2 * info.pad().first;
+    int         out_y        = src.shape().y() + (src.shape().y() - 1) * (stride_y - 1) + a.second + 2 * info.pad().second;
+    scaled_shape.set(0, out_x);
+    scaled_shape.set(1, out_y);
     SimpleTensor<T> scaled{ scaled_shape, src.data_type(), 1, src.fixed_point_position() };
 
-    const int          width_in      = src.shape().x();
-    const int          height_in     = src.shape().y();
-    const int          width_scaled  = scaled.shape().x();
-    const int          height_scaled = scaled.shape().y();
-    const int          num_2d_slices = src.shape().total_size() / (width_in * height_in);
-    const float        width_ratio   = static_cast<float>(width_in) / static_cast<float>(width_scaled);
-    const float        height_ratio  = static_cast<float>(height_in) / static_cast<float>(height_scaled);
-    const int          ax            = a.first;  // The number of zeros added to right edge of the input.
-    const int          ay            = a.second; // The number of zeros added to bottom edge of the input.
-    const unsigned int kernel_size   = weights.shape().x();
-    ARM_COMPUTE_ERROR_ON(info.pad().first > (kernel_size - 1));
-    const int transposed_convolution_padx = kernel_size - info.pad().first - 1;
-    const int transposed_convolution_pady = kernel_size - info.pad().second - 1;
-    const int stridex                     = info.stride().first;
-    const int stridey                     = info.stride().second;
+    const int width_in      = src.shape().x();
+    const int height_in     = src.shape().y();
+    const int width_scaled  = scaled.shape().x();
+    const int height_scaled = scaled.shape().y();
+    const int num_2d_slices = src.shape().total_size() / (width_in * height_in);
+    const int ax            = a.first;  // The number of zeros added to right edge of the input.
+    const int ay            = a.second; // The number of zeros added to top edge of the input.
+    ARM_COMPUTE_ERROR_ON(info.pad().first > (weights.shape().x() - 1));
+
+    ARM_COMPUTE_ERROR_ON_MSG(ax > stride_x - 1, "ax must be smaller than stride_x");
+    ARM_COMPUTE_ERROR_ON_MSG(ay > stride_y - 1, "ay must be smaller than stride_y");
+
     for(int j = 0; j < scaled.num_elements(); ++j)
     {
         scaled[j] = T(0);
@@ -68,34 +69,23 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
     {
         const int offset_slice_in  = slice * width_in * height_in;
         const int offset_slice_out = slice * width_scaled * height_scaled;
-        for(int yi = ay; yi < height_scaled; yi += stridey)
+        const int start_x          = info.pad().first;
+        const int start_y          = ay + info.pad().second;
+        const int end_y            = height_scaled - info.pad().second;
+        const int end_x            = width_scaled - ax - info.pad().first;
+
+        for(int yi = start_y, in_y = 0; yi < end_y; yi += stride_y, in_y++)
         {
-            for(int xi = transposed_convolution_padx; xi < width_scaled; xi += stridex)
+            for(int xi = start_x, in_x = 0; xi < end_x; xi += stride_x, in_x++)
             {
-                const float x_src     = (xi + 0.5f) * width_ratio - 0.5f;
-                const float y_src     = (yi + 0.5f) * height_ratio - 0.5f;
-                T          *out       = scaled.data() + offset_slice_out + xi + yi * width_scaled;
-                const bool  in_bounds = x_src > -1 && y_src > -1 && x_src < width_in && y_src < height_in;
-                const bool  in_axy    = xi < transposed_convolution_padx || xi >= (width_scaled - ax)  // this is checking if the x coordinate is in the padded left/right area
-                                        || yi < ay || yi >= (height_scaled - transposed_convolution_pady); // like above but top and bottom padding in the upscaled XY plane
-                if(!in_axy)
-                {
-                    if(in_bounds)
-                    {
-                        const int in_scaled_x = (x_src < 0.f) ? static_cast<int>(x_src - 0.5f) : static_cast<int>(x_src + 0.5f);
-                        const int in_scaled_y = (y_src < 0.f) ? static_cast<int>(y_src - 0.5f) : static_cast<int>(y_src + 0.5f);
-                        const T *in          = src.data() + offset_slice_in + in_scaled_x + in_scaled_y * width_in;
-                        *out                  = *in;
-                    }
-                    else
-                    {
-                        *out = T(0);
-                    }
-                }
+                const T *in  = src.data() + offset_slice_in + in_y * width_in + in_x;
+                T       *out = scaled.data() + offset_slice_out + xi + yi * width_scaled;
+                *out         = *in;
             }
         }
     }
-    const PadStrideInfo conv_info(1, 1, 1, 1, DimensionRoundingType::CEIL);
+
+    const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
     return convolution_layer(scaled, weights, bias, output_shape, conv_info);
 }
 

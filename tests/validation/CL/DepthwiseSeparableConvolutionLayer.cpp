@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,7 +27,7 @@
 #include "arm_compute/runtime/CL/functions/CLDepthwiseSeparableConvolutionLayer.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/PaddingCalculator.h"
-#include "tests/datasets/MobileNetDepthwiseSeparableConvolutionLayerDataset.h"
+#include "tests/datasets/system_tests/mobilenet/MobileNetDepthwiseSeparableConvolutionLayerDataset.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"

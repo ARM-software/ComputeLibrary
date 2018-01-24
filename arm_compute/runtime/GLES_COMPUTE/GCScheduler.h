@@ -35,10 +35,6 @@ class IGCKernel;
 /** Provides global access to a OpenGL ES context and command queue. */
 class GCScheduler
 {
-private:
-    /** Constructor */
-    GCScheduler();
-
 public:
     /** Access the scheduler singleton.
      *
@@ -56,7 +52,7 @@ public:
      * @param[in] kernel Kernel to execute.
      * @param[in] flush  (Optional) Specifies if the command queue will be flushed after running the kernel.
      */
-    void enqueue(IGCKernel &kernel, bool flush = true);
+    void dispatch(IGCKernel &kernel, bool flush = true);
 
     /** Initialises the display and context to be used by the scheduler.
      *
@@ -65,9 +61,27 @@ public:
      */
     void init(EGLDisplay dpy, EGLContext ctx);
 
-    /** Blocks until all commands in the associated command queue have finished. */
-    void sync();
+    /** Defines a barrier ordering memory transactions. */
+    void memory_barrier();
+
+private:
+    /** Constructor */
+    GCScheduler();
+    /** Destructor */
+    ~GCScheduler();
+    /** Prevent instances of this class from being copied */
+    GCScheduler(const GCScheduler &) = delete;
+    /** Prevent instances of this class from being copied */
+    GCScheduler &operator=(const GCScheduler &) = delete;
+
+    /** Set up EGL context */
+    void setup_context();
+
+    /** Flag to ensure symbols initialisation is happening before Scheduler creation */
+    static std::once_flag _initialize_symbols;
+
+    EGLDisplay _display; /**< Underlying EGL Display. */
+    EGLContext _context; /**< Underlying EGL Context. */
 };
 }
-
 #endif /* __ARM_COMPUTE_GCSCHEDULER_H__ */

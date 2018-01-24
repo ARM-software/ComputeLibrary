@@ -8,6 +8,7 @@ var searchData=
   ['fixedpointvalidationfixture',['FixedPointValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_fixed_point_validation_fixture.xhtml',1,'arm_compute::test::validation']]],
   ['fixture',['Fixture',['../classarm__compute_1_1test_1_1framework_1_1_fixture.xhtml',1,'arm_compute::test::framework']]],
   ['flattenlayer',['FlattenLayer',['../classarm__compute_1_1graph_1_1_flatten_layer.xhtml',1,'arm_compute::graph']]],
+  ['flattenlayerfixture',['FlattenLayerFixture',['../classarm__compute_1_1test_1_1benchmark_1_1_flatten_layer_fixture.xhtml',1,'arm_compute::test::benchmark']]],
   ['flattenlayervalidationfixture',['FlattenLayerValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_flatten_layer_validation_fixture.xhtml',1,'arm_compute::test::validation']]],
   ['floorfixture',['FloorFixture',['../classarm__compute_1_1test_1_1_floor_fixture.xhtml',1,'arm_compute::test']]],
   ['floorlayer',['FloorLayer',['../classarm__compute_1_1graph_1_1_floor_layer.xhtml',1,'arm_compute::graph']]],

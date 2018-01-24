@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,7 +64,7 @@ std::pair<Status, Window> validate_and_configure_window_matrix_a_reduction(ITens
 
     bool window_changed = update_window_and_padding(win, input_access, output_access);
 
-    output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->tensor_shape()));
+    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
@@ -90,7 +90,7 @@ std::pair<Status, Window> validate_and_configure_window_matrix_b_reduction(ITens
 
     bool window_changed = update_window_and_padding(win, input_access, output_access);
 
-    output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->tensor_shape()));
+    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);

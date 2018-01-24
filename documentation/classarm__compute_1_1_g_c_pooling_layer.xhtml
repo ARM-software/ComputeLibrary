@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -116,7 +116,8 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_g_c_pooling_laye
 
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a>  </div>
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a>  </div>
   <div class="headertitle">
 <div class="title">GCPoolingLayer Class Reference</div>  </div>
 </div><!--header-->
@@ -149,6 +150,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_function.xhtml#ab921ecc3f3f6ae2b4bd61f3e1998d8c4">~IFunction</a> ()=default</td></tr>
 <tr class="memdesc:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#ab921ecc3f3f6ae2b4bd61f3e1998d8c4">More...</a><br /></td></tr>
 <tr class="separator:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:aef4f19189a247ce133811ae59ab556e1"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_pooling_layer.xhtml#aef4f19189a247ce133811ae59ab556e1">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output, const <a class="el" href="classarm__compute_1_1_pooling_layer_info.xhtml">PoolingLayerInfo</a> &amp;pool_info)</td></tr>
+<tr class="memdesc:aef4f19189a247ce133811ae59ab556e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_g_c_pooling_layer.xhtml">GCPoolingLayer</a>.  <a href="#aef4f19189a247ce133811ae59ab556e1">More...</a><br /></td></tr>
+<tr class="separator:aef4f19189a247ce133811ae59ab556e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Basic function to simulate a pooling layer with the specified pooling operation. </p>
@@ -202,6 +209,59 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="aef4f19189a247ce133811ae59ab556e1"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a> validate </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_pooling_layer_info.xhtml">PoolingLayerInfo</a> &amp;&#160;</td>
+          <td class="paramname"><em>pool_info</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_g_c_pooling_layer.xhtml">GCPoolingLayer</a>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor info. Data types supported: F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Destination tensor info. Data types supported: Same as <code>input</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">pool_info</td><td>Contains pooling operation information described in <a class="el" href="classarm__compute_1_1_pooling_layer_info.xhtml">PoolingLayerInfo</a>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
+
+<p>Referenced by <a class="el" href="validation_2_g_l_e_s___c_o_m_p_u_t_e_2_pooling_layer_8cpp_source.xhtml#l00059">arm_compute::test::validation::DATA_TEST_CASE()</a>.</p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>arm_compute/runtime/GLES_COMPUTE/functions/<a class="el" href="_g_c_pooling_layer_8h_source.xhtml">GCPoolingLayer.h</a></li>
 </ul>
@@ -211,7 +271,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_g_c_pooling_layer.xhtml">GCPoolingLayer</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:36 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:45 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

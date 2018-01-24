@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,7 +53,7 @@ public:
      *
      * @note This kernel fills the borders within the XY-planes.
      *
-     * @param[in,out] tensor                Tensor to process. Data types supported: U8/S8/QS8/QS16/S16/S32/F32.
+     * @param[in,out] tensor                Tensor to process. Data types supported: U8/S8/QS8/QASYMM8/QS16/S16/S32/F32.
      * @param[in]     border_size           Size of the border to fill in elements.
      * @param[in]     border_mode           Border mode to use for the convolution.
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.

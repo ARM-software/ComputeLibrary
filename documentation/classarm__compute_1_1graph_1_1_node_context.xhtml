@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -463,11 +463,11 @@ Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_node_context_8h_source.xhtml#l00134">134</a> of file <a class="el" href="_node_context_8h_source.xhtml">NodeContext.h</a>.</p>
 
-<p>References <a class="el" href="core_2_error_8h_source.xhtml#l00306">ARM_COMPUTE_ERROR_ON</a>, and <a class="el" href="hwc_8hpp_source.xhtml#l00269">value</a>.</p>
+<p>References <a class="el" href="core_2_error_8h_source.xhtml#l00306">ARM_COMPUTE_ERROR_ON</a>, and <a class="el" href="hwc_8hpp_source.xhtml#l00278">value</a>.</p>
 
 <p>Referenced by <a class="el" href="_node_context_8h_source.xhtml#l00127">NodeContext::add_parameter()</a>, and <a class="el" href="_node_context_8h_source.xhtml#l00051">NodeContext::NodeContext()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;{</div><div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;    <span class="keyword">auto</span> it = _parameters.find(name);</div><div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;    <a class="code" href="core_2_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a>(it == _parameters.end());</div><div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;    <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span>NodeParameter&lt;T&gt; *<span class="keyword">&gt;</span>(it-&gt;second.get())-&gt;<a class="code" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>();</div><div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;}</div><div class="ttc" id="core_2_error_8h_xhtml_a54a6080c9f4df1f908e57a9bbb46f5da"><div class="ttname"><a href="core_2_error_8h.xhtml#a54a6080c9f4df1f908e57a9bbb46f5da">ARM_COMPUTE_ERROR_ON</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_ON(cond)</div><div class="ttdoc">If the condition is true then an error message is printed and an exception thrown. </div><div class="ttdef"><b>Definition:</b> <a href="core_2_error_8h_source.xhtml#l00306">Error.h:306</a></div></div>
-<div class="ttc" id="hwc_8hpp_xhtml_a0f61d63b009d0880a89c843bd50d8d76"><div class="ttname"><a href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a></div><div class="ttdeci">void * value</div><div class="ttdef"><b>Definition:</b> <a href="hwc_8hpp_source.xhtml#l00269">hwc.hpp:269</a></div></div>
+<div class="ttc" id="hwc_8hpp_xhtml_a0f61d63b009d0880a89c843bd50d8d76"><div class="ttname"><a href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a></div><div class="ttdeci">void * value</div><div class="ttdef"><b>Definition:</b> <a href="hwc_8hpp_source.xhtml#l00278">hwc.hpp:278</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -526,7 +526,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1_node_context.xhtml">NodeContext</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:37 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:46 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

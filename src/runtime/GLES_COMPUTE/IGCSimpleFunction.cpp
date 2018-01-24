@@ -38,7 +38,7 @@ void IGCSimpleFunction::run()
 {
     ARM_COMPUTE_ERROR_ON_MSG(!_kernel, "The child class didn't set the GLES kernel or function isn't configured");
 
-    GCScheduler::get().enqueue(_border_handler, false);
-    GCScheduler::get().sync();
-    GCScheduler::get().enqueue(*_kernel);
+    GCScheduler::get().dispatch(_border_handler, false);
+    GCScheduler::get().memory_barrier();
+    GCScheduler::get().dispatch(*_kernel);
 }

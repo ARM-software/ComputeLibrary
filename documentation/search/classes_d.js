@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['magnitudefixture',['MagnitudeFixture',['../classarm__compute_1_1test_1_1benchmark_1_1_magnitude_fixture.xhtml',1,'arm_compute::test::benchmark']]],
   ['magnitudevalidationfixture',['MagnitudeValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_magnitude_validation_fixture.xhtml',1,'arm_compute::test::validation']]],
   ['mali_5fbase_5fgpu_5fcoherent_5fgroup',['mali_base_gpu_coherent_group',['../structmali__userspace_1_1mali__base__gpu__coherent__group.xhtml',1,'mali_userspace']]],
   ['mali_5fbase_5fgpu_5fcoherent_5fgroup_5finfo',['mali_base_gpu_coherent_group_info',['../structmali__userspace_1_1mali__base__gpu__coherent__group__info.xhtml',1,'mali_userspace']]],
@@ -26,6 +27,7 @@ var searchData=
   ['minmaxlocationvalues_3c_20t_20_3e',['MinMaxLocationValues&lt; T &gt;',['../structarm__compute_1_1_min_max_location_values.xhtml',1,'arm_compute']]],
   ['minmaxlocationvalues_3c_20target_5ftype_20_3e',['MinMaxLocationValues&lt; target_type &gt;',['../structarm__compute_1_1_min_max_location_values.xhtml',1,'arm_compute']]],
   ['mixedthresholddataset',['MixedThresholdDataset',['../classarm__compute_1_1test_1_1datasets_1_1_mixed_threshold_dataset.xhtml',1,'arm_compute::test::datasets']]],
+  ['mobilenetactivationlayerdataset',['MobileNetActivationLayerDataset',['../classarm__compute_1_1test_1_1datasets_1_1_mobile_net_activation_layer_dataset.xhtml',1,'arm_compute::test::datasets']]],
   ['mobilenetdepthwiseconvolutionlayerdataset',['MobileNetDepthwiseConvolutionLayerDataset',['../classarm__compute_1_1test_1_1datasets_1_1_mobile_net_depthwise_convolution_layer_dataset.xhtml',1,'arm_compute::test::datasets']]],
   ['mobilenetdepthwiseseparableconvolutionlayerdataset',['MobileNetDepthwiseSeparableConvolutionLayerDataset',['../classarm__compute_1_1test_1_1datasets_1_1_mobile_net_depthwise_separable_convolution_layer_dataset.xhtml',1,'arm_compute::test::datasets']]],
   ['mobilenetfixture',['MobileNetFixture',['../classarm__compute_1_1test_1_1_mobile_net_fixture.xhtml',1,'arm_compute::test']]],

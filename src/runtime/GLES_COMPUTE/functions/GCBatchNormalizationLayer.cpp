@@ -44,5 +44,5 @@ void GCBatchNormalizationLayer::configure(const IGCTensor *input, IGCTensor *out
 
 void GCBatchNormalizationLayer::run()
 {
-    GCScheduler::get().enqueue(_norm_kernel, true);
+    GCScheduler::get().dispatch(_norm_kernel, true);
 }

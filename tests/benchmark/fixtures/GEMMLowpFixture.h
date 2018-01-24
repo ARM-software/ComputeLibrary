@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,14 +60,16 @@ public:
         a.allocator()->allocate();
         b.allocator()->allocate();
         c.allocator()->allocate();
-
-        // Fill tensors
-        library->fill_tensor_uniform(Accessor(a), 0);
-        library->fill_tensor_uniform(Accessor(b), 1);
     }
     void run()
     {
         gemmlowp.run();
+    }
+
+    void sync()
+    {
+        sync_if_necessary<TensorType>();
+        sync_tensor_if_necessary<TensorType>(c);
     }
 
     void teardown()

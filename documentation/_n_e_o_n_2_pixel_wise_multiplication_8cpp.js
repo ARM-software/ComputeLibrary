@@ -48,7 +48,7 @@ var _n_e_o_n_2_pixel_wise_multiplication_8cpp =
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#ac52b56b57d9dcfdb12e0df9da3eb5b75", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#acaca42ec0ec6459356598dba527eaf06", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#aed966eb5c0c998ceed6fc0a11dc83848", null ],
-    [ "TEST_SUITE_END", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#af77b34bd2ffc2b5b0b87daa9b5e63ea8", null ],
+    [ "TEST_SUITE_END", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],
     [ "convert_policy", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#a5d58c32bff63e4c34b3234f884a4da58", null ],
     [ "dt1", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#a291ba30858ed1dc2a1154ddfcf28eac9", null ],
     [ "dt2", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#a80668d60af0d74d7e9f33bf4a233d695", null ],

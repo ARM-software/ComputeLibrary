@@ -15,7 +15,9 @@ var tests_2_utils_8h =
     [ "make_unsigned_conditional_t", "tests_2_utils_8h.xhtml#a020cbca88ae935289ad3cbacbf963905", null ],
     [ "promote_t", "tests_2_utils_8h.xhtml#ac20ca549fa27b2eed44367745055a233", null ],
     [ "coord2index", "tests_2_utils_8h.xhtml#a9be4cb7e6ee20063a4a10bc3abb750b9", null ],
+    [ "create_HOG", "tests_2_utils_8h.xhtml#ac0cf6098a0e58cdfb4483dfa9347bfc0", null ],
     [ "create_tensor", "tests_2_utils_8h.xhtml#a316948014329b50b11a302305a6ab3ab", null ],
+    [ "create_tensor", "tests_2_utils_8h.xhtml#a1a1319867418814820134ec77cf09eed", null ],
     [ "fill_array", "tests_2_utils_8h.xhtml#ac35e7a1ad467f5fe8620cbbc5793d53b", null ],
     [ "foldl", "tests_2_utils_8h.xhtml#a1ebbb23b0094d47c51226d58e17e6447", null ],
     [ "foldl", "tests_2_utils_8h.xhtml#ad933f996ccb22854ae56dd86de8cbbfe", null ],
@@ -29,7 +31,9 @@ var tests_2_utils_8h =
     [ "round_half_even", "tests_2_utils_8h.xhtml#ad93bb148a873f19ad7692756e59617f4", null ],
     [ "round_half_up", "tests_2_utils_8h.xhtml#af4bcf30f8c56f547f66d61c7c5ae01db", null ],
     [ "saturate_cast", "tests_2_utils_8h.xhtml#a4965b2f6821e0cf0afee738158bd8377", null ],
-    [ "shape_to_valid_region", "tests_2_utils_8h.xhtml#a4c9ad143c34306817986409ffb1dbd40", null ],
-    [ "shape_to_valid_region_gaussian_pyramid_half", "tests_2_utils_8h.xhtml#a0c848c53c05bedad63a7cc1bfa0b9725", null ],
-    [ "store_value_with_data_type", "tests_2_utils_8h.xhtml#a1e6934e95738573214c2ce1d6648d116", null ]
+    [ "shape_to_valid_region", "tests_2_utils_8h.xhtml#a8103df0e6c416f55f40106aa49072b42", null ],
+    [ "shape_to_valid_region_gaussian_pyramid_half", "tests_2_utils_8h.xhtml#a1177ef8061a8b46b5d79c1af93c12de1", null ],
+    [ "store_value_with_data_type", "tests_2_utils_8h.xhtml#a1e6934e95738573214c2ce1d6648d116", null ],
+    [ "sync_if_necessary", "tests_2_utils_8h.xhtml#a5967bb62a612be6b300aa96049a2166a", null ],
+    [ "sync_tensor_if_necessary", "tests_2_utils_8h.xhtml#a619736e19838c20cac8f668ab13aae37", null ]
 ];

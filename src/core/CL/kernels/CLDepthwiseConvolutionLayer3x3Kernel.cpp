@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,32 +33,11 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 
 using namespace arm_compute;
-
-namespace
-{
-/** Calculates expected output shape dimension
- *
- * @param[in] Input shape
- *
- * @return Expected output shape
- */
-TensorShape get_output_shape(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info)
-{
-    unsigned int output_width  = 0;
-    unsigned int output_height = 0;
-
-    std::tie(output_width, output_height) = scaled_dimensions(input_shape.x(), input_shape.y(), weights_shape.x(), weights_shape.y(), conv_info);
-
-    TensorShape output_shape = input_shape;
-    output_shape.set(0, output_width);
-    output_shape.set(1, output_height);
-
-    return output_shape;
-}
-} // namespace
+using namespace arm_compute::misc::shape_calculator;
 
 CLDepthwiseConvolutionLayer3x3Kernel::CLDepthwiseConvolutionLayer3x3Kernel()
     : _border_size(0), _input(), _output(), _weights(), _biases(), _conv_stride_x(0), _conv_stride_y(0), _conv_pad_left(0), _conv_pad_top(0)
@@ -91,7 +70,7 @@ void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, con
     }
 
     // Get convolved dimensions
-    TensorShape output_shape = get_output_shape(input->info()->tensor_shape(), weights->info()->tensor_shape(), conv_info);
+    const TensorShape output_shape = compute_depthwise_convolution_shape(*input->info(), *weights->info(), conv_info);
 
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output->info(),
@@ -179,9 +158,9 @@ void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, con
     }
 
     // Configure kernel window
-    const unsigned int num_elems_processed_per_iteration = 2;
-    const unsigned int num_elems_written_per_iteration   = 2;
-    const unsigned int num_elems_read_per_iteration      = 3 + _conv_stride_x;
+    const unsigned int num_elems_processed_per_iteration = 8 / data_size_from_type(input->info()->data_type());
+    const unsigned int num_elems_written_per_iteration   = num_elems_processed_per_iteration;
+    const unsigned int num_elems_read_per_iteration      = 3 + (num_elems_processed_per_iteration - 1) * _conv_stride_x;
     const unsigned int num_rows_read_per_iteration       = 3;
 
     Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));

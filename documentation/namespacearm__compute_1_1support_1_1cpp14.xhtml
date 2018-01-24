@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -158,12 +158,12 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_toolchain_support_8h_source.xhtml#l00361">361</a> of file <a class="el" href="_toolchain_support_8h_source.xhtml">ToolchainSupport.h</a>.</p>
+<p>Definition at line <a class="el" href="_toolchain_support_8h_source.xhtml#l00362">362</a> of file <a class="el" href="_toolchain_support_8h_source.xhtml">ToolchainSupport.h</a>.</p>
 
 <p>References <a class="el" href="caffe__data__extractor_8py_source.xhtml#l00021">caffe_data_extractor::args</a>.</p>
 
 <p>Referenced by <a class="el" href="_framework_8h_source.xhtml#l00342">Framework::add_test_case()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;{</div><div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;    <span class="keywordflow">return</span> std::unique_ptr&lt;T&gt;(<span class="keyword">new</span> T(std::forward&lt;Args&gt;(<a class="code" href="namespacecaffe__data__extractor.xhtml#a8187411843a6284ffb964ef3fb9fcab3">args</a>)...));</div><div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;}</div><div class="ttc" id="namespacecaffe__data__extractor_xhtml_a8187411843a6284ffb964ef3fb9fcab3"><div class="ttname"><a href="namespacecaffe__data__extractor.xhtml#a8187411843a6284ffb964ef3fb9fcab3">caffe_data_extractor.args</a></div><div class="ttdeci">args</div><div class="ttdef"><b>Definition:</b> <a href="caffe__data__extractor_8py_source.xhtml#l00021">caffe_data_extractor.py:21</a></div></div>
+<div class="fragment"><div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;{</div><div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;    <span class="keywordflow">return</span> std::unique_ptr&lt;T&gt;(<span class="keyword">new</span> T(std::forward&lt;Args&gt;(<a class="code" href="namespacecaffe__data__extractor.xhtml#a8187411843a6284ffb964ef3fb9fcab3">args</a>)...));</div><div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;}</div><div class="ttc" id="namespacecaffe__data__extractor_xhtml_a8187411843a6284ffb964ef3fb9fcab3"><div class="ttname"><a href="namespacecaffe__data__extractor.xhtml#a8187411843a6284ffb964ef3fb9fcab3">caffe_data_extractor.args</a></div><div class="ttdeci">args</div><div class="ttdef"><b>Definition:</b> <a href="caffe__data__extractor_8py_source.xhtml#l00021">caffe_data_extractor.py:21</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -181,10 +181,10 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_toolchain_support_8h_source.xhtml#l00368">368</a> of file <a class="el" href="_toolchain_support_8h_source.xhtml">ToolchainSupport.h</a>.</p>
+<p>Definition at line <a class="el" href="_toolchain_support_8h_source.xhtml#l00369">369</a> of file <a class="el" href="_toolchain_support_8h_source.xhtml">ToolchainSupport.h</a>.</p>
 
 <p>References <a class="el" href="namespacearm__compute_1_1support_1_1cpp14.xhtml#a2ccfba86a91625f5bc79156f2a598a6d">make_unique()</a>, <a class="el" href="caffe__data__extractor_8py_source.xhtml#l00019">caffe_data_extractor::type</a>, and <a class="el" href="namespacearm__compute.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aa4c614360da93c0a041b22e537de151eb">arm_compute::U</a>.</p>
-<div class="fragment"><div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;{</div><div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;    <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="namespacecaffe__data__extractor.xhtml#a7aead736a07eaf25623ad7bfa1f0ee2d">std::remove_extent&lt;T&gt;::type</a> <a class="code" href="namespacearm__compute.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aa4c614360da93c0a041b22e537de151eb">U</a>;</div><div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;    <span class="keywordflow">return</span> std::unique_ptr&lt;T&gt;(<span class="keyword">new</span> U[n]());</div><div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;}</div><div class="ttc" id="namespacearm__compute_xhtml_a1ce9b523fd4f3b5bbcadcd796183455aa4c614360da93c0a041b22e537de151eb"><div class="ttname"><a href="namespacearm__compute.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aa4c614360da93c0a041b22e537de151eb">arm_compute::Channel::U</a></div><div class="ttdoc">Cb/U channel. </div></div>
+<div class="fragment"><div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;{</div><div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;    <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="namespacecaffe__data__extractor.xhtml#a7aead736a07eaf25623ad7bfa1f0ee2d">std::remove_extent&lt;T&gt;::type</a> <a class="code" href="namespacearm__compute.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aa4c614360da93c0a041b22e537de151eb">U</a>;</div><div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;    <span class="keywordflow">return</span> std::unique_ptr&lt;T&gt;(<span class="keyword">new</span> U[n]());</div><div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;}</div><div class="ttc" id="namespacearm__compute_xhtml_a1ce9b523fd4f3b5bbcadcd796183455aa4c614360da93c0a041b22e537de151eb"><div class="ttname"><a href="namespacearm__compute.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aa4c614360da93c0a041b22e537de151eb">arm_compute::Channel::U</a></div><div class="ttdoc">Cb/U channel. </div></div>
 <div class="ttc" id="namespacecaffe__data__extractor_xhtml_a7aead736a07eaf25623ad7bfa1f0ee2d"><div class="ttname"><a href="namespacecaffe__data__extractor.xhtml#a7aead736a07eaf25623ad7bfa1f0ee2d">caffe_data_extractor.type</a></div><div class="ttdeci">type</div><div class="ttdef"><b>Definition:</b> <a href="caffe__data__extractor_8py_source.xhtml#l00019">caffe_data_extractor.py:19</a></div></div>
 </div><!-- fragment -->
 </div>
@@ -211,7 +211,7 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Referenced by <a class="el" href="_toolchain_support_8h_source.xhtml#l00368">make_unique()</a>.</p>
+<p>Referenced by <a class="el" href="_toolchain_support_8h_source.xhtml#l00369">make_unique()</a>.</p>
 
 </div>
 </div>
@@ -221,7 +221,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1support.xhtml">support</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1support_1_1cpp14.xhtml">cpp14</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:37 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:46 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

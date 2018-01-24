@@ -1,6 +1,5 @@
 var benchmark_2_g_l_e_s___c_o_m_p_u_t_e_2_direct_convolution_layer_8cpp =
 [
-    [ "GCConvolutionLayerFixture", "benchmark_2_g_l_e_s___c_o_m_p_u_t_e_2_direct_convolution_layer_8cpp.xhtml#afb74db03ceee9fb272663c68133771f2", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_g_l_e_s___c_o_m_p_u_t_e_2_direct_convolution_layer_8cpp.xhtml#a20190a6c2970433854d7a0ffbf17bb80", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_g_l_e_s___c_o_m_p_u_t_e_2_direct_convolution_layer_8cpp.xhtml#a245e9548b6ab48c67db2ddbccf67cdd2", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_g_l_e_s___c_o_m_p_u_t_e_2_direct_convolution_layer_8cpp.xhtml#add96c569b006602c948ff7f3444b1c9a", null ],

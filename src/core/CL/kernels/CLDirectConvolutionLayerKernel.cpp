@@ -117,6 +117,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     TensorShape output_shape = get_output_shape(input->tensor_shape(), weights->tensor_shape(), conv_info);
 
     // Output auto inizialitation if not yet initialized
+    //input->clone()->set_tensor_shape(output_shape) doesn't work with subtensors for grouped direct convolutions (AlexNet).
     auto_init_if_empty(*output, output_shape,
                        1,
                        input->data_type(),
@@ -284,6 +285,7 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     TensorShape output_shape = get_output_shape(input->info()->tensor_shape(), weights->info()->tensor_shape(), conv_info);
 
     // Output auto inizialitation if not yet initialized
+    //input->clone()->set_tensor_shape(output_shape) doesn't work with subtensors for grouped direct convolutions (AlexNet).
     auto_init_if_empty(*output->info(),
                        output_shape,
                        1,

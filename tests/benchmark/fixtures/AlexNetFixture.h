@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,18 +51,22 @@ public:
     template <typename...>
     void setup(DataType data_type, int batches)
     {
-        constexpr bool weights_reshaped     = true;
+        constexpr bool weights_reshaped     = false;
         constexpr int  fixed_point_position = 4;
 
         network.init(data_type, fixed_point_position, batches, weights_reshaped);
         network.build();
         network.allocate();
-        network.fill_random();
     }
 
     void run()
     {
         network.run();
+    }
+
+    void sync()
+    {
+        network.sync();
     }
 
     void teardown()

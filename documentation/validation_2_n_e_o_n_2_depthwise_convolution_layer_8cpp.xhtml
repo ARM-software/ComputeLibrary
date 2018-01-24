@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -154,11 +154,14 @@ Typedefs</h2></td></tr>
 <tr class="memitem:af545623a2c17371605b1aee6aaaf3bef"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:af545623a2c17371605b1aee6aaaf3bef"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af545623a2c17371605b1aee6aaaf3bef">NEDepthwiseConvolutionLayerFixture3x3</a> = DepthwiseConvolutionLayerValidationFixture&lt; Tensor, Accessor, NEDepthwiseConvolutionLayer3x3, T &gt;</td></tr>
 <tr class="separator:af545623a2c17371605b1aee6aaaf3bef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0da52ea071a372131bf38f1ee7434ff9"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a0da52ea071a372131bf38f1ee7434ff9"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a0da52ea071a372131bf38f1ee7434ff9">NEDepthwiseConvolutionLayerQuantizedFixture3x3</a> = DepthwiseConvolutionLayerValidationQuantizedFixture&lt; Tensor, Accessor, NEDepthwiseConvolutionLayer3x3, T &gt;</td></tr>
+<tr class="separator:a0da52ea071a372131bf38f1ee7434ff9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a793e248a361022afcb4c80450415b8dd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a793e248a361022afcb4c80450415b8dd">DATA_TEST_CASE</a> (Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallDepthwiseConvolutionLayerDataset3x3(), datasets::LargeDepthwiseConvolutionLayerDataset3x3()), framework::dataset::make(&quot;DataType&quot;, DataType::F32)), input_shape, weights_shape, bias_shape, output_shape, info, data_type)</td></tr>
-<tr class="separator:a793e248a361022afcb4c80450415b8dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a24855302bf89c7923221ed4ad308140d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a24855302bf89c7923221ed4ad308140d">DATA_TEST_CASE</a> (Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallDepthwiseConvolutionLayerDataset3x3(), datasets::LargeDepthwiseConvolutionLayerDataset3x3()), framework::dataset::make(&quot;DataType&quot;, DataType::F32)), input_shape, weights_shape, output_shape, info, data_type)</td></tr>
+<tr class="separator:a24855302bf89c7923221ed4ad308140d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a93d1c5ee9134116a1124c24b85134351"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a93d1c5ee9134116a1124c24b85134351">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NEDepthwiseConvolutionLayerFixture&lt; float &gt;, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallDepthwiseConvolutionLayerDataset(), framework::dataset::make(&quot;DataType&quot;, DataType::F32)))</td></tr>
 <tr class="separator:a93d1c5ee9134116a1124c24b85134351"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af31fa957849b28b6dd6428da708e09c7"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af31fa957849b28b6dd6428da708e09c7">FIXTURE_DATA_TEST_CASE</a> (RunLarge, NEDepthwiseConvolutionLayerFixture&lt; float &gt;, framework::DatasetMode::NIGHTLY, combine(datasets::LargeDepthwiseConvolutionLayerDataset(), framework::dataset::make(&quot;DataType&quot;, DataType::F32)))</td></tr>
@@ -167,6 +170,10 @@ Functions</h2></td></tr>
 <tr class="separator:a90c4a1ed59d26b935517d73be7c4f88b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6d55fe090a2252a8fc590709aa85e3a1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a6d55fe090a2252a8fc590709aa85e3a1">FIXTURE_DATA_TEST_CASE</a> (RunLarge, NEDepthwiseConvolutionLayerFixture3x3&lt; float &gt;, framework::DatasetMode::NIGHTLY, combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(), framework::dataset::make(&quot;DataType&quot;, DataType::F32)))</td></tr>
 <tr class="separator:a6d55fe090a2252a8fc590709aa85e3a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2eba794f5fa6310013d267e0826a276c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a2eba794f5fa6310013d267e0826a276c">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NEDepthwiseConvolutionLayerQuantizedFixture3x3&lt; uint8_t &gt;, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(), framework::dataset::make(&quot;DataType&quot;, DataType::QASYMM8)), framework::dataset::make(&quot;QuantizationInfo&quot;,{QuantizationInfo(0.5f, 10)})))</td></tr>
+<tr class="separator:a2eba794f5fa6310013d267e0826a276c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3f2de5a44dc6c32f9511d3c4e10b5f09"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a3f2de5a44dc6c32f9511d3c4e10b5f09">FIXTURE_DATA_TEST_CASE</a> (RunLarge, NEDepthwiseConvolutionLayerQuantizedFixture3x3&lt; uint8_t &gt;, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(), framework::dataset::make(&quot;DataType&quot;, DataType::QASYMM8)), framework::dataset::make(&quot;QuantizationInfo&quot;,{QuantizationInfo(0.5f, 10)})))</td></tr>
+<tr class="separator:a3f2de5a44dc6c32f9511d3c4e10b5f09"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -174,7 +181,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_0538a82dae0483a21d0f1e9d7e0a45c6.xhtml">NEON</a></li><li class="navelem"><a class="el" href="validation_2_n_e_o_n_2_depthwise_convolution_layer_8cpp.xhtml">DepthwiseConvolutionLayer.cpp</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:34 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:43 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

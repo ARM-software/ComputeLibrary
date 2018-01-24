@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -259,7 +259,7 @@ Data Fields</h2></td></tr>
 <p>Referenced by <a class="el" href="_helpers_8cpp_source.xhtml#l00116">arm_compute::test::validation::convert_from_asymmetric()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;    {</div><div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;        <a class="code" href="core_2_error_8h.xhtml#a5bbdcf574d3f5e412fa6a1117911e67b">ARM_COMPUTE_ERROR_ON_MSG</a>(<a class="code" href="structarm__compute_1_1_quantization_info.xhtml#a1d28dec57cce925ad92342891bd71e7c">scale</a> == 0, <span class="stringliteral">&quot;QuantizationInfo::dequantize: scale == 0&quot;</span>);</div><div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="namespacearm__compute.xhtml#a69d3ceb714f7600f60cb2b3d4f3d86b1">scvt_f32_qasymm8</a>(<a class="code" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>, <a class="code" href="structarm__compute_1_1_quantization_info.xhtml#a1d28dec57cce925ad92342891bd71e7c">scale</a>, <a class="code" href="structarm__compute_1_1_quantization_info.xhtml#aed7ea92f45bd273dde380a45ddced592">offset</a>);</div><div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_xhtml_a69d3ceb714f7600f60cb2b3d4f3d86b1"><div class="ttname"><a href="namespacearm__compute.xhtml#a69d3ceb714f7600f60cb2b3d4f3d86b1">arm_compute::scvt_f32_qasymm8</a></div><div class="ttdeci">float scvt_f32_qasymm8(qasymm8_t value, float scale, int offset)</div><div class="ttdef"><b>Definition:</b> <a href="_q_asymm8_8inl_source.xhtml#l00036">QAsymm8.inl:36</a></div></div>
 <div class="ttc" id="structarm__compute_1_1_quantization_info_xhtml_a1d28dec57cce925ad92342891bd71e7c"><div class="ttname"><a href="structarm__compute_1_1_quantization_info.xhtml#a1d28dec57cce925ad92342891bd71e7c">arm_compute::QuantizationInfo::scale</a></div><div class="ttdeci">float scale</div><div class="ttdoc">scale </div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00131">Types.h:131</a></div></div>
-<div class="ttc" id="hwc_8hpp_xhtml_a0f61d63b009d0880a89c843bd50d8d76"><div class="ttname"><a href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a></div><div class="ttdeci">void * value</div><div class="ttdef"><b>Definition:</b> <a href="hwc_8hpp_source.xhtml#l00269">hwc.hpp:269</a></div></div>
+<div class="ttc" id="hwc_8hpp_xhtml_a0f61d63b009d0880a89c843bd50d8d76"><div class="ttname"><a href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a></div><div class="ttdeci">void * value</div><div class="ttdef"><b>Definition:</b> <a href="hwc_8hpp_source.xhtml#l00278">hwc.hpp:278</a></div></div>
 <div class="ttc" id="core_2_error_8h_xhtml_a5bbdcf574d3f5e412fa6a1117911e67b"><div class="ttname"><a href="core_2_error_8h.xhtml#a5bbdcf574d3f5e412fa6a1117911e67b">ARM_COMPUTE_ERROR_ON_MSG</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_ON_MSG(cond,...)</div><div class="ttdef"><b>Definition:</b> <a href="core_2_error_8h_source.xhtml#l00297">Error.h:297</a></div></div>
 <div class="ttc" id="structarm__compute_1_1_quantization_info_xhtml_aed7ea92f45bd273dde380a45ddced592"><div class="ttname"><a href="structarm__compute_1_1_quantization_info.xhtml#aed7ea92f45bd273dde380a45ddced592">arm_compute::QuantizationInfo::offset</a></div><div class="ttdeci">int offset</div><div class="ttdoc">offset </div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00132">Types.h:132</a></div></div>
 </div><!-- fragment -->
@@ -290,7 +290,7 @@ Data Fields</h2></td></tr>
 
 <p>Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00149">149</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
 
-<p>Referenced by <a class="el" href="_helpers_8inl_source.xhtml#l00279">arm_compute::set_quantization_info_if_empty()</a>.</p>
+<p>Referenced by <a class="el" href="_helpers_8inl_source.xhtml#l00274">arm_compute::set_quantization_info_if_empty()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;    {</div><div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="structarm__compute_1_1_quantization_info.xhtml#a1d28dec57cce925ad92342891bd71e7c">scale</a> == 0;</div><div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;    }</div><div class="ttc" id="structarm__compute_1_1_quantization_info_xhtml_a1d28dec57cce925ad92342891bd71e7c"><div class="ttname"><a href="structarm__compute_1_1_quantization_info.xhtml#a1d28dec57cce925ad92342891bd71e7c">arm_compute::QuantizationInfo::scale</a></div><div class="ttdeci">float scale</div><div class="ttdoc">scale </div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00131">Types.h:131</a></div></div>
 </div><!-- fragment -->
 </div>
@@ -390,7 +390,7 @@ Data Fields</h2></td></tr>
 <p>References <a class="el" href="core_2_error_8h_source.xhtml#l00297">ARM_COMPUTE_ERROR_ON_MSG</a>, and <a class="el" href="_q_asymm8_8inl_source.xhtml#l00029">arm_compute::sqcvt_qasymm8_f32()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;    {</div><div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;        <a class="code" href="core_2_error_8h.xhtml#a5bbdcf574d3f5e412fa6a1117911e67b">ARM_COMPUTE_ERROR_ON_MSG</a>(<a class="code" href="structarm__compute_1_1_quantization_info.xhtml#a1d28dec57cce925ad92342891bd71e7c">scale</a> == 0, <span class="stringliteral">&quot;QuantizationInfo::quantize: scale == 0&quot;</span>);</div><div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="namespacearm__compute.xhtml#af58ed9dce099d48202110cd40e793dca">sqcvt_qasymm8_f32</a>(<a class="code" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>, <a class="code" href="structarm__compute_1_1_quantization_info.xhtml#a1d28dec57cce925ad92342891bd71e7c">scale</a>, <a class="code" href="structarm__compute_1_1_quantization_info.xhtml#aed7ea92f45bd273dde380a45ddced592">offset</a>, <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a60ad1078faeaf3f59266d69ad937339f">rounding_policy</a>);</div><div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_xhtml_af58ed9dce099d48202110cd40e793dca"><div class="ttname"><a href="namespacearm__compute.xhtml#af58ed9dce099d48202110cd40e793dca">arm_compute::sqcvt_qasymm8_f32</a></div><div class="ttdeci">qasymm8_t sqcvt_qasymm8_f32(float value, float scale, int offset, RoundingPolicy rounding_policy=RoundingPolicy::TO_NEAREST_UP)</div><div class="ttdef"><b>Definition:</b> <a href="_q_asymm8_8inl_source.xhtml#l00029">QAsymm8.inl:29</a></div></div>
 <div class="ttc" id="structarm__compute_1_1_quantization_info_xhtml_a1d28dec57cce925ad92342891bd71e7c"><div class="ttname"><a href="structarm__compute_1_1_quantization_info.xhtml#a1d28dec57cce925ad92342891bd71e7c">arm_compute::QuantizationInfo::scale</a></div><div class="ttdeci">float scale</div><div class="ttdoc">scale </div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00131">Types.h:131</a></div></div>
-<div class="ttc" id="hwc_8hpp_xhtml_a0f61d63b009d0880a89c843bd50d8d76"><div class="ttname"><a href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a></div><div class="ttdeci">void * value</div><div class="ttdef"><b>Definition:</b> <a href="hwc_8hpp_source.xhtml#l00269">hwc.hpp:269</a></div></div>
+<div class="ttc" id="hwc_8hpp_xhtml_a0f61d63b009d0880a89c843bd50d8d76"><div class="ttname"><a href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a></div><div class="ttdeci">void * value</div><div class="ttdef"><b>Definition:</b> <a href="hwc_8hpp_source.xhtml#l00278">hwc.hpp:278</a></div></div>
 <div class="ttc" id="core_2_error_8h_xhtml_a5bbdcf574d3f5e412fa6a1117911e67b"><div class="ttname"><a href="core_2_error_8h.xhtml#a5bbdcf574d3f5e412fa6a1117911e67b">ARM_COMPUTE_ERROR_ON_MSG</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_ON_MSG(cond,...)</div><div class="ttdef"><b>Definition:</b> <a href="core_2_error_8h_source.xhtml#l00297">Error.h:297</a></div></div>
 <div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a60ad1078faeaf3f59266d69ad937339f"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a60ad1078faeaf3f59266d69ad937339f">arm_compute::test::validation::rounding_policy</a></div><div class="ttdeci">rounding_policy</div><div class="ttdef"><b>Definition:</b> <a href="_n_e_o_n_2_pixel_wise_multiplication_8cpp_source.xhtml#l00176">PixelWiseMultiplication.cpp:176</a></div></div>
 <div class="ttc" id="structarm__compute_1_1_quantization_info_xhtml_aed7ea92f45bd273dde380a45ddced592"><div class="ttname"><a href="structarm__compute_1_1_quantization_info.xhtml#aed7ea92f45bd273dde380a45ddced592">arm_compute::QuantizationInfo::offset</a></div><div class="ttdeci">int offset</div><div class="ttdoc">offset </div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00132">Types.h:132</a></div></div>
@@ -412,7 +412,7 @@ Data Fields</h2></td></tr>
 
 <p>Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00132">132</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
 
-<p>Referenced by <a class="el" href="validation_2reference_2_depthwise_convolution_layer_8cpp_source.xhtml#l00115">arm_compute::test::validation::reference::depthwise_convolution()</a>, <a class="el" href="_type_printer_8h_source.xhtml#l00155">arm_compute::operator&lt;&lt;()</a>, and <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00121">QuantizationInfo::operator==()</a>.</p>
+<p>Referenced by <a class="el" href="validation_2reference_2_depthwise_convolution_layer_8cpp_source.xhtml#l00116">arm_compute::test::validation::reference::depthwise_convolution()</a>, <a class="el" href="_type_printer_8h_source.xhtml#l00157">arm_compute::operator&lt;&lt;()</a>, and <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00121">QuantizationInfo::operator==()</a>.</p>
 
 </div>
 </div>
@@ -430,7 +430,7 @@ Data Fields</h2></td></tr>
 
 <p>Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00131">131</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
 
-<p>Referenced by <a class="el" href="validation_2reference_2_depthwise_convolution_layer_8cpp_source.xhtml#l00115">arm_compute::test::validation::reference::depthwise_convolution()</a>, <a class="el" href="_type_printer_8h_source.xhtml#l00155">arm_compute::operator&lt;&lt;()</a>, and <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00121">QuantizationInfo::operator==()</a>.</p>
+<p>Referenced by <a class="el" href="validation_2reference_2_depthwise_convolution_layer_8cpp_source.xhtml#l00116">arm_compute::test::validation::reference::depthwise_convolution()</a>, <a class="el" href="_type_printer_8h_source.xhtml#l00157">arm_compute::operator&lt;&lt;()</a>, and <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00121">QuantizationInfo::operator==()</a>.</p>
 
 </div>
 </div>
@@ -443,7 +443,7 @@ Data Fields</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:37 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:46 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -275,6 +275,17 @@ public:
      */
     void fill(RawTensor &raw, const std::string &name, Format format, Channel channel) const;
 
+    /** Fills the specified @p tensor with the content of the raw tensor.
+     *
+     * @param[in, out] tensor To be filled tensor.
+     * @param[in]      raw    Raw tensor used to fill the tensor.
+     *
+     * @warning No check is performed that the specified format actually
+     *          matches the format of the tensor.
+     */
+    template <typename T>
+    void fill(T &&tensor, RawTensor raw) const;
+
     /** Fill a tensor with uniform distribution across the range of its type
      *
      * @param[in, out] tensor      To be filled tensor.
@@ -463,6 +474,19 @@ void AssetsLibrary::fill(T &&tensor, const std::string &name, Format format, Cha
 {
     const RawTensor &raw = get(name, format, channel);
 
+    for(size_t offset = 0; offset < raw.size(); offset += raw.element_size())
+    {
+        const Coordinates id = index2coord(raw.shape(), offset / raw.element_size());
+
+        const RawTensor::value_type *const raw_ptr = raw.data() + offset;
+        const auto                         out_ptr = static_cast<RawTensor::value_type *>(tensor(id));
+        std::copy_n(raw_ptr, raw.element_size(), out_ptr);
+    }
+}
+
+template <typename T>
+void AssetsLibrary::fill(T &&tensor, RawTensor raw) const
+{
     for(size_t offset = 0; offset < raw.size(); offset += raw.element_size())
     {
         const Coordinates id = index2coord(raw.shape(), offset / raw.element_size());

@@ -16,6 +16,7 @@ var classarm__compute_1_1_h_o_g_info =
     [ "num_bins", "classarm__compute_1_1_h_o_g_info.xhtml#ae3664b841732a09d7749953ca5b81373", null ],
     [ "num_blocks_per_image", "classarm__compute_1_1_h_o_g_info.xhtml#a649a86d58ff88cfd8523d6cb71d64332", null ],
     [ "num_cells_per_block", "classarm__compute_1_1_h_o_g_info.xhtml#adb20b5249eedf180a461ea097622fe7f", null ],
+    [ "num_cells_per_block_stride", "classarm__compute_1_1_h_o_g_info.xhtml#a932db6ec1490ede3ff23e8c0ce80865c", null ],
     [ "operator=", "classarm__compute_1_1_h_o_g_info.xhtml#a64f60c469394d4f5f621546fc3108590", null ],
     [ "operator=", "classarm__compute_1_1_h_o_g_info.xhtml#a3f48ffe9fe37db10eb23de67101c1500", null ],
     [ "phase_type", "classarm__compute_1_1_h_o_g_info.xhtml#a96823b4d7dc642aa9f51a0077899d3f9", null ]

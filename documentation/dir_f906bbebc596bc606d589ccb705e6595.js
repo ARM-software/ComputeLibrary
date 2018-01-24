@@ -53,6 +53,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
       [ "CLColorConvertKernel", "classarm__compute_1_1_c_l_color_convert_kernel.xhtml", "classarm__compute_1_1_c_l_color_convert_kernel" ]
     ] ],
     [ "CLConvolutionKernel.h", "_c_l_convolution_kernel_8h.xhtml", "_c_l_convolution_kernel_8h" ],
+    [ "CLDeconvolutionLayerUpsampleKernel.h", "_c_l_deconvolution_layer_upsample_kernel_8h.xhtml", [
+      [ "CLDeconvolutionLayerUpsampleKernel", "classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel.xhtml", "classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel" ]
+    ] ],
     [ "CLDepthConcatenateLayerKernel.h", "_c_l_depth_concatenate_layer_kernel_8h.xhtml", [
       [ "CLDepthConcatenateLayerKernel", "classarm__compute_1_1_c_l_depth_concatenate_layer_kernel.xhtml", "classarm__compute_1_1_c_l_depth_concatenate_layer_kernel" ]
     ] ],
@@ -194,6 +197,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     ] ],
     [ "CLNormalizationLayerKernel.h", "_c_l_normalization_layer_kernel_8h.xhtml", [
       [ "CLNormalizationLayerKernel", "classarm__compute_1_1_c_l_normalization_layer_kernel.xhtml", "classarm__compute_1_1_c_l_normalization_layer_kernel" ]
+    ] ],
+    [ "CLPermuteKernel.h", "_c_l_permute_kernel_8h.xhtml", [
+      [ "CLPermuteKernel", "classarm__compute_1_1_c_l_permute_kernel.xhtml", "classarm__compute_1_1_c_l_permute_kernel" ]
     ] ],
     [ "CLPixelWiseMultiplicationKernel.h", "_c_l_pixel_wise_multiplication_kernel_8h.xhtml", [
       [ "CLPixelWiseMultiplicationKernel", "classarm__compute_1_1_c_l_pixel_wise_multiplication_kernel.xhtml", "classarm__compute_1_1_c_l_pixel_wise_multiplication_kernel" ]

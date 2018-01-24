@@ -3,6 +3,7 @@ var namespacearm__compute_1_1test_1_1framework =
     [ "dataset", "namespacearm__compute_1_1test_1_1framework_1_1dataset.xhtml", "namespacearm__compute_1_1test_1_1framework_1_1dataset" ],
     [ "detail", "namespacearm__compute_1_1test_1_1framework_1_1detail.xhtml", "namespacearm__compute_1_1test_1_1framework_1_1detail" ],
     [ "CommandLineParser", "classarm__compute_1_1test_1_1framework_1_1_command_line_parser.xhtml", "classarm__compute_1_1test_1_1framework_1_1_command_line_parser" ],
+    [ "CommonOptions", "classarm__compute_1_1test_1_1framework_1_1_common_options.xhtml", "classarm__compute_1_1test_1_1framework_1_1_common_options" ],
     [ "DataTestCase", "classarm__compute_1_1test_1_1framework_1_1_data_test_case.xhtml", null ],
     [ "DataTestCaseFactory", "classarm__compute_1_1test_1_1framework_1_1_data_test_case_factory.xhtml", "classarm__compute_1_1test_1_1framework_1_1_data_test_case_factory" ],
     [ "EnumListOption", "classarm__compute_1_1test_1_1framework_1_1_enum_list_option.xhtml", "classarm__compute_1_1test_1_1framework_1_1_enum_list_option" ],

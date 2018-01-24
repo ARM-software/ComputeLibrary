@@ -156,13 +156,13 @@ REGISTER_SIMPLE_OPERATION(CLDepthwiseConvolutionOperation, OPENCL, OperationType
     bool                                    run_3x3_opt = opt3x3 && weights->info()->dimension(0) == 3;
     if(run_3x3_opt)
     {
-        auto depwthwise_conv = arm_compute::support::cpp14::make_unique<arm_compute::CLDepthwiseConvolutionLayer>();
+        auto depwthwise_conv = arm_compute::support::cpp14::make_unique<arm_compute::CLDepthwiseConvolutionLayer3x3>();
         depwthwise_conv->configure(in, weights, biases, out, conv_info);
         func = std::move(depwthwise_conv);
     }
     else
     {
-        auto depwthwise_conv = arm_compute::support::cpp14::make_unique<arm_compute::CLDepthwiseConvolutionLayer3x3>();
+        auto depwthwise_conv = arm_compute::support::cpp14::make_unique<arm_compute::CLDepthwiseConvolutionLayer>();
         depwthwise_conv->configure(in, weights, biases, out, conv_info);
         func = std::move(depwthwise_conv);
     }

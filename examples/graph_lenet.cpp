@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,110 +29,95 @@
 
 #include <cstdlib>
 
+using namespace arm_compute::utils;
 using namespace arm_compute::graph;
 using namespace arm_compute::graph_utils;
-
-namespace
-{
-/** Generates appropriate accessor according to the specified path
- *
- * @note If path is empty will generate a DummyAccessor else will generate a NumPyBinLoader
- *
- * @param path       Path to the data files
- * @param data_file  Relative path to the data files from path
- *
- * @return An appropriate tensor accessor
- */
-std::unique_ptr<ITensorAccessor> get_accessor(const std::string &path, const std::string &data_file)
-{
-    if(path.empty())
-    {
-        return arm_compute::support::cpp14::make_unique<DummyAccessor>();
-    }
-    else
-    {
-        return arm_compute::support::cpp14::make_unique<NumPyBinLoader>(path + data_file);
-    }
-}
-} // namespace
 
 /** Example demonstrating how to implement LeNet's network using the Compute Library's graph API
  *
  * @param[in] argc Number of arguments
  * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] batches )
  */
-void main_graph_lenet(int argc, const char **argv)
+class GraphLenetExample : public Example
 {
-    std::string  data_path;   /** Path to the trainable data */
-    unsigned int batches = 4; /** Number of batches */
-
-    // Set target. 0 (NEON), 1 (OpenCL). By default it is NEON
-    TargetHint target_hint = set_target_hint(argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0);
-
-    // Parse arguments
-    if(argc < 2)
+public:
+    void do_setup(int argc, char **argv) override
     {
-        // Print help
-        std::cout << "Usage: " << argv[0] << " [target] [path_to_data] [batches]\n\n";
-        std::cout << "No data folder provided: using random values\n\n";
+        std::string  data_path;   /** Path to the trainable data */
+        unsigned int batches = 4; /** Number of batches */
+
+        // Set target. 0 (NEON), 1 (OpenCL). By default it is NEON
+        TargetHint target_hint = set_target_hint(argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0);
+
+        // Parse arguments
+        if(argc < 2)
+        {
+            // Print help
+            std::cout << "Usage: " << argv[0] << " [target] [path_to_data] [batches]\n\n";
+            std::cout << "No data folder provided: using random values\n\n";
+        }
+        else if(argc == 2)
+        {
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " [path_to_data] [batches]\n\n";
+            std::cout << "No data folder provided: using random values\n\n";
+        }
+        else if(argc == 3)
+        {
+            //Do something with argv[1]
+            data_path = argv[2];
+            std::cout << "Usage: " << argv[0] << " [path_to_data] [batches]\n\n";
+            std::cout << "No number of batches where specified, thus will use the default : " << batches << "\n\n";
+        }
+        else
+        {
+            //Do something with argv[1] and argv[2]
+            data_path = argv[2];
+            batches   = std::strtol(argv[3], nullptr, 0);
+        }
+
+        //conv1 << pool1 << conv2 << pool2 << fc1 << act1 << fc2 << smx
+        graph << target_hint
+              << Tensor(TensorInfo(TensorShape(28U, 28U, 1U, batches), 1, DataType::F32), DummyAccessor())
+              << ConvolutionLayer(
+                  5U, 5U, 20U,
+                  get_weights_accessor(data_path, "/cnn_data/lenet_model/conv1_w.npy"),
+                  get_weights_accessor(data_path, "/cnn_data/lenet_model/conv1_b.npy"),
+                  PadStrideInfo(1, 1, 0, 0))
+              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0)))
+              << ConvolutionLayer(
+                  5U, 5U, 50U,
+                  get_weights_accessor(data_path, "/cnn_data/lenet_model/conv2_w.npy"),
+                  get_weights_accessor(data_path, "/cnn_data/lenet_model/conv2_b.npy"),
+                  PadStrideInfo(1, 1, 0, 0))
+              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0)))
+              << FullyConnectedLayer(
+                  500U,
+                  get_weights_accessor(data_path, "/cnn_data/lenet_model/ip1_w.npy"),
+                  get_weights_accessor(data_path, "/cnn_data/lenet_model/ip1_b.npy"))
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+              << FullyConnectedLayer(
+                  10U,
+                  get_weights_accessor(data_path, "/cnn_data/lenet_model/ip2_w.npy"),
+                  get_weights_accessor(data_path, "/cnn_data/lenet_model/ip2_b.npy"))
+              << SoftmaxLayer()
+              << Tensor(DummyAccessor());
     }
-    else if(argc == 2)
+    void do_run() override
     {
-        std::cout << "Usage: " << argv[0] << " " << argv[1] << " [path_to_data] [batches]\n\n";
-        std::cout << "No data folder provided: using random values\n\n";
-    }
-    else if(argc == 3)
-    {
-        //Do something with argv[1]
-        data_path = argv[2];
-        std::cout << "Usage: " << argv[0] << " [path_to_data] [batches]\n\n";
-        std::cout << "No number of batches where specified, thus will use the default : " << batches << "\n\n";
-    }
-    else
-    {
-        //Do something with argv[1] and argv[2]
-        data_path = argv[2];
-        batches   = std::strtol(argv[3], nullptr, 0);
+        // Run graph
+        graph.run();
     }
 
-    Graph graph;
-
-    //conv1 << pool1 << conv2 << pool2 << fc1 << act1 << fc2 << smx
-    graph << target_hint
-          << Tensor(TensorInfo(TensorShape(28U, 28U, 1U, batches), 1, DataType::F32), DummyAccessor())
-          << ConvolutionLayer(
-              5U, 5U, 20U,
-              get_accessor(data_path, "/cnn_data/lenet_model/conv1_w.npy"),
-              get_accessor(data_path, "/cnn_data/lenet_model/conv1_b.npy"),
-              PadStrideInfo(1, 1, 0, 0))
-          << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0)))
-          << ConvolutionLayer(
-              5U, 5U, 50U,
-              get_accessor(data_path, "/cnn_data/lenet_model/conv2_w.npy"),
-              get_accessor(data_path, "/cnn_data/lenet_model/conv2_b.npy"),
-              PadStrideInfo(1, 1, 0, 0))
-          << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0)))
-          << FullyConnectedLayer(
-              500U,
-              get_accessor(data_path, "/cnn_data/lenet_model/ip1_w.npy"),
-              get_accessor(data_path, "/cnn_data/lenet_model/ip1_b.npy"))
-          << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-          << FullyConnectedLayer(
-              10U,
-              get_accessor(data_path, "/cnn_data/lenet_model/ip2_w.npy"),
-              get_accessor(data_path, "/cnn_data/lenet_model/ip2_b.npy"))
-          << SoftmaxLayer()
-          << Tensor(DummyAccessor());
-
-    graph.run();
-}
+private:
+    Graph graph{};
+};
 
 /** Main program for LeNet
  *
  * @param[in] argc Number of arguments
  * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] batches )
  */
-int main(int argc, const char **argv)
+int main(int argc, char **argv)
 {
-    return arm_compute::utils::run_example(argc, argv, main_graph_lenet);
+    return arm_compute::utils::run_example<GraphLenetExample>(argc, argv);
 }

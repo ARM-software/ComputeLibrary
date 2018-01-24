@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,91 +39,100 @@ using namespace utils;
  * @param[in] argc Number of arguments
  * @param[in] argv Arguments ( [optional] Path to PPM image to process )
  */
-void main_neoncl_scale_median_gaussian(int argc, const char **argv)
+class NEONCLScaleMedianGaussianExample : public Example
 {
-    /** [NEON / OpenCL Interop] */
-    PPMLoader ppm;
-    CLImage   src, scale_median, median_gauss, dst;
-
-    CLScheduler::get().default_init();
-
-    if(argc < 2)
+public:
+    void do_setup(int argc, char **argv) override
     {
-        // Print help
-        std::cout << "Usage: ./build/cl_convolution [input_image.ppm]\n\n";
-        std::cout << "No input_image provided, creating a dummy 640x480 image\n";
-        // Create an empty grayscale 640x480 image
-        src.allocator()->init(TensorInfo(640, 480, Format::U8));
+        /** [NEON / OpenCL Interop] */
+        PPMLoader ppm;
+
+        CLScheduler::get().default_init();
+
+        if(argc < 2)
+        {
+            // Print help
+            std::cout << "Usage: ./build/cl_convolution [input_image.ppm]\n\n";
+            std::cout << "No input_image provided, creating a dummy 640x480 image\n";
+            // Create an empty grayscale 640x480 image
+            src.allocator()->init(TensorInfo(640, 480, Format::U8));
+        }
+        else
+        {
+            ppm.open(argv[1]);
+            ppm.init_image(src, Format::U8);
+        }
+
+        TensorInfo scale_median_info(TensorInfo(src.info()->dimension(0) / 2, src.info()->dimension(1) / 2, Format::U8));
+
+        // Configure the temporary and destination images
+        scale_median.allocator()->init(scale_median_info);
+        median_gauss.allocator()->init(scale_median_info);
+        dst.allocator()->init(scale_median_info);
+
+        scale.configure(&src, &scale_median, InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::REPLICATE);
+        median.configure(&scale_median, &median_gauss, BorderMode::REPLICATE);
+        gauss.configure(&median_gauss, &dst, BorderMode::REPLICATE);
+
+        // Allocate all the images
+        src.allocator()->allocate();
+        scale_median.allocator()->allocate();
+        median_gauss.allocator()->allocate();
+        dst.allocator()->allocate();
+
+        // Fill the input image with the content of the PPM image if a filename was provided:
+        if(ppm.is_open())
+        {
+            ppm.fill_image(src);
+            const std::string output_filename = std::string(argv[1]) + "_out.ppm";
+        }
+        /** [NEON / OpenCL Interop] */
     }
-    else
+    void do_run() override
     {
-        ppm.open(argv[1]);
-        ppm.init_image(src, Format::U8);
+        // Enqueue and flush the OpenCL kernel:
+        scale.run();
+
+        // Do a blocking map of the input and output buffers of the NEON function:
+        scale_median.map();
+        median_gauss.map();
+
+        // Run the NEON function:
+        median.run();
+
+        // Unmap the output buffer before it's used again by OpenCL:
+        scale_median.unmap();
+        median_gauss.unmap();
+
+        // Run the final OpenCL function:
+        gauss.run();
+
+        // Make sure all the OpenCL jobs are done executing:
+        CLScheduler::get().sync();
     }
-
-    TensorInfo scale_median_info(TensorInfo(src.info()->dimension(0) / 2, src.info()->dimension(1) / 2, Format::U8));
-
-    // Configure the temporary and destination images
-    scale_median.allocator()->init(scale_median_info);
-    median_gauss.allocator()->init(scale_median_info);
-    dst.allocator()->init(scale_median_info);
-
-    // Declare and configure the functions to create the following pipeline: scale -> median -> gauss
-    CLScale       scale;
-    NEMedian3x3   median;
-    CLGaussian5x5 gauss;
-
-    scale.configure(&src, &scale_median, InterpolationPolicy::NEAREST_NEIGHBOR, BorderMode::REPLICATE);
-    median.configure(&scale_median, &median_gauss, BorderMode::REPLICATE);
-    gauss.configure(&median_gauss, &dst, BorderMode::REPLICATE);
-
-    // Allocate all the images
-    src.allocator()->allocate();
-    scale_median.allocator()->allocate();
-    median_gauss.allocator()->allocate();
-    dst.allocator()->allocate();
-
-    // Fill the input image with the content of the PPM image if a filename was provided:
-    if(ppm.is_open())
+    void do_teardown() override
     {
-        ppm.fill_image(src);
+        // Save the result to file:
+        if(!output_filename.empty())
+        {
+            save_to_ppm(dst, output_filename); // save_to_ppm maps and unmaps the image to store as PPM
+        }
     }
 
-    // Enqueue and flush the OpenCL kernel:
-    scale.run();
+private:
+    CLImage       src{}, scale_median{}, median_gauss{}, dst{};
+    CLScale       scale{};
+    NEMedian3x3   median{};
+    CLGaussian5x5 gauss{};
+    std::string   output_filename{};
+};
 
-    // Do a blocking map of the input and output buffers of the NEON function:
-    scale_median.map();
-    median_gauss.map();
-
-    // Run the NEON function:
-    median.run();
-
-    // Unmap the output buffer before it's used again by OpenCL:
-    scale_median.unmap();
-    median_gauss.unmap();
-
-    // Run the final OpenCL function:
-    gauss.run();
-
-    // Make sure all the OpenCL jobs are done executing:
-    CLScheduler::get().sync();
-
-    // Save the result to file:
-    if(ppm.is_open())
-    {
-        const std::string output_filename = std::string(argv[1]) + "_out.ppm";
-        save_to_ppm(dst, output_filename); // save_to_ppm maps and unmaps the image to store as PPM
-    }
-    /** [NEON / OpenCL Interop] */
-}
-
-/** Main program for convolution test
+/** Main program for neon/cl scale median gaussian test
  *
  * @param[in] argc Number of arguments
  * @param[in] argv Arguments ( [optional] Path to PPM image to process )
  */
-int main(int argc, const char **argv)
+int main(int argc, char **argv)
 {
-    return utils::run_example(argc, argv, main_neoncl_scale_median_gaussian);
+    return utils::run_example<NEONCLScaleMedianGaussianExample>(argc, argv);
 }

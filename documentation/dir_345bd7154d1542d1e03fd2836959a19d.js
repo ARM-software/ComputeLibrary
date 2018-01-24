@@ -58,9 +58,6 @@ var dir_345bd7154d1542d1e03fd2836959a19d =
     [ "NEDeconvolutionLayer.h", "_n_e_deconvolution_layer_8h.xhtml", [
       [ "NEDeconvolutionLayer", "classarm__compute_1_1_n_e_deconvolution_layer.xhtml", "classarm__compute_1_1_n_e_deconvolution_layer" ]
     ] ],
-    [ "NEDeconvolutionLayerUpsample.h", "_n_e_deconvolution_layer_upsample_8h.xhtml", [
-      [ "NEDeconvolutionLayerUpsample", "classarm__compute_1_1_n_e_deconvolution_layer_upsample.xhtml", "classarm__compute_1_1_n_e_deconvolution_layer_upsample" ]
-    ] ],
     [ "NEDepthConcatenateLayer.h", "_n_e_depth_concatenate_layer_8h.xhtml", [
       [ "NEDepthConcatenateLayer", "classarm__compute_1_1_n_e_depth_concatenate_layer.xhtml", "classarm__compute_1_1_n_e_depth_concatenate_layer" ]
     ] ],

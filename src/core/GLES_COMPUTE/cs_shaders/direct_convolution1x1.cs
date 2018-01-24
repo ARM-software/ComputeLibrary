@@ -1005,6 +1005,6 @@ void main()
     STORE_PACK8_HALF(dst_ptr, TENSOR3D_OFFSET(dst_iter, 0, 1, 0), pixels1);
 }
 #endif /* PROCESS_4X_1Y_1Z */
-#else  /* DATA_TYPE_F32 */
+#else  /* DATA_TYPE_FP32 */
 #error Data type not supported
 #endif /* DATA_TYPE_FP32 */

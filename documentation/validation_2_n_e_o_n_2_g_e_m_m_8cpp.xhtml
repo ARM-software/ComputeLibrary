@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -116,13 +116,13 @@ $(document).ready(function(){initNavTree('validation_2_n_e_o_n_2_g_e_m_m_8cpp.xh
   <div class="summary">
 <a href="#namespaces">Namespaces</a> &#124;
 <a href="#typedef-members">Typedefs</a> &#124;
-<a href="#func-members">Functions</a> &#124;
-<a href="#var-members">Variables</a>  </div>
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">GEMM.cpp File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="_n_e_g_e_m_m_interleave4x4_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_n_e_g_e_m_m_transpose1x_w_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">arm_compute/core/Types.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_n_e_g_e_m_m_8h_source.xhtml">arm_compute/runtime/NEON/functions/NEGEMM.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="runtime_2_tensor_8h_source.xhtml">arm_compute/runtime/Tensor.h</a>&quot;</code><br />
@@ -137,7 +137,8 @@ $(document).ready(function(){initNavTree('validation_2_n_e_o_n_2_g_e_m_m_8cpp.xh
 <code>#include &quot;<a class="el" href="_datasets_8h_source.xhtml">tests/framework/datasets/Datasets.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_validation_8h_source.xhtml">tests/validation/Validation.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="validation_2fixtures_2_g_e_m_m_fixture_8h_source.xhtml">tests/validation/fixtures/GEMMFixture.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_g_e_m_m_interleave4x4_fixture_8h_source.xhtml">tests/validation/fixtures/GEMMInterleave4x4Fixture.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="validation_2fixtures_2_g_e_m_m_interleave4x4_fixture_8h_source.xhtml">tests/validation/fixtures/GEMMInterleave4x4Fixture.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_g_e_m_m_transpose1x_w_fixture_8h_source.xhtml">tests/validation/fixtures/GEMMTranspose1xWFixture.h</a>&quot;</code><br />
 </div>
 <p><a href="validation_2_n_e_o_n_2_g_e_m_m_8cpp_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -153,8 +154,10 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:ab2579d0ff50da45589100e084090c16a"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ab2579d0ff50da45589100e084090c16a">NEGEMMInterleave4x4</a> = NESynthetizeFunctionWithZeroConstantBorder&lt; NEGEMMInterleave4x4Kernel, 4 &gt;</td></tr>
-<tr class="separator:ab2579d0ff50da45589100e084090c16a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1467c1a2ecf0eb62ca02e2e85f8809b8"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a1467c1a2ecf0eb62ca02e2e85f8809b8">NEGEMMTranspose1xW</a> = NESynthetizeFunctionWithZeroConstantBorder&lt; NEGEMMTranspose1xWKernel, 4 &gt;</td></tr>
+<tr class="separator:a1467c1a2ecf0eb62ca02e2e85f8809b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a958d768913578924e955c51c18cac38d"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a958d768913578924e955c51c18cac38d">NEGEMMTranspose1xWFixture</a> = GEMMTranspose1xWValidationFixture&lt; Tensor, Accessor, NEGEMMTranspose1xW, float &gt;</td></tr>
+<tr class="separator:a958d768913578924e955c51c18cac38d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab1389710c7003797f9f5420ea5b6e542"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ab1389710c7003797f9f5420ea5b6e542">NEGEMMInterleave4x4Fixture</a> = GEMMInterleave4x4ValidationFixture&lt; Tensor, Accessor, NEGEMMInterleave4x4, float &gt;</td></tr>
 <tr class="separator:ab1389710c7003797f9f5420ea5b6e542"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a70bc5be1a91942b87f6992b37f87b62e"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
@@ -166,22 +169,26 @@ Typedefs</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:af77b34bd2ffc2b5b0b87daa9b5e63ea8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af77b34bd2ffc2b5b0b87daa9b5e63ea8">TEST_SUITE_END</a> () const auto quantize_down_int32_to_uint8_scale_cases</td></tr>
-<tr class="separator:af77b34bd2ffc2b5b0b87daa9b5e63ea8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a38fe4b20a05bbaa1c844f3d7a19791ae"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae">TEST_SUITE_END</a> () <a class="el" href="tests_2validation_2_u_n_i_t_2_utils_8cpp.xhtml#a9e461b3ac0012c8c7193c1e180c91f67">DATA_TEST_CASE</a>(Configuration = ConvolutionSeparableValidationFixture&lt;CLTensor, CLAccessor, CLConvolution5x5, T&gt;</td></tr>
+<tr class="separator:a38fe4b20a05bbaa1c844f3d7a19791ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a396eda86f03e20c6abbe4234ee88fd70"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a396eda86f03e20c6abbe4234ee88fd70">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NEGEMMTranspose1xWFixture, framework::DatasetMode::PRECOMMIT, data_transpose *framework::dataset::make(&quot;DataType&quot;, DataType::QS8)*framework::dataset::make(&quot;FractionalBits&quot;, 1, 7))</td></tr>
+<tr class="separator:a396eda86f03e20c6abbe4234ee88fd70"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa907e1431428f87ebd94ffa1a874a28f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aa907e1431428f87ebd94ffa1a874a28f">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NEGEMMTranspose1xWFixture, framework::DatasetMode::PRECOMMIT, data_transpose *framework::dataset::make(&quot;DataType&quot;, DataType::QS16)*framework::dataset::make(&quot;FractionalBits&quot;, 1, 14))</td></tr>
+<tr class="separator:aa907e1431428f87ebd94ffa1a874a28f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7f49f98d7b824e42508eacd11b7c6691"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7f49f98d7b824e42508eacd11b7c6691">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NEGEMMInterleave4x4Fixture, framework::DatasetMode::PRECOMMIT, data_interleave *framework::dataset::make(&quot;DataType&quot;, DataType::QS8)*framework::dataset::make(&quot;FractionalBits&quot;, 1, 7))</td></tr>
 <tr class="separator:a7f49f98d7b824e42508eacd11b7c6691"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afcac23cd7e0bc151806543c362c590c0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#afcac23cd7e0bc151806543c362c590c0">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NEGEMMInterleave4x4Fixture, framework::DatasetMode::PRECOMMIT, data_interleave *framework::dataset::make(&quot;DataType&quot;, DataType::QS16)*framework::dataset::make(&quot;FractionalBits&quot;, 1, 14))</td></tr>
 <tr class="separator:afcac23cd7e0bc151806543c362c590c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ade8ca6eb2ab9d0ce3b2ee06c3db5a7cd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ade8ca6eb2ab9d0ce3b2ee06c3db5a7cd">combine</a> (framework::dataset::concat(datasets::SmallGEMMDataset(), datasets::LargeGEMMDataset()), CNNDataTypes)</td></tr>
-<tr class="separator:ade8ca6eb2ab9d0ce3b2ee06c3db5a7cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a09b036c709fc72912ee5fdb2231faca2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a09b036c709fc72912ee5fdb2231faca2">ARM_COMPUTE_EXPECT</a> (a.info() -&gt;is_resizable(), framework::LogLevel::ERRORS)</td></tr>
-<tr class="separator:a09b036c709fc72912ee5fdb2231faca2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa9ab937568ef94a7bbeeedb17f0f728e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aa9ab937568ef94a7bbeeedb17f0f728e">ARM_COMPUTE_EXPECT</a> (b.info() -&gt;is_resizable(), framework::LogLevel::ERRORS)</td></tr>
-<tr class="separator:aa9ab937568ef94a7bbeeedb17f0f728e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8e10e0e3c85ad87617891607949566e3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8e10e0e3c85ad87617891607949566e3">ARM_COMPUTE_EXPECT</a> (c.info() -&gt;is_resizable(), framework::LogLevel::ERRORS)</td></tr>
-<tr class="separator:a8e10e0e3c85ad87617891607949566e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5efd9713b2a736750ecd81ed9c3c449d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a5efd9713b2a736750ecd81ed9c3c449d">ARM_COMPUTE_EXPECT</a> (dst.info() -&gt;is_resizable(), framework::LogLevel::ERRORS)</td></tr>
-<tr class="separator:a5efd9713b2a736750ecd81ed9c3c449d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2c6b9d9c2494e45cb83313f09519dc4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ac2c6b9d9c2494e45cb83313f09519dc4">combine</a> (framework::dataset::concat(datasets::SmallGEMMDataset(), datasets::LargeGEMMDataset()), CNNDataTypes)</td></tr>
+<tr class="separator:ac2c6b9d9c2494e45cb83313f09519dc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7af1f415dd7596057e3762fb9578b6d5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7af1f415dd7596057e3762fb9578b6d5">ARM_COMPUTE_EXPECT</a> (a.info() -&gt;is_resizable(), framework::LogLevel::ERRORS)</td></tr>
+<tr class="separator:a7af1f415dd7596057e3762fb9578b6d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a377dba528b66d44ab5b2c9b16dab9bfb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a377dba528b66d44ab5b2c9b16dab9bfb">ARM_COMPUTE_EXPECT</a> (b.info() -&gt;is_resizable(), framework::LogLevel::ERRORS)</td></tr>
+<tr class="separator:a377dba528b66d44ab5b2c9b16dab9bfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6ccc6dd4b02114eccc4d7652dcf03efd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a6ccc6dd4b02114eccc4d7652dcf03efd">ARM_COMPUTE_EXPECT</a> (c.info() -&gt;is_resizable(), framework::LogLevel::ERRORS)</td></tr>
+<tr class="separator:a6ccc6dd4b02114eccc4d7652dcf03efd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aedc846191741fb759460952ef3dbf6d2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aedc846191741fb759460952ef3dbf6d2">ARM_COMPUTE_EXPECT</a> (dst.info() -&gt;is_resizable(), framework::LogLevel::ERRORS)</td></tr>
+<tr class="separator:aedc846191741fb759460952ef3dbf6d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a27bbd7ce9130e3429b2adcdc305efe0a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a27bbd7ce9130e3429b2adcdc305efe0a">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NEGEMMFixture&lt; float &gt;, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallGEMMDataset(), framework::dataset::make(&quot;DataType&quot;, DataType::F32)))</td></tr>
 <tr class="separator:a27bbd7ce9130e3429b2adcdc305efe0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a34d0cf04b80a88b56a3f142d82cc86b8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a34d0cf04b80a88b56a3f142d82cc86b8">FIXTURE_DATA_TEST_CASE</a> (RunLarge, NEGEMMFixture&lt; float &gt;, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMDataset(), framework::dataset::make(&quot;DataType&quot;, DataType::F32)))</td></tr>
@@ -194,31 +201,6 @@ Functions</h2></td></tr>
 <tr class="separator:a17430c974457953501238162026e9825"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a143d8f9422caf32b8ac1d532b9bb4232"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a143d8f9422caf32b8ac1d532b9bb4232">FIXTURE_DATA_TEST_CASE</a> (RunLarge, NEGEMMFixedPointFixture&lt; int16_t &gt;, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeGEMMDataset(), framework::dataset::make(&quot;DataType&quot;, DataType::QS16)), framework::dataset::make(&quot;FractionalBits&quot;, 1, 14)))</td></tr>
 <tr class="separator:a143d8f9422caf32b8ac1d532b9bb4232"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
-Variables</h2></td></tr>
-<tr class="memitem:ac2c387216b8389a6069b2e5205bc03a9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ac2c387216b8389a6069b2e5205bc03a9">shape_a</a></td></tr>
-<tr class="separator:ac2c387216b8389a6069b2e5205bc03a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab39a7489f0c4ef5db0dfa9291073fe61"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ab39a7489f0c4ef5db0dfa9291073fe61">shape_b</a></td></tr>
-<tr class="separator:ab39a7489f0c4ef5db0dfa9291073fe61"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a141b596a566813a7fc3116f9881d3dc9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a141b596a566813a7fc3116f9881d3dc9">shape_c</a></td></tr>
-<tr class="separator:a141b596a566813a7fc3116f9881d3dc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7fc93f37dac131a1a40b7921f9df3a9a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7fc93f37dac131a1a40b7921f9df3a9a">output_shape</a></td></tr>
-<tr class="separator:a7fc93f37dac131a1a40b7921f9df3a9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a62197192f0fbf4e0675eb37be1c4c175"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a62197192f0fbf4e0675eb37be1c4c175">alpha</a></td></tr>
-<tr class="separator:a62197192f0fbf4e0675eb37be1c4c175"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab146b9cbab6e73e7588b240dc709fe01"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ab146b9cbab6e73e7588b240dc709fe01">beta</a></td></tr>
-<tr class="separator:ab146b9cbab6e73e7588b240dc709fe01"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aac40b7097f2bda9274ae07fa33d15a79"><td class="memItemLeft" align="right" valign="top">Tensor&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aac40b7097f2bda9274ae07fa33d15a79">a</a> = create_tensor&lt;Tensor&gt;(shape_a, data_type, 1, fixed_point_position)</td></tr>
-<tr class="separator:aac40b7097f2bda9274ae07fa33d15a79"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7b8004eef325a40dd43eb80755610fff"><td class="memItemLeft" align="right" valign="top">Tensor&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7b8004eef325a40dd43eb80755610fff">b</a> = create_tensor&lt;Tensor&gt;(shape_b, data_type, 1, fixed_point_position)</td></tr>
-<tr class="separator:a7b8004eef325a40dd43eb80755610fff"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a497347573faa3778743ddf277f861094"><td class="memItemLeft" align="right" valign="top">Tensor&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a497347573faa3778743ddf277f861094">c</a> = create_tensor&lt;Tensor&gt;(shape_c, data_type, 1, fixed_point_position)</td></tr>
-<tr class="separator:a497347573faa3778743ddf277f861094"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adbf67dcee294e673cf796f1ed8aeb6a4"><td class="memItemLeft" align="right" valign="top">Tensor&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#adbf67dcee294e673cf796f1ed8aeb6a4">dst</a> = create_tensor&lt;Tensor&gt;(output_shape, data_type, 1, fixed_point_position)</td></tr>
-<tr class="separator:adbf67dcee294e673cf796f1ed8aeb6a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab84214a10c816dc554f190c53b535622"><td class="memItemLeft" align="right" valign="top">NEGEMM&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ab84214a10c816dc554f190c53b535622">gemm</a></td></tr>
-<tr class="separator:ab84214a10c816dc554f190c53b535622"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -226,7 +208,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_0538a82dae0483a21d0f1e9d7e0a45c6.xhtml">NEON</a></li><li class="navelem"><a class="el" href="validation_2_n_e_o_n_2_g_e_m_m_8cpp.xhtml">GEMM.cpp</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:34 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:43 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

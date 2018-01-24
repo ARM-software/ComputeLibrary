@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -165,9 +165,17 @@ struct ValidRegion
     ValidRegion &operator=(ValidRegion &&) = default;
     ~ValidRegion()                         = default;
 
-    ValidRegion(Coordinates anchor, TensorShape shape)
-        : anchor{ anchor }, shape{ shape }
+    ValidRegion(const Coordinates &an_anchor, const TensorShape &a_shape)
+        : anchor{ an_anchor }, shape{ a_shape }
     {
+        anchor.set_num_dimensions(std::max(anchor.num_dimensions(), shape.num_dimensions()));
+    }
+
+    ValidRegion(const Coordinates &an_anchor, const TensorShape &a_shape, size_t num_dimensions)
+        : anchor{ an_anchor }, shape{ a_shape }
+    {
+        ARM_COMPUTE_ERROR_ON(num_dimensions < std::max(anchor.num_dimensions(), shape.num_dimensions()));
+        anchor.set_num_dimensions(num_dimensions);
     }
 
     /** Return the start of the valid region for the given dimension @p d */

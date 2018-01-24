@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,16 +40,14 @@ void CLPoolingLayer::configure(ICLTensor *input, ICLTensor *output, const Poolin
     k->configure(input, output, pool_info);
     _kernel = std::move(k);
 
-    // Configure border depending on operation required
+    // Configure border depending on operation required (quantize border in case of asymmetric data_type)
     BorderMode border_mode = (PoolingType::MAX == pool_info.pool_type()) ? BorderMode::REPLICATE : BorderMode::CONSTANT;
-    // Quantize border in case data type is quantized asymmetric data type
-    uint32_t border_value = 0;
+    PixelValue zero_value(0.f);
     if(is_data_type_quantized_asymmetric(input->info()->data_type()) && !pool_info.exclude_padding())
     {
-        border_value = static_cast<uint32_t>(input->info()->quantization_info().quantize(0.f, RoundingPolicy::TO_NEAREST_UP));
+        zero_value = PixelValue(static_cast<uint32_t>(input->info()->quantization_info().offset));
     }
-
-    _border_handler.configure(input, _kernel->border_size(), border_mode, PixelValue(border_value));
+    _border_handler.configure(input, _kernel->border_size(), border_mode, zero_value);
 }
 
 Status CLPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)

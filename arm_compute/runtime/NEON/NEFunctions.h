@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,6 @@
 #include "arm_compute/runtime/NEON/functions/NEConvolution.h"
 #include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEDeconvolutionLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEDeconvolutionLayerUpsample.h"
 #include "arm_compute/runtime/NEON/functions/NEDepthConcatenateLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEDepthConvertLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEDepthwiseConvolutionLayer.h"

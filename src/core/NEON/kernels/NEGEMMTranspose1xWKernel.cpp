@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -89,7 +89,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     {
         AccessWindowTranspose output_access(output, 0, 0, num_elems_processed_per_iteration, 1, scale_x, 1.f / scale_x);
         window_changed = window_changed || update_window_and_padding(win, output_access);
-        output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), input->tensor_shape()));
+        output_access.set_valid_region(win, ValidRegion(Coordinates(), input->tensor_shape()));
     }
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};

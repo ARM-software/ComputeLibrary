@@ -132,7 +132,7 @@ void main()
     ImageIterator buf_iter = CONVERT_TENSOR3D_TO_IMAGE_ITERATOR_NO_STEP(buf_attrs, buf_shift);
 
     // Update pointer to point to the starting point of the valid region
-    TENSOR_ITERATOR_ADVANCE_IN_BYTES(buf_iter, uint(start_pos_y) * buf_attrs.stride_y + uint(start_pos_x) * buf_attrs.stride_x);
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(buf_iter, start_pos_y * int(buf_attrs.stride_y) + start_pos_x * int(buf_attrs.stride_x));
 
     int total_width = BORDER_SIZE_LEFT + int(width) + BORDER_SIZE_RIGHT;
     int gid0        = int(gl_GlobalInvocationID.x);
@@ -158,12 +158,29 @@ void main()
             {
                 if(pos % 2 == 0)
                 {
-                    STORE_PACK2_HALF(buf_ptr, offset, left_val.xx);
+                    if(BORDER_SIZE_LEFT % 2 == 0)
+                    {
+                        STORE_PACK2_HALF(buf_ptr, offset, left_val.xx);
+                    }
+                    else
+                    {
+                        STORE_PACK2_HALF(buf_ptr, offset, left_val.yy);
+                    }
+                    i++;
                 }
             }
         }
         // Handle right border
-        vec2 right_val = LOAD_UNPACK2_HALF(buf_ptr, IMAGE_OFFSET(buf_iter, int(width) - 1, gidH));
+        vec2 right_val_origin = LOAD_UNPACK2_HALF(buf_ptr, IMAGE_OFFSET(buf_iter, int(width) - 1, gidH));
+        vec2 right_val;
+        if((((BORDER_SIZE_LEFT + int(width)) % 2)) == 1)
+        {
+            right_val = vec2(right_val_origin.x, right_val_origin.x);
+        }
+        else
+        {
+            right_val = vec2(right_val_origin.y, right_val_origin.y);
+        }
         for(int i = 0; i < BORDER_SIZE_RIGHT; ++i)
         {
             uint offset = IMAGE_OFFSET(buf_iter, int(width) + i, gidH);
@@ -173,7 +190,8 @@ void main()
             {
                 if(pos % 2 == 0)
                 {
-                    STORE_PACK2_HALF(buf_ptr, offset, right_val.yy);
+                    STORE_PACK2_HALF(buf_ptr, offset, right_val);
+                    i++;
                 }
                 else
                 {
@@ -184,7 +202,8 @@ void main()
             {
                 if(pos % 2 == 0)
                 {
-                    STORE_PACK2_HALF(buf_ptr, offset, right_val.yy);
+                    STORE_PACK2_HALF(buf_ptr, offset, right_val);
+                    i++;
                 }
             }
         }
@@ -208,7 +227,14 @@ void main()
             {
                 if(gidW == (int(width) - 1))
                 {
-                    STORE_PACK2_HALF(buf_ptr, offset, top_val.xx);
+                    if(((BORDER_SIZE_LEFT + int(width)) % 2 == 1))
+                    {
+                        STORE_PACK2_HALF(buf_ptr, offset, top_val.xx);
+                    }
+                    else
+                    {
+                        STORE_PACK2_HALF(buf_ptr, offset, top_val.yy);
+                    }
                 }
                 else
                 {
@@ -228,6 +254,10 @@ void main()
                         if((BORDER_SIZE_LEFT + int(width)) % 2 == 0)
                         {
                             STORE_PACK2_HALF(buf_ptr, offset, top_val.yy);
+                        }
+                        else
+                        {
+                            STORE_PACK2_HALF(buf_ptr, offset, top_val.xx);
                         }
                     }
                     else
@@ -267,6 +297,10 @@ void main()
                         if((BORDER_SIZE_LEFT + int(width)) % 2 == 0)
                         {
                             STORE_PACK2_HALF(buf_ptr, offset, bottom_val.yy);
+                        }
+                        else
+                        {
+                            STORE_PACK2_HALF(buf_ptr, offset, bottom_val.xx);
                         }
                     }
                     else

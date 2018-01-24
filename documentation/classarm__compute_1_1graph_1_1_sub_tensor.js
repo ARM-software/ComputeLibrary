@@ -1,8 +1,8 @@
 var classarm__compute_1_1graph_1_1_sub_tensor =
 [
     [ "SubTensor", "classarm__compute_1_1graph_1_1_sub_tensor.xhtml#a29f0969775d17df94d8e87c40b7b7df1", null ],
-    [ "SubTensor", "classarm__compute_1_1graph_1_1_sub_tensor.xhtml#a4d7f0813294db763fadf9ebf62b512d3", null ],
-    [ "SubTensor", "classarm__compute_1_1graph_1_1_sub_tensor.xhtml#a2eb4c5766d4ffbe979168946f1d088ea", null ],
+    [ "SubTensor", "classarm__compute_1_1graph_1_1_sub_tensor.xhtml#a61d247ace734aaece16c2236ed6815af", null ],
+    [ "SubTensor", "classarm__compute_1_1graph_1_1_sub_tensor.xhtml#ad236716cfc3188fa6b07800877baebf8", null ],
     [ "SubTensor", "classarm__compute_1_1graph_1_1_sub_tensor.xhtml#ab7280b618490cedd24a18fe8849b4679", null ],
     [ "SubTensor", "classarm__compute_1_1graph_1_1_sub_tensor.xhtml#a366eac7e6cd70c8032528a17da5c3999", null ],
     [ "~SubTensor", "classarm__compute_1_1graph_1_1_sub_tensor.xhtml#af1fc5900259cbc0bc26c9e6e28bb49b6", null ],

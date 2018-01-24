@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,7 +54,8 @@ NEConvolutionSquare<matrix_size>::NEConvolutionSquare(std::shared_ptr<IMemoryMan
 }
 
 template <unsigned int matrix_size>
-void NEConvolutionSquare<matrix_size>::configure(ITensor *input, ITensor *output, const int16_t *conv, uint32_t scale, BorderMode border_mode, uint8_t constant_border_value)
+void NEConvolutionSquare<matrix_size>::configure(ITensor *input, ITensor *output, const int16_t *conv, uint32_t scale, BorderMode border_mode,
+                                                 uint8_t constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON(conv == nullptr);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);

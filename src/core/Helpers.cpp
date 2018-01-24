@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,25 +23,17 @@
  */
 #include "arm_compute/core/Helpers.h"
 
-#include "arm_compute/core/Error.h"
-#include "arm_compute/core/IKernel.h"
-#include "arm_compute/core/ITensorInfo.h"
-#include "arm_compute/core/Utils.h"
-
-#include <algorithm>
-#include <cstdint>
-
 using namespace arm_compute;
 
-Window arm_compute::calculate_max_window(const ITensorInfo &info, const Steps &steps, bool skip_border, BorderSize border_size)
+Window arm_compute::calculate_max_window(const ValidRegion &valid_region, const Steps &steps, bool skip_border, BorderSize border_size)
 {
     if(!skip_border)
     {
         border_size = BorderSize(0);
     }
 
-    const Coordinates &anchor = info.valid_region().anchor;
-    const TensorShape &shape  = info.valid_region().shape;
+    const Coordinates &anchor = valid_region.anchor;
+    const TensorShape &shape  = valid_region.shape;
 
     Window window;
 
@@ -53,10 +45,9 @@ Window arm_compute::calculate_max_window(const ITensorInfo &info, const Steps &s
                    anchor[0] + border_size.left + ceil_to_multiple(std::max(0, static_cast<int>(shape[0]) - static_cast<int>(border_size.left) - static_cast<int>(border_size.right)), steps[0]),
                    steps[0]));
 
-    size_t             n            = 1;
-    const TensorShape &tensor_shape = info.tensor_shape();
+    size_t n = 1;
 
-    if(tensor_shape.num_dimensions() > 1)
+    if(anchor.num_dimensions() > 1)
     {
         window.set(1, Window::Dimension(
                        // Skip the border above the image
@@ -68,18 +59,23 @@ Window arm_compute::calculate_max_window(const ITensorInfo &info, const Steps &s
         ++n;
     }
 
+    for(; n < anchor.num_dimensions(); ++n)
+    {
+        window.set(n, Window::Dimension(anchor[n], std::max<size_t>(1, shape[n])));
+    }
+
     for(; n < Coordinates::num_max_dimensions; ++n)
     {
-        window.set(n, Window::Dimension(0, std::max<size_t>(1, tensor_shape[n])));
+        window.set(n, Window::Dimension(0, 1));
     }
 
     return window;
 }
 
-Window arm_compute::calculate_max_enlarged_window(const ITensorInfo &info, const Steps &steps, BorderSize border_size)
+Window arm_compute::calculate_max_enlarged_window(const ValidRegion &valid_region, const Steps &steps, BorderSize border_size)
 {
-    const Coordinates &anchor = info.valid_region().anchor;
-    const TensorShape &shape  = info.valid_region().shape;
+    const Coordinates &anchor = valid_region.anchor;
+    const TensorShape &shape  = valid_region.shape;
 
     Window window;
 
@@ -91,10 +87,9 @@ Window arm_compute::calculate_max_enlarged_window(const ITensorInfo &info, const
                    anchor[0] - border_size.left + ceil_to_multiple(shape[0] + border_size.left + border_size.right, steps[0]),
                    steps[0]));
 
-    size_t             n            = 1;
-    const TensorShape &tensor_shape = info.tensor_shape();
+    size_t n = 1;
 
-    if(tensor_shape.num_dimensions() > 1)
+    if(anchor.num_dimensions() > 1)
     {
         window.set(1, Window::Dimension(
                        // Include the border above the image
@@ -106,22 +101,27 @@ Window arm_compute::calculate_max_enlarged_window(const ITensorInfo &info, const
         ++n;
     }
 
-    if(tensor_shape.num_dimensions() > 2)
+    if(anchor.num_dimensions() > 2)
     {
-        window.set(2, Window::Dimension(0, std::max<size_t>(1, tensor_shape[n]), steps[2]));
+        window.set(2, Window::Dimension(0, std::max<size_t>(1, shape[n]), steps[2]));
 
         ++n;
     }
 
+    for(; n < anchor.num_dimensions(); ++n)
+    {
+        window.set(n, Window::Dimension(anchor[n], std::max<size_t>(1, shape[n])));
+    }
+
     for(; n < Coordinates::num_max_dimensions; ++n)
     {
-        window.set(n, Window::Dimension(0, std::max<size_t>(1, tensor_shape[n])));
+        window.set(n, Window::Dimension(0, 1));
     }
 
     return window;
 }
 
-Window arm_compute::calculate_max_window_horizontal(const ITensorInfo &info, const Steps &steps, bool skip_border, BorderSize border_size)
+Window arm_compute::calculate_max_window_horizontal(const ValidRegion &valid_region, const Steps &steps, bool skip_border, BorderSize border_size)
 {
     if(skip_border)
     {
@@ -134,8 +134,8 @@ Window arm_compute::calculate_max_window_horizontal(const ITensorInfo &info, con
         border_size.right = 0;
     }
 
-    const Coordinates &anchor = info.valid_region().anchor;
-    const TensorShape &shape  = info.valid_region().shape;
+    const Coordinates &anchor = valid_region.anchor;
+    const TensorShape &shape  = valid_region.shape;
 
     Window window;
 
@@ -147,10 +147,9 @@ Window arm_compute::calculate_max_window_horizontal(const ITensorInfo &info, con
                    anchor[0] + border_size.left + ceil_to_multiple(std::max(0, static_cast<int>(shape[0]) - static_cast<int>(border_size.left) - static_cast<int>(border_size.right)), steps[0]),
                    steps[0]));
 
-    size_t             n            = 1;
-    const TensorShape &tensor_shape = info.tensor_shape();
+    size_t n = 1;
 
-    if(tensor_shape.num_dimensions() > 1)
+    if(anchor.num_dimensions() > 1)
     {
         window.set(1, Window::Dimension(
                        // Skip the border above the image
@@ -162,9 +161,14 @@ Window arm_compute::calculate_max_window_horizontal(const ITensorInfo &info, con
         ++n;
     }
 
+    for(; n < anchor.num_dimensions(); ++n)
+    {
+        window.set(n, Window::Dimension(anchor[n], std::max<size_t>(1, shape[n])));
+    }
+
     for(; n < Coordinates::num_max_dimensions; ++n)
     {
-        window.set(n, Window::Dimension(0, std::max<size_t>(1, tensor_shape[n])));
+        window.set(n, Window::Dimension(0, 1));
     }
 
     return window;

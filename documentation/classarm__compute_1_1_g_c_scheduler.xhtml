@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -133,15 +133,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a19bb5002a62b62e050e89c975f7b9fdf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_scheduler.xhtml#a19bb5002a62b62e050e89c975f7b9fdf">default_init</a> ()</td></tr>
 <tr class="memdesc:a19bb5002a62b62e050e89c975f7b9fdf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialises the context and command queue used by the scheduler to default values and sets a default device and kernel path for the <a class="el" href="classarm__compute_1_1_g_c_kernel_library.xhtml">GCKernelLibrary</a>.  <a href="#a19bb5002a62b62e050e89c975f7b9fdf">More...</a><br /></td></tr>
 <tr class="separator:a19bb5002a62b62e050e89c975f7b9fdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1ddf24e952edf8ca6731fb3e8eb4c0c3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_scheduler.xhtml#a1ddf24e952edf8ca6731fb3e8eb4c0c3">enqueue</a> (<a class="el" href="classarm__compute_1_1_i_g_c_kernel.xhtml">IGCKernel</a> &amp;kernel, bool flush=true)</td></tr>
-<tr class="memdesc:a1ddf24e952edf8ca6731fb3e8eb4c0c3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Schedule the execution of the passed kernel if possible.  <a href="#a1ddf24e952edf8ca6731fb3e8eb4c0c3">More...</a><br /></td></tr>
-<tr class="separator:a1ddf24e952edf8ca6731fb3e8eb4c0c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66a29e27a51a13250143981b0ee4ad19"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_scheduler.xhtml#a66a29e27a51a13250143981b0ee4ad19">dispatch</a> (<a class="el" href="classarm__compute_1_1_i_g_c_kernel.xhtml">IGCKernel</a> &amp;kernel, bool flush=true)</td></tr>
+<tr class="memdesc:a66a29e27a51a13250143981b0ee4ad19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Schedule the execution of the passed kernel if possible.  <a href="#a66a29e27a51a13250143981b0ee4ad19">More...</a><br /></td></tr>
+<tr class="separator:a66a29e27a51a13250143981b0ee4ad19"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9120bd38578ddee701b5526dfe2369db"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_scheduler.xhtml#a9120bd38578ddee701b5526dfe2369db">init</a> (EGLDisplay dpy, EGLContext ctx)</td></tr>
 <tr class="memdesc:a9120bd38578ddee701b5526dfe2369db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialises the display and context to be used by the scheduler.  <a href="#a9120bd38578ddee701b5526dfe2369db">More...</a><br /></td></tr>
 <tr class="separator:a9120bd38578ddee701b5526dfe2369db"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad55f80ed3cd8b6c4f247763b747016af"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_scheduler.xhtml#ad55f80ed3cd8b6c4f247763b747016af">sync</a> ()</td></tr>
-<tr class="memdesc:ad55f80ed3cd8b6c4f247763b747016af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Blocks until all commands in the associated command queue have finished.  <a href="#ad55f80ed3cd8b6c4f247763b747016af">More...</a><br /></td></tr>
-<tr class="separator:ad55f80ed3cd8b6c4f247763b747016af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2dcf87458fcfdfb5e9fdd369e0320d78"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_scheduler.xhtml#a2dcf87458fcfdfb5e9fdd369e0320d78">memory_barrier</a> ()</td></tr>
+<tr class="memdesc:a2dcf87458fcfdfb5e9fdd369e0320d78"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defines a barrier ordering memory transactions.  <a href="#a2dcf87458fcfdfb5e9fdd369e0320d78">More...</a><br /></td></tr>
+<tr class="separator:a2dcf87458fcfdfb5e9fdd369e0320d78"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
@@ -169,16 +169,16 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Initialises the context and command queue used by the scheduler to default values and sets a default device and kernel path for the <a class="el" href="classarm__compute_1_1_g_c_kernel_library.xhtml">GCKernelLibrary</a>. </p>
 
-<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00062">main()</a>, and <a class="el" href="gc__absdiff_8cpp_source.xhtml#l00037">main_gc_absdiff()</a>.</p>
+<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00063">main()</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="a1ddf24e952edf8ca6731fb3e8eb4c0c3"></a>
+<a class="anchor" id="a66a29e27a51a13250143981b0ee4ad19"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void enqueue </td>
+          <td class="memname">void dispatch </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classarm__compute_1_1_i_g_c_kernel.xhtml">IGCKernel</a> &amp;&#160;</td>
           <td class="paramname"><em>kernel</em>, </td>
@@ -232,7 +232,7 @@ Static Public Member Functions</h2></td></tr>
 <p>Access the scheduler singleton. </p>
 <dl class="section return"><dt>Returns</dt><dd>The scheduler </dd></dl>
 
-<p>Referenced by <a class="el" href="_framework_8cpp_source.xhtml#l00260">Framework::error_on_missing_assets()</a>, <a class="el" href="main_8cpp_source.xhtml#l00062">main()</a>, and <a class="el" href="gc__absdiff_8cpp_source.xhtml#l00037">main_gc_absdiff()</a>.</p>
+<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00063">main()</a>.</p>
 
 </div>
 </div>
@@ -271,12 +271,12 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ad55f80ed3cd8b6c4f247763b747016af"></a>
+<a class="anchor" id="a2dcf87458fcfdfb5e9fdd369e0320d78"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void sync </td>
+          <td class="memname">void memory_barrier </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -284,9 +284,7 @@ Static Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Blocks until all commands in the associated command queue have finished. </p>
-
-<p>Referenced by <a class="el" href="_framework_8cpp_source.xhtml#l00260">Framework::error_on_missing_assets()</a>, and <a class="el" href="gc__absdiff_8cpp_source.xhtml#l00037">main_gc_absdiff()</a>.</p>
+<p>Defines a barrier ordering memory transactions. </p>
 
 </div>
 </div>
@@ -299,7 +297,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_g_c_scheduler.xhtml">GCScheduler</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:36 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:45 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

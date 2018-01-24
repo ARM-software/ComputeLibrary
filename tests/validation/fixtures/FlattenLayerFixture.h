@@ -76,9 +76,7 @@ protected:
     TensorType compute_target(const TensorShape &shape, DataType data_type)
     {
         TensorShape shape_flatten(shape);
-        shape_flatten.set(0, shape[0] * shape[1] * shape[2]);
-        shape_flatten.remove_dimension(1);
-        shape_flatten.remove_dimension(1);
+        shape_flatten.collapse(3);
 
         // Create tensors
         TensorType src = create_tensor<TensorType>(shape, data_type, 1, _fractional_bits);

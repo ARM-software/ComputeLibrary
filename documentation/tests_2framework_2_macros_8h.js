@@ -22,6 +22,7 @@ var tests_2framework_2_macros_8h =
     [ "FIXTURE_DATA_TEST_CASE_IMPL", "tests_2framework_2_macros_8h.xhtml#a9c14b58feb41d3702ce3ed63822ac2a8", null ],
     [ "FIXTURE_RUN", "tests_2framework_2_macros_8h.xhtml#a67ff67e5a2343bc8d05b1b02290c9fde", null ],
     [ "FIXTURE_SETUP", "tests_2framework_2_macros_8h.xhtml#af26a9a440f7ae0444624a5ff4392ea2e", null ],
+    [ "FIXTURE_SYNC", "tests_2framework_2_macros_8h.xhtml#afc8f808405401fbb9528d36b15127f5b", null ],
     [ "FIXTURE_TEARDOWN", "tests_2framework_2_macros_8h.xhtml#ae4ff555702946b1f9dddd59f2bff3a2b", null ],
     [ "FIXTURE_TEST_CASE", "tests_2framework_2_macros_8h.xhtml#a926fbae618fcbb44111e683b8a1e2f99", null ],
     [ "FIXTURE_TEST_CASE_IMPL", "tests_2framework_2_macros_8h.xhtml#a2ff966da00c382c25e5b064b019d870c", null ],

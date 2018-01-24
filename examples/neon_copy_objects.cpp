@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,122 +31,134 @@
 #include <iostream>
 
 using namespace arm_compute;
+using namespace utils;
 
-void main_neon_copy_objects(int argc, const char **argv)
+class NEONCopyObjectsExample : public Example
 {
-    ARM_COMPUTE_UNUSED(argc);
-    ARM_COMPUTE_UNUSED(argv);
-
-    /** [Copy objects example] */
-    constexpr unsigned int width  = 4;
-    constexpr unsigned int height = 3;
-    constexpr unsigned int batch  = 2;
-
-    auto *src_data = new float[width * height * batch];
-    auto *dst_data = new float[width * height * batch];
-
-    // Fill src_data with dummy values:
-    for(unsigned int b = 0; b < batch; b++)
+public:
+    void do_setup(int argc, char **argv) override
     {
-        for(unsigned int h = 0; h < height; h++)
+        ARM_COMPUTE_UNUSED(argc);
+        ARM_COMPUTE_UNUSED(argv);
+
+        /** [Copy objects example] */
+        constexpr unsigned int width  = 4;
+        constexpr unsigned int height = 3;
+        constexpr unsigned int batch  = 2;
+
+        src_data = new float[width * height * batch];
+        dst_data = new float[width * height * batch];
+
+        // Fill src_data with dummy values:
+        for(unsigned int b = 0; b < batch; b++)
         {
-            for(unsigned int w = 0; w < width; w++)
+            for(unsigned int h = 0; h < height; h++)
             {
-                src_data[b * (width * height) + h * width + w] = static_cast<float>(100 * b + 10 * h + w);
+                for(unsigned int w = 0; w < width; w++)
+                {
+                    src_data[b * (width * height) + h * width + w] = static_cast<float>(100 * b + 10 * h + w);
+                }
             }
         }
+
+        // Initialize the tensors dimensions and type:
+        const TensorShape shape(width, height, batch);
+        input.allocator()->init(TensorInfo(shape, 1, DataType::F32));
+        output.allocator()->init(TensorInfo(shape, 1, DataType::F32));
+
+        // Configure softmax:
+        softmax.configure(&input, &output);
+
+        // Allocate the input / output tensors:
+        input.allocator()->allocate();
+        output.allocator()->allocate();
+
+        // Fill the input tensor:
+        // Simplest way: create an iterator to iterate through each element of the input tensor:
+        Window input_window;
+        input_window.use_tensor_dimensions(input.info()->tensor_shape());
+        std::cout << " Dimensions of the input's iterator:\n";
+        std::cout << " X = [start=" << input_window.x().start() << ", end=" << input_window.x().end() << ", step=" << input_window.x().step() << "]\n";
+        std::cout << " Y = [start=" << input_window.y().start() << ", end=" << input_window.y().end() << ", step=" << input_window.y().step() << "]\n";
+        std::cout << " Z = [start=" << input_window.z().start() << ", end=" << input_window.z().end() << ", step=" << input_window.z().step() << "]\n";
+
+        // Create an iterator:
+        Iterator input_it(&input, input_window);
+
+        // Iterate through the elements of src_data and copy them one by one to the input tensor:
+        // This is equivalent to:
+        // for( unsigned int z = 0; z < batch; ++z)
+        // {
+        //   for( unsigned int y = 0; y < height; ++y)
+        //   {
+        //     for( unsigned int x = 0; x < width; ++x)
+        //     {
+        //       *reinterpret_cast<float*>( input.buffer() + input.info()->offset_element_in_bytes(Coordinates(x,y,z))) = src_data[ z * (width*height) + y * width + x];
+        //     }
+        //   }
+        // }
+        // Except it works for an arbitrary number of dimensions
+        execute_window_loop(input_window, [&](const Coordinates & id)
+        {
+            std::cout << "Setting item [" << id.x() << "," << id.y() << "," << id.z() << "]\n";
+            *reinterpret_cast<float *>(input_it.ptr()) = src_data[id.z() * (width * height) + id.y() * width + id.x()];
+        },
+        input_it);
+
+        // More efficient way: create an iterator to iterate through each row (instead of each element) of the output tensor:
+        Window output_window;
+        output_window.use_tensor_dimensions(output.info()->tensor_shape(), /* first_dimension =*/Window::DimY); // Iterate through the rows (not each element)
+        std::cout << " Dimensions of the output's iterator:\n";
+        std::cout << " X = [start=" << output_window.x().start() << ", end=" << output_window.x().end() << ", step=" << output_window.x().step() << "]\n";
+        std::cout << " Y = [start=" << output_window.y().start() << ", end=" << output_window.y().end() << ", step=" << output_window.y().step() << "]\n";
+        std::cout << " Z = [start=" << output_window.z().start() << ", end=" << output_window.z().end() << ", step=" << output_window.z().step() << "]\n";
+
+        // Create an iterator:
+        Iterator output_it(&output, output_window);
+
+        // Iterate through the rows of the output tensor and copy them to dst_data:
+        // This is equivalent to:
+        // for( unsigned int z = 0; z < batch; ++z)
+        // {
+        //   for( unsigned int y = 0; y < height; ++y)
+        //   {
+        //     memcpy( dst_data + z * (width*height) + y * width, input.buffer() + input.info()->offset_element_in_bytes(Coordinates(0,y,z)), width * sizeof(float));
+        //   }
+        // }
+        // Except it works for an arbitrary number of dimensions
+        execute_window_loop(output_window, [&](const Coordinates & id)
+        {
+            std::cout << "Copying one row starting from [" << id.x() << "," << id.y() << "," << id.z() << "]\n";
+            // Copy one whole row:
+            memcpy(dst_data + id.z() * (width * height) + id.y() * width, output_it.ptr(), width * sizeof(float));
+        },
+        output_it);
+
+        /** [Copy objects example] */
+    }
+    void do_run() override
+    {
+        // Run NEON softmax:
+        softmax.run();
+    }
+    void do_teardown() override
+    {
+        delete[] src_data;
+        delete[] dst_data;
     }
 
-    Tensor         input, output;
-    NESoftmaxLayer softmax;
-
-    // Initialize the tensors dimensions and type:
-    const TensorShape shape(width, height, batch);
-    input.allocator()->init(TensorInfo(shape, 1, DataType::F32));
-    output.allocator()->init(TensorInfo(shape, 1, DataType::F32));
-
-    // Configure softmax:
-    softmax.configure(&input, &output);
-
-    // Allocate the input / output tensors:
-    input.allocator()->allocate();
-    output.allocator()->allocate();
-
-    // Fill the input tensor:
-    // Simplest way: create an iterator to iterate through each element of the input tensor:
-    Window input_window;
-    input_window.use_tensor_dimensions(input.info()->tensor_shape());
-    std::cout << " Dimensions of the input's iterator:\n";
-    std::cout << " X = [start=" << input_window.x().start() << ", end=" << input_window.x().end() << ", step=" << input_window.x().step() << "]\n";
-    std::cout << " Y = [start=" << input_window.y().start() << ", end=" << input_window.y().end() << ", step=" << input_window.y().step() << "]\n";
-    std::cout << " Z = [start=" << input_window.z().start() << ", end=" << input_window.z().end() << ", step=" << input_window.z().step() << "]\n";
-
-    // Create an iterator:
-    Iterator input_it(&input, input_window);
-
-    // Iterate through the elements of src_data and copy them one by one to the input tensor:
-    // This is equivalent to:
-    // for( unsigned int z = 0; z < batch; ++z)
-    // {
-    //   for( unsigned int y = 0; y < height; ++y)
-    //   {
-    //     for( unsigned int x = 0; x < width; ++x)
-    //     {
-    //       *reinterpret_cast<float*>( input.buffer() + input.info()->offset_element_in_bytes(Coordinates(x,y,z))) = src_data[ z * (width*height) + y * width + x];
-    //     }
-    //   }
-    // }
-    // Except it works for an arbitrary number of dimensions
-    execute_window_loop(input_window, [&](const Coordinates & id)
-    {
-        std::cout << "Setting item [" << id.x() << "," << id.y() << "," << id.z() << "]\n";
-        *reinterpret_cast<float *>(input_it.ptr()) = src_data[id.z() * (width * height) + id.y() * width + id.x()];
-    },
-    input_it);
-
-    // Run NEON softmax:
-    softmax.run();
-
-    // More efficient way: create an iterator to iterate through each row (instead of each element) of the output tensor:
-    Window output_window;
-    output_window.use_tensor_dimensions(output.info()->tensor_shape(), /* first_dimension =*/Window::DimY); // Iterate through the rows (not each element)
-    std::cout << " Dimensions of the output's iterator:\n";
-    std::cout << " X = [start=" << output_window.x().start() << ", end=" << output_window.x().end() << ", step=" << output_window.x().step() << "]\n";
-    std::cout << " Y = [start=" << output_window.y().start() << ", end=" << output_window.y().end() << ", step=" << output_window.y().step() << "]\n";
-    std::cout << " Z = [start=" << output_window.z().start() << ", end=" << output_window.z().end() << ", step=" << output_window.z().step() << "]\n";
-
-    // Create an iterator:
-    Iterator output_it(&output, output_window);
-
-    // Iterate through the rows of the output tensor and copy them to dst_data:
-    // This is equivalent to:
-    // for( unsigned int z = 0; z < batch; ++z)
-    // {
-    //   for( unsigned int y = 0; y < height; ++y)
-    //   {
-    //     memcpy( dst_data + z * (width*height) + y * width, input.buffer() + input.info()->offset_element_in_bytes(Coordinates(0,y,z)), width * sizeof(float));
-    //   }
-    // }
-    // Except it works for an arbitrary number of dimensions
-    execute_window_loop(output_window, [&](const Coordinates & id)
-    {
-        std::cout << "Copying one row starting from [" << id.x() << "," << id.y() << "," << id.z() << "]\n";
-        // Copy one whole row:
-        memcpy(dst_data + id.z() * (width * height) + id.y() * width, output_it.ptr(), width * sizeof(float));
-    },
-    output_it);
-
-    delete[] src_data;
-    delete[] dst_data;
-    /** [Copy objects example] */
-}
-
+private:
+    Tensor         input{}, output{};
+    float         *src_data{};
+    float         *dst_data{};
+    NESoftmaxLayer softmax{};
+};
 /** Main program for the copy objects test
  *
  * @param[in] argc Number of arguments
  * @param[in] argv Arguments
  */
-int main(int argc, const char **argv)
+int main(int argc, char **argv)
 {
-    return utils::run_example(argc, argv, main_neon_copy_objects);
+    return utils::run_example<NEONCopyObjectsExample>(argc, argv);
 }

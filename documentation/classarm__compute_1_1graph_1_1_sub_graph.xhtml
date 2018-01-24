@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -138,9 +138,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab354fb05f2ce43224f098bb3dc7ff42c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_sub_graph.xhtml#ab354fb05f2ce43224f098bb3dc7ff42c">add_tensor_object</a> (std::unique_ptr&lt; <a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_object.xhtml">ITensorObject</a> &gt; tensor)</td></tr>
 <tr class="memdesc:ab354fb05f2ce43224f098bb3dc7ff42c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a tensor to the graph.  <a href="#ab354fb05f2ce43224f098bb3dc7ff42c">More...</a><br /></td></tr>
 <tr class="separator:ab354fb05f2ce43224f098bb3dc7ff42c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a66a49e1820429b278b86df2536d7936d"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_sub_graph.xhtml#a66a49e1820429b278b86df2536d7936d">construct</a> (<a class="el" href="namespacearm__compute_1_1graph.xhtml#a8d5e69e9a697c2007e241eb413c9833b">TargetHint</a> hint, std::unique_ptr&lt; <a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_object.xhtml">ITensorObject</a> &gt; input, std::unique_ptr&lt; <a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_object.xhtml">ITensorObject</a> &gt; output)</td></tr>
-<tr class="memdesc:a66a49e1820429b278b86df2536d7936d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a graph from a subgraph.  <a href="#a66a49e1820429b278b86df2536d7936d">More...</a><br /></td></tr>
-<tr class="separator:a66a49e1820429b278b86df2536d7936d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef80393e7a12fc5963ebaf8b0b6fa290"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_sub_graph.xhtml#aef80393e7a12fc5963ebaf8b0b6fa290">construct</a> (const <a class="el" href="classarm__compute_1_1graph_1_1_graph_context.xhtml">GraphContext</a> &amp;ctx, std::unique_ptr&lt; <a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_object.xhtml">ITensorObject</a> &gt; input, std::unique_ptr&lt; <a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_object.xhtml">ITensorObject</a> &gt; output)</td></tr>
+<tr class="memdesc:aef80393e7a12fc5963ebaf8b0b6fa290"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a graph from a subgraph.  <a href="#aef80393e7a12fc5963ebaf8b0b6fa290">More...</a><br /></td></tr>
+<tr class="separator:aef80393e7a12fc5963ebaf8b0b6fa290"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a600262854eb0ed96af45ca2bf05c5c8c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_sub_graph.xhtml#a600262854eb0ed96af45ca2bf05c5c8c">has_input</a> () const </td></tr>
 <tr class="memdesc:a600262854eb0ed96af45ca2bf05c5c8c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if the subgraph has an input.  <a href="#a600262854eb0ed96af45ca2bf05c5c8c">More...</a><br /></td></tr>
 <tr class="separator:a600262854eb0ed96af45ca2bf05c5c8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -221,15 +221,15 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a66a49e1820429b278b86df2536d7936d"></a>
+<a class="anchor" id="aef80393e7a12fc5963ebaf8b0b6fa290"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">std::unique_ptr&lt;<a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a>&gt; construct </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a8d5e69e9a697c2007e241eb413c9833b">TargetHint</a>&#160;</td>
-          <td class="paramname"><em>hint</em>, </td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1graph_1_1_graph_context.xhtml">GraphContext</a> &amp;&#160;</td>
+          <td class="paramname"><em>ctx</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -254,7 +254,7 @@ Public Member Functions</h2></td></tr>
 <p>Constructs a graph from a subgraph. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">hint</td><td>Execution target hint </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ctx</td><td>Parent graph context </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input to the graph </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Output to the graph</td></tr>
   </table>
@@ -309,7 +309,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1_sub_graph.xhtml">SubGraph</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:37 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:46 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

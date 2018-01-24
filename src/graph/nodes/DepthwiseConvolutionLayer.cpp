@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,11 +43,14 @@ std::unique_ptr<arm_compute::IFunction> DepthwiseConvolutionLayer::instantiate_n
         TensorShape shape = in->info()->tensor_shape();
         shape.set(Window::DimX, _conv_width);
         shape.set(Window::DimY, _conv_height);
-        _weights.set_info(TensorInfo(TensorShape(shape), in->info()->num_channels(), in->info()->data_type(), in->info()->fixed_point_position()));
+        TensorInfo info = TensorInfo(TensorShape(shape), in->info()->num_channels(), in->info()->data_type(), in->info()->fixed_point_position());
+        info.set_quantization_info(_quant_info);
+        _weights.set_info(std::move(info));
     }
     if(_biases.has_accessor() && _biases.tensor() == nullptr)
     {
-        _biases.set_info(TensorInfo(TensorShape(in->info()->dimension(2)), in->info()->num_channels(), in->info()->data_type(), in->info()->fixed_point_position()));
+        DataType dt = in->info()->data_type();
+        _biases.set_info(TensorInfo(TensorShape(in->info()->dimension(2)), in->info()->num_channels(), is_data_type_quantized_asymmetric(dt) ? DataType::S32 : dt, in->info()->fixed_point_position()));
     }
 
     bool weights_is_loaded = _weights.tensor() != nullptr;

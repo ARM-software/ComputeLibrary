@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,7 +61,7 @@ void GCFullyConnectedLayer::configure_conv_fc(const IGCTensor *input, const IGCT
     _im2col_output.allocator()->init(TensorInfo(shape_im2col, 1, dt));
 
     // Configure im2col kernel
-    _im2col_kernel.configure(input, &_im2col_output, std::make_pair(1, 1), PadStrideInfo(1, 1, 0, 0), false);
+    _im2col_kernel.configure(input, &_im2col_output, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false);
 
     // Configure matrix multiply kernel
     _mm_kernel.configure(&_im2col_output, weights, output, 1.0f, false);
@@ -159,19 +159,22 @@ void GCFullyConnectedLayer::run()
     // Linearize input if it comes from a convolutional layer
     if(_is_fc_after_conv)
     {
-        GCScheduler::get().enqueue(_im2col_kernel, false);
+        GCScheduler::get().dispatch(_im2col_kernel, false);
     }
 
-    GCScheduler::get().sync();
+    if(!_are_weights_reshaped || _is_fc_after_conv)
+    {
+        GCScheduler::get().memory_barrier();
+    }
 
     // Run matrix multiply
-    GCScheduler::get().enqueue(_mm_kernel, !_accumulate_biases);
+    GCScheduler::get().dispatch(_mm_kernel, !_accumulate_biases);
 
     // Accumulate biases if provided
     if(_accumulate_biases)
     {
-        GCScheduler::get().sync();
+        GCScheduler::get().memory_barrier();
 
-        GCScheduler::get().enqueue(_accumulate_biases_kernel);
+        GCScheduler::get().dispatch(_accumulate_biases_kernel);
     }
 }

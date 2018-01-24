@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">17.12</span>
+   &#160;<span id="projectnumber">18.01</span>
    </div>
   </td>
  </tr>
@@ -169,6 +169,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a6dc2398a934f02224ad3743185f27699"><td class="memItemLeft" align="right" valign="top">cl::NDRange&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#a6dc2398a934f02224ad3743185f27699">default_ndrange</a> () const </td></tr>
 <tr class="memdesc:a6dc2398a934f02224ad3743185f27699"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the default NDRange for the device.  <a href="#a6dc2398a934f02224ad3743185f27699">More...</a><br /></td></tr>
 <tr class="separator:a6dc2398a934f02224ad3743185f27699"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ad613086cc79a2e32d5b87bcefc7488"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#a0ad613086cc79a2e32d5b87bcefc7488">clear_programs_cache</a> ()</td></tr>
+<tr class="memdesc:a0ad613086cc79a2e32d5b87bcefc7488"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clear the library's cache of binary programs.  <a href="#a0ad613086cc79a2e32d5b87bcefc7488">More...</a><br /></td></tr>
+<tr class="separator:a0ad613086cc79a2e32d5b87bcefc7488"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
@@ -208,6 +211,33 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a0ad613086cc79a2e32d5b87bcefc7488"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void clear_programs_cache </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Clear the library's cache of binary programs. </p>
+
+<p>Definition at line <a class="el" href="_c_l_kernel_library_8h_source.xhtml#l00291">291</a> of file <a class="el" href="_c_l_kernel_library_8h_source.xhtml">CLKernelLibrary.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;    {</div><div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;        _programs_map.clear();</div><div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;        _built_programs_map.clear();</div><div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;    }</div></div><!-- fragment -->
+</div>
+</div>
 <a class="anchor" id="a07b37240bd1f09e36cf119dced79f9c4"></a>
 <div class="memitem">
 <div class="memproto">
@@ -285,7 +315,7 @@ Static Public Member Functions</h2></td></tr>
 <p>Access the KernelLibrary singleton. </p>
 <dl class="section return"><dt>Returns</dt><dd>The KernelLibrary instance. </dd></dl>
 
-<p>Referenced by <a class="el" href="_i_c_l_kernel_8h_source.xhtml#l00155">ICLKernel::config_id()</a>, and <a class="el" href="_c_l_scheduler_8h_source.xhtml#l00083">CLScheduler::default_init()</a>.</p>
+<p>Referenced by <a class="el" href="_i_c_l_kernel_8h_source.xhtml#l00155">ICLKernel::config_id()</a>, and <a class="el" href="_c_l_scheduler_8h_source.xhtml#l00071">CLScheduler::default_init()</a>.</p>
 
 </div>
 </div>
@@ -390,7 +420,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_c_l_kernel_library_8h_source.xhtml#l00209">209</a> of file <a class="el" href="_c_l_kernel_library_8h_source.xhtml">CLKernelLibrary.h</a>.</p>
 
-<p>Referenced by <a class="el" href="_c_l_scheduler_8h_source.xhtml#l00083">CLScheduler::default_init()</a>.</p>
+<p>Referenced by <a class="el" href="_c_l_scheduler_8h_source.xhtml#l00071">CLScheduler::default_init()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;    {</div><div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;        _kernel_path = std::move(kernel_path);</div><div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;        _context     = std::move(context);</div><div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;        _device      = std::move(device);</div><div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
@@ -586,7 +616,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml">CLKernelLibrary</a></li>
-    <li class="footer">Generated on Thu Dec 14 2017 23:48:35 for Compute Library by
+    <li class="footer">Generated on Wed Jan 24 2018 14:30:44 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

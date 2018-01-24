@@ -10,5 +10,6 @@ var tests_2validation_2_helpers_8h =
     [ "fill_mask_from_pattern", "tests_2validation_2_helpers_8h.xhtml#a131ea3f96ddd20058d2f866a012f1416", null ],
     [ "get_activation_layer_test_bounds", "tests_2validation_2_helpers_8h.xhtml#a87133ff9132626517c920974508575c0", null ],
     [ "get_batchnormalization_layer_test_bounds", "tests_2validation_2_helpers_8h.xhtml#a87338eeb8578a4990b6ab73b9696af45", null ],
+    [ "get_normalize_planar_yuv_layer_test_bounds", "tests_2validation_2_helpers_8h.xhtml#a4bd7c62a72ba0ac0a1e073de9935506d", null ],
     [ "harris_corners_parameters", "tests_2validation_2_helpers_8h.xhtml#ad03c1c39d75226aecd5acd8e3959b02a", null ]
 ];

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -96,9 +96,9 @@ void GCDropoutLayerKernel::run(const Window &window)
     {
         unsigned int idx = 0;
 
-        add_3D_tensor_argument(idx, _input, BufferParam(1, 2), slice);
-        add_3D_tensor_argument(idx, _mask, BufferParam(2, 2), slice);
-        add_3D_tensor_argument(idx, _output, BufferParam(3, 2), slice);
+        add_3D_tensor_argument(idx, _input, 1, slice);
+        add_3D_tensor_argument(idx, _mask, 2, slice);
+        add_3D_tensor_argument(idx, _output, 3, slice);
 
         _kernel.update_shader_params();
         enqueue(*this, slice);

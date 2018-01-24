@@ -1,7 +1,6 @@
 var classarm__compute_1_1_g_c_kernel_library =
 [
     [ "GCKernelLibrary", "classarm__compute_1_1_g_c_kernel_library.xhtml#a86bdc674d5c99b1ed9e11ff56567467e", null ],
-    [ "~GCKernelLibrary", "classarm__compute_1_1_g_c_kernel_library.xhtml#a8654ef10c691a43bd0a6e52b131ff79d", null ],
     [ "create_kernel", "classarm__compute_1_1_g_c_kernel_library.xhtml#a3c9232d786719d0387c11c36af18f9d0", null ],
     [ "init", "classarm__compute_1_1_g_c_kernel_library.xhtml#abe24625d55f2fb35da7e293e5e28d483", null ],
     [ "load_binary", "classarm__compute_1_1_g_c_kernel_library.xhtml#a389a543ae040ca6bf6b57fd6215f154b", null ],

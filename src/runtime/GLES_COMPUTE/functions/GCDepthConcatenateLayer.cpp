@@ -63,7 +63,8 @@ void GCDepthConcatenateLayer::run()
 {
     for(unsigned i = 0; i < _num_inputs; i++)
     {
-        GCScheduler::get().enqueue(_border_handlers_vector[i], false);
-        GCScheduler::get().enqueue(_concat_kernels_vector[i], true);
+        GCScheduler::get().dispatch(_border_handlers_vector[i], false);
+        GCScheduler::get().memory_barrier();
+        GCScheduler::get().dispatch(_concat_kernels_vector[i], true);
     }
 }

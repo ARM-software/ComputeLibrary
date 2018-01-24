@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -239,7 +239,7 @@ public:
     SmallDeconvolutionShapes()
         : ShapeDataset("InputShape",
     {
-        TensorShape{ 2U, 3U, 3U, 2U },
+        TensorShape{ 4U, 3U, 3U, 2U },
                      TensorShape{ 5U, 5U, 3U },
                      TensorShape{ 11U, 13U, 4U, 3U }
     })
@@ -337,6 +337,35 @@ public:
     }
 };
 
+/** Data set containing 2D tensor shapes relative to an image size. */
+class SmallImageShapes final : public ShapeDataset
+{
+public:
+    SmallImageShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 640U, 480U },
+                     TensorShape{ 800U, 600U },
+                     TensorShape{ 1200U, 800U }
+    })
+    {
+    }
+};
+
+/** Data set containing 2D tensor shapes relative to an image size. */
+class LargeImageShapes final : public ShapeDataset
+{
+public:
+    LargeImageShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 1920U, 1080U },
+                     TensorShape{ 2560U, 1536U },
+                     TensorShape{ 3584U, 2048U }
+    })
+    {
+    }
+};
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute

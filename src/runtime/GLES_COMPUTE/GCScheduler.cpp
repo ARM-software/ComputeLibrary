@@ -28,11 +28,27 @@
 
 using namespace arm_compute;
 
-GCScheduler::GCScheduler() = default;
+std::once_flag GCScheduler::_initialize_symbols;
+
+GCScheduler::GCScheduler()
+    : _display(EGL_NO_DISPLAY), _context(EGL_NO_CONTEXT)
+{
+}
+
+GCScheduler::~GCScheduler()
+{
+    eglDestroyContext(_display, _context);
+    eglTerminate(_display);
+
+    _context = EGL_NO_CONTEXT;
+    _display = EGL_NO_DISPLAY;
+}
 
 void GCScheduler::default_init()
 {
-    GCKernelLibrary::get().init("./cs_shaders/");
+    setup_context();
+
+    GCKernelLibrary::get().init("./cs_shaders/", _display, _context);
 }
 
 void GCScheduler::init(EGLDisplay dpy, EGLContext ctx)
@@ -42,11 +58,12 @@ void GCScheduler::init(EGLDisplay dpy, EGLContext ctx)
 
 GCScheduler &GCScheduler::get()
 {
+    std::call_once(_initialize_symbols, opengles31_is_available);
     static GCScheduler scheduler;
     return scheduler;
 }
 
-void GCScheduler::enqueue(IGCKernel &kernel, bool flush)
+void GCScheduler::dispatch(IGCKernel &kernel, bool flush)
 {
     kernel.run(kernel.window());
     if(flush)
@@ -55,7 +72,60 @@ void GCScheduler::enqueue(IGCKernel &kernel, bool flush)
     }
 }
 
-void GCScheduler::sync()
+void GCScheduler::memory_barrier()
 {
     ARM_COMPUTE_GL_CHECK(glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT));
+}
+
+void GCScheduler::setup_context()
+{
+    EGLBoolean res;
+    _display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+
+    ARM_COMPUTE_ERROR_ON_MSG(_display == EGL_NO_DISPLAY, "Failed to get display: 0x%x.", eglGetError());
+
+    res = eglInitialize(_display, nullptr, nullptr);
+
+    ARM_COMPUTE_ERROR_ON_MSG(res == EGL_FALSE, "Failed to initialize egl: 0x%x.", eglGetError());
+    ARM_COMPUTE_UNUSED(res);
+
+    const char *egl_extension_st = eglQueryString(_display, EGL_EXTENSIONS);
+    ARM_COMPUTE_ERROR_ON_MSG((strstr(egl_extension_st, "EGL_KHR_create_context") == nullptr), "Failed to query EGL_KHR_create_context");
+    ARM_COMPUTE_ERROR_ON_MSG((strstr(egl_extension_st, "EGL_KHR_surfaceless_context") == nullptr), "Failed to query EGL_KHR_surfaceless_context");
+    ARM_COMPUTE_UNUSED(egl_extension_st);
+
+    const EGLint config_attribs[] =
+    {
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT_KHR,
+        EGL_NONE
+    };
+    EGLConfig cfg;
+    EGLint    count;
+
+    res = eglChooseConfig(_display, config_attribs, &cfg, 1, &count);
+
+    ARM_COMPUTE_ERROR_ON_MSG(res == EGL_FALSE, "Failed to choose config: 0x%x.", eglGetError());
+    ARM_COMPUTE_UNUSED(res);
+
+    res = eglBindAPI(EGL_OPENGL_ES_API);
+
+    ARM_COMPUTE_ERROR_ON_MSG(res == EGL_FALSE, "Failed to bind api: 0x%x.", eglGetError());
+
+    const EGLint attribs[] =
+    {
+        EGL_CONTEXT_CLIENT_VERSION, 3,
+        EGL_NONE
+    };
+    _context = eglCreateContext(_display,
+                                cfg,
+                                EGL_NO_CONTEXT,
+                                attribs);
+
+    ARM_COMPUTE_ERROR_ON_MSG(_context == EGL_NO_CONTEXT, "Failed to create context: 0x%x.", eglGetError());
+    ARM_COMPUTE_UNUSED(res);
+
+    res = eglMakeCurrent(_display, EGL_NO_SURFACE, EGL_NO_SURFACE, _context);
+
+    ARM_COMPUTE_ERROR_ON_MSG(res == EGL_FALSE, "Failed to make current: 0x%x.", eglGetError());
+    ARM_COMPUTE_UNUSED(res);
 }

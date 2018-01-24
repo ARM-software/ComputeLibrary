@@ -36,7 +36,7 @@ class NEGEMMAssemblyBaseKernel : public INEKernel
 public:
     /** Constructor */
     NEGEMMAssemblyBaseKernel()
-        : _input0(nullptr), _input1(nullptr), _output(nullptr), _workspace(nullptr), _alpha(1.f), _beta(0.f), _transform_0(true), _transform_1(true)
+        : _input0(nullptr), _input1(nullptr), _output(nullptr), _workspace(nullptr), _alpha(1.f), _beta(0.f), _is_transposed_0(false), _is_transposed_1(false)
     {
     }
 
@@ -55,22 +55,22 @@ public:
      *
      * The computed function is C = a * AxB + b * C.
      *
-     * @param[in]     input0      Input tensor containing the Matrix A. Data types supported: F32
-     * @param[in]     input1      Input tensor containing the Matrix B. Data types supported: same as @p input0
-     * @param[in,out] output      Output tensor to store the result of matrix multiplication. If @p beta is not zero the values are multiplied by @p beta before the result is accumulated. Otherwise the values are overwritten by the result. Data types supported: same as @p input0.
-     * @param[out]    workspace   Space for intermediate results.
-     * @param[in]     alpha       Weight of the matrix product
-     * @param[in]     beta        Weight of the accumulation.
-     * @param[in]     transform_0 If true the kernel will transform @p input0 prior to the multiplication.
-     * @param[in]     transform_1 If true the kernel will transform @p input1 prior to the multiplication.
+     * @param[in]     input0          Input tensor containing the Matrix A. Data types supported: F32
+     * @param[in]     input1          Input tensor containing the Matrix B. Data types supported: same as @p input0
+     * @param[in,out] output          Output tensor to store the result of matrix multiplication. If @p beta is not zero the values are multiplied by @p beta before the result is accumulated. Otherwise the values are overwritten by the result. Data types supported: same as @p input0.
+     * @param[out]    workspace       Space for intermediate results.
+     * @param[in]     alpha           Weight of the matrix product
+     * @param[in]     beta            Weight of the accumulation.
+     * @param[in]     is_transposed_0 (Optional)True if @p input0 is transposed else false. (Defaults to false)
+     * @param[in]     is_transposed_1 (Optional)True if @p input1 is transposed else false. (Defaults to false)
      */
-    void configure(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha = 1.f, float beta = 0.f, bool transform_0 = true, bool transform_1 = true)
+    void configure(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha = 1.f, float beta = 0.f, bool is_transposed_0 = false, bool is_transposed_1 = false)
     {
-        internal_configure(input0, input1, output, workspace, alpha, beta, transform_0, transform_1);
+        internal_configure(input0, input1, output, workspace, alpha, beta, is_transposed_0, is_transposed_1);
     }
 
 protected:
-    virtual void internal_configure(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool transform_0, bool transform_1) = 0;
+    virtual void internal_configure(const ITensor *input0, const ITensor *input1, ITensor *output, ITensor *workspace, float alpha, float beta, bool _is_transposed_0, bool _is_transposed_1) = 0;
 
     const ITensor *_input0;
     const ITensor *_input1;
@@ -78,8 +78,8 @@ protected:
     ITensor       *_workspace;
     float          _alpha;
     float          _beta;
-    bool           _transform_0;
-    bool           _transform_1;
+    bool           _is_transposed_0;
+    bool           _is_transposed_1;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEGEMMASSEMBLYBASE_H__*/

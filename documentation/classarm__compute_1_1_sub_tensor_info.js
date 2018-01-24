@@ -1,7 +1,7 @@
 var classarm__compute_1_1_sub_tensor_info =
 [
     [ "SubTensorInfo", "classarm__compute_1_1_sub_tensor_info.xhtml#a9025d7eb7c8e0d40239ddc3568d2e201", null ],
-    [ "SubTensorInfo", "classarm__compute_1_1_sub_tensor_info.xhtml#afbfb4cf97d6af2500035f181f877ed4b", null ],
+    [ "SubTensorInfo", "classarm__compute_1_1_sub_tensor_info.xhtml#a76662f85dcac7c47e14753c03e61123f", null ],
     [ "~SubTensorInfo", "classarm__compute_1_1_sub_tensor_info.xhtml#ad86e6a6af47f1b493eac9873f88b843f", null ],
     [ "SubTensorInfo", "classarm__compute_1_1_sub_tensor_info.xhtml#ae2f91fa1c229a5e05f81c4b50e667236", null ],
     [ "SubTensorInfo", "classarm__compute_1_1_sub_tensor_info.xhtml#a3504ac3cf390bdc4eadbc5dca081e07a", null ],

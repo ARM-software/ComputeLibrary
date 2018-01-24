@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -80,17 +80,12 @@ struct IncrementIterators
     template <typename T, typename... Ts>
     static void unroll(T &&it, Ts &&... iterators)
     {
-        it.increment(dimension);
-        IncrementIterators<dimension>::unroll<Ts...>(std::forward<Ts>(iterators)...);
+        auto increment = [](T && it)
+        {
+            it.increment(dimension);
+        };
+        utility::for_each(increment, std::forward<T>(it), std::forward<Ts>(iterators)...);
     }
-
-    template <typename T>
-    static void unroll(T &&it)
-    {
-        it.increment(dimension);
-        // End of recursion
-    }
-
     static void unroll()
     {
         // End of recursion
@@ -289,11 +284,14 @@ inline bool set_quantization_info_if_empty(ITensorInfo &info, QuantizationInfo q
 
 inline ValidRegion calculate_valid_region_scale(const ITensorInfo &src_info, const TensorShape &dst_shape, InterpolationPolicy policy, BorderSize border_size, bool border_undefined)
 {
-    const auto  wr = static_cast<float>(dst_shape[0]) / static_cast<float>(src_info.tensor_shape()[0]);
-    const auto  hr = static_cast<float>(dst_shape[1]) / static_cast<float>(src_info.tensor_shape()[1]);
-    Coordinates anchor;
-    anchor.set_num_dimensions(src_info.tensor_shape().num_dimensions());
-    TensorShape new_dst_shape(dst_shape);
+    const auto wr = static_cast<float>(dst_shape[0]) / static_cast<float>(src_info.tensor_shape()[0]);
+    const auto hr = static_cast<float>(dst_shape[1]) / static_cast<float>(src_info.tensor_shape()[1]);
+
+    ValidRegion valid_region{ Coordinates(), dst_shape, src_info.tensor_shape().num_dimensions() };
+
+    Coordinates &anchor = valid_region.anchor;
+    TensorShape &shape  = valid_region.shape;
+
     anchor.set(0, (policy == InterpolationPolicy::BILINEAR
                    && border_undefined) ?
                ((static_cast<int>(src_info.valid_region().anchor[0]) + border_size.left + 0.5f) * wr - 0.5f) :
@@ -311,10 +309,10 @@ inline ValidRegion calculate_valid_region_scale(const ITensorInfo &src_info, con
                         ((static_cast<int>(src_info.valid_region().anchor[1]) + static_cast<int>(src_info.valid_region().shape[1]) - 1) - 1 + 0.5f) * hr - 0.5f :
                         ((static_cast<int>(src_info.valid_region().anchor[1]) + static_cast<int>(src_info.valid_region().shape[1])) + 0.5f) * hr - 0.5f;
 
-    new_dst_shape.set(0, shape_out_x - anchor[0]);
-    new_dst_shape.set(1, shape_out_y - anchor[1]);
+    shape.set(0, shape_out_x - anchor[0]);
+    shape.set(1, shape_out_y - anchor[1]);
 
-    return ValidRegion(std::move(anchor), std::move(new_dst_shape));
+    return valid_region;
 }
 
 inline Coordinates index2coords(const TensorShape &shape, int index)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,7 +62,7 @@ void arm_compute::enqueue(IGCKernel &kernel, const Window &window, const gles::N
 }
 
 IGCKernel::IGCKernel()
-    : _kernel()
+    : _kernel(), _lws_hint(gles::NDRange(1U, 1U, 1U))
 {
 }
 
@@ -79,7 +79,7 @@ unsigned int           IGCKernel::num_arguments_per_tensor() const
 }
 
 template <unsigned int dimension_size>
-void IGCKernel::add_tensor_argument(unsigned int &idx, const IGCTensor *tensor, const BufferParam &param, const Window &window)
+void IGCKernel::add_tensor_argument(unsigned int &idx, const IGCTensor *tensor, const unsigned int binding_point, const Window &window)
 {
     ARM_COMPUTE_ERROR_ON(tensor == nullptr);
 
@@ -103,7 +103,6 @@ void IGCKernel::add_tensor_argument(unsigned int &idx, const IGCTensor *tensor, 
     }
 
     _kernel.set_argument(idx++, offset_first_element);
-    _kernel.set_argument(idx++, param.buffer_data_type_shift);
 
     // Rounding up the tensor attributes structure in compute shader to a multiple of a vec4
     unsigned int idx_end = ceil_to_multiple(idx, 4);
@@ -113,7 +112,7 @@ void IGCKernel::add_tensor_argument(unsigned int &idx, const IGCTensor *tensor, 
     }
     idx = idx_end;
 
-    ARM_COMPUTE_GL_CHECK(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, param.binding_point, tensor->gc_buffer()));
+    ARM_COMPUTE_GL_CHECK(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, binding_point, tensor->gc_buffer()));
 
     ARM_COMPUTE_ERROR_ON_MSG(idx_start + num_arguments_per_tensor<dimension_size>() != idx,
                              "add_%dD_tensor_argument() is supposed to add exactly %d arguments to the kernel", dimension_size, num_arguments_per_tensor<dimension_size>());
@@ -122,32 +121,17 @@ void IGCKernel::add_tensor_argument(unsigned int &idx, const IGCTensor *tensor, 
 
 void IGCKernel::add_1D_tensor_argument(unsigned int &idx, const IGCTensor *tensor, const unsigned int binding_point, const Window &window)
 {
-    add_tensor_argument<1>(idx, tensor, BufferParam(binding_point, 0), window);
-}
-
-void IGCKernel::add_1D_tensor_argument(unsigned int &idx, const IGCTensor *tensor, const BufferParam &param, const Window &window)
-{
-    add_tensor_argument<1>(idx, tensor, param, window);
+    add_tensor_argument<1>(idx, tensor, binding_point, window);
 }
 
 void IGCKernel::add_2D_tensor_argument(unsigned int &idx, const IGCTensor *tensor, const unsigned int binding_point, const Window &window)
 {
-    add_tensor_argument<2>(idx, tensor, BufferParam(binding_point, 0), window);
-}
-
-void IGCKernel::add_2D_tensor_argument(unsigned int &idx, const IGCTensor *tensor, const BufferParam &param, const Window &window)
-{
-    add_tensor_argument<2>(idx, tensor, param, window);
+    add_tensor_argument<2>(idx, tensor, binding_point, window);
 }
 
 void IGCKernel::add_3D_tensor_argument(unsigned int &idx, const IGCTensor *tensor, const unsigned int binding_point, const Window &window)
 {
-    add_tensor_argument<3>(idx, tensor, BufferParam(binding_point, 0), window);
-}
-
-void IGCKernel::add_3D_tensor_argument(unsigned int &idx, const IGCTensor *tensor, const BufferParam &param, const Window &window)
-{
-    add_tensor_argument<3>(idx, tensor, param, window);
+    add_tensor_argument<3>(idx, tensor, binding_point, window);
 }
 
 unsigned int IGCKernel::num_arguments_per_1D_tensor() const

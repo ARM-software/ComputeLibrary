@@ -74,8 +74,9 @@ bool CLSymbols::load(const std::string &library)
 #define LOAD_FUNCTION_PTR(func_name, handle) \
     func_name##_ptr = reinterpret_cast<decltype(func_name) *>(dlsym(handle, #func_name));
 
-    LOAD_FUNCTION_PTR(clBuildProgram, handle);
-    LOAD_FUNCTION_PTR(clEnqueueNDRangeKernel, handle);
+    LOAD_FUNCTION_PTR(clCreateContextFromType, handle);
+    LOAD_FUNCTION_PTR(clCreateCommandQueue, handle);
+    LOAD_FUNCTION_PTR(clGetContextInfo, handle);
     LOAD_FUNCTION_PTR(clBuildProgram, handle);
     LOAD_FUNCTION_PTR(clEnqueueNDRangeKernel, handle);
     LOAD_FUNCTION_PTR(clSetKernelArg, handle);
@@ -124,6 +125,59 @@ bool opencl_is_available()
     return CLSymbols::get().clBuildProgram_ptr != nullptr;
 }
 } // namespace arm_compute
+
+cl_int clGetContextInfo(cl_context      context,
+                        cl_context_info param_name,
+                        size_t          param_value_size,
+                        void           *param_value,
+                        size_t         *param_value_size_ret)
+{
+    arm_compute::CLSymbols::get().load_default();
+    auto func = arm_compute::CLSymbols::get().clGetContextInfo_ptr;
+    if(func != nullptr)
+    {
+        return func(context, param_name, param_value_size, param_value, param_value_size_ret);
+    }
+    else
+    {
+        return CL_OUT_OF_RESOURCES;
+    }
+}
+
+cl_command_queue clCreateCommandQueue(cl_context                  context,
+                                      cl_device_id                device,
+                                      cl_command_queue_properties properties,
+                                      cl_int                     *errcode_ret)
+{
+    arm_compute::CLSymbols::get().load_default();
+    auto func = arm_compute::CLSymbols::get().clCreateCommandQueue_ptr;
+    if(func != nullptr)
+    {
+        return func(context, device, properties, errcode_ret);
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
+cl_context clCreateContextFromType(const cl_context_properties *properties,
+                                   cl_device_type               device_type,
+                                   void (*pfn_notify)(const char *, const void *, size_t, void *),
+                                   void   *user_data,
+                                   cl_int *errcode_ret)
+{
+    arm_compute::CLSymbols::get().load_default();
+    auto func = arm_compute::CLSymbols::get().clCreateContextFromType_ptr;
+    if(func != nullptr)
+    {
+        return func(properties, device_type, pfn_notify, user_data, errcode_ret);
+    }
+    else
+    {
+        return nullptr;
+    }
+}
 
 cl_int clBuildProgram(
     cl_program          program,

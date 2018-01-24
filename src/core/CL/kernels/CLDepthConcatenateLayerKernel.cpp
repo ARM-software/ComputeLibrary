@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -103,7 +103,7 @@ void CLDepthConcatenateLayerKernel::configure(const ICLTensor *input, unsigned i
     AccessWindowRectangle  input_access(input->info(), -_left_right, -_top_bottom, num_elems_read_per_iteration, num_rows_read_per_iteration);
     AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
     update_window_and_padding(win, input_access, output_access);
-    output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->info()->tensor_shape()));
+    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     ICLKernel::configure(win);
 }

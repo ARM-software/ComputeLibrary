@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017, 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,8 @@
 
 #include "arm_compute/core/Dimensions.h"
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/HOGInfo.h"
+#include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
@@ -855,5 +857,72 @@ inline std::string to_string(const arm_compute::GradientDimension &type)
     str << type;
     return str.str();
 }
+
+/** Formatted output of the HOGNormType type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const HOGNormType &norm_type)
+{
+    switch(norm_type)
+    {
+        case HOGNormType::L1_NORM:
+            os << "L1_NORM";
+            break;
+        case HOGNormType::L2_NORM:
+            os << "L2_NORM";
+            break;
+        case HOGNormType::L2HYS_NORM:
+            os << "L2HYS_NORM";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+inline std::string to_string(const HOGNormType &type)
+{
+    std::stringstream str;
+    str << type;
+    return str.str();
+}
+
+/** Formatted output of the Size2D type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const Size2D &size)
+{
+    os << size.width << "x" << size.height;
+
+    return os;
+}
+
+inline std::string to_string(const Size2D &type)
+{
+    std::stringstream str;
+    str << type;
+    return str.str();
+}
+
+/** Formatted output of the Size2D type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const HOGInfo &hog_info)
+{
+    os << "{CellSize=" << hog_info.cell_size() << ","
+       << "BlockSize=" << hog_info.block_size() << ","
+       << "DetectionWindowSize=" << hog_info.detection_window_size() << ","
+       << "BlockStride=" << hog_info.block_stride() << ","
+       << "NumBins=" << hog_info.num_bins() << ","
+       << "NormType=" << hog_info.normalization_type() << ","
+       << "L2HystThreshold=" << hog_info.l2_hyst_threshold() << ","
+       << "PhaseType=" << hog_info.phase_type() << "}";
+
+    return os;
+}
+
+/** Formatted output of the HOGInfo type. */
+inline std::string to_string(const HOGInfo &type)
+{
+    std::stringstream str;
+    str << type;
+    return str.str();
+}
+
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_TEST_TYPE_PRINTER_H__ */

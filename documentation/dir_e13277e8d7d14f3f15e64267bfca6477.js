@@ -4,6 +4,9 @@ var dir_e13277e8d7d14f3f15e64267bfca6477 =
     [ "ActivationFunctionsDataset.h", "_activation_functions_dataset_8h.xhtml", [
       [ "ActivationFunctions", "classarm__compute_1_1test_1_1datasets_1_1_activation_functions.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_activation_functions" ]
     ] ],
+    [ "AlexNetGEMMDataset.h", "_alex_net_g_e_m_m_dataset_8h.xhtml", [
+      [ "AlexNetGEMMDataset", "classarm__compute_1_1test_1_1datasets_1_1_alex_net_g_e_m_m_dataset.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_alex_net_g_e_m_m_dataset" ]
+    ] ],
     [ "BatchNormalizationLayerDataset.h", "_batch_normalization_layer_dataset_8h.xhtml", [
       [ "BatchNormalizationLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_batch_normalization_layer_dataset.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_batch_normalization_layer_dataset" ],
       [ "iterator", "structarm__compute_1_1test_1_1datasets_1_1_batch_normalization_layer_dataset_1_1iterator.xhtml", "structarm__compute_1_1test_1_1datasets_1_1_batch_normalization_layer_dataset_1_1iterator" ]
@@ -53,6 +56,18 @@ var dir_e13277e8d7d14f3f15e64267bfca6477 =
     [ "GradientDimensionDataset.h", "_gradient_dimension_dataset_8h.xhtml", [
       [ "GradientDimensions", "classarm__compute_1_1test_1_1datasets_1_1_gradient_dimensions.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_gradient_dimensions" ]
     ] ],
+    [ "HOGDescriptorDataset.h", "_h_o_g_descriptor_dataset_8h.xhtml", [
+      [ "HOGDescriptorDataset", "classarm__compute_1_1test_1_1datasets_1_1_h_o_g_descriptor_dataset.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_h_o_g_descriptor_dataset" ],
+      [ "iterator", "structarm__compute_1_1test_1_1datasets_1_1_h_o_g_descriptor_dataset_1_1iterator.xhtml", "structarm__compute_1_1test_1_1datasets_1_1_h_o_g_descriptor_dataset_1_1iterator" ],
+      [ "SmallHOGDescriptorDataset", "classarm__compute_1_1test_1_1datasets_1_1_small_h_o_g_descriptor_dataset.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_small_h_o_g_descriptor_dataset" ],
+      [ "LargeHOGDescriptorDataset", "classarm__compute_1_1test_1_1datasets_1_1_large_h_o_g_descriptor_dataset.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_large_h_o_g_descriptor_dataset" ]
+    ] ],
+    [ "ImageFileDatasets.h", "_image_file_datasets_8h.xhtml", [
+      [ "ImageFileDataset", "classarm__compute_1_1test_1_1datasets_1_1_image_file_dataset.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_image_file_dataset" ],
+      [ "iterator", "structarm__compute_1_1test_1_1datasets_1_1_image_file_dataset_1_1iterator.xhtml", "structarm__compute_1_1test_1_1datasets_1_1_image_file_dataset_1_1iterator" ],
+      [ "SmallImageFiles", "classarm__compute_1_1test_1_1datasets_1_1_small_image_files.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_small_image_files" ],
+      [ "LargeImageFiles", "classarm__compute_1_1test_1_1datasets_1_1_large_image_files.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_large_image_files" ]
+    ] ],
     [ "InterpolationPolicyDataset.h", "_interpolation_policy_dataset_8h.xhtml", [
       [ "InterpolationPolicies", "classarm__compute_1_1test_1_1datasets_1_1_interpolation_policies.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_interpolation_policies" ]
     ] ],
@@ -71,17 +86,15 @@ var dir_e13277e8d7d14f3f15e64267bfca6477 =
     [ "MatrixPatternDataset.h", "_matrix_pattern_dataset_8h.xhtml", [
       [ "MatrixPatterns", "classarm__compute_1_1test_1_1datasets_1_1_matrix_patterns.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_matrix_patterns" ]
     ] ],
-    [ "MobileNetDepthwiseConvolutionLayerDataset.h", "_mobile_net_depthwise_convolution_layer_dataset_8h.xhtml", [
-      [ "MobileNetDepthwiseConvolutionLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_mobile_net_depthwise_convolution_layer_dataset.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_mobile_net_depthwise_convolution_layer_dataset" ]
-    ] ],
-    [ "MobileNetDepthwiseSeparableConvolutionLayerDataset.h", "_mobile_net_depthwise_separable_convolution_layer_dataset_8h.xhtml", [
-      [ "MobileNetDepthwiseSeparableConvolutionLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_mobile_net_depthwise_separable_convolution_layer_dataset.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_mobile_net_depthwise_separable_convolution_layer_dataset" ]
-    ] ],
     [ "NonLinearFilterFunctionDataset.h", "_non_linear_filter_function_dataset_8h.xhtml", [
       [ "NonLinearFilterFunctions", "classarm__compute_1_1test_1_1datasets_1_1_non_linear_filter_functions.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_non_linear_filter_functions" ]
     ] ],
     [ "NormalizationTypesDataset.h", "_normalization_types_dataset_8h.xhtml", [
       [ "NormalizationTypes", "classarm__compute_1_1test_1_1datasets_1_1_normalization_types.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_normalization_types" ]
+    ] ],
+    [ "NormalizePlanarYUVLayerDataset.h", "_normalize_planar_y_u_v_layer_dataset_8h.xhtml", [
+      [ "NormalizePlanarYUVLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_normalize_planar_y_u_v_layer_dataset.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_normalize_planar_y_u_v_layer_dataset" ],
+      [ "iterator", "structarm__compute_1_1test_1_1datasets_1_1_normalize_planar_y_u_v_layer_dataset_1_1iterator.xhtml", "structarm__compute_1_1test_1_1datasets_1_1_normalize_planar_y_u_v_layer_dataset_1_1iterator" ]
     ] ],
     [ "PoolingLayerDataset.h", "_pooling_layer_dataset_8h.xhtml", [
       [ "PoolingLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_pooling_layer_dataset.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_pooling_layer_dataset" ],
@@ -92,6 +105,9 @@ var dir_e13277e8d7d14f3f15e64267bfca6477 =
     ] ],
     [ "RandomBatchNormalizationLayerDataset.h", "_random_batch_normalization_layer_dataset_8h.xhtml", [
       [ "RandomBatchNormalizationLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_random_batch_normalization_layer_dataset.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_random_batch_normalization_layer_dataset" ]
+    ] ],
+    [ "RandomNormalizePlanarYUVLayerDataset.h", "_random_normalize_planar_y_u_v_layer_dataset_8h.xhtml", [
+      [ "RandomNormalizePlanarYUVLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_random_normalize_planar_y_u_v_layer_dataset.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_random_normalize_planar_y_u_v_layer_dataset" ]
     ] ],
     [ "ReductionOperationDataset.h", "_reduction_operation_dataset_8h.xhtml", [
       [ "ReductionOperations", "classarm__compute_1_1test_1_1datasets_1_1_reduction_operations.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_reduction_operations" ]
@@ -108,6 +124,12 @@ var dir_e13277e8d7d14f3f15e64267bfca6477 =
     ] ],
     [ "SamplingPolicyDataset.h", "_sampling_policy_dataset_8h.xhtml", [
       [ "SamplingPolicies", "classarm__compute_1_1test_1_1datasets_1_1_sampling_policies.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_sampling_policies" ]
+    ] ],
+    [ "ScaleLayerDataset.h", "_scale_layer_dataset_8h.xhtml", [
+      [ "ScaleLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_scale_layer_dataset.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_scale_layer_dataset" ],
+      [ "iterator", "structarm__compute_1_1test_1_1datasets_1_1_scale_layer_dataset_1_1iterator.xhtml", "structarm__compute_1_1test_1_1datasets_1_1_scale_layer_dataset_1_1iterator" ],
+      [ "SmallScaleLayerShapes", "classarm__compute_1_1test_1_1datasets_1_1_small_scale_layer_shapes.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_small_scale_layer_shapes" ],
+      [ "LargeScaleLayerShapes", "classarm__compute_1_1test_1_1datasets_1_1_large_scale_layer_shapes.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_large_scale_layer_shapes" ]
     ] ],
     [ "ShapeDatasets.h", "_shape_datasets_8h.xhtml", "_shape_datasets_8h" ],
     [ "SmallConvolutionLayerDataset.h", "_small_convolution_layer_dataset_8h.xhtml", [
