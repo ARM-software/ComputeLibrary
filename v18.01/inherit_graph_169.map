@@ -1,0 +1,10 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__compute_1_1test_1_1datasets_1_1_pooling_layer_dataset.xhtml" title="PoolingLayerDataset" alt="" coords="5,188,160,215"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1datasets_1_1_alex_net_pooling_layer_dataset.xhtml" title="AlexNetPoolingLayerDataset" alt="" coords="223,5,427,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1test_1_1datasets_1_1_goog_le_net_inception_v1_pooling_layer_dataset.xhtml" title="GoogLeNetInceptionV1Pooling\lLayerDataset" alt="" coords="217,57,432,98"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1test_1_1datasets_1_1_goog_le_net_inception_v4_pooling_layer_dataset.xhtml" title="GoogLeNetInceptionV4Pooling\lLayerDataset" alt="" coords="217,122,432,163"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1test_1_1datasets_1_1_le_net5_pooling_layer_dataset.xhtml" title="LeNet5PoolingLayerDataset" alt="" coords="225,188,425,215"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1test_1_1datasets_1_1_squeeze_net_pooling_layer_dataset.xhtml" title="SqueezeNetPoolingLayerDataset" alt="" coords="208,239,441,265"/>
+<area shape="rect" id="node7" href="$classarm__compute_1_1test_1_1datasets_1_1_v_g_g16_pooling_layer_dataset.xhtml" title="VGG16PoolingLayerDataset" alt="" coords="225,289,424,316"/>
+<area shape="rect" id="node8" href="$classarm__compute_1_1test_1_1datasets_1_1_y_o_l_o_v2_pooling_layer_dataset.xhtml" title="YOLOV2PoolingLayerDataset" alt="" coords="223,340,427,367"/>
+</map>

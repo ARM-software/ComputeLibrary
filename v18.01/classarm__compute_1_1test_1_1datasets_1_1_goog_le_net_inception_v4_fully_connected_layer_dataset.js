@@ -1,0 +1,4 @@
+var classarm__compute_1_1test_1_1datasets_1_1_goog_le_net_inception_v4_fully_connected_layer_dataset =
+[
+    [ "GoogLeNetInceptionV4FullyConnectedLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_goog_le_net_inception_v4_fully_connected_layer_dataset.xhtml#a0e3a7975960a7a9aaf9c17cca2e9a8c0", null ]
+];

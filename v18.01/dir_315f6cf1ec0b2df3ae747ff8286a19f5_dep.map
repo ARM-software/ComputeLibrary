@@ -1,0 +1,11 @@
+<map id="arm_compute/core/NEON" name="arm_compute/core/NEON">
+<area shape="rect" id="node2" href="dir_2c3c4cb85e732569e2614ad40a451d53.xhtml" title="kernels" alt="" coords="37,159,109,207"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000014_000015.xhtml" title="93" alt="" coords="73,133,90,148"/>
+<area shape="rect" id="node3" href="dir_5815af820a9cc9481f1d0990a0d60286.xhtml" title="support" alt="" coords="37,351,109,399"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000015_000043.xhtml" title="5" alt="" coords="70,324,79,339"/>
+<area shape="rect" id="node4" href="dir_7484b841a86f2d7fdd057c9b24fbf230.xhtml" title="CPP" alt="" coords="75,255,147,303"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000015_000004.xhtml" title="2" alt="" coords="98,227,107,242"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000004_000043.xhtml" title="1" alt="" coords="92,330,102,344"/>
+<area shape="rect" id="clust2" href="dir_315f6cf1ec0b2df3ae747ff8286a19f5.xhtml" alt="" coords="27,52,120,217"/>
+<area shape="rect" id="clust1" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml" title="core" alt="" coords="16,16,131,228"/>
+</map>

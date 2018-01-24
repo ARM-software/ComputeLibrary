@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['texture_5ffeatures',['texture_features',['../structmali__userspace_1_1mali__base__gpu__core__props.xhtml#a255e7d6c5f15e81874fb886e713716fd',1,'mali_userspace::mali_base_gpu_core_props::texture_features()'],['../structmali__userspace_1_1gpu__raw__gpu__props.xhtml#a255e7d6c5f15e81874fb886e713716fd',1,'mali_userspace::gpu_raw_gpu_props::texture_features()']]],
+  ['thread_5ffeatures',['thread_features',['../structmali__userspace_1_1gpu__raw__gpu__props.xhtml#a84f53a5429512541b1ca5142d818f23f',1,'mali_userspace::gpu_raw_gpu_props']]],
+  ['thread_5fid',['thread_id',['../structarm__compute_1_1_thread_info.xhtml#ab488bfc5d1f76143651f915915046354',1,'arm_compute::ThreadInfo']]],
+  ['thread_5fmax_5fbarrier_5fsize',['thread_max_barrier_size',['../structmali__userspace_1_1gpu__raw__gpu__props.xhtml#afe226c0d48a3533ac28ec4a6c43a9d1b',1,'mali_userspace::gpu_raw_gpu_props']]],
+  ['thread_5fmax_5fthreads',['thread_max_threads',['../structmali__userspace_1_1gpu__raw__gpu__props.xhtml#a21f9daa1d1d37eaf7f2c283fdafbaa41',1,'mali_userspace::gpu_raw_gpu_props']]],
+  ['thread_5fmax_5fworkgroup_5fsize',['thread_max_workgroup_size',['../structmali__userspace_1_1gpu__raw__gpu__props.xhtml#a2ceaed722d99e0dabf3bf4cf92538097',1,'mali_userspace::gpu_raw_gpu_props']]],
+  ['thread_5fprops',['thread_props',['../structmali__userspace_1_1mali__base__gpu__props.xhtml#a3f14fc65dd5daa60a43caf0ad91e5014',1,'mali_userspace::mali_base_gpu_props']]],
+  ['threads',['threads',['../classarm__compute_1_1test_1_1framework_1_1_common_options.xhtml#ad6174941c7ae1c945e4f7fcb3261f87c',1,'arm_compute::test::framework::CommonOptions']]],
+  ['threshold',['threshold',['../structarm__compute_1_1test_1_1validation_1_1_harris_corners_parameters.xhtml#a376acef8954eadc70f4b55e8e0588e13',1,'arm_compute::test::validation::HarrisCornersParameters']]],
+  ['throw_5ferrors',['throw_errors',['../classarm__compute_1_1test_1_1framework_1_1_common_options.xhtml#af9894d2ffeae91ef9f6630e52c47d2ce',1,'arm_compute::test::framework::CommonOptions']]],
+  ['tiler_5fbm',['tiler_bm',['../hwc_8hpp.xhtml#a7d4adae772f71d0064e27381887c9e0e',1,'hwc.hpp']]],
+  ['tiler_5ffeatures',['tiler_features',['../structmali__userspace_1_1gpu__raw__gpu__props.xhtml#af6c1da039edb4e6f81c89f193088585d',1,'mali_userspace::gpu_raw_gpu_props']]],
+  ['tiler_5fpresent',['tiler_present',['../structmali__userspace_1_1gpu__raw__gpu__props.xhtml#a0efb161b55ab0fd2ffca83155872f923',1,'mali_userspace::gpu_raw_gpu_props']]],
+  ['tiler_5fprops',['tiler_props',['../structmali__userspace_1_1mali__base__gpu__props.xhtml#a7a08e5c57e038ea0d673a81a42c7b45b',1,'mali_userspace::mali_base_gpu_props']]],
+  ['timestamp',['timestamp',['../structmali__userspace_1_1kbase__hwcnt__reader__metadata.xhtml#a465bef81f6478756e5443025b1f2ddfa',1,'mali_userspace::kbase_hwcnt_reader_metadata']]],
+  ['top',['top',['../structarm__compute_1_1_border_size.xhtml#a3fdd42ea34070a54e696b3adc28c4be3',1,'arm_compute::BorderSize']]],
+  ['tracking_5fstatus',['tracking_status',['../structarm__compute_1_1_c_l_l_k_internal_keypoint.xhtml#a08361efa212a9ab04a5965766ea942d5',1,'arm_compute::CLLKInternalKeypoint::tracking_status()'],['../structarm__compute_1_1_n_e_l_k_internal_keypoint.xhtml#a633fd1d1a22ab1b18aa0e091cb201553',1,'arm_compute::NELKInternalKeypoint::tracking_status()'],['../structarm__compute_1_1_key_point.xhtml#a8ca2aae59762685dd38143e5f8267147',1,'arm_compute::KeyPoint::tracking_status()'],['../struct_internal_keypoint.xhtml#a08361efa212a9ab04a5965766ea942d5',1,'InternalKeypoint::tracking_status()'],['../struct_keypoint.xhtml#a7edfed755585d6095522904dbe0ec4d8',1,'Keypoint::tracking_status()']]],
+  ['true',['True',['../namespacecaffe__data__extractor.xhtml#a643a20c0c59588a0f741a6095e2025fd',1,'caffe_data_extractor.True()'],['../namespacetensorflow__data__extractor.xhtml#a643a20c0c59588a0f741a6095e2025fd',1,'tensorflow_data_extractor.True()']]],
+  ['type',['type',['../namespacecaffe__data__extractor.xhtml#a7aead736a07eaf25623ad7bfa1f0ee2d',1,'caffe_data_extractor.type()'],['../namespacetensorflow__data__extractor.xhtml#a7aead736a07eaf25623ad7bfa1f0ee2d',1,'tensorflow_data_extractor.type()'],['../namespacemali__userspace.xhtml#ad44b615021ed3ccb734fcaf583ef4a03',1,'mali_userspace::type()']]],
+  ['type_5fmax',['type_max',['../minmaxloc_8cl.xhtml#a4464d6f922ea17b4a9ca6a2cec7ddb75',1,'minmaxloc.cl']]],
+  ['type_5fmin',['type_min',['../minmaxloc_8cl.xhtml#a538b4b63f40e7b12891774e03a4f0dec',1,'type_min():&#160;minmaxloc.cl'],['../softmax__layer_8cl.xhtml#a538b4b63f40e7b12891774e03a4f0dec',1,'type_min():&#160;softmax_layer.cl'],['../softmax__layer__quantized_8cl.xhtml#a4701bcd6d0c0472d7d3e8017a24f2be6',1,'type_min():&#160;softmax_layer_quantized.cl']]],
+  ['type_5fmin_5f',['type_min_',['../softmax__layer_8cl.xhtml#af7a08044d0e491a0ee1520a24a107a2b',1,'softmax_layer.cl']]]
+];

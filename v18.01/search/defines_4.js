@@ -1,0 +1,28 @@
+var searchData=
+[
+  ['d0',['D0',['../optical__flow__pyramid__lk_8cl.xhtml#ae0b2360d4b8e961bf2709b0663fd9f2a',1,'optical_flow_pyramid_lk.cl']]],
+  ['d1',['D1',['../optical__flow__pyramid__lk_8cl.xhtml#a52deba56234661c77d4b9573d5175ae2',1,'optical_flow_pyramid_lk.cl']]],
+  ['data_5ftest_5fcase',['DATA_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#a43b1925356e3d36a468e104d798c60ec',1,'Macros.h']]],
+  ['data_5ftest_5fcase_5fconstructor',['DATA_TEST_CASE_CONSTRUCTOR',['../tests_2framework_2_macros_8h.xhtml#adbd9bcfdb4c52d5acf73ce39c232b5c8',1,'Macros.h']]],
+  ['data_5ftest_5fcase_5fimpl',['DATA_TEST_CASE_IMPL',['../tests_2framework_2_macros_8h.xhtml#adf3ec4a62a3f0d3e74ebd35d59ddd097',1,'Macros.h']]],
+  ['data_5ftest_5fregistrar',['DATA_TEST_REGISTRAR',['../tests_2framework_2_macros_8h.xhtml#aa4df8c1af6041bc017bd9fb943d5e5d6',1,'Macros.h']]],
+  ['data_5ftype',['DATA_TYPE',['../convolution3x3_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1',1,'DATA_TYPE():&#160;convolution3x3.cl'],['../convolution5x5_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1',1,'DATA_TYPE():&#160;convolution5x5.cl'],['../convolution7x7_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1',1,'DATA_TYPE():&#160;convolution7x7.cl'],['../convolution9x9_8cl.xhtml#afb8c72ce35c4a1f4a2588d6573e54aa1',1,'DATA_TYPE():&#160;convolution9x9.cl']]],
+  ['data_5ftype_5fmax',['DATA_TYPE_MAX',['../minmaxloc_8cl.xhtml#afa6b114aa46a23bb226c5c9547f9f623',1,'minmaxloc.cl']]],
+  ['data_5ftype_5fmin',['DATA_TYPE_MIN',['../minmaxloc_8cl.xhtml#a17decce255d6f94a60379a61a54e3bac',1,'minmaxloc.cl']]],
+  ['data_5ftype_5fout',['DATA_TYPE_OUT',['../convolution3x3_8cl.xhtml#ac06f3e24d3fffd3c465d8b2a6e7c985e',1,'DATA_TYPE_OUT():&#160;convolution3x3.cl'],['../convolution5x5_8cl.xhtml#ac06f3e24d3fffd3c465d8b2a6e7c985e',1,'DATA_TYPE_OUT():&#160;convolution5x5.cl'],['../convolution7x7_8cl.xhtml#ac06f3e24d3fffd3c465d8b2a6e7c985e',1,'DATA_TYPE_OUT():&#160;convolution7x7.cl'],['../convolution9x9_8cl.xhtml#ac06f3e24d3fffd3c465d8b2a6e7c985e',1,'DATA_TYPE_OUT():&#160;convolution9x9.cl']]],
+  ['declare_5ffunction_5fptr',['DECLARE_FUNCTION_PTR',['../_open_c_l_8h.xhtml#af6e65f36e2be6bd9a1cac10ba6e82f7c',1,'OpenCL.h']]],
+  ['default_5fvalidate',['DEFAULT_VALIDATE',['../_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#aafb2ac305c1cfb580f29d538687f1fb5',1,'PixelWiseMultiplication.cpp']]],
+  ['determinant_5fthr',['DETERMINANT_THR',['../optical__flow__pyramid__lk_8cl.xhtml#a0f3927d942874a04e6464bdb946de046',1,'optical_flow_pyramid_lk.cl']]],
+  ['disabled_5fdata_5ftest_5fcase',['DISABLED_DATA_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#a2d0deff95a1325348da7d2a945982b59',1,'Macros.h']]],
+  ['disabled_5ffixture_5fdata_5ftest_5fcase',['DISABLED_FIXTURE_DATA_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#a7fb6c2e21b15474448e1f50d8acc854b',1,'Macros.h']]],
+  ['disabled_5ffixture_5ftest_5fcase',['DISABLED_FIXTURE_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#a55d3bef40f09e56dc87e8f351a275385',1,'Macros.h']]],
+  ['disabled_5fregister_5ffixture_5fdata_5ftest_5fcase',['DISABLED_REGISTER_FIXTURE_DATA_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#a934ee9a7581b65523fd180c96b159fb8',1,'Macros.h']]],
+  ['disabled_5fregister_5ffixture_5ftest_5fcase',['DISABLED_REGISTER_FIXTURE_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#a55d2ae62838572e7be1c87128d02b493',1,'Macros.h']]],
+  ['disabled_5ftest_5fcase',['DISABLED_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#a89747ae30c60b9f052fbf9707c8301a9',1,'Macros.h']]],
+  ['div_5fop',['DIV_OP',['../activation__layer_8cl.xhtml#a59d29af688da2590946e966789041856',1,'DIV_OP():&#160;activation_layer.cl'],['../normalization__layer_8cl.xhtml#a5db17889d824975fefb2ce2f4690637f',1,'DIV_OP():&#160;normalization_layer.cl'],['../pooling__layer_8cl.xhtml#a5db17889d824975fefb2ce2f4690637f',1,'DIV_OP():&#160;pooling_layer.cl'],['../pooling__layer__quantized_8cl.xhtml#a5db17889d824975fefb2ce2f4690637f',1,'DIV_OP():&#160;pooling_layer_quantized.cl'],['../softmax__layer_8cl.xhtml#a8cde99b1ce0f3c1dacd49261b0cf03d8',1,'DIV_OP():&#160;softmax_layer.cl']]],
+  ['div_5fsat_5fop_5fexpand',['DIV_SAT_OP_EXPAND',['../fixed__point_8h.xhtml#aa13fe0d2ecef3e5b22315baf39715e46',1,'fixed_point.h']]],
+  ['div_5fsat_5fop_5fexpand_5fstr',['DIV_SAT_OP_EXPAND_STR',['../fixed__point_8h.xhtml#ac2995f9506cbc5c918ecf47f447bcfce',1,'fixed_point.h']]],
+  ['div_5fsat_5fop_5fvec_5fexpand',['DIV_SAT_OP_VEC_EXPAND',['../fixed__point_8h.xhtml#a774126960511e4d827f0d2d3d68abe97',1,'fixed_point.h']]],
+  ['div_5fsat_5fop_5fvec_5fexpand_5fstr',['DIV_SAT_OP_VEC_EXPAND_STR',['../fixed__point_8h.xhtml#a6ad4d9db82a42c5266cba5e0f317998c',1,'fixed_point.h']]],
+  ['divq_5fsat_5fimpl',['DIVQ_SAT_IMPL',['../fixed__point_8h.xhtml#aac0b47414a86d32e5c891ab6a75b313b',1,'fixed_point.h']]]
+];

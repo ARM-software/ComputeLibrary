@@ -1,0 +1,6 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__compute_1_1test_1_1datasets_1_1_batch_normalization_layer_dataset.xhtml" title="BatchNormalizationLayerDataset" alt="" coords="5,78,240,105"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1datasets_1_1_goog_le_net_inception_v4_batch_normalization_layer_dataset.xhtml" title="GoogLeNetInceptionV4Batch\lNormalizationLayerDataset" alt="" coords="288,5,495,47"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1test_1_1datasets_1_1_random_batch_normalization_layer_dataset.xhtml" title="RandomBatchNormalization\lLayerDataset" alt="" coords="291,71,492,112"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1test_1_1datasets_1_1_y_o_l_o_v2_batch_normalization_layer_dataset.xhtml" title="YOLOV2BatchNormalization\lLayerDataset" alt="" coords="292,136,491,177"/>
+</map>

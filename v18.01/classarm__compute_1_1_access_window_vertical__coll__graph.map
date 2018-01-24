@@ -1,0 +1,4 @@
+<map id="AccessWindowVertical" name="AccessWindowVertical">
+<area shape="rect" id="node2" href="$classarm__compute_1_1_access_window_rectangle.xhtml" title="Implementation of a rectangular access pattern. " alt="" coords="5,80,181,107"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_access_window.xhtml" title="Interface describing methods to update access window and padding based on kernel parameters. " alt="" coords="35,5,152,32"/>
+</map>
