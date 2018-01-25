@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -72,33 +72,48 @@ cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel)
 
     double min_exec_time = std::numeric_limits<double>::max();
 
-    cl::NDRange opt_lws = cl::NDRange(1, 1);
+    cl::NDRange opt_lws = cl::NDRange(1, 1, 1);
 
-    for(int y = 1; y <= 16; ++y)
+    const int x_step = std::max(1, kernel.window().x().step());
+    const int y_step = std::max(1, kernel.window().y().step());
+    const int z_step = std::max(1, kernel.window().z().step());
+    const int x_end  = kernel.window().x().end() - kernel.window().x().start() / x_step > 1 ? 16 : 1;
+    const int y_end  = kernel.window().y().end() - kernel.window().y().start() / y_step > 1 ? 16 : 1;
+    const int z_end  = kernel.window().z().end() - kernel.window().z().start() / z_step > 1 ? 8 : 1;
+
+    for(int z = 1; z <= z_end; ++z)
     {
-        for(int x = 1; x <= 16; ++x)
+        for(int y = 1; y <= y_end; ++y)
         {
-            cl::NDRange lws_test = cl::NDRange(x, y);
-
-            //Set the Local-Workgroup-Size
-            kernel.set_lws_hint(lws_test);
-
-            auto t_start = std::chrono::high_resolution_clock::now();
-
-            // Run
-            kernel.run(kernel.window(), q);
-
-            CLScheduler::get().sync();
-
-            auto t_stop = std::chrono::high_resolution_clock::now();
-
-            std::chrono::duration<double, std::nano> fp_nano = t_stop - t_start;
-
-            // Check the execution time
-            if(fp_nano.count() < min_exec_time)
+            for(int x = 1; x <= x_end; ++x)
             {
-                min_exec_time = fp_nano.count();
-                opt_lws       = cl::NDRange(x, y);
+                if(x == 1 && y == 1 && z == 1)
+                {
+                    continue;
+                }
+
+                cl::NDRange lws_test = cl::NDRange(x, y, z);
+
+                //Set the Local-Workgroup-Size
+                kernel.set_lws_hint(lws_test);
+
+                auto t_start = std::chrono::high_resolution_clock::now();
+
+                // Run
+                kernel.run(kernel.window(), q);
+
+                CLScheduler::get().sync();
+
+                auto t_stop = std::chrono::high_resolution_clock::now();
+
+                std::chrono::duration<double, std::nano> fp_nano = t_stop - t_start;
+
+                // Check the execution time
+                if(fp_nano.count() < min_exec_time)
+                {
+                    min_exec_time = fp_nano.count();
+                    opt_lws       = cl::NDRange(x, y, z);
+                }
             }
         }
     }
