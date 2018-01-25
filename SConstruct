@@ -136,8 +136,8 @@ elif env['arch'] == 'arm64-v8a':
     elif env['os'] == 'android':
         prefix = "aarch64-linux-android-"
 elif env['arch'] == 'arm64-v8.2-a':
+    env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
     env.Append(CPPDEFINES = ['ARM_COMPUTE_AARCH64_V8_2'])
-
     if cpp_compiler == 'clang++':
         env.Append(CXXFLAGS = ['-fno-integrated-as'])
 
