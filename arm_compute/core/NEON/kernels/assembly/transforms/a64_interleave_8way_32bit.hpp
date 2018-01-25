@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,13 +25,12 @@
 
 #ifdef __aarch64__
 
-#include "../asmlib.hpp"
-
 #include <arm_neon.h>
+#include "asmlib.hpp"
 
 template<>
 template<typename T>
-void TransformImpl<8, 1, false, 4, 4>::Transform(T *out, const T *in, int ldin, int y0, int ymax, int k0, int kmax) {
+inline void TransformImpl<8, 1, false, 4, 4>::Transform(T *out, const T *in, int ldin, int y0, int ymax, int k0, int kmax) {
     uint32_t *outptr = (uint32_t *)out;
     const uint32_t *inptr = (uint32_t *)in;
 
@@ -92,47 +91,46 @@ void TransformImpl<8, 1, false, 4, 4>::Transform(T *out, const T *in, int ldin, 
                 "ZIP1       v17.4s, v2.4s, v6.4s\n" // q17=B0D0B1D1
                 "LDP        q8, q9, [%[inptr4]], #32\n"
                 "LDP        q10, q11, [%[inptr5]], #32\n"
-                ASM_PREFETCH("[%[inptr1], #128]")
                 "LDP        q12, q13, [%[inptr6]], #32\n"
                 "ZIP1       v18.4s, v8.4s, v12.4s\n"
+                ASM_PREFETCH("[%[inptr1], #128]")
                 "LDP        q14, q15, [%[inptr7]], #32\n"
                 "ZIP1       v19.4s, v10.4s, v14.4s\n"
 
-                ASM_PREFETCH("[%[inptr2], #128]")
                 "ZIP1       v20.4s, v16.4s, v17.4s\n" // q20=A0B0C0D0
+                ASM_PREFETCH("[%[inptr2], #128]")
                 "ZIP1       v21.4s, v18.4s, v19.4s\n"
                 "ZIP2       v22.4s, v16.4s, v17.4s\n"
                 "ZIP2       v23.4s, v18.4s, v19.4s\n"
-                ASM_PREFETCH("[%[inptr3], #128]")
 
                 "ZIP2       v16.4s, v0.4s, v4.4s\n"
+                ASM_PREFETCH("[%[inptr3], #128]")
                 "ZIP2       v17.4s, v2.4s, v6.4s\n"
                 "STP        q20, q21, [%[outptr]], #32\n" // Write back the first element of each source
 
                 "ZIP2       v18.4s, v8.4s, v12.4s\n"
-                ASM_PREFETCH("[%[inptr4], #128]")
                 "ZIP2       v19.4s, v10.4s, v14.4s\n"
                 "STP        q22, q23, [%[outptr]], #32\n" // Write back the second element of each source
 
                 "ZIP1       v20.4s, v16.4s, v17.4s\n"
+                ASM_PREFETCH("[%[inptr4], #128]")
                 "ZIP1       v21.4s, v18.4s, v19.4s\n"
-                ASM_PREFETCH("[%[inptr5], #128]")
                 "ZIP2       v22.4s, v16.4s, v17.4s\n"
                 "ZIP2       v23.4s, v18.4s, v19.4s\n"
 
                 "ZIP1       v16.4s, v1.4s, v5.4s\n"
+                ASM_PREFETCH("[%[inptr5], #128]")
                 "ZIP1       v17.4s, v3.4s, v7.4s\n"
-                ASM_PREFETCH("[%[inptr6], #128]")
                 "STP        q20, q21, [%[outptr]], #32\n" // Third element
 
                 "ZIP1       v18.4s, v9.4s, v13.4s\n"
                 "ZIP1       v19.4s, v11.4s, v15.4s\n"
                 "STP        q22, q23, [%[outptr]], #32\n" // Fourth element
-                ASM_PREFETCH("[%[inptr7], #128]")
 
                 "ZIP1       v20.4s, v16.4s, v17.4s\n"
                 "ZIP1       v21.4s, v18.4s, v19.4s\n"
                 "ZIP2       v22.4s, v16.4s, v17.4s\n"
+                ASM_PREFETCH("[%[inptr6], #128]")
                 "ZIP2       v23.4s, v18.4s, v19.4s\n"
 
                 "ZIP2       v16.4s, v1.4s, v5.4s\n"
@@ -140,6 +138,7 @@ void TransformImpl<8, 1, false, 4, 4>::Transform(T *out, const T *in, int ldin, 
                 "STP        q20, q21, [%[outptr]], #32\n" // Fifth element
 
                 "ZIP2       v18.4s, v9.4s, v13.4s\n"
+                ASM_PREFETCH("[%[inptr7], #128]")
                 "ZIP2       v19.4s, v11.4s, v15.4s\n"
                 "STP        q22, q23, [%[outptr]], #32\n" // Sixth element
 

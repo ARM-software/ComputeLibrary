@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,13 +25,12 @@
 
 #ifdef __arm__
 
-#include "../asmlib.hpp"
-
 #include <arm_neon.h>
+#include "asmlib.hpp"
 
 template<>
 template<typename T>
-void TransformImpl<6, 1, false, 4, 4>::Transform(T *out, const T *in, int ldin, int y0, int ymax, int k0, int kmax) {
+inline void TransformImpl<6, 1, false, 4, 4>::Transform(T *out, const T *in, int ldin, int y0, int ymax, int k0, int kmax) {
     uint32_t *outptr = reinterpret_cast<uint32_t *>(out);
     const uint32_t *inptr = reinterpret_cast<const uint32_t *>(in);
 

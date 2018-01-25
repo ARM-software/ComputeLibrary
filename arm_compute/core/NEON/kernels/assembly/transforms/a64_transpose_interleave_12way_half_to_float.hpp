@@ -23,48 +23,20 @@
  */
 #pragma once
 
-#ifdef __aarch64__
+#if defined( __aarch64__) && defined( __ARM_FEATURE_FP16_VECTOR_ARITHMETIC)
 
 #include "transpose_interleave_common.hpp"
 
-// Generic unblocked transposed 12x32-bit sized specialisation
 template <>
-template <typename T>
-inline void TransformImpl<12, 1, true, 4, 4>::Transform(
-    T* out, const T* const in, const int stride,
-    const int x0, const int xmax, const int k0, const int kmax
-) {
-  // Redirect to a 24 x uint16_t specialisation
-  TransformImpl<24, 1, true, 2, 2>::Transform(
-    reinterpret_cast<uint16_t *>(out),
-    reinterpret_cast<const uint16_t * const>(in),
-    stride*2, x0*2, xmax*2, k0, kmax
-  );
-}
-
-// Generic 24x16-bit sized specialisation
-template <>
-template <typename T>
-inline void TransformImpl<24, 1, true, 2, 2>::Transform(
-    T* out, const T* const in, const int stride,
-    const int x0, const int xmax, const int k0, const int kmax
-) {
-  // Redirect to a uint16_t specialisation
-  Transform(
-    reinterpret_cast<uint16_t *>(out),
-    reinterpret_cast<const uint16_t * const>(in),
-    stride, x0, xmax, k0, kmax
-  );
-}
-
-// Specialised 24 x uint16_t version
-template <>
-inline void TransposeInterleaveCommon<24, uint16_t, uint16_t>::moveblock_1x1(const uint16_t *&in0, uint16_t *out) {
+inline void TransposeInterleaveCommon<12, __fp16, float>::moveblock_1x1(const __fp16 *&in0, float *out) {
     __asm __volatile (
-        "LDP    q0, q1, [%[in0]], #32\n"
+        "LDR    q0, [%[in0]], #16\n"
+        "FCVTL2	v1.4s, v0.8h\n"
+        "FCVTL	v0.4s, v0.4h\n"
         "STP    q0, q1, [%[out]]\n"
         ASM_PREFETCH("[%[in0], #192]")
-        "LDR    q2, [%[in0]], #16\n"
+        "LDR    d2, [%[in0]], #8\n"
+        "FCVTL	v2.4s, v2.4h\n"
         "STR    q2, [%[out], #32]\n"
     : [in0] "+r" (in0), [out] "+r" (out)
     :
@@ -73,16 +45,22 @@ inline void TransposeInterleaveCommon<24, uint16_t, uint16_t>::moveblock_1x1(con
 }
 
 template <>
-inline void TransposeInterleaveCommon<24, uint16_t, uint16_t>::moveblock_1x2(const uint16_t *&in0, const uint16_t *&in1,uint16_t *out) {
+inline void TransposeInterleaveCommon<12, __fp16, float>::moveblock_1x2(const __fp16 *&in0, const __fp16 *&in1, float *out) {
     __asm __volatile (
-        "LDP    q0, q1, [%[in0]], #32\n"
+        "LDR    q0, [%[in0]], #16\n"
+        "FCVTL2	v1.4s, v0.8h\n"
+        "FCVTL	v0.4s, v0.4h\n"
         "STP    q0, q1, [%[out]]\n"
         ASM_PREFETCH("[%[in0], #192]")
-        "LDR    q2, [%[in0]], #16\n"
-        "LDP	q3, q4, [%[in1]], #32\n"
+        "LDR    d2, [%[in0]], #8\n"
+        "FCVTL	v2.4s, v2.4h\n"
+        "LDR	q3, [%[in1]], #16\n"
+        "FCVTL2	v4.4s, v3.8h\n"
+        "FCVTL	v3.4s, v3.4h\n"
         "STP    q2, q3, [%[out], #32]\n"
         ASM_PREFETCH("[%[in1], #192]")
-        "LDR	q5, [%[in1]], #16\n"
+        "LDR	d5, [%[in1]], #16\n"
+        "FCVTL	v5.4s, v5.4h\n"
         "STP    q4, q5, [%[out], #64]\n"
     : [in0] "+r" (in0), [in1] "+r" (in1), [out] "+r" (out)
     :
@@ -91,24 +69,36 @@ inline void TransposeInterleaveCommon<24, uint16_t, uint16_t>::moveblock_1x2(con
 }
 
 template <>
-inline void TransposeInterleaveCommon<24, uint16_t, uint16_t>::moveblock_1x4(const uint16_t *&in0, const uint16_t *&in1, const uint16_t *&in2, const uint16_t *&in3, uint16_t *out) {
+inline void TransposeInterleaveCommon<12, __fp16, float>::moveblock_1x4(const __fp16 *&in0, const __fp16 *&in1, const __fp16 *&in2, const __fp16 *&in3, float *out) {
     __asm __volatile (
-        "LDP    q0, q1, [%[in0]], #32\n"
+        "LDR    q0, [%[in0]], #16\n"
+        "FCVTL2	v1.4s, v0.8h\n"
+        "FCVTL	v0.4s, v0.4h\n"
         "STP    q0, q1, [%[out]]\n"
-        "LDR    q2, [%[in0]], #16\n"
+        "LDR    d2, [%[in0]], #8\n"
         ASM_PREFETCH("[%[in0], #192]")
-        "LDP	q3, q4, [%[in1]], #32\n"
+        "FCVTL	v2.4s, v2.4h\n"
+        "LDR	q3, [%[in1]], #16\n"
+        "FCVTL2	v4.4s, v3.8h\n"
+        "FCVTL	v3.4s, v3.4h\n"
         "STP    q2, q3, [%[out], #32]\n"
-        "LDR	q5, [%[in1]], #16\n"
+        "LDR	d5, [%[in1]], #8\n"
+        "FCVTL	v5.4s, v5.4h\n"
         ASM_PREFETCH("[%[in1], #192]")
         "STP    q4, q5, [%[out], #64]\n"
-        "LDP	q6, q7, [%[in2]], #32\n"
+        "LDR	q6, [%[in2]], #16\n"
+        "FCVTL2	v7.4s, v6.8h\n"
+        "FCVTL	v6.4s, v6.4h\n"
         "STP    q6, q7, [%[out], #96]\n"
-        "LDR	q8, [%[in2]], #16\n"
+        "LDR	d8, [%[in2]], #8\n"
+        "FCVTL	v8.4s, v8.4h\n"
         ASM_PREFETCH("[%[in2], #192]")
-        "LDP	q9, q10, [%[in3]], #32\n"
+        "LDR	q9, [%[in3]], #16\n"
+        "FCVTL2	v10.4s, v9.8h\n"
+        "FCVTL	v9.4s, v9.4h\n"
         "STP    q8, q9, [%[out], #128]\n"
-        "LDR	q11, [%[in3]], #16\n"
+        "LDR	d11, [%[in3]], #8\n"
+        "FCVTL	v11.4s, v11.4h\n"
         "STP    q10, q11, [%[out], #160]\n"
         ASM_PREFETCH("[%[in3], #192]")
 
@@ -120,11 +110,11 @@ inline void TransposeInterleaveCommon<24, uint16_t, uint16_t>::moveblock_1x4(con
 
 template <>
 template <>
-inline void TransformImpl<24, 1, true, 2, 2>::Transform(
-    uint16_t* out, const uint16_t* const in, const int stride,
+inline void TransformImpl<12, 1, true, 4, 2>::Transform(
+    float* out, const __fp16* const in, const int stride,
     const int x0, const int xmax, const int k0, const int kmax
 ) {
-  TransposeInterleaveCommon<24, uint16_t, uint16_t>::Transform(out, in, stride, x0, xmax, k0, kmax);
+  TransposeInterleaveCommon<12, __fp16, float>::Transform(out, in, stride, x0, xmax, k0, kmax);
 }
 
-#endif  // __arch64__
+#endif // __aarch64__

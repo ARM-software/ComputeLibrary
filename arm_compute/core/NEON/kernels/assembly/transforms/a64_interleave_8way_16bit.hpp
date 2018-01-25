@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,8 +26,7 @@
 #ifdef __aarch64__
 
 #include <arm_neon.h>
-#include "../asmlib.hpp"
-
+#include "asmlib.hpp"
 
 template<>
 template<typename T>
@@ -76,8 +75,6 @@ void TransformImpl<8, 1, false, 2, 2>::Transform(T *out, const T *in, int ldin, 
                         inptr6 = zerobuff;
                     case 0:
                         inptr7 = zerobuff;
-                    default:
-                        break;
                 }
             }
 
