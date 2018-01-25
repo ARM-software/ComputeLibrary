@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/Error.h"
 
 #include <cstdint>
+#include <errno.h>
 #include <linux/perf_event.h>
 #include <stdexcept>
 #include <sys/syscall.h>
