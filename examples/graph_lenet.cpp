@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -100,7 +100,7 @@ public:
                   get_weights_accessor(data_path, "/cnn_data/lenet_model/ip2_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/lenet_model/ip2_b.npy"))
               << SoftmaxLayer()
-              << Tensor(DummyAccessor());
+              << Tensor(DummyAccessor(0));
     }
     void do_run() override
     {
