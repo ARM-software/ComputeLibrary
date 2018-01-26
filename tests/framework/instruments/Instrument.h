@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -88,6 +88,7 @@ inline std::unique_ptr<Instrument> Instrument::make_instrument()
 {
     return support::cpp14::make_unique<T>(scale);
 }
+
 } // namespace framework
 } // namespace test
 } // namespace arm_compute
