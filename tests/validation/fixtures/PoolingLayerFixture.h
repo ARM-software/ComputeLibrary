@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -132,7 +132,7 @@ class PoolingLayerValidationFixture : public PoolingLayerValidationGenericFixtur
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, PoolingType pool_type, int pool_size, PadStrideInfo pad_stride_info, bool exclude_padding, DataType data_type)
+    void setup(TensorShape shape, PoolingType pool_type, Size2D pool_size, PadStrideInfo pad_stride_info, bool exclude_padding, DataType data_type)
     {
         PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, PoolingLayerInfo(pool_type, pool_size, pad_stride_info, exclude_padding),
                                                                                                data_type, 0, QuantizationInfo());
@@ -144,7 +144,7 @@ class PoolingLayerValidationFixedPointFixture : public PoolingLayerValidationGen
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, PoolingType pool_type, int pool_size, PadStrideInfo pad_stride_info, bool exclude_padding, DataType data_type, int fractional_bits)
+    void setup(TensorShape shape, PoolingType pool_type, Size2D pool_size, PadStrideInfo pad_stride_info, bool exclude_padding, DataType data_type, int fractional_bits)
     {
         PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, PoolingLayerInfo(pool_type, pool_size, pad_stride_info, exclude_padding),
                                                                                                data_type, fractional_bits, QuantizationInfo());
@@ -156,7 +156,7 @@ class PoolingLayerValidationQuantizedFixture : public PoolingLayerValidationGene
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, PoolingType pool_type, int pool_size, PadStrideInfo pad_stride_info, bool exclude_padding, DataType data_type, QuantizationInfo quantization_info)
+    void setup(TensorShape shape, PoolingType pool_type, Size2D pool_size, PadStrideInfo pad_stride_info, bool exclude_padding, DataType data_type, QuantizationInfo quantization_info)
     {
         PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, PoolingLayerInfo(pool_type, pool_size, pad_stride_info, exclude_padding),
                                                                                                data_type, 0, quantization_info);

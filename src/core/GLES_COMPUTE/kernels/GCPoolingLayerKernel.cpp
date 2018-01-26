@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,12 +62,13 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
                                     "Unsupported combination of parameters!");
 
     const bool         is_global_pooling = pool_info.is_global_pooling();
-    const unsigned int pool_size         = is_global_pooling ? input->tensor_shape().x() : pool_info.pool_size();
+    const unsigned int pool_size         = is_global_pooling ? input->tensor_shape().x() : pool_info.pool_size().width;
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_global_pooling && (input->tensor_shape().x() != input->tensor_shape().y()),
                                     "Global pooling is supported only with rectangular inputs!");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_global_pooling && ((pool_info.pad_stride_info().pad().first >= pool_size) || (pool_info.pad_stride_info().pad().second >= pool_size)),
                                     "Invalid pool size and pool pad combination!");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(pool_info.pool_size().width != pool_info.pool_size().height, "Invalid Pool size, width not equal to height!");
 
     // Checks performed when output is configured
     if(output->total_size() != 0)
@@ -97,7 +98,7 @@ std::tuple<Status, Window, GCPoolingConfig> validate_and_configure_window(ITenso
     int                 pool_stride_y   = 0;
     unsigned int        pooled_w        = 0;
     unsigned int        pooled_h        = 0;
-    int                 pool_size       = pool_info.pool_size();
+    int                 pool_size       = pool_info.pool_size().width;
     const PadStrideInfo pad_stride_info = pool_info.pad_stride_info();
     std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
@@ -229,7 +230,7 @@ void GCPoolingLayerKernel::configure(const IGCTensor *input, IGCTensor *output, 
     unsigned int        pooled_w        = 0;
     unsigned int        pooled_h        = 0;
     const PoolingType   pool_type       = pool_info.pool_type();
-    int                 pool_size       = pool_info.pool_size();
+    int                 pool_size       = pool_info.pool_size().width;
     const PadStrideInfo pad_stride_info = pool_info.pad_stride_info();
     const bool          exclude_padding = pool_info.exclude_padding();
     std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();

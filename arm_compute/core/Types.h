@@ -27,6 +27,7 @@
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/QAsymm8.h"
 #include "arm_compute/core/Rounding.h"
+#include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorShape.h"
 #include "support/Half.h"
@@ -578,7 +579,7 @@ class PoolingLayerInfo
 public:
     /** Default Constructor */
     PoolingLayerInfo()
-        : _pool_type(PoolingType::MAX), _pool_size(0), _pad_stride_info(PadStrideInfo()), _exclude_padding(false), _is_global_pooling(false)
+        : _pool_type(PoolingType::MAX), _pool_size(Size2D()), _pad_stride_info(PadStrideInfo()), _exclude_padding(false), _is_global_pooling(false)
     {
     }
     /** Default Constructor
@@ -594,6 +595,22 @@ public:
                               unsigned int  pool_size,
                               PadStrideInfo pad_stride_info = PadStrideInfo(),
                               bool          exclude_padding = false)
+        : _pool_type(pool_type), _pool_size(Size2D(pool_size, pool_size)), _pad_stride_info(pad_stride_info), _exclude_padding(exclude_padding), _is_global_pooling(false)
+    {
+    }
+    /** Default Constructor
+     *
+     * @param[in] pool_type       Pooling type @ref PoolingType.
+     * @param[in] pool_size       Pooling size, in elements, across  x and y.
+     * @param[in] pad_stride_info (Optional) Padding and stride information @ref PadStrideInfo
+     * @param[in] exclude_padding (Optional) Strategy when accounting padding in calculations.
+     *                             True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
+     *                             Defaults to false;
+     */
+    explicit PoolingLayerInfo(PoolingType   pool_type,
+                              Size2D        pool_size,
+                              PadStrideInfo pad_stride_info = PadStrideInfo(),
+                              bool          exclude_padding = false)
         : _pool_type(pool_type), _pool_size(pool_size), _pad_stride_info(pad_stride_info), _exclude_padding(exclude_padding), _is_global_pooling(false)
     {
     }
@@ -604,14 +621,14 @@ public:
      * @param[in] pool_type Pooling type @ref PoolingType.
      */
     explicit PoolingLayerInfo(PoolingType pool_type)
-        : _pool_type(pool_type), _pool_size(0), _pad_stride_info(PadStrideInfo(1, 1, 0, 0)), _exclude_padding(false), _is_global_pooling(true)
+        : _pool_type(pool_type), _pool_size(Size2D()), _pad_stride_info(PadStrideInfo(1, 1, 0, 0)), _exclude_padding(false), _is_global_pooling(true)
     {
     }
     PoolingType pool_type() const
     {
         return _pool_type;
     }
-    unsigned int pool_size() const
+    const Size2D &pool_size() const
     {
         return _pool_size;
     }
@@ -630,7 +647,7 @@ public:
 
 private:
     PoolingType   _pool_type;
-    unsigned int  _pool_size;
+    Size2D        _pool_size;
     PadStrideInfo _pad_stride_info;
     bool          _exclude_padding;
     bool          _is_global_pooling;

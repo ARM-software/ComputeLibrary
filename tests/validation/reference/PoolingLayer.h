@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,10 +36,10 @@ namespace validation
 namespace reference
 {
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type = 0>
-SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info);
+SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, const PoolingLayerInfo &info);
 
 template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info);
+SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, const PoolingLayerInfo &info);
 } // namespace reference
 } // namespace validation
 } // namespace test

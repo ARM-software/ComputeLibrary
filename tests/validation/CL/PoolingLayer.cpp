@@ -46,21 +46,21 @@ namespace
 /** Failing data set */
 const auto PoolingLayerDatasetSpecial = ((((framework::dataset::make("Shape", TensorShape{ 60U, 52U, 3U, 5U })
                                             * framework::dataset::make("PoolType", PoolingType::AVG))
-                                           * framework::dataset::make("PoolingSize", 100))
+                                           * framework::dataset::make("PoolingSize", Size2D(100, 100)))
                                           * framework::dataset::make("PadStride", PadStrideInfo(5, 5, 50, 50)))
                                          * framework::dataset::make("ExcludePadding", true));
 /** Input data set for floating-point data types */
-const auto PoolingLayerDatasetFP = combine(combine(combine(datasets::PoolingTypes(), framework::dataset::make("PoolingSize", { 2, 3, 4, 7, 9 })),
+const auto PoolingLayerDatasetFP = combine(combine(combine(datasets::PoolingTypes(), framework::dataset::make("PoolingSize", { Size2D(2, 2), Size2D(3, 3), Size2D(7, 7), Size2D(9, 9) })),
                                                    framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) })),
                                            framework::dataset::make("ExcludePadding", { true, false }));
 
 /** Input data set for fixed-point data types */
-const auto PoolingLayerDatasetQS = combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }), framework::dataset::make("PoolingSize", { 2, 3 })),
+const auto PoolingLayerDatasetQS = combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }), framework::dataset::make("PoolingSize", { Size2D(2, 2), Size2D(3, 3) })),
                                                    framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) })),
                                            framework::dataset::make("ExcludePadding", { true, false }));
 
 /** Input data set for asymmetric data type */
-const auto PoolingLayerDatasetQASYMM8 = combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }), framework::dataset::make("PoolingSize", { 2, 3 })),
+const auto PoolingLayerDatasetQASYMM8 = combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }), framework::dataset::make("PoolingSize", { Size2D(2, 2), Size2D(3, 3) })),
                                                         framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) })),
                                                 framework::dataset::make("ExcludePadding", { true, false }));
 

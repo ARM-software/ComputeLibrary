@@ -760,7 +760,7 @@ inline std::string to_string(const PoolingLayerInfo &info)
     if(!info.is_global_pooling())
     {
         str << ","
-            << "PoolSize=" << info.pool_size() << ","
+            << "PoolSize=" << info.pool_size().width << "," << info.pool_size().height << ","
             << "PadStride=" << info.pad_stride_info();
     }
     str << "}";

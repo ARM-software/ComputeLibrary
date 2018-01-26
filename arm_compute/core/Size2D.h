@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_SIZE2D_H__
 
 #include <cstddef>
+#include <utility>
 
 namespace arm_compute
 {
@@ -33,10 +34,7 @@ class Size2D
 {
 public:
     /** Default constructor */
-    Size2D()
-        : width(0), height(0)
-    {
-    }
+    Size2D() = default;
     /** Constructor. Initializes "width" and "height" respectively with "w" and "h"
      *
      * @param[in] w Width of the image or rectangle
@@ -45,26 +43,6 @@ public:
     Size2D(size_t w, size_t h)
         : width(w), height(h)
     {
-    }
-    /** Constructor. Initializes "width" and "height" with the dimensions of "size"
-     *
-     * @param[in] size Size data object
-     */
-    Size2D(const Size2D &size)
-        : width(size.width), height(size.height)
-    {
-    }
-    /** Copy assignment
-     *
-     * @param[in] size Constant reference input "Size2D" data object to copy
-     *
-     * @return Reference to the newly altered left hand side "Size2D" data object
-     */
-    Size2D &operator=(const Size2D &size)
-    {
-        width  = size.width;
-        height = size.height;
-        return *this;
     }
     /** The area of the image or rectangle calculated as (width * height)
      *
@@ -77,8 +55,8 @@ public:
     }
 
 public:
-    size_t width;  /**< Width of the image region or rectangle */
-    size_t height; /**< Height of the image region or rectangle */
+    size_t width  = {}; /**< Width of the image region or rectangle */
+    size_t height = {}; /**< Height of the image region or rectangle */
 };
 }
 #endif /*__ARM_COMPUTE_SIZE2D_H__ */

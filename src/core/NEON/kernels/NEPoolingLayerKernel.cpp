@@ -151,7 +151,7 @@ inline void scale_vector_s16x8(uint16x8_t &v, const Coordinates &id, int id_offs
     v = vsetq_lane_u16(elems[7], v, 7);
 }
 
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, unsigned int &pooled_w, unsigned int pooled_h, int pool_size)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info, unsigned int &pooled_w, unsigned int pooled_h, int pool_size_x, int pool_size_y)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
 
@@ -166,10 +166,11 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(pool_type == PoolingType::L2 && is_data_type_quantized(input->data_type()));
-    ARM_COMPUTE_RETURN_ERROR_ON((supported_pool_sizes.find(pool_size) == supported_pool_sizes.end()) && ((input->data_type() != DataType::F32) && (input->data_type() != DataType::QASYMM8)));
+    ARM_COMPUTE_RETURN_ERROR_ON((supported_pool_sizes.find(pool_size_x) == supported_pool_sizes.end()) && ((input->data_type() != DataType::F32) && (input->data_type() != DataType::QASYMM8)));
     ARM_COMPUTE_RETURN_ERROR_ON(is_global_pooling && (input->tensor_shape().x() != input->tensor_shape().y()));
     ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_fixed_point(input->data_type()) && pool_stride_x > 2);
     ARM_COMPUTE_RETURN_ERROR_ON(exclude_padding && is_data_type_fixed_point(input->data_type()));
+    ARM_COMPUTE_RETURN_ERROR_ON(pool_size_x != pool_size_y);
 
     if(output->total_size() != 0)
     {
@@ -370,7 +371,7 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
     const int           pool_stride_x     = pad_stride_info.stride().first;
 
     // Update pool size in case of global pooling
-    const int pool_size = is_global_pooling ? input->info()->dimension(0) : pool_info.pool_size();
+    const int pool_size = is_global_pooling ? input->info()->dimension(0) : pool_info.pool_size().width;
 
     // Validate pool info before calling scaled_dimensions
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments_pool_info(input->info(), pool_info, pool_size));
@@ -387,7 +388,7 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
     auto_init(input->info(), output->info(), pooled_w, pooled_h);
 
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), pool_info, pooled_w, pooled_h, pool_size));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), pool_info, pooled_w, pooled_h, pool_size, pool_size));
 
     // Set instance variables
     _input     = input;
@@ -1491,7 +1492,7 @@ void NEPoolingLayerKernel::poolingN_f32(const Window &window_input, const Window
     Iterator input(_input, window_input);
     Iterator output(_output, window);
 
-    const int pool_size       = _pool_info.is_global_pooling() ? _input->info()->tensor_shape().x() : _pool_info.pool_size();
+    const int pool_size       = _pool_info.is_global_pooling() ? _input->info()->tensor_shape().x() : _pool_info.pool_size().width;
     const int pool_pad_right  = _pool_info.pad_stride_info().pad_right();
     const int pool_pad_top    = _pool_info.pad_stride_info().pad_top();
     const int pool_pad_left   = _pool_info.pad_stride_info().pad_left();
@@ -1613,7 +1614,7 @@ void NEPoolingLayerKernel::poolingN_qasymm8(const Window &window_input, const Wi
     Iterator input(_input, window_input);
     Iterator output(_output, window);
 
-    const int pool_size       = _pool_info.is_global_pooling() ? _input->info()->tensor_shape().x() : _pool_info.pool_size();
+    const int pool_size       = _pool_info.is_global_pooling() ? _input->info()->tensor_shape().x() : _pool_info.pool_size().width;
     const int pool_pad_right  = _pool_info.pad_stride_info().pad_right();
     const int pool_pad_top    = _pool_info.pad_stride_info().pad_top();
     const int pool_pad_left   = _pool_info.pad_stride_info().pad_left();
@@ -1712,7 +1713,7 @@ Status NEPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInf
     BorderSize   border_size(0);
 
     const bool         is_global_pooling = pool_info.is_global_pooling();
-    const unsigned int pool_size         = is_global_pooling ? input->tensor_shape().x() : pool_info.pool_size();
+    const unsigned int pool_size         = is_global_pooling ? input->tensor_shape().x() : pool_info.pool_size().width;
 
     // Validate pool info befor calling scaled_dimensions
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_pool_info(input, pool_info, pool_size));
@@ -1724,7 +1725,7 @@ Status NEPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInf
                                                      pool_size,
                                                      pool_info.pad_stride_info());
 
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, pool_info, pooled_w, pooled_h, pool_size));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, pool_info, pooled_w, pooled_h, pool_size, pool_size));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), pool_info, num_elems_processed_per_iteration, border_size, pooled_w, pooled_h, pool_size).first);
 
     return Status{};
@@ -1739,7 +1740,7 @@ void NEPoolingLayerKernel::run(const Window &window, const ThreadInfo &info)
 
     const unsigned int pool_stride_x = _pool_info.pad_stride_info().stride().first;
     const unsigned int pool_stride_y = _pool_info.pad_stride_info().stride().second;
-    const unsigned int pool_size     = _pool_info.pool_size();
+    const unsigned int pool_size     = _pool_info.pool_size().width;
 
     // Set step for input in x and y direction for the input
     Window       window_input(window);

@@ -38,7 +38,7 @@ NEPoolingLayer::NEPoolingLayer()
 void NEPoolingLayer::configure(ITensor *input, ITensor *output, const PoolingLayerInfo &pool_info)
 {
     // Check if we have Global Pooling Layer
-    _is_global_pooling_layer = (input->info()->dimension(0) == pool_info.pool_size()) && (input->info()->dimension(1) == pool_info.pool_size());
+    _is_global_pooling_layer = (input->info()->dimension(0) == pool_info.pool_size().width) && (input->info()->dimension(1) == pool_info.pool_size().height);
 
     // Configure pooling kernel
     _pooling_layer_kernel.configure(input, output, pool_info);
