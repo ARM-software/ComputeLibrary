@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -70,39 +70,46 @@ inline DATA_TYPE sum(__global const DATA_TYPE *input)
  * @param[in] src_ptr                                   Pointer to the source tensor. Supported data types: F32
  * @param[in] src_stride_x                              Stride of the source tensor in X dimension (in bytes)
  * @param[in] src_step_x                                src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] src_stride_y                              Stride of the source tensor in Y dimension (in bytes)
+ * @param[in] src_step_y                                src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in] src_offset_first_element_in_bytes         The offset of the first element in the source tensor
  * @param[in] partial_sum_ptr                           The local buffer to hold sumed values. Supported data types: same as @p src_ptt
- * @param[in] partial_sum_stride_x                      Stride of the source tensor in X dimension (in bytes)
+ * @param[in] partial_sum_stride_x                      Stride of the output tensor in X dimension (in bytes)
  * @param[in] partial_sum_step_x                        partial_sum_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] partial_sum_stride_y                      Stride of the output tensor in Y dimension (in bytes)
+ * @param[in] partial_sum_step_y                        partial_sum_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in] partial_sum_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[in] local_sums                                Local buffer for storing the partioal sum
+ * @param[in] local_sums                                Local buffer for storing the partial sum
  */
 __kernel void reduction_operation(
-    VECTOR_DECLARATION(src),
-    VECTOR_DECLARATION(partial_sum),
+    IMAGE_DECLARATION(src),
+    IMAGE_DECLARATION(partial_sum),
     __local DATA_TYPE *local_sums)
 {
-    Vector src         = CONVERT_TO_VECTOR_STRUCT(src);
-    Vector partial_sum = CONVERT_TO_VECTOR_STRUCT(partial_sum);
+    Image src         = CONVERT_TO_IMAGE_STRUCT(src);
+    Image partial_sum = CONVERT_TO_IMAGE_STRUCT(partial_sum);
 
     unsigned int lsize = get_local_size(0);
     unsigned int lid   = get_local_id(0);
 
-    local_sums[lid] = OPERATION((__global DATA_TYPE *)src.ptr);
-    barrier(CLK_LOCAL_MEM_FENCE);
-
-    // Perform parallel reduction
-    for(unsigned int i = lsize >> 1; i > 0; i >>= 1)
+    for(unsigned int y = 0; y < get_local_size(1); ++y)
     {
-        if(lid < i)
-        {
-            local_sums[lid] += local_sums[lid + i];
-        }
+        local_sums[lid] = OPERATION((__global DATA_TYPE *)offset(&src, 0, y));
         barrier(CLK_LOCAL_MEM_FENCE);
-    }
 
-    if(lid == 0)
-    {
-        ((__global DATA_TYPE *)partial_sum.ptr + get_group_id(0))[0] = local_sums[0];
+        // Perform parallel reduction
+        for(unsigned int i = lsize >> 1; i > 0; i >>= 1)
+        {
+            if(lid < i)
+            {
+                local_sums[lid] += local_sums[lid + i];
+            }
+            barrier(CLK_LOCAL_MEM_FENCE);
+        }
+
+        if(lid == 0)
+        {
+            ((__global DATA_TYPE *)offset(&partial_sum, get_group_id(0), y))[0] = local_sums[0];
+        }
     }
 }

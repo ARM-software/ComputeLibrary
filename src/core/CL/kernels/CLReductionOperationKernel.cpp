@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -118,8 +118,8 @@ void CLReductionOperationKernel::run(const Window &window, cl::CommandQueue &que
     out_window.set(Window::DimX, Window::Dimension(0, 0, 0));
 
     // Get first input and output slices
-    Window in_slice  = window.first_slice_window_1D();
-    Window out_slice = out_window.first_slice_window_1D();
+    Window in_slice  = window.first_slice_window_2D();
+    Window out_slice = out_window.first_slice_window_2D();
 
     // Reshape window
     const unsigned int border_width = ((in_slice.x().end() % 128) != 0) ? 128 - in_slice.x().end() % 128 : 0;
@@ -127,14 +127,14 @@ void CLReductionOperationKernel::run(const Window &window, cl::CommandQueue &que
 
     // Set local sums buffer
     unsigned int local_sum_size = _lws_hint[0] * _input->info()->element_size();
-    _kernel.setArg(num_arguments_per_1D_tensor() * 2, local_sum_size, nullptr);
+    _kernel.setArg(num_arguments_per_2D_tensor() * 2, local_sum_size, nullptr);
 
     do
     {
         unsigned int idx = 0;
-        add_1D_tensor_argument(idx, _input, in_slice);
-        add_1D_tensor_argument(idx, _output, out_slice);
+        add_2D_tensor_argument(idx, _input, in_slice);
+        add_2D_tensor_argument(idx, _output, out_slice);
         enqueue(queue, *this, in_slice, _lws_hint);
     }
-    while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(out_slice));
+    while(window.slide_window_slice_2D(in_slice) && window.slide_window_slice_2D(out_slice));
 }
