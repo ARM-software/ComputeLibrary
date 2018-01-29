@@ -177,6 +177,16 @@ public:
      */
     void shift(size_t dimension, int shift_value);
 
+    /** Shift down all the dimensions of a window
+     *
+     * i.e new_dims[n] = old_dims[n+shift_value].
+     *
+     * @param[in] shift_value Number of dimensions to shift the window by.
+     *
+     * @return The window with the shifted dimensions.
+     */
+    Window shift_dimensions(unsigned int shift_value) const;
+
     /** Adjust the start or end of a given dimension by the given value
      *
      * @param[in] dimension    The dimension to adjust

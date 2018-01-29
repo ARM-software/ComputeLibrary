@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -96,7 +96,6 @@ void NEMinMaxLayerKernel::run(const Window &window, const ThreadInfo &info)
     // First one will use vector operations, second one processes the left over pixels
     Window window_input(window);
     window_input.set(Window::DimX, Window::Dimension(0, 1, 1));
-    window_input.collapse_if_possible(INEKernel::window(), 3);
     window_input.set(3, Window::Dimension(0, 1, 1));
 
     Iterator input(_input, window_input);

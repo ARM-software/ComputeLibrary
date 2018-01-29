@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -89,7 +89,6 @@ void CLMinMaxLayerKernel::reset(cl::CommandQueue &queue)
     Window window_output;
     window_output.use_tensor_dimensions(_output->info()->tensor_shape());
     window_output.set(Window::DimX, Window::Dimension(0, 1, 1));
-    window_output.collapse_if_possible(ICLKernel::window(), 1);
 
     Iterator output(_output, window_output);
 
@@ -110,27 +109,21 @@ void CLMinMaxLayerKernel::run(const Window &window, cl::CommandQueue &queue)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
 
-    // Collapse min/max batches
     Window window_collapsed = window.collapse_if_possible(ICLKernel::window(), 3);
     Window slice            = window_collapsed.first_slice_window_3D();
     slice.set(Window::DimX, Window::Dimension(0, 1, 1));
     slice.set(Window::DimY, Window::Dimension(0, 1, 1));
     slice.set(Window::DimZ, Window::Dimension(0, 1, 1));
 
-    Window window_output;
-    window_output.use_tensor_dimensions(_output->info()->tensor_shape());
-    window_output.set(Window::DimX, Window::Dimension(0, 1, 1));
-    window_output.collapse_if_possible(ICLKernel::window(), 1);
-
-    Window output_slice = window_output.first_slice_window_1D();
-
     do
     {
+        Window output_slice = slice.shift_dimensions(2);
+
         unsigned int idx = 0;
         // Set inputs
         add_3D_tensor_argument(idx, _input, slice);
         add_1D_tensor_argument(idx, _output, output_slice);
         enqueue(queue, *this, slice);
     }
-    while(window.slide_window_slice_3D(slice) && window_output.slide_window_slice_1D(output_slice));
+    while(window_collapsed.slide_window_slice_3D(slice));
 }

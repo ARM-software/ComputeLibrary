@@ -77,6 +77,16 @@ inline Window Window::collapse_if_possible(const Window &full_window, const size
     return collapsed;
 }
 
+inline Window Window::shift_dimensions(unsigned int shift_value) const
+{
+    Window shifted_window;
+    for(size_t n = 0; n < (Coordinates::num_max_dimensions - shift_value); n++)
+    {
+        shifted_window.set(n, _dims[n + shift_value]);
+    }
+    return shifted_window;
+}
+
 inline Window Window::collapse(const Window &full_window, const size_t first, const size_t last) const
 {
     bool   has_collapsed = false;

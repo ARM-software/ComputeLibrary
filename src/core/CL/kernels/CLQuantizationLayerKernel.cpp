@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -82,20 +82,16 @@ void CLQuantizationLayerKernel::run(const Window &window, cl::CommandQueue &queu
     Window window_collapsed = window.collapse_if_possible(ICLKernel::window(), 3);
     Window slice            = window_collapsed.first_slice_window_3D();
 
-    Window window_min_max;
-    window_min_max.use_tensor_dimensions(_min_max->info()->tensor_shape());
-    window_min_max.set(Window::DimX, Window::Dimension(0, 1, 1));
-    window_min_max.collapse_if_possible(ICLKernel::window(), 1);
-
-    Window slice_min_max = window_min_max.first_slice_window_1D();
-
     do
     {
+        Window slice_min_max = slice.shift_dimensions(2);
+        slice_min_max.set(Window::DimX, Window::Dimension(0, 1, 1));
+
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice);
         add_3D_tensor_argument(idx, _output, slice);
         add_1D_tensor_argument(idx, _min_max, slice_min_max);
         enqueue(queue, *this, slice);
     }
-    while(window.slide_window_slice_3D(slice) && window_min_max.slide_window_slice_1D(slice_min_max));
+    while(window_collapsed.slide_window_slice_3D(slice));
 }
