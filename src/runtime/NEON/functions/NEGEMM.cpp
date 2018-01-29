@@ -28,6 +28,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/kernels/arm32/NEGEMMAArch32Kernel.h"
 #include "arm_compute/core/NEON/kernels/arm64/NEGEMMAArch64Kernel.h"
+#include "arm_compute/core/NEON/kernels/arm64/NEGEMVAArch64Kernel.h"
 #include "arm_compute/core/NEON/kernels/arm64/NEHGEMMAArch64FP16Kernel.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
@@ -40,10 +41,13 @@ namespace arm_compute
 {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch-default"
+#pragma GCC diagnostic ignored "-Weffc++"
 #include "arm_compute/core/NEON/kernels/assembly/gemm_interleaved.hpp"
+#include "arm_compute/core/NEON/kernels/assembly/gemv_transposed.hpp"
 #include "arm_compute/core/NEON/kernels/assembly/kernels/a32_sgemm_8x6.hpp"
 #include "arm_compute/core/NEON/kernels/assembly/kernels/a64_hgemm_24x8.hpp"
 #include "arm_compute/core/NEON/kernels/assembly/kernels/a64_sgemm_12x8.hpp"
+#include "arm_compute/core/NEON/kernels/assembly/kernels/a64_sgemv_trans.hpp"
 #pragma GCC diagnostic pop
 } // namespace arm_compute
 
@@ -83,8 +87,41 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
     // If so, all the kernels for reshaping the tensors can be skipped
     if(_run_vector_matrix_multiplication)
     {
-        // Configure the matrix multiply kernel
-        _mm_kernel.configure(a, b, d, alpha);
+#if defined(__aarch64__)
+        if(NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV8 && a->info()->data_type() == DataType::F32 && (c == nullptr || beta == 0.f))
+        {
+            _mm_optimised_kernel = support::cpp14::make_unique<NEGEMVAArch64Kernel>();
+        }
+
+        if(_mm_optimised_kernel != nullptr)
+        {
+            struct CPUInfo ci = NEScheduler::get().cpu_info();
+
+            const int N = d->info()->tensor_shape().x();
+            const int K = a->info()->tensor_shape().x();
+
+            size_t workbench_size = 0;
+
+            if(a->info()->data_type() == DataType::F32)
+            {
+                workbench_size = GemvTransposed<sgemv_trans, sgemv_trans::operand_type, sgemv_trans::result_type>(&ci, N, K).get_working_size();
+            }
+
+            constexpr size_t alignment = 4096;
+            ARM_COMPUTE_ERROR_ON_MSG(workbench_size == 0, "size cannot be 0");
+            _workspace.allocator()->init(TensorInfo(TensorShape{ (workbench_size + alignment - 1) * NEScheduler::get().num_threads() }, 1, DataType::S8));
+            _memory_group.manage(&_workspace);
+
+            // Configure matrix multiplication kernel
+            _mm_optimised_kernel->configure(a, b, d, &_workspace, alpha, 0.f, false /* is_transposed_0 */, false /* is_transposed_1 */);
+            _workspace.allocator()->allocate();
+        }
+        else
+#endif /* defined(__aarch64__) */
+        {
+            // Configure the matrix multiply kernel
+            _mm_kernel.configure(a, b, d, alpha);
+        }
 
         // Configure matrix addition kernel
         if(beta != 0 && c != nullptr)

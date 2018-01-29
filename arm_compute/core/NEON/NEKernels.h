@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2018 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -117,6 +117,7 @@
 #include "arm_compute/core/NEON/kernels/arm64/NEGEMMLowpAArch64A53Kernel.h"
 #include "arm_compute/core/NEON/kernels/arm64/NEGEMMLowpAArch64Kernel.h"
 #include "arm_compute/core/NEON/kernels/arm64/NEGEMMLowpAArch64V8P4Kernel.h"
+#include "arm_compute/core/NEON/kernels/arm64/NEGEMVAArch64Kernel.h"
 #include "arm_compute/core/NEON/kernels/arm64/NEHGEMMAArch64FP16Kernel.h"
 
 #endif /* __ARM_COMPUTE_NEKERNELS_H__ */
