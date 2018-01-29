@@ -151,7 +151,6 @@ void NEWinogradLayer::configure(const ITensor *input, const ITensor *weights, co
 
     // Reorder the convoluted output to ACL's ordering NCHW
     _permute_output.configure(&_output_nhwc, _output, PermutationVector(1U, 2U, 0U));
-
 }
 
 void NEWinogradLayer::run()
