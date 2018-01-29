@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -476,19 +476,19 @@ TANHQ_IMPL(qs16, qs16x8, 8)
 #define floatx16 float16
 #define float16_TYPE float16
 
-#define CONVERTQ_DOWN_IMPL(in_type, out_type)                                                                                      \
-    inline out_type convert_##out_type##_##in_type(in_type a, int fixed_point_position)                                            \
-    {                                                                                                                              \
-        return CONVERT(a * (1 << fixed_point_position) + select((in_type)-0.5, (in_type)0.5, isgreater(a, (in_type)0)), out_type); \
+#define CONVERTQ_DOWN_IMPL(in_type, out_type)                                                                                        \
+    inline out_type convert_##out_type##_##in_type(in_type a, int fixed_point_position)                                              \
+    {                                                                                                                                \
+        return CONVERT(a * (1 << fixed_point_position) + select((in_type)-0.5f, (in_type)0.5f, isgreater(a, (in_type)0)), out_type); \
     }
 
 CONVERTQ_DOWN_IMPL(float16, qs8x16)
 CONVERTQ_DOWN_IMPL(float16, qs16x16)
 
-#define CONVERTQ_DOWN_SAT_IMPL(in_type, out_type)                                                                                      \
-    inline out_type convert_##out_type##_##in_type##_sat(in_type a, int fixed_point_position)                                          \
-    {                                                                                                                                  \
-        return CONVERT_SAT(a * (1 << fixed_point_position) + select((in_type)-0.5, (in_type)0.5, isgreater(a, (in_type)0)), out_type); \
+#define CONVERTQ_DOWN_SAT_IMPL(in_type, out_type)                                                                                        \
+    inline out_type convert_##out_type##_##in_type##_sat(in_type a, int fixed_point_position)                                            \
+    {                                                                                                                                    \
+        return CONVERT_SAT(a * (1 << fixed_point_position) + select((in_type)-0.5f, (in_type)0.5f, isgreater(a, (in_type)0)), out_type); \
     }
 
 CONVERTQ_DOWN_SAT_IMPL(float16, qs8x16)

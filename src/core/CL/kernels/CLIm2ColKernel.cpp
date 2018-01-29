@@ -59,7 +59,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, b
 } // namespace
 
 CLIm2ColKernel::CLIm2ColKernel()
-    : _input(nullptr), _output(nullptr), _convolved_dims(), _num_elems_processed_per_iteration(1), _run_func(nullptr)
+    : _input(nullptr), _output(nullptr), _convolved_dims(), _num_elems_processed_per_iteration(1), _run_func(nullptr), _kernel_dims()
 {
 }
 
@@ -70,8 +70,9 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), has_bias));
 
-    _input  = input;
-    _output = output;
+    _input       = input;
+    _output      = output;
+    _kernel_dims = kernel_dims;
 
     const DataType  data_type  = input->info()->data_type();
     const GPUTarget gpu_target = get_arch_from_target(get_target());
@@ -79,6 +80,7 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     // Create kernel
     CLBuildOptions build_opts;
     build_opts.add_option(("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type)));
+    build_opts.add_option("-DELEMENT_SIZE=" + support::cpp11::to_string(input->info()->element_size()));
     build_opts.add_option_if(has_bias, "-DHAS_BIAS");
     build_opts.add_option_if(is_data_type_fixed_point(data_type), "-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
 
@@ -93,13 +95,19 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
                                                     output->info()->tensor_shape().cbegin() + 1))
                                      && ((stride_x == 1) && (stride_y == 1) && !conv_info.has_padding());
 
-    std::string kernel_name = "im2col_generic";
+    bool is_optimized_path = false;
+
+    _num_elems_processed_per_iteration = 1;
+
+    std::string kernel_name;
     if(!run_img2col_reduced)
     {
+        // Default kernel name
+        kernel_name = "im2col_generic_dchw";
+
         _convolved_dims = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1),
                                             kernel_dims.width, kernel_dims.height,
                                             conv_info);
-        _num_elems_processed_per_iteration = output->info()->dimension(0);
 
         build_opts.add_option("-DKERNEL_WIDTH=" + support::cpp11::to_string(kernel_dims.width));
         build_opts.add_option("-DKERNEL_HEIGHT=" + support::cpp11::to_string(kernel_dims.height));
@@ -116,19 +124,50 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
         build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(1)));
         build_opts.add_option_if_else(is_data_type_quantized(data_type), "-DPAD_VALUE=" + support::cpp11::to_string(input->info()->quantization_info().offset), "-DPAD_VALUE=0");
 
-        if(kernel_dims.width == 3 && kernel_dims.height == 3 && !conv_info.has_padding())
-        {
-            kernel_name = "im2col_kernel3x3_padx0_pady0";
+        const bool squared_im2col = kernel_dims.width == kernel_dims.height;
 
-            // Local work size optimized for the 3x3 MobileNets convolution on Bifrost.
-            if(gpu_target == GPUTarget::BIFROST && input->info()->dimension(0) == 224)
+        if(squared_im2col && !is_data_type_fixed_point(data_type))
+        {
+            // Check if we can run an optimized im2col
+            switch(kernel_dims.width)
             {
-                _lws_hint = cl::NDRange(2, 3, 3);
+                case 1:
+                    // Optimized im2col1x1 if stride_x = 1 and conv_info.has_padding() = false
+                    if(conv_info.stride().first == 1 && !conv_info.has_padding())
+                    {
+                        _num_elems_processed_per_iteration = 4;
+                        is_optimized_path                  = true;
+                        kernel_name                        = "im2col1x1_stridex1_dchw";
+                    }
+                    break;
+                case 3:
+                    _num_elems_processed_per_iteration = 1;
+                    is_optimized_path                  = true;
+                    kernel_name                        = "im2col3x3_dchw";
+                    break;
+                case 5:
+                    _num_elems_processed_per_iteration = 1;
+                    is_optimized_path                  = true;
+                    kernel_name                        = "im2col5x5_dchw";
+                    break;
+                case 11:
+                    // Optimized im2col11x11 if pad_x = pad_y = 0
+                    if(!conv_info.has_padding())
+                    {
+                        _num_elems_processed_per_iteration = 1;
+                        is_optimized_path                  = true;
+                        kernel_name                        = "im2col11x11_padx0_pady0_dchw";
+                    }
+                    break;
+                default:
+                    is_optimized_path = false;
+                    break;
             }
         }
         else if(kernel_dims.width > 1 && !conv_info.has_padding())
         {
-            kernel_name = "im2col_generic_padx0_pady0";
+            _num_elems_processed_per_iteration = 1;
+            kernel_name                        = "im2col_generic_padx0_pady0_dchw";
 
             // Optimized im2col is performed using one or more vector operations with the specified vector size
             // and a remainder. For example, for 5x5 convolutions, im2col is performed using vectors of size 4
@@ -152,30 +191,12 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
             build_opts.add_option("-DVECTOR_SIZE=" + support::cpp11::to_string(vector_size));
             build_opts.add_option("-DWIDTH_MOD_VECTOR_SIZE=" + support::cpp11::to_string(width_mod_vector_size));
         }
-        else
-        {
-            if(gpu_target == GPUTarget::BIFROST)
-            {
-                const size_t input_channels = input->info()->dimension(2);
-                if((input_channels & (input_channels - 1)) == 0)
-                {
-                    // input_channels is a power of two
-                    _lws_hint = cl::NDRange(1, 1, 4);
-                }
-                else if(input_channels < 192 && (input_channels % 4) == 0)
-                {
-                    // input_channels is less than 192 and is a multiple of 4
-                    _lws_hint = cl::NDRange(1, 1, 2);
-                }
-                // otherwise the default is optimal
-            }
-        }
         _run_func = &CLIm2ColKernel::run_generic;
     }
     else
     {
-        kernel_name                        = "im2col_reduced";
         _num_elems_processed_per_iteration = 1;
+        kernel_name                        = "im2col_reduced_dchw";
         _run_func                          = &CLIm2ColKernel::run_reduced;
     }
 
@@ -183,8 +204,30 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     // Configure  kernel window
-    Window win = calculate_max_window(*input->info(), Steps());
-    // The CLIm2ColKernel doesn't need padding so update_window_and_padding() can be skipped
+    Window win;
+    if(is_optimized_path)
+    {
+        win = calculate_max_window(*input->info(),
+                                   Steps(_num_elems_processed_per_iteration),
+                                   false,
+                                   BorderSize(conv_info.pad_top(), conv_info.pad_right(), conv_info.pad_bottom(), conv_info.pad_left()));
+
+        const int x = -conv_info.pad_left();
+        const int y = -conv_info.pad_top();
+        const int w = kernel_dims.width * _num_elems_processed_per_iteration;
+        const int h = kernel_dims.height;
+
+        AccessWindowRectangle input_access(input->info(), x, y, w, h);
+
+        update_window_and_padding(win, input_access);
+    }
+    else
+    {
+        // For the generic case, CLIm2ColKernel doesn't need padding (we do not read out-of-bounds elements) so
+        // update_window_and_padding() can be skipped
+        win = calculate_max_window(*input->info(), Steps());
+    }
+
     output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
     if(!run_img2col_reduced)
     {
@@ -195,8 +238,8 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     ICLKernel::configure(win);
 
     // Set config_id for enabling LWS tuning
-    _config_id = "im2col_";
-    _config_id += (run_img2col_reduced ? "reduced_" : "");
+    _config_id = kernel_name;
+    _config_id += "_";
     _config_id += lower_string(string_from_data_type(input->info()->data_type()));
     _config_id += "_";
     _config_id += support::cpp11::to_string(output->info()->dimension(0));
@@ -233,9 +276,15 @@ void CLIm2ColKernel::run_generic(const Window &window, cl::CommandQueue &queue)
     Window slice_in  = window_collapsed.first_slice_window_3D();
     Window slice_out = window_collapsed.first_slice_window_3D();
 
-    // Setup slice
-    slice.set(Window::DimX, Window::Dimension(0, static_cast<int>(_convolved_dims.first), 1));
-    slice.set(Window::DimY, Window::Dimension(0, static_cast<int>(_convolved_dims.second), 1));
+    // Setup slice if stride_x != 0 or stride_y != 0
+    if(_convolved_dims.first != _input->info()->dimension(0) || _convolved_dims.second != _input->info()->dimension(1))
+    {
+        // If the stride_x or stride_y are not 1, the output tensor of matrix multiply (Convolved tensor) will not
+        // have the same shape of the im2col input tensor
+        // In this case we need to re-compute the window using the shape of the tensor after matrix multiply (convolved_dims)
+        slice.set(Window::DimX, Window::Dimension(0, static_cast<int>(_convolved_dims.first), 1));
+        slice.set(Window::DimY, Window::Dimension(0, static_cast<int>(_convolved_dims.second), 1));
+    }
 
     // Setup input slice
     // The first three dimensions of the input are increased by the inner loops
@@ -244,7 +293,7 @@ void CLIm2ColKernel::run_generic(const Window &window, cl::CommandQueue &queue)
     slice_in.set(Window::DimZ, Window::Dimension(0, 0, 0));
 
     // Setup output slice
-    slice_out.set(Window::DimX, Window::Dimension(0, _output->info()->dimension(0), _num_elems_processed_per_iteration));
+    slice_out.set(Window::DimX, Window::Dimension(0, _output->info()->dimension(0), _kernel_dims.area()));
     slice_out.set(Window::DimY, Window::Dimension(0, _output->info()->dimension(1), 1));
     slice_out.set(Window::DimZ, Window::Dimension(0, 1, 1));
 

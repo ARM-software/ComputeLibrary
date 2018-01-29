@@ -170,7 +170,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "combine_gradients_L2", "canny.cl" },
     { "concatenate_depth", "concatenate.cl" },
     { "convolution_rectangle", "convolution_rectangle.cl" },
-    { "col2im", "convolution_layer.cl" },
+    { "col2im", "col2im.cl" },
     { "convolution3x3_static", "convolution3x3.cl" },
     { "convolution5x5_static", "convolution5x5.cl" },
     { "convolution7x7_static", "convolution7x7.cl" },
@@ -248,10 +248,13 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "hog_detector", "hog.cl" },
     { "hog_orientation_binning", "hog.cl" },
     { "hysteresis", "canny.cl" },
-    { "im2col_generic", "convolution_layer.cl" },
-    { "im2col_generic_padx0_pady0", "convolution_layer.cl" },
-    { "im2col_kernel3x3_padx0_pady0", "convolution_layer.cl" },
-    { "im2col_reduced", "convolution_layer.cl" },
+    { "im2col1x1_stridex1_dchw", "im2col.cl" },
+    { "im2col3x3_dchw", "im2col.cl" },
+    { "im2col5x5_dchw", "im2col.cl" },
+    { "im2col11x11_padx0_pady0_dchw", "im2col.cl" },
+    { "im2col_generic_dchw", "im2col.cl" },
+    { "im2col_generic_padx0_pady0_dchw", "im2col.cl" },
+    { "im2col_reduced_dchw", "im2col.cl" },
     { "init_level", "optical_flow_pyramid_lk.cl" },
     { "init_level_max", "optical_flow_pyramid_lk.cl" },
     { "init_level_max_initial_estimate", "optical_flow_pyramid_lk.cl" },
@@ -390,6 +393,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 #include "./cl_kernels/channel_extract.clembed"
     },
     {
+        "col2im.cl",
+#include "./cl_kernels/col2im.clembed"
+    },
+    {
         "concatenate.cl",
 #include "./cl_kernels/concatenate.clembed"
     },
@@ -520,6 +527,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "hog.cl",
 #include "./cl_kernels/hog.clembed"
+    },
+    {
+        "im2col.cl",
+#include "./cl_kernels/im2col.clembed"
     },
     {
         "integral_image.cl",

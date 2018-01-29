@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,11 +25,11 @@
 #define __ARM_COMPUTE_CLIM2COLKERNEL_H__
 
 #include "arm_compute/core/CL/ICLKernel.h"
+#include "arm_compute/core/Size2D.h"
 
 namespace arm_compute
 {
 class ICLTensor;
-class Size2D;
 
 /** Interface for the im2col reshape kernel.
  *
@@ -117,6 +117,7 @@ private:
     std::pair<unsigned int, unsigned int> _convolved_dims;
     unsigned int   _num_elems_processed_per_iteration;
     Im2ColFunction _run_func;
+    Size2D         _kernel_dims;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLIM2COLKERNEL_H__ */
