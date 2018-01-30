@@ -25,104 +25,93 @@
 #define __ARM_COMPUTE_NEGEMMWINOGRADLAYERKERNEL_H__
 
 #include "arm_compute/core/NEON/INEKernel.h"
+#include "arm_compute/core/NEON/kernels/winograd/batched_blocked_gemm.hpp"
 #include "arm_compute/core/NEON/kernels/winograd/convolution.hpp"
 #include "arm_compute/core/NEON/kernels/winograd/tensor.hpp"
+#include "arm_compute/core/NEON/kernels/winograd/winograd_gemm.hpp"
 
 namespace arm_compute
 {
 class ITensor;
-class NEWinogradLayerKernel;
-class NEWinogradLayerTransformInputKernel;
-class NEWinogradLayerTransformWeightsKernel;
 
-class Winograd3x3F32 final
+template <int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+class NEWinogradLayerTransformInputKernel : public INEKernel
 {
 public:
-    /** Create a new Winograd convolution layer.
+    /** Determine how much memory (in units of TIn) to allocate for the
+     * transformed input.
      *
-     * @param[in]  n_batches         Number of batches in the input and output tensors.
-     * @param[in]  n_input_channels  Number of feature maps in a batch of the input tensor.
-     * @param[in]  n_input_rows      Number of rows in a feature map of the input tensor.
-     * @param[in]  n_input_cols      Number of columns in a feature map of the input tensor.
-     * @param[in]  n_output_channels Number of feature maps in the output tensor.
-     * @param[in]  same_padding      Use "SAME" padding, otherwise use "VALID".
-     * @param[in]  weights           Pointer to weight tensor in spatial domain. Must be ordered as "Height x Rows x Input Feature Maps x Output Feature Maps.
-     * @param[out] weights_storage   Pointer to storage for weight tensor in the Winograd domain. Must be at least the size returned by `get_weight_storage_size
-     * @param[in]  input             Pointer to NHWC ordered input tensor, in the spatial domain.
-     * @param[out] winograd_input    Pointer to working space for the input tensor in the Winograd domain. Must be at least the size returned by `get_input_storage_size`.
-     * @param[in]  biases            Pointer to the biases vector.
-     * @param[out] output            Pointer to NHWC ordered output tensor, in the spatial domain.
-     * @param[out] winograd_output   Pointer to working space for the output tensor in the Winograd domain. Must be at least the size returned by `get_output_storage_size`.
+     * @param[in] n_batches    Number of batches in the input tensor.
+     * @param[in] n_channels   Number of feature maps in the input tensor.
+     * @param[in] n_rows       Number of rows in each feature map.
+     * @param[in] n_cols       Number of columns in each feature map.
+     * @param[in] same_padding Use "SAME" padding, otherwise use "VALID".
      */
-    friend class NEWinogradLayerKernel;
-    friend class NEWinogradLayerTransformInputKernel;
-    friend class NEWinogradLayerTransformOutputKernel;
-    friend class NEWinogradLayerTransformWeightsKernel;
+    static unsigned int get_input_storage_size(
+        int  n_batches,
+        int  n_channels,
+        int  n_rows,
+        int  n_cols,
+        bool same_padding);
 
-    Winograd3x3F32(
-        const int          n_batches,
-        const int          n_input_channels,
-        const int          n_input_rows,
-        const int          n_input_cols,
-        const int          n_output_channels,
-        const bool         same_padding,
-        const float *const weights,
-        float *const       weights_storage,
-        const float *const input,
-        float *const       winograd_input,
-        float *const       output,
-        float *const       winograd_output);
-
-    ~Winograd3x3F32();
-
-private:
-    class Private;
-    std::unique_ptr<Private> _pimpl;
-};
-
-class INEWinogradLayerTransformKernel : public INEKernel
-{
-public:
-    /** Constructor */
-    INEWinogradLayerTransformKernel();
-
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    INEWinogradLayerTransformKernel(const INEWinogradLayerTransformKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    INEWinogradLayerTransformKernel &operator=(const INEWinogradLayerTransformKernel &) = delete;
-    /** Allow instances of this class to be moved */
-    INEWinogradLayerTransformKernel(INEWinogradLayerTransformKernel &&) = default;
-    /** Allow instances of this class to be moved */
-    INEWinogradLayerTransformKernel &operator=(INEWinogradLayerTransformKernel &&) = default;
-
-    virtual ~INEWinogradLayerTransformKernel() = default;
-
-    /** Initialise the kernel
-     *
-     * @param[in] convolver A pointer to the winograd convolver, this object must have been configured and is ready to execute 16 GEMMS .
-     */
-    virtual void configure(Winograd3x3F32 *convolver);
-
-protected:
-    Winograd3x3F32 *_convolver;
-};
-
-class NEWinogradLayerTransformInputKernel final : public INEWinogradLayerTransformKernel
-{
-public:
+    NEWinogradLayerTransformInputKernel();
     const char *name() const override
     {
         return "NEWinogradLayerTransformInputKernel";
     }
+
+    /** Configure the output transform kernel.
+     *
+     * @param[in]  input         Input tensor data
+     * @param[in]  n_batches     Number of batches in input tensor.
+     * @param[in]  n_rows        Number of rows in input tensor.
+     * @param[in]  n_cols        Number of columns in input tensor.
+     * @param[in]  n_channels    Number of channels in input tensor.
+     * @param[in]  padding       Padding type.
+     * @param[out] output        Base of output matrices.
+     * @param[in]  matrix_stride Stride between output matrices.
+     */
+    void configure(
+        const float *const input,
+        const int          n_batches,
+        const int          n_rows,
+        const int          n_cols,
+        const int          n_channels,
+        const PaddingType  padding,
+        float *const       output,
+        const int          matrix_stride);
+
     // Inherited methods overridden:
-    void configure(Winograd3x3F32 *convolver) override;
     void run(const Window &window, const ThreadInfo &info) override;
     bool is_parallelisable() const override;
+
+private:
+    using WinogradBase   = winograd::WinogradGEMM<OutputTileRows, OutputTileCols, KernelCols, KernelCols>;
+    using WinogradConv   = typename WinogradBase::template Convolution<float, float>;
+    using InputTransform = typename WinogradBase::template InputTransform<float>;
+    std::unique_ptr<InputTransform> _transform;
 };
 
-class NEWinogradLayerTransformOutputKernel final : public INEKernel
+template <int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+class NEWinogradLayerTransformOutputKernel : public INEKernel
 {
 public:
+    /** Determine how much memory (in units of TOut) to allocate for the
+     * (Winograd domain) output.
+     *
+     * @param[in] n_batches         Number of batches in the output tensor.
+     * @param[in] n_rows            Number of rows in each feature map of the input tensor.
+     * @param[in] n_cols            Number of columns in each feature map of the input tensor.
+     * @param[in] n_output_channels Number of feature maps in the output tensor.
+     * @param[in] same_padding      Use "SAME" padding, otherwise use "VALID".
+     */
+    static unsigned int get_output_storage_size(
+        int  n_batches,
+        int  n_rows,
+        int  n_cols,
+        int  n_output_channels,
+        bool same_padding);
+
     const char *name() const override
     {
         return "NEWinogradLayerTransformOutputKernel";
@@ -167,6 +156,10 @@ public:
     bool is_parallelisable() const override;
 
 private:
+    using WinogradBase    = winograd::WinogradGEMM<OutputTileRows, OutputTileCols, KernelRows, KernelCols>;
+    using WinogradConv    = typename WinogradBase::template Convolution<float, float>;
+    using OutputTransform = typename WinogradBase::template OutputTransform<float>;
+
     const ITensor *_biases;
     const float   *_output_workspace;
     int            _matrix_stride;
@@ -178,22 +171,61 @@ private:
     int            _n_channels;
 };
 
-class NEWinogradLayerTransformWeightsKernel final : public INEWinogradLayerTransformKernel
+template <int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+class NEWinogradLayerTransformWeightsKernel final : public INEKernel
 {
 public:
+    /** Determine how much memory (in units of TIn) to allocate for the
+     * transformed weights.
+     *
+     * @param[in] n_output_channels Number of output feature maps.
+     * @param[in] n_input_channels  Number of input feature maps.
+     */
+    static unsigned int get_weight_storage_size(int n_output_channels, int n_input_channels);
+
+    NEWinogradLayerTransformWeightsKernel();
     const char *name() const override
     {
         return "NEWinogradLayerTransformWeightsKernel";
     }
+    /** Configure the output transform kernel.
+     *
+     * @param[in] weights_hwio      Pointer to the weights tensor
+     * @param[in] output            Pointer to working space for the output tensor in the Winograd domain.
+     * @param[in] matrix_stride     Stride across matrices in the output workspace.
+     * @param[in] n_output_channels Number of filters.
+     * @param[in] n_input_channels  Number of channels in each filter.
+     */
+    void configure(
+        const ITensor *weights_hwio,
+        float *const   output,
+        const int      matrix_stride,
+        const int      n_output_channels,
+        const int      n_input_channels);
+
     // Inherited methods overridden:
-    void configure(Winograd3x3F32 *convolver) override;
+
     void run(const Window &window, const ThreadInfo &info) override;
     bool is_parallelisable() const override;
+
+private:
+    using WinogradBase     = winograd::WinogradGEMM<OutputTileRows, OutputTileCols, KernelRows, KernelCols>;
+    using WinogradConv     = typename WinogradBase::template Convolution<float, float>;
+    using WeightsTransform = typename WinogradBase::template WeightsTransform<float>;
+    std::unique_ptr<WeightsTransform> _transform;
 };
 
-class NEWinogradLayerKernel final : public INEKernel
+template <int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+class NEWinogradLayerKernel : public INEKernel
 {
 public:
+    using WinogradBase = winograd::WinogradGEMM<OutputTileRows, OutputTileCols, KernelRows, KernelCols>;
+    using WinogradConv = typename WinogradBase::template Convolution<float, float>;
+    using MultiGEMM    = winograd::BatchedBlockedGemm<WinogradConv::M_BLOCK, WinogradConv::N_BLOCK, float, float>;
+
+    static const int _output_tile_rows = OutputTileRows;
+    static const int _output_tile_cols = OutputTileCols;
+
     const char *name() const override
     {
         return "NEWinogradLayerKernel";
@@ -214,57 +246,38 @@ public:
 
     /** Initialise the kernel
      *
-     * @param[in] convolver A pointer to the winograd convolver, this object must have been configured and is ready to execute 16 GEMMS .
+     * @param[in]  n_gemms         Number of GEMMs to compute.
+     * @param[in]  M               in_shape.n_batches * tile_rows * tile_cols.
+     * @param[in]  K               Number of channels in the input tensor.
+     * @param[in]  N               Number of channels in the output tensor.
+     * @param[in]  a_matrix_stride Stride between input matrices.
+     * @param[in]  a_row_stride    Row stride inside input matrix.
+     * @param[in]  b_matrix_stride Stride between weights matrices.
+     * @param[in]  b_row_stride    Row stride inside the weights matrix.
+     * @param[in]  c_matrix_stride Stride between output matrices.
+     * @param[in]  c_row_stride    Row stride inside the output matrix.
+     * @param[out] a_ptr           Input workspace.
+     * @param[out] b_ptr           Kernel workspace.
+     * @param[out] c_ptr           Output workspace.
      */
-    void configure(Winograd3x3F32 *convolver);
+    void configure(
+        const unsigned int n_gemms,
+        const int M, const int K, const int N,
+        const int          a_matrix_stride,
+        const int          a_row_stride,
+        const int          b_matrix_stride,
+        const int          b_row_stride,
+        const int          c_matrix_stride,
+        const int          c_row_stride,
+        const float *const a_ptr,
+        const float *const b_ptr,
+        float *const       c_ptr);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 
-    /** Determine how much memory (in units of TIn) to allocate for the
-     * transformed weights.
-     *
-     * @param[in] n_output_channels Number of output feature maps.
-     * @param[in] n_input_channels  Number of input feature maps.
-     */
-    static unsigned int get_weight_storage_size(
-        const int n_output_channels,
-        const int n_input_channels);
-
-    /** Determine how much memory (in units of TIn) to allocate for the
-     * transformed input.
-     *
-     * @param[in] n_batches    Number of batches in the input tensor.
-     * @param[in] n_channels   Number of feature maps in the input tensor.
-     * @param[in] n_rows       Number of rows in each feature map.
-     * @param[in] n_cols       Number of columns in each feature map.
-     * @param[in] same_padding Use "SAME" padding, otherwise use "VALID".
-     */
-    static unsigned int get_input_storage_size(
-        const int  n_batches,
-        const int  n_channels,
-        const int  n_rows,
-        const int  n_cols,
-        const bool same_padding);
-
-    /** Determine how much memory (in units of TOut) to allocate for the
-     * (Winograd domain) output.
-     *
-     * @param[in] n_batches         Number of batches in the output tensor.
-     * @param[in] n_rows            Number of rows in each feature map of the input tensor.
-     * @param[in] n_cols            Number of columns in each feature map of the input tensor.
-     * @param[in] n_output_channels Number of feature maps in the output tensor.
-     * @param[in] same_padding      Use "SAME" padding, otherwise use "VALID".
-     */
-    static unsigned int get_output_storage_size(
-        const int  n_batches,
-        const int  n_rows,
-        const int  n_cols,
-        const int  n_output_channels,
-        const bool same_padding);
-
-protected:
-    Winograd3x3F32 *_convolver;
+private:
+    std::unique_ptr<MultiGEMM> _gemms;
 };
 
 } // namespace arm_compute

@@ -68,25 +68,24 @@ public:
     NEWinogradLayer &operator=(const NEWinogradLayer &) = delete;
 
 private:
-    MemoryGroup                           _memory_group;
-    NEWinogradLayerKernel                 _winograd_kernel;
-    NEWinogradLayerTransformInputKernel   _transform_input_kernel;
-    NEWinogradLayerTransformOutputKernel  _transform_output_kernel;
-    NEWinogradLayerTransformWeightsKernel _transform_weights_kernel;
-    CPPPermute                            _permute_input;
-    CPPPermute                            _permute_weights;
-    CPPPermute                            _permute_output;
-    Tensor                                _input_workspace;
-    Tensor                                _output_workspace;
-    Tensor                                _kernel_storage;
-    Tensor                                _input_nhwc;
-    Tensor                                _output_nhwc;
-    Tensor                                _weights_hwio;
-    const ITensor                        *_input;
-    const ITensor                        *_weights;
-    ITensor                              *_output;
-    bool                                  _reshaped_kernel;
-    std::unique_ptr<Winograd3x3F32>       _conv;
+    MemoryGroup _memory_group;
+    NEWinogradLayerKernel<2, 2, 3, 3>                 _winograd_kernel;
+    NEWinogradLayerTransformInputKernel<2, 2, 3, 3>   _transform_input_kernel;
+    NEWinogradLayerTransformOutputKernel<2, 2, 3, 3>  _transform_output_kernel;
+    NEWinogradLayerTransformWeightsKernel<2, 2, 3, 3> _transform_weights_kernel;
+    CPPPermute     _permute_input;
+    CPPPermute     _permute_weights;
+    CPPPermute     _permute_output;
+    Tensor         _input_workspace;
+    Tensor         _output_workspace;
+    Tensor         _kernel_storage;
+    Tensor         _input_nhwc;
+    Tensor         _output_nhwc;
+    Tensor         _weights_hwio;
+    const ITensor *_input;
+    const ITensor *_weights;
+    ITensor       *_output;
+    bool           _reshaped_kernel;
 };
 }
 #endif /* __ARM_COMPUTE_NEWINOGRADLAYER_H__ */
