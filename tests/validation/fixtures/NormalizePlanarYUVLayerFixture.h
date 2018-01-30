@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,7 +62,7 @@ protected:
             float max_bound = 0.f;
             std::tie(min_bound, max_bound) = get_normalize_planar_yuv_layer_test_bounds<T>();
             std::uniform_real_distribution<> distribution(min_bound, max_bound);
-            std::uniform_real_distribution<> distribution_sd(0, max_bound);
+            std::uniform_real_distribution<> distribution_sd(0.1, max_bound);
             library->fill(src_tensor, distribution, 0);
             library->fill(mean_tensor, distribution, 1);
             library->fill(sd_tensor, distribution_sd, 2);
