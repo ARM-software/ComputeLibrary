@@ -158,8 +158,8 @@ void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weigh
     }
 
     // Fill borders on inputs
-    PixelValue zero_in(0);
-    PixelValue zero_w(0);
+    PixelValue zero_in(static_cast<int32_t>(0));
+    PixelValue zero_w(static_cast<int32_t>(0));
     if(_is_quantized)
     {
         zero_in = PixelValue(static_cast<int32_t>(input->info()->quantization_info().offset));
