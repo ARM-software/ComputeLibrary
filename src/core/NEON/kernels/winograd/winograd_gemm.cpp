@@ -34,11 +34,10 @@ Tensor4DShape WinogradGEMM<kr, kc, itr, itc>::Convolution<TOut, TIn>::get_output
   const PaddingType padding
 )
 {
-  // TODO Accept different kernel sizes
   return Tensor4DShape {
     in_shape.n_batches,
-    (padding == PADDING_SAME) ? in_shape.n_rows : in_shape.n_rows - 2,
-    (padding == PADDING_SAME) ? in_shape.n_cols : in_shape.n_cols - 2,
+    (padding == PADDING_SAME) ? in_shape.n_rows : in_shape.n_rows - (kernel_rows - 2),
+    (padding == PADDING_SAME) ? in_shape.n_cols : in_shape.n_cols - (kernel_cols - 2),
     kernel_shape.n_output_channels,
     in_shape.ordering
   };
