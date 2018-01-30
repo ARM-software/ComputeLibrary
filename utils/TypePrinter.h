@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -290,14 +290,14 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NormType &norm_type)
 inline std::string to_string(const arm_compute::NormalizationLayerInfo &info)
 {
     std::stringstream str;
-    str << info.type();
+    str << info.type() << ":NormSize=" << info.norm_size();
     return str.str();
 }
 
 /** Formatted output of @ref NormalizationLayerInfo. */
 inline ::std::ostream &operator<<(::std::ostream &os, const NormalizationLayerInfo &info)
 {
-    os << info.type();
+    os << info.type() << ":NormSize=" << info.norm_size();
     return os;
 }
 
