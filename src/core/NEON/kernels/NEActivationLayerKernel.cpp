@@ -361,8 +361,16 @@ typename std::enable_if<std::is_same<T, float>::value, void>::type NEActivationL
         const auto input_ptr  = reinterpret_cast<const float *>(input.ptr());
         const auto output_ptr = reinterpret_cast<float *>(output.ptr());
 
-        const float32x4x4_t in  = vld4q_f32(input_ptr);
-        float32x4x4_t       tmp = { {} };
+        const float32x4x4_t in =
+        {
+            {
+                vld1q_f32(input_ptr),
+                vld1q_f32(input_ptr + 4),
+                vld1q_f32(input_ptr + 8),
+                vld1q_f32(input_ptr + 12)
+            }
+        };
+        float32x4x4_t tmp = { {} };
 
         switch(F)
         {
@@ -491,7 +499,10 @@ typename std::enable_if<std::is_same<T, float>::value, void>::type NEActivationL
                 break;
         }
 
-        vst4q_f32(output_ptr, tmp);
+        vst1q_f32(output_ptr, tmp.val[0]);
+        vst1q_f32(output_ptr + 4, tmp.val[1]);
+        vst1q_f32(output_ptr + 8, tmp.val[2]);
+        vst1q_f32(output_ptr + 12, tmp.val[3]);
     },
     input, output);
 }
