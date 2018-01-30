@@ -22,8 +22,9 @@
  * SOFTWARE.
  */
 
-#include "batched_blocked_gemm.hpp"
-#include "gemm.hpp"
+#include "arm_compute/core/NEON/kernels/convolution/winograd/batched_blocked_gemm.hpp"
+#include "arm_compute/core/NEON/kernels/convolution/winograd/gemm.hpp"
+
 using namespace winograd;
 
 template <const int MB, const int NB, typename TIn, typename TOut>

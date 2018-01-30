@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -149,13 +149,23 @@ REGISTER_SIMPLE_OPERATION(NEDepthwiseConvolutionOperation, NEON, OperationType::
     auto      *biases    = ctx.num_inputs() == 3 ? dynamic_cast<arm_compute::ITensor *>(ctx.input(2)) : nullptr;
     auto      *out       = dynamic_cast<arm_compute::ITensor *>(ctx.output(0));
     const auto conv_info = ctx.parameter<PadStrideInfo>("ConvolutionInfo");
+    const auto opt3x3    = ctx.parameter<bool>("Optimized3x3");
 
     // Create and configure function
     std::unique_ptr<arm_compute::IFunction> func;
-    // TODO (COMPMID-769): Add support for asymmetric padding in NEDepthwiseConvolutionLayer3x3 to enable opt3x3 support
-    auto depwthwise_conv = arm_compute::support::cpp14::make_unique<arm_compute::NEDepthwiseConvolutionLayer>();
-    depwthwise_conv->configure(in, weights, biases, out, conv_info);
-    func = std::move(depwthwise_conv);
+    bool                                    run_3x3_opt = opt3x3 && weights->info()->dimension(0) == 3;
+    if(run_3x3_opt)
+    {
+        auto depwthwise_conv = arm_compute::support::cpp14::make_unique<arm_compute::NEDepthwiseConvolutionLayer3x3>();
+        depwthwise_conv->configure(in, weights, biases, out, conv_info);
+        func = std::move(depwthwise_conv);
+    }
+    else
+    {
+        auto depwthwise_conv = arm_compute::support::cpp14::make_unique<arm_compute::NEDepthwiseConvolutionLayer>();
+        depwthwise_conv->configure(in, weights, biases, out, conv_info);
+        func = std::move(depwthwise_conv);
+    }
 
     // Log info
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEDepthwiseConvolutionLayer"

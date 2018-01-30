@@ -24,13 +24,13 @@
 
 #pragma once
 
-#include "alloc.hpp"
-#include "convolution.hpp"
+#include "arm_compute/core/NEON/kernels/convolution/common/alloc.hpp"
+#include "arm_compute/core/NEON/kernels/convolution/common/convolution.hpp"
 #include "gemm.hpp"
-#include "profiler.hpp"
-#include "shims.hpp"
-#include "tensor.hpp"
-#include "utils.hpp"
+#include "arm_compute/core/NEON/kernels/convolution/common/profiler.hpp"
+#include "arm_compute/core/NEON/kernels/convolution/common/shims.hpp"
+#include "arm_compute/core/NEON/kernels/convolution/common/tensor.hpp"
+#include "arm_compute/core/NEON/kernels/convolution/common/utils.hpp"
 
 #include <thread>
 #include <utility>

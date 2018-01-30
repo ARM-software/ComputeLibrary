@@ -23,7 +23,7 @@
  */
 
 #pragma once
-#include "../winograd_gemm.hpp"
+#include "arm_compute/core/NEON/kernels/convolution/winograd/winograd_gemm.hpp"
 
 namespace winograd
 {

@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/NEON/kernels/NEDirectConvolutionLayerKernel.h"
-#include "arm_compute/core/NEON/kernels/convolution/NEDirectConvolutionDetail.h"
+#include "arm_compute/core/NEON/kernels/detail/NEDirectConvolutionDetail.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/Error.h"

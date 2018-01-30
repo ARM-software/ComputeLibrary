@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include "winograd_gemm.hpp"
+#include "arm_compute/core/NEON/kernels/convolution/winograd/winograd_gemm.hpp"
 using namespace winograd;
 
 

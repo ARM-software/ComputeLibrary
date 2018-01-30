@@ -121,6 +121,12 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerFixture3x3<float>, f
 {
     validate(Accessor(_target), _reference, tolerance_f32);
 }
+FIXTURE_DATA_TEST_CASE(RunOptimized, NEDepthwiseConvolutionLayerFixture3x3<float>, framework::DatasetMode::ALL, combine(datasets::OptimizedDepthwiseConvolutionLayerDataset3x3(),
+                                                                                                                        framework::dataset::make("DataType",
+                                                                                                                                DataType::F32)))
+{
+    validate(Accessor(_target), _reference, tolerance_f32);
+}
 TEST_SUITE_END()
 TEST_SUITE_END()
 

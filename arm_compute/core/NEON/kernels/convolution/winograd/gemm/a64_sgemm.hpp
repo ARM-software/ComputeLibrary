@@ -24,7 +24,7 @@
 
 #pragma once
 #include <cassert>
-#include "../utils.hpp"
+#include "arm_compute/core/NEON/kernels/convolution/common/utils.hpp"
 
 #ifdef __aarch64__
 

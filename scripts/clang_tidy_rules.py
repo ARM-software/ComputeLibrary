@@ -42,7 +42,7 @@ def filter_clang_tidy_lines( lines ):
         if "/assembly/" in line:
             continue
 
-        if "/winograd/" in line:
+        if "/convolution/" in line:
             continue
 
         if "error:" in line:

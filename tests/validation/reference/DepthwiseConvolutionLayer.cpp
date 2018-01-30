@@ -67,10 +67,10 @@ SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTe
     const int filter_half_width  = filter_width / 2;
     const int filter_half_height = filter_height / 2;
 
-    const int pad_left   = std::min(static_cast<int>(conv_info.pad_left()), filter_half_width);
-    const int pad_top    = std::min(static_cast<int>(conv_info.pad_top()), filter_half_height);
-    const int pad_right  = std::min(static_cast<int>(conv_info.pad_right()), filter_half_width);
-    const int pad_bottom = std::min(static_cast<int>(conv_info.pad_bottom()), filter_half_height);
+    const int pad_left   = conv_info.pad_left();
+    const int pad_top    = conv_info.pad_top();
+    const int pad_right  = conv_info.pad_right();
+    const int pad_bottom = conv_info.pad_bottom();
 
     const int minimum_x = -pad_left + filter_half_width;
     const int minimum_y = -pad_top + filter_half_height;

@@ -22,9 +22,9 @@
  * SOFTWARE.
  */
 
-#include "transforms/output.hpp"
-#include "winograd_gemm.hpp"
-#include "arm.hpp"
+#include "arm_compute/core/NEON/kernels/convolution/winograd/transforms/output.hpp"
+#include "arm_compute/core/NEON/kernels/convolution/winograd/winograd_gemm.hpp"
+#include "arm_compute/core/NEON/kernels/convolution/common/arm.hpp"
 
 namespace winograd
 {

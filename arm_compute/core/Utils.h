@@ -602,6 +602,16 @@ inline DataType data_type_for_convolution_matrix(const int16_t *conv, size_t siz
     }
 }
 
+/** Calculate padding requirements in case of SAME padding
+ *
+ * @param[in] input_shape   Input shape
+ * @param[in] weights_shape Weights shape
+ * @param[in] conv_info     Convolution information (containing strides)
+ *
+ * @return PadStrideInfo for SAME padding
+ */
+PadStrideInfo calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info);
+
 /** Returns expected shape for the deconvolution output tensor.
  *
  * @param[in] out_dims widht and height of the output tensor, these values can be obtained with the function deconvolution_output_dimensions.

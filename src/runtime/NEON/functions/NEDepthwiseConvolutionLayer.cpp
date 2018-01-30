@@ -33,9 +33,11 @@
 
 using namespace arm_compute;
 using namespace arm_compute::misc;
+using namespace arm_compute::misc::shape_calculator;
 
 NEDepthwiseConvolutionLayer3x3::NEDepthwiseConvolutionLayer3x3()
-    : _kernel(), _output_stage_kernel(), _border_handler(), _accumulator(), _has_bias(false), _is_quantized(false)
+    : _dwc_kernel(), _output_stage_kernel(), _border_handler(), _permute_input(), _permute_weights(), _permute_output(), _accumulator(), _input_nhwc(), _weights_hwio(), _output_nhwc(), _has_bias(false),
+      _is_quantized(false), _is_optimized(false), _are_weights_reshaped(false)
 {
 }
 
@@ -48,20 +50,49 @@ void NEDepthwiseConvolutionLayer3x3::configure(ITensor *input, const ITensor *we
 
     _is_quantized = is_data_type_quantized_asymmetric(input->info()->data_type());
     _has_bias     = biases != nullptr;
+    _is_optimized = NEDepthwiseConvolutionLayer3x3Kernel::is_optimized_execution_possible(input->info()->tensor_shape(),
+                                                                                          conv_info,
+                                                                                          input->info()->data_type());
+    _are_weights_reshaped = false;
 
-    // Allocate the intermediate accumulator tensor in case of fixed point input
-    if(_is_quantized)
+    if(_is_optimized)
     {
-        _accumulator.allocator()->init(TensorInfo(output->info()->tensor_shape(), 1, DataType::S32));
-        _accumulator.info()->set_quantization_info(input->info()->quantization_info());
-        zero_value = PixelValue(static_cast<uint32_t>(input->info()->quantization_info().offset));
+        // Configure the function to transform the input tensor from NCHW -> NHWC
+        _permute_input.configure(input, &_input_nhwc, PermutationVector(2U, 0U, 1U));
+
+        // Configure the function to transform the weights tensor from IHW -> HWI
+        _permute_weights.configure(weights, &_weights_hwio, PermutationVector(2U, 0U, 1U));
+
+        // Configure optimized depthwise
+        _dwc_kernel.configure(&_input_nhwc, &_weights_hwio, &_output_nhwc, conv_info, DataLayout::NHWC);
+
+        // Configure the function to transform the convoluted output to ACL's native ordering format NCHW
+        _permute_output.configure(&_output_nhwc, output, PermutationVector(1U, 2U, 0U));
+
+        // Allocate tensors
+        _input_nhwc.allocator()->allocate();
+        _weights_hwio.allocator()->allocate();
+        _output_nhwc.allocator()->allocate();
+
+        // Create convolver (deferred)
+        _dwc_kernel.generate_convolver();
     }
+    else
+    {
+        // Allocate the intermediate accumulator tensor in case of fixed point input
+        if(_is_quantized)
+        {
+            _accumulator.allocator()->init(TensorInfo(output->info()->tensor_shape(), 1, DataType::S32));
+            _accumulator.info()->set_quantization_info(input->info()->quantization_info());
+            zero_value = PixelValue(static_cast<uint32_t>(input->info()->quantization_info().offset));
+        }
 
-    // Configure depthwise convolution kernel
-    _kernel.configure(input, weights, (_is_quantized) ? &_accumulator : output, conv_info);
+        // Configure depthwise convolution kernel
+        _dwc_kernel.configure(input, weights, (_is_quantized) ? &_accumulator : output, conv_info);
 
-    // Configure border handler
-    _border_handler.configure(input, _kernel.border_size(), BorderMode::CONSTANT, zero_value);
+        // Configure border handler
+        _border_handler.configure(input, _dwc_kernel.border_size(), BorderMode::CONSTANT, zero_value);
+    }
 
     // Configure biases accumulation
     if(_has_bias || _is_quantized)
@@ -83,8 +114,35 @@ void NEDepthwiseConvolutionLayer3x3::configure(ITensor *input, const ITensor *we
 
 void NEDepthwiseConvolutionLayer3x3::run()
 {
-    NEScheduler::get().schedule(&_border_handler, Window::DimX);
-    NEScheduler::get().schedule(&_kernel, Window::DimX);
+    // Permute weights in HWIO format if the optimized kernel will be executedd
+    if(!_are_weights_reshaped && _is_optimized)
+    {
+        _are_weights_reshaped = true;
+        _permute_weights.run();
+    }
+
+    // Handle input
+    if(_is_optimized)
+    {
+        // Permute input to NHWC format execution
+        _permute_input.run();
+    }
+    else
+    {
+        // Fill border in NCHW format execution
+        NEScheduler::get().schedule(&_border_handler, Window::DimX);
+    }
+
+    // Execute depthwise convolution
+    NEScheduler::get().schedule(&_dwc_kernel, Window::DimX);
+
+    // Permute output to ACL's native NCHW format in case of NHWC execution
+    if(_is_optimized)
+    {
+        _permute_output.run();
+    }
+
+    // Add biases
     if(_has_bias || _is_quantized)
     {
         NEScheduler::get().schedule(&_output_stage_kernel, Window::DimX);

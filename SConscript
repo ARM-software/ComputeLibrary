@@ -176,8 +176,8 @@ if env['neon']:
     core_files += Glob('src/core/NEON/kernels/*.cpp')
 
     # build winograd sources for either v7a / v8a
-    core_files += Glob('src/core/NEON/kernels/winograd/*.cpp')
-    core_files += Glob('src/core/NEON/kernels/winograd/transforms/*.cpp')
+    core_files += Glob('src/core/NEON/kernels/convolution/*/*.cpp')
+    core_files += Glob('src/core/NEON/kernels/convolution/winograd/*/*.cpp')
     arm_compute_env.Append(CPPPATH = ["arm_compute/core/NEON/kernels/winograd/", "arm_compute/core/NEON/kernels/assembly/"])
 
     if env['arch'] == "armv7a":

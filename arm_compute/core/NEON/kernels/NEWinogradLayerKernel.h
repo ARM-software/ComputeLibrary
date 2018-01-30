@@ -25,10 +25,10 @@
 #define __ARM_COMPUTE_NEGEMMWINOGRADLAYERKERNEL_H__
 
 #include "arm_compute/core/NEON/INEKernel.h"
-#include "arm_compute/core/NEON/kernels/winograd/batched_blocked_gemm.hpp"
-#include "arm_compute/core/NEON/kernels/winograd/convolution.hpp"
-#include "arm_compute/core/NEON/kernels/winograd/tensor.hpp"
-#include "arm_compute/core/NEON/kernels/winograd/winograd_gemm.hpp"
+#include "arm_compute/core/NEON/kernels/convolution/common/convolution.hpp"
+#include "arm_compute/core/NEON/kernels/convolution/common/tensor.hpp"
+#include "arm_compute/core/NEON/kernels/convolution/winograd/batched_blocked_gemm.hpp"
+#include "arm_compute/core/NEON/kernels/convolution/winograd/winograd_gemm.hpp"
 
 namespace arm_compute
 {

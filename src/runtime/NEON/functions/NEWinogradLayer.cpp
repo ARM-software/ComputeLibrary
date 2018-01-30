@@ -28,7 +28,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "support/ToolchainSupport.h"
 
-#include "arm_compute/core/NEON/kernels/winograd/winograd_gemm.hpp"
+#include "arm_compute/core/NEON/kernels/convolution/winograd/winograd_gemm.hpp"
 
 namespace
 {

@@ -23,7 +23,7 @@
  */
 
 #pragma once
-#include "utils.hpp"
+#include "arm_compute/core/NEON/kernels/convolution/common/utils.hpp"
 
 template <typename TIn, typename TOut>
 inline void Gemm(const TIn* const a, const TIn* const b, TOut *c,

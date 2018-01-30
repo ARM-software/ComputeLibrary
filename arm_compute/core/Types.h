@@ -106,6 +106,13 @@ constexpr float SCALE_PYRAMID_HALF = 0.5f;
 /* Constant value used to indicate a ORB scaled pyramid */
 constexpr float SCALE_PYRAMID_ORB = 8.408964152537146130583778358414e-01;
 
+/** Supported tensor data layouts */
+enum class DataLayout
+{
+    NCHW,
+    NHWC
+};
+
 /** Quantization settings (used for QASYMM8 data type) */
 struct QuantizationInfo
 {
