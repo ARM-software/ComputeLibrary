@@ -50,7 +50,7 @@ inline bool is_interleaved_transposed(int m, int n, int k, DataType data_type, b
         if(k > 256 && m > 4 && data_type == DataType::F32 && reshape_b_only_on_first_run)
         {
             const float scale = k < 1024 ? 2.0f : 2.5f;
-            flag              = scale * n > 1.66f * n + 38.4f;
+            flag              = (scale * n) > ((1.66f * n) + 38.4f);
         }
         else
         {
@@ -122,6 +122,10 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
         matrix_a = &_tmp_a;
         matrix_b = &_tmp_b;
 
+        // Manage intermediate buffers
+        _memory_group.manage(&_tmp_a);
+        _memory_group.manage(&_tmp_b);
+
         // _tmp_a and _tmp_b will be auto configured in _interleave_kernel and in _transpose_kernel
 
         // Configure interleave kernel
@@ -129,10 +133,6 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
 
         // Configure transpose kernel
         _transpose_kernel.configure(b, &_tmp_b, mult_transpose1xW_width);
-
-        // Manage intermediate buffers
-        _memory_group.manage(&_tmp_a);
-        _memory_group.manage(&_tmp_b);
     }
 
     _mm_kernel.configure(matrix_a, matrix_b, output, alpha, _is_interleaved_transposed, GEMMReshapeInfo(m, n, k, mult_transpose1xW_width, mult_interleave4x4_height));

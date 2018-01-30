@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -91,7 +91,7 @@ Status validate_arguments(const ITensorInfo *mm_result, const ITensorInfo *vecto
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *mm_result, ITensorInfo *vector_sum_col, ITensorInfo *vector_sum_row,
                                                         int32_t a_offset, int32_t b_offset)
 {
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    constexpr unsigned int num_elems_processed_per_iteration = 4;
     bool                   window_changed                    = false;
 
     // Configure kernel window
@@ -160,6 +160,14 @@ void CLGEMMLowpOffsetContributionKernel::configure(ICLTensor *mm_result, const I
                                                     a_offset, b_offset); // NOLINT
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure(win_config.second);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = "gemmlowp_offset_contribution_";
+    _config_id += support::cpp11::to_string(mm_result->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(mm_result->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(mm_result->info()->dimension(2));
 }
 
 Status CLGEMMLowpOffsetContributionKernel::validate(const ITensorInfo *mm_result, const ITensorInfo *vector_sum_col, const ITensorInfo *vector_sum_row,

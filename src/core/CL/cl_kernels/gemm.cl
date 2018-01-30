@@ -29,19 +29,20 @@
 
 #if defined(TRANSPOSE_W) && defined(MULT_TRANSPOSE1XW_WIDTH)
 
-#if TRANSPOSE_W == 4
-#define DATA_TYPE uint
-#elif TRANSPOSE_W == 8
-#define DATA_TYPE ushort
-#elif TRANSPOSE_W == 16
+#if ELEMENT_SIZE == 1
 #define DATA_TYPE uchar
-#else // TRANSPOSE_W == 16
-#error "Transpose width not supported"
-#endif // TRANSPOSE_W
+#elif ELEMENT_SIZE == 2
+#define DATA_TYPE ushort
+#elif ELEMENT_SIZE == 4
+#define DATA_TYPE uint
+#else // ELEMENT_SIZE == 1
+#error "Element size not supported"
+#endif // ELEMENT_SIZE
 
 /** This OpenCL kernel computes the "vector" 1xW transposition of input matrix
  *
- * @attention The multiplication factor (mult_transpose1xW_width) must be passed at compile time using -DMULT_TRANSPOSE1XW_WIDTH (i.e. -DMULT_TRANSPOSE1XW_WIDTH=2)
+ * @note The transposition width must be passed at compile time using -DTRANSPOSE_W (i.e. -DTRANSPOSE_W)
+ * @note The multiplication factor for the transposition width (mult_transpose1xW_width) must be passed at compile time using -DMULT_TRANSPOSE1XW_WIDTH (i.e. -DMULT_TRANSPOSE1XW_WIDTH=2)
  *
  * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32
  * @param[in]  src_stride_x                      Stride of the source matrix in X dimension (in bytes)
@@ -80,6 +81,9 @@ __kernel void gemm_transpose1xW(IMAGE_DECLARATION(src),
 #if defined(MULT_INTERLEAVE4X4_HEIGHT) && defined(DATA_TYPE)
 
 /** This OpenCL kernel reshapes the input matrix transposing each 4x4 block and interleaving the values
+ *
+ * @note The data type must be passed at compile time using -DDATA_TYPE (i.e. -DDATA_TYPE=float)
+ * @note The multiplication factor for the height of the 4x4 interleaved block must be passed at compile time using -DMULT_INTERLEAVE4X4_HEIGHT (i.e. -DMULT_INTERLEAVE4X4_HEIGHT=2)
  *
  * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32
  * @param[in]  src_stride_x                      Stride of the source matrix in X dimension (in bytes)
@@ -137,7 +141,9 @@ __kernel void gemm_interleave4x4(IMAGE_DECLARATION(src),
 /** This OpenCL kernel is optimised for Midgard. It computes the matrix multiplication between matrix A (src0) and matrix B (src1)
  *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_32bit and @ref gemm_transpose1x4 before running the matrix multiplication
  *
- * @attention The number of columns of matrix B and the optional alpha's value need to be passed at compile time using -DCOLS_B and -DALPHA
+ * @note The number of columns of matrix B and the optional alpha's value need to be passed at compile time using -DCOLS_B and -DALPHA
+ * @note The multiplication factor for the transposition width (mult_transpose1xW_width) must be passed at compile time using -DMULT_TRANSPOSE1XW_WIDTH (i.e. -DMULT_TRANSPOSE1XW_WIDTH=2)
+ * @note The multiplication factor for the height of the 4x4 interleaved block must be passed at compile time using -DMULT_INTERLEAVE4X4_HEIGHT (i.e. -DMULT_INTERLEAVE4X4_HEIGHT=2)
  *
  * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F32
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
@@ -240,7 +246,9 @@ __kernel void gemm_mm_interleaved_transposed_f32_midgard(IMAGE_DECLARATION(src0)
 /** This OpenCL kernel is optimized for Bifrost. It computes the matrix multiplication between matrix A (src0) and matrix B (src1)
  *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_32bit and @ref gemm_transpose1x4 before running the matrix multiplication
  *
- * @attention The number of matrix B columns and the optional alpha's value need to be passed at compile time using -DCOLS_B and -DALPHA
+ * @note The number of columns of matrix B and the optional alpha's value need to be passed at compile time using -DCOLS_B and -DALPHA
+ * @note The multiplication factor for the transposition width (mult_transpose1xW_width) must be passed at compile time using -DMULT_TRANSPOSE1XW_WIDTH (i.e. -DMULT_TRANSPOSE1XW_WIDTH=2)
+ * @note The multiplication factor for the height of the 4x4 interleaved block must be passed at compile time using -DMULT_INTERLEAVE4X4_HEIGHT (i.e. -DMULT_INTERLEAVE4X4_HEIGHT=2)
  *
  * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F32
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
@@ -461,7 +469,9 @@ __kernel void gemm_mm_interleaved_transposed_f32_bifrost(IMAGE_DECLARATION(src0)
 /** This OpenCL kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1)
  *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_16bit and @ref gemm_transpose1x8 before running the matrix multiplication
  *
- * @attention The number of matrix B columns and the optional alpha's value need to be passed at compile time using -DCOLS_B and -DALPHA
+ * @note The number of columns of matrix B and the optional alpha's value need to be passed at compile time using -DCOLS_B and -DALPHA
+ * @note The multiplication factor for the transposition width (mult_transpose1xW_width) must be passed at compile time using -DMULT_TRANSPOSE1XW_WIDTH (i.e. -DMULT_TRANSPOSE1XW_WIDTH=2)
+ * @note The multiplication factor for the height of the 4x4 interleaved block must be passed at compile time using -DMULT_INTERLEAVE4X4_HEIGHT (i.e. -DMULT_INTERLEAVE4X4_HEIGHT=2)
  *
  * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F16
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
@@ -566,7 +576,9 @@ __kernel void gemm_mm_interleaved_transposed_f16(IMAGE_DECLARATION(src0),
 /** This OpenCL kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1) in 8 bit fixed point precision
  *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_8bit and @ref gemm_transpose1x16 before running the matrix multiplication
  *
- * @attention The number of matrix B columns, the optional alpha's value and fixed point position need to be passed at compile time using -DCOLS_B -DALPHA and -DFIXED_POINT_POSITION
+ * @note The number of columns of matrix B and the optional alpha's value need to be passed at compile time using -DCOLS_B and -DALPHA
+ * @note The multiplication factor for the transposition width (mult_transpose1xW_width) must be passed at compile time using -DMULT_TRANSPOSE1XW_WIDTH (i.e. -DMULT_TRANSPOSE1XW_WIDTH=2)
+ * @note The multiplication factor for the height of the 4x4 interleaved block must be passed at compile time using -DMULT_INTERLEAVE4X4_HEIGHT (i.e. -DMULT_INTERLEAVE4X4_HEIGHT=2)
  *
  * @note: ALPHA must be passed in 8 bit fixed point format
  *
@@ -665,7 +677,9 @@ __kernel void gemm_mm_interleaved_transposed_qs8(IMAGE_DECLARATION(src0),
 /** This OpenCL kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1) in 16 bit fixed point precision
  *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_16bit and @ref gemm_transpose1x8 before running the matrix multiplication
  *
- * @attention The number of matrix B columns, the optional alpha's value and fixed point position need to be passed at compile time using -DCOLS_B -DALPHA and -DFIXED_POINT_POSITION
+ * @note The number of columns of matrix B and the optional alpha's value need to be passed at compile time using -DCOLS_B and -DALPHA
+ * @note The multiplication factor for the transposition width (mult_transpose1xW_width) must be passed at compile time using -DMULT_TRANSPOSE1XW_WIDTH (i.e. -DMULT_TRANSPOSE1XW_WIDTH=2)
+ * @note The multiplication factor for the height of the 4x4 interleaved block must be passed at compile time using -DMULT_INTERLEAVE4X4_HEIGHT (i.e. -DMULT_INTERLEAVE4X4_HEIGHT=2)
  *
  * @note: ALPHA must be passed in 16 bit fixed point format
  *
@@ -1643,7 +1657,7 @@ __kernel void gemm_mm_qs16(IMAGE_DECLARATION(src0),
 #if defined(BETA)
 /** This OpenCL kernel performs the in-place matrix addition between 2 matrices taking into account that the second matrix might be weighted by a scalar value beta:
  *
- * @attention The beta's value need to be passed at compile time using -DBETA
+ * @note The beta's value need to be passed at compile time using -DBETA
  *
  * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: F32
  * @param[in]  src_stride_x                      Stride of the source matrix in X dimension (in bytes)
@@ -1680,7 +1694,7 @@ __kernel void gemm_ma_f32(IMAGE_DECLARATION(src),
 
 /** This OpenCL kernel performs the in-place matrix addition between 2 matrices taking into account that the second matrix might be weighted by a scalar value beta:
  *
- * @attention The beta's value need to be passed at compile time using -DBETA
+ * @note The beta's value need to be passed at compile time using -DBETA
  *
  * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: F16
  * @param[in]  src_stride_x                      Stride of the source matrix in X dimension (in bytes)
@@ -1718,7 +1732,7 @@ __kernel void gemm_ma_f16(IMAGE_DECLARATION(src),
 #if defined(FIXED_POINT_POSITION)
 /** This OpenCL kernel performs the in-place matrix addition between 2 matrices in 8 bit fixed point taking into account that the second matrix might be weighted by a scalar value beta:
  *
- * @attention The beta's value and the fixed point position need to be passed at compile time using -DBETA and -DFIXED_POINT_POSITION
+ * @note The beta's value and the fixed point position need to be passed at compile time using -DBETA and -DFIXED_POINT_POSITION
  *
  * @note: BETA must be passed in 8 bit fixed point format
  *
@@ -1757,7 +1771,7 @@ __kernel void gemm_ma_qs8(IMAGE_DECLARATION(src),
 
 /** This OpenCL kernel performs the in-place matrix addition between 2 matrices in 16 bit fixed point taking into account that the second matrix might be weighted by a scalar value beta:
  *
- * @attention The beta's value and the fixed point position need to be passed at compile time using -DBETA and -DFIXED_POINT_POSITION
+ * @note The beta's value and the fixed point position need to be passed at compile time using -DBETA and -DFIXED_POINT_POSITION
  *
  * @note: BETA must be passed in 16 bit fixed point format
  *
@@ -1799,9 +1813,9 @@ __kernel void gemm_ma_qs16(IMAGE_DECLARATION(src),
 #if defined(WIDTH_VECTOR_A)
 /** This OpenCL kernel computes the vector by matrix multiplication between each row of A (src0) and matrix B (src1) used for locally connected layer
  *
- * @attention The width of A need to be passed at compile time using -DWIDTH_VECTOR_A
+ * @note The width of A need to be passed at compile time using -DWIDTH_VECTOR_A
  *
- * @attention The input A and matrix B must not be reshaped
+ * @note The input A and matrix B must not be reshaped
  *
  * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F32
  * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)

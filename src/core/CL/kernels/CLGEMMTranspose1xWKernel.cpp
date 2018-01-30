@@ -113,6 +113,7 @@ void CLGEMMTranspose1xWKernel::configure(const ICLTensor *input, ICLTensor *outp
 
     // Create build options
     CLBuildOptions build_opts;
+    build_opts.add_option("-DELEMENT_SIZE=" + support::cpp11::to_string(input->info()->element_size()));
     build_opts.add_option("-DTRANSPOSE_W=" + support::cpp11::to_string(num_elems_processed_per_iteration));
     build_opts.add_option("-DMULT_TRANSPOSE1XW_WIDTH=" + support::cpp11::to_string(mult_transpose1xW_width));
 

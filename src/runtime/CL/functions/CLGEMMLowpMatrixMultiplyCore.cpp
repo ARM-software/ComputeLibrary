@@ -35,6 +35,29 @@
 using namespace arm_compute;
 using namespace arm_compute::misc::shape_calculator;
 
+namespace
+{
+inline bool is_interleaved_transposed(int m, int n, int k, bool reshape_b_only_on_first_run, GPUTarget gpu_target)
+{
+    bool flag = true;
+
+    if(gpu_target == GPUTarget::BIFROST)
+    {
+        // COMPMID-852
+        if(k > 256 && m > 4 && reshape_b_only_on_first_run)
+        {
+            flag = ((0.72f + n * 0.10766f) < (n * 0.1284f));
+        }
+        else
+        {
+            flag = false;
+        }
+    }
+
+    return flag;
+}
+} // namespace
+
 CLGEMMLowpMatrixMultiplyCore::CLGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _mm_kernel(), _mtx_a_reshape_kernel(), _mtx_b_reshape_kernel(), _mtx_a_reduction_kernel(), _mtx_b_reduction_kernel(), _offset_contribution_kernel(),
       _vector_sum_col(), _vector_sum_row(), _tmp_a(), _tmp_b(), _a_offset(0), _b_offset(0), _is_interleaved_transposed(true), _is_first_run(true), _reshape_b_only_on_first_run(false)
@@ -51,36 +74,45 @@ void CLGEMMLowpMatrixMultiplyCore::configure(const ICLTensor *a, const ICLTensor
     _a_offset                    = a->info()->quantization_info().offset;
     _b_offset                    = b->info()->quantization_info().offset;
 
-    // If the input tensor has less than 16 rows, we run a special version of GEMMLowp without reshaping the input tensors
-    _is_interleaved_transposed = (a->info()->dimension(1)) > 16 && (CLScheduler::get().target() != GPUTarget::BIFROST);
+    // Get the GPU target
+    const GPUTarget gpu_target = CLScheduler::get().target();
 
-    // Set the target for the matrix multiply kernel
-    _mm_kernel.set_target(CLScheduler::get().target());
+    // Set the target for the kernels
+    _mtx_a_reshape_kernel.set_target(gpu_target);
+    _mm_kernel.set_target(gpu_target);
 
     const ICLTensor *matrix_a = a;
     const ICLTensor *matrix_b = b;
+
+    // Arguments used by GEMMReshapeInfo
+    // If we pass the matrix A and matrix B reshaped to CLGEMMMatrixMultiplyKernel, we need to pass m, n, k, mult_transpose1xW_width and mult_interleave4x4_height to CLGEMMReshapeInfo
+    // in order to know how the matrices have been reshaped
+    const int     m                         = a->info()->dimension(1);
+    const int     n                         = b->info()->dimension(0);
+    const int     k                         = a->info()->dimension(0);
+    constexpr int mult_transpose1xW_width   = 1;
+    constexpr int mult_interleave4x4_height = 1;
+
+    // Check if we need to reshape the matrix A and matrix B
+    _is_interleaved_transposed = is_interleaved_transposed(m, n, k, _reshape_b_only_on_first_run, gpu_target);
 
     if(_is_interleaved_transposed)
     {
         matrix_a = &_tmp_a;
         matrix_b = &_tmp_b;
 
-        TensorInfo info_a(compute_interleaved_shape(*a->info()), 1, a->info()->data_type());
-        TensorInfo info_b(compute_transpose1xW_shape(*b->info()), 1, b->info()->data_type());
-        _tmp_a.allocator()->init(info_a);
-        _tmp_b.allocator()->init(info_b);
         _memory_group.manage(&_tmp_a);
         _memory_group.manage(&_tmp_b);
 
         // Configure interleave kernel
-        _mtx_a_reshape_kernel.configure(a, &_tmp_a);
+        _mtx_a_reshape_kernel.configure(a, &_tmp_a, mult_interleave4x4_height);
 
         // Configure transpose kernel
-        _mtx_b_reshape_kernel.configure(b, &_tmp_b);
+        _mtx_b_reshape_kernel.configure(b, &_tmp_b, mult_transpose1xW_width);
     }
 
     // Configure matrix multiply kernel
-    _mm_kernel.configure(matrix_a, matrix_b, output, _is_interleaved_transposed);
+    _mm_kernel.configure(matrix_a, matrix_b, output, _is_interleaved_transposed, GEMMReshapeInfo(m, n, k, mult_transpose1xW_width, mult_interleave4x4_height));
 
     // Initialize matrix B reduction kernel only if _a_offset is not equal to 0
     if(_a_offset != 0)
@@ -139,22 +171,30 @@ Status CLGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_a_reshaped(), "Matrix A already reshaped is not supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_b_reshaped(), "Matrix B already reshaped is not supported");
 
-    int32_t a_offset                  = a->quantization_info().offset;
-    int32_t b_offset                  = b->quantization_info().offset;
-    bool    is_interleaved_transposed = (a->dimension(1)) > 16 && (CLScheduler::get().target() != GPUTarget::BIFROST);
+    int32_t a_offset = a->quantization_info().offset;
+    int32_t b_offset = b->quantization_info().offset;
 
-    if(is_interleaved_transposed)
+    const int             m                         = a->dimension(1);
+    const int             n                         = b->dimension(0);
+    const int             k                         = a->dimension(0);
+    constexpr int         mult_transpose1xW_width   = 1;
+    constexpr int         mult_interleave4x4_height = 1;
+    const GEMMReshapeInfo reshape_info(m, n, k, mult_transpose1xW_width, mult_interleave4x4_height);
+
+    bool reshape_matrices = is_interleaved_transposed(m, n, k, gemm_info.reshape_b_only_on_first_run(), CLScheduler::get().target());
+
+    if(reshape_matrices)
     {
-        TensorInfo info_a(compute_interleaved_shape(*a), 1, a->data_type());
-        TensorInfo info_b(compute_transpose1xW_shape(*b), 1, b->data_type());
+        TensorInfo info_a(compute_interleaved_shape(*a, mult_interleave4x4_height), 1, a->data_type());
+        TensorInfo info_b(compute_transpose1xW_with_element_size_shape(*b, mult_transpose1xW_width), 1, b->data_type());
 
-        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMInterleave4x4Kernel::validate(a, &info_a, 1));
-        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMTranspose1xWKernel::validate(b, &info_b, 1));
-        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpMatrixMultiplyKernel::validate(&info_a, &info_b, output));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMInterleave4x4Kernel::validate(a, &info_a, mult_interleave4x4_height));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMTranspose1xWKernel::validate(b, &info_b, mult_transpose1xW_width));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpMatrixMultiplyKernel::validate(&info_a, &info_b, output, reshape_matrices, reshape_info));
     }
     else
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpMatrixMultiplyKernel::validate(a, b, output));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMLowpMatrixMultiplyKernel::validate(a, b, output, reshape_matrices, reshape_info));
     }
 
     TensorInfo info_vector_sum_col, info_vector_sum_row;
