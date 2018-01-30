@@ -586,8 +586,12 @@ void main(void)
         // even row
         if((pos.y + pos.z * height) % uint(2) == uint(0))
         {
-            tmp = LOAD_CURRENT_ITEM(src_ptr, src_iter);
-            STORE(dst_ptr, tmp_out_offset, tmp);
+            // skip last element of each line to avoid write conflict except for last line
+            if((pos.x < (width / element_count)) || ((pos.y == gl_NumWorkGroups.y - 1u) && (pos.z == gl_NumWorkGroups.z - 1u)))
+            {
+                tmp = LOAD_CURRENT_ITEM(src_ptr, src_iter);
+                STORE(dst_ptr, tmp_out_offset, tmp);
+            }
         }
         else
         {
@@ -612,19 +616,19 @@ void main(void)
     {
         tmp = LOAD_CURRENT_ITEM(src_ptr, src_iter);
         STORE(dst_ptr, tmp_out_offset, tmp);
+    }
 
 #ifdef HAS_BIAS
-        // If it is the last thread in the 3 dimensional workgroup
-        if(pos.x == (size.x - 1) && pos.y == (size.y - 1) && pos.z == (size.z - 1))
-        {
-            tmp_out_offset += (dst_attrs.stride_x >> dst_shift);
+    // If it is the last thread in the 3 dimensional workgroup
+    if(pos.x == (size.x - 1u) && pos.y == (size.y - 1u) && pos.z == (size.z - 1u))
+    {
+        tmp_out_offset += (dst_attrs.stride_x >> dst_shift);
 
-            // FIXME: need odd/even detection for tmp_out_offset?
-            mediump vec2 bias_vec = vec2(1.0f, 1.0f);
-            STORE_PACK2_HALF(dst_ptr, tmp_out_offset, bias_vec);
-        }
-#endif // HAS_BIAS
+        // FIXME: need odd/even detection for tmp_out_offset?
+        mediump vec2 bias_vec = vec2(1.0f, 1.0f);
+        STORE_PACK2_HALF(dst_ptr, tmp_out_offset, bias_vec);
     }
+#endif // HAS_BIAS
 }
 
 #else /* IM2COL_REDUCED_GENERIC */
