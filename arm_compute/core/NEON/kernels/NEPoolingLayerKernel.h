@@ -153,20 +153,41 @@ private:
      */
     template <PoolingType pooling_type, bool exclude_padding = false>
     void pooling7_f32(const Window &window_input, const Window &window);
-    /** Function to perform NxN pooling.
+    /** Function to perform MxN pooling for 8bit fixed point.
+     *
+     * @param[in] window_input Input region on which to execute the kernel.
+     * @param[in] window       Output region on which to execute the kernel.
+     */
+    template <PoolingType pooling_type>
+    void poolingMxN_q8(const Window &window_input, const Window &window);
+    /** Function to perform MxN pooling for 8-bit quantized.
      *
      * @param[in] window_input Input region on which to execute the kernel.
      * @param[in] window       Output region on which to execute the kernel.
      */
     template <PoolingType pooling_type, bool exclude_padding = false>
-    void poolingN_qasymm8(const Window &window_input, const Window &window);
-    /** Function to perform NxN pooling.
+    void poolingMxN_qasymm8(const Window &window_input, const Window &window);
+    /** Function to perform MxN pooling for 16bit fixed point.
+     *
+     * @param[in] window_input Input region on which to execute the kernel.
+     * @param[in] window       Output region on which to execute the kernel.
+     */
+    template <PoolingType pooling_type>
+    void poolingMxN_q16(const Window &window_input, const Window &window);
+    /** Function to perform MxN pooling for 16-bit floating point values.
      *
      * @param[in] window_input Input region on which to execute the kernel.
      * @param[in] window       Output region on which to execute the kernel.
      */
     template <PoolingType pooling_type, bool exclude_padding = false>
-    void poolingN_f32(const Window &window_input, const Window &window);
+    void poolingMxN_f16(const Window &window_input, const Window &window);
+    /** Function to perform MxN pooling for 32-bit floating point values.
+     *
+     * @param[in] window_input Input region on which to execute the kernel.
+     * @param[in] window       Output region on which to execute the kernel.
+     */
+    template <PoolingType pooling_type, bool exclude_padding = false>
+    void poolingMxN_f32(const Window &window_input, const Window &window);
     /** Common signature for all the specialised Pooling functions
      *
      * @param[in] window_input Input region on which to execute the kernel.
@@ -181,6 +202,7 @@ private:
     PoolingLayerInfo _pool_info;
     unsigned int     _num_elems_processed_per_iteration;
     BorderSize       _border_size;
+    bool             _is_square;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEPOOLINGLAYERKERNEL_H__ */
