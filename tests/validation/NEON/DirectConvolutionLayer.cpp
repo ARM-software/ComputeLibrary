@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -72,14 +72,14 @@ const auto data_f32 = combine(datasets::SmallDirectConvolutionShapes(),
                                               combine(data_pad_f32,
                                                       framework::dataset::make("NumKernels", { 1, 4, 8, 16 })))));
 
-const auto data_qs8 = combine(datasets::SmallDirectConvolutionShapes(),
+const auto data_qs8 = combine(datasets::TinyDirectConvolutionShapes(),
                               combine(framework::dataset::make("StrideX", 1, 3),
                                       combine(framework::dataset::make("StrideY", 1, 3),
                                               combine(data_pad_qs8,
                                                       framework::dataset::make("NumKernels", { 1, 4, 8, 16 })))));
 
 /** Direct convolution QS16 data set. */
-const auto data_qs16 = combine(datasets::SmallDirectConvolutionShapes(),
+const auto data_qs16 = combine(datasets::TinyDirectConvolutionShapes(),
                                combine(framework::dataset::make("StrideX", 1, 3),
                                        combine(framework::dataset::make("StrideY", 1, 3),
                                                combine(framework::dataset::make("PadX", 0),

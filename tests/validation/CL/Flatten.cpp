@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -80,13 +80,13 @@ TEST_SUITE_END()
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QS8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFlattenLayerFixture<int8_t>, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::Small3DShapes(), datasets::Small4DShapes()),
-                                                                                                     framework::dataset::make("DataType", DataType::QS8)))
+FIXTURE_DATA_TEST_CASE(RunTiny, CLFlattenLayerFixture<int8_t>, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::Tiny3DShapes(), datasets::Tiny4DShapes()),
+                                                                                                    framework::dataset::make("DataType", DataType::QS8)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLFlattenLayerFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(framework::dataset::concat(datasets::Large3DShapes(), datasets::Large4DShapes()),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFlattenLayerFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(framework::dataset::concat(datasets::Small3DShapes(), datasets::Small4DShapes()),
                                                                                                          framework::dataset::make("DataType", DataType::QS8)))
 {
     // Validate output
@@ -95,13 +95,13 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLFlattenLayerFixture<int8_t>, framework::Datas
 TEST_SUITE_END()
 
 TEST_SUITE(QS16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFlattenLayerFixture<int16_t>, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::Small3DShapes(), datasets::Small4DShapes()),
-                                                                                                      framework::dataset::make("DataType", DataType::QS16)))
+FIXTURE_DATA_TEST_CASE(RunTiny, CLFlattenLayerFixture<int16_t>, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::Tiny3DShapes(), datasets::Tiny4DShapes()),
+                                                                                                     framework::dataset::make("DataType", DataType::QS16)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLFlattenLayerFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(framework::dataset::concat(datasets::Large3DShapes(), datasets::Large4DShapes()),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFlattenLayerFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(framework::dataset::concat(datasets::Small3DShapes(), datasets::Small4DShapes()),
                                                                                                           framework::dataset::make("DataType", DataType::QS16)))
 {
     // Validate output

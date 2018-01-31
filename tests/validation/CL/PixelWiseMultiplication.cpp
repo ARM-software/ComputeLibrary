@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -156,7 +156,7 @@ TEST_SUITE(FixedPointPixelWiseMultiplication)
 TEST_SUITE(QS8)
 
 TEST_SUITE(ScaleUnity)
-FP_PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, Fixture<qint8_t>, PRECOMMIT, SmallShapes(), QS8, QS8, scale_unity, TO_ZERO, 1, 7)
+FP_PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunTiny, Fixture<qint8_t>, PRECOMMIT, TinyShapes(), QS8, QS8, scale_unity, TO_ZERO, 1, 7)
 TEST_SUITE_END() // ScaleUnity
 
 TEST_SUITE_END() // QS8
@@ -164,7 +164,7 @@ TEST_SUITE_END() // QS8
 TEST_SUITE(QS16)
 
 TEST_SUITE(ScaleUnity)
-FP_PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, Fixture<qint16_t>, PRECOMMIT, SmallShapes(), QS16, QS16, scale_unity, TO_ZERO, 1, 15)
+FP_PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunTiny, Fixture<qint16_t>, PRECOMMIT, TinyShapes(), QS16, QS16, scale_unity, TO_ZERO, 1, 15)
 TEST_SUITE_END() // ScaleUnity
 
 TEST_SUITE_END() // QS16

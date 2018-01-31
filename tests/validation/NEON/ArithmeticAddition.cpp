@@ -178,7 +178,7 @@ using NEArithmeticAdditionFixedPointFixture = ArithmeticAdditionValidationFixedP
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QS8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), ArithmeticAdditionQS8Dataset),
+FIXTURE_DATA_TEST_CASE(RunTiny, NEArithmeticAdditionFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::TinyShapes(), ArithmeticAdditionQS8Dataset),
                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                        framework::dataset::make("FractionalBits", 1, 7)))
 {
@@ -186,7 +186,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixedPointFixture<int8_t>, 
     validate(Accessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEArithmeticAdditionFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), ArithmeticAdditionQS8Dataset),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallShapes(), ArithmeticAdditionQS8Dataset),
                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                        framework::dataset::make("FractionalBits", 1, 7)))
 {
@@ -196,7 +196,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEArithmeticAdditionFixedPointFixture<int8_t>, 
 TEST_SUITE_END()
 
 TEST_SUITE(QS16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), ArithmeticAdditionQS16Dataset),
+FIXTURE_DATA_TEST_CASE(RunTiny, NEArithmeticAdditionFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::TinyShapes(), ArithmeticAdditionQS16Dataset),
                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                        framework::dataset::make("FractionalBits", 1, 15)))
 {
@@ -204,7 +204,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixedPointFixture<int16_t>,
     validate(Accessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEArithmeticAdditionFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), ArithmeticAdditionQS16Dataset),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEArithmeticAdditionFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallShapes(), ArithmeticAdditionQS16Dataset),
                        framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                        framework::dataset::make("FractionalBits", 1, 15)))
 {

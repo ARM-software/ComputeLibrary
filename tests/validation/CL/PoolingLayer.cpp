@@ -163,14 +163,14 @@ using CLPoolingLayerFixedPointFixture = PoolingLayerValidationFixedPointFixture<
 
 TEST_SUITE(FixedPoint)
 TEST_SUITE(QS8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetQS,
-                                                                                                                       framework::dataset::make("DataType", DataType::QS8))),
-                                                                                                               framework::dataset::make("FractionalBits", 1, 4)))
+FIXTURE_DATA_TEST_CASE(RunTiny, CLPoolingLayerFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapes(), combine(PoolingLayerDatasetQS,
+                                                                                                                      framework::dataset::make("DataType", DataType::QS8))),
+                                                                                                              framework::dataset::make("FractionalBits", 1, 4)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qs8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLPoolingLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), combine(PoolingLayerDatasetQS,
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetQS,
                                                                                                                    framework::dataset::make("DataType", DataType::QS8))),
                                                                                                                    framework::dataset::make("FractionalBits", 1, 4)))
 {
@@ -180,14 +180,14 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLPoolingLayerFixedPointFixture<int8_t>, framew
 TEST_SUITE_END()
 
 TEST_SUITE(QS16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerFixedPointFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetQS,
-                                                                                                                        framework::dataset::make("DataType", DataType::QS16))),
-                                                                                                                framework::dataset::make("FractionalBits", 1, 12)))
+FIXTURE_DATA_TEST_CASE(RunTiny, CLPoolingLayerFixedPointFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapes(), combine(PoolingLayerDatasetQS,
+                                                                                                                       framework::dataset::make("DataType", DataType::QS16))),
+                                                                                                               framework::dataset::make("FractionalBits", 1, 12)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qs16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLPoolingLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), combine(PoolingLayerDatasetQS,
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetQS,
                                                                                                                     framework::dataset::make("DataType", DataType::QS16))),
                                                                                                                     framework::dataset::make("FractionalBits", 1, 12)))
 {

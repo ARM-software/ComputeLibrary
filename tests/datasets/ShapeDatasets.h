@@ -51,6 +51,19 @@ public:
     }
 };
 
+/** Data set containing tiny 2D tensor shapes. */
+class Tiny2DShapes final : public ShapeDataset
+{
+public:
+    Tiny2DShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 7U, 7U },
+                     TensorShape{ 11U, 13U },
+    })
+    {
+    }
+};
 /** Data set containing small 2D tensor shapes. */
 class Small2DShapes final : public ShapeDataset
 {
@@ -61,6 +74,20 @@ public:
         TensorShape{ 7U, 7U },
                      TensorShape{ 27U, 13U },
                      TensorShape{ 128U, 64U }
+    })
+    {
+    }
+};
+
+/** Data set containing tiny 3D tensor shapes. */
+class Tiny3DShapes final : public ShapeDataset
+{
+public:
+    Tiny3DShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 7U, 7U, 5U },
+                     TensorShape{ 23U, 13U, 9U },
     })
     {
     }
@@ -81,6 +108,19 @@ public:
     }
 };
 
+/** Data set containing tiny 4D tensor shapes. */
+class Tiny4DShapes final : public ShapeDataset
+{
+public:
+    Tiny4DShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 7U, 7U, 5U, 3U },
+                     TensorShape{ 17U, 13U, 7U, 2U },
+    })
+    {
+    }
+};
 /** Data set containing small 4D tensor shapes. */
 class Small4DShapes final : public ShapeDataset
 {
@@ -96,6 +136,20 @@ public:
     }
 };
 
+/** Data set containing small tensor shapes. */
+class TinyShapes final : public ShapeDataset
+{
+public:
+    TinyShapes()
+        : ShapeDataset("Shape",
+    {
+        // Batch size 1
+        TensorShape{ 9U, 9U },
+                     TensorShape{ 27U, 13U, 2U },
+    })
+    {
+    }
+};
 /** Data set containing small tensor shapes. */
 class SmallShapes final : public ShapeDataset
 {
@@ -299,6 +353,20 @@ public:
     }
 };
 
+/** Data set containing tiny tensor shapes for direct convolution. */
+class TinyDirectConvolutionShapes final : public ShapeDataset
+{
+public:
+    TinyDirectConvolutionShapes()
+        : ShapeDataset("InputShape",
+    {
+        // Batch size 1
+        TensorShape{ 11U, 13U, 3U },
+                     TensorShape{ 7U, 27U, 3U }
+    })
+    {
+    }
+};
 /** Data set containing small tensor shapes for direct convolution. */
 class SmallDirectConvolutionShapes final : public ShapeDataset
 {
@@ -348,6 +416,19 @@ public:
                      // Batch size 4
                      TensorShape{ 31U, 31U, 3U, 4U },
                      TensorShape{ 34U, 34U, 2U, 4U }
+    })
+    {
+    }
+};
+/** Data set containing tiny softmax layer shapes. */
+class SoftmaxLayerTinyShapes final : public ShapeDataset
+{
+public:
+    SoftmaxLayerTinyShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 9U, 9U },
+                     TensorShape{ 128U, 10U, 2U },
     })
     {
     }

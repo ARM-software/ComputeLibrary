@@ -29,6 +29,7 @@
 #include "tests/PaddingCalculator.h"
 #include "tests/datasets/LargeConvolutionLayerDataset.h"
 #include "tests/datasets/SmallConvolutionLayerDataset.h"
+#include "tests/datasets/TinyConvolutionLayerDataset.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
@@ -157,16 +158,16 @@ using CLConvolutionLayerFixedPointFixture = ConvolutionValidationFixedPointFixtu
 TEST_SUITE(FixedPoint)
 TEST_SUITE(QS8)
 // We test for fixed point precision [4,6]
-FIXTURE_DATA_TEST_CASE(RunSmall, CLConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
-                       framework::dataset::make("ReshapeWeights", { true })),
-                       framework::dataset::make("DataType",
-                                                DataType::QS8)),
-                       framework::dataset::make("FractionalBits", 4, 7)))
+FIXTURE_DATA_TEST_CASE(RunTiny, CLConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::TinyConvolutionLayerDataset(),
+                                                                                                                        framework::dataset::make("ReshapeWeights", { true })),
+                                                                                                                        framework::dataset::make("DataType",
+                                                                                                                                DataType::QS8)),
+                                                                                                                        framework::dataset::make("FractionalBits", 4, 7)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fixed);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeConvolutionLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
                                                                                                                        framework::dataset::make("ReshapeWeights", { true })),
                                                                                                                        framework::dataset::make("DataType",
                                                                                                                                DataType::QS8)),
@@ -179,7 +180,7 @@ TEST_SUITE_END()
 
 TEST_SUITE(QS16)
 // Testing for fixed point position [1,14)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunTiny, CLConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::TinyConvolutionLayerDataset(),
                        framework::dataset::make("ReshapeWeights", { true })),
                        framework::dataset::make("DataType",
                                                 DataType::QS16)),
@@ -188,7 +189,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLConvolutionLayerFixedPointFixture<int16_t>, f
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fixed);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeConvolutionLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
                                                                                                                         framework::dataset::make("ReshapeWeights", { true })),
                                                                                                                         framework::dataset::make("DataType",
                                                                                                                                 DataType::QS16)),

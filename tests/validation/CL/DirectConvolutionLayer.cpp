@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,7 +63,7 @@ const auto data = combine(datasets::SmallDirectConvolutionShapes(),
                                                                  combine(framework::dataset::make("PadY", 0, 2),
                                                                          framework::dataset::make("KernelSize", { 3, 5 })))),
                                                   framework::dataset::make("NumKernels", { 1, 4, 8, 16 })))));
-const auto data_fixed_point = combine(datasets::SmallDirectConvolutionShapes(),
+const auto data_fixed_point = combine(datasets::TinyDirectConvolutionShapes(),
                                       combine(framework::dataset::make("StrideX", 1, 3),
                                               combine(framework::dataset::make("StrideY", 1, 3),
                                                       combine(concat(combine(framework::dataset::make("PadX", 0),

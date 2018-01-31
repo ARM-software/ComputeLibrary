@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -83,14 +83,14 @@ TEST_SUITE_END()
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QS8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConcatenateLayerFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(),
-                                                                                                                    framework::dataset::make("DataType",
-                                                                                                                            DataType::QS8)))
+FIXTURE_DATA_TEST_CASE(RunTiny, NEDepthConcatenateLayerFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Tiny2DShapes(),
+                                                                                                                   framework::dataset::make("DataType",
+                                                                                                                           DataType::QS8)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConcatenateLayerFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::DepthConcatenateLayerShapes(),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConcatenateLayerFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::DepthConcatenateLayerShapes(),
                                                                                                                   framework::dataset::make("DataType",
                                                                                                                           DataType::QS8)))
 {
@@ -100,14 +100,14 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConcatenateLayerFixture<int8_t>, framewo
 TEST_SUITE_END()
 
 TEST_SUITE(QS16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConcatenateLayerFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(),
-                                                                                                                     framework::dataset::make("DataType",
-                                                                                                                             DataType::QS16)))
+FIXTURE_DATA_TEST_CASE(RunTiny, NEDepthConcatenateLayerFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Tiny2DShapes(),
+                                                                                                                    framework::dataset::make("DataType",
+                                                                                                                            DataType::QS16)))
 {
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthConcatenateLayerFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::DepthConcatenateLayerShapes(),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthConcatenateLayerFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::DepthConcatenateLayerShapes(),
                                                                                                                    framework::dataset::make("DataType",
                                                                                                                            DataType::QS16)))
 {

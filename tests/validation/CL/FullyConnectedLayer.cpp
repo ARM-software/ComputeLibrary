@@ -205,7 +205,7 @@ using CLFullyConnectedLayerFixedPointFixture = FullyConnectedLayerValidationFixe
 TEST_SUITE(FixedPoint)
 TEST_SUITE(QS8)
 // Testing for fixed point position [1,6) as reciprocal limits the maximum fixed point position to 5
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunTiny, CLFullyConnectedLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::TinyFullyConnectedLayerDataset(),
                        FullyConnectedParameters),
                        framework::dataset::make("DataType",
                                                 DataType::QS8)),
@@ -214,7 +214,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerFixedPointFixture<int8_t>,
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fixed_point);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLFullyConnectedLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeFullyConnectedLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
                        FullyConnectedParameters),
                        framework::dataset::make("DataType",
                                                 DataType::QS8)),
@@ -227,7 +227,7 @@ TEST_SUITE_END()
 
 TEST_SUITE(QS16)
 // Testing for fixed point position [1,14) as reciprocal limits the maximum fixed point position to 14
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunTiny, CLFullyConnectedLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::TinyFullyConnectedLayerDataset(),
                        FullyConnectedParameters),
                        framework::dataset::make("DataType",
                                                 DataType::QS16)),
@@ -236,7 +236,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerFixedPointFixture<int16_t>
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fixed_point);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLFullyConnectedLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeFullyConnectedLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallFullyConnectedLayerDataset(),
                        FullyConnectedParameters),
                        framework::dataset::make("DataType",
                                                 DataType::QS16)),
