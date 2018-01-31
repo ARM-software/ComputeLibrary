@@ -46,7 +46,8 @@
 #include "arm_compute/core/CL/kernels/CLDeconvolutionLayerUpsampleKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthConcatenateLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthConvertLayerKernel.h"
-#include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayer3x3Kernel.h"
+#include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NCHWKernel.h"
+#include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NHWCKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthwiseIm2ColKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthwiseVectorToTensorKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthwiseWeightsReshapeKernel.h"
@@ -113,5 +114,6 @@
 #include "arm_compute/core/CL/kernels/CLWinogradFilterTransformKernel.h"
 #include "arm_compute/core/CL/kernels/CLWinogradInputTransformKernel.h"
 #include "arm_compute/core/CL/kernels/CLWinogradOutputTransformKernel.h"
+#include "arm_compute/core/CL/kernels/ICLDepthwiseConvolutionLayer3x3Kernel.h"
 
 #endif /* __ARM_COMPUTE_CLKERNELS_H__ */

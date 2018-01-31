@@ -130,15 +130,19 @@ inline TensorShape compute_depthwise_convolution_shape(const ITensorInfo &input,
     const TensorShape input_shape{ input.tensor_shape() };
     const TensorShape weights_shape{ weights.tensor_shape() };
 
+    const DataLayout data_layout = input.data_layout();
+    const int        width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int        height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+
     unsigned int output_width  = 0;
     unsigned int output_height = 0;
-    std::tie(output_width, output_height) = scaled_dimensions(input_shape.x(), input_shape.y(),
-                                                              weights_shape.x(), weights_shape.y(),
+    std::tie(output_width, output_height) = scaled_dimensions(input_shape[width_idx], input_shape[height_idx],
+                                                              weights_shape[width_idx], weights_shape[height_idx],
                                                               conv_info);
 
     TensorShape output_shape{ input_shape };
-    output_shape.set(0, output_width);
-    output_shape.set(1, output_height);
+    output_shape.set(width_idx, output_width);
+    output_shape.set(height_idx, output_height);
 
     return output_shape;
 }

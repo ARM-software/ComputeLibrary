@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayer3x3Kernel.h"
+#include "arm_compute/core/CL/kernels/CLDepthwiseConvolutionLayer3x3NCHWKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
@@ -39,18 +39,18 @@
 using namespace arm_compute;
 using namespace arm_compute::misc::shape_calculator;
 
-CLDepthwiseConvolutionLayer3x3Kernel::CLDepthwiseConvolutionLayer3x3Kernel()
-    : _border_size(0), _input(), _output(), _weights(), _biases(), _conv_stride_x(0), _conv_stride_y(0), _conv_pad_left(0), _conv_pad_top(0)
+CLDepthwiseConvolutionLayer3x3NCHWKernel::CLDepthwiseConvolutionLayer3x3NCHWKernel()
+    : _conv_stride_x(0), _conv_pad_top(0)
 {
 }
 
-BorderSize CLDepthwiseConvolutionLayer3x3Kernel::border_size() const
+BorderSize CLDepthwiseConvolutionLayer3x3NCHWKernel::border_size() const
 {
     return _border_size;
 }
 
-void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
-                                                     ActivationLayerInfo act_info)
+void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
+                                                         ActivationLayerInfo act_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
@@ -144,8 +144,6 @@ void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, con
         }
     }
 
-    // Configure the local work size for Bifrost with a value obtained
-    // via exhaustive autotuning for the MobileNets tensor shapes.
     const GPUTarget gpu_target = get_target();
     const bool      is_bifrost = gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX);
 
@@ -228,7 +226,7 @@ void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, con
     }
     else
     {
-        kernel_name                       = is_qasymm ? "depthwise_convolution_3x3_quantized" : "depthwise_convolution_3x3";
+        kernel_name                       = is_qasymm ? "depthwise_convolution_3x3_quantized_nchw" : "depthwise_convolution_3x3";
         num_elems_written_per_iteration_x = 8 / data_size_from_type(input->info()->data_type());
         num_elems_written_per_iteration_y = (is_qasymm && _conv_stride_y < 3) ? (2 / _conv_stride_y) : 1;
         num_elems_read_per_iteration_x    = 3 + (num_elems_written_per_iteration_x - 1) * _conv_stride_x;
@@ -268,7 +266,7 @@ void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, con
     _config_id += support::cpp11::to_string(output->info()->dimension(1));
 }
 
-void CLDepthwiseConvolutionLayer3x3Kernel::run(const Window &window, cl::CommandQueue &queue)
+void CLDepthwiseConvolutionLayer3x3NCHWKernel::run(const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);

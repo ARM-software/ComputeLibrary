@@ -177,10 +177,10 @@ class DepthwiseConvolutionLayerValidationQuantizedFixture : public DepthwiseConv
 {
 public:
     template <typename...>
-    void setup(TensorShape in_shape, TensorShape weights_shape, TensorShape out_shape, PadStrideInfo pad_stride_info, DataType data_type, QuantizationInfo quantization_info)
+    void setup(TensorShape in_shape, TensorShape weights_shape, TensorShape out_shape, PadStrideInfo pad_stride_info, DataType data_type, QuantizationInfo quantization_info, DataLayout data_layout)
     {
         DepthwiseConvolutionLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(in_shape, weights_shape, out_shape, pad_stride_info,
-                                                                                                            data_type, quantization_info, DataLayout::NCHW);
+                                                                                                            data_type, quantization_info, data_layout);
     }
 };
 } // namespace validation

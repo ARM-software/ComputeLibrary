@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,30 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLDEPTHWISECONVOLUTIONKERNEL3x3_H__
-#define __ARM_COMPUTE_CLDEPTHWISECONVOLUTIONKERNEL3x3_H__
+#ifndef __ARM_COMPUTE_CLDEPTHWISECONVOLUTIONNCHWKERNEL3x3_H__
+#define __ARM_COMPUTE_CLDEPTHWISECONVOLUTIONNCHWKERNEL3x3_H__
 
-#include "arm_compute/core/CL/ICLKernel.h"
+#include "arm_compute/core/CL/kernels/ICLDepthwiseConvolutionLayer3x3Kernel.h"
 
 namespace arm_compute
 {
 class ICLTensor;
 
-/** Interface for the kernel to run a 3x3 depthwise convolution on a tensor.
+/** Interface for the kernel to run a 3x3 depthwise convolution on a tensor when the data layout is NCHW.
  */
-class CLDepthwiseConvolutionLayer3x3Kernel : public ICLKernel
+class CLDepthwiseConvolutionLayer3x3NCHWKernel : public ICLDepthwiseConvolutionLayer3x3Kernel
 {
 public:
     /** Default constructor */
-    CLDepthwiseConvolutionLayer3x3Kernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLDepthwiseConvolutionLayer3x3Kernel(const CLDepthwiseConvolutionLayer3x3Kernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    CLDepthwiseConvolutionLayer3x3Kernel &operator=(const CLDepthwiseConvolutionLayer3x3Kernel &) = delete;
-    /** Default Move Constructor. */
-    CLDepthwiseConvolutionLayer3x3Kernel(CLDepthwiseConvolutionLayer3x3Kernel &&) = default;
-    /** Default move assignment operator */
-    CLDepthwiseConvolutionLayer3x3Kernel &operator=(CLDepthwiseConvolutionLayer3x3Kernel &&) = default;
+    CLDepthwiseConvolutionLayer3x3NCHWKernel();
     /** Initialize the function's source, destination, conv and border_size.
      *
      * @param[in]  input     Source tensor. DataType supported: QASYMM8/F16/F32.
@@ -55,22 +47,15 @@ public:
      * @param[in]  conv_info Padding and stride information to use for the convolution.
      * @param[in]  act_info  (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU for QASYMM8 supported.
      */
-    void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, ActivationLayerInfo act_info = ActivationLayerInfo());
+    void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
+                   ActivationLayerInfo act_info) override;
 
-    // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
     BorderSize border_size() const override;
 
 private:
-    BorderSize       _border_size;
-    const ICLTensor *_input;
-    ICLTensor       *_output;
-    const ICLTensor *_weights;
-    const ICLTensor *_biases;
-    unsigned int     _conv_stride_x;
-    unsigned int     _conv_stride_y;
-    unsigned int     _conv_pad_left;
-    unsigned int     _conv_pad_top;
+    unsigned int _conv_stride_x;
+    unsigned int _conv_pad_top;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLDEPTHWISECONVOLUTIONKERNEL3x3_H__ */
+#endif /*__ARM_COMPUTE_CLDEPTHWISECONVOLUTIONNCHWKERNEL3x3_H__ */

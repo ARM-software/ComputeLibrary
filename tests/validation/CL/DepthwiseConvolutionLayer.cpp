@@ -76,10 +76,12 @@ using CLDepthwiseConvolutionLayerFixture3x3 = DepthwiseConvolutionLayerValidatio
 TEST_SUITE(Float)
 TEST_SUITE(F16)
 TEST_SUITE(W3x3)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
-                                                                                                                   framework::dataset::make("DataType",
-                                                                                                                           DataType::F16)),
-                                                                                                                   framework::dataset::make("DataLayout", DataLayout::NCHW)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::ALL,
+                       combine(combine(framework::dataset::concat(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
+                                                                  datasets::SmallDepthwiseConvolutionLayerDataset3x3NCHW()),
+                                       framework::dataset::make("DataType",
+                                                                DataType::F16)),
+                               framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
@@ -95,10 +97,12 @@ TEST_SUITE_END()
 
 TEST_SUITE(FP32)
 TEST_SUITE(W3x3)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerFixture3x3<float>, framework::DatasetMode::ALL, combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
-                                                                                                                    framework::dataset::make("DataType",
-                                                                                                                            DataType::F32)),
-                                                                                                                    framework::dataset::make("DataLayout", DataLayout::NCHW)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerFixture3x3<float>, framework::DatasetMode::ALL,
+                       combine(combine(framework::dataset::concat(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
+                                                                  datasets::SmallDepthwiseConvolutionLayerDataset3x3NCHW()),
+                                       framework::dataset::make("DataType",
+                                                                DataType::F32)),
+                               framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
@@ -121,29 +125,34 @@ using CLDepthwiseConvolutionLayerQuantizedFixture3x3 = DepthwiseConvolutionLayer
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 TEST_SUITE(Generic)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset(),
                        framework::dataset::make("DataType", DataType::QASYMM8)),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                       framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset(),
                        framework::dataset::make("DataType", DataType::QASYMM8)),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                       framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END()
 TEST_SUITE(W3x3)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
-                       framework::dataset::make("DataType", DataType::QASYMM8)),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
+                                               framework::dataset::make("DataType", DataType::QASYMM8)),
+                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
                        framework::dataset::make("DataType", DataType::QASYMM8)),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })),
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }

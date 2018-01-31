@@ -35,7 +35,7 @@ using namespace arm_compute::misc;
 using namespace arm_compute::misc::shape_calculator;
 
 CLDepthwiseConvolutionLayer3x3::CLDepthwiseConvolutionLayer3x3()
-    : _kernel(), _border_handler()
+    : _kernel(nullptr), _border_handler()
 {
 }
 
@@ -44,8 +44,17 @@ void CLDepthwiseConvolutionLayer3x3::configure(ICLTensor *input, const ICLTensor
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
 
-    _kernel.set_target(CLScheduler::get().target());
-    _kernel.configure(input, weights, biases, output, conv_info, act_info);
+    if(input->info()->data_layout() == DataLayout::NCHW)
+    {
+        _kernel = arm_compute::support::cpp14::make_unique<CLDepthwiseConvolutionLayer3x3NCHWKernel>();
+    }
+    else
+    {
+        _kernel = arm_compute::support::cpp14::make_unique<CLDepthwiseConvolutionLayer3x3NHWCKernel>();
+    }
+
+    _kernel->set_target(CLScheduler::get().target());
+    _kernel->configure(input, weights, biases, output, conv_info, act_info);
 
     // Configure border handler
     PixelValue &&zero_value(0.f);
@@ -53,13 +62,13 @@ void CLDepthwiseConvolutionLayer3x3::configure(ICLTensor *input, const ICLTensor
     {
         zero_value = PixelValue(static_cast<uint8_t>(input->info()->quantization_info().offset));
     }
-    _border_handler.configure(input, _kernel.border_size(), BorderMode::CONSTANT, zero_value);
+    _border_handler.configure(input, _kernel->border_size(), BorderMode::CONSTANT, zero_value);
 }
 
 void CLDepthwiseConvolutionLayer3x3::run()
 {
     CLScheduler::get().enqueue(_border_handler);
-    CLScheduler::get().enqueue(_kernel);
+    CLScheduler::get().enqueue(*_kernel);
 }
 
 CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayer()
