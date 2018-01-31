@@ -352,7 +352,7 @@ bool NumPyBinLoader::access_tensor(ITensor &tensor)
     if(tensor.info()->padding().empty())
     {
         // If tensor has no padding read directly from stream.
-        stream.read(reinterpret_cast<char *>(tensor.buffer()), tensor.info()->total_size());
+        stream.read(reinterpret_cast<char *>(tensor.buffer() + tensor.info()->offset_first_element_in_bytes()), tensor.info()->total_size());
     }
     else
     {
