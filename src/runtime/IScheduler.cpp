@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,7 +38,7 @@ unsigned int get_cpu_impl()
 {
 #ifndef BARE_METAL
     int fd = open("/proc/cpuinfo", 0); // NOLINT
-    std::array<char, 1200> buff{ {} };
+    std::array<char, 3000> buff{ {} };
     char *pos     = nullptr;
     char *end     = nullptr;
     bool  foundid = false;
@@ -50,7 +50,7 @@ unsigned int get_cpu_impl()
         return 0;
     }
 
-    int charsread = read(fd, buff.data(), 1200);
+    int charsread = read(fd, buff.data(), 3000);
     pos           = buff.data();
     end           = buff.data() + charsread;
 
