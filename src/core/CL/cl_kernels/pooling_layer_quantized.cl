@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,13 +35,13 @@
 #error "L2 pooling is not supported"
 #endif /* defined(POOL_L2) */
 
-int calculate_avg_scale(const int pool_size, const int upper_bound_w, const int upper_bound_h,
+int calculate_avg_scale(const int pool_size_x, const int pool_size_y, const int upper_bound_w, const int upper_bound_h,
                         const int pad_x, const int pad_y, const int stride_x, const int stride_y)
 {
     int       start_x = get_global_id(0) * stride_x - pad_x;
     int       start_y = get_global_id(1) * stride_y - pad_y;
-    const int end_x   = min(start_x + pool_size, upper_bound_w);
-    const int end_y   = min(start_y + pool_size, upper_bound_h);
+    const int end_x   = min(start_x + pool_size_x, upper_bound_w);
+    const int end_y   = min(start_y + pool_size_y, upper_bound_h);
 #if defined(EXCLUDE_PADDING)
     start_x = max(0, start_x);
     start_y = max(0, start_y);
@@ -51,7 +51,7 @@ int calculate_avg_scale(const int pool_size, const int upper_bound_w, const int 
 
 /** Performs a pooling function of pool size equal to N
  *
- * @note Pool size must be passed using -DPOOL_SIZE e.g. -DPOOL_SIZE=13;
+ * @note Pool sizes must be passed using -DPOOL_SIZE_X and -DPOOL_SIZE_Y e.g. -DPOOL_SIZE_X=13;
  * @note In case of average pooling the following information must be passed at compile time:
  *       -DPOOL_AVG must be provided otherwise max pooling will be performed.
  *       -DMAX_WIDTH and -DMAX_HEIGHT which are the maximum accessible indeces in x and y dimensions (width + pad)
@@ -75,7 +75,7 @@ int calculate_avg_scale(const int pool_size, const int upper_bound_w, const int 
  * @param[in]  output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  output_offset_first_element_in_bytes The offset of the first element in the destination image
  */
-__kernel void pooling_layer_N_quantized(
+__kernel void pooling_layer_MxN_quantized(
     TENSOR3D_DECLARATION(input),
     TENSOR3D_DECLARATION(output))
 {
@@ -87,10 +87,10 @@ __kernel void pooling_layer_N_quantized(
     int  sdata = 0;
 
     // Load data
-    for(int y = 0; y < POOL_SIZE; y++)
+    for(int y = 0; y < POOL_SIZE_Y; y++)
     {
         int x = 0;
-        for(; x <= ((int)POOL_SIZE - 8); x += 8)
+        for(; x <= ((int)POOL_SIZE_X - 8); x += 8)
         {
             uchar8 data = vload8(0, (__global uchar *)tensor3D_offset(&input, x, y, 0));
             int8 data0  = convert_int8(data);
@@ -98,7 +98,7 @@ __kernel void pooling_layer_N_quantized(
         }
 
         // Leftover
-        for(; x < (int)POOL_SIZE; ++x)
+        for(; x < (int)POOL_SIZE_X; ++x)
         {
             uchar data = *((__global uchar *)tensor3D_offset(&input, x, y, 0));
             int data0  = convert_int(data);
@@ -113,7 +113,7 @@ __kernel void pooling_layer_N_quantized(
     res          = POOL_OP(res, sdata);
 
 #if defined(POOL_AVG)
-    res = round(DIV_OP(res, calculate_avg_scale(POOL_SIZE, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y)));
+    res = round(DIV_OP(res, calculate_avg_scale(POOL_SIZE_X, POOL_SIZE_Y, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y)));
 #endif /* defined(POOL_AVG) */
 
     // Store result
