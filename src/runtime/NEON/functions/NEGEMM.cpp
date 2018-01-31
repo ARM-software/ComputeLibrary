@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,10 +38,13 @@
 
 namespace arm_compute
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch-default"
 #include "arm_compute/core/NEON/kernels/assembly/gemm_interleaved.hpp"
 #include "arm_compute/core/NEON/kernels/assembly/kernels/a32_sgemm_8x6.hpp"
 #include "arm_compute/core/NEON/kernels/assembly/kernels/a64_hgemm_24x8.hpp"
 #include "arm_compute/core/NEON/kernels/assembly/kernels/a64_sgemm_12x8.hpp"
+#pragma GCC diagnostic pop
 } // namespace arm_compute
 
 #include <cmath>
