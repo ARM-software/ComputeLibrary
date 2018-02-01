@@ -26,6 +26,7 @@
 #ifdef __arm__
 
 // Actual kernel implementations
+#include "a32_sgemm_8x6/a53.hpp"
 #include "a32_sgemm_8x6/generic.hpp"
 
 // 8x6 SGEMM "strategy" class.
@@ -62,7 +63,10 @@ public:
 
     sgemm_8x6(const CPUInfo *ci) {
         kernel = a32_sgemm_8x6;
+        if(ci->CPU == CPUTarget::A53) {
+            kernel = a32_sgemm_8x6_a53;
+        }
     }
 };
 
-#endif // __aarch64__
+#endif // __arm__
