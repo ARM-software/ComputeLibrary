@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,11 +33,13 @@ using namespace arm_compute::misc::shape_calculator;
 
 NEDeconvolutionLayer::NEDeconvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
     : _memory_group(std::move(memory_manager)),
+      _direct_conv_f(),
       _conv_f(),
       _scaled_output(),
       _input(nullptr),
       _info(),
-      _inner_border()
+      _inner_border(),
+      _run_direct_convolution(false)
 {
 }
 
@@ -47,11 +49,12 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON(weights->info()->dimension(0) != weights->info()->dimension(1));
-    ARM_COMPUTE_ERROR_ON(weights->info()->dimension(0) != 1 && weights->info()->dimension(0) != 3 && weights->info()->dimension(0) != 5);
 
     _input        = input;
     _info         = info;
     _inner_border = std::make_pair(inner_border_right, inner_border_top);
+    // FIXME: ConvolutionLayer Segfaults in GEMM assembly code for 1x1 convolutions
+    _run_direct_convolution = (weights->info()->dimension(0) == weights->info()->dimension(1)) && (weights->info()->dimension(0) == 1);
 
     const unsigned int stride_x = info.stride().first;
     const unsigned int stride_y = info.stride().second;
@@ -75,7 +78,9 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
 
     // setup the function to convolve the upscaled output
     const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
-    _conv_f.configure(&_scaled_output, weights, bias, output, conv_info);
+    (_run_direct_convolution) ? _direct_conv_f.configure(&_scaled_output, weights, bias, output, conv_info) : _conv_f.configure(&_scaled_output, weights, bias, output, conv_info);
+
+    // Allocate auxiliary tensors
     _scaled_output.allocator()->allocate();
 }
 
@@ -92,7 +97,7 @@ void NEDeconvolutionLayer::run()
     const int stride_x      = _info.stride().first;
     const int stride_y      = _info.stride().second;
 
-    std::fill_n(reinterpret_cast<float *>(_scaled_output.buffer()), _scaled_output.info()->tensor_shape().total_size(), 0.f);
+    std::fill_n(_scaled_output.buffer(), _scaled_output.info()->total_size(), 0);
 
     // scaled_output is the input for the forward convolution. We copy the input elements to scaled_output
     // and insert rows and columns with zeroes depending on the stride values.
@@ -113,6 +118,8 @@ void NEDeconvolutionLayer::run()
         }
     }
 
-    _conv_f.run();
+    // Run convolution layer
+    (_run_direct_convolution) ? _direct_conv_f.run() : _conv_f.run();
+
     _memory_group.release();
 }

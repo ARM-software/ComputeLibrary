@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,8 +24,8 @@
 #ifndef __ARM_COMPUTE_CLDECONVOLUTIONLAYER_H__
 #define __ARM_COMPUTE_CLDECONVOLUTIONLAYER_H__
 
+#include "arm_compute/runtime/CL/functions/CLConvolutionLayer.h"
 #include "arm_compute/runtime/CL/functions/CLDeconvolutionLayerUpsample.h"
-#include "arm_compute/runtime/CL/functions/CLDirectConvolutionLayer.h"
 
 #include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
@@ -96,7 +96,7 @@ public:
 private:
     CLMemoryGroup                _memory_group;
     CLDeconvolutionLayerUpsample _scale_f;
-    CLDirectConvolutionLayer     _conv_f;
+    CLConvolutionLayer           _conv_f;
     CLTensor                     _scaled_output;
 };
 }

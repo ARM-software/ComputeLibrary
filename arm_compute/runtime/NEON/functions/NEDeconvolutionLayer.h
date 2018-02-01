@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef __ARM_COMPUTE_NEDECONVOLUTIONLAYER_H__
 #define __ARM_COMPUTE_NEDECONVOLUTIONLAYER_H__
 
+#include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEDirectConvolutionLayer.h"
 
 #include "arm_compute/core/Types.h"
@@ -95,11 +96,13 @@ public:
 
 private:
     MemoryGroup              _memory_group;
-    NEDirectConvolutionLayer _conv_f;
+    NEDirectConvolutionLayer _direct_conv_f;
+    NEConvolutionLayer       _conv_f;
     Tensor                   _scaled_output;
     ITensor                 *_input;
     PadStrideInfo            _info;
     std::pair<unsigned int, unsigned int> _inner_border;
+    bool _run_direct_convolution;
 };
 } // arm_compute
 #endif /* __ARM_COMPUTE_NEDECONVOLUTIONLAYER_H__ */

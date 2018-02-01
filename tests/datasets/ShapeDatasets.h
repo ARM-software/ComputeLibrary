@@ -270,6 +270,7 @@ public:
     ShapeDataset("Shape1",
     {
         TensorShape{ 1921U, 1U, 2U },
+        TensorShape{ 1921U, 1U, 2U },
         TensorShape{ 641U, 1U, 2U, 3U },
         TensorShape{ 1U, 127U, 25U },
         TensorShape{ 799U, 595U, 1U, 4U }
@@ -345,7 +346,7 @@ public:
     SmallDeconvolutionShapes()
         : ShapeDataset("InputShape",
     {
-        TensorShape{ 4U, 3U, 3U, 2U },
+        TensorShape{ 5U, 4U, 3U, 2U },
                      TensorShape{ 5U, 5U, 3U },
                      TensorShape{ 11U, 13U, 4U, 3U }
     })

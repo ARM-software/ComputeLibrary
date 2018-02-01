@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -79,7 +79,7 @@ Status CLDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
     const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
 
     ARM_COMPUTE_RETURN_ON_ERROR(CLDeconvolutionLayerUpsample::validate(input, &scale_out_info, BorderSize(inner_border_right, inner_border_top), info));
-    ARM_COMPUTE_RETURN_ON_ERROR(CLDirectConvolutionLayer::validate(&scale_out_info, weights, bias, output, conv_info));
+    // TODO (COMPMID-754): Add validation of CLConvolutionLayer when added.
 
     return Status{};
 }
