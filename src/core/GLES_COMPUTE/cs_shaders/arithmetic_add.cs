@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,20 +29,20 @@ layout(local_size_x = LOCAL_SIZE_X, local_size_y = LOCAL_SIZE_Y, local_size_z = 
 precision mediump float;
 #define ADD(x, y) (x) + (y)
 
-/** This function add two images.
+/** This function add two tensors.
  *
- * @param[in]  src1_ptr   Pointer to the first source image. Supported data types: F16
- * @param[in]  src1_attrs The attributes of the first source image
- * @param[in]  src2_ptr   Pointer to the second source image. Supported data types: Same as @p src1_ptr
- * @param[in]  src2_attrs The attributes of the second source image
- * @param[out] dst_ptr    Pointer to the destination image. Supported data types: Same as @p src1_ptr
- * @param[in]  dst_attrs  The attributes of the destination image
+ * @param[in]  src1_ptr   Pointer to the first source tensor. Supported data types: F16
+ * @param[in]  src1_attrs The attributes of the first source tensor
+ * @param[in]  src2_ptr   Pointer to the second source tensor. Supported data types: Same as @p src1_ptr
+ * @param[in]  src2_attrs The attributes of the second source tensor
+ * @param[out] dst_ptr    Pointer to the destination tensor. Supported data types: Same as @p src1_ptr
+ * @param[in]  dst_attrs  The attributes of the destination tensor
  */
 SHADER_PARAMS_DECLARATION
 {
-    ImageAttributes src1_attrs;
-    ImageAttributes src2_attrs;
-    ImageAttributes dst_attrs;
+    Tensor3DAttributes src1_attrs;
+    Tensor3DAttributes src2_attrs;
+    Tensor3DAttributes dst_attrs;
 };
 
 TENSOR_DECLARATION(1, src1Buffer, uvec4, src1_ptr, src1_shift, 4, readonly);
@@ -51,9 +51,9 @@ TENSOR_DECLARATION(3, dstBuffer, uvec4, dst_ptr, dst_shift, 4, writeonly);
 
 void main(void)
 {
-    ImageIterator src1_iter = CONVERT_TO_IMAGE_ITERATOR(src1_attrs, src1_shift);
-    ImageIterator src2_iter = CONVERT_TO_IMAGE_ITERATOR(src2_attrs, src2_shift);
-    ImageIterator dst_iter  = CONVERT_TO_IMAGE_ITERATOR(dst_attrs, dst_shift);
+    Tensor3DIterator src1_iter = CONVERT_TO_TENSOR3D_ITERATOR(src1_attrs, src1_shift);
+    Tensor3DIterator src2_iter = CONVERT_TO_TENSOR3D_ITERATOR(src2_attrs, src2_shift);
+    Tensor3DIterator dst_iter  = CONVERT_TO_TENSOR3D_ITERATOR(dst_attrs, dst_shift);
 
     vec4 tmp1[2] = LOAD_UNPACK8_CURRENT_ITEM_HALF(src1_ptr, src1_iter);
     vec4 tmp2[2] = LOAD_UNPACK8_CURRENT_ITEM_HALF(src2_ptr, src2_iter);

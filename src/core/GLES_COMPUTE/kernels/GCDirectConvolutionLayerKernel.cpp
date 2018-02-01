@@ -394,6 +394,8 @@ void GCDirectConvolutionLayerKernel<kernel_size>::run(const Window &window)
 
     _kernel.use();
 
+    _output->set_needs_shifting(true);
+
     // Get initial windows
     Window slice  = window.first_slice_window_3D();
     Window win_in = window;

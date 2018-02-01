@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,7 +26,7 @@
 using namespace arm_compute;
 
 IGCTensor::IGCTensor()
-    : _mapping(nullptr)
+    : _mapping(nullptr), _needs_shifting(false)
 {
 }
 
@@ -51,4 +51,14 @@ void IGCTensor::clear()
 uint8_t *IGCTensor::buffer() const
 {
     return _mapping;
+}
+
+bool IGCTensor::needs_shifting() const
+{
+    return _needs_shifting;
+}
+
+void IGCTensor::set_needs_shifting(bool needs_shifting)
+{
+    _needs_shifting = needs_shifting;
 }

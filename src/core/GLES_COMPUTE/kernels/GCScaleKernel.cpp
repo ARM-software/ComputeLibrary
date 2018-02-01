@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2018 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -128,9 +128,34 @@ void GCScaleKernel::configure(const IGCTensor *input, IGCTensor *output, Interpo
 
     IGCKernel::configure(win);
 
-    unsigned int idx = 2 * num_arguments_per_2D_tensor(); //Skip the tensor parameters
+    unsigned int idx = 2 * num_arguments_per_3D_tensor(); //Skip the tensor parameters
     _kernel.set_argument<float>(idx++, static_cast<float>(input->info()->dimension(0)));
     _kernel.set_argument<float>(idx++, static_cast<float>(input->info()->dimension(1)));
     _kernel.set_argument<float>(idx++, wr);
     _kernel.set_argument<float>(idx++, hr);
+}
+
+void GCScaleKernel::run(const Window &window)
+{
+    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
+
+    _kernel.use();
+
+    _output->set_needs_shifting(true);
+
+    Window slice    = window.first_slice_window_3D();
+    Window slice_in = window.first_slice_window_3D();
+
+    slice.shift(Window::DimX, -(_output->info()->padding()).left);
+
+    do
+    {
+        unsigned int idx = 0;
+        add_3D_tensor_argument(idx, _input, 1, slice_in);
+        add_3D_tensor_argument(idx, _output, 2, slice);
+        _kernel.update_shader_params();
+        enqueue(*this, slice);
+    }
+    while(window.slide_window_slice_3D(slice) && window.slide_window_slice_3D(slice_in));
 }

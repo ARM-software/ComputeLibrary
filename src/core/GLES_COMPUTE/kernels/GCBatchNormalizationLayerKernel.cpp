@@ -119,7 +119,10 @@ void GCBatchNormalizationLayerKernel::run(const Window &window)
 
     _kernel.use();
 
-    Window slice = window.first_slice_window_3D();
+    _output->set_needs_shifting(true);
+
+    Window slice    = window.first_slice_window_3D();
+    Window slice_in = window.first_slice_window_3D();
 
     Window vector_slice = window.first_slice_window_1D();
     vector_slice.set(Window::DimX, Window::Dimension(0, 0, 0));
@@ -130,14 +133,16 @@ void GCBatchNormalizationLayerKernel::run(const Window &window)
     add_1D_tensor_argument(idx, _beta, 5, vector_slice);
     add_1D_tensor_argument(idx, _gamma, 6, vector_slice);
 
+    slice.shift(Window::DimX, -(_output->info()->padding()).left);
+
     do
     {
         idx = 0;
-        add_3D_tensor_argument(idx, _input, 1, slice);
+        add_3D_tensor_argument(idx, _input, 1, slice_in);
         add_3D_tensor_argument(idx, _output, 2, slice);
 
         _kernel.update_shader_params();
         enqueue(*this, slice);
     }
-    while(window.slide_window_slice_3D(slice));
+    while(window.slide_window_slice_3D(slice) && window.slide_window_slice_3D(slice_in));
 }

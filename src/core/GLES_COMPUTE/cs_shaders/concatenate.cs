@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,8 +53,8 @@ void main(void)
     Tensor3DIterator src_iter = CONVERT_TO_TENSOR3D_ITERATOR(src_attrs, src_shift);
     Tensor3DIterator dst_iter = CONVERT_TO_TENSOR3D_ITERATOR(dst_attrs, dst_shift);
 
-    float tmp = LOAD(src_ptr, TENSOR3D_OFFSET(src_iter, -OFFSETS_X, -OFFSETS_Y, 0));
-    STORE(dst_ptr, TENSOR_OFFSET_ADVANCE_IN_BYTES(dst_iter, OFFSETS_Z), tmp);
+    float tmp = LOAD(src_ptr, TENSOR3D_OFFSET(src_iter, -OFFSET_X, -OFFSET_Y, 0));
+    STORE_CURRENT_ITEM(dst_ptr, dst_iter, tmp);
 }
 
 #elif defined(DATA_TYPE_FP16)
@@ -66,7 +66,7 @@ void main(void)
     Tensor3DIterator src_iter = CONVERT_TO_TENSOR3D_ITERATOR(src_attrs, src_shift);
     Tensor3DIterator dst_iter = CONVERT_TO_TENSOR3D_ITERATOR(dst_attrs, dst_shift);
 
-    uvec2 tmp = LOAD(src_ptr, TENSOR3D_OFFSET(src_iter, -OFFSETS_X, -OFFSETS_Y, 0));
-    STORE(dst_ptr, TENSOR_OFFSET_ADVANCE_IN_BYTES(dst_iter, OFFSETS_Z), tmp);
+    uvec2 tmp = LOAD(src_ptr, TENSOR3D_OFFSET(src_iter, -OFFSET_X, -OFFSET_Y, 0));
+    STORE_CURRENT_ITEM(dst_ptr, dst_iter, tmp);
 }
 #endif /*DATA_TYPE_FP16*/

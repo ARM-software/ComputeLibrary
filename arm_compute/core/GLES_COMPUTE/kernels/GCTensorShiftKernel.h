@@ -78,6 +78,7 @@ public:
 private:
     IGCTensor    *_input;
     gles::NDRange _lws;
+    int           _left_padding;
 };
 }
 #endif /*__ARM_COMPUTE_GCTENSORSHIFTKERNEL_H__ */

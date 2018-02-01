@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -75,6 +75,18 @@ public:
      */
     virtual GLuint gc_buffer() const = 0;
 
+    /** Flag indicating whether the tensor has been left aligned by a kernel and therefore needs shifting.
+     *
+     * @return True if the tensor is left aligned.
+     */
+    bool needs_shifting() const;
+    /** Set the flag indicating whether or not a tensor needs shifting.
+     *
+     * @param[in] needs_shifting Indicates if the tensor is left aligned or not.
+     *
+     */
+    void set_needs_shifting(bool needs_shifting);
+
 protected:
     /** Method to be implemented by the child class to map the SSBO.
      *
@@ -92,6 +104,7 @@ protected:
 
 private:
     uint8_t *_mapping;
+    bool     _needs_shifting;
 };
 
 using IGCImage = IGCTensor;

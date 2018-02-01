@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -89,6 +89,8 @@ void GCNormalizePlanarYUVLayerKernel::run(const Window &window)
 
     _kernel.use();
 
+    _output->set_needs_shifting(true);
+
     Window slice = window.first_slice_window_3D();
 
     Window slice_in;
@@ -100,15 +102,19 @@ void GCNormalizePlanarYUVLayerKernel::run(const Window &window)
     add_1D_tensor_argument(idx, _mean, 3, slice_in);
     add_1D_tensor_argument(idx, _sd, 4, slice_in);
 
+    slice_in = window.first_slice_window_3D();
+
+    slice.shift(Window::DimX, -(_output->info()->padding()).left);
+
     do
     {
         idx = 0;
-        add_3D_tensor_argument(idx, _input, 1, slice);
+        add_3D_tensor_argument(idx, _input, 1, slice_in);
         add_3D_tensor_argument(idx, _output, 2, slice);
 
         _kernel.update_shader_params();
 
         enqueue(*this, slice);
     }
-    while(window.slide_window_slice_3D(slice));
+    while(window.slide_window_slice_3D(slice) && window.slide_window_slice_3D(slice_in));
 }

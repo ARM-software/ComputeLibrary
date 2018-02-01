@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -71,6 +71,7 @@ private:
     IGCTensor       *_output;
     int              _top_bottom;
     int              _left_right;
+    int              _depth_offset;
 };
 }
 #endif /* __ARM_COMPUTE_GCDEPTHCONCATENATEKERNEL_H__ */
