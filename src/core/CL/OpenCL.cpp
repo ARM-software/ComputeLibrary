@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -108,6 +108,9 @@ bool CLSymbols::load(const std::string &library)
     LOAD_FUNCTION_PTR(clRetainEvent, handle);
     LOAD_FUNCTION_PTR(clGetPlatformIDs, handle);
     LOAD_FUNCTION_PTR(clGetKernelWorkGroupInfo, handle);
+    LOAD_FUNCTION_PTR(clGetCommandQueueInfo, handle);
+    LOAD_FUNCTION_PTR(clGetKernelInfo, handle);
+    LOAD_FUNCTION_PTR(clGetEventProfilingInfo, handle);
 
 #undef LOAD_FUNCTION_PTR
 
@@ -723,6 +726,63 @@ clGetKernelWorkGroupInfo(cl_kernel                 kernel,
     if(func != nullptr)
     {
         return func(kernel, device, param_name, param_value_size, param_value, param_value_size_ret);
+    }
+    else
+    {
+        return CL_OUT_OF_RESOURCES;
+    }
+}
+
+cl_int
+clGetCommandQueueInfo(cl_command_queue      command_queue,
+                      cl_command_queue_info param_name,
+                      size_t                param_value_size,
+                      void                 *param_value,
+                      size_t               *param_value_size_ret)
+{
+    arm_compute::CLSymbols::get().load_default();
+    auto func = arm_compute::CLSymbols::get().clGetCommandQueueInfo_ptr;
+    if(func != nullptr)
+    {
+        return func(command_queue, param_name, param_value_size, param_value, param_value_size_ret);
+    }
+    else
+    {
+        return CL_OUT_OF_RESOURCES;
+    }
+}
+
+cl_int
+clGetKernelInfo(cl_kernel      kernel,
+                cl_kernel_info param_name,
+                size_t         param_value_size,
+                void          *param_value,
+                size_t        *param_value_size_ret)
+{
+    arm_compute::CLSymbols::get().load_default();
+    auto func = arm_compute::CLSymbols::get().clGetKernelInfo_ptr;
+    if(func != nullptr)
+    {
+        return func(kernel, param_name, param_value_size, param_value, param_value_size_ret);
+    }
+    else
+    {
+        return CL_OUT_OF_RESOURCES;
+    }
+}
+
+cl_int
+clGetEventProfilingInfo(cl_event          event,
+                        cl_profiling_info param_name,
+                        size_t            param_value_size,
+                        void             *param_value,
+                        size_t           *param_value_size_ret)
+{
+    arm_compute::CLSymbols::get().load_default();
+    auto func = arm_compute::CLSymbols::get().clGetEventProfilingInfo_ptr;
+    if(func != nullptr)
+    {
+        return func(event, param_name, param_value_size, param_value, param_value_size_ret);
     }
     else
     {

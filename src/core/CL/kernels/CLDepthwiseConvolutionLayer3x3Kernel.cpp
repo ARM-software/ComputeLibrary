@@ -174,6 +174,20 @@ void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, con
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     ICLKernel::configure(win);
+
+    // Set config_id for enabling LWS tuning
+    _config_id = "depthwise_convolution3x3_";
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(2));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(1));
 }
 
 void CLDepthwiseConvolutionLayer3x3Kernel::run(const Window &window, cl::CommandQueue &queue)

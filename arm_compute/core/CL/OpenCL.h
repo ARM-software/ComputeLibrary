@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -93,6 +93,9 @@ public:
     DECLARE_FUNCTION_PTR(clRetainEvent);
     DECLARE_FUNCTION_PTR(clGetPlatformIDs);
     DECLARE_FUNCTION_PTR(clGetKernelWorkGroupInfo);
+    DECLARE_FUNCTION_PTR(clGetCommandQueueInfo);
+    DECLARE_FUNCTION_PTR(clGetKernelInfo);
+    DECLARE_FUNCTION_PTR(clGetEventProfilingInfo);
 
 #undef DECLARE_FUNCTION_PTR
 

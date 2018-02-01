@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -175,32 +175,7 @@ public:
     }
     void do_teardown() override
     {
-        if(output_filename.empty()) /* If the inputs were not files, print the results */
-        {
-            std::cout << "\nMatrix 1:" << std::endl;
-            src0.map(true);
-            src0.print(std::cout, IOFormatInfo());
-            src0.unmap();
-
-            std::cout << "Matrix 2:" << std::endl;
-            src1.map(true);
-            src1.print(std::cout, IOFormatInfo());
-            src1.unmap();
-
-            std::cout << "Matrix 3:" << std::endl;
-            src2.map(true);
-            src2.print(std::cout, IOFormatInfo());
-            src2.unmap();
-
-            std::cout << "Alpha:" << alpha << "\n\n";
-            std::cout << "Beta:" << beta << "\n\n";
-
-            std::cout << "Output Matrix:" << std::endl;
-            dst.map(true);
-            dst.print(std::cout, IOFormatInfo());
-            dst.unmap();
-        }
-        else /* Save to .npy file */
+        if(!output_filename.empty()) /* Save to .npy file */
         {
             save_to_npy(dst, output_filename, is_fortran);
         }
