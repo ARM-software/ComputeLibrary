@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -156,7 +156,7 @@ CPPScheduler &CPPScheduler::get()
 }
 
 CPPScheduler::CPPScheduler()
-    : _num_threads(std::thread::hardware_concurrency()),
+    : _num_threads(num_threads_hint()),
       _threads(_num_threads - 1)
 {
 }
