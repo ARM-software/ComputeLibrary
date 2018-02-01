@@ -27,6 +27,7 @@
 
 // Actual kernel implementations
 #include "a32_sgemm_8x6/a53.hpp"
+#include "a32_sgemm_8x6/a55r1.hpp"
 #include "a32_sgemm_8x6/generic.hpp"
 
 // 8x6 SGEMM "strategy" class.
@@ -62,9 +63,18 @@ public:
     kern_type kernel = nullptr;
 
     sgemm_8x6(const CPUInfo *ci) {
-        kernel = a32_sgemm_8x6;
-        if(ci->CPU == CPUTarget::A53) {
-            kernel = a32_sgemm_8x6_a53;
+        switch(ci->CPU) {
+            case CPUTarget::A53:
+                kernel = a32_sgemm_8x6_a53;
+                break;
+
+            case CPUTarget::A55_DOT:
+                kernel = a32_sgemm_8x6_a55r1;
+                break;
+
+            default:
+                kernel = a32_sgemm_8x6;
+                break;
         }
     }
 };
