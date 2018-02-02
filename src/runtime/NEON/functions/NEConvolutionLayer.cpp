@@ -186,7 +186,7 @@ Status validate_and_initialize_values(const ITensorInfo *input, const ITensorInf
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON(!weights_info.are_reshaped() && weights->dimension(2) != input->dimension(2));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
-    ARM_COMPUTE_ERROR_ON(weights_info.are_reshaped() && is_data_type_quantized_asymmetric(input->data_type()));
+    ARM_COMPUTE_RETURN_ERROR_ON(weights_info.are_reshaped() && is_data_type_quantized_asymmetric(input->data_type()));
 
     dt           = input->data_type();
     is_quantized = is_data_type_quantized_asymmetric(dt);
@@ -195,11 +195,11 @@ Status validate_and_initialize_values(const ITensorInfo *input, const ITensorInf
     {
         if(is_quantized)
         {
-            ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
         }
         else
         {
-            ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
         }
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, biases);
         ARM_COMPUTE_RETURN_ERROR_ON(!weights_info.are_reshaped() && biases->dimension(0) != weights->dimension(3));
