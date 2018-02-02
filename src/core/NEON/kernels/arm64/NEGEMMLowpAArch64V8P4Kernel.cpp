@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -102,6 +102,11 @@ void execute_gemm(const Window &win, Iterator &in0, Iterator &in1, Iterator &out
                   const ThreadInfo &info, ITensor *ws, int M, int N, int K, bool is_transposed_0, bool is_transposed_1,
                   int lda, int ldb, int ldc, float alpha, float beta)
 {
+    ARM_COMPUTE_UNUSED(M);
+    ARM_COMPUTE_UNUSED(N);
+    ARM_COMPUTE_UNUSED(K);
+    ARM_COMPUTE_UNUSED(is_transposed_0);
+    ARM_COMPUTE_UNUSED(is_transposed_1);
     GemmInterleaved<strategy, typename strategy::operand_type, typename strategy::result_type> gemm(&info.cpu_info, M, N, K, is_transposed_0, is_transposed_1);
     void *workspace = align_workspace(gemm, info, ws);
     execute_window_loop(win, [&](const Coordinates & id)

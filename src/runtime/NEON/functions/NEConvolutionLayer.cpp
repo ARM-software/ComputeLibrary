@@ -224,8 +224,8 @@ Status validate_and_initialize_values(const ITensorInfo *input, const ITensorInf
 }
 } // namespace
 
-NEConvolutionLayer::NEConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _input_im2col_kernel(), _input_interleave_kernel(), _reshape_weights(), _mm_kernel(), _mm_optimised_kernel(nullptr), _mm_gemmlowp(memory_manager),
+NEConvolutionLayer::NEConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager)
+    : _memory_group(memory_manager), _input_im2col_kernel(), _input_interleave_kernel(), _reshape_weights(), _mm_kernel(), _mm_optimised_kernel(nullptr), _mm_gemmlowp(memory_manager),
       _gemmlowp_output_stage(), _output_col2im_kernel(), _input_im2col_reshaped(), _input_interleaved_reshaped(), _weights_reshaped(), _gemm_output(), _tmp_output(), _workspace(), _append_bias(false),
       _is_fully_connected_convolution(false), _are_weights_reshaped(false), _is_quantized(false), _is_interleaved_transposed(false)
 {

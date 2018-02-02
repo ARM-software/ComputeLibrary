@@ -98,7 +98,7 @@ class NEConvolutionLayer : public IFunction
 {
 public:
     /** Constructor */
-    NEConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NEConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager = nullptr);
 
     /** Set the input and output tensors.
      *
