@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,6 +28,7 @@
 #include "arm_compute/core/CL/kernels/CLDepthwiseIm2ColKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthwiseVectorToTensorKernel.h"
 #include "arm_compute/core/CL/kernels/CLDepthwiseWeightsReshapeKernel.h"
+#include "arm_compute/core/CL/kernels/CLDirectConvolutionLayerOutputStageKernel.h"
 #include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixVectorMultiplyKernel.h"
 #include "arm_compute/core/Types.h"
@@ -83,10 +84,10 @@ public:
     CLDepthwiseConvolutionLayer();
     /** Initialize the function's source, destination, weights and convolution information.
      *
-     * @param[in, out] input     Source tensor. Data type supported: F32. (Written to only for border filling).
+     * @param[in, out] input     Source tensor. Data type supported: QASYMM8/F32. (Written to only for border filling).
      * @param[in]      weights   Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM]. Data type supported: Same as @p input.
      * @param[in]      biases    (Optional) Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
-     *                           Data type supported: Same as @p input.
+     *                           Data type supported: Same as @p input, S32 when input is QASYMM8.
      * @param[out]     output    Destination tensor. Data type supported: same as @p input.
      * @param[in]      conv_info Padding and stride information to use for the convolution.
      */
@@ -96,15 +97,18 @@ public:
     void run() override;
 
 private:
-    CLDepthwiseIm2ColKernel          _im2col_kernel;
-    CLDepthwiseWeightsReshapeKernel  _weights_reshape_kernel;
-    CLGEMMMatrixVectorMultiplyKernel _v2mm_kernel;
-    CLDepthwiseVectorToTensorKernel  _vector_to_tensor_kernel;
-    CLFillBorderKernel               _v2mm_input_fill_border;
-    CLFillBorderKernel               _v2mm_weights_fill_border;
-    CLTensor                         _input_reshaped;
-    CLTensor                         _weights_reshaped;
-    CLTensor                         _v2mm_output;
+    CLDepthwiseIm2ColKernel                   _im2col_kernel;
+    CLDepthwiseWeightsReshapeKernel           _weights_reshape_kernel;
+    CLGEMMMatrixVectorMultiplyKernel          _v2mm_kernel;
+    CLDepthwiseVectorToTensorKernel           _vector_to_tensor_kernel;
+    CLDirectConvolutionLayerOutputStageKernel _output_stage_kernel;
+    CLFillBorderKernel                        _v2mm_input_fill_border;
+    CLFillBorderKernel                        _v2mm_weights_fill_border;
+    CLTensor                                  _input_reshaped;
+    CLTensor                                  _weights_reshaped;
+    CLTensor                                  _v2mm_output;
+    CLTensor                                  _output_reshaped;
+    bool                                      _is_quantized;
 };
 }
 #endif /*__ARM_COMPUTE_CLDEPTHWISECONVOLUTION_H__ */

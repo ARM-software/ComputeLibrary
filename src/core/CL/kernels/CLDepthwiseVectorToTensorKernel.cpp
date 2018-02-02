@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,7 @@ CLDepthwiseVectorToTensorKernel::CLDepthwiseVectorToTensorKernel()
 
 void CLDepthwiseVectorToTensorKernel::configure(const ICLTensor *input, ICLTensor *output, size_t conv_w, size_t conv_h)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::S32, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
 
     TensorShape output_shape = input->info()->tensor_shape();
@@ -60,12 +60,12 @@ void CLDepthwiseVectorToTensorKernel::configure(const ICLTensor *input, ICLTenso
     _output = output;
 
     // Create kernel
-    std::set<std::string> build_opts;
-    build_opts.emplace("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
-    build_opts.emplace("-DCONV_WIDTH=" + support::cpp11::to_string(conv_w));
-    build_opts.emplace("-DCONV_HEIGHT=" + support::cpp11::to_string(conv_h));
+    CLBuildOptions build_opts;
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DCONV_WIDTH=" + support::cpp11::to_string(conv_w));
+    build_opts.add_option("-DCONV_HEIGHT=" + support::cpp11::to_string(conv_h));
 
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("depthwise_vector_to_tensor", build_opts));
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("depthwise_vector_to_tensor", build_opts.options()));
 
     // Configure  kernel window
     Window win = calculate_max_window(*input->info(), Steps());

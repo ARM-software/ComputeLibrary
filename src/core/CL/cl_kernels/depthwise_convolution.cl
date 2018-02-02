@@ -469,7 +469,7 @@ __kernel void depthwise_weights_reshape(
 }
 #endif //defined(SRC_WIDTH) && defined(DATA_TYPE)
 
-#if defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP) && defined(PAD_RIGHT) && defined(PAD_BOTTOM) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(DATA_TYPE)
+#if defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP) && defined(PAD_RIGHT) && defined(PAD_BOTTOM) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(DATA_TYPE) && defined(PAD_VALUE)
 /** This kernel performs a reshaping of the input tensor to a tensor used to perform depthwise convolution using vector to matrix multiplication.
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
@@ -513,7 +513,7 @@ __kernel void depthwise_im2col(TENSOR3D_DECLARATION(src), TENSOR3D_DECLARATION(d
         {
             if(x < 0 || x >= SRC_WIDTH || y < 0 || y >= SRC_HEIGHT)
             {
-                *output_ptr = 0;
+                *output_ptr = PAD_VALUE;
             }
             else
             {
@@ -526,7 +526,7 @@ __kernel void depthwise_im2col(TENSOR3D_DECLARATION(src), TENSOR3D_DECLARATION(d
 #endif // defined(HAS_BIAS)
 }
 
-#endif //defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP) && defined(PAD_RIGHT) && defined(PAD_BOTTOM) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(SRC_WIDTH) && defined(DATA_TYPE)
+#endif //defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP) && defined(PAD_RIGHT) && defined(PAD_BOTTOM) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(SRC_WIDTH) && defined(DATA_TYPE) && defined(PAD_VALUE)
 
 #if defined(CONV_WIDTH) && defined(CONV_HEIGHT) && defined(DATA_TYPE)
 

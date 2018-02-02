@@ -103,7 +103,7 @@ public:
      * @param[out]     output    Destination tensor. Data type supported: same as @p input.
      * @param[in]      weights   Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM]. Data type supported: Same as @p input.
      * @param[in]      biases    (Optional) Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
-     *                           Data type supported: Same as @p input.
+     *                           Data type supported: Same as @p input, S32 when input is QASYMM8.
      * @param[in]      conv_info Padding and stride information to use for the convolution.
      */
     void configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info);

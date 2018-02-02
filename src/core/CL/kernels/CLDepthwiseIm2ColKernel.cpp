@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,9 +44,10 @@ CLDepthwiseIm2ColKernel::CLDepthwiseIm2ColKernel()
 
 void CLDepthwiseIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    ARM_COMPUTE_ERROR_ON(is_data_type_quantized_asymmetric(input->info()->data_type()) && has_bias);
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(2) != output->info()->dimension(2));
     ARM_COMPUTE_ERROR_ON(output->info()->dimension(0) != (kernel_dims.width * kernel_dims.height + ((has_bias) ? 1 : 0)));
 
@@ -54,24 +55,25 @@ void CLDepthwiseIm2ColKernel::configure(const ICLTensor *input, ICLTensor *outpu
     _output = output;
 
     // Create kernel
-    std::set<std::string> build_opts;
+    CLBuildOptions build_opts;
 
-    build_opts.emplace("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
-    build_opts.emplace("-DSTRIDE_X=" + support::cpp11::to_string(conv_info.stride().first));
-    build_opts.emplace("-DSTRIDE_Y=" + support::cpp11::to_string(conv_info.stride().second));
-    build_opts.emplace("-DPAD_LEFT=" + support::cpp11::to_string(conv_info.pad_left()));
-    build_opts.emplace("-DPAD_TOP=" + support::cpp11::to_string(conv_info.pad_top()));
-    build_opts.emplace("-DPAD_RIGHT=" + support::cpp11::to_string(conv_info.pad_right()));
-    build_opts.emplace("-DPAD_BOTTOM=" + support::cpp11::to_string(conv_info.pad_bottom()));
-    build_opts.emplace("-DSRC_WIDTH=" + support::cpp11::to_string(input->info()->dimension(0)));
-    build_opts.emplace("-DSRC_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(1)));
-    build_opts.emplace("-DKERNEL_WIDTH=" + support::cpp11::to_string(kernel_dims.width));
-    build_opts.emplace("-DKERNEL_HEIGHT=" + support::cpp11::to_string(kernel_dims.height));
-    if(has_bias)
-    {
-        build_opts.emplace("-DHAS_BIAS");
-    }
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("depthwise_im2col", build_opts));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
+    build_opts.add_option("-DSTRIDE_X=" + support::cpp11::to_string(conv_info.stride().first));
+    build_opts.add_option("-DSTRIDE_Y=" + support::cpp11::to_string(conv_info.stride().second));
+    build_opts.add_option("-DPAD_LEFT=" + support::cpp11::to_string(conv_info.pad_left()));
+    build_opts.add_option("-DPAD_TOP=" + support::cpp11::to_string(conv_info.pad_top()));
+    build_opts.add_option("-DPAD_RIGHT=" + support::cpp11::to_string(conv_info.pad_right()));
+    build_opts.add_option("-DPAD_BOTTOM=" + support::cpp11::to_string(conv_info.pad_bottom()));
+    build_opts.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(input->info()->dimension(0)));
+    build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(1)));
+    build_opts.add_option("-DKERNEL_WIDTH=" + support::cpp11::to_string(kernel_dims.width));
+    build_opts.add_option("-DKERNEL_HEIGHT=" + support::cpp11::to_string(kernel_dims.height));
+    build_opts.add_option_if(has_bias, "-DHAS_BIAS");
+    build_opts.add_option_if_else(is_data_type_quantized(input->info()->data_type()),
+                                  "-DPAD_VALUE=" + support::cpp11::to_string(input->info()->quantization_info().offset),
+                                  "-DPAD_VALUE=0");
+
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("depthwise_im2col", build_opts.options()));
 
     // Configure the local work size for Bifrost with a value obtained
     // via exhaustive autotuning for the MobileNets tensor shapes.

@@ -51,7 +51,7 @@ public:
      *
      * @param[in]  input0 First Input tensor. Data types supported: QASYMM8/F32
      * @param[in]  input1 Second Input tensor. Data types supported: same as @p input.
-     * @param[out] output Output tensor which stores the interleaved matrix. Data type supported: same as @p input.
+     * @param[out] output Output tensor which stores the interleaved matrix. Data type supported: same as @p input, S32 for QASYMM8 input.
      */
     void configure(const ITensor *input0, const ITensor *input1, ITensor *output);
 

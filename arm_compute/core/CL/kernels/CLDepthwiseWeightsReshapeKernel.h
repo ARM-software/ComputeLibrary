@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,7 +50,8 @@ public:
     CLDepthwiseWeightsReshapeKernel &operator=(CLDepthwiseWeightsReshapeKernel &&) = default;
     /** Set the input and output of the kernel.
      *
-     * @param[in]  input  The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM]. Data type supported: F32.
+     * @param[in]  input  The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM].
+     *                    Data type supported: QASYMM8/F32.
      * @param[out] output The output tensor. Data type supported: same as @p input.
      * @param[in]  biases (Optional) The input biases to add. Shape [IFM]. Data type supported: same as @p input.
      */
