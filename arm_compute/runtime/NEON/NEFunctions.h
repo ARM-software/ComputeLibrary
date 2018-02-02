@@ -60,6 +60,7 @@
 #include "arm_compute/runtime/NEON/functions/NEFloor.h"
 #include "arm_compute/runtime/NEON/functions/NEFullyConnectedLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMM.h"
+#include "arm_compute/runtime/NEON/functions/NEGEMMConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMInterleave4x4.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpAssemblyMatrixMultiplyCore.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.h"

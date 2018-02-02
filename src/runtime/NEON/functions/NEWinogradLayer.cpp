@@ -23,6 +23,7 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEWinogradLayer.h"
 
+#include "arm_compute/core/Error.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
@@ -46,6 +47,33 @@ inline Tensor4DShape internal_get_input_shape(const arm_compute::ITensor *input)
 
 namespace arm_compute
 {
+namespace
+{
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights, biases);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(0) != 3 && weights->dimension(0) != 5, "Only 3 and 5 kernels are supported");
+    ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
+
+    if(biases != nullptr)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
+        ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
+    }
+
+    // Get parameters from conv_info
+    unsigned int stride_x = 0;
+    unsigned int stride_y = 0;
+    std::tie(stride_x, stride_y) = conv_info.stride();
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(stride_y != 1 || stride_x != 1, "Winograd layer only supports unit strides.");
+
+    ARM_COMPUTE_UNUSED(output);
+
+    return Status{};
+}
+} //namespace
+
 NEWinogradLayer::NEWinogradLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _batched_gemm_kernel(nullptr), _transform_input_kernel(nullptr), _transform_output_kernel(nullptr), _transform_weights_kernel(nullptr), _permute_input(),
       _permute_weights(), _permute_output(), _input_workspace(), _output_workspace(), _kernel_storage(), _input_nhwc(), _output_nhwc(), _weights_hwio(), _input(), _weights(), _output(),
@@ -55,16 +83,9 @@ NEWinogradLayer::NEWinogradLayer(std::shared_ptr<IMemoryManager> memory_manager)
 
 void NEWinogradLayer::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights, biases);
-    ARM_COMPUTE_ERROR_ON_MSG(weights->info()->dimension(0) != 3 && weights->info()->dimension(0) != 5, "Only 3 and 5 kernels are supported");
-    ARM_COMPUTE_ERROR_ON(weights->info()->num_dimensions() > 4);
-
-    if(biases != nullptr)
-    {
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
-        ARM_COMPUTE_ERROR_ON(biases->info()->num_dimensions() > 1);
-    }
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, biases, output);
+    ARM_COMPUTE_UNUSED(conv_info);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), weights->info(), biases->info(), output->info(), conv_info));
 
     _weights = weights;
     _input   = input;
@@ -119,19 +140,15 @@ void NEWinogradLayer::configure(const ITensor *input, const ITensor *weights, co
     constexpr size_t storage_alignment   = 64;
     const size_t     kernel_storage_size = transform_weights_kernel->get_weight_storage_size(out_channels, in_channels) * data_type_size;
     _kernel_storage.allocator()->init(TensorInfo(TensorShape{ (kernel_storage_size + storage_alignment - 1) }, 1, DataType::U8));
-    _memory_group.manage(&_kernel_storage);
-    _memory_group.manage(&_input_nhwc);
     _kernel_storage.allocator()->allocate();
     // Input storage
     const size_t input_storage_size = transform_input_kernel->get_input_storage_size(in_shape.n_batches, in_shape.n_channels, in_shape.n_rows, in_shape.n_cols, use_same_padding) * data_type_size;
     _input_workspace.allocator()->init(TensorInfo(TensorShape{ (input_storage_size + storage_alignment - 1) }, 1, DataType::U8));
-    _memory_group.manage(&_input_workspace);
     _input_workspace.allocator()->allocate();
 
     // Output storage
     const size_t output_storage_size = transform_output_kernel->get_output_storage_size(in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, out_channels, use_same_padding) * data_type_size;
     _output_workspace.allocator()->init(TensorInfo(TensorShape{ (output_storage_size + storage_alignment - 1) }, 1, DataType::U8));
-    _memory_group.manage(&_output_workspace);
     _output_workspace.allocator()->allocate();
 
     // configure and allocate dst tensor to be used to convert from winograd domain to spatial domain when calling to reshape_output()
@@ -227,4 +244,13 @@ void NEWinogradLayer::run()
     _permute_output.run();
     _memory_group.release();
 }
+
+Status NEWinogradLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, biases, output);
+    ARM_COMPUTE_RETURN_ERROR_ON(validate_arguments(input, weights, biases, output, conv_info));
+
+    return Status{};
+}
+
 } // namespace arm_compute

@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEGEMMConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEWinogradLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
@@ -68,6 +69,44 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
 
 TEST_SUITE(NEON)
 
+TEST_SUITE(ConvolutionLayer)
+DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
+                                                                                           framework::dataset::make("InputInfo", { TensorInfo(TensorShape(8U, 8U, 2U), 1, DataType::F32, 0),
+                                                                                                                    TensorInfo(TensorShape(23U, 27U, 5U, 4U), 1, DataType::F32, 0),
+                                                                                                                    TensorInfo(TensorShape(3U, 3U, 2U, 1U), 1, DataType::F32, 0),
+                                                                                                                    TensorInfo(TensorShape(33U, 27U, 7U, 4U), 1, DataType::F32, 0)
+                                                                                                                                 }),
+                                                                                           framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
+                                                                                                                    TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
+                                                                                                                    TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
+                                                                                                                    TensorInfo(TensorShape(5U, 5U, 7U, 16U), 1, DataType::F16, 0)
+                                                                                                                                   })),
+                                                                                       framework::dataset::make("BiasesInfo", { TensorInfo(TensorShape(1U), 1, DataType::F32, 0),
+                                                                                                                TensorInfo(TensorShape(21U), 1, DataType::F32, 0),
+                                                                                                                TensorInfo(TensorShape(21U), 1, DataType::F32, 0),
+                                                                                                                TensorInfo(TensorShape(16U), 1, DataType::F32, 0)
+                                                                                                                              })),
+                                                                                   framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(6U, 6U, 1U), 1, DataType::F32, 0),
+                                                                                                            TensorInfo(TensorShape(21U, 25U, 21U, 4U), 1, DataType::F32, 0),
+                                                                                                            TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32, 0),
+                                                                                                            TensorInfo(TensorShape(11U, 12U, 16U, 4U), 1, DataType::F32, 0)
+                                                                                                                          })),
+                                                                               framework::dataset::make("ConvInfo", { PadStrideInfo(1, 1, 0, 0),
+                                                                                                                      PadStrideInfo(1, 1, 0, 0),
+                                                                                                                      PadStrideInfo(2, 1, 0, 0),
+                                                                                                                      PadStrideInfo(3, 2, 1, 0)
+                                                                                                                    })),
+                                                                           framework::dataset::make("Expected", { ConvolutionMethod::WINOGRAD, ConvolutionMethod::WINOGRAD, ConvolutionMethod::GEMM, ConvolutionMethod::GEMM })),
+               input_info, weights_info, biases_info, output_info, conv_info, expected)
+{
+    ConvolutionMethod is_valid = NEConvolutionLayer::get_convolution_method(&input_info.clone()->set_is_resizable(false),
+                                                                            &weights_info.clone()->set_is_resizable(false),
+                                                                            &biases_info.clone()->set_is_resizable(false),
+                                                                            &output_info.clone()->set_is_resizable(false), conv_info);
+    ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
+}
+TEST_SUITE_END()
+
 TEST_SUITE(WinogradLayer)
 template <typename T>
 using NEWinogradLayerFixture = WinogradLayerValidationFixture<Tensor, Accessor, NEWinogradLayer, T>;
@@ -82,7 +121,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEWinogradLayerFixture<float>, framework::Datas
 TEST_SUITE_END()
 TEST_SUITE_END()
 
-TEST_SUITE(ConvolutionLayer)
+TEST_SUITE(GEMMConvolutionLayer)
 
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallConvolutionLayerDataset(), datasets::LargeConvolutionLayerDataset()), CNNDataTypes),
                input_shape, weights_shape, bias_shape, output_shape, info, data_type)
@@ -107,7 +146,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     const QuantizationInfo weights_quantization_info = weights.info()->quantization_info();
 
     // Create and configure function
-    NEConvolutionLayer conv;
+    NEGEMMConvolutionLayer conv;
     conv.configure(&src, &weights, &bias, &dst, info);
 
     // Validate valid region
@@ -130,21 +169,21 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
 }
 
 template <typename T>
-using NEConvolutionLayerFixture = ConvolutionValidationFixture<Tensor, Accessor, NEConvolutionLayer, T>;
+using NEGEMMConvolutionLayerFixture = ConvolutionValidationFixture<Tensor, Accessor, NEConvolutionLayer, T>;
 
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallConvolutionLayerDataset(),
-                                                                                                                     framework::dataset::make("ReshapeWeights", { true, false })),
-                                                                                                             framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallConvolutionLayerDataset(),
+                                                                                                                 framework::dataset::make("ReshapeWeights", { true, false })),
+                                                                                                                 framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeConvolutionLayerDataset(),
-                                                                                                                   framework::dataset::make("ReshapeWeights", { true, false })),
-                                                                                                           framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeConvolutionLayerDataset(),
+                                                                                                                       framework::dataset::make("ReshapeWeights", { true, false })),
+                                                                                                               framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f16);
@@ -153,16 +192,16 @@ TEST_SUITE_END()
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallConvolutionLayerDataset(),
-                                                                                                                      framework::dataset::make("ReshapeWeights", { true, false })),
-                                                                                                              framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallConvolutionLayerDataset(),
+                                                                                                                  framework::dataset::make("ReshapeWeights", { true, false })),
+                                                                                                                  framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeConvolutionLayerDataset(),
-                                                                                                                    framework::dataset::make("ReshapeWeights", { true, false })),
-                                                                                                            framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeConvolutionLayerDataset(),
+                                                                                                                        framework::dataset::make("ReshapeWeights", { true, false })),
+                                                                                                                framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
@@ -171,23 +210,23 @@ TEST_SUITE_END()
 TEST_SUITE_END()
 
 template <typename T>
-using NEConvolutionLayerFixedPointFixture = ConvolutionValidationFixedPointFixture<Tensor, Accessor, NEConvolutionLayer, T>;
+using NEGEMMConvolutionLayerFixedPointFixture = ConvolutionValidationFixedPointFixture<Tensor, Accessor, NEGEMMConvolutionLayer, T>;
 
 TEST_SUITE(FixedPoint)
 TEST_SUITE(QS8)
 // We test for fixed point precision [4,6]
-FIXTURE_DATA_TEST_CASE(RunTiny, NEConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::TinyConvolutionLayerDataset(),
-                                                                                                                        framework::dataset::make("ReshapeWeights", { true, false })),
-                                                                                                                        framework::dataset::make("DataType", DataType::QS8)),
-                                                                                                                        framework::dataset::make("FractionalBits", 4, 7)))
+FIXTURE_DATA_TEST_CASE(RunTiny, NEGEMMConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::TinyConvolutionLayerDataset(),
+                       framework::dataset::make("ReshapeWeights", { true, false })),
+                       framework::dataset::make("DataType", DataType::QS8)),
+                       framework::dataset::make("FractionalBits", 4, 7)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_q);
 }
-FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
-                                                                                                                       framework::dataset::make("ReshapeWeights", { true, false })),
-                                                                                                                       framework::dataset::make("DataType", DataType::QS8)),
-                                                                                                                       framework::dataset::make("FractionalBits", 4, 7)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
+                       framework::dataset::make("ReshapeWeights", { true, false })),
+                       framework::dataset::make("DataType", DataType::QS8)),
+                       framework::dataset::make("FractionalBits", 4, 7)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_q);
@@ -196,7 +235,7 @@ TEST_SUITE_END()
 
 TEST_SUITE(QS16)
 // Testing for fixed point position [1,14)
-FIXTURE_DATA_TEST_CASE(RunTiny, NEConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::TinyConvolutionLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunTiny, NEGEMMConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::TinyConvolutionLayerDataset(),
                        framework::dataset::make("ReshapeWeights", { true, false })),
                        framework::dataset::make("DataType", DataType::QS16)),
                        framework::dataset::make("FractionalBits", 1, 14)))
@@ -204,10 +243,10 @@ FIXTURE_DATA_TEST_CASE(RunTiny, NEConvolutionLayerFixedPointFixture<int16_t>, fr
     // Validate output
     validate(Accessor(_target), _reference, tolerance_q);
 }
-FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
-                                                                                                                        framework::dataset::make("ReshapeWeights", { true, false })),
-                                                                                                                        framework::dataset::make("DataType", DataType::QS16)),
-                                                                                                                        framework::dataset::make("FractionalBits", 1, 14)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
+                       framework::dataset::make("ReshapeWeights", { true, false })),
+                       framework::dataset::make("DataType", DataType::QS16)),
+                       framework::dataset::make("FractionalBits", 1, 14)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_q);
@@ -216,11 +255,11 @@ TEST_SUITE_END()
 TEST_SUITE_END()
 
 template <typename T>
-using NEConvolutionLayerQuantizedFixture = ConvolutionValidationQuantizedFixture<Tensor, Accessor, NEConvolutionLayer, T>;
+using NEGEMMConvolutionLayerQuantizedFixture = ConvolutionValidationQuantizedFixture<Tensor, Accessor, NEGEMMConvolutionLayer, T>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
                        framework::dataset::make("ReshapeWeights", { true })),
                        framework::dataset::make("DataType", DataType::QASYMM8)),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })))
@@ -228,10 +267,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionLayerQuantizedFixture<uint8_t>, fr
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeConvolutionLayerDataset(),
-                                                                                                                       framework::dataset::make("ReshapeWeights", { true })),
-                                                                                                                       framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeConvolutionLayerDataset(),
+                       framework::dataset::make("ReshapeWeights", { true })),
+                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qasymm8);
