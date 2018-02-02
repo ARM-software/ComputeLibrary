@@ -92,7 +92,7 @@ void NEDeconvolutionLayer::run()
     const int stride_x      = _info.stride().first;
     const int stride_y      = _info.stride().second;
 
-    std::fill_n(reinterpret_cast<float *>(_scaled_output.buffer()), _scaled_output.info()->tensor_shape().total_size(), 0.f);
+    std::fill_n(_scaled_output.buffer(), _scaled_output.info()->total_size(), 0);
 
     // scaled_output is the input for the forward convolution. We copy the input elements to scaled_output
     // and insert rows and columns with zeroes depending on the stride values.
