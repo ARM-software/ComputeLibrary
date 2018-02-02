@@ -46,20 +46,29 @@ TensorShape get_output_shape(const ITensorInfo *input, const PermutationVector &
     permute(output_shape, perm);
     return output_shape;
 }
-} // namespace
 
-void CLPermuteKernel::configure(const ICLTensor *input, ICLTensor *output, const PermutationVector &perm)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QS8, DataType::QASYMM8,
-                                                  DataType::U16, DataType::S16, DataType::QS16,
-                                                  DataType::U32, DataType::S32,
-                                                  DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MSG(input->info()->num_dimensions() < 3, "Invalid input size!");
-    ARM_COMPUTE_ERROR_ON_MSG(
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QS8, DataType::QASYMM8,
+                                                         DataType::U16, DataType::S16, DataType::QS16,
+                                                         DataType::U32, DataType::S32,
+                                                         DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->num_dimensions() < 3), "Invalid input size!");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(
         (perm.num_dimensions() != 3 && ((perm[0] != 2 && perm[1] != 0 && perm[2] != 1) || (perm[0] != 1 && perm[1] != 2 && perm[2] != 0))) && (perm.num_dimensions() != 4 && ((perm[0] != 2 && perm[1] != 0
                 && perm[2] != 1)
                 || (perm[0] != 1 && perm[1] != 2 && perm[2] != 0))),
         "Only [2, 0, 1],[1, 2, 0] and [3, 2, 0, 1] permutation is supported");
+
+    ARM_COMPUTE_UNUSED(output);
+    return Status{};
+}
+} // namespace
+
+void CLPermuteKernel::configure(const ICLTensor *input, ICLTensor *output, const PermutationVector &perm)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), perm));
 
     _input  = input;
     _output = output;
@@ -99,6 +108,14 @@ void CLPermuteKernel::configure(const ICLTensor *input, ICLTensor *output, const
     Window win = calculate_max_window(*input->info(), Steps());
 
     ICLKernel::configure(win);
+}
+
+Status CLPermuteKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON(validate_arguments(input, output, perm));
+
+    return Status{};
 }
 
 void CLPermuteKernel::run(const Window &window, cl::CommandQueue &queue)
