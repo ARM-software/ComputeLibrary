@@ -72,9 +72,9 @@ void NEGEMVAArch64Kernel::internal_configure(const ITensor *input0, const ITenso
     // Configure kernel window
     Window win = calculate_max_window(*output->info());
 
-    AccessWindowRectangle output_access(output->info(), 0, 0, 12, 8);
+    AccessWindowRectangle output_access(output->info(), 0, 0, 12, 1);
 
-    const int input0_access_end = ceil_to_multiple(input0->info()->tensor_shape().x(), 8);
+    const int input0_access_end = ceil_to_multiple(input0->info()->tensor_shape().x(), 12);
     const int input1_access_end = ceil_to_multiple(input1->info()->tensor_shape().x(), 12);
 
     update_window_and_padding(win,
