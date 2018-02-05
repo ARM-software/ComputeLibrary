@@ -786,7 +786,7 @@ void NEHOGBlockNormalizationKernel::run(const Window &window, const ThreadInfo &
 
     Window win_in(window);
     win_in.set_dimension_step(Window::DimX, _num_cells_per_block_stride.width);
-    win_in.set_dimension_step(Window::DimY, _num_cells_per_block_stride.height);
+    win_in.set(Window::DimY, Window::Dimension(0, 0, 0));
 
     Iterator in(_input, win_in);
     Iterator out(_output, window);
@@ -794,7 +794,7 @@ void NEHOGBlockNormalizationKernel::run(const Window &window, const ThreadInfo &
     // Normalises blocks
     execute_window_loop(window, [&](const Coordinates & id)
     {
-        const auto input_row_ptr = reinterpret_cast<const float *>(in.ptr());
+        const auto input_row_ptr = reinterpret_cast<const float *>(in.ptr() + id.y() * _num_cells_per_block_stride.height * _input->info()->strides_in_bytes()[Window::DimY]);
         const auto out_row_ptr   = reinterpret_cast<float *>(out.ptr());
 
         // Execute normalization function
