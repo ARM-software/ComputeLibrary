@@ -59,22 +59,22 @@ protected:
         ARM_COMPUTE_ERROR_ON(3 != width && 5 != width && 7 != width && 9 != width);
         ARM_COMPUTE_ERROR_ON(3 != height && 5 != height && 7 != height && 9 != height);
 
-        int16_t conv[width * height];
+        std::vector<int16_t> conv(width * height);
 
         _width  = width;
         _height = height;
 
         if(is_separable)
         {
-            create_separable_conv(conv);
+            create_separable_conv(conv.data());
         }
         else
         {
-            create_conv(conv);
+            create_conv(conv.data());
         }
 
-        _target    = compute_target(shape, output_data_type, conv, scale, border_mode, constant_border_value);
-        _reference = compute_reference(shape, output_data_type, conv, scale, border_mode, constant_border_value);
+        _target    = compute_target(shape, output_data_type, conv.data(), scale, border_mode, constant_border_value);
+        _reference = compute_reference(shape, output_data_type, conv.data(), scale, border_mode, constant_border_value);
     }
 
     void

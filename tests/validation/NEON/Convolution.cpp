@@ -66,7 +66,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
     Tensor dst = create_tensor<Tensor>(shape, output_data_type);
 
     // Create conv matrix
-    int16_t conv[9];
+    int16_t conv[9] = {};
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -150,7 +150,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
     Tensor dst = create_tensor<Tensor>(shape, output_data_type);
 
     // Create conv matrix
-    int16_t conv[25];
+    int16_t conv[25] = {};
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -234,7 +234,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
     Tensor dst = create_tensor<Tensor>(shape, output_data_type);
 
     // Create conv matrix
-    int16_t conv[49];
+    int16_t conv[49] = {};
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -318,7 +318,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
     Tensor dst = create_tensor<Tensor>(shape, output_data_type);
 
     // Create conv matrix
-    int16_t conv[81];
+    int16_t conv[81] = {};
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -404,14 +404,14 @@ shape, output_data_type, border_mode, filter_width, filter_height)
     Tensor dst = create_tensor<Tensor>(shape, output_data_type);
 
     // Create conv matrix
-    int16_t conv[filter_width * filter_height];
+    std::vector<int16_t> conv(filter_height * filter_width);
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
     NEConvolutionRectangle convolution;
-    convolution.configure(&src, &dst, conv, filter_width, filter_height, 1, border_mode);
+    convolution.configure(&src, &dst, conv.data(), filter_width, filter_height, 1, border_mode);
 
     // Validate valid region
     const ValidRegion dst_valid_region = shape_to_valid_region(shape, (border_mode == BorderMode::UNDEFINED), BorderSize(filter_height / 2, filter_width / 2));
