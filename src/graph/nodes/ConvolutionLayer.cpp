@@ -29,6 +29,7 @@
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEDirectConvolutionLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEWinogradLayer.h"
 #include "support/ToolchainSupport.h"
 #include "utils/GraphTypePrinter.h"
 #include "utils/TypePrinter.h"
@@ -125,8 +126,22 @@ std::unique_ptr<arm_compute::IFunction> instantiate<TargetHint::NEON>(arm_comput
                                                                       const WeightsInfo    &weights_info,
                                                                       ConvolutionMethodHint conv_method)
 {
-    if((conv_method == ConvolutionMethodHint::DIRECT)
-       && arm_compute::NEDirectConvolutionLayer::validate(input->info(), weights->info(), biases != nullptr ? biases->info() : nullptr, output->info(), conv_info)) // NOLINT
+    const unsigned int kernel_size_x = weights->info()->tensor_shape().x();
+    const unsigned int kernel_size_y = weights->info()->tensor_shape().y();
+    const unsigned int conv_stride_x = conv_info.stride().first;
+    const unsigned int conv_stride_y = conv_info.stride().second;
+
+    bool is_square_kernel = (kernel_size_x == kernel_size_y);
+    bool has_same_stride  = (conv_stride_x == conv_stride_y);
+
+    // TODO (COMPID-765) : Winograd should have a validate function
+    if(conv_method == ConvolutionMethodHint::WINOGRAD && is_square_kernel && ((kernel_size_x == 3) || (kernel_size_x == 5)) && has_same_stride && (conv_info.stride().first == 1))
+    {
+        ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEWinogradConvolutionLayer");
+        return instantiate_direct_function<arm_compute::NEWinogradLayer, arm_compute::ITensor, TargetHint::NEON>(input, weights, biases, output, conv_info);
+    }
+    else if((conv_method == ConvolutionMethodHint::DIRECT)
+            && arm_compute::NEDirectConvolutionLayer::validate(input->info(), weights->info(), biases != nullptr ? biases->info() : nullptr, output->info(), conv_info)) // NOLINT
     {
         ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEDirectConvolutionLayer");
         return instantiate_direct_function<arm_compute::NEDirectConvolutionLayer, arm_compute::ITensor, TargetHint::NEON>(input, weights, biases, output, conv_info);

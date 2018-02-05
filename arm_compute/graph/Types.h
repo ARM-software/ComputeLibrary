@@ -83,8 +83,9 @@ enum class TargetHint
 /** Convolution method hint to the graph executor */
 enum class ConvolutionMethodHint
 {
-    GEMM,  /**< Convolution using GEMM */
-    DIRECT /**< Direct convolution */
+    GEMM,    /**< Convolution using GEMM */
+    DIRECT,  /**< Direct convolution */
+    WINOGRAD /**< Winograd convolution */
 };
 
 /** Supported layer operations */
