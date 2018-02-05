@@ -53,8 +53,7 @@ public:
         constexpr float std  = 255.f; /* Standard deviation value to divide from the channels */
 
         // Set target. 0 (NEON), 1 (OpenCL). By default it is NEON
-        TargetHint            target_hint      = set_target_hint(argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0);
-        ConvolutionMethodHint convolution_hint = ConvolutionMethodHint::DIRECT;
+        TargetHint target_hint = set_target_hint(argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0);
 
         // Parse arguments
         if(argc < 2)
@@ -88,10 +87,10 @@ public:
             label     = argv[4];
         }
 
-        graph << target_hint << convolution_hint << Tensor(TensorInfo(TensorShape(299U, 299U, 3U, 1U), 1, DataType::F32),
-                                                           get_input_accessor(image,
-                                                                              mean, mean, mean,
-                                                                              std, std, std, false /* Do not convert to BGR */))
+        graph << target_hint << Tensor(TensorInfo(TensorShape(299U, 299U, 3U, 1U), 1, DataType::F32),
+                                       get_input_accessor(image,
+                                                          mean, mean, mean,
+                                                          std, std, std, false /* Do not convert to BGR */))
 
               << ConvolutionLayer(3U, 3U, 32U,
                                   get_weights_accessor(data_path, "/cnn_data/inceptionv3_model/Conv2d_1a_3x3_weights.npy"),
