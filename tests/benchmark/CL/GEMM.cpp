@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,17 +41,26 @@ namespace test
 {
 namespace
 {
-const auto data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32 });
+const auto data_types          = framework::dataset::make("DataType", { DataType::F16, DataType::F32 });
+const auto reshape_b_only_once = framework::dataset::make("ReshapeBOnlyOnce", { false, true });
 } // namespace
 
 using CLGEMMFixture = GEMMFixture<CLTensor, CLGEMM, CLAccessor>;
 
 TEST_SUITE(CL)
 
-REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1GEMM, CLGEMMFixture, framework::DatasetMode::ALL, framework::dataset::combine(datasets::GoogLeNetInceptionV1GEMMDataset(), data_types));
-REGISTER_FIXTURE_DATA_TEST_CASE(MatrixMultiplyGEMM, CLGEMMFixture, framework::DatasetMode::ALL, framework::dataset::combine(datasets::MatrixMultiplyGEMMDataset(), data_types));
-REGISTER_FIXTURE_DATA_TEST_CASE(GoogleNetGEMM, CLGEMMFixture, framework::DatasetMode::NIGHTLY, framework::dataset::combine(datasets::GoogleNetGEMMDataset(), data_types));
-REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetGEMM, CLGEMMFixture, framework::DatasetMode::NIGHTLY, framework::dataset::combine(datasets::AlexNetGEMMDataset(), data_types));
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1GEMM, CLGEMMFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1GEMMDataset(),
+                                                                                        data_types),
+                                                            reshape_b_only_once));
+REGISTER_FIXTURE_DATA_TEST_CASE(MatrixMultiplyGEMM, CLGEMMFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(datasets::MatrixMultiplyGEMMDataset(),
+                                data_types),
+                                reshape_b_only_once));
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogleNetGEMM, CLGEMMFixture, framework::DatasetMode::NIGHTLY, framework::dataset::combine(framework::dataset::combine(datasets::GoogleNetGEMMDataset(), data_types),
+                                reshape_b_only_once));
+REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetGEMM, CLGEMMFixture, framework::DatasetMode::NIGHTLY, framework::dataset::combine(framework::dataset::combine(datasets::AlexNetGEMMDataset(),
+                                data_types),
+                                reshape_b_only_once));
 
 TEST_SUITE_END()
 } // namespace test
