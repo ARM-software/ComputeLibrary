@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -108,7 +108,7 @@ void CLROIPoolingLayerKernel::run(const Window &window, cl::CommandQueue &queue)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
 
-    Window slice(window);
+    Window slice = window.first_slice_window_3D();
     // Parallelize spatially and across the fourth dimension of the output tensor (also across ROIArray)
     slice.set(Window::DimZ, window[3]);
 

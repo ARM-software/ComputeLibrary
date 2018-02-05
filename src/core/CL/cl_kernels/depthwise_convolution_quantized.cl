@@ -171,9 +171,8 @@ inline uchar8 convolution3x3(
 
     pixels = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(pixels, output_multiplier, output_shift, 8);
     pixels = pixels + output_offset;
-    pixels = clamp(pixels, 0, 255);
 
-    return CONVERT(pixels, uchar8);
+    return CONVERT_SAT(pixels, uchar8);
 }
 
 /** This function computes the horizontal integral of the image.
