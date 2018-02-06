@@ -414,7 +414,6 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
         if(_is_interleaved_transposed)
         {
             // Configure GEMMInterleave4x4. _input_interleaved_reshaped will be auto configured in the kernel
-            _memory_group.manage(&_input_interleaved_reshaped);
             _input_interleave_kernel.configure(&_input_im2col_reshaped, &_input_interleaved_reshaped);
 
             // Configure GEMM
