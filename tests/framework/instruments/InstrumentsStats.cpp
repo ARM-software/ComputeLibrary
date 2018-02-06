@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 #include "InstrumentsStats.h"
+#include "arm_compute/core/utils/misc/utility.h"
 
 namespace arm_compute
 {
@@ -32,25 +33,16 @@ namespace framework
 InstrumentsStats::InstrumentsStats(const std::vector<Measurement> &measurements)
     : _min(nullptr), _max(nullptr), _median(nullptr), _mean(measurements.begin()->value().is_floating_point), _stddev(0.0)
 {
-    auto cmp_measurements = [](const Measurement & a, const Measurement & b)
-    {
-        return a.value() < b.value();
-    };
-
     auto add_measurements = [](Measurement::Value a, const Measurement & b)
     {
         return a + b.value();
     };
 
-    //Calculate min & max
-    const auto values = std::minmax_element(measurements.begin(), measurements.end(), cmp_measurements);
-    _min              = &(*values.first);
-    _max              = &(*values.second);
-
-    // Calculate the median value
-    auto copy = measurements;
-    std::nth_element(copy.begin(), copy.begin() + (copy.size() / 2), copy.end(), cmp_measurements);
-    _median = &copy[copy.size() / 2];
+    //Calculate min, max & median values
+    auto indices = arm_compute::utility::sort_indices(measurements);
+    _median      = &measurements[indices[measurements.size() / 2]];
+    _min         = &measurements[indices[0]];
+    _max         = &measurements[indices[measurements.size() - 1]];
 
     Measurement::Value sum_values = std::accumulate(measurements.begin(), measurements.end(), Measurement::Value(_min->value().is_floating_point), add_measurements);
 

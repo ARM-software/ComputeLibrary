@@ -24,8 +24,11 @@
 #ifndef __ARM_COMPUTE_MISC_UTILITY_H__
 #define __ARM_COMPUTE_MISC_UTILITY_H__
 
+#include <algorithm>
 #include <array>
 #include <limits>
+#include <numeric>
+#include <vector>
 
 namespace arm_compute
 {
@@ -140,6 +143,28 @@ T saturate_cast(U val)
     const auto high = static_cast<U>(std::numeric_limits<T>::max());
     return static_cast<T>(clamp(val, low, high));
 }
+
+/** Perform an index sort of a given vector.
+ *
+ * @param[in] v Vector to sort
+ *
+ * @return Sorted index vector.
+ */
+template <typename T>
+std::vector<size_t> sort_indices(const std::vector<T> &v)
+{
+    std::vector<size_t> idx(v.size());
+    std::iota(idx.begin(), idx.end(), 0);
+
+    std::sort(idx.begin(), idx.end(),
+              [&v](size_t i1, size_t i2)
+    {
+        return v[i1] < v[i2];
+    });
+
+    return idx;
+}
+
 } // namespace utility
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_MISC_UTILITY_H__ */
