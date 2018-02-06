@@ -67,6 +67,9 @@ void NEWinogradLayer::configure(const ITensor *input, const ITensor *weights, co
     _input   = input;
     _output  = output;
 
+    const PaddingType use_padding_type = (conv_info.pad_left() != 0u) ? PADDING_SAME : PADDING_VALID;
+    const bool        use_same_padding = use_padding_type == PADDING_SAME;
+
     // Get parameters from conv_info
     unsigned int stride_x = 0;
     unsigned int stride_y = 0;
@@ -87,17 +90,16 @@ void NEWinogradLayer::configure(const ITensor *input, const ITensor *weights, co
     _memory_group.manage(&_input_nhwc);
     _kernel_storage.allocator()->allocate();
     // Input storage
-    const size_t input_storage_size = NEWinogradLayerTransformInputKernel<2, 2, 3, 3>::get_input_storage_size(in_shape.n_batches, in_shape.n_channels, in_shape.n_rows, in_shape.n_cols,
-                                                                                                              false)
-                                      * data_type_size;
+
+    using IT                        = NEWinogradLayerTransformInputKernel<2, 2, 3, 3>;
+    const size_t input_storage_size = IT::get_input_storage_size(in_shape.n_batches, in_shape.n_channels, in_shape.n_rows, in_shape.n_cols, use_same_padding) * data_type_size;
     _input_workspace.allocator()->init(TensorInfo(TensorShape{ (input_storage_size + storage_alignment - 1) }, 1, DataType::U8));
     _memory_group.manage(&_input_workspace);
     _input_workspace.allocator()->allocate();
 
     // Output storage
-    const size_t output_storage_size = NEWinogradLayerTransformOutputKernel<2, 2, 3, 3>::get_output_storage_size(in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, out_channels,
-                                                                                                                 false)
-                                       * data_type_size;
+    using OT                         = NEWinogradLayerTransformOutputKernel<2, 2, 3, 3>;
+    const size_t output_storage_size = OT::get_output_storage_size(in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, out_channels, use_same_padding) * data_type_size;
     _output_workspace.allocator()->init(TensorInfo(TensorShape{ (output_storage_size + storage_alignment - 1) }, 1, DataType::U8));
     _memory_group.manage(&_output_workspace);
     _output_workspace.allocator()->allocate();
@@ -143,8 +145,8 @@ void NEWinogradLayer::configure(const ITensor *input, const ITensor *weights, co
     const KernelShape kernel_shape({ out_channels, weights_height, weights_width, in_channels });
 
     // Configure the InputTransform
-    const int input_matrix_stride = T::get_input_matrix_stride(kernel_shape, in_shape, PADDING_VALID);
-    _transform_input_kernel.configure(reinterpret_cast<float *>(_input_nhwc.buffer()), in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, in_shape.n_channels, PADDING_VALID,
+    const int input_matrix_stride = T::get_input_matrix_stride(kernel_shape, in_shape, use_padding_type);
+    _transform_input_kernel.configure(reinterpret_cast<float *>(_input_nhwc.buffer()), in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, in_shape.n_channels, use_padding_type,
                                       reinterpret_cast<float *>(_input_workspace.buffer()), input_matrix_stride);
 
     // Configure WeightsTransform
@@ -153,8 +155,8 @@ void NEWinogradLayer::configure(const ITensor *input, const ITensor *weights, co
 
     // Configure OutputTransform
     //The biases tensor has not been allocated at this point in time, the output transform will add the biases to the final result in the run() method
-    const int  output_matrix_stride = T::get_output_matrix_stride(kernel_shape, in_shape, PADDING_VALID);
-    const auto output_shape(T::get_output_shape(kernel_shape, in_shape, PADDING_VALID));
+    const int  output_matrix_stride = T::get_output_matrix_stride(kernel_shape, in_shape, use_padding_type);
+    const auto output_shape(T::get_output_shape(kernel_shape, in_shape, use_padding_type));
 
     _transform_output_kernel.configure(biases, reinterpret_cast<float *>(_output_workspace.buffer()),
                                        output_matrix_stride, reinterpret_cast<float *>(_output_nhwc.buffer()),
@@ -189,9 +191,9 @@ void NEWinogradLayer::run()
         _permute_weights.run();
         NEScheduler::get().schedule(&_transform_weights_kernel, Window::DimX);
     }
-
     //Bring channels to the front as Winograd code expects the tensor to be in the format NHWC
     _permute_input.run();
+
     // Transform input tensor to the winograd domain
     NEScheduler::get().schedule(&_transform_input_kernel, Window::DimX);
 
