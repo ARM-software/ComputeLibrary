@@ -1058,5 +1058,13 @@ struct IOFormatInfo
     std::string   row_delim;
     bool          align_columns;
 };
+
+/** Available ConvolutionMethod*/
+enum class ConvolutionMethod
+{
+    GEMM,    /**< Convolution using GEMM */
+    DIRECT,  /**< Direct convolution */
+    WINOGRAD /**< Convolution using Winograd */
+};
 }
 #endif /* __ARM_COMPUTE_TYPES_H__ */

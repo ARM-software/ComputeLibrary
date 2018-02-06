@@ -24,6 +24,7 @@
 #ifndef __ARM_COMPUTE_TEST_TYPE_PRINTER_H__
 #define __ARM_COMPUTE_TEST_TYPE_PRINTER_H__
 
+#include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/Dimensions.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/HOGInfo.h"
@@ -932,5 +933,70 @@ inline std::string to_string(const HOGInfo &type)
     return str.str();
 }
 
+inline ::std::ostream &operator<<(::std::ostream &os, const ConvolutionMethod &conv_method)
+{
+    switch(conv_method)
+    {
+        case ConvolutionMethod::GEMM:
+            os << "GEMM";
+            break;
+        case ConvolutionMethod::DIRECT:
+            os << "DIRECT";
+            break;
+        case ConvolutionMethod::WINOGRAD:
+            os << "WINOGRAD";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+inline std::string to_string(const ConvolutionMethod &conv_method)
+{
+    std::stringstream str;
+    str << conv_method;
+    return str.str();
+}
+
+inline ::std::ostream &operator<<(::std::ostream &os, const GPUTarget &gpu_target)
+{
+    switch(gpu_target)
+    {
+        case GPUTarget::GPU_ARCH_MASK:
+            os << "GPU_ARCH_MASK";
+            break;
+        case GPUTarget::MIDGARD:
+            os << "MIDGARD";
+            break;
+        case GPUTarget::BIFROST:
+            os << "BIFROST";
+            break;
+        case GPUTarget::T600:
+            os << "T600";
+            break;
+        case GPUTarget::T700:
+            os << "T700";
+            break;
+        case GPUTarget::T800:
+            os << "T800";
+            break;
+        case GPUTarget::G70:
+            os << "G70";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+inline std::string to_string(const GPUTarget &gpu_target)
+{
+    std::stringstream str;
+    str << gpu_target;
+    return str.str();
+}
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_TEST_TYPE_PRINTER_H__ */
