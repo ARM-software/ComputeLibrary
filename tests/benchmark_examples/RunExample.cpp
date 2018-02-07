@@ -88,6 +88,10 @@ int run_example(int argc, char **argv, Example &example)
     {
         example_argv.emplace_back(const_cast<char *>(arg.c_str())); // NOLINT
     }
+
+    // Set number of threads in Scheduler
+    Scheduler::get().set_num_threads(options.threads->value());
+
     // We need to do the setup here because framework.init() will need CL / GLES to be initialised
     try
     {
@@ -111,8 +115,6 @@ int run_example(int argc, char **argv, Example &example)
         std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
         return 1;
     }
-
-    Scheduler::get().set_num_threads(options.threads->value());
 
     if(options.log_level->value() > framework::LogLevel::NONE)
     {
