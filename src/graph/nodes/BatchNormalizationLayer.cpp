@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -77,6 +77,7 @@ std::unique_ptr<arm_compute::IFunction> BatchNormalizationLayer::instantiate_nod
     node_ctx.add_input(_gamma.tensor());
     node_ctx.add_output(out);
     node_ctx.add_parameter<float>("epsilon", _epsilon);
+    node_ctx.add_parameter<ActivationLayerInfo>("act_info", _act_info);
 
     // Configure operation
     auto func = OperationRegistry::get().find_operation(OperationType::BatchNormalizationLayer, _target_hint)->configure(node_ctx);

@@ -122,9 +122,7 @@ public:
                   get_weights_accessor(data_path, "Conv2d_0_BatchNorm_moving_variance.npy"),
                   get_weights_accessor(data_path, "Conv2d_0_BatchNorm_gamma.npy"),
                   get_weights_accessor(data_path, "Conv2d_0_BatchNorm_beta.npy"),
-                  0.001f)
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))
-
+                  0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))
               << get_dwsc_node(data_path, "Conv2d_1", 64 * depth_scale, PadStrideInfo(1, 1, 1, 1), PadStrideInfo(1, 1, 0, 0))
               << get_dwsc_node(data_path, "Conv2d_2", 128 * depth_scale, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::CEIL), PadStrideInfo(1, 1, 0, 0))
               << get_dwsc_node(data_path, "Conv2d_3", 128 * depth_scale, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::CEIL), PadStrideInfo(1, 1, 0, 0))
@@ -174,8 +172,7 @@ private:
                get_weights_accessor(data_path, total_path + "depthwise_BatchNorm_moving_variance.npy"),
                get_weights_accessor(data_path, total_path + "depthwise_BatchNorm_gamma.npy"),
                get_weights_accessor(data_path, total_path + "depthwise_BatchNorm_beta.npy"),
-               0.001f)
-           << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))
+               0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))
            << ConvolutionLayer(
                1U, 1U, conv_filt,
                get_weights_accessor(data_path, total_path + "pointwise_weights.npy"),
@@ -186,8 +183,7 @@ private:
                get_weights_accessor(data_path, total_path + "pointwise_BatchNorm_moving_variance.npy"),
                get_weights_accessor(data_path, total_path + "pointwise_BatchNorm_gamma.npy"),
                get_weights_accessor(data_path, total_path + "pointwise_BatchNorm_beta.npy"),
-               0.001f)
-           << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f));
+               0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f));
 
         return BranchLayer(std::move(sg));
     }

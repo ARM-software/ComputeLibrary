@@ -101,8 +101,7 @@ public:
                                                               "/cnn_data/inceptionv3_model/Conv2d_1a_3x3_BatchNorm_moving_variance.npy"),
                                          get_random_accessor(1.f, 1.f), get_weights_accessor(data_path,
                                                                                              "/cnn_data/inceptionv3_model/Conv2d_1a_3x3_BatchNorm_beta.npy"),
-                                         0.001f)
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                                         0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
 
               << ConvolutionLayer(3U, 3U, 32U,
                                   get_weights_accessor(data_path, "/cnn_data/inceptionv3_model/Conv2d_2a_3x3_weights.npy"),
@@ -113,8 +112,7 @@ public:
                                                               "/cnn_data/inceptionv3_model/Conv2d_2a_3x3_BatchNorm_moving_variance.npy"),
                                          get_random_accessor(1.f, 1.f), get_weights_accessor(data_path,
                                                                                              "/cnn_data/inceptionv3_model/Conv2d_2a_3x3_BatchNorm_beta.npy"),
-                                         0.001f)
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                                         0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
 
               << ConvolutionLayer(3U, 3U, 64U,
                                   get_weights_accessor(data_path, "/cnn_data/inceptionv3_model/Conv2d_2b_3x3_weights.npy"),
@@ -125,8 +123,7 @@ public:
                                                               "/cnn_data/inceptionv3_model/Conv2d_2b_3x3_BatchNorm_moving_variance.npy"),
                                          get_random_accessor(1.f, 1.f), get_weights_accessor(data_path,
                                                                                              "/cnn_data/inceptionv3_model/Conv2d_2b_3x3_BatchNorm_beta.npy"),
-                                         0.001f)
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                                         0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
 
               << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)))
 
@@ -139,8 +136,7 @@ public:
                                                               "/cnn_data/inceptionv3_model/Conv2d_3b_1x1_BatchNorm_moving_variance.npy"),
                                          get_random_accessor(1.f, 1.f), get_weights_accessor(data_path,
                                                                                              "/cnn_data/inceptionv3_model/Conv2d_3b_1x1_BatchNorm_beta.npy"),
-                                         0.001f)
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                                         0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
 
               << ConvolutionLayer(3U, 3U, 192U,
                                   get_weights_accessor(data_path, "/cnn_data/inceptionv3_model/Conv2d_4a_3x3_weights.npy"),
@@ -151,8 +147,7 @@ public:
                                                               "/cnn_data/inceptionv3_model/Conv2d_4a_3x3_BatchNorm_moving_variance.npy"),
                                          get_random_accessor(1.f, 1.f), get_weights_accessor(data_path,
                                                                                              "/cnn_data/inceptionv3_model/Conv2d_4a_3x3_BatchNorm_beta.npy"),
-                                         0.001f)
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                                         0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
 
               << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)))
 
@@ -231,8 +226,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_0a_1x1_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_0a_1x1_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
         SubGraph i_b;
         i_b << ConvolutionLayer(
@@ -245,8 +239,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d" + conv_id0 + "1x1_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d" + conv_id0 + "1x1_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
             << ConvolutionLayer(
                 5U, 5U, std::get<1>(b_filters),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv" + conv_id1 + "5x5_weights.npy"),
@@ -257,8 +250,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv" + conv_id1 + "5x5_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv" + conv_id1 + "5x5_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
         SubGraph i_c;
         i_c << ConvolutionLayer(
@@ -271,8 +263,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0a_1x1_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0a_1x1_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
             << ConvolutionLayer(
                 3U, 3U, std::get<1>(c_filters),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0b_3x3_weights.npy"),
@@ -283,8 +274,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0b_3x3_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0b_3x3_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
             << ConvolutionLayer(
                 3U, 3U, std::get<2>(c_filters),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0c_3x3_weights.npy"),
@@ -295,8 +285,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0c_3x3_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0c_3x3_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
         SubGraph i_d;
         i_d << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL), true))
@@ -310,8 +299,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_3_Conv2d_0b_1x1_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_3_Conv2d_0b_1x1_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
         return BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_a), std::move(i_b), std::move(i_c), std::move(i_d));
     }
@@ -332,8 +320,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_1a_1x1_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_1a_1x1_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
         SubGraph i_b;
         i_b << ConvolutionLayer(
@@ -346,8 +333,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0a_1x1_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0a_1x1_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
             << ConvolutionLayer(
                 3U, 3U, std::get<1>(b_filters),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0b_3x3_weights.npy"),
@@ -358,8 +344,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0b_3x3_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0b_3x3_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
             << ConvolutionLayer(
                 3U, 3U, std::get<2>(b_filters),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_1a_1x1_weights.npy"),
@@ -370,8 +355,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_1a_1x1_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_1a_1x1_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
         SubGraph i_c;
         i_c << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)))
@@ -399,8 +383,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_0a_1x1_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_0a_1x1_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
         SubGraph i_b;
         i_b << ConvolutionLayer(
@@ -413,8 +396,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0a_1x1_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0a_1x1_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
             << ConvolutionLayer(
                 7U, 1U, std::get<1>(b_filters),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0b_1x7_weights.npy"),
@@ -425,8 +407,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0b_1x7_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0b_1x7_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
             << ConvolutionLayer(
                 1U, 7U, std::get<2>(b_filters),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0c_7x1_weights.npy"),
@@ -437,8 +418,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0c_7x1_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0c_7x1_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
         SubGraph i_c;
         i_c << ConvolutionLayer(
@@ -451,8 +431,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0a_1x1_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0a_1x1_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
             << ConvolutionLayer(
                 1U, 7U, std::get<1>(c_filters),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0b_7x1_weights.npy"),
@@ -463,8 +442,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0b_7x1_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0b_7x1_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
             << ConvolutionLayer(
                 7U, 1U, std::get<2>(c_filters),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0c_1x7_weights.npy"),
@@ -475,8 +453,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0c_1x7_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0c_1x7_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
             << ConvolutionLayer(
                 1U, 7U, std::get<3>(c_filters),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0d_7x1_weights.npy"),
@@ -487,8 +464,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0d_7x1_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0d_7x1_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
             << ConvolutionLayer(
                 7U, 1U, std::get<4>(c_filters),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0e_1x7_weights.npy"),
@@ -499,8 +475,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0e_1x7_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0e_1x7_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
         SubGraph i_d;
         i_d << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL), true))
@@ -514,8 +489,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_3_Conv2d_0b_1x1_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_3_Conv2d_0b_1x1_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
         return BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_a), std::move(i_b), std::move(i_c), std::move(i_d));
     }
@@ -536,8 +510,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_0a_1x1_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_0a_1x1_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
             << ConvolutionLayer(
                 3U, 3U, std::get<1>(a_filters),
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_1a_3x3_weights.npy"),
@@ -548,8 +521,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_1a_3x3_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_1a_3x3_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
         SubGraph i_b;
         i_b << ConvolutionLayer(
@@ -562,8 +534,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0a_1x1_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0a_1x1_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
             << ConvolutionLayer(
                 7U, 1U, std::get<1>(b_filters),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0b_1x7_weights.npy"),
@@ -574,8 +545,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0b_1x7_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0b_1x7_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
             << ConvolutionLayer(
                 1U, 7U, std::get<2>(b_filters),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0c_7x1_weights.npy"),
@@ -586,8 +556,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0c_7x1_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0c_7x1_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
             << ConvolutionLayer(
                 3U, 3U, std::get<3>(b_filters),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_1a_3x3_weights.npy"),
@@ -598,8 +567,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_1a_3x3_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_1a_3x3_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
         SubGraph i_c;
         i_c << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)))
@@ -635,8 +603,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_0a_1x1_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_0_Conv2d_0a_1x1_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
         SubGraph i_b1;
         i_b1 << ConvolutionLayer(
@@ -649,8 +616,7 @@ private:
                  get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0b_1x3_BatchNorm_moving_variance.npy"),
                  get_random_accessor(1.f, 1.f),
                  get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0b_1x3_BatchNorm_beta.npy"),
-                 0.001f)
-             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+                 0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
         SubGraph i_b2;
         i_b2 << ConvolutionLayer(
@@ -663,8 +629,7 @@ private:
                  get_weights_accessor(data_path, total_path + "Branch_1_Conv2d" + conv_id + "3x1_BatchNorm_moving_variance.npy"),
                  get_random_accessor(1.f, 1.f),
                  get_weights_accessor(data_path, total_path + "Branch_1_Conv2d" + conv_id + "3x1_BatchNorm_beta.npy"),
-                 0.001f)
-             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+                 0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
         SubGraph i_b;
         i_b << ConvolutionLayer(
@@ -677,8 +642,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0a_1x1_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0a_1x1_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
             << BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_b1), std::move(i_b2));
 
         SubGraph i_c1;
@@ -692,8 +656,7 @@ private:
                  get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0c_1x3_BatchNorm_moving_variance.npy"),
                  get_random_accessor(1.f, 1.f),
                  get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0c_1x3_BatchNorm_beta.npy"),
-                 0.001f)
-             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+                 0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
         SubGraph i_c2;
         i_c2 << ConvolutionLayer(
@@ -706,8 +669,7 @@ private:
                  get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0d_3x1_BatchNorm_moving_variance.npy"),
                  get_random_accessor(1.f, 1.f),
                  get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0d_3x1_BatchNorm_beta.npy"),
-                 0.001f)
-             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+                 0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
         SubGraph i_c;
         i_c << ConvolutionLayer(
@@ -720,8 +682,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0a_1x1_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0a_1x1_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
             << ConvolutionLayer(
                 3U, 3U, std::get<1>(c_filters),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0b_3x3_weights.npy"),
@@ -732,8 +693,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0b_3x3_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0b_3x3_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
             << BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_c1), std::move(i_c2));
 
         SubGraph i_d;
@@ -748,8 +708,7 @@ private:
                 get_weights_accessor(data_path, total_path + "Branch_3_Conv2d_0b_1x1_BatchNorm_moving_variance.npy"),
                 get_random_accessor(1.f, 1.f),
                 get_weights_accessor(data_path, total_path + "Branch_3_Conv2d_0b_1x1_BatchNorm_beta.npy"),
-                0.001f)
-            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+                0.001f, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
         return BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_a), std::move(i_b), std::move(i_c), std::move(i_d));
     }

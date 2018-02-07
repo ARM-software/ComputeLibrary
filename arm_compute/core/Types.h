@@ -713,6 +713,7 @@ public:
         LINEAR           /**< Linear ( \f$ f(x)= ax + b \f$ ) */
     };
 
+    ActivationLayerInfo() = default;
     /** Default Constructor
      *
      * @param[in] f The activation function to use.
@@ -721,7 +722,7 @@ public:
      * @param[in] b (Optional) The beta parameter used by some activation functions (@ref ActivationFunction::LINEAR, @ref ActivationFunction::LU_BOUNDED_RELU, @ref ActivationFunction::TANH).
      */
     ActivationLayerInfo(ActivationFunction f, float a = 0.0f, float b = 0.0f)
-        : _act(f), _a(a), _b(b)
+        : _act(f), _a(a), _b(b), _enabled(true)
     {
     }
     ActivationFunction activation() const
@@ -736,11 +737,16 @@ public:
     {
         return _b;
     }
+    bool enabled() const
+    {
+        return _enabled;
+    }
 
 private:
-    ActivationFunction _act;
-    float              _a;
-    float              _b;
+    ActivationFunction _act     = { ActivationLayerInfo::ActivationFunction::LOGISTIC };
+    float              _a       = {};
+    float              _b       = {};
+    bool               _enabled = { false };
 };
 
 /** Normalization Layer Information class */

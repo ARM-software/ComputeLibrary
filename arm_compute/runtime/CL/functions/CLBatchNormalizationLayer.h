@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,35 +48,38 @@ public:
      *
      * @note If the output tensor is a nullptr, the batch normalization function will be performed in-place
      *
-     * @param[in, out] input   Source tensor. In case of @p output tensor = nullptr, this tensor will store the result.
-     *                         3 lower dimensions represent a single input with dimensions [width, height, FM].
-     *                         The rest are optional and used for representing batches. Data types supported: QS8/QS16/F16/F32.
-     * @param[out]     output  Destination tensor. Output will have the same number of dimensions as input. Data type supported: same as @p input
-     * @param[in]      mean    Mean values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]      var     Variance values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]      beta    Beta values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]      gamma   Gamma values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]      epsilon Small value to avoid division with zero.
+     * @param[in, out] input    Source tensor. In case of @p output tensor = nullptr, this tensor will store the result.
+     *                          3 lower dimensions represent a single input with dimensions [width, height, FM].
+     *                          The rest are optional and used for representing batches. Data types supported: QS8/QS16/F16/F32.
+     * @param[out]     output   Destination tensor. Output will have the same number of dimensions as input. Data type supported: same as @p input
+     * @param[in]      mean     Mean values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in]      var      Variance values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in]      beta     Beta values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in]      gamma    Gamma values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in]      epsilon  Small value to avoid division with zero.
+     * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
      */
-    void configure(ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta, const ICLTensor *gamma, float epsilon);
+    void configure(ICLTensor *input, ICLTensor *output, const ICLTensor *mean, const ICLTensor *var, const ICLTensor *beta, const ICLTensor *gamma, float epsilon,
+                   ActivationLayerInfo act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLBatchNormalizationLayer
      *
-     * @param[in] input   Source tensor info. In case of @p output tensor info = nullptr, this tensor will store the result.
-     *                    3 lower dimensions represent a single input with dimensions [width, height, FM].
-     *                    The rest are optional and used for representing batches. Data types supported: QS8/QS16/F16/F32.
-     * @param[in] output  Destination tensor info. Output will have the same number of dimensions as input. Data type supported: same as @p input
-     * @param[in] mean    Mean values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in] var     Variance values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in] beta    Beta values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in] gamma   Gamma values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in] epsilon Small value to avoid division with zero.
+     * @param[in] input    Source tensor info. In case of @p output tensor info = nullptr, this tensor will store the result.
+     *                     3 lower dimensions represent a single input with dimensions [width, height, FM].
+     *                     The rest are optional and used for representing batches. Data types supported: QS8/QS16/F16/F32.
+     * @param[in] output   Destination tensor info. Output will have the same number of dimensions as input. Data type supported: same as @p input
+     * @param[in] mean     Mean values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in] var      Variance values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in] beta     Beta values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in] gamma    Gamma values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in] epsilon  Small value to avoid division with zero.
+     * @param[in] act_info (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output,
                            const ITensorInfo *mean, const ITensorInfo *var,
                            const ITensorInfo *beta, const ITensorInfo *gamma,
-                           float epsilon);
+                           float epsilon, ActivationLayerInfo act_info);
 
     // Inherited methods overridden:
     void run() override;

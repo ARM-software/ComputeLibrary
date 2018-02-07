@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "tests/GLES_COMPUTE/GCAccessor.h"
 #include "tests/benchmark/fixtures/BatchNormalizationLayerFixture.h"
 #include "tests/datasets/system_tests/googlenet/inceptionv4/GoogLeNetInceptionV4BatchNormalizationLayerDataset.h"
+#include "tests/datasets/system_tests/mobilenet/MobileNetBatchNormalizationLayerDataset.h"
 #include "tests/datasets/system_tests/yolo/v2/YOLOV2BatchNormalizationLayerDataset.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
@@ -47,24 +48,41 @@ using GCBatchNormalizationLayerFixture = BatchNormalizationLayerFixture<GCTensor
 
 TEST_SUITE(GC)
 
+REGISTER_FIXTURE_DATA_TEST_CASE(MobileNetBatchNormalizationLayer, GCBatchNormalizationLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::MobileNetBatchNormalizationLayerDataset(),
+                                                                                                                    framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", 1)));
+
 REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2BatchNormalizationLayer, GCBatchNormalizationLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2BatchNormalizationLayerDataset(),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2BatchNormalizationLayerDataset(), framework::dataset::make("ActivationInfo",
+                                                                                                                    ActivationLayerInfo())),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4BatchNormalizationLayer, GCBatchNormalizationLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4BatchNormalizationLayerDataset(),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4BatchNormalizationLayerDataset(),
+                                                                                                                    framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", 1)));
 
 TEST_SUITE(NIGHTLY)
+
+REGISTER_FIXTURE_DATA_TEST_CASE(MobileNetBatchNormalizationLayer, GCBatchNormalizationLayerFixture, framework::DatasetMode::NIGHTLY,
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::MobileNetBatchNormalizationLayerDataset(),
+                                                                                                                    framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))),
+                                                                                        data_types),
+                                                            framework::dataset::make("Batches", { 4, 8 })));
+
 REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2BatchNormalizationLayer, GCBatchNormalizationLayerFixture, framework::DatasetMode::NIGHTLY,
-                                framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2BatchNormalizationLayerDataset(),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2BatchNormalizationLayerDataset(), framework::dataset::make("ActivationInfo",
+                                                                                                                    ActivationLayerInfo())),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4BatchNormalizationLayer, GCBatchNormalizationLayerFixture, framework::DatasetMode::NIGHTLY,
-                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4BatchNormalizationLayerDataset(),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4BatchNormalizationLayerDataset(),
+                                                                                                                    framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 TEST_SUITE_END()

@@ -23,6 +23,8 @@
  */
 #include "helpers.h"
 
+#if defined(VEC_SIZE) && defined(DATA_TYPE)
+
 #if defined(FIXED_POINT_POSITION)
 #include "fixed_point.h"
 
@@ -41,6 +43,16 @@
 #define SQCVT_SAT(a) (a)
 
 #endif /* FIXED_POINT_POSITION */
+
+#if defined(LU_BRELU)
+#define ACTIVATION_FUNC(x) CLAMP(x, (DATA_TYPE)B_VAL, (DATA_TYPE)A_VAL)
+#elif defined(BRELU)
+#define ACTIVATION_FUNC(x) CLAMP(x, (DATA_TYPE)0, (DATA_TYPE)A_VAL)
+#elif defined(RELU)
+#define ACTIVATION_FUNC(x) max(x, (DATA_TYPE)0)
+#else /* FUSED_ACT */
+#define ACTIVATION_FUNC(x) (x)
+#endif /* FUSED_ACT */
 
 /** Apply batch normalization.
  *
@@ -126,6 +138,13 @@ __kernel void batchnormalization_layer(TENSOR3D_DECLARATION(input),
     gamma_vec = *((__global DATA_TYPE *)(gamma.ptr + current_slice * gamma.stride_x));
     beta_vec  = *((__global DATA_TYPE *)(beta.ptr + current_slice * beta.stride_x));
 
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    res = ADD_OP(MUL_OP(gamma_vec, x_bar), beta_vec);
+
+    res = ACTIVATION_FUNC(res);
+
     VSTORE(VEC_SIZE)
-    (ADD_OP(MUL_OP(gamma_vec, x_bar), beta_vec), 0, (__global DATA_TYPE *)out.ptr);
+    (res, 0, (__global DATA_TYPE *)out.ptr);
 }
+
+#endif /* defined(VEC_SIZE) && defined(DATA_TYPE) */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,6 +35,16 @@ precision mediump float;
 #define MUL_OP(a, b) ((a) * (b))
 #define INVSQRT_OP(a) inversesqrt((a))
 #define SQCVT_SAT(a) (a)
+
+#if defined(LU_BRELU)
+#define ACTIVATION_FUNC(x) min(max(x, float(B_VAL)), float(A_VAL))
+#elif defined(BRELU)
+#define ACTIVATION_FUNC(x) min(max(x, float(0)), float(A_VAL))
+#elif defined(RELU)
+#define ACTIVATION_FUNC(x) max(x, float(0))
+#else /* defined(FUSED_ACT) */
+#define ACTIVATION_FUNC(x) (x)
+#endif /* defined(FUSED_ACT) */
 
 /** Apply batch normalization.
  *
@@ -102,7 +112,7 @@ void main(void)
     gamma_param = LOAD(gamma_ptr, TENSOR_OFFSET_ADVANCE_IN_BYTES(gamma_iter, current_slice * beta_attrs.stride_x));
     beta_param  = LOAD(beta_ptr, TENSOR_OFFSET_ADVANCE_IN_BYTES(beta_iter, current_slice * beta_attrs.stride_x));
 
-    STORE_CURRENT_ITEM(dst_ptr, dst_iter, ADD_OP(MUL_OP(gamma_param, x_bar), beta_param));
+    STORE_CURRENT_ITEM(dst_ptr, dst_iter, ACTIVATION_FUNC(ADD_OP(MUL_OP(gamma_param, x_bar), beta_param)));
 }
 
 #elif defined(DATA_TYPE_FP16)
@@ -148,7 +158,7 @@ void main(void)
 
         gamma_param = unpacked_s[3].x;
         beta_param  = unpacked_s[4].x;
-        result      = ADD_OP(MUL_OP(gamma_param, x_bar), beta_param);
+        result      = ACTIVATION_FUNC(ADD_OP(MUL_OP(gamma_param, x_bar), beta_param));
 
         STORE_PACK4_CURRENT_ITEM_HALF(dst_ptr, dst_iter, result);
     }
@@ -163,7 +173,7 @@ void main(void)
 
         gamma_param = unpacked_s[3].y;
         beta_param  = unpacked_s[4].y;
-        result      = ADD_OP(MUL_OP(gamma_param, x_bar), beta_param);
+        result      = ACTIVATION_FUNC(ADD_OP(MUL_OP(gamma_param, x_bar), beta_param));
 
         STORE_PACK4_CURRENT_ITEM_HALF(dst_ptr, dst_iter, result);
     }
@@ -178,7 +188,7 @@ void main(void)
 
         gamma_param = unpacked_s[3].z;
         beta_param  = unpacked_s[4].z;
-        result      = ADD_OP(MUL_OP(gamma_param, x_bar), beta_param);
+        result      = ACTIVATION_FUNC(ADD_OP(MUL_OP(gamma_param, x_bar), beta_param));
 
         STORE_PACK4_CURRENT_ITEM_HALF(dst_ptr, dst_iter, result);
     }
@@ -193,7 +203,7 @@ void main(void)
 
         gamma_param = unpacked_s[3].w;
         beta_param  = unpacked_s[4].w;
-        result      = ADD_OP(MUL_OP(gamma_param, x_bar), beta_param);
+        result      = ACTIVATION_FUNC(ADD_OP(MUL_OP(gamma_param, x_bar), beta_param));
 
         STORE_PACK4_CURRENT_ITEM_HALF(dst_ptr, dst_iter, result);
     }
