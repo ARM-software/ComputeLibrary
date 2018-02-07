@@ -39,49 +39,19 @@ SimpleTensor<T> convolution(const SimpleTensor<uint8_t> &src, DataType output_da
                             const unsigned int width,
                             const unsigned int height)
 {
-    ARM_COMPUTE_ERROR_ON(0 == scale);
+    ARM_COMPUTE_ERROR_ON(scale == 0);
+    ARM_COMPUTE_ERROR_ON(scale >= std::numeric_limits<int32_t>::max());
 
-    SimpleTensor<T> dst(src.shape(), output_data_type);
+    SimpleTensor<T>       dst(src.shape(), output_data_type);
+    SimpleTensor<int32_t> sum(src.shape(), output_data_type);
 
-    switch(output_data_type)
+    for(int element_idx = 0; element_idx < src.num_elements(); ++element_idx)
     {
-        case DataType::S16:
-        {
-            SimpleTensor<int16_t> sum(src.shape(), output_data_type);
-            for(int element_idx = 0; element_idx < src.num_elements(); ++element_idx)
-            {
-                const Coordinates id = index2coord(src.shape(), element_idx);
-                apply_2d_spatial_filter(id, src, sum, TensorShape(width, height), conv, 1 / static_cast<double>(scale), border_mode, constant_border_value);
-                dst[element_idx] = tensor_elem_at<int16_t>(sum, id, border_mode, constant_border_value);
-            }
-        }
-        break;
-        case DataType::U8:
-        {
-            SimpleTensor<int32_t> sum(src.shape(), output_data_type);
-            for(int element_idx = 0; element_idx < src.num_elements(); ++element_idx)
-            {
-                const Coordinates id = index2coord(src.shape(), element_idx);
-                apply_2d_spatial_filter(id, src, sum, TensorShape(width, height), conv, 1, border_mode, constant_border_value);
-                if(tensor_elem_at<int32_t>(sum, id, border_mode, constant_border_value) < 0)
-                {
-                    dst[element_idx] = 0;
-                }
-                else if((tensor_elem_at<int32_t>(sum, id, border_mode, constant_border_value) / scale) > 255)
-                {
-                    dst[element_idx] = 255;
-                }
-                else
-                {
-                    dst[element_idx] = tensor_elem_at<int32_t>(sum, id, border_mode, constant_border_value) / scale;
-                }
-            }
-        }
-        break;
-        default:
-            ARM_COMPUTE_ERROR("Not supported DataType");
-            break;
+        const Coordinates id = index2coord(src.shape(), element_idx);
+        apply_2d_spatial_filter(id, src, sum, TensorShape(width, height), conv, 1, border_mode, constant_border_value);
+        dst[element_idx] = saturate_cast<T>(tensor_elem_at<int32_t>(sum, id, border_mode, constant_border_value) / static_cast<int>(scale));
     }
+
     return dst;
 }
 
