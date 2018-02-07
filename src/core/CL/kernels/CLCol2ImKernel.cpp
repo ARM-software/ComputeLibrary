@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,6 +67,8 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
     // Create kernel
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
+    build_opts.add_option("-DELEMENT_SIZE=" + support::cpp11::to_string(input->info()->element_size()));
+    build_opts.add_option("-DWIDTH_INPUT=" + support::cpp11::to_string(input->info()->dimension(0)));
     build_opts.add_option("-DWIDTH_OUTPUT=" + support::cpp11::to_string(_convolved_dims.first));
     build_opts.add_option_if(is_data_type_fixed_point(data_type), "-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
 
@@ -87,10 +89,15 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
         }
     }
 
-    // Configure window
-    Window win = calculate_max_window(*input->info(), Steps());
+    const unsigned int num_elems_read_per_iteration = is_data_type_fixed_point(data_type) ? 1 : 8;
 
-    // The CLCol2ImKernel doesn't need padding so update_window_and_padding() can be skipped
+    // Configure window
+    Window win = calculate_max_window(*input->info(), Steps(num_elems_read_per_iteration));
+
+    // Update window and padding just for the input tensor as we cannot access out-of-bounds elements in the output one
+    AccessWindowHorizontal input_access(input->info(), 0, num_elems_read_per_iteration);
+    update_window_and_padding(win, input_access);
+
     Coordinates coord;
     coord.set_num_dimensions(output->info()->num_dimensions());
     output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
