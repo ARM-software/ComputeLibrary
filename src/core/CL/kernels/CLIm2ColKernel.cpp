@@ -135,12 +135,15 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
                     // Optimized im2col1x1 if stride_x = 1 and conv_info.has_padding() = false
                     if(conv_info.stride().first == 1 && !conv_info.has_padding())
                     {
+                        // Set hint for LWS
+                        _lws_hint                          = cl::NDRange(1, 1, 8);
                         _num_elems_processed_per_iteration = 4;
                         is_optimized_path                  = true;
                         kernel_name                        = "im2col1x1_stridex1_dchw";
                     }
                     break;
                 case 3:
+                    _lws_hint                          = cl::NDRange(1, 1, 8);
                     _num_elems_processed_per_iteration = 1;
                     is_optimized_path                  = true;
                     kernel_name                        = "im2col3x3_dchw";
