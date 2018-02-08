@@ -33,6 +33,20 @@ using namespace arm_compute::utils;
 using namespace arm_compute::graph;
 using namespace arm_compute::graph_utils;
 
+namespace
+{
+/** This function checks if we can use GEMM-based convolution trying to allocate a memory of size "size_in_bytes"
+ *
+ * @param[in] size_in_bytes Memory size in bytes needed for VGG-16
+ *
+ * @return The convolution layer hint
+ */
+ConvolutionMethodHint convolution_hint_vgg16(size_t size_in_bytes)
+{
+    return ((get_mem_free_from_meminfo() * 1024) >= size_in_bytes) ? ConvolutionMethodHint::GEMM : ConvolutionMethodHint::DIRECT;
+}
+} // namespace
+
 /** Example demonstrating how to implement VGG16's network using the Compute Library's graph API
  *
  * @param[in] argc Number of arguments
@@ -52,8 +66,11 @@ public:
         constexpr float mean_b = 103.939f; /* Mean value to subtract from blue channel */
 
         // Set target. 0 (NEON), 1 (OpenCL). By default it is NEON
-        TargetHint            target_hint      = set_target_hint(argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0);
-        ConvolutionMethodHint convolution_hint = ConvolutionMethodHint::DIRECT;
+        TargetHint target_hint = set_target_hint(argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0);
+
+        // Check if we can use GEMM-based convolutions evaluating if the platform has at least 1.8 GB of available memory
+        const size_t          memory_required  = 1932735283L;
+        ConvolutionMethodHint convolution_hint = convolution_hint_vgg16(memory_required);
 
         // Parse arguments
         if(argc < 2)
