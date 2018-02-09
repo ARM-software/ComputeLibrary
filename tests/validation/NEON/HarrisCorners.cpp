@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,9 +46,9 @@ namespace validation
 namespace
 {
 /* Allowed percentage of keypoints missing for target */
-float allowed_missing_percentage = 10.f;
+const float allowed_missing_percentage = 10.f;
 /* Allowed percentage of keypoints mismatching between target and reference */
-float allowed_mismatch_percentage = 10.f;
+const float allowed_mismatch_percentage = 10.f;
 
 const auto use_fp16 = framework::dataset::make("UseFP16",
 {

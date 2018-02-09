@@ -28,11 +28,12 @@
 #include "tests/CL/CLAccessor.h"
 #include "tests/CL/CLArrayAccessor.h"
 #include "tests/PaddingCalculator.h"
+#include "tests/datasets/ImageFileDatasets.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
-#include "tests/validation/FastValidation.h"
+#include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/FastCornersFixture.h"
 
 namespace arm_compute
@@ -45,10 +46,6 @@ namespace
 {
 /* Radius of the Bresenham circle around the candidate point */
 const unsigned int bresenham_radius = 3;
-/* Allowed percentage of keypoints missing for target */
-const float allowed_missing = 10.f;
-/* Allowed percentage of keypoints mismatching between target and reference */
-const float allowed_mismatching = 10.f;
 /* Tolerance used to compare corner strengths */
 const AbsoluteTolerance<float> tolerance(0.5f);
 } // namespace
@@ -95,21 +92,21 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
 template <typename T>
 using CLFastCornersFixture = FastCornersValidationFixture<CLTensor, CLAccessor, CLKeyPointArray, CLFastCorners, T>;
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLFastCornersFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(), framework::dataset::make("Format", Format::U8)),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLFastCornersFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallImageFiles(), framework::dataset::make("Format", Format::U8)),
                                                                                                                    framework::dataset::make("SuppressNonMax", { false, true })),
                                                                                                            framework::dataset::make("BorderMode", BorderMode::UNDEFINED)))
 {
     // Validate output
     CLArrayAccessor<KeyPoint> array(_target);
-    fast_validate_keypoints(array.buffer(), array.buffer() + array.num_values(), _reference.begin(), _reference.end(), tolerance, allowed_missing, allowed_mismatching);
+    validate_keypoints(array.buffer(), array.buffer() + array.num_values(), _reference.begin(), _reference.end(), tolerance);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLFastCornersFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Large2DShapes(), framework::dataset::make("Format", Format::U8)),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLFastCornersFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeImageFiles(), framework::dataset::make("Format", Format::U8)),
                                                                                                                  framework::dataset::make("SuppressNonMax", { false, true })),
                                                                                                          framework::dataset::make("BorderMode", BorderMode::UNDEFINED)))
 {
     // Validate output
     CLArrayAccessor<KeyPoint> array(_target);
-    fast_validate_keypoints(array.buffer(), array.buffer() + array.num_values(), _reference.begin(), _reference.end(), tolerance, allowed_missing, allowed_mismatching);
+    validate_keypoints(array.buffer(), array.buffer() + array.num_values(), _reference.begin(), _reference.end(), tolerance);
 }
 
 TEST_SUITE_END()

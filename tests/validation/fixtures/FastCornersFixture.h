@@ -49,7 +49,7 @@ class FastCornersValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, Format format, bool suppress_nonmax, BorderMode border_mode)
+    void setup(std::string image, Format format, bool suppress_nonmax, BorderMode border_mode)
     {
         std::mt19937                           gen(library->seed());
         std::uniform_int_distribution<uint8_t> int_dist(0, 255);
@@ -58,15 +58,15 @@ public:
         const uint8_t constant_border_value = int_dist(gen);
         const float   threshold             = real_dist(gen);
 
-        _target    = compute_target(shape, format, threshold, suppress_nonmax, border_mode, constant_border_value);
-        _reference = compute_reference(shape, format, threshold, suppress_nonmax, border_mode, constant_border_value);
+        _target    = compute_target(image, format, threshold, suppress_nonmax, border_mode, constant_border_value);
+        _reference = compute_reference(image, format, threshold, suppress_nonmax, border_mode, constant_border_value);
     }
 
 protected:
     template <typename U>
-    void fill(U &&tensor)
+    void fill(U &&tensor, RawTensor raw)
     {
-        library->fill_tensor_uniform(tensor, 0);
+        library->fill(tensor, raw);
     }
 
     template <typename F, typename std::enable_if<std::is_same<F, CLFastCorners>::value, int>::type = 0>
@@ -79,19 +79,20 @@ protected:
     void configure_target(F &func, TensorType &src, ArrayType &corners, unsigned int *num_corners, float threshold, bool suppress_nonmax, BorderMode border_mode, uint8_t constant_border_value)
     {
         ARM_COMPUTE_UNUSED(num_corners);
-        // ARM_COMPUTE_ERROR_ON(num_corners);
         func.configure(&src, threshold, suppress_nonmax, &corners, border_mode, constant_border_value);
     }
 
-    ArrayType compute_target(const TensorShape &shape, Format format, float threshold, bool suppress_nonmax, BorderMode border_mode, uint8_t constant_border_value)
+    ArrayType compute_target(const std::string &image, Format format, float threshold, bool suppress_nonmax, BorderMode border_mode, uint8_t constant_border_value)
     {
+        // Load the image (cached by the library if loaded before)
+        const RawTensor &raw = library->get(image, format);
+
         // Create tensors
-        TensorType src = create_tensor<TensorType>(shape, data_type_from_format(format));
-        src.info()->set_format(format);
+        TensorType src = create_tensor<TensorType>(raw.shape(), format);
 
         // Create array of keypoints
-        ArrayType    corners(shape.total_size());
-        unsigned int num_corners = shape.total_size();
+        ArrayType    corners(raw.shape().total_size());
+        unsigned int num_corners = raw.shape().total_size();
 
         // Create and configure function
         FunctionType fast_corners;
@@ -105,7 +106,7 @@ protected:
         ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Fill tensors
-        fill(AccessorType(src));
+        fill(AccessorType(src), raw);
 
         // Compute function
         fast_corners.run();
@@ -113,13 +114,16 @@ protected:
         return corners;
     }
 
-    std::vector<KeyPoint> compute_reference(const TensorShape &shape, Format format, float threshold, bool suppress_nonmax, BorderMode border_mode, uint8_t constant_border_value)
+    std::vector<KeyPoint> compute_reference(const std::string &image, Format format, float threshold, bool suppress_nonmax, BorderMode border_mode, uint8_t constant_border_value)
     {
+        // Load the image (cached by the library if loaded before)
+        const RawTensor &raw = library->get(image, format);
+
         // Create reference
-        SimpleTensor<T> src{ shape, format };
+        SimpleTensor<T> src{ raw.shape(), format };
 
         // Fill reference
-        fill(src);
+        fill(src, raw);
 
         // Compute reference
         return reference::fast_corners<T>(src, threshold, suppress_nonmax, border_mode, constant_border_value);

@@ -79,9 +79,7 @@ const std::array<std::array<int, 2>, 16> circle_offsets =
 
 /*
     FAST-9 bit masks for consecutive points surrounding a corner candidate
-
-    // Speed-up rejection of non-corners by checking pixels 1, 9, then 5, 13...
-    const std::array<unsigned int, 16> fast9_order = { { 0, 8, 4, 12, 1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15 } };
+    Rejection of non-corners is expedited by checking pixels 1, 9, then 5, 13...
 */
 const std::array<uint16_t, 16> fast9_masks =
 {
@@ -156,8 +154,8 @@ std::vector<KeyPoint> fast_corners(const SimpleTensor<T> &src, float input_thres
     // Get intensity of pixel at given index on the Bresenham circle around a candidate point
     const auto intensity_at = [&](const Coordinates & point, const unsigned int idx)
     {
-        const auto  offs = circle_offsets[idx];
-        Coordinates px{ point.x() + offs[0], point.y() + offs[1] };
+        const auto  offset = circle_offsets[idx];
+        Coordinates px{ point.x() + offset[0], point.y() + offset[1] };
         return tensor_elem_at(src, px, border_mode, constant_border_value);
     };
 
@@ -166,13 +164,13 @@ std::vector<KeyPoint> fast_corners(const SimpleTensor<T> &src, float input_thres
 
     // 1. Detect potential corners (the segment test)
     std::vector<Coordinates> corner_candidates;
-    SimpleTensor<float>      scores(src.shape(), DataType::F32);
+    SimpleTensor<uint8_t>    scores(src.shape(), DataType::U8);
     ValidRegion              valid_region = shape_to_valid_region(src.shape(), BorderMode::UNDEFINED == border_mode, BorderSize(bresenham_radius));
 
     for(int i = 0; i < src.num_elements(); ++i)
     {
         Coordinates candidate = index2coord(src.shape(), i);
-        scores[i]             = 0.f;
+        scores[i]             = 0;
         if(!is_in_valid_region(valid_region, candidate))
         {
             continue;
@@ -181,30 +179,21 @@ std::vector<KeyPoint> fast_corners(const SimpleTensor<T> &src, float input_thres
         if(is_a_corner(candidate, src, threshold, border_mode, constant_border_value, intensity_at))
         {
             corner_candidates.emplace_back(candidate);
-            scores[i] = 1.f;
+            scores[i] = 1;
         }
     }
 
-    // 2. Calculate corner scores if non-maxima suppression
-    // The corner response Cp function is defined as the largest threshold t for which the pixel p remains a corner
+    // 2. Calculate corner scores if necessary
     if(suppress_nonmax)
     {
         for(const auto &candidate : corner_candidates)
         {
-            const auto index = coord2index(scores.shape(), candidate);
+            const auto index      = coord2index(scores.shape(), candidate);
+            uint8_t    thresh_max = UINT8_MAX;
+            uint8_t    thresh_min = threshold;
+            uint8_t    response   = (thresh_min + thresh_max) / 2;
 
-#ifdef CALC_CORNER_RESPONSE_BY_ITERATION
-            auto response = threshold;
-            while(is_a_corner(candidate, src, response, border_mode, constant_border_value, intensity_at))
-            {
-                response += 1;
-            }
-            scores[index] = response - 1;
-#else  // CALC_CORNER_RESPONSE_BY_ITERATION
-            uint8_t thresh_max = UINT8_MAX;
-            uint8_t thresh_min = threshold;
-            uint8_t response   = (thresh_min + thresh_max) / 2;
-
+            // Corner score (response) is the largest threshold for which the pixel remains a corner
             while(thresh_max - thresh_min > 1)
             {
                 response = (thresh_min + thresh_max) / 2;
@@ -218,10 +207,9 @@ std::vector<KeyPoint> fast_corners(const SimpleTensor<T> &src, float input_thres
                 }
             }
             scores[index] = thresh_min;
-#endif // CALC_CORNER_RESPONSE_BY_ITERATION
         }
 
-        scores       = non_maxima_suppression(scores, border_mode, static_cast<float>(constant_border_value));
+        scores       = non_maxima_suppression(scores, border_mode, constant_border_value);
         valid_region = shape_to_valid_region(scores.shape(), BorderMode::UNDEFINED == border_mode, BorderSize(bresenham_radius + 1));
     }
 
