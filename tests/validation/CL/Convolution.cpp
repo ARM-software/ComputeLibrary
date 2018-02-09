@@ -199,7 +199,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLConvolutionFixture<int16_t>, framework::Datas
     validate(CLAccessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)));
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, CLConvolutionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
                                                                                                                  DataType::S16)),
                                                                                                                  datasets::BorderModes()),
                                                                                                          framework::dataset::make("filter_size", { 5 })))
