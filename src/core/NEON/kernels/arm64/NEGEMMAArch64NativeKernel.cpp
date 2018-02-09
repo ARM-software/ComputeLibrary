@@ -39,7 +39,7 @@
 
 namespace arm_compute
 {
-#include "arm_compute/core/NEON/kernels/winograd/gemm.hpp"
+#include "arm_compute/core/NEON/kernels/convolution/winograd/gemm.hpp"
 } // namespace arm_compute
 
 #include <arm_neon.h>
