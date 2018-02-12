@@ -341,7 +341,10 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo:
 inline std::string to_string(const arm_compute::ActivationLayerInfo &info)
 {
     std::stringstream str;
-    str << info.activation();
+    if(info.enabled())
+    {
+        str << info.activation();
+    }
     return str.str();
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,6 +68,13 @@ const auto data = combine(datasets::SmallDirectConvolutionShapes(),
                                                                  combine(framework::dataset::make("PadY", 0, 2),
                                                                          framework::dataset::make("KernelSize", { 3, 5 })))),
                                                   framework::dataset::make("NumKernels", { 1, 4, 8, 16 })))));
+/** Activation function Dataset*/
+const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
+{
+    ActivationLayerInfo(),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+});
 } // namespace
 
 TEST_SUITE(GC)
@@ -80,7 +87,8 @@ using GCDirectConvolutionLayerFixture = DirectConvolutionValidationFixture<GCTen
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(Run, GCDirectConvolutionLayerFixture<half_float::half>, framework::DatasetMode::ALL, combine(data, framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(Run, GCDirectConvolutionLayerFixture<half_float::half>, framework::DatasetMode::ALL, combine(combine(data, framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                    ActivationFunctionsDataset))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_fp16, tolerance_num);
@@ -88,7 +96,8 @@ FIXTURE_DATA_TEST_CASE(Run, GCDirectConvolutionLayerFixture<half_float::half>, f
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(Run, GCDirectConvolutionLayerFixture<float>, framework::DatasetMode::ALL, combine(data, framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(Run, GCDirectConvolutionLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(data, framework::dataset::make("DataType", DataType::F32)),
+                                                                                                         ActivationFunctionsDataset))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_fp32);

@@ -43,7 +43,8 @@ class DirectConvolutionLayerFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape src_shape, TensorShape weights_shape, TensorShape biases_shape, TensorShape dst_shape, PadStrideInfo info, Size2D dilation, DataType data_type, int batches)
+    void setup(TensorShape src_shape, TensorShape weights_shape, TensorShape biases_shape, TensorShape dst_shape, PadStrideInfo info, Size2D dilation, ActivationLayerInfo act_info, DataType data_type,
+               int batches)
     {
         ARM_COMPUTE_UNUSED(dilation);
 
@@ -60,7 +61,7 @@ public:
         dst     = create_tensor<TensorType>(dst_shape, data_type, 1, fixed_point_position);
 
         // Create and configure function
-        conv_layer.configure(&src, &weights, &biases, &dst, info);
+        conv_layer.configure(&src, &weights, &biases, &dst, info, act_info);
 
         // Allocate tensors
         src.allocator()->allocate();

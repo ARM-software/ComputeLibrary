@@ -53,13 +53,21 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
     DataType::F16,
     // DataType::F32,
 });
+const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
+{
+    ActivationLayerInfo(),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.5f)
+});
 } // namespace
 
 TEST_SUITE(GC)
 TEST_SUITE(ConvolutionLayer)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallConvolutionLayerDataset(), datasets::LargeConvolutionLayerDataset()), CNNDataTypes),
-               input_shape, weights_shape, bias_shape, output_shape, info, dilation, data_type)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallConvolutionLayerDataset(), datasets::LargeConvolutionLayerDataset()),
+                                                                           CNNDataTypes),
+                                                                   ActivationFunctionsDataset),
+               input_shape, weights_shape, bias_shape, output_shape, info, dilation, data_type, act_info)
 {
     // Set fixed point position data type allowed
     int fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
@@ -82,7 +90,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
 
     // Create and configure function
     GCConvolutionLayer conv;
-    conv.configure(&src, &weights, &bias, &dst, info, WeightsInfo(), dilation);
+    conv.configure(&src, &weights, &bias, &dst, info, WeightsInfo(), dilation, act_info);
 
     // Validate valid region
     const ValidRegion src_valid_region     = shape_to_valid_region(input_shape);
@@ -108,18 +116,20 @@ using GCConvolutionLayerFixture = ConvolutionValidationFixture<GCTensor, GCAcces
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, GCConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallConvolutionLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunSmall, GCConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
                                                                                                                      framework::dataset::make("ReshapeWeights", { true, false })),
-                                                                                                             framework::dataset::make("DataType",
-                                                                                                                     DataType::F16)))
+                                                                                                                     framework::dataset::make("DataType",
+                                                                                                                             DataType::F16)),
+                                                                                                             ActivationFunctionsDataset))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, GCConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeConvolutionLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunLarge, GCConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeConvolutionLayerDataset(),
                                                                                                                    framework::dataset::make("ReshapeWeights", { true, false })),
-                                                                                                           framework::dataset::make("DataType",
-                                                                                                                   DataType::F16)))
+                                                                                                                   framework::dataset::make("DataType",
+                                                                                                                           DataType::F16)),
+                                                                                                           ActivationFunctionsDataset))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f16, tolerance_num);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,96 +23,8 @@
  */
 layout(local_size_x = LOCAL_SIZE_X, local_size_y = LOCAL_SIZE_Y, local_size_z = LOCAL_SIZE_Z) in;
 
+#include "activation_layer_helpers_cs.h"
 #include "helpers_cs.h"
-
-#ifdef DATA_TYPE_FP32
-precision highp float;
-#elif defined(DATA_TYPE_FP16)
-#if defined(LOGISTIC) || defined(TANH) || defined(SRELU) || defined(SQRT)
-precision highp float;
-#else  /*LOGISTIC_TANH_SRELU_SQRT*/
-precision mediump float;
-#endif /*LOGISTIC_TANH_SRELU_SQRT*/
-#endif /*DATA_TYPE_FP32*/
-
-#define ABS_OP(a) abs((a))
-#define ADD_OP(a, b) ((a) + (b))
-#define SUB_OP(a, b) ((a) - (b))
-#define MUL_OP(a, b) ((a) * (b))
-#define MLA_OP(a, b, c) ((b) * (c) + (a))
-#define DIV_OP(a, b) ((a) / (b))
-#define EXP_OP(a) exp((a))
-#define LOG_OP(a) log((a))
-#define SQRT_OP(a) sqrt((a))
-#define CONST_ONE (1.f)
-
-// Logistic Activation
-float logistic_op(float x)
-{
-    return DIV_OP(CONST_ONE, ADD_OP(CONST_ONE, EXP_OP(-x)));
-}
-// Hyperbolic Tangent Activation
-float tanh_op(float x)
-{
-    float tmp = float(B_VAL) * x;
-    if(tmp > 10.f)
-    {
-        return MUL_OP(float(A_VAL), 1.f);
-    }
-    else if(tmp < -10.f)
-    {
-        return MUL_OP(float(A_VAL), -1.f);
-    }
-    else
-    {
-        return MUL_OP(float(A_VAL), tanh(tmp + 0.000001f));
-    }
-}
-// RELU Tangent Activation
-float relu_op(float x)
-{
-    return max(0.f, x);
-}
-// Bounded RELU Activation
-float brelu_op(float x)
-{
-    return min(float(A_VAL), max(float(0.0), x));
-}
-// Lower Upper Bounded RELU Activation
-float lu_brelu_op(float x)
-{
-    return min(max(x, float(B_VAL)), float(A_VAL));
-}
-// Leaky RELU Activation
-float lrelu_op(float x)
-{
-    return (x > float(0.0)) ? x : MUL_OP(float(A_VAL), x);
-}
-// Soft RELU Activation
-float srelu_op(float x)
-{
-    return LOG_OP(ADD_OP(CONST_ONE, EXP_OP(x)));
-}
-// Absolute Activation
-float abs_op(float x)
-{
-    return ABS_OP(x);
-}
-// Square Activation
-float square_op(float x)
-{
-    return MUL_OP(x, x);
-}
-// Square-root Activation
-float sqrt_op(float x)
-{
-    return SQRT_OP(x);
-}
-// Linear Activation
-float linear_op(float x)
-{
-    return MLA_OP(float(B_VAL), float(A_VAL), x);
-}
 
 /** This performs an activation function floating point inputs.
  *

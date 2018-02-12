@@ -43,13 +43,13 @@ CLConvolutionLayer::CLConvolutionLayer(std::shared_ptr<IMemoryManager> memory_ma
 }
 
 void CLConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
-                                   const Size2D &dilation)
+                                   const Size2D &dilation, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_ERROR_THROW_ON(CLConvolutionLayer::validate(input->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), output->info(), conv_info, weights_info, dilation));
+    ARM_COMPUTE_ERROR_THROW_ON(CLConvolutionLayer::validate(input->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), output->info(), conv_info, weights_info, dilation, act_info));
 
     switch(CLConvolutionLayer::get_convolution_method(input->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), output->info(), conv_info,
-                                                      weights_info, CLScheduler::get().target(), dilation))
+                                                      weights_info, act_info, CLScheduler::get().target(), dilation))
     {
         case ConvolutionMethod::DIRECT:
         {
@@ -72,25 +72,25 @@ void CLConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, c
 }
 
 Status CLConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                    const WeightsInfo &weights_info, const Size2D &dilation)
+                                    const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
 
     //Configure if the parameters match the direct convolution or the gemm-based
     const GPUTarget gpu_target = CLScheduler::get().target();
 
-    switch(CLConvolutionLayer::get_convolution_method(input, weights, biases, output, conv_info, weights_info, gpu_target, dilation))
+    switch(CLConvolutionLayer::get_convolution_method(input, weights, biases, output, conv_info, weights_info, act_info, gpu_target, dilation))
     {
         case ConvolutionMethod::DIRECT:
         {
             // Validate direct convolution layer
-            CLDirectConvolutionLayer::validate(input, weights, biases, output, conv_info);
+            CLDirectConvolutionLayer::validate(input, weights, biases, output, conv_info, act_info);
             break;
         }
         case ConvolutionMethod::GEMM:
         {
             // Validate gemm-based convolution layer
-            CLGEMMConvolutionLayer::validate(input, weights, biases, output, conv_info, weights_info, dilation);
+            CLGEMMConvolutionLayer::validate(input, weights, biases, output, conv_info, weights_info, dilation, act_info);
             break;
         }
         default:
@@ -102,7 +102,7 @@ Status CLConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo 
 }
 
 ConvolutionMethod CLConvolutionLayer::get_convolution_method(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                                             const WeightsInfo &weights_info, const GPUTarget gpu_target, const Size2D &dilation)
+                                                             const WeightsInfo &weights_info, const ActivationLayerInfo &act_info, const GPUTarget gpu_target, const Size2D &dilation)
 {
     ARM_COMPUTE_UNUSED(input);
     ARM_COMPUTE_UNUSED(weights);
@@ -112,6 +112,7 @@ ConvolutionMethod CLConvolutionLayer::get_convolution_method(const ITensorInfo *
     ARM_COMPUTE_UNUSED(weights_info);
     ARM_COMPUTE_UNUSED(gpu_target);
     ARM_COMPUTE_UNUSED(dilation);
+    ARM_COMPUTE_UNUSED(act_info);
 
     return ConvolutionMethod::GEMM;
 }

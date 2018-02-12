@@ -29,6 +29,7 @@
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCFillBorderKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCTensorShiftKernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/GLES_COMPUTE/functions/GCActivationLayer.h"
 #include "arm_compute/runtime/IFunction.h"
 
 #include <memory>
@@ -62,8 +63,10 @@ public:
      * @param[out]    output    Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
      *                          Data types supported: Same as @p input.
      * @param[in]     conv_info Contains padding and stride information described in @ref PadStrideInfo.
+     * @param[in]     act_info  (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, const PadStrideInfo &conv_info);
+    void configure(IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, const PadStrideInfo &conv_info,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run() override final;

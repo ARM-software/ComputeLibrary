@@ -37,6 +37,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/AssemblyHelper.h"
+#include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpOutputStage.h"
 #include "arm_compute/runtime/Tensor.h"
@@ -95,6 +96,7 @@ private:
  * -# @ref NEGEMMMatrixMultiplyKernel or @ref NEGEMMLowpMatrixMultiplyCore (if quantized asymmetric)
  * -# @ref NEGEMMLowpQuantizeDownInt32ToUint8Scale (if quantized asymmetric)
  * -# @ref NECol2ImKernel
+ * -# @ref NEActivationLayer (executed only if the activation layer is enabled)
  */
 class NEGEMMConvolutionLayer : public IFunction
 {
@@ -123,9 +125,10 @@ public:
      * @param[in]  weights_info Specifies if the weights tensor has been reshaped with NEWeightsReshapeKernel. If this is not part of the fully connected layer the weights
      *                          tensor has also been transposed with NEGEMMTranspose1xWKernel. Data type supported: Same as @p input.
      * @param[in]  dilation     (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
+     * @param[in]  act_info     (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
      */
     void configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info = WeightsInfo(),
-                   const Size2D &dilation = Size2D(1U, 1U));
+                   const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMConvolutionLayer
      *
      * @param[in] input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -140,11 +143,12 @@ public:
      * @param[in] weights_info Specifies if the weights tensor has been reshaped with NEWeightsReshapeKernel. If this is not part of the fully connected layer the weights
      *                         tensor has also been transposed with NEGEMMTranspose1xWKernel. Data type supported: Same as @p input.
      * @param[in] dilation     (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
+     * @param[in] act_info     (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                           const WeightsInfo &weights_info = WeightsInfo(), const Size2D &dilation = Size2D(1U, 1U));
+                           const WeightsInfo &weights_info = WeightsInfo(), const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run() override;
@@ -171,6 +175,7 @@ private:
     NEGEMMLowpMatrixMultiplyCore                        _mm_gemmlowp;
     NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint _gemmlowp_output_stage;
     NECol2ImKernel                                      _output_col2im_kernel;
+    NEActivationLayer                                   _activationlayer_function;
 
     const ITensor *_original_weights;
 
@@ -186,6 +191,7 @@ private:
     bool _are_weights_reshaped;
     bool _is_quantized;
     bool _is_interleaved;
+    bool _is_activationlayer_enabled;
 };
 }
 #endif /* __ARM_COMPUTE_NECONVOLUTIONGEMMLAYER_H__ */

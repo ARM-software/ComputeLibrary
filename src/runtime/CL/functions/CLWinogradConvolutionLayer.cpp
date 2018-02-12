@@ -32,11 +32,12 @@
 using namespace arm_compute;
 
 CLWinogradConvolutionLayer::CLWinogradConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(memory_manager), _batched_mm(memory_manager), _input_transform(), _filter_transform(), _output_transform(), _input0(), _input1(), _batched_mm_output(), _is_first_run(true)
+    : _memory_group(memory_manager), _batched_mm(memory_manager), _input_transform(), _filter_transform(), _output_transform(), _activationlayer_function(), _input0(), _input1(), _batched_mm_output(),
+      _is_first_run(true), _is_activationlayer_enabled(false)
 {
 }
 
-void CLWinogradConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info)
+void CLWinogradConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
     // TODO(COMPMID-1013): This part will be removed
     // Get indeces for the width and height
@@ -73,13 +74,21 @@ void CLWinogradConvolutionLayer::configure(ICLTensor *input, const ICLTensor *we
     _output_transform.configure(&_batched_mm_output, biases, output, Size2D(kernel_w, kernel_h), Size2D(output_convolved_shape[idx_width], output_convolved_shape[idx_height]), Size2D(num_tiles_x,
                                 num_tiles_y));
 
+    // Configure activation layer
+    _is_activationlayer_enabled = act_info.enabled();
+    if(_is_activationlayer_enabled)
+    {
+        _activationlayer_function.configure(output, nullptr, act_info);
+    }
+
     // Allocate temporary tensors
     _input0.allocator()->allocate();
     _input1.allocator()->allocate();
     _batched_mm_output.allocator()->allocate();
 }
 
-Status CLWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info)
+Status CLWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
+                                            const ActivationLayerInfo &act_info)
 {
     // TODO(COMPMID-1013): This part will be removed
     // Get indeces for the width and height
@@ -107,16 +116,22 @@ Status CLWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITen
     const TensorInfo  input1       = weights->clone()->set_tensor_shape(input1_shape);
     ARM_COMPUTE_RETURN_ON_ERROR(CLWinogradFilterTransformKernel::validate(weights, &input1, Size2D(2U, 2U)));
 
-    // Configure batched matrix multiply
+    // Validate batched matrix multiply
     TensorShape batched_mm_output_shape = input0.tensor_shape();
     batched_mm_output_shape[0]          = input1.tensor_shape()[0];
     const TensorInfo batched_mm_output  = input0.clone()->set_tensor_shape(batched_mm_output_shape);
     ARM_COMPUTE_RETURN_ON_ERROR(CLGEMM::validate(&input0, &input1, nullptr, &batched_mm_output, 1.0f, 0.0f, GEMMInfo(false, false, true /* Reshape weights only for the first run*/)));
 
-    // Configure output transform
+    // Validate output transform
     ARM_COMPUTE_RETURN_ON_ERROR(CLWinogradOutputTransformKernel::validate(&batched_mm_output, biases, output, Size2D(kernel_w, kernel_h), Size2D(output_convolved_shape[idx_width],
                                                                           output_convolved_shape[idx_height]),
                                                                           Size2D(num_tiles_x, num_tiles_y)));
+
+    // Validate Activation Layer
+    if(act_info.enabled())
+    {
+        CLActivationLayer::validate(output, nullptr, act_info);
+    }
 
     return Status{};
 }
@@ -141,6 +156,11 @@ void CLWinogradConvolutionLayer::run()
 
     // Run output transform
     CLScheduler::get().enqueue(_output_transform);
+
+    if(_is_activationlayer_enabled)
+    {
+        _activationlayer_function.run();
+    }
 
     _memory_group.release();
 }

@@ -55,64 +55,73 @@ using GCConvolutionLayerFixture = ConvolutionLayerFixture<GCTensor, GCConvolutio
 TEST_SUITE(GC)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetConvolutionLayer, GCConvolutionLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetConvolutionLayerDataset(),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::AlexNetConvolutionLayerDataset(), framework::dataset::make("ActivationInfo",
+                                                                                                                    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5ConvolutionLayer, GCConvolutionLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::LeNet5ConvolutionLayerDataset(),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::LeNet5ConvolutionLayerDataset(), framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1ConvolutionLayer, GCConvolutionLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1ConvolutionLayerDataset(),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1ConvolutionLayerDataset(), framework::dataset::make("ActivationInfo",
+                                                                                                                    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4ConvolutionLayer, GCConvolutionLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4ConvolutionLayerDataset(),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4ConvolutionLayerDataset(), framework::dataset::make("ActivationInfo",
+                                                                                                                    ActivationLayerInfo())),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetConvolutionLayer, GCConvolutionLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetConvolutionLayerDataset(),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetConvolutionLayerDataset(), framework::dataset::make("ActivationInfo",
+                                                                                                                    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", 1)));
 
 TEST_SUITE(NIGHTLY)
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetConvolutionLayer, GCConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
-                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetConvolutionLayerDataset(),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::AlexNetConvolutionLayerDataset(), framework::dataset::make("ActivationInfo",
+                                                                                                                    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5ConvolutionLayer, GCConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
-                                framework::dataset::combine(framework::dataset::combine(datasets::LeNet5ConvolutionLayerDataset(),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::LeNet5ConvolutionLayerDataset(), framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1ConvolutionLayer, GCConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
-                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1ConvolutionLayerDataset(),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1ConvolutionLayerDataset(), framework::dataset::make("ActivationInfo",
+                                                                                                                    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4ConvolutionLayer, GCConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
-                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4ConvolutionLayerDataset(),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4ConvolutionLayerDataset(), framework::dataset::make("ActivationInfo",
+                                                                                                                    ActivationLayerInfo())),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetConvolutionLayer, GCConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
-                                framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetConvolutionLayerDataset(),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetConvolutionLayerDataset(), framework::dataset::make("ActivationInfo",
+                                                                                                                    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 
 // 8 batches use about 1.8GB of memory which is too much for most devices!
 REGISTER_FIXTURE_DATA_TEST_CASE(VGG16ConvolutionLayer, GCConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
-                                framework::dataset::combine(framework::dataset::combine(datasets::VGG16ConvolutionLayerDataset(),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::VGG16ConvolutionLayerDataset(), framework::dataset::make("ActivationInfo",
+                                                                                                                    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", { 1, 4 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2ConvolutionLayer, GCConvolutionLayerFixture, framework::DatasetMode::NIGHTLY,
-                                framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2ConvolutionLayerDataset(),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2ConvolutionLayerDataset(), framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 TEST_SUITE_END()

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,10 @@
 layout(local_size_x = LOCAL_SIZE_X, local_size_y = LOCAL_SIZE_Y, local_size_z = LOCAL_SIZE_Z) in;
 
 #include "helpers_cs.h"
+
+#ifdef FUSED_ACTIVATION
+#include "activation_layer_helpers_cs.h"
+#endif /* FUSED_ACTIVATION */
 
 #if defined(DATA_TYPE_FP16)
 precision mediump float;
@@ -116,6 +120,10 @@ void main()
     pixels += LOAD(biases_ptr, VECTOR_OFFSET(biases_iter, z_index));
 #endif /* BIAS */
 
+#ifdef FUSED_ACTIVATION
+    pixels = ACT_OP(pixels);
+#endif /* FUSED_ACTIVATION */
+
     STORE_CURRENT_ITEM(dst_ptr, dst_iter, pixels);
 }
 #elif defined(DATA_TYPE_FP16)
@@ -203,6 +211,10 @@ void main()
     b      = (z_index % uint(2) == uint(0)) ? vec2_b.x : vec2_b.y;
     res += vec4(b);
 #endif /* BIAS */
+
+#ifdef FUSED_ACTIVATION
+    res = ACT_OP(res);
+#endif /* FUSED_ACTIVATION */
 
     STORE_PACK4_CURRENT_ITEM_HALF(dst_ptr, dst_iter, res);
 }

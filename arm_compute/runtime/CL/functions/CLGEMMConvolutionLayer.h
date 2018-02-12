@@ -36,6 +36,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
@@ -125,9 +126,10 @@ public:
      * @param[in]  weights_info Specifies if the weights tensor has been reshaped with CLWeightsReshapeKernel. If this is not part of the fully connected layer the weights
      *                          tensor has also been transposed with CLGEMMTranspose1xWKernel. Data type supported: Same as @p input.
      * @param[in]  dilation     (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
+     * @param[in]  act_info     (Optional) Activation layer information in case of a fused activation.
      */
     void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info = WeightsInfo(),
-                   const Size2D &dilation = Size2D(1U, 1U));
+                   const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMConvolutionLayer.
      *
      * @param[in]  input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -142,11 +144,12 @@ public:
      * @param[in]  weights_info Specifies if the weights tensor has been reshaped with CLWeightsReshapeKernel. If this is not part of the fully connected layer the weights
      *                          tensor has also been transposed with CLGEMMTranspose1xWKernel. Data type supported: Same as @p input.
      * @param[in]  dilation     (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
+     * @param[in]  act_info     (Optional) Activation layer information in case of a fused activation.
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                           const WeightsInfo &weights_info = WeightsInfo(), const Size2D &dilation = Size2D(1U, 1U));
+                           const WeightsInfo &weights_info = WeightsInfo(), const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run() override;
@@ -179,6 +182,7 @@ private:
     CLGEMMLowpMatrixMultiplyCore                        _mm_gemmlowp;
     CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint _gemmlowp_output_stage;
     CLCol2ImKernel                                      _col2im_kernel;
+    CLActivationLayer                                   _activationlayer_function;
 
     const ICLTensor *_original_weights;
 
@@ -189,6 +193,7 @@ private:
 
     bool _is_quantized;
     bool _is_first_run;
+    bool _is_activationlayer_enabled;
 };
 }
 #endif /* __ARM_COMPUTE_CLGEMMCONVOLUTIONLAYER_H__ */

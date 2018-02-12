@@ -232,6 +232,14 @@ const std::map<std::string, std::string> GCKernelLibrary::_program_source_map =
 {
 #ifdef EMBEDDED_KERNELS
     {
+        "helpers_cs.h",
+#include "./cs_shaders/helpers_cs.hembed"
+    },
+    {
+        "activation_layer_helpers_cs.h",
+#include "./cs_shaders/activation_layer_helpers_cs.hembed"
+    },
+    {
         "absdiff.cs",
 #include "./cs_shaders/absdiff.csembed"
     },

@@ -92,8 +92,9 @@ void GCConvolutionLayerReshapeWeights::run()
 }
 
 GCConvolutionLayer::GCConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _reshape_weights(), _input_im2col_kernel(), _input_interleave_kernel(), _mm_kernel(), _output_col2im_kernel(), _fill_border(), _input_im2col_reshaped(),
-      _input_interleaved_reshaped(), _weights_reshaped(), _weights_transposed(), _gemm_output(), _tmp_output(), _append_bias(false), _is_fully_connected_convolution(false), _are_weights_reshaped(false)
+    : _memory_group(std::move(memory_manager)), _reshape_weights(), _input_im2col_kernel(), _input_interleave_kernel(), _mm_kernel(), _output_col2im_kernel(), _fill_border(), _activationlayer_function(),
+      _input_im2col_reshaped(), _input_interleaved_reshaped(), _weights_reshaped(), _weights_transposed(), _gemm_output(), _tmp_output(), _append_bias(false), _is_fully_connected_convolution(false),
+      _are_weights_reshaped(false), _is_activationlayer_enabled(false)
 {
 }
 
@@ -103,7 +104,7 @@ void GCConvolutionLayer::configure_mm(const IGCTensor *input, const IGCTensor *w
 }
 
 void GCConvolutionLayer::configure(const IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
-                                   const Size2D &dilation)
+                                   const Size2D &dilation, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
@@ -256,6 +257,14 @@ void GCConvolutionLayer::configure(const IGCTensor *input, const IGCTensor *weig
     {
         _weights_reshaped.allocator()->allocate();
     }
+
+    //Configure Activation Layer
+    _is_activationlayer_enabled = act_info.enabled();
+
+    if(_is_activationlayer_enabled)
+    {
+        _activationlayer_function.configure(output, nullptr, act_info);
+    }
 }
 
 void GCConvolutionLayer::run()
@@ -290,4 +299,11 @@ void GCConvolutionLayer::run()
     GCScheduler::get().dispatch(_output_col2im_kernel, false);
 
     _memory_group.release();
+
+    GCScheduler::get().memory_barrier();
+    // Run Activation Layer
+    if(_is_activationlayer_enabled)
+    {
+        _activationlayer_function.run();
+    }
 }

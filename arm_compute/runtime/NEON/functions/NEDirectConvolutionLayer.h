@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <memory>
@@ -66,8 +67,9 @@ public:
      * @param[out]     output    Output tensor.
      *                           The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: Same as @p input.
      * @param[in]      conv_info Contains padding and stride information described in @ref PadStrideInfo.
+     * @param[in]      act_info  (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &conv_info);
+    void configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEDirectConvolutionLayer
      *
      * @note: DirectConvolution only works in the following configurations:
@@ -84,10 +86,12 @@ public:
      * @param[in] output    Output tensor.
      *                      The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: Same as @p input.
      * @param[in] conv_info Contains padding and stride information described in @ref PadStrideInfo.
+     * @param[in] act_info  (Optional) Activation layer information in case of a fused activation.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *output, const PadStrideInfo &conv_info);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *output, const PadStrideInfo &conv_info,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run() override;
@@ -97,9 +101,11 @@ private:
     NEDirectConvolutionLayerOutputStageKernel _output_stage_kernel;
     NEDirectConvolutionLayerKernel            _conv_kernel;
     NEFillBorderKernel                        _input_border_handler;
+    NEActivationLayer                         _activationlayer_function;
     Tensor                                    _accumulator;
     bool                                      _has_bias;
     bool                                      _is_fixed_point;
+    bool                                      _is_activationlayer_enabled;
 };
 }
 #endif /* __ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYER_H__ */

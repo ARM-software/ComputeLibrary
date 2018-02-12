@@ -373,14 +373,17 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
 // *INDENT-ON*
 
 using CLWinogradConvolutionLayerFixture = WinogradConvolutionLayerValidationFixture<CLTensor, CLAccessor, CLWinogradConvolutionLayer, float>;
-FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFixture, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallWinogradConvolutionLayer3x3Dataset(),
-                                                                                                               framework::dataset::make("DataType", { DataType::F32 })))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFixture, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallWinogradConvolutionLayer3x3Dataset(),
+                                                                                                                       framework::dataset::make("DataType", { DataType::F32 })),
+                                                                                                               framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFixture, framework::DatasetMode::NIGHTLY, combine(datasets::LargeWinogradConvolutionLayer3x3Dataset(), framework::dataset::make("DataType", { DataType::F32 })))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFixture, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeWinogradConvolutionLayer3x3Dataset(),
+                                                                                                                     framework::dataset::make("DataType", { DataType::F32 })),
+                                                                                                             framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);

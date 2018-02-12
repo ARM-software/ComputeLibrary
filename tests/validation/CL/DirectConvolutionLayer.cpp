@@ -73,6 +73,14 @@ const auto data_fixed_point = combine(datasets::TinyDirectConvolutionShapes(),
                                                                              combine(framework::dataset::make("PadY", 0, 2),
                                                                                      framework::dataset::make("KernelSize", { 3 })))),
                                                               framework::dataset::make("NumKernels", { 1, 4, 8, 16 })))));
+/** Activation function Dataset*/
+const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
+{
+    ActivationLayerInfo(),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 0.5f),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 0.5f)
+});
 } // namespace
 
 TEST_SUITE(CL)
@@ -82,7 +90,7 @@ TEST_SUITE(DirectConvolutionLayer)
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Mismatching data type input/weights
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Mismatching input feature maps
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Unsupported kernel width
@@ -143,10 +151,14 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                                                        PadStrideInfo(1, 1, 0, 0),
                                                        PadStrideInfo(1, 1, 0, 0),
                                                       })),
-               framework::dataset::make("Expected", { false, false, false, false, false, false, false, false, false, false, true })),
-               input_info, weights_info, biases_info, output_info, conv_info, expected)
+                       framework::dataset::make("ActivationInfo",
 {
-    bool is_valid = bool(CLDirectConvolutionLayer::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &biases_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), conv_info));
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)
+})),
+               framework::dataset::make("Expected", { false, false, false, false, false, false, false, false, false, false, true })),
+               input_info, weights_info, biases_info, output_info, conv_info, act_info, expected)
+{
+    bool is_valid = bool(CLDirectConvolutionLayer::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &biases_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), conv_info, act_info));
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
@@ -159,7 +171,7 @@ using CLDirectConvolutionValidationWithTensorShapesFixture = DirectConvolutionVa
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixture<half>, framework::DatasetMode::ALL, combine(data, framework::dataset::make("DataType", DataType::F16)))
+FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(data, framework::dataset::make("DataType", DataType::F16)), ActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp16, tolerance_num);
@@ -167,7 +179,8 @@ FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixture<half>, framework::Da
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixture<float>, framework::DatasetMode::ALL, combine(data, framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(data, framework::dataset::make("DataType", DataType::F32)),
+                                                                                                         ActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
@@ -175,8 +188,9 @@ FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixture<float>, framework::D
 TEST_SUITE_END()
 
 TEST_SUITE(FP32_CustomDataset)
-FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionValidationWithTensorShapesFixture<float>, framework::DatasetMode::ALL, combine(datasets::DirectConvolutionLayerDataset(),
-                       framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionValidationWithTensorShapesFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::DirectConvolutionLayerDataset(),
+                       framework::dataset::make("DataType", DataType::F32)),
+                       ActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);
@@ -189,8 +203,10 @@ using CLDirectConvolutionLayerFixedPointFixture = DirectConvolutionValidationFix
 
 TEST_SUITE(FixedPoint)
 TEST_SUITE(QS8)
-FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(data_fixed_point, framework::dataset::make("DataType", DataType::QS8)),
-                                                                                                                    framework::dataset::make("FractionalBits", 2, 7)))
+FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(data_fixed_point, framework::dataset::make("DataType",
+                                                                                                                    DataType::QS8)),
+                                                                                                                    framework::dataset::make("FractionalBits", 2, 7)),
+                                                                                                                    ActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qs8);
@@ -198,8 +214,10 @@ FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixedPointFixture<int8_t>, f
 TEST_SUITE_END()
 
 TEST_SUITE(QS16)
-FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(data_fixed_point, framework::dataset::make("DataType", DataType::QS16)),
-                                                                                                                     framework::dataset::make("FractionalBits", 2, 15)))
+FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(combine(data_fixed_point, framework::dataset::make("DataType",
+                                                                                                                     DataType::QS16)),
+                                                                                                                     framework::dataset::make("FractionalBits", 2, 15)),
+                                                                                                                     ActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qs16);
@@ -212,10 +230,17 @@ using CLDirectConvolutionLayerQuantizedFixture = DirectConvolutionValidationQuan
 template <typename T>
 using CLDirectConvolutionValidationWithTensorShapesQuantizedFixture = DirectConvolutionValidationWithTensorShapesQuantizedFixture<CLTensor, CLAccessor, CLDirectConvolutionLayer, T>;
 
+const auto QuantizedActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
+{
+    ActivationLayerInfo(),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)
+});
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(data, framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                    framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10) })))
+FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(data, framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                                                                                    framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 10) })),
+                                                                                                                    QuantizedActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
@@ -223,9 +248,10 @@ FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerQuantizedFixture<uint8_t>, f
 TEST_SUITE_END()
 
 TEST_SUITE(QASYMM8_CustomDataset)
-FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionValidationWithTensorShapesQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(datasets::DirectConvolutionLayerDataset(),
+FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionValidationWithTensorShapesQuantizedFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::DirectConvolutionLayerDataset(),
                        framework::dataset::make("DataType", DataType::QASYMM8)),
-                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 127) })))
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 127) })),
+                       QuantizedActivationFunctionsDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);

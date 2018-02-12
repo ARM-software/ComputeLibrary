@@ -75,13 +75,13 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
 } //namespace
 
 NEWinogradLayer::NEWinogradLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _batched_gemm_kernel(nullptr), _transform_input_kernel(nullptr), _transform_output_kernel(nullptr), _transform_weights_kernel(nullptr), _permute_input(),
-      _permute_weights(), _permute_output(), _input_workspace(), _output_workspace(), _kernel_storage(), _input_nhwc(), _output_nhwc(), _weights_hwio(), _input(), _weights(), _output(),
-      _reshaped_kernel(false)
+    : _memory_group(std::move(memory_manager)), _batched_gemm_kernel(nullptr), _transform_input_kernel(nullptr), _transform_output_kernel(nullptr), _transform_weights_kernel(nullptr),
+      _activationlayer_function(), _permute_input(), _permute_weights(), _permute_output(), _input_workspace(), _output_workspace(), _kernel_storage(), _input_nhwc(), _output_nhwc(), _weights_hwio(),
+      _input(), _weights(), _output(), _reshaped_kernel(false), _is_activationlayer_enabled(false)
 {
 } /* arm_compute */
 
-void NEWinogradLayer::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info)
+void NEWinogradLayer::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, biases, output);
     ARM_COMPUTE_UNUSED(conv_info);
@@ -217,6 +217,13 @@ void NEWinogradLayer::configure(const ITensor *input, const ITensor *weights, co
     _transform_weights_kernel = std::move(transform_weights_kernel);
     _transform_output_kernel  = std::move(transform_output_kernel);
     _batched_gemm_kernel      = std::move(batched_gemm_kernel);
+
+    //Configure Activation Layer
+    _is_activationlayer_enabled = act_info.enabled();
+    if(_is_activationlayer_enabled)
+    {
+        _activationlayer_function.configure(output, nullptr, act_info);
+    }
 }
 
 void NEWinogradLayer::run()
@@ -242,6 +249,12 @@ void NEWinogradLayer::run()
 
     // Reorder the convoluted output to ACL's ordering NCHW
     _permute_output.run();
+
+    if(_is_activationlayer_enabled)
+    {
+        _activationlayer_function.run();
+    }
+
     _memory_group.release();
 }
 

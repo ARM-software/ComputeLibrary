@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,10 @@
 layout(local_size_x = LOCAL_SIZE_X, local_size_y = LOCAL_SIZE_Y, local_size_z = LOCAL_SIZE_Z) in;
 
 #include "helpers_cs.h"
+
+#ifdef FUSED_ACTIVATION
+#include "activation_layer_helpers_cs.h"
+#endif /* FUSED_ACTIVATION */
 
 #if defined(DATA_TYPE_FP16)
 precision mediump float;
@@ -98,6 +102,10 @@ void main()
 #ifdef BIAS
     pixels += LOAD(biases_ptr, VECTOR_OFFSET(biases_iter, z_index));
 #endif /* BIAS */
+
+#ifdef FUSED_ACTIVATION
+    pixels = ACT_OP(pixels);
+#endif /* FUSED_ACTIVATION */
 
     STORE_CURRENT_ITEM(dst_ptr, dst_iter, pixels);
 }
@@ -209,6 +217,10 @@ void main()
 
     pixels += b;
 #endif /* BIAS */
+
+#ifdef FUSED_ACTIVATION
+    pixels = ACT_OP(pixels);
+#endif /* FUSED_ACTIVATION */
 
     STORE_PACK4_CURRENT_ITEM_HALF(dst_ptr, dst_iter, pixels);
 }
@@ -332,6 +344,11 @@ void main()
     pixels[0] += b;
     pixels[1] += b;
 #endif /* BIAS */
+
+#ifdef FUSED_ACTIVATION
+    pixels[0] = ACT_OP(pixels[0]);
+    pixels[1] = ACT_OP(pixels[1]);
+#endif /* FUSED_ACTIVATION */
 
     STORE_PACK4_CURRENT_ITEM_HALF(dst_ptr, dst_iter, pixels[0]);
     STORE_PACK4_HALF(dst_ptr, TENSOR3D_OFFSET(dst_iter, 0, 1, 0), pixels[1]);
@@ -469,6 +486,12 @@ void main()
     pixels[1] += b;
     pixels[2] += b;
 #endif /* BIAS */
+
+#ifdef FUSED_ACTIVATION
+    pixels[0] = ACT_OP(pixels[0]);
+    pixels[1] = ACT_OP(pixels[1]);
+    pixels[2] = ACT_OP(pixels[2]);
+#endif /* FUSED_ACTIVATION */
 
     STORE_PACK4_CURRENT_ITEM_HALF(dst_ptr, dst_iter, pixels[0]);
     STORE_PACK4_HALF(dst_ptr, TENSOR3D_OFFSET(dst_iter, 0, 1, 0), pixels[1]);
@@ -609,6 +632,13 @@ void main()
     pixels1[1] += b;
 #endif /* BIAS */
 
+#ifdef FUSED_ACTIVATION
+    pixels[0]  = ACT_OP(pixels[0]);
+    pixels[1]  = ACT_OP(pixels[1]);
+    pixels1[0] = ACT_OP(pixels1[0]);
+    pixels1[1] = ACT_OP(pixels1[1]);
+#endif /* FUSED_ACTIVATION */
+
     STORE_PACK4_CURRENT_ITEM_HALF(dst_ptr, dst_iter, pixels[0]);
     STORE_PACK4_HALF(dst_ptr, TENSOR3D_OFFSET(dst_iter, 0, 1, 0), pixels[1]);
     STORE_PACK4_HALF(dst_ptr, TENSOR3D_OFFSET(dst_iter, 0, 2, 0), pixels1[0]);
@@ -745,6 +775,11 @@ void main()
         pixels[1] += b;
 #endif /* BIAS */
 
+#ifdef FUSED_ACTIVATION
+        pixels[0] = ACT_OP(pixels[0]);
+        pixels[1] = ACT_OP(pixels[1]);
+#endif /* FUSED_ACTIVATION */
+
         STORE_PACK4_CURRENT_ITEM_HALF(dst_ptr, dst_iter, pixels[0]);
         STORE_PACK4_HALF(dst_ptr, TENSOR3D_OFFSET(dst_iter, 0, 1, 0), pixels[1]);
 
@@ -867,6 +902,11 @@ void main()
     pixels[0] += b;
     pixels[1] += b;
 #endif /* BIAS */
+
+#ifdef FUSED_ACTIVATION
+    pixels[0] = ACT_OP(pixels[0]);
+    pixels[1] = ACT_OP(pixels[1]);
+#endif /* FUSED_ACTIVATION */
 
     STORE_PACK8_CURRENT_ITEM_HALF(dst_ptr, dst_iter, pixels);
 }
@@ -1000,6 +1040,13 @@ void main()
     pixels1[0] += b;
     pixels1[1] += b;
 #endif /* BIAS */
+
+#ifdef FUSED_ACTIVATION
+    pixels[0]  = ACT_OP(pixels[0]);
+    pixels[1]  = ACT_OP(pixels[1]);
+    pixels1[0] = ACT_OP(pixels1[0]);
+    pixels1[1] = ACT_OP(pixels1[1]);
+#endif /* FUSED_ACTIVATION */
 
     STORE_PACK8_CURRENT_ITEM_HALF(dst_ptr, dst_iter, pixels);
     STORE_PACK8_HALF(dst_ptr, TENSOR3D_OFFSET(dst_iter, 0, 1, 0), pixels1);

@@ -33,11 +33,11 @@
 using namespace arm_compute;
 
 CLDirectConvolutionLayer::CLDirectConvolutionLayer()
-    : _direct_conv_kernel(), _input_border_handler()
+    : _direct_conv_kernel(), _input_border_handler(), _activationlayer_function(), _is_activationlayer_enabled(false)
 {
 }
 
-void CLDirectConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info)
+void CLDirectConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
     // Set GPU target
     _direct_conv_kernel.set_target(CLScheduler::get().target());
@@ -55,11 +55,25 @@ void CLDirectConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weig
 
     // Tune kernels
     CLScheduler::get().tune_kernel_static(_direct_conv_kernel);
+
+    _is_activationlayer_enabled = act_info.enabled();
+
+    //Configure Activation Layer
+    if(_is_activationlayer_enabled)
+    {
+        _activationlayer_function.configure(output, nullptr, act_info);
+    }
 }
 
-Status CLDirectConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info)
+Status CLDirectConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
+                                          const ActivationLayerInfo &act_info)
 {
-    return CLDirectConvolutionLayerKernel::validate(input, weights, biases, output, conv_info, CLScheduler::get().target());
+    ARM_COMPUTE_RETURN_ON_ERROR(CLDirectConvolutionLayerKernel::validate(input, weights, biases, output, conv_info, CLScheduler::get().target()));
+    if(act_info.enabled())
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayer::validate(output, nullptr, act_info));
+    }
+    return Status{};
 }
 
 void CLDirectConvolutionLayer::run()
@@ -69,4 +83,10 @@ void CLDirectConvolutionLayer::run()
 
     // Run direct convolution
     CLScheduler::get().enqueue(_direct_conv_kernel);
+
+    //Run Activation Layer
+    if(_is_activationlayer_enabled)
+    {
+        _activationlayer_function.run();
+    }
 }

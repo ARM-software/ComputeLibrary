@@ -35,6 +35,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCMemoryGroup.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
+#include "arm_compute/runtime/GLES_COMPUTE/functions/GCActivationLayer.h"
 #include "arm_compute/runtime/IFunction.h"
 
 #include <memory>
@@ -100,9 +101,10 @@ public:
      * @param[in]  weights_info Specifies if the weights tensor has been reshaped with GCWeightsReshapeKernel. If this is not part of the fully connected layer the weights
      *                          tensor has also been transposed with GCGEMMTranspose1xWKernel. Data type supported: Same as @p input.
      * @param[in]  dilation     (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
+     * @param[in]  act_info     (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info = WeightsInfo(),
-                   const Size2D &dilation = Size2D(1U, 1U));
+    void configure(const IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, const PadStrideInfo &conv_info,
+                   const WeightsInfo &weights_info = WeightsInfo(), const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run() override;
@@ -125,6 +127,7 @@ private:
     GCGEMMMatrixMultiplyKernel       _mm_kernel;
     GCCol2ImKernel                   _output_col2im_kernel;
     GCFillBorderKernel               _fill_border;
+    GCActivationLayer                _activationlayer_function;
 
     GCTensor _input_im2col_reshaped;
     GCTensor _input_interleaved_reshaped;
@@ -136,6 +139,7 @@ private:
     bool _append_bias;
     bool _is_fully_connected_convolution;
     bool _are_weights_reshaped;
+    bool _is_activationlayer_enabled;
 };
 }
 

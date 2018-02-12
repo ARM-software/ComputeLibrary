@@ -27,6 +27,7 @@
 #include "arm_compute/core/CL/kernels/CLWinogradFilterTransformKernel.h"
 #include "arm_compute/core/CL/kernels/CLWinogradOutputTransformKernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "arm_compute/runtime/CL/functions/CLWinogradInputTransform.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -60,8 +61,10 @@ public:
      * @param[out] output    Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
      *                       Data types supported: Same as @p input.
      * @param[in]  conv_info Contains padding and stride information described in @ref PadStrideInfo.
+     * @param[in]  act_info  (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info);
+    void configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
+                   const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLWinogradConvolutionLayer
      *
      * @note: This function only works with 3x3 kernels and unit strides
@@ -74,10 +77,12 @@ public:
      * @param[out] output    Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
      *                       Data types supported: Same as @p input.
      * @param[in]  conv_info Contains padding and stride information described in @ref PadStrideInfo.
+     * @param[in]  act_info  (Optional) Activation layer information in case of a fused activation.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run() override;
@@ -88,10 +93,12 @@ private:
     CLWinogradInputTransform        _input_transform;
     CLWinogradFilterTransformKernel _filter_transform;
     CLWinogradOutputTransformKernel _output_transform;
+    CLActivationLayer               _activationlayer_function;
     CLTensor                        _input0;
     CLTensor                        _input1;
     CLTensor                        _batched_mm_output;
     bool                            _is_first_run;
+    bool                            _is_activationlayer_enabled;
 };
 }
 #endif /* __ARM_COMPUTE_CLWINOGRADCONVOLUTIONLAYER_H__ */

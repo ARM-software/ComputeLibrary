@@ -165,10 +165,11 @@ TensorShape get_reshaped_weights_shape_conv(const ITensorInfo *weights, bool app
     }
 }
 
-Status validate_and_initialize_values(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const PadStrideInfo &conv_info, const WeightsInfo &weights_info, DataType &dt,
+Status validate_and_initialize_values(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
+                                      const ActivationLayerInfo &act_info, DataType &dt,
                                       bool &append_bias,
                                       bool &are_weights_reshaped, unsigned int &kernel_width, unsigned int &kernel_height,
-                                      bool &is_fully_connected_convolution, bool &is_interleaved, bool &is_quantized,
+                                      bool &is_fully_connected_convolution, bool &is_interleaved, bool &is_quantized, bool &is_activationlayer_enabled,
                                       unsigned int &mat_weights_cols, unsigned int &mat_weights_rows,
                                       unsigned int &conv_w, unsigned int &conv_h, const Size2D &dilation)
 {
@@ -210,6 +211,7 @@ Status validate_and_initialize_values(const ITensorInfo *input, const ITensorInf
     // Check if its a "fully connected" convolution
     is_fully_connected_convolution = ((conv_w == 1) && (conv_h == 1));
     is_interleaved                 = (!is_fully_connected_convolution && !is_quantized);
+    is_activationlayer_enabled     = act_info.enabled();
 
     return Status{};
 }
@@ -217,8 +219,8 @@ Status validate_and_initialize_values(const ITensorInfo *input, const ITensorInf
 
 NEGEMMConvolutionLayer::NEGEMMConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager)
     : _asm_glue(), _memory_group(memory_manager), _input_im2col_kernel(), _input_interleave_kernel(), _reshape_weights(), _mm_kernel(), _mm_gemmlowp(memory_manager), _gemmlowp_output_stage(),
-      _output_col2im_kernel(), _original_weights(nullptr), _input_im2col_reshaped(), _input_interleaved_reshaped(), _weights_reshaped(), _gemm_output(), _tmp_output(), _workspace(), _append_bias(false),
-      _is_fully_connected_convolution(false), _are_weights_reshaped(false), _is_quantized(false), _is_interleaved(false)
+      _output_col2im_kernel(), _activationlayer_function(), _original_weights(nullptr), _input_im2col_reshaped(), _input_interleaved_reshaped(), _weights_reshaped(), _gemm_output(), _tmp_output(),
+      _workspace(), _append_bias(false), _is_fully_connected_convolution(false), _are_weights_reshaped(false), _is_quantized(false), _is_interleaved(false), _is_activationlayer_enabled(false)
 {
 }
 
@@ -247,7 +249,7 @@ void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *w
 }
 
 void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
-                                       const Size2D &dilation)
+                                       const Size2D &dilation, const ActivationLayerInfo &act_info)
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
@@ -260,9 +262,10 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     unsigned int conv_w           = 0;
     unsigned int conv_h           = 0;
 
-    Status status = validate_and_initialize_values(input->info(), weights->info(), (biases == nullptr) ? nullptr : biases->info(), conv_info, weights_info, dt, _append_bias, _are_weights_reshaped,
+    Status status = validate_and_initialize_values(input->info(), weights->info(), (biases == nullptr) ? nullptr : biases->info(), conv_info, weights_info, act_info, dt, _append_bias,
+                                                   _are_weights_reshaped,
                                                    kernel_width, kernel_height,
-                                                   _is_fully_connected_convolution, _is_interleaved, _is_quantized,
+                                                   _is_fully_connected_convolution, _is_interleaved, _is_quantized, _is_activationlayer_enabled,
                                                    mat_weights_cols, mat_weights_rows, conv_w, conv_h, dilation);
 
     ARM_COMPUTE_ERROR_THROW_ON(status);
@@ -420,10 +423,16 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     {
         _weights_reshaped.allocator()->allocate();
     }
+
+    //Configure Activation Layer
+    if(_is_activationlayer_enabled)
+    {
+        _activationlayer_function.configure(output, nullptr, act_info);
+    }
 }
 
 Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                        const WeightsInfo &weights_info, const Size2D &dilation)
+                                        const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_UNUSED(output);
 
@@ -433,6 +442,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     bool         is_fully_connected_convolution{};
     bool         is_interleaved{};
     bool         is_quantized{};
+    bool         is_activationlayer_enabled{};
     unsigned int kernel_width     = 0;
     unsigned int kernel_height    = 0;
     unsigned int mat_weights_cols = 0;
@@ -440,8 +450,8 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     unsigned int conv_w           = 0;
     unsigned int conv_h           = 0;
 
-    Status status = validate_and_initialize_values(input, weights, biases, conv_info, weights_info, dt, append_bias, are_weights_reshaped, kernel_width, kernel_height,
-                                                   is_fully_connected_convolution, is_interleaved, is_quantized, mat_weights_cols, mat_weights_rows,
+    Status status = validate_and_initialize_values(input, weights, biases, conv_info, weights_info, act_info, dt, append_bias, are_weights_reshaped, kernel_width, kernel_height,
+                                                   is_fully_connected_convolution, is_interleaved, is_quantized, is_activationlayer_enabled, mat_weights_cols, mat_weights_rows,
                                                    conv_w, conv_h, dilation);
 
     const Size2D kernel_weights = Size2D(kernel_width, kernel_height);
@@ -536,6 +546,15 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
         ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMMatrixMultiplyKernel::validate(&im2_col_info, weights, &gemm_output_info, 1.f, is_interleaved, GEMMReshapeInfo()));
     }
 
+    ARM_COMPUTE_RETURN_ON_ERROR(NECol2ImKernel::validate(&gemm_output_info, output, Size2D(conv_w, conv_h)));
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((output->dimension(0) != conv_w) || (output->dimension(1) != conv_h), "Output shape does not match the expected one");
+
+    if(act_info.enabled())
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(output, nullptr, act_info));
+    }
+
     return Status{};
 }
 
@@ -590,6 +609,11 @@ void NEGEMMConvolutionLayer::run()
 
     // Reshape output matrix
     NEScheduler::get().schedule(&_output_col2im_kernel, Window::DimY);
+
+    if(_is_activationlayer_enabled)
+    {
+        _activationlayer_function.run();
+    }
 
     _memory_group.release();
 }
