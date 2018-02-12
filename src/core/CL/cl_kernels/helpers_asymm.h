@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,6 +45,7 @@
     }
 
 ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(2)
+ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(4)
 ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(8)
 ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(16)
 
@@ -68,20 +69,14 @@ ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL(16)
         b_64 = convert_long##size(b);                                                                        \
         VEC_DATA_TYPE(long, size)                                                                            \
         ab_64 = a_64 * b_64;                                                                                 \
-        VEC_DATA_TYPE(long, size)                                                                            \
-        mask1 = 1 << 30;                                                                                     \
-        VEC_DATA_TYPE(long, size)                                                                            \
-        mask2 = 1 - (1 << 30);                                                                               \
-        VEC_DATA_TYPE(long, size)                                                                            \
-        nudge = select(mask2, mask1, ab_64 >= 0);                                                            \
-        VEC_DATA_TYPE(long, size)                                                                            \
-        mask = 1ll << 31;                                                                                    \
         VEC_DATA_TYPE(int, size)                                                                             \
-        ab_x2_high32 = convert_int##size((ab_64 + nudge) / mask);                                            \
+        /* COMPMID-907 */                                                                                    \
+        ab_x2_high32 = convert_int##size(((ab_64 + (1 << 30)) >> 31));                                       \
         return select(ab_x2_high32, INT_MAX, overflow);                                                      \
     }
 
 ASYMM_MULT_IMP(2)
+ASYMM_MULT_IMP(4)
 ASYMM_MULT_IMP(8)
 ASYMM_MULT_IMP(16)
 
