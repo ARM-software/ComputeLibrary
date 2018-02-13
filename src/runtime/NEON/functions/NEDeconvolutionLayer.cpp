@@ -33,13 +33,11 @@ using namespace arm_compute::misc::shape_calculator;
 
 NEDeconvolutionLayer::NEDeconvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
     : _memory_group(std::move(memory_manager)),
-      _direct_conv_f(),
       _conv_f(),
       _scaled_output(),
       _input(nullptr),
       _info(),
-      _inner_border(),
-      _run_direct_convolution(false)
+      _inner_border()
 {
 }
 
@@ -53,8 +51,6 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
     _input        = input;
     _info         = info;
     _inner_border = std::make_pair(inner_border_right, inner_border_top);
-    // FIXME: ConvolutionLayer Segfaults in GEMM assembly code for 1x1 convolutions
-    _run_direct_convolution = (weights->info()->dimension(0) == weights->info()->dimension(1)) && (weights->info()->dimension(0) == 1);
 
     const unsigned int stride_x = info.stride().first;
     const unsigned int stride_y = info.stride().second;
@@ -78,7 +74,7 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
 
     // setup the function to convolve the upscaled output
     const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
-    (_run_direct_convolution) ? _direct_conv_f.configure(&_scaled_output, weights, bias, output, conv_info) : _conv_f.configure(&_scaled_output, weights, bias, output, conv_info);
+    _conv_f.configure(&_scaled_output, weights, bias, output, conv_info);
 
     // Allocate auxiliary tensors
     _scaled_output.allocator()->allocate();
@@ -119,7 +115,7 @@ void NEDeconvolutionLayer::run()
     }
 
     // Run convolution layer
-    (_run_direct_convolution) ? _direct_conv_f.run() : _conv_f.run();
+    _conv_f.run();
 
     _memory_group.release();
 }

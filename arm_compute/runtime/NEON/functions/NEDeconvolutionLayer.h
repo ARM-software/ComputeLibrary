@@ -95,14 +95,12 @@ public:
     void run() override;
 
 private:
-    MemoryGroup              _memory_group;
-    NEDirectConvolutionLayer _direct_conv_f;
-    NEConvolutionLayer       _conv_f;
-    Tensor                   _scaled_output;
-    ITensor                 *_input;
-    PadStrideInfo            _info;
+    MemoryGroup        _memory_group;
+    NEConvolutionLayer _conv_f;
+    Tensor             _scaled_output;
+    ITensor           *_input;
+    PadStrideInfo      _info;
     std::pair<unsigned int, unsigned int> _inner_border;
-    bool _run_direct_convolution;
 };
 } // arm_compute
 #endif /* __ARM_COMPUTE_NEDECONVOLUTIONLAYER_H__ */
