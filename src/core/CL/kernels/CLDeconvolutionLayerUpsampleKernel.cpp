@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -79,9 +79,8 @@ void CLDeconvolutionLayerUpsampleKernel::configure(const ICLTensor *input, ICLTe
     constexpr unsigned int num_elems_processed_per_iteration = 1;
 
     // Configure kernel window
-    Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
-
-    AccessWindowHorizontal output_access(output->info(), 0, 0, num_elems_processed_per_iteration);
+    Window                 win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     ICLKernel::configure(win);
