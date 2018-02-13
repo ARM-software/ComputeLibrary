@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,6 +33,7 @@ using namespace arm_compute::graph;
 ActivationLayer::ActivationLayer(const ActivationLayerInfo activation_info)
     : _activation_info(activation_info)
 {
+    set_supports_in_place(true);
 }
 
 std::unique_ptr<arm_compute::IFunction> ActivationLayer::instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output)

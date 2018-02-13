@@ -101,7 +101,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 } // namespace
 
 CLBatchNormalizationLayerKernel::CLBatchNormalizationLayerKernel()
-    : _input(nullptr), _output(nullptr), _mean(nullptr), _var(nullptr), _beta(nullptr), _gamma(nullptr), _epsilon(0)
+    : _input(nullptr), _output(nullptr), _mean(nullptr), _var(nullptr), _beta(nullptr), _gamma(nullptr), _epsilon(0), _run_in_place(false)
 {
 }
 
@@ -117,6 +117,8 @@ void CLBatchNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *out
     _beta    = beta;
     _gamma   = gamma;
     _epsilon = epsilon;
+
+    _run_in_place = (output == nullptr) || (output == input);
 
     if(output != nullptr)
     {
@@ -137,19 +139,19 @@ void CLBatchNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *out
     build_opts.add_option_if(act_info.enabled(), "-D" + string_from_activation_func(act_info.activation()));
     build_opts.add_option_if(act_info.enabled(), "-DA_VAL=" + float_to_string_with_full_precision(act_info.a()));
     build_opts.add_option_if(act_info.enabled(), "-DB_VAL=" + float_to_string_with_full_precision(act_info.b()));
-    build_opts.add_option_if(output == nullptr, "-DIN_PLACE");
+    build_opts.add_option_if(_run_in_place, "-DIN_PLACE");
     build_opts.add_option_if(is_data_type_fixed_point(input->info()->data_type()), "-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("batchnormalization_layer", build_opts.options()));
 
     // Set kernel static arguments
-    unsigned int include_output = (output != nullptr) ? 1 : 0;
+    unsigned int include_output = (!_run_in_place) ? 1 : 0;
     unsigned int idx            = (1 + include_output) * num_arguments_per_3D_tensor() + 4 * num_arguments_per_1D_tensor(); // Skip the input and output parameters
     _kernel.setArg<cl_float>(idx++, _epsilon);
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), (output == nullptr) ? nullptr : output->info());
+    auto win_config = validate_and_configure_window(input->info(), (_run_in_place) ? nullptr : output->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure(win_config.second);
 
@@ -168,8 +170,9 @@ Status CLBatchNormalizationLayerKernel::validate(const ITensorInfo *input, const
                                                  const ITensorInfo *beta, const ITensorInfo *gamma,
                                                  float epsilon, ActivationLayerInfo act_info)
 {
+    const bool run_in_place = (output == nullptr) || (output == input);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, mean, var, beta, gamma, epsilon, act_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), (output == nullptr) ? nullptr : output->clone().get()).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), (run_in_place) ? nullptr : output->clone().get()).first);
 
     return Status{};
 }
@@ -184,7 +187,7 @@ void CLBatchNormalizationLayerKernel::run(const Window &window, cl::CommandQueue
     Window vector_slice = window.first_slice_window_1D();
     vector_slice.set(Window::DimX, Window::Dimension(0, 0, 0));
 
-    unsigned int include_output = (_output != nullptr) ? 1 : 0;
+    unsigned int include_output = (!_run_in_place) ? 1 : 0;
     unsigned int idx            = (1 + include_output) * num_arguments_per_3D_tensor();
     add_1D_tensor_argument(idx, _mean, vector_slice);
     add_1D_tensor_argument(idx, _var, vector_slice);
@@ -195,7 +198,7 @@ void CLBatchNormalizationLayerKernel::run(const Window &window, cl::CommandQueue
     {
         idx = 0;
         add_3D_tensor_argument(idx, _input, slice);
-        if(_output != nullptr)
+        if(!_run_in_place)
         {
             add_3D_tensor_argument(idx, _output, slice);
         }

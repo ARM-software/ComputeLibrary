@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,7 @@ class CLActivationLayer : public ICLSimpleFunction
 public:
     /** Set the input and output tensor.
      *
-     * @note If the output tensor is a nullptr, the activation function will be performed in-place
+     * @note If the output tensor is a nullptr or is equal to the input, the activation function will be performed in-place
      *
      * @param[in, out] input    Source tensor. In case of @p output tensor = nullptr, this tensor will store the result
      *                          of the activation function. Data types supported: QS8/QS16/F16/F32.

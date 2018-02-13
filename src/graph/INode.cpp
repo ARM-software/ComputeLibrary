@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,6 +38,14 @@ TargetHint INode::override_target_hint(TargetHint target_hint) const
     target_hint = node_override_hints(hints).target_hint();
     ARM_COMPUTE_ERROR_ON(target_hint == TargetHint::OPENCL && !opencl_is_available());
     return target_hint;
+}
+bool INode::supports_in_place() const
+{
+    return _supports_in_place;
+}
+void INode::set_supports_in_place(bool value)
+{
+    _supports_in_place = value;
 }
 GraphHints INode::node_override_hints(GraphHints hints) const
 {

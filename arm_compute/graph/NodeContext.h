@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,7 +60,7 @@ public:
      * @param[in] input Input to add
      */
     void add_input(arm_compute::ITensor *input);
-    /** Adds and output to the context
+    /** Adds an output to the context
      *
      * @param[in] output Output to add
      */

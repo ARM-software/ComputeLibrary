@@ -131,6 +131,11 @@ void Graph::Private::configure(GraphHints _next_hints)
         _previous_hints = _current_hints; // For the first node just assume the previous node was of the same type as this one
     }
 
+    if(_current_node->supports_in_place())
+    {
+        _current_output = _current_input;
+    }
+
     //Automatic output configuration ?
     if(_current_output == nullptr)
     {
@@ -152,8 +157,12 @@ void Graph::Private::configure(GraphHints _next_hints)
     _ctx.hints()                                 = _current_hints;
     std::unique_ptr<arm_compute::IFunction> func = _current_node->instantiate_node(_ctx, _current_input, _current_output);
 
-    // Allocate current input
-    _current_input->allocate();
+    // If the operation is done in-place, do not allocate or it will prevent following layers from performing the configuration
+    if(!_current_node->supports_in_place())
+    {
+        // Allocate current input
+        _current_input->allocate();
+    }
 
     // Map input if needed
     if(_current_input->target() == TargetHint::OPENCL)

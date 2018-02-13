@@ -51,6 +51,7 @@ public:
     BatchNormalizationLayer(AccessorType &&mean, AccessorType &&var, AccessorType &&gamma, AccessorType &&beta, float epsilon, ActivationLayerInfo act_info = ActivationLayerInfo())
         : _mean(std::move(mean)), _var(std::move(var)), _gamma(std::move(gamma)), _beta(std::move(beta)), _epsilon(epsilon), _act_info(act_info)
     {
+        set_supports_in_place(true);
     }
 
     // Inherited methods overriden:

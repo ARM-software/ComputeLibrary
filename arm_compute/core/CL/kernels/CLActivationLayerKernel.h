@@ -73,6 +73,7 @@ public:
 private:
     ICLTensor *_input;
     ICLTensor *_output;
+    bool       _run_in_place;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLACTIVATIONLAYERKERNEL_H__ */

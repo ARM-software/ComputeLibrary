@@ -46,7 +46,7 @@ public:
     CLBatchNormalizationLayer();
     /** Set the input and output tensors.
      *
-     * @note If the output tensor is a nullptr, the batch normalization function will be performed in-place
+     * @note If the output tensor is a nullptr or is equal to the input, the batch normalization function will be performed in-place
      *
      * @param[in, out] input    Source tensor. In case of @p output tensor = nullptr, this tensor will store the result.
      *                          3 lower dimensions represent a single input with dimensions [width, height, FM].
