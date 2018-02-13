@@ -146,6 +146,14 @@ private:
      *                     except for input of QASYMM8 type where output should be of S32 type.
      */
     void configure_mm(const ITensor *input, const ITensor *weights, ITensor *output);
+    /** Prepare the appropriate assembly optimized kernel
+     *
+     * @param[in] ci CPU information
+     * @param[in] M  M parameter of matrix multiplication
+     * @param[in] N  N parameter of matrix multiplication
+     * @param[in] K  K parameter of matrix multiplication
+     */
+    void configure_asm_mm(const struct CPUInfo &ci, int M, int N, int K);
 
 private:
     MemoryGroup                                         _memory_group;

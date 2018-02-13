@@ -32,10 +32,10 @@
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMMatrixVectorMultiplyKernel.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CPP/functions/CPPPermute.h"
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/NEON/functions/NEPermute.h"
 #include "arm_compute/runtime/Tensor.h"
 
 namespace arm_compute
@@ -71,9 +71,9 @@ private:
     NEDepthwiseConvolutionLayer3x3Kernel      _dwc_kernel;
     NEDirectConvolutionLayerOutputStageKernel _output_stage_kernel;
     NEFillBorderKernel                        _border_handler;
-    CPPPermute                                _permute_input;
-    CPPPermute                                _permute_weights;
-    CPPPermute                                _permute_output;
+    NEPermute                                 _permute_input;
+    NEPermute                                 _permute_weights;
+    NEPermute                                 _permute_output;
     Tensor                                    _accumulator;
     Tensor                                    _input_nhwc;
     Tensor                                    _weights_hwio;

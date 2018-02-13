@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/NEON/kernels/arm32/NEGEMMAArch32Kernel.h"
 #include "arm_compute/core/NEON/kernels/arm64/NEGEMMAArch64Kernel.h"
+#include "arm_compute/core/NEON/kernels/arm64/NEGEMMAArch64NativeKernel.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Utils.h"
@@ -255,6 +256,25 @@ void NEConvolutionLayer::configure_mm(const ITensor *input, const ITensor *weigh
     }
 }
 
+void NEConvolutionLayer::configure_asm_mm(const struct CPUInfo &ci, int M, int N, int K)
+{
+    ARM_COMPUTE_UNUSED(ci);
+    ARM_COMPUTE_UNUSED(M);
+    ARM_COMPUTE_UNUSED(N);
+    ARM_COMPUTE_UNUSED(K);
+#if defined(__arm__) || defined(__aarch64__)
+#if defined(__arm__)
+    GemmInterleaved<sgemm_8x6, float, float> gemm(&ci, M, N, K, false, false);
+#elif defined(__aarch64__)
+    GemmInterleaved<sgemm_12x8, float, float> gemm(&ci, M, N, K, false, false);
+#endif /* defined(__arm__) || defined(__aarch64__) */
+
+    constexpr size_t alignment = 4096;
+    _workspace.allocator()->init(TensorInfo(TensorShape{ (gemm.get_working_size() + alignment - 1) * NEScheduler::get().num_threads() }, 1, DataType::U8));
+    _memory_group.manage(&_workspace);
+#endif /* defined(__arm__) || defined(__aarch64__) */
+}
+
 void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info)
 {
     // Perform validate step
@@ -384,7 +404,6 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
     _input_im2col_kernel.configure(input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, _append_bias);
 
     // Configure matrix multiply
-#if defined(__arm__) || defined(__aarch64__)
     if(_mm_optimised_kernel != nullptr)
     {
         struct CPUInfo ci = NEScheduler::get().cpu_info();
@@ -393,15 +412,16 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
         const int N = _gemm_output.info()->tensor_shape().x();
         const int K = _input_im2col_reshaped.info()->tensor_shape().x();
 
-#if defined(__arm__)
-        GemmInterleaved<sgemm_8x6, float, float> gemm(&ci, M, N, K, false, false);
-#elif defined(__aarch64__)
-        GemmInterleaved<sgemm_12x8, float, float> gemm(&ci, M, N, K, false, false);
-#endif /* defined(__arm__) || defined(__aarch64__) */
-
-        constexpr size_t alignment = 4096;
-        _workspace.allocator()->init(TensorInfo(TensorShape{ (gemm.get_working_size() + alignment - 1) * NEScheduler::get().num_threads() }, 1, DataType::U8));
-        _memory_group.manage(&_workspace);
+#if defined(__aarch64__)
+        if((N <= 128) && (K <= 128))
+        {
+            _mm_optimised_kernel = support::cpp14::make_unique<NEGEMMAArch64NativeKernel>();
+        }
+        else
+#endif /* defined(__aarch64__) */
+        {
+            configure_asm_mm(ci, M, N, K);
+        }
 
         // Configure matrix multiplication kernel
         _mm_optimised_kernel->configure(&_input_im2col_reshaped, weights, &_gemm_output, &_workspace);
@@ -409,7 +429,6 @@ void NEConvolutionLayer::configure(const ITensor *input, const ITensor *weights,
         _workspace.allocator()->allocate();
     }
     else
-#endif /* defined(__arm__) || defined(__aarch64__) */
     {
         if(_is_interleaved_transposed)
         {
