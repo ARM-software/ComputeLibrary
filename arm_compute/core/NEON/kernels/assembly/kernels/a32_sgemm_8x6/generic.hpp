@@ -75,6 +75,9 @@ inline void a32_sgemm_8x6(const float *Apanel, const float *Bpanel, float *Cpane
                 ASM_PREFETCH("[%[b_ptr], #176]")
                 "vmov.i32	q15, #0\n"
 
+                "cmp		%[k], #0\n"
+                "beq		6f\n"
+
                 "1:\n"
                 // Unroll 0
                 "vmla.f32	q4, q2, d0[0]\n"
@@ -155,6 +158,9 @@ inline void a32_sgemm_8x6(const float *Apanel, const float *Bpanel, float *Cpane
                 "vmla.f32	q14, q3, d3[0]\n"
                 "vmla.f32	q15, q3, d3[1]\n"
                 "bne		1b\n"
+
+                // Branch here if we never execute main loop.
+                "6:\n"
 
                 // "Tails" shows how many multiply blocks are needed at the
                 // end, must be 1-4 inclusive.  Bail out to alternative tail
