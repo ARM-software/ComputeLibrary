@@ -154,6 +154,7 @@ class SmallDepthwiseConvolutionLayerDataset3x3 final : public DepthwiseConvoluti
 public:
     SmallDepthwiseConvolutionLayerDataset3x3()
     {
+        add_config(TensorShape(3U, 3U, 2U), TensorShape(3U, 3U, 2U), TensorShape(1U, 1U, 2U), PadStrideInfo(1, 1, 0, 0));
         add_config(TensorShape(7U, 7U, 3U, 2U), TensorShape(3U, 3U, 3U), TensorShape(5U, 5U, 3U, 2U), PadStrideInfo(1, 1, 0, 0));
         add_config(TensorShape(33U, 27U, 11U), TensorShape(3U, 3U, 11U), TensorShape(11U, 14U, 11U), PadStrideInfo(3, 2, 1, 1));
         add_config(TensorShape(21U, 31U, 9U, 4U), TensorShape(3U, 3U, 9U), TensorShape(21U, 15U, 9U, 4U), PadStrideInfo(1, 2, 1, 0));

@@ -82,8 +82,11 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     validate(bias.info()->valid_region(), bias_valid_region);
 
     // Validate padding
-    const int         step    = 16 >> info.stride().first;
-    const PaddingSize padding = PaddingCalculator(output_shape.x(), step).required_padding();
+    bool              is_optimized_run = NEDepthwiseConvolutionLayer3x3Kernel::is_optimized_execution_possible(input_shape, info, data_type, DataLayout::NCHW);
+    const int         step_non_opt_dwc = 16 >> info.stride().first;
+    const int         step_bias_add    = 16 / src.info()->element_size();
+    const int         step             = is_optimized_run ? step_bias_add : std::max(step_non_opt_dwc, step_bias_add);
+    const PaddingSize padding          = PaddingCalculator(output_shape.x(), step).required_padding();
     validate(dst.info()->padding(), padding);
 }
 

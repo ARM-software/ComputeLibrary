@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,7 +42,7 @@ namespace validation
 {
 namespace
 {
-const auto PermuteParametersSmall = combine(datasets::Small4DShapes(),
+const auto PermuteParametersSmall = combine(concat(concat(datasets::Small2DShapes(), datasets::Small3DShapes()), datasets::Small4DShapes()),
                                             framework::dataset::make("PermutationVector", { PermutationVector(2U, 0U, 1U), PermutationVector(1U, 2U, 0U), PermutationVector(3U, 2U, 0U, 1U) }));
 const auto PermuteParametersLarge = combine(datasets::Large4DShapes(),
                                             framework::dataset::make("PermutationVector", { PermutationVector(2U, 0U, 1U), PermutationVector(1U, 2U, 0U), PermutationVector(3U, 2U, 0U, 1U) }));
