@@ -42,11 +42,15 @@ class SmallWinogradLayerDataset final : public ConvolutionLayerDataset
 public:
     SmallWinogradLayerDataset()
     {
+        // Kernel size 3
         // Batch size 1
         add_config(TensorShape(8U, 8U, 2U), TensorShape(3U, 3U, 2U, 1U), TensorShape(1U), TensorShape(6U, 6U, 1U), PadStrideInfo(1, 1, 0, 0));
         // Batch size 4
         add_config(TensorShape(23U, 27U, 5U, 4U), TensorShape(3U, 3U, 5U, 21U), TensorShape(21U), TensorShape(21U, 25U, 21U, 4U), PadStrideInfo(1, 1, 0, 0));
         add_config(TensorShape(8U, 8U, 2U), TensorShape(3U, 3U, 2U, 1U), TensorShape(1U), TensorShape(8U, 8U, 1U), PadStrideInfo(1, 1, 1, 1));
+
+        // Kernel size 5
+        add_config(TensorShape(8U, 8U, 2U), TensorShape(5U, 5U, 2U, 1U), TensorShape(1U), TensorShape(4U, 4U, 1U), PadStrideInfo(1, 1, 0, 0));
     }
 };
 

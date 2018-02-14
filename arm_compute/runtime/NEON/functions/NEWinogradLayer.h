@@ -26,7 +26,7 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
-#include "arm_compute/core/NEON/kernels/NEWinogradLayerKernel.h"
+#include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CPP/functions/CPPPermute.h"
 #include "arm_compute/runtime/MemoryGroup.h"
@@ -38,6 +38,11 @@ namespace arm_compute
 {
 class ITensor;
 /** Basic function to simulate a convolution layer. This function calls the following NEON kernels:
+ * -# @ref NEWinogradLayerTransformWeightsKernel (executed only once in the first call to the run() method )
+ * -# @ref NEWinogradLayerTransformInputKernel
+ * -# @ref NEWinogradLayerTransformOutputKernel
+ * -# @ref NEWinogradLayerBatchedGEMMKernel
+ * -# @ref CPPPermute (three times: weights, input and output)
  */
 class NEWinogradLayer : public IFunction
 {
@@ -68,11 +73,12 @@ public:
     NEWinogradLayer &operator=(const NEWinogradLayer &) = delete;
 
 private:
-    MemoryGroup _memory_group;
-    NEWinogradLayerKernel<2, 2, 3, 3>                 _winograd_kernel;
-    NEWinogradLayerTransformInputKernel<2, 2, 3, 3>   _transform_input_kernel;
-    NEWinogradLayerTransformOutputKernel<2, 2, 3, 3>  _transform_output_kernel;
-    NEWinogradLayerTransformWeightsKernel<2, 2, 3, 3> _transform_weights_kernel;
+    MemoryGroup                _memory_group;
+    std::unique_ptr<INEKernel> _batched_gemm_kernel;
+    std::unique_ptr<INEKernel> _transform_input_kernel;
+    std::unique_ptr<INEKernel> _transform_output_kernel;
+    std::unique_ptr<INEKernel> _transform_weights_kernel;
+
     CPPPermute     _permute_input;
     CPPPermute     _permute_weights;
     CPPPermute     _permute_output;

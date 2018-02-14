@@ -32,25 +32,25 @@
 namespace arm_compute
 {
 //Batched Gemms
-template <int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-NEWinogradLayerKernel<OutputTileRows, OutputTileCols, KernelRows, KernelCols>::NEWinogradLayerKernel()
+template <typename TIn, typename TOut, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+NEWinogradLayerBatchedGEMMKernel<TIn, TOut, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::NEWinogradLayerBatchedGEMMKernel()
     : _gemms()
 {
 }
 
-template <int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-void NEWinogradLayerKernel<OutputTileRows, OutputTileCols, KernelRows, KernelCols>::configure(
+template <typename TIn, typename TOut, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+void NEWinogradLayerBatchedGEMMKernel<TIn, TOut, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::configure(
     const unsigned int n_gemms,
     const int M, const int K, const int N,
-    const int          a_matrix_stride,
-    const int          a_row_stride,
-    const int          b_matrix_stride,
-    const int          b_row_stride,
-    const int          c_matrix_stride,
-    const int          c_row_stride,
-    const float *const a_ptr,
-    const float *const b_ptr,
-    float *const       c_ptr)
+    const int        a_matrix_stride,
+    const int        a_row_stride,
+    const int        b_matrix_stride,
+    const int        b_row_stride,
+    const int        c_matrix_stride,
+    const int        c_row_stride,
+    const TIn *const a_ptr,
+    const TIn *const b_ptr,
+    TOut *const      c_ptr)
 {
     _gemms = support::cpp14::make_unique<MultiGEMM>(n_gemms, M, K, N, a_matrix_stride, a_row_stride, b_matrix_stride, b_row_stride, c_matrix_stride, c_row_stride, a_ptr, b_ptr, c_ptr);
     Window win;
@@ -59,8 +59,8 @@ void NEWinogradLayerKernel<OutputTileRows, OutputTileCols, KernelRows, KernelCol
     INEKernel::configure(win);
 }
 
-template <int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-void NEWinogradLayerKernel<OutputTileRows, OutputTileCols, KernelRows, KernelCols>::run(const Window &window, const ThreadInfo &info)
+template <typename TIn, typename TOut, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+void NEWinogradLayerBatchedGEMMKernel<TIn, TOut, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::run(const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
@@ -69,36 +69,66 @@ void NEWinogradLayerKernel<OutputTileRows, OutputTileCols, KernelRows, KernelCol
     _gemms->run(first_gemm, last_gemm);
 }
 
-template class NEWinogradLayerKernel<2, 2, 3, 3>;
+template <typename TIn, typename TOut, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+unsigned int NEWinogradLayerBatchedGEMMKernel<TIn, TOut, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_number_gemms() const
+{
+    return WinogradBase::N_GEMMS;
+}
+
+template <typename TIn, typename TOut, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+int NEWinogradLayerBatchedGEMMKernel<TIn, TOut, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_output_tile_rows() const
+{
+    return _output_tile_rows;
+}
+
+template <typename TIn, typename TOut, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+int NEWinogradLayerBatchedGEMMKernel<TIn, TOut, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_output_tile_cols() const
+{
+    return _output_tile_cols;
+}
+
+template <typename TIn, typename TOut, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+int NEWinogradLayerBatchedGEMMKernel<TIn, TOut, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_number_blocks() const
+{
+    return WinogradConv::N_BLOCK;
+}
+
+template class NEWinogradLayerBatchedGEMMKernel<float, float, 2, 2, 3, 3>;
+template class NEWinogradLayerBatchedGEMMKernel<float, float, 2, 2, 5, 5>;
 
 // Weights transform
 
-template <int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-unsigned int NEWinogradLayerTransformWeightsKernel<OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_weight_storage_size(int n_output_channels, int n_input_channels)
+template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+unsigned int NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_weight_storage_size(int n_output_channels, int n_input_channels) const
 {
     const KernelShape shape(n_output_channels, KernelRows, KernelCols, n_input_channels);
     return static_cast<unsigned int>(
-               // WinogradConv returns the size in bytes, we divide by `sizeof(float)` to
-               // express that in units of float.
-               WinogradConv::get_kernel_storage_size(shape) / sizeof(float));
+               // WinogradConv returns the size in bytes, we divide by `sizeof(T)` to express that in units of T
+               WinogradConv::get_kernel_storage_size(shape) / sizeof(T));
 }
 
-template <int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-NEWinogradLayerTransformWeightsKernel<OutputTileRows, OutputTileCols, KernelRows, KernelCols>::NEWinogradLayerTransformWeightsKernel()
+template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::NEWinogradLayerTransformWeightsKernel()
     : _transform()
 {
 }
 
-template <int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-void NEWinogradLayerTransformWeightsKernel<OutputTileRows, OutputTileCols, KernelRows, KernelCols>::configure(
+template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+int NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_matrix_stride(const KernelShape &kernel_shape) const
+{
+    return WinogradConv::get_kernel_matrix_stride(kernel_shape);
+}
+
+template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+void NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::configure(
     const ITensor *weights_hwio,
-    float *const   output,
+    T *const       output,
     const int      matrix_stride,     /** Stride across matrices in the output. */
     const int      n_output_channels, /** Number of filters. */
     const int      n_input_channels)  /** Number of channels in each filter. */
 {
     const int matrix_row_stride = roundup(n_output_channels, WinogradConv::N_BLOCK);
-    _transform                  = support::cpp14::make_unique<WeightsTransform>(reinterpret_cast<float *>(weights_hwio->buffer()), output, matrix_stride, matrix_row_stride, n_output_channels,
+    _transform                  = support::cpp14::make_unique<WeightsTransform>(reinterpret_cast<T *>(weights_hwio->buffer()), output, matrix_stride, matrix_row_stride, n_output_channels,
                                                                                 n_input_channels);
     Window win;
     auto   win_last = _transform->get_window();
@@ -106,8 +136,8 @@ void NEWinogradLayerTransformWeightsKernel<OutputTileRows, OutputTileCols, Kerne
     INEKernel::configure(win);
 }
 
-template <int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-void NEWinogradLayerTransformWeightsKernel<OutputTileRows, OutputTileCols, KernelRows, KernelCols>::run(const Window &window, const ThreadInfo &info)
+template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+void NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::run(const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
@@ -116,50 +146,57 @@ void NEWinogradLayerTransformWeightsKernel<OutputTileRows, OutputTileCols, Kerne
     _transform->run(fst, lst);
 }
 
-template <int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-bool NEWinogradLayerTransformWeightsKernel<OutputTileRows, OutputTileCols, KernelRows, KernelCols>::is_parallelisable() const
+template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+bool NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::is_parallelisable() const
 {
     return false;
 }
 
-template class NEWinogradLayerTransformWeightsKernel<2, 2, 3, 3>;
+template class NEWinogradLayerTransformWeightsKernel<float, 2, 2, 3, 3>;
+template class NEWinogradLayerTransformWeightsKernel<float, 2, 2, 5, 5>;
 
 // Input transform
 
-template <int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-unsigned int NEWinogradLayerTransformInputKernel<OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_input_storage_size(
+template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+unsigned int NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_input_storage_size(
     int  n_batches,   /** Number of batches in the input tensor. */
     int  n_channels,  /** Number of feature maps in the input tensor. */
     int  n_rows,      /** Number of rows in each feature map. */
     int  n_cols,      /** Number of columns in each feature map. */
     bool same_padding /** Use "SAME" padding, otherwise use "VALID". */
-)
+) const
 {
     // Construct shapes for the input and kernel tensors.
     const Tensor4DShape input_shape(n_batches, n_rows, n_cols, n_channels);
     const KernelShape   kern_shape(1, KernelRows, KernelCols, n_channels);
     const PaddingType   padding = (same_padding) ? PADDING_SAME : PADDING_VALID;
     // Return the size, converted into units of TIn
-    return static_cast<unsigned int>(
-               WinogradConv::get_input_storage_size(kern_shape, input_shape, padding) / sizeof(float));
+    return static_cast<unsigned int>(WinogradConv::get_input_storage_size(kern_shape, input_shape, padding) / sizeof(T));
 }
 
-template <int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-NEWinogradLayerTransformInputKernel<OutputTileRows, OutputTileCols, KernelRows, KernelCols>::NEWinogradLayerTransformInputKernel()
+template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+int NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_matrix_stride(
+    const KernelShape &kernel_shape, const Tensor4DShape &input_shape, const PaddingType padding_type) const
+{
+    return WinogradConv::get_input_matrix_stride(kernel_shape, input_shape, padding_type);
+}
+
+template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::NEWinogradLayerTransformInputKernel()
     : _transform()
 {
 }
 
-template <int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-void NEWinogradLayerTransformInputKernel<OutputTileRows, OutputTileCols, KernelRows, KernelCols>::configure(
-    const float *const input,         /** Input tensor data */
-    const int          n_batches,     /** Number of batches in input tensor. */
-    const int          n_rows,        /** Number of rows in input tensor. */
-    const int          n_cols,        /** Number of columns in input tensor. */
-    const int          n_channels,    /** Number of channels in input tensor. */
-    const PaddingType  padding,       /** Padding type. */
-    float *const       output,        /** Base of output matrices. */
-    const int          matrix_stride) /** Stride between output matrices. */
+template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+void NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::configure(
+    const T *const    input,         /** Input tensor data */
+    const int         n_batches,     /** Number of batches in input tensor. */
+    const int         n_rows,        /** Number of rows in input tensor. */
+    const int         n_cols,        /** Number of columns in input tensor. */
+    const int         n_channels,    /** Number of channels in input tensor. */
+    const PaddingType padding,       /** Padding type. */
+    T *const          output,        /** Base of output matrices. */
+    const int         matrix_stride) /** Stride between output matrices. */
 {
     //  _input_matrix_row_stride(n_input_channels),
     _transform = support::cpp14::make_unique<InputTransform>(input, n_batches, n_rows, n_cols, n_channels, padding, output, matrix_stride, n_channels);
@@ -169,8 +206,8 @@ void NEWinogradLayerTransformInputKernel<OutputTileRows, OutputTileCols, KernelR
     INEKernel::configure(win);
 }
 
-template <int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-void NEWinogradLayerTransformInputKernel<OutputTileRows, OutputTileCols, KernelRows, KernelCols>::run(const Window &window, const ThreadInfo &info)
+template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+void NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::run(const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
@@ -179,24 +216,25 @@ void NEWinogradLayerTransformInputKernel<OutputTileRows, OutputTileCols, KernelR
     _transform->run(fst, lst);
 }
 
-template <int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-bool NEWinogradLayerTransformInputKernel<OutputTileRows, OutputTileCols, KernelRows, KernelCols>::is_parallelisable() const
+template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+bool NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::is_parallelisable() const
 {
     return false;
 }
 
-template class NEWinogradLayerTransformInputKernel<2, 2, 3, 3>;
+template class NEWinogradLayerTransformInputKernel<float, 2, 2, 3, 3>;
+template class NEWinogradLayerTransformInputKernel<float, 2, 2, 5, 5>;
 
 // Output transform
 
-template <int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-unsigned int NEWinogradLayerTransformOutputKernel<OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_output_storage_size(
+template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+unsigned int NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_output_storage_size(
     int  n_batches,         /** Number of batches in the output tensor. */
     int  n_rows,            /** Number of rows in each feature map of the input tensor. */
     int  n_cols,            /** Number of columns in each feature map of the input tensor. */
     int  n_output_channels, /** Number of feature maps in the output tensor. */
     bool same_padding       /** Use "SAME" padding, otherwise use "VALID". */
-)
+) const
 {
     // Construct shapes for the input and kernel tensors.
     const Tensor4DShape input_shape(n_batches, n_rows, n_cols, 1);
@@ -205,25 +243,38 @@ unsigned int NEWinogradLayerTransformOutputKernel<OutputTileRows, OutputTileCols
 
     // Return the size, converted into units of TOut
     return static_cast<unsigned int>(
-               WinogradConv::get_output_storage_size(kern_shape, input_shape, padding) / sizeof(float));
+               WinogradConv::get_output_storage_size(kern_shape, input_shape, padding) / sizeof(T));
 }
 
-template <int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-NEWinogradLayerTransformOutputKernel<OutputTileRows, OutputTileCols, KernelRows, KernelCols>::NEWinogradLayerTransformOutputKernel()
+template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::NEWinogradLayerTransformOutputKernel()
     : _biases(nullptr), _output_workspace(nullptr), _matrix_stride(0), _matrix_row_stride(0), _output(nullptr), _n_batches(0), _n_rows(0), _n_cols(0), _n_channels(0)
 {
 }
 
-template <int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-void NEWinogradLayerTransformOutputKernel<OutputTileRows, OutputTileCols, KernelRows, KernelCols>::configure(
-    const ITensor     *biases,
-    const float *const output_workingspace,
-    const int          matrix_stride,
-    float *const       output,
-    const int          n_batches,
-    const int          n_rows,
-    const int          n_cols,
-    const int          n_channels)
+template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+int NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_matrix_stride(
+    const KernelShape &kernel_shape, const Tensor4DShape &input_shape, const PaddingType padding_type) const
+{
+    return WinogradConv::get_output_matrix_stride(kernel_shape, input_shape, padding_type);
+}
+template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+Tensor4DShape NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::get_output_shape(
+    const KernelShape &kernel_shape, const Tensor4DShape &in_shape, const PaddingType padding) const
+{
+    return WinogradConv::get_output_shape(kernel_shape, in_shape, padding);
+}
+
+template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+void NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::configure(
+    const ITensor *biases,
+    const T *const output_workingspace,
+    const int      matrix_stride,
+    T *const       output,
+    const int      n_batches,
+    const int      n_rows,
+    const int      n_cols,
+    const int      n_channels)
 {
     _biases            = biases;
     _output_workspace  = output_workingspace;
@@ -243,8 +294,8 @@ void NEWinogradLayerTransformOutputKernel<OutputTileRows, OutputTileCols, Kernel
     INEKernel::configure(win);
 }
 
-template <int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-void NEWinogradLayerTransformOutputKernel<OutputTileRows, OutputTileCols, KernelRows, KernelCols>::run(const Window &window, const ThreadInfo &info)
+template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+void NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::run(const Window &window, const ThreadInfo &info)
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
@@ -253,7 +304,7 @@ void NEWinogradLayerTransformOutputKernel<OutputTileRows, OutputTileCols, Kernel
     ARM_COMPUTE_ERROR_ON_NULLPTR(_output);
 
     OutputTransform output_transform(_output_workspace, _matrix_stride, _matrix_row_stride,
-                                     reinterpret_cast<float *>(_biases->buffer()), _output,
+                                     reinterpret_cast<T *>(_biases->buffer()), _output,
                                      _n_batches, _n_rows, _n_cols, _n_channels);
 
     // The code below cannot be moved to configure because biases hasn't been allocated at that point
@@ -262,12 +313,13 @@ void NEWinogradLayerTransformOutputKernel<OutputTileRows, OutputTileCols, Kernel
     output_transform.run(fst, lst);
 }
 
-template <int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-bool NEWinogradLayerTransformOutputKernel<OutputTileRows, OutputTileCols, KernelRows, KernelCols>::is_parallelisable() const
+template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+bool NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::is_parallelisable() const
 {
     return false;
 }
 
-template class NEWinogradLayerTransformOutputKernel<2, 2, 3, 3>;
+template class NEWinogradLayerTransformOutputKernel<float, 2, 2, 3, 3>;
+template class NEWinogradLayerTransformOutputKernel<float, 2, 2, 5, 5>;
 
 } // namespace arm_compute

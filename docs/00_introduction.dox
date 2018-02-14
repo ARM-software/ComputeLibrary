@@ -189,6 +189,13 @@ If there is more than one release in a month then an extra sequential number is 
 
 @subsection S2_2_changelog Changelog
 
+v18.02 Public maintenance release
+ - New NEON kernels / functions
+    - @ref arm_compute::NEWinogradLayerTransformInputKernel / @ref arm_compute::NEWinogradLayer
+    - @ref arm_compute::NEWinogradLayerTransformOutputKernel / @ref arm_compute::NEWinogradLayer
+    - @ref arm_compute::NEWinogradLayerTransformWeightsKernel / @ref arm_compute::NEWinogradLayer
+    - Renamed arm_compute::NEWinogradLayerKernel into @ref arm_compute::NEWinogradLayerBatchedGEMMKernel
+
 v18.01 Public maintenance release
  - Various bug fixes
  - Added some of the missing validate() methods
@@ -205,7 +212,7 @@ v18.01 Public maintenance release
     - @ref arm_compute::GCGEMMInterleave4x4Kernel
     - @ref arm_compute::GCGEMMTranspose1xWKernel
     - @ref arm_compute::GCIm2ColKernel
- - Refactored NEON Winograd (@ref arm_compute::NEWinogradLayerKernel)
+ - Refactored NEON Winograd (arm_compute::NEWinogradLayerKernel)
  - Added @ref arm_compute::NEDirectConvolutionLayerOutputStageKernel
  - Added QASYMM8 support to the following NEON kernels:
     - @ref arm_compute::NEDepthwiseConvolutionLayer3x3Kernel
@@ -256,7 +263,7 @@ v17.12 Public major release
     - @ref arm_compute::NEGEMMLowpOffsetContributionKernel / @ref arm_compute::NEGEMMLowpMatrixAReductionKernel / @ref arm_compute::NEGEMMLowpMatrixBReductionKernel / @ref arm_compute::NEGEMMLowpMatrixMultiplyCore
     - @ref arm_compute::NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel / @ref arm_compute::NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
     - @ref arm_compute::NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel / @ref arm_compute::NEGEMMLowpQuantizeDownInt32ToUint8Scale
-    - @ref arm_compute::NEWinogradLayerKernel / @ref arm_compute::NEWinogradLayer
+    - @ref arm_compute::NEWinogradLayer / arm_compute::NEWinogradLayerKernel
 
  - New OpenCL kernels / functions
     - @ref arm_compute::CLGEMMLowpOffsetContributionKernel / @ref arm_compute::CLGEMMLowpMatrixAReductionKernel / @ref arm_compute::CLGEMMLowpMatrixBReductionKernel / @ref arm_compute::CLGEMMLowpMatrixMultiplyCore
