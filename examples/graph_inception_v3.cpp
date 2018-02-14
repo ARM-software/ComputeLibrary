@@ -52,8 +52,9 @@ public:
         constexpr float mean = 0.f;   /* Mean value to subtract from the channels */
         constexpr float std  = 255.f; /* Standard deviation value to divide from the channels */
 
-        // Set target. 0 (NEON), 1 (OpenCL). By default it is NEON
-        TargetHint target_hint = set_target_hint(argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0);
+        // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
+        const int  int_target_hint = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
+        TargetHint target_hint     = set_target_hint(int_target_hint);
 
         // Parse arguments
         if(argc < 2)
@@ -86,6 +87,9 @@ public:
             image     = argv[3];
             label     = argv[4];
         }
+
+        // Initialize graph
+        graph.graph_init(int_target_hint == 2);
 
         graph << target_hint << Tensor(TensorInfo(TensorShape(299U, 299U, 3U, 1U), 1, DataType::F32),
                                        get_input_accessor(image,

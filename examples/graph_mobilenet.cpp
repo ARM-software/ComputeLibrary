@@ -36,7 +36,7 @@ using namespace arm_compute::graph_utils;
 /** Example demonstrating how to implement MobileNet's network using the Compute Library's graph API
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] image, [optional] labels )
+ * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL, 2 = OpenCL with Tuner), [optional] Path to the weights folder, [optional] image, [optional] labels )
  */
 class GraphMobilenetExample : public Example
 {
@@ -50,8 +50,9 @@ public:
         constexpr float mean = 0.f;   /* Mean value to subtract from the channels */
         constexpr float std  = 255.f; /* Standard deviation value to divide from the channels */
 
-        // Set target. 0 (NEON), 1 (OpenCL). By default it is NEON
-        TargetHint            target_hint      = set_target_hint(argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0);
+        // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
+        const int             int_target_hint  = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
+        TargetHint            target_hint      = set_target_hint(int_target_hint);
         ConvolutionMethodHint convolution_hint = ConvolutionMethodHint::GEMM;
 
         // Set model to execute. 0 (MobileNetV1_1.0_224), 1 (MobileNetV1_0.75_160)
@@ -105,6 +106,9 @@ public:
         {
             data_path += model_path;
         }
+
+        // Initialize graph
+        graph.graph_init(int_target_hint == 2);
 
         graph << target_hint
               << convolution_hint

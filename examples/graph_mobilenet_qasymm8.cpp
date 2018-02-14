@@ -34,7 +34,7 @@ using namespace arm_compute::graph_utils;
 /** Example demonstrating how to implement QASYMM8 MobileNet's network using the Compute Library's graph API
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Path to the weights folder, [optional] npy_input, [optional] labels )
+ * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL, 2 = OpenCL with Tuner), [optional] Path to the weights folder, [optional] npy_input, [optional] labels )
  */
 class GraphMobileNetQASYMM8Example : public utils::Example
 {
@@ -89,34 +89,40 @@ public:
             QuantizationInfo(0.0338749065995f, 140)   // dwsc13
         };
 
+        // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
+        const int  int_target_hint = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
+        TargetHint target_hint     = set_target_hint(int_target_hint);
+
         // Parse arguments
         if(argc < 2)
         {
             // Print help
-            std::cout << "Usage: " << argv[0] << " [path_to_data] [npy_input] [labels]\n\n";
+            std::cout << "Usage: " << argv[0] << " [target] [path_to_data] [npy_input] [labels]\n\n";
             std::cout << "No data folder provided: using random values\n\n";
         }
         else if(argc == 2)
         {
-            data_path = argv[1];
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " [npy_input] [labels]\n\n";
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " [path_to_data] [npy_input] [labels]\n\n";
             std::cout << "No input provided: using random values\n\n";
         }
-        else if(argc == 3)
+        else if(argc == 4)
         {
-            data_path = argv[1];
-            input     = argv[2];
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " [labels]\n\n";
+            data_path = argv[2];
+            input     = argv[3];
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " [labels]\n\n";
             std::cout << "No text file with labels provided: skipping output accessor\n\n";
         }
         else
         {
-            data_path = argv[1];
-            input     = argv[2];
-            label     = argv[3];
+            data_path = argv[2];
+            input     = argv[3];
+            label     = argv[4];
         }
 
-        graph << TargetHint::OPENCL
+        // Initialize graph
+        graph.graph_init(int_target_hint == 2);
+
+        graph << target_hint
               << arm_compute::graph::Tensor(TensorInfo(TensorShape(224U, 224U, 3U, 1U), 1, DataType::QASYMM8, in_quant_info),
                                             get_weights_accessor(data_path, "/cnn_data/mobilenet_qasymm8_model/" + input))
               << ConvolutionLayer(

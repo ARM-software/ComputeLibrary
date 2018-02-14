@@ -62,6 +62,7 @@ public:
     std::unique_ptr<INode>                      _current_node{ nullptr };
     ITensorObject                              *_current_output{ nullptr };
     bool                                        _info_enabled{ false };
+    CLTuner                                     _tuner{};
 
 private:
     ITensorObject *_current_input{ nullptr };
@@ -76,10 +77,21 @@ Graph::~Graph() //NOLINT
 Graph::Graph()
     : _pimpl{ new Private() }
 {
+}
+
+void Graph::graph_init(const bool use_cl_tuner)
+{
     // Check if OpenCL is available and initialize the scheduler
     if(opencl_is_available())
     {
-        arm_compute::CLScheduler::get().default_init();
+        if(use_cl_tuner)
+        {
+            arm_compute::CLScheduler::get().default_init(&_pimpl->_tuner);
+        }
+        else
+        {
+            arm_compute::CLScheduler::get().default_init();
+        }
     }
 }
 

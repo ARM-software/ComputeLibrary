@@ -46,8 +46,9 @@ public:
         std::string  data_path;   /** Path to the trainable data */
         unsigned int batches = 4; /** Number of batches */
 
-        // Set target. 0 (NEON), 1 (OpenCL). By default it is NEON
-        TargetHint target_hint = set_target_hint(argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0);
+        // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
+        const int  int_target_hint = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
+        TargetHint target_hint     = set_target_hint(int_target_hint);
 
         // Parse arguments
         if(argc < 2)
@@ -74,6 +75,9 @@ public:
             data_path = argv[2];
             batches   = std::strtol(argv[3], nullptr, 0);
         }
+
+        // Initialize graph
+        graph.graph_init(int_target_hint == 2);
 
         //conv1 << pool1 << conv2 << pool2 << fc1 << act1 << fc2 << smx
         graph << target_hint

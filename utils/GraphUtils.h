@@ -256,14 +256,14 @@ inline std::unique_ptr<graph::ITensorAccessor> get_input_accessor(const std::str
 
 /** Utility function to return the TargetHint
  *
- * @param[in] target Integer value which expresses the selected target. Must be 0 for NEON or 1 for OpenCL
+ * @param[in] target Integer value which expresses the selected target. Must be 0 for NEON, 1 for OpenCL or 2 for OpenCL with Tuner
  *
  * @return the TargetHint
  */
 inline graph::TargetHint set_target_hint(int target)
 {
-    ARM_COMPUTE_ERROR_ON_MSG(target > 1, "Invalid target. Target must be 0 (NEON) or 1 (OpenCL)");
-    if(target == 1 && graph::Graph::opencl_is_available())
+    ARM_COMPUTE_ERROR_ON_MSG(target > 2, "Invalid target. Target must be 0 (NEON), 1 (OpenCL) or 2 (OpenCL with Tuner)");
+    if((target == 1 || target == 2) && graph::Graph::opencl_is_available())
     {
         // If type of target is OpenCL, check if OpenCL is available and initialize the scheduler
         return graph::TargetHint::OPENCL;

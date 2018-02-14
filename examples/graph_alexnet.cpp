@@ -38,7 +38,7 @@ using namespace arm_compute::graph_utils;
 /** Example demonstrating how to implement AlexNet's network using the Compute Library's graph API
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] image, [optional] labels )
+ * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL, 2 = OpenCL with Tuner), [optional] Path to the weights folder, [optional] image, [optional] labels )
  */
 class GraphAlexnetExample : public Example
 {
@@ -53,8 +53,9 @@ public:
         constexpr float mean_g = 116.67f; /* Mean value to subtract from green channel */
         constexpr float mean_b = 104.01f; /* Mean value to subtract from blue channel */
 
-        // Set target. 0 (NEON), 1 (OpenCL). By default it is NEON
-        TargetHint target_hint = set_target_hint(argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0);
+        // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
+        const int  int_target_hint = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
+        TargetHint target_hint     = set_target_hint(int_target_hint);
 
         const bool            is_gemm_convolution5x5 = Graph::gpu_target() == arm_compute::GPUTarget::MIDGARD || target_hint == TargetHint::NEON;
         ConvolutionMethodHint convolution_5x5_hint   = is_gemm_convolution5x5 ? ConvolutionMethodHint::GEMM : ConvolutionMethodHint::DIRECT;
@@ -90,6 +91,9 @@ public:
             image     = argv[3];
             label     = argv[4];
         }
+
+        // Initialize the graph
+        graph.graph_init(int_target_hint == 2);
 
         graph << target_hint
               << Tensor(TensorInfo(TensorShape(227U, 227U, 3U, 1U), 1, DataType::F32),

@@ -56,6 +56,11 @@ public:
     Graph(Graph &&) = delete;
     /** Prevent instances from being move assigned */
     Graph &operator=(Graph &&) = delete;
+    /** Initialize the graph
+     *
+     * @param[in] use_cl_tuner Use the CLTuner if this value is true
+     */
+    void graph_init(const bool use_cl_tuner = false);
     /** Executes the graph */
     void run();
     /** Adds a node to the graph

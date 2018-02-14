@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,8 +51,9 @@ public:
         constexpr float mean_g = 116.779f; /* Mean value to subtract from green channel */
         constexpr float mean_b = 103.939f; /* Mean value to subtract from blue channel */
 
-        // Set target. 0 (NEON), 1 (OpenCL). By default it is NEON
-        TargetHint            target_hint      = set_target_hint(argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0);
+        // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
+        const int             int_target_hint  = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
+        TargetHint            target_hint      = set_target_hint(int_target_hint);
         ConvolutionMethodHint convolution_hint = ConvolutionMethodHint::DIRECT;
 
         // Parse arguments
@@ -86,6 +87,9 @@ public:
             image     = argv[3];
             label     = argv[4];
         }
+
+        // Initialize graph
+        graph.graph_init(int_target_hint == 2);
 
         graph << target_hint
               << convolution_hint
