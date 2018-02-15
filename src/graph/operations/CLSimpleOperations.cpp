@@ -66,6 +66,34 @@ REGISTER_SIMPLE_OPERATION(CLActivationLayerOperation, OPENCL, OperationType::Act
     return std::move(activation);
 }
 
+/* Arithmetic addition */
+REGISTER_SIMPLE_OPERATION(CLArithmeticAdditionOperation, OPENCL, OperationType::ArithmeticAddition)
+{
+    ARM_COMPUTE_ERROR_ON(ctx.num_inputs() != 2);
+    ARM_COMPUTE_ERROR_ON(ctx.num_outputs() != 1);
+    ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ICLTensor *>(ctx.input(0)) == nullptr);
+    ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ICLTensor *>(ctx.input(1)) == nullptr);
+    ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ICLTensor *>(ctx.output(0)) == nullptr);
+
+    // Extract IO and info
+    auto *in1 = dynamic_cast<arm_compute::ICLTensor *>(ctx.input(0));
+    auto *in2 = dynamic_cast<arm_compute::ICLTensor *>(ctx.input(1));
+    auto *out = dynamic_cast<arm_compute::ICLTensor *>(ctx.output(0));
+
+    auto addition = arm_compute::support::cpp14::make_unique<arm_compute::CLArithmeticAddition>();
+    addition->configure(in1, in2, out, ConvertPolicy::SATURATE);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLArithmeticAddition"
+                               << " Data Type: " << in1->info()->data_type()
+                               << " Input 1 shape: " << in1->info()->tensor_shape()
+                               << " Input 2 shape: " << in2->info()->tensor_shape()
+                               << " Output shape: " << out->info()->tensor_shape()
+                               << std::endl);
+
+    return std::move(addition);
+}
+
 /* Batch Normalization Layer */
 REGISTER_SIMPLE_OPERATION(CLBatchNormalizationLayerOperation, OPENCL, OperationType::BatchNormalizationLayer)
 {

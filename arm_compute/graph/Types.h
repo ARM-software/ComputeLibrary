@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -91,6 +91,7 @@ enum class ConvolutionMethodHint
 enum class OperationType
 {
     ActivationLayer,
+    ArithmeticAddition,
     BatchNormalizationLayer,
     ConvolutionLayer,
     DepthConvertLayer,

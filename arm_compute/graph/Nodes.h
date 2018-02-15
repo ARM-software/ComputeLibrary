@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,6 +39,7 @@
 #include "arm_compute/graph/nodes/PoolingLayer.h"
 #include "arm_compute/graph/nodes/QuantizationLayer.h"
 #include "arm_compute/graph/nodes/ReshapeLayer.h"
+#include "arm_compute/graph/nodes/ResidualLayer.h"
 #include "arm_compute/graph/nodes/SoftmaxLayer.h"
 
 #endif /* __ARM_COMPUTE_GRAPH_NODES_H__ */
