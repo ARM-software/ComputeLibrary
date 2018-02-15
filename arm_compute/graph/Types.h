@@ -91,6 +91,7 @@ enum class ConvolutionMethodHint
 enum class OperationType
 {
     ActivationLayer,
+    ArithmeticAddition,
     BatchNormalizationLayer,
     ConvolutionLayer,
     DepthConvertLayer,

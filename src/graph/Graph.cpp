@@ -77,6 +77,7 @@ Graph::~Graph() //NOLINT
 Graph::Graph()
     : _pimpl{ new Private() }
 {
+    graph_init();
 }
 
 void Graph::graph_init(const bool use_cl_tuner)
