@@ -93,17 +93,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datase
     CLLogits1DMaxShiftExpSumKernel::ParallelReductionInfo reduction_info = CLLogits1DMaxShiftExpSumKernel::is_parallel_reduction(shape.x());
 
     // Validate src padding
-    // Legacy path used only by quantized asymmetric data type TODO(COMPMID-661) : Remove when port to new path
-    if(is_data_type_quantized_asymmetric(data_type))
-    {
-        const PaddingSize padding_src = PaddingCalculator(shape.x(), 16).required_padding();
-        validate(src.info()->padding(), padding_src);
-    }
-    else
-    {
-        const PaddingSize padding_src = PaddingCalculator(shape.x(), std::get<1>(reduction_info)).required_padding();
-        validate(src.info()->padding(), padding_src);
-    }
+    const PaddingSize padding_src = PaddingCalculator(shape.x(), std::get<1>(reduction_info)).required_padding();
+    validate(src.info()->padding(), padding_src);
 
     // Validate dst padding
     const PaddingSize padding_dst = PaddingCalculator(shape.x(), 16).required_padding();

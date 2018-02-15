@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -72,14 +72,11 @@ public:
 
 private:
     CLMemoryGroup                  _memory_group;
-    CLLogits1DMaxKernel            _max_kernel;
-    CLLogits1DShiftExpSumKernel    _shift_exp_sum_kernel;
     CLLogits1DMaxShiftExpSumKernel _max_shift_exp_sum_kernel;
     CLLogits1DNormKernel           _norm_kernel;
     CLTensor                       _max;
     CLTensor                       _sum;
     CLTensor                       _tmp;
-    bool                           _run_legacy_path;
 };
 }
 #endif /* __ARM_COMPUTE_CLSOFTMAXLAYER_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,7 @@
 using namespace arm_compute;
 
 CLSoftmaxLayer::CLSoftmaxLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _max_kernel(), _shift_exp_sum_kernel(), _max_shift_exp_sum_kernel(), _norm_kernel(), _max(), _sum(), _tmp(), _run_legacy_path(false)
+    : _memory_group(std::move(memory_manager)), _max_shift_exp_sum_kernel(), _norm_kernel(), _max(), _sum(), _tmp()
 {
 }
 
@@ -65,17 +65,7 @@ void CLSoftmaxLayer::configure(const ICLTensor *input, ICLTensor *output, float 
     _memory_group.manage(&_sum);
 
     // Configure kernels
-    // TODO (COMPMID-661): Remove legacy path once the new one is properly validated
-    _run_legacy_path = is_data_type_quantized_asymmetric(input->info()->data_type());
-    if(_run_legacy_path)
-    {
-        _max_kernel.configure(input, &_max);
-        _shift_exp_sum_kernel.configure(input, &_max, &_tmp, &_sum, beta);
-    }
-    else
-    {
-        _max_shift_exp_sum_kernel.configure(input, &_max, &_tmp, &_sum, beta);
-    }
+    _max_shift_exp_sum_kernel.configure(input, &_max, &_tmp, &_sum, beta);
     _norm_kernel.configure(&_tmp, &_sum, output, beta);
 
     // Allocate intermediate buffers
@@ -97,16 +87,7 @@ Status CLSoftmaxLayer::validate(const ITensorInfo *input, const ITensorInfo *out
     TensorInfo tensor_info_max(input->clone()->set_tensor_shape(max_sum_shape));
     TensorInfo tensor_info_sum(input->clone()->set_tensor_shape(max_sum_shape).set_data_type(tmp_data_type).set_quantization_info(QuantizationInfo()));
 
-    bool run_legacy_path = is_data_type_quantized_asymmetric(input->data_type());
-    if(run_legacy_path)
-    {
-        ARM_COMPUTE_RETURN_ON_ERROR(CLLogits1DMaxKernel::validate(input, &tensor_info_max));
-        ARM_COMPUTE_RETURN_ON_ERROR(CLLogits1DShiftExpSumKernel::validate(input, &tensor_info_max, &tensor_info_tmp, &tensor_info_sum));
-    }
-    else
-    {
-        ARM_COMPUTE_RETURN_ON_ERROR(CLLogits1DMaxShiftExpSumKernel::validate(input, &tensor_info_max, &tensor_info_tmp, &tensor_info_sum));
-    }
+    ARM_COMPUTE_RETURN_ON_ERROR(CLLogits1DMaxShiftExpSumKernel::validate(input, &tensor_info_max, &tensor_info_tmp, &tensor_info_sum));
     ARM_COMPUTE_RETURN_ON_ERROR(CLLogits1DNormKernel::validate(&tensor_info_tmp, &tensor_info_sum, output));
 
     return Status{};
@@ -116,16 +97,7 @@ void CLSoftmaxLayer::run()
 {
     _memory_group.acquire();
 
-    // Force to use the new fused kernel
-    if(_run_legacy_path)
-    {
-        CLScheduler::get().enqueue(_max_kernel, false);
-        CLScheduler::get().enqueue(_shift_exp_sum_kernel, false);
-    }
-    else
-    {
-        CLScheduler::get().enqueue(_max_shift_exp_sum_kernel, false);
-    }
+    CLScheduler::get().enqueue(_max_shift_exp_sum_kernel, false);
     CLScheduler::get().enqueue(_norm_kernel);
 
     _memory_group.release();
