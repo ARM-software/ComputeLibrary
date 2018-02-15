@@ -109,34 +109,14 @@ void NEWinogradLayer::configure(const ITensor *input, const ITensor *weights, co
                                 _output->info()->dimension(1), _output->info()->dimension(3)),
                     1, _output->info()->data_type());
     _output_nhwc.allocator()->init(info);
-
     _output_nhwc.allocator()->allocate();
 
     // Re-order a weight tensor from [Output feature map x Input feature map x Height x Width] to [Height x Width x Input feature map x Output feature map]
-    switch(weights->info()->num_dimensions())
-    {
-        case 3:
-        {
-            _permute_weights.configure(weights, &_weights_hwio, PermutationVector(2U, 0U, 1U));
-            break;
-        }
-        case 4:
-        {
-            _permute_weights.configure(weights, &_weights_hwio, PermutationVector(3U, 2U, 0U, 1U));
-            break;
-        }
-        default:
-        {
-            ARM_COMPUTE_ERROR("Not supported.");
-            break;
-        }
-    }
-
+    _permute_weights.configure(weights, &_weights_hwio, PermutationVector(3U, 2U, 0U, 1U));
     _weights_hwio.allocator()->allocate();
 
     // configure the kernel to transform the input tensor from NCHW -> NHWC
     _permute_input.configure(input, &_input_nhwc, PermutationVector(2U, 0U, 1U));
-
     _input_nhwc.allocator()->allocate();
 
     using T                          = winograd::WinogradGEMM<2, 2, 3, 3>::Convolution<float, float>;

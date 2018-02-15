@@ -68,7 +68,6 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
 
 TEST_SUITE(NEON)
 
-#if defined(__aarch64__)
 TEST_SUITE(WinogradLayer)
 template <typename T>
 using NEWinogradLayerFixture = WinogradLayerValidationFixture<Tensor, Accessor, NEWinogradLayer, T>;
@@ -82,7 +81,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEWinogradLayerFixture<float>, framework::Datas
 
 TEST_SUITE_END()
 TEST_SUITE_END()
-#endif /* __aarch64__ */
 
 TEST_SUITE(ConvolutionLayer)
 

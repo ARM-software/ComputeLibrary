@@ -65,7 +65,7 @@ inline void permute_strides(Dimensions<T> &dimensions, const PermutationVector &
     const auto old_dim = utility::make_array<Dimensions<T>::num_max_dimensions>(dimensions.begin(), dimensions.end());
     for(unsigned int i = 0; i < perm.num_dimensions(); ++i)
     {
-        T dimension_val = (perm[i] < dimensions.num_dimensions()) ? old_dim[i] : 0;
+        T dimension_val = old_dim[i];
         dimensions.set(perm[i], dimension_val);
     }
 }
