@@ -158,8 +158,17 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
         output_access.set_valid_region(win, ValidRegion(coord, output->tensor_shape()));
     }
 
+    // Collapse along the Z direction
+    // This collapse needs to be here in order to tune the Z dimension of LWS
+    Window collapsed = win;
+    if(input1->num_dimensions() > 1)
+    {
+        const unsigned int dimension_to_collapse = std::min(static_cast<unsigned int>(input1->num_dimensions() - 1), 2u);
+        collapsed                                = win.collapse(win, dimension_to_collapse);
+    }
+
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
+    return std::make_pair(err, collapsed);
 }
 } // namespace
 
@@ -286,6 +295,10 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
     _config_id += "_";
     _config_id += support::cpp11::to_string(output->info()->dimension(0));
     _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(2));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(3));
+    _config_id += "_";
     _config_id += (is_interleaved_transposed ? support::cpp11::to_string(input1->info()->dimension(0)) : support::cpp11::to_string(input1->info()->dimension(1)));
 }
 
@@ -312,7 +325,13 @@ void CLGEMMMatrixMultiplyKernel::run(const Window &window, cl::CommandQueue &que
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    Window slice          = window.first_slice_window_2D();
+    if(_input1->info()->num_dimensions() < 3)
+    {
+        // The stride_z for matrix B must be zero if we do not slice
+        ARM_COMPUTE_ERROR_ON(_input1->info()->strides_in_bytes()[3] != 0);
+    }
+
+    Window slice          = window.first_slice_window_3D();
     Window slice_matrix_b = slice;
 
     slice_matrix_b.set(Window::DimX, Window::Dimension(0, 1, 1));
@@ -322,7 +341,7 @@ void CLGEMMMatrixMultiplyKernel::run(const Window &window, cl::CommandQueue &que
     {
         Window slice_b = slice;
         // Don't slice matrix B along the z dimension if matrix B has just 2 dimensions and matrix A more than 2
-        // This scenario can happen when the the matrix multiplication is used to perform a convolution operation
+        // This scenario can happen when the matrix multiplication is used to perform a convolution operation
         if(_input1->info()->num_dimensions() < 3)
         {
             slice_b = slice_matrix_b;
@@ -332,7 +351,10 @@ void CLGEMMMatrixMultiplyKernel::run(const Window &window, cl::CommandQueue &que
         add_2D_tensor_argument(idx, _input0, slice);
         add_2D_tensor_argument(idx, _input1, slice_b);
         add_2D_tensor_argument(idx, _output, slice);
+        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input0->info()->strides_in_bytes()[3]));
+        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input1->info()->strides_in_bytes()[3]));
+        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_output->info()->strides_in_bytes()[3]));
         enqueue(queue, *this, slice, _lws_hint);
     }
-    while(window.slide_window_slice_2D(slice));
+    while(window.slide_window_slice_3D(slice));
 }

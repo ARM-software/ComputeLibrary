@@ -86,8 +86,11 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
         output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), input->tensor_shape()));
     }
 
+    // Collapse along the Z direction
+    Window collapsed = win.collapse(win, Window::DimZ);
+
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
+    return std::make_pair(err, collapsed);
 }
 } // namespace
 
@@ -151,15 +154,15 @@ void CLGEMMTranspose1xWKernel::run(const Window &window, cl::CommandQueue &queue
     out_window.set(Window::DimX, window.y());
     out_window.set(Window::DimY, window.x());
 
-    Window in_slice  = window.first_slice_window_2D();
-    Window out_slice = out_window.first_slice_window_2D();
+    Window in_slice  = window.first_slice_window_3D();
+    Window out_slice = out_window.first_slice_window_3D();
 
     do
     {
         unsigned int idx = 0;
-        add_2D_tensor_argument(idx, _input, in_slice);
-        add_2D_tensor_argument(idx, _output, out_slice);
+        add_3D_tensor_argument(idx, _input, in_slice);
+        add_3D_tensor_argument(idx, _output, out_slice);
         enqueue(queue, *this, in_slice, _lws_hint);
     }
-    while(window.slide_window_slice_2D(in_slice) && out_window.slide_window_slice_2D(out_slice));
+    while(window.slide_window_slice_3D(in_slice) && out_window.slide_window_slice_3D(out_slice));
 }
