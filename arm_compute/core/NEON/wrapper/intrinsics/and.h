@@ -24,8 +24,6 @@
 #ifndef __ARM_COMPUTE_WRAPPER_AND_H__
 #define __ARM_COMPUTE_WRAPPER_AND_H__
 
-#include "arm_compute/core/NEON/wrapper/traits.h"
-
 #include <arm_neon.h>
 
 namespace arm_compute
@@ -55,6 +53,8 @@ VAND_IMPL(uint32_t, uint32x4_t, vandq, u32)
 VAND_IMPL(int32_t, int32x4_t, vandq, s32)
 VAND_IMPL(uint64_t, uint64x2_t, vandq, u64)
 VAND_IMPL(int64_t, int64x2_t, vandq, s64)
-}
-}
+
+#undef VAND_IMPL
+} // namespace wrapper
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_WRAPPER_AND_H__ */

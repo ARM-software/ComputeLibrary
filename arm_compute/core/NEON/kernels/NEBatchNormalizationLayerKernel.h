@@ -55,49 +55,98 @@ public:
      *
      * @note If the output tensor is a nullptr, the batch normalization function will be performed in-place
      *
-     * @param[in, out] input   Source tensor. In case of @p output tensor = nullptr, this tensor will store the result.
-     *                         3 lower dimensions represent a single input with dimensions [width, height, FM].
-     *                         The rest are optional and used for representing batches. Data types supported: QS8/QS16/F16/F32.
-     * @param[out]     output  Destination tensor. Output will have the same number of dimensions as input. Data type supported: same as @p input
-     * @param[in]      mean    Mean values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]      var     Variance values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]      beta    Beta values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]      gamma   Gamma values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]      epsilon Small value to avoid division with zero.
+     * @param[in, out] input    Source tensor. In case of @p output tensor = nullptr, this tensor will store the result.
+     *                          3 lower dimensions represent a single input with dimensions [width, height, FM].
+     *                          The rest are optional and used for representing batches. Data types supported: QS8/QS16/F16/F32.
+     * @param[out]     output   Destination tensor. Output will have the same number of dimensions as input. Data type supported: same as @p input
+     * @param[in]      mean     Mean values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in]      var      Variance values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in]      beta     Beta values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in]      gamma    Gamma values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in]      epsilon  Small value to avoid division with zero.
+     * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
+     *                          Data types supported: F32
      */
-    void configure(ITensor *input, ITensor *output, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma, float epsilon);
+    void configure(ITensor *input, ITensor *output, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma, float epsilon,
+                   ActivationLayerInfo act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEBatchNormalizationLayerKernel
      *
-     * @param[in] input   Source tensor info. In case of @p output tensor = nullptr, this tensor will store the result.
-     *                    3 lower dimensions represent a single input with dimensions [width, height, FM].
-     *                    The rest are optional and used for representing batches. Data types supported: QS8/QS16/F16/F32.
-     * @param[in] output  Destination tensor info. Output will have the same number of dimensions as input. Data type supported: same as @p input
-     * @param[in] mean    Mean values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in] var     Variance values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in] beta    Beta values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in] gamma   Gamma values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in] epsilon Small value to avoid division with zero.
+     * @param[in] input    Source tensor info. In case of @p output tensor = nullptr, this tensor will store the result.
+     *                     3 lower dimensions represent a single input with dimensions [width, height, FM].
+     *                     The rest are optional and used for representing batches. Data types supported: QS8/QS16/F16/F32.
+     * @param[in] output   Destination tensor info. Output will have the same number of dimensions as input. Data type supported: same as @p input
+     * @param[in] mean     Mean values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in] var      Variance values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in] beta     Beta values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in] gamma    Gamma values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in] epsilon  Small value to avoid division with zero.
+     * @param[in] act_info (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
+     *                     Data types supported: F32
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output,
                            const ITensorInfo *mean, const ITensorInfo *var,
                            const ITensorInfo *beta, const ITensorInfo *gamma,
-                           float epsilon);
+                           float epsilon, ActivationLayerInfo act_info);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    using BatchNormFunction = void(ITensor *input, ITensor *output, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma, float epsilon, const Window &window);
-    BatchNormFunction *_func;
-    ITensor           *_input;
-    ITensor           *_output;
-    const ITensor     *_mean;
-    const ITensor     *_var;
-    const ITensor     *_gamma;
-    const ITensor     *_beta;
-    float              _epsilon;
+    /** Configure execution function in case of non-fused activation **/
+    void configure_non_fused();
+    /** Configure execution function in case of fused activation **/
+    void configure_fused();
+    /** Template function to run batch normalization on 8-bit fixed point
+     *
+     * @tparam fused_activation Boolean that flags if its a fused activation or not
+     *
+     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
+     */
+    template <bool fused_activation>
+    void batch_normalization_qs8(const Window &window);
+    /** Template function to run batch normalization on 16-bit fixed point
+     *
+     * @tparam fused_activation Boolean that flags if its a fused activation or not
+     *
+     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
+     */
+    template <bool fused_activation>
+    void batch_normalization_qs16(const Window &window);
+    /** Template function to run batch normalization on fp16
+     *
+     * @tparam fused_activation Boolean that flags if its a fused activation or not
+     *
+     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
+     */
+    template <bool fused_activation>
+    void batch_normalization_fp16(const Window &window);
+    /** Template function to run batch normalization on fp32
+     *
+     * @tparam fused_activation Boolean that flags if its a fused activation or not
+     * @tparam F                Activation function functor to run
+     *
+     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
+     */
+    template <bool fused_activation, typename F>
+    void batch_normalization_fp32(const Window &window);
+    /** Common signature for all the batch normalization functions
+     *
+     * @param[in] window Region on which to execute the kernel.
+     */
+    using BatchNormFunctionPtr = void (NEBatchNormalizationLayerKernel::*)(const Window &window);
+
+private:
+    BatchNormFunctionPtr _func;
+    ITensor             *_input;
+    ITensor             *_output;
+    const ITensor       *_mean;
+    const ITensor       *_var;
+    const ITensor       *_gamma;
+    const ITensor       *_beta;
+    float                _epsilon;
+    ActivationLayerInfo  _act_info;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEBATCHNORMALIZATIONLAYERKERNEL_H__ */

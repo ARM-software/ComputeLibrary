@@ -55,7 +55,7 @@ TEST_SUITE(NEON)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(MobileNetBatchNormalizationLayer, NEBatchNormalizationLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::MobileNetBatchNormalizationLayerDataset(),
-                                                                                                                    framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))),
+                                                                                                                    framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", 1)));
 REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2BatchNormalizationLayer, NEBatchNormalizationLayerFixture, framework::DatasetMode::ALL,
@@ -73,7 +73,7 @@ REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4BatchNormalizationLayer, NEB
 TEST_SUITE(NIGHTLY)
 REGISTER_FIXTURE_DATA_TEST_CASE(MobileNetBatchNormalizationLayer, NEBatchNormalizationLayerFixture, framework::DatasetMode::NIGHTLY,
                                 framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::MobileNetBatchNormalizationLayerDataset(),
-                                                                                                                    framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))),
+                                                                                                                    framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
                                                                                         data_types),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2BatchNormalizationLayer, NEBatchNormalizationLayerFixture, framework::DatasetMode::NIGHTLY,

@@ -162,7 +162,7 @@ TEST_SUITE_END()
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(Float16)
 FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
-                                                                                                                  act_infos),
+                                                                                                                  framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
                                                                                                                   framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output

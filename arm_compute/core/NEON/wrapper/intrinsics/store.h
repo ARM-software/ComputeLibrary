@@ -24,8 +24,6 @@
 #ifndef __ARM_COMPUTE_WRAPPER_STORE_H__
 #define __ARM_COMPUTE_WRAPPER_STORE_H__
 
-#include "arm_compute/core/NEON/wrapper/traits.h"
-
 #include <arm_neon.h>
 
 namespace arm_compute
@@ -57,6 +55,8 @@ VSTORE_IMPL(int32_t, int32x4_t, vst1q, s32)
 //VSTORE_IMPL(uint64_t, 2, vst1q, u64)
 //VSTORE_IMPL(int64_t, 2, vst1q, s64)
 VSTORE_IMPL(float, float32x4_t, vst1q, f32)
-}
-}
+
+#undef VSTORE_IMPL
+} // namespace wrapper
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_WRAPPER_STORE_H__ */

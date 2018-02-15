@@ -21,13 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_WRAPPER_H__
-#define __ARM_COMPUTE_WRAPPER_H__
+#ifndef __ARM_COMPUTE_WRAPPER_INTRINSICS_H__
+#define __ARM_COMPUTE_WRAPPER_INTRINSICS_H__
 
-// Traits
-#include "arm_compute/core/NEON/wrapper/traits.h"
+#include "arm_compute/core/NEON/wrapper/intrinsics/and.h"
+#include "arm_compute/core/NEON/wrapper/intrinsics/dup_n.h"
+#include "arm_compute/core/NEON/wrapper/intrinsics/load.h"
+#include "arm_compute/core/NEON/wrapper/intrinsics/max.h"
+#include "arm_compute/core/NEON/wrapper/intrinsics/min.h"
+#include "arm_compute/core/NEON/wrapper/intrinsics/store.h"
 
-// Intrinsics Overloads
-#include "arm_compute/core/NEON/wrapper/intrinsics/intrinsics.h"
-
-#endif /* __ARM_COMPUTE_WRAPPER_H__ */
+#endif /* __ARM_COMPUTE_WRAPPER_INTRINSICS_H__ */

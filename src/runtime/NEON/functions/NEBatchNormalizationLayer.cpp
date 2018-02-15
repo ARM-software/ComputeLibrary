@@ -33,40 +33,25 @@
 using namespace arm_compute;
 
 NEBatchNormalizationLayer::NEBatchNormalizationLayer()
-    : _norm_kernel(), _act_func(), _act_info_enabled(false)
+    : _norm_kernel()
 {
 }
 
 void NEBatchNormalizationLayer::configure(ITensor *input, ITensor *output, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma, float epsilon,
                                           ActivationLayerInfo act_info)
 {
-    _act_info_enabled = act_info.enabled();
-
     // Configure kernel
-    _norm_kernel.configure(input, output, mean, var, beta, gamma, epsilon);
-    if(_act_info_enabled)
-    {
-        _act_func.configure(output, nullptr, act_info);
-    }
+    _norm_kernel.configure(input, output, mean, var, beta, gamma, epsilon, act_info);
 }
 
 Status NEBatchNormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *mean, const ITensorInfo *var, const ITensorInfo *beta, const ITensorInfo *gamma,
                                            float epsilon, ActivationLayerInfo act_info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(NEBatchNormalizationLayerKernel::validate(input, output, mean, var, beta, gamma, epsilon));
-    if(act_info.enabled())
-    {
-        ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayer::validate(output, nullptr, act_info));
-    }
-
+    ARM_COMPUTE_RETURN_ON_ERROR(NEBatchNormalizationLayerKernel::validate(input, output, mean, var, beta, gamma, epsilon, act_info));
     return Status{};
 }
 
 void NEBatchNormalizationLayer::run()
 {
     NEScheduler::get().schedule(&_norm_kernel, Window::DimY);
-    if(_act_info_enabled)
-    {
-        _act_func.run();
-    }
 }

@@ -35,31 +35,40 @@ namespace traits
 // *INDENT-OFF*
 // clang-format off
 
+/** 64-bit vector tag */
+struct vector_64_tag {};
+/** 128-bit vector tag */
+struct vector_128_tag {};
+
 /** Create the appropriate NEON vector given its type and size */
 template <typename T, int S> struct neon_vector;
 /** Specializations */
-template <> struct neon_vector<uint8_t, 8>{ using type = uint8x8_t; };
-template <> struct neon_vector<int8_t, 8>{ using type = int8x8_t; };
-template <> struct neon_vector<uint8_t, 16>{ using type = uint8x16_t; };
-template <> struct neon_vector<int8_t, 16>{ using type = int8x16_t; };
-template <> struct neon_vector<uint16_t, 4>{ using type = uint16x4_t; };
-template <> struct neon_vector<int16_t, 4>{ using type = int16x4_t; };
-template <> struct neon_vector<uint16_t, 8>{ using type = uint16x8_t; };
-template <> struct neon_vector<int16_t, 8>{ using type = int16x8_t; };
-template <> struct neon_vector<uint32_t, 2>{ using type = uint32x2_t; };
-template <> struct neon_vector<int32_t, 2>{ using type = int32x2_t; };
-template <> struct neon_vector<uint32_t, 4>{ using type = uint32x4_t; };
-template <> struct neon_vector<int32_t, 4>{ using type = int32x4_t; };
-template <> struct neon_vector<uint64_t, 1>{ using type = uint64x1_t; };
-template <> struct neon_vector<int64_t, 1>{ using type = int64x1_t; };
-template <> struct neon_vector<uint64_t, 2>{ using type = uint64x2_t; };
-template <> struct neon_vector<int64_t, 2>{ using type = int64x2_t; };
-template <> struct neon_vector<float_t, 2>{ using type = float32x2_t; };
-template <> struct neon_vector<float_t, 4>{ using type = float32x4_t; };
+template <> struct neon_vector<uint8_t, 8>{ using type = uint8x8_t; using tag_type = vector_64_tag; };
+template <> struct neon_vector<int8_t, 8>{ using type = int8x8_t; using tag_type = vector_64_tag; };
+template <> struct neon_vector<uint8_t, 16>{ using type = uint8x16_t; using tag_type = vector_128_tag; };
+template <> struct neon_vector<int8_t, 16>{ using type = int8x16_t; using tag_type = vector_128_tag; };
+template <> struct neon_vector<uint16_t, 4>{ using type = uint16x4_t; using tag_type = vector_64_tag; };
+template <> struct neon_vector<int16_t, 4>{ using type = int16x4_t; using tag_type = vector_64_tag; };
+template <> struct neon_vector<uint16_t, 8>{ using type = uint16x8_t; using tag_type = vector_128_tag; };
+template <> struct neon_vector<int16_t, 8>{ using type = int16x8_t; using tag_type = vector_128_tag; };
+template <> struct neon_vector<uint32_t, 2>{ using type = uint32x2_t; using tag_type = vector_64_tag; };
+template <> struct neon_vector<int32_t, 2>{ using type = int32x2_t; using tag_type = vector_64_tag; };
+template <> struct neon_vector<uint32_t, 4>{ using type = uint32x4_t; using tag_type = vector_128_tag; };
+template <> struct neon_vector<int32_t, 4>{ using type = int32x4_t; using tag_type = vector_128_tag; };
+template <> struct neon_vector<uint64_t, 1>{ using type = uint64x1_t; using tag_type = vector_64_tag; };
+template <> struct neon_vector<int64_t, 1>{ using type = int64x1_t; using tag_type = vector_64_tag; };
+template <> struct neon_vector<uint64_t, 2>{ using type = uint64x2_t; using tag_type = vector_128_tag; };
+template <> struct neon_vector<int64_t, 2>{ using type = int64x2_t; using tag_type = vector_128_tag; };
+template <> struct neon_vector<float_t, 2>{ using type = float32x2_t; using tag_type = vector_64_tag; };
+template <> struct neon_vector<float_t, 4>{ using type = float32x4_t; using tag_type = vector_128_tag; };
+
+/**  Helper type template to get the type of a neon vector */
 template <typename T, int S> using neon_vector_t = typename neon_vector<T, S>::type;
+/**  Helper type template to get the tag type of a neon vector */
+template <typename T, int S> using neon_vector_tag_t = typename neon_vector<T, S>::tag_type;
 // clang-format on
 // *INDENT-ON*
-}
-}
-}
+} // namespace traits
+} // namespace wrapper
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_WRAPPER_TRAITS_H__ */

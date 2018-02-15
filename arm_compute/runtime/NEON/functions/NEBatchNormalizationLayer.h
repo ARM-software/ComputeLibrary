@@ -58,6 +58,7 @@ public:
      * @param[in]      gamma    Gamma values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
      * @param[in]      epsilon  Small value to avoid division with zero.
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
+     *                          Data types supported: F32
      */
     void configure(ITensor *input, ITensor *output, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma, float epsilon,
                    ActivationLayerInfo act_info = ActivationLayerInfo());
@@ -73,6 +74,7 @@ public:
      * @param[in] gamma    Gamma values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
      * @param[in] epsilon  Small value to avoid division with zero.
      * @param[in] act_info (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
+     *                     Data types supported: F32
      *
      * @return a status
      */
@@ -86,9 +88,6 @@ public:
 
 private:
     NEBatchNormalizationLayerKernel _norm_kernel; /**< Batch normalization layer kernel */
-    // COMPMID-906 Use fused activation in NEON Batch normalization
-    NEActivationLayer _act_func;
-    bool              _act_info_enabled;
 };
 }
 #endif /* __ARM_COMPUTE_NEBATCHNORMALIZATIONLAYER_H__ */
