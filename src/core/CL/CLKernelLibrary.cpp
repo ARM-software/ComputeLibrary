@@ -294,7 +294,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "NV21_to_RGB888_bt709", "color_convert.cl" },
     { "NV21_to_RGBA8888_bt709", "color_convert.cl" },
     { "NV21_to_YUV444_bt709", "color_convert.cl" },
-    { "output_stage_quantized", "depthwise_convolution_quantized.cl" },
+    { "output_stage_quantized", "direct_convolution_1x1_3x3_5x5_quantized.cl" },
     { "permute_201", "permute.cl" },
     { "permute_120", "permute.cl" },
     { "permute_3201", "permute.cl" },
