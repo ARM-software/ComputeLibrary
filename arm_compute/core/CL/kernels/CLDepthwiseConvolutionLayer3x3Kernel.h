@@ -53,8 +53,9 @@ public:
      *                       Data type supported: Same as @p input.
      * @param[out] output    Destination tensor. Data type supported: Same as @p input.
      * @param[in]  conv_info Padding and stride information to use for the convolution.
+     * @param[in]  act_info  (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU for QASYMM8 supported.
      */
-    void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info);
+    void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, ActivationLayerInfo act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

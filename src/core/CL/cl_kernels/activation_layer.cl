@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -115,6 +115,8 @@ inline TYPE linear_op(TYPE x)
 #define ACTIVATION_OP2(op, x) op##_op(x)
 #define ACTIVATION_OP(op, x) ACTIVATION_OP2(op, x)
 
+#if defined(ACT)
+
 /** This performs an activation function floating point inputs.
  *
  * @note In order to perform the activation function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
@@ -168,3 +170,5 @@ __kernel void activation_layer(
     VSTORE(VEC_SIZE)
     (data, 0, (__global DATA_TYPE *)output.ptr);
 }
+
+#endif /* defined(ACT) */

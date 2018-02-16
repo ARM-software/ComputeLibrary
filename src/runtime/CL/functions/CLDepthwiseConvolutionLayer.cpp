@@ -39,13 +39,13 @@ CLDepthwiseConvolutionLayer3x3::CLDepthwiseConvolutionLayer3x3()
 {
 }
 
-void CLDepthwiseConvolutionLayer3x3::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info)
+void CLDepthwiseConvolutionLayer3x3::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, ActivationLayerInfo act_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
 
     _kernel.set_target(CLScheduler::get().target());
-    _kernel.configure(input, weights, biases, output, conv_info);
+    _kernel.configure(input, weights, biases, output, conv_info, act_info);
 
     // Configure border handler
     PixelValue &&zero_value(0.f);

@@ -26,6 +26,15 @@
 
 #if defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y) && defined(WEIGHTS_OFFSET) && defined(INPUT_OFFSET) && defined(K_OFFSET) && defined(OUTPUT_OFFSET) && defined(OUTPUT_MULTIPLIER) && defined(OUTPUT_SHIFT)
 
+#if defined(FUSED_ACTIVATION)
+#define DATA_TYPE uchar
+#define VEC_SIZE 8
+#include "activation_layer_qa8.cl"
+#define ACTIVATION_FUNC(x) PERFORM_ACTIVATION_QA8(FUSED_ACTIVATION, x)
+#else /* defined(FUSED_ACTIVATION) */
+#define ACTIVATION_FUNC(x) (x)
+#endif /* defined(FUSED_ACTIVATION) */
+
 #if CONV_STRIDE_X > 3
 #error "Stride X not supported"
 #endif /* CONV_STRIDE_X > 3 */
@@ -222,7 +231,7 @@ __kernel void depthwise_convolution_3x3_quantized(
     res0        = max(res0, (uchar8)0);
     res0        = min(res0, (uchar8)255);
 
-    vstore8(res0, 0, dst.ptr);
+    vstore8(ACTIVATION_FUNC(res0), 0, dst.ptr);
 #if CONV_STRIDE_Y == 1
 
     values1 = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(values1, OUTPUT_MULTIPLIER, OUTPUT_SHIFT, 8);
@@ -231,7 +240,7 @@ __kernel void depthwise_convolution_3x3_quantized(
     res1        = max(res1, (uchar8)0);
     res1        = min(res1, (uchar8)255);
 
-    vstore8(res1, 0, dst.ptr + dst_stride_y);
+    vstore8(ACTIVATION_FUNC(res1), 0, dst.ptr + dst_stride_y);
 #endif /* CONV_STRIDE_Y == 1 */
 }
 

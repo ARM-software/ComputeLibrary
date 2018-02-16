@@ -44,15 +44,12 @@
 
 #endif /* FIXED_POINT_POSITION */
 
-#if defined(LU_BRELU)
-#define ACTIVATION_FUNC(x) CLAMP(x, (DATA_TYPE)B_VAL, (DATA_TYPE)A_VAL)
-#elif defined(BRELU)
-#define ACTIVATION_FUNC(x) CLAMP(x, (DATA_TYPE)0, (DATA_TYPE)A_VAL)
-#elif defined(RELU)
-#define ACTIVATION_FUNC(x) max(x, (DATA_TYPE)0)
-#else /* FUSED_ACT */
+#if defined(FUSED_ACTIVATION)
+#include "activation_layer.cl"
+#define ACTIVATION_FUNC(x) ACTIVATION_OP(FUSED_ACTIVATION, x)
+#else /* defined(FUSED_ACTIVATION) */
 #define ACTIVATION_FUNC(x) (x)
-#endif /* FUSED_ACT */
+#endif /* defined(FUSED_ACTIVATION) */
 
 /** Apply batch normalization.
  *

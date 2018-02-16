@@ -49,7 +49,8 @@ BorderSize CLDepthwiseConvolutionLayer3x3Kernel::border_size() const
     return _border_size;
 }
 
-void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info)
+void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
+                                                     ActivationLayerInfo act_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
@@ -114,6 +115,33 @@ void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, con
         build_opts.add_option("-DK_OFFSET=" + support::cpp11::to_string(9 * input->info()->quantization_info().offset * weights->info()->quantization_info().offset));
         build_opts.add_option("-DOUTPUT_MULTIPLIER=" + support::cpp11::to_string(output_multiplier));
         build_opts.add_option("-DOUTPUT_SHIFT=" + support::cpp11::to_string(output_shift));
+
+        if(act_info.enabled())
+        {
+            const int a_val = input->info()->quantization_info().quantize(act_info.a(), RoundingPolicy::TO_NEAREST_UP);
+            const int b_val = input->info()->quantization_info().quantize(act_info.b(), RoundingPolicy::TO_NEAREST_UP);
+            const int o1    = input->info()->quantization_info().offset;
+
+            build_opts.add_option("-DFUSED_ACTIVATION=" + lower_string(string_from_activation_func(act_info.activation())));
+            build_opts.add_option("-DA_VAL=" + support::cpp11::to_string(a_val));
+            build_opts.add_option("-DB_VAL=" + support::cpp11::to_string(b_val));
+            build_opts.add_option("-DCONST_0=" + support::cpp11::to_string(o1));
+
+            if(output != nullptr)
+            {
+                const float s1 = input->info()->quantization_info().scale;
+                const float s2 = output->info()->quantization_info().scale;
+                const int   o2 = output->info()->quantization_info().offset;
+
+                if(o1 != o2 || s1 != s2)
+                {
+                    build_opts.add_option("-DS1_VAL=" + float_to_string_with_full_precision(s1));
+                    build_opts.add_option("-DS2_VAL=" + float_to_string_with_full_precision(s2));
+                    build_opts.add_option("-DO1_VAL=" + support::cpp11::to_string(o1));
+                    build_opts.add_option("-DO2_VAL=" + support::cpp11::to_string(o2));
+                }
+            }
+        }
     }
 
     // Configure the local work size for Bifrost with a value obtained
