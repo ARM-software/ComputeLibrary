@@ -55,9 +55,11 @@ void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, con
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_ERROR_ON(weights->info()->dimension(0) != 3 || weights->info()->dimension(1) != 3);
 
+    bool is_qasymm = is_data_type_quantized_asymmetric(input->info()->data_type());
+
     if(biases != nullptr)
     {
-        if(is_data_type_quantized_asymmetric(weights->info()->data_type()))
+        if(is_qasymm)
         {
             ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
         }
@@ -97,6 +99,22 @@ void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, con
     CLBuildOptions build_opts;
     build_opts.add_option("-DCONV_STRIDE_X=" + support::cpp11::to_string(_conv_stride_x));
     build_opts.add_option_if(_biases != nullptr, "-DHAS_BIAS");
+
+    if(is_qasymm)
+    {
+        float multiplier        = _input->info()->quantization_info().scale * _weights->info()->quantization_info().scale / _output->info()->quantization_info().scale;
+        int   output_multiplier = 0;
+        int   output_shift      = 0;
+        quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
+
+        build_opts.add_option("-DCONV_STRIDE_Y=" + support::cpp11::to_string(_conv_stride_y));
+        build_opts.add_option("-DINPUT_OFFSET=" + support::cpp11::to_string(-_input->info()->quantization_info().offset));
+        build_opts.add_option("-DWEIGHTS_OFFSET=" + support::cpp11::to_string(-_weights->info()->quantization_info().offset));
+        build_opts.add_option("-DOUTPUT_OFFSET=" + support::cpp11::to_string(_output->info()->quantization_info().offset));
+        build_opts.add_option("-DK_OFFSET=" + support::cpp11::to_string(9 * input->info()->quantization_info().offset * weights->info()->quantization_info().offset));
+        build_opts.add_option("-DOUTPUT_MULTIPLIER=" + support::cpp11::to_string(output_multiplier));
+        build_opts.add_option("-DOUTPUT_SHIFT=" + support::cpp11::to_string(output_shift));
+    }
 
     // Configure the local work size for Bifrost with a value obtained
     // via exhaustive autotuning for the MobileNets tensor shapes.
@@ -145,11 +163,11 @@ void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, con
     }
     else
     {
-        kernel_name                       = is_data_type_quantized_asymmetric(_input->info()->data_type()) ? "depthwise_convolution_3x3_quantized" : "depthwise_convolution_3x3";
+        kernel_name                       = is_qasymm ? "depthwise_convolution_3x3_quantized" : "depthwise_convolution_3x3";
         num_elems_written_per_iteration_x = 8 / data_size_from_type(input->info()->data_type());
-        num_elems_written_per_iteration_y = 1;
+        num_elems_written_per_iteration_y = (is_qasymm && _conv_stride_y < 3) ? (2 / _conv_stride_y) : 1;
         num_elems_read_per_iteration_x    = 3 + (num_elems_written_per_iteration_x - 1) * _conv_stride_x;
-        num_elems_read_per_iteration_y    = 3;
+        num_elems_read_per_iteration_y    = num_elems_written_per_iteration_y + 2;
     }
 
     // Calculate right and bottom border
@@ -174,23 +192,6 @@ void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, con
     ICLKernel::configure(win);
 
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
-
-    // Set static arguments
-    if(is_data_type_quantized_asymmetric(_input->info()->data_type()))
-    {
-        float multiplier        = _input->info()->quantization_info().scale * _weights->info()->quantization_info().scale / _output->info()->quantization_info().scale;
-        int   output_multiplier = 0;
-        int   output_shift      = 0;
-        quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
-
-        unsigned int idx = 3 * num_arguments_per_3D_tensor() + ((_biases != nullptr) ? num_arguments_per_1D_tensor() : 0);
-
-        _kernel.setArg(idx++, -_input->info()->quantization_info().offset);
-        _kernel.setArg(idx++, -_weights->info()->quantization_info().offset);
-        _kernel.setArg(idx++, _output->info()->quantization_info().offset);
-        _kernel.setArg(idx++, output_multiplier);
-        _kernel.setArg(idx++, output_shift);
-    }
 
     // Set config_id for enabling LWS tuning
     _config_id = kernel_name;
