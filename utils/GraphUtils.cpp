@@ -23,6 +23,8 @@
  */
 
 #include "utils/GraphUtils.h"
+
+#include "arm_compute/runtime/SubTensor.h"
 #include "utils/Utils.h"
 
 #ifdef ARM_COMPUTE_CL
@@ -206,7 +208,7 @@ void RandomAccessor::fill(ITensor &tensor, D &&distribution)
 {
     std::mt19937 gen(_seed);
 
-    if(tensor.info()->padding().empty())
+    if(tensor.info()->padding().empty() && (dynamic_cast<SubTensor *>(&tensor) == nullptr))
     {
         for(size_t offset = 0; offset < tensor.info()->total_size(); offset += tensor.info()->element_size())
         {
@@ -362,7 +364,7 @@ bool NumPyBinLoader::access_tensor(ITensor &tensor)
     }
 
     // Read data
-    if(tensor.info()->padding().empty())
+    if(tensor.info()->padding().empty() && (dynamic_cast<SubTensor *>(&tensor) == nullptr))
     {
         // If tensor has no padding read directly from stream.
         stream.read(reinterpret_cast<char *>(tensor.buffer()), tensor.info()->total_size());
