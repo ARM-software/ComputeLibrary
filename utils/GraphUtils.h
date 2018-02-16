@@ -29,6 +29,7 @@
 #include "arm_compute/graph/ITensorAccessor.h"
 #include "arm_compute/graph/Types.h"
 
+#include <array>
 #include <random>
 #include <string>
 #include <vector>
@@ -37,6 +38,38 @@ namespace arm_compute
 {
 namespace graph_utils
 {
+/** Preprocessor interface **/
+class IPreprocessor
+{
+public:
+    virtual ~IPreprocessor()                 = default;
+    virtual void preprocess(ITensor &tensor) = 0;
+};
+
+/** Caffe preproccessor */
+class CaffePreproccessor : public IPreprocessor
+{
+public:
+    /** Default Constructor
+     *
+     * @param mean Mean array in RGB ordering
+     * @param bgr  Boolean specifying if the preprocessing should assume BGR format
+     */
+    CaffePreproccessor(std::array<float, 3> mean = std::array<float, 3> { { 0, 0, 0 } }, bool bgr = true);
+    void preprocess(ITensor &tensor) override;
+
+private:
+    std::array<float, 3> _mean;
+    bool _bgr;
+};
+
+/** TF preproccessor */
+class TFPreproccessor : public IPreprocessor
+{
+public:
+    void preprocess(ITensor &tensor) override;
+};
+
 /** PPM writer class */
 class PPMWriter : public graph::ITensorAccessor
 {
@@ -85,18 +118,11 @@ class PPMAccessor final : public graph::ITensorAccessor
 public:
     /** Constructor
      *
-     * @param[in] ppm_path Path to PPM file
-     * @param[in] bgr      (Optional) Fill the first plane with blue channel (default = false)
-     * @param[in] mean_r   (Optional) Red mean value to be subtracted from red channel
-     * @param[in] mean_g   (Optional) Green mean value to be subtracted from green channel
-     * @param[in] mean_b   (Optional) Blue mean value to be subtracted from blue channel
-     * @param[in] std_r    (Optional) Red standard deviation value to be divided from red channel
-     * @param[in] std_g    (Optional) Green standard deviation value to be divided from green channel
-     * @param[in] std_b    (Optional) Blue standard deviation value to be divided from blue channel
+     * @param[in] ppm_path     Path to PPM file
+     * @param[in] bgr          (Optional) Fill the first plane with blue channel (default = false)
+     * @param[in] preprocessor (Optional) PPM pre-processing object
      */
-    PPMAccessor(std::string ppm_path, bool bgr = true,
-                float mean_r = 0.0f, float mean_g = 0.0f, float mean_b = 0.0f,
-                float std_r = 1.f, float std_g = 1.f, float std_b = 1.f);
+    PPMAccessor(std::string ppm_path, bool bgr = true, std::unique_ptr<IPreprocessor> preprocessor = nullptr);
     /** Allow instances of this class to be move constructed */
     PPMAccessor(PPMAccessor &&) = default;
 
@@ -104,14 +130,9 @@ public:
     bool access_tensor(ITensor &tensor) override;
 
 private:
-    const std::string _ppm_path;
-    const bool        _bgr;
-    const float       _mean_r;
-    const float       _mean_g;
-    const float       _mean_b;
-    const float       _std_r;
-    const float       _std_g;
-    const float       _std_b;
+    const std::string              _ppm_path;
+    const bool                     _bgr;
+    std::unique_ptr<IPreprocessor> _preprocessor;
 };
 
 /** Result accessor class */
@@ -226,21 +247,15 @@ inline std::unique_ptr<graph::ITensorAccessor> get_weights_accessor(const std::s
  *
  * @note If ppm_path is empty will generate a DummyAccessor else will generate a PPMAccessor
  *
- * @param[in] ppm_path Path to PPM file
- * @param[in] mean_r   Red mean value to be subtracted from red channel
- * @param[in] mean_g   Green mean value to be subtracted from green channel
- * @param[in] mean_b   Blue mean value to be subtracted from blue channel
- * @param[in] std_r    (Optional) Red standard deviation value to be divided from red channel
- * @param[in] std_g    (Optional) Green standard deviation value to be divided from green channel
- * @param[in] std_b    (Optional) Blue standard deviation value to be divided from blue channel
- * @param[in] bgr      (Optional) Fill the first plane with blue channel (default = true)
+ * @param[in] ppm_path     Path to PPM file
+ * @param[in] preprocessor Preproccessor object
+ * @param[in] bgr          (Optional) Fill the first plane with blue channel (default = true)
  *
  * @return An appropriate tensor accessor
  */
-inline std::unique_ptr<graph::ITensorAccessor> get_input_accessor(const std::string &ppm_path,
-                                                                  float mean_r = 0.f, float mean_g = 0.f, float mean_b = 0.f,
-                                                                  float std_r = 1.f, float std_g = 1.f, float std_b = 1.f,
-                                                                  bool bgr = true)
+inline std::unique_ptr<graph::ITensorAccessor> get_input_accessor(const std::string             &ppm_path,
+                                                                  std::unique_ptr<IPreprocessor> preprocessor = nullptr,
+                                                                  bool                           bgr          = true)
 {
     if(ppm_path.empty())
     {
@@ -248,9 +263,7 @@ inline std::unique_ptr<graph::ITensorAccessor> get_input_accessor(const std::str
     }
     else
     {
-        return arm_compute::support::cpp14::make_unique<PPMAccessor>(ppm_path, bgr,
-                                                                     mean_r, mean_g, mean_b,
-                                                                     std_r, std_g, std_b);
+        return arm_compute::support::cpp14::make_unique<PPMAccessor>(ppm_path, bgr, std::move(preprocessor));
     }
 }
 

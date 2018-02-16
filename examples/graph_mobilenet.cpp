@@ -47,8 +47,8 @@ public:
         std::string image;     /* Image data */
         std::string label;     /* Label data */
 
-        constexpr float mean = 0.f;   /* Mean value to subtract from the channels */
-        constexpr float std  = 255.f; /* Standard deviation value to divide from the channels */
+        // Create a preprocessor object
+        std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<TFPreproccessor>();
 
         // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
         const int             int_target_hint  = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
@@ -113,9 +113,7 @@ public:
         graph << target_hint
               << convolution_hint
               << Tensor(TensorInfo(TensorShape(spatial_size, spatial_size, 3U, 1U), 1, DataType::F32),
-                        get_input_accessor(image,
-                                           mean, mean, mean,
-                                           std, std, std, false /* Do not convert to BGR */))
+                        get_input_accessor(image, std::move(preprocessor), false))
               << ConvolutionLayer(
                   3U, 3U, 32U * depth_scale,
                   get_weights_accessor(data_path, "Conv2d_0_weights.npy"),

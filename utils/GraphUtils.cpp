@@ -36,6 +36,41 @@
 
 using namespace arm_compute::graph_utils;
 
+void TFPreproccessor::preprocess(ITensor &tensor)
+{
+    Window window;
+    window.use_tensor_dimensions(tensor.info()->tensor_shape());
+
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        const float value                                     = *reinterpret_cast<float *>(tensor.ptr_to_element(id));
+        float       res                                       = value / 255.f;      // Normalize to [0, 1]
+        res                                                   = (res - 0.5f) * 2.f; // Map to [-1, 1]
+        *reinterpret_cast<float *>(tensor.ptr_to_element(id)) = res;
+    });
+}
+
+CaffePreproccessor::CaffePreproccessor(std::array<float, 3> mean, bool bgr)
+    : _mean(mean), _bgr(bgr)
+{
+    if(_bgr)
+    {
+        std::swap(_mean[0], _mean[2]);
+    }
+}
+
+void CaffePreproccessor::preprocess(ITensor &tensor)
+{
+    Window window;
+    window.use_tensor_dimensions(tensor.info()->tensor_shape());
+
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        const float value                                     = *reinterpret_cast<float *>(tensor.ptr_to_element(id)) - _mean[id.z()];
+        *reinterpret_cast<float *>(tensor.ptr_to_element(id)) = value;
+    });
+}
+
 PPMWriter::PPMWriter(std::string name, unsigned int maximum)
     : _name(std::move(name)), _iterator(0), _maximum(maximum)
 {
@@ -76,28 +111,14 @@ bool DummyAccessor::access_tensor(ITensor &tensor)
     return ret;
 }
 
-PPMAccessor::PPMAccessor(std::string ppm_path, bool bgr,
-                         float mean_r, float mean_g, float mean_b,
-                         float std_r, float std_g, float std_b)
-    : _ppm_path(std::move(ppm_path)), _bgr(bgr), _mean_r(mean_r), _mean_g(mean_g), _mean_b(mean_b), _std_r(std_r), _std_g(std_g), _std_b(std_b)
+PPMAccessor::PPMAccessor(std::string ppm_path, bool bgr, std::unique_ptr<IPreprocessor> preprocessor)
+    : _ppm_path(std::move(ppm_path)), _bgr(bgr), _preprocessor(std::move(preprocessor))
 {
 }
 
 bool PPMAccessor::access_tensor(ITensor &tensor)
 {
     utils::PPMLoader ppm;
-    const float      mean[3] =
-    {
-        _bgr ? _mean_b : _mean_r,
-        _mean_g,
-        _bgr ? _mean_r : _mean_b
-    };
-    const float std[3] =
-    {
-        _bgr ? _std_b : _std_r,
-        _std_g,
-        _bgr ? _std_r : _std_b
-    };
 
     // Open PPM file
     ppm.open(_ppm_path);
@@ -108,15 +129,11 @@ bool PPMAccessor::access_tensor(ITensor &tensor)
     // Fill the tensor with the PPM content (BGR)
     ppm.fill_planar_tensor(tensor, _bgr);
 
-    // Subtract the mean value from each channel
-    Window window;
-    window.use_tensor_dimensions(tensor.info()->tensor_shape());
-
-    execute_window_loop(window, [&](const Coordinates & id)
+    // Preprocess tensor
+    if(_preprocessor)
     {
-        const float value                                     = *reinterpret_cast<float *>(tensor.ptr_to_element(id)) - mean[id.z()];
-        *reinterpret_cast<float *>(tensor.ptr_to_element(id)) = value / std[id.z()];
-    });
+        _preprocessor->preprocess(tensor);
+    }
 
     return true;
 }

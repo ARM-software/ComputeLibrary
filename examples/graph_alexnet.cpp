@@ -49,9 +49,9 @@ public:
         std::string image;     /* Image data */
         std::string label;     /* Label data */
 
-        constexpr float mean_r = 122.68f; /* Mean value to subtract from red channel */
-        constexpr float mean_g = 116.67f; /* Mean value to subtract from green channel */
-        constexpr float mean_b = 104.01f; /* Mean value to subtract from blue channel */
+        // Create a preprocessor object
+        const std::array<float, 3> mean_rgb{ { 122.68f, 116.67f, 104.01f } };
+        std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<CaffePreproccessor>(mean_rgb);
 
         // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
         const int  int_target_hint = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
@@ -97,7 +97,7 @@ public:
 
         graph << target_hint
               << Tensor(TensorInfo(TensorShape(227U, 227U, 3U, 1U), 1, DataType::F32),
-                        get_input_accessor(image, mean_r, mean_g, mean_b))
+                        get_input_accessor(image, std::move(preprocessor)))
               // Layer 1
               << ConvolutionLayer(
                   11U, 11U, 96U,
