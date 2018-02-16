@@ -47,6 +47,7 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON(weights->info()->dimension(0) != weights->info()->dimension(1));
+    ARM_COMPUTE_ERROR_ON(!info.padding_is_symmetric());
 
     _input        = input;
     _info         = info;

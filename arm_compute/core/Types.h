@@ -536,10 +536,14 @@ public:
     {
         return _stride;
     }
+    bool padding_is_symmetric() const
+    {
+        return (_pad_left == _pad_right) && (_pad_top == _pad_bottom);
+    }
     std::pair<unsigned int, unsigned int> pad() const
     {
         //this accessor should be used only when padding is symmetric
-        ARM_COMPUTE_ERROR_ON(_pad_left != _pad_right || _pad_top != _pad_bottom);
+        ARM_COMPUTE_ERROR_ON(!padding_is_symmetric());
         return std::make_pair(_pad_left, _pad_top);
     }
 

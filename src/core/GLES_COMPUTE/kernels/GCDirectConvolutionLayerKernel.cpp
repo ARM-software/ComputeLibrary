@@ -84,6 +84,7 @@ void GCDirectConvolutionLayerKernel<kernel_size>::configure(const IGCTensor *inp
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    ARM_COMPUTE_ERROR_ON(!conv_info.padding_is_symmetric());
 
     _conv_stride_x = std::get<0>(conv_info.stride());
     _conv_stride_y = std::get<1>(conv_info.stride());

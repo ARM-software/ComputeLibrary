@@ -61,6 +61,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((is_data_type_quantized_asymmetric(input->data_type()) && pool_info.pool_type() == PoolingType::L2),
                                     "Unsupported combination of parameters!");
+    ARM_COMPUTE_RETURN_ERROR_ON(!pool_info.pad_stride_info().padding_is_symmetric());
 
     const bool         is_global_pooling = pool_info.is_global_pooling();
     const unsigned int pool_size_x       = is_global_pooling ? input->tensor_shape().x() : pool_info.pool_size().width;

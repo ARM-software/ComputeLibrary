@@ -49,6 +49,7 @@ Status CLDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(0) != weights->dimension(1));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(0) < 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(!info.padding_is_symmetric());
 
     const unsigned int stride_x = info.stride().first;
     const unsigned int stride_y = info.stride().second;

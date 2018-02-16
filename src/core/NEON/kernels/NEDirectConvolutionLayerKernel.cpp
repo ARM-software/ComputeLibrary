@@ -1016,6 +1016,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+    ARM_COMPUTE_RETURN_ERROR_ON(!conv_info.padding_is_symmetric());
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(0) == 1 && (std::get<0>(conv_info.pad()) || std::get<1>(conv_info.pad())),
                                     "Pad > 0 not supported for 1x1 weights");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(0) == 3 && (std::get<0>(conv_info.pad()) > 1 || std::get<1>(conv_info.pad()) > 1),

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,6 +46,7 @@ void NELocallyConnectedLayer::configure(const ITensor *input, const ITensor *wei
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights, output);
     ARM_COMPUTE_ERROR_ON(weights->info()->dimension(2) != input->info()->dimension(2));
+    ARM_COMPUTE_ERROR_ON(!conv_info.padding_is_symmetric());
 
     if(biases != nullptr)
     {
