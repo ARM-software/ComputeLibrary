@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 #include "arm_compute/core/NEON/kernels/convolution/winograd/transforms/input.hpp"
 #include "arm_compute/core/NEON/kernels/convolution/winograd/winograd_gemm.hpp"
 #include "arm_compute/core/NEON/kernels/convolution/common/arm.hpp"
@@ -35,6 +34,7 @@ template <>
 template <>
 int Transform::ops_performed(const Tensor4DShape &input_shape)
 {
+  (void) input_shape;
   return 0;  // TODO
 }
 
@@ -45,8 +45,8 @@ int Transform::ops_performed(const Tensor4DShape &input_shape)
 * different padding combinations which may be required. These padding
 * constraints are the space:
 *
-*     Padding top in {0, 1}
-*     Padding left in {0, 1}
+*     Padding top in {0, 2}
+*     Padding left in {0, 2}
 *     Padding bottom in {0, 1, 2, 3, 4}
 *     Padding right in {0, 1, 2, 3, 4}
 */
@@ -340,115 +340,115 @@ const Transform::TileFn Transform::tile_fns[2][2][max_pad_bottom][max_pad_right]
     },
     {
       {
-        Transform::template process_tile<0, 1, 0, 0>,  // Left
-        Transform::template process_tile<0, 1, 0, 1>,
-        Transform::template process_tile<0, 1, 0, 2>,
-        Transform::template process_tile<0, 1, 0, 3>,
-        Transform::template process_tile<0, 1, 0, 4>,
+        Transform::template process_tile<0, 2, 0, 0>,  // Left
+        Transform::template process_tile<0, 2, 0, 1>,
+        Transform::template process_tile<0, 2, 0, 2>,
+        Transform::template process_tile<0, 2, 0, 3>,
+        Transform::template process_tile<0, 2, 0, 4>,
       },
       {
-        Transform::template process_tile<0, 1, 1, 0>,  // Bottom left
-        Transform::template process_tile<0, 1, 1, 1>,
-        Transform::template process_tile<0, 1, 1, 2>,
-        Transform::template process_tile<0, 1, 1, 3>,
-        Transform::template process_tile<0, 1, 1, 4>,
+        Transform::template process_tile<0, 2, 1, 0>,  // Bottom left
+        Transform::template process_tile<0, 2, 1, 1>,
+        Transform::template process_tile<0, 2, 1, 2>,
+        Transform::template process_tile<0, 2, 1, 3>,
+        Transform::template process_tile<0, 2, 1, 4>,
       },
       {
-        Transform::template process_tile<0, 1, 2, 0>,  // "          "
-        Transform::template process_tile<0, 1, 2, 1>,
-        Transform::template process_tile<0, 1, 2, 2>,
-        Transform::template process_tile<0, 1, 2, 3>,
-        Transform::template process_tile<0, 1, 2, 4>,
+        Transform::template process_tile<0, 2, 2, 0>,  // "          "
+        Transform::template process_tile<0, 2, 2, 1>,
+        Transform::template process_tile<0, 2, 2, 2>,
+        Transform::template process_tile<0, 2, 2, 3>,
+        Transform::template process_tile<0, 2, 2, 4>,
       },
       {
-        Transform::template process_tile<0, 1, 3, 0>,  // "          "
-        Transform::template process_tile<0, 1, 3, 1>,
-        Transform::template process_tile<0, 1, 3, 2>,
-        Transform::template process_tile<0, 1, 3, 3>,
-        Transform::template process_tile<0, 1, 3, 4>,
+        Transform::template process_tile<0, 2, 3, 0>,  // "          "
+        Transform::template process_tile<0, 2, 3, 1>,
+        Transform::template process_tile<0, 2, 3, 2>,
+        Transform::template process_tile<0, 2, 3, 3>,
+        Transform::template process_tile<0, 2, 3, 4>,
       },
       {
-        Transform::template process_tile<0, 1, 4, 0>,  // "          "
-        Transform::template process_tile<0, 1, 4, 1>,
-        Transform::template process_tile<0, 1, 4, 2>,
-        Transform::template process_tile<0, 1, 4, 3>,
-        Transform::template process_tile<0, 1, 4, 4>,
+        Transform::template process_tile<0, 2, 4, 0>,  // "          "
+        Transform::template process_tile<0, 2, 4, 1>,
+        Transform::template process_tile<0, 2, 4, 2>,
+        Transform::template process_tile<0, 2, 4, 3>,
+        Transform::template process_tile<0, 2, 4, 4>,
       }
     }
   },
   {
     {
       {
-        Transform::template process_tile<1, 0, 0, 0>,  // Top
-        Transform::template process_tile<1, 0, 0, 1>,  // Top right
-        Transform::template process_tile<1, 0, 0, 2>,  // "       "
-        Transform::template process_tile<1, 0, 0, 3>,  // "       "
-        Transform::template process_tile<1, 0, 0, 4>,  // "       "
+        Transform::template process_tile<2, 0, 0, 0>,  // Top
+        Transform::template process_tile<2, 0, 0, 1>,  // Top right
+        Transform::template process_tile<2, 0, 0, 2>,  // "       "
+        Transform::template process_tile<2, 0, 0, 3>,  // "       "
+        Transform::template process_tile<2, 0, 0, 4>,  // "       "
       },
       {
-        Transform::template process_tile<1, 0, 1, 0>,
-        Transform::template process_tile<1, 0, 1, 1>,
-        Transform::template process_tile<1, 0, 1, 2>,
-        Transform::template process_tile<1, 0, 1, 3>,
-        Transform::template process_tile<1, 0, 1, 4>,
+        Transform::template process_tile<2, 0, 1, 0>,
+        Transform::template process_tile<2, 0, 1, 1>,
+        Transform::template process_tile<2, 0, 1, 2>,
+        Transform::template process_tile<2, 0, 1, 3>,
+        Transform::template process_tile<2, 0, 1, 4>,
       },
       {
-        Transform::template process_tile<1, 0, 2, 0>,
-        Transform::template process_tile<1, 0, 2, 1>,
-        Transform::template process_tile<1, 0, 2, 2>,
-        Transform::template process_tile<1, 0, 2, 3>,
-        Transform::template process_tile<1, 0, 2, 4>,
+        Transform::template process_tile<2, 0, 2, 0>,
+        Transform::template process_tile<2, 0, 2, 1>,
+        Transform::template process_tile<2, 0, 2, 2>,
+        Transform::template process_tile<2, 0, 2, 3>,
+        Transform::template process_tile<2, 0, 2, 4>,
       },
       {
-        Transform::template process_tile<1, 0, 3, 0>,
-        Transform::template process_tile<1, 0, 3, 1>,
-        Transform::template process_tile<1, 0, 3, 2>,
-        Transform::template process_tile<1, 0, 3, 3>,
-        Transform::template process_tile<1, 0, 3, 4>,
+        Transform::template process_tile<2, 0, 3, 0>,
+        Transform::template process_tile<2, 0, 3, 1>,
+        Transform::template process_tile<2, 0, 3, 2>,
+        Transform::template process_tile<2, 0, 3, 3>,
+        Transform::template process_tile<2, 0, 3, 4>,
       },
       {
-        Transform::template process_tile<1, 0, 4, 0>,
-        Transform::template process_tile<1, 0, 4, 1>,
-        Transform::template process_tile<1, 0, 4, 2>,
-        Transform::template process_tile<1, 0, 4, 3>,
-        Transform::template process_tile<1, 0, 4, 4>,
+        Transform::template process_tile<2, 0, 4, 0>,
+        Transform::template process_tile<2, 0, 4, 1>,
+        Transform::template process_tile<2, 0, 4, 2>,
+        Transform::template process_tile<2, 0, 4, 3>,
+        Transform::template process_tile<2, 0, 4, 4>,
       },
     },
     {
       {
-        Transform::template process_tile<1, 1, 0, 0>,  // Top left
-        Transform::template process_tile<1, 1, 0, 1>,
-        Transform::template process_tile<1, 1, 0, 2>,
-        Transform::template process_tile<1, 1, 0, 3>,
-        Transform::template process_tile<1, 1, 0, 4>,
+        Transform::template process_tile<2, 2, 0, 0>,  // Top left
+        Transform::template process_tile<2, 2, 0, 1>,
+        Transform::template process_tile<2, 2, 0, 2>,
+        Transform::template process_tile<2, 2, 0, 3>,
+        Transform::template process_tile<2, 2, 0, 4>,
       },
       {
-        Transform::template process_tile<1, 1, 1, 0>,
-        Transform::template process_tile<1, 1, 1, 1>,
-        Transform::template process_tile<1, 1, 1, 2>,
-        Transform::template process_tile<1, 1, 1, 3>,
-        Transform::template process_tile<1, 1, 1, 4>,
+        Transform::template process_tile<2, 2, 1, 0>,
+        Transform::template process_tile<2, 2, 1, 1>,
+        Transform::template process_tile<2, 2, 1, 2>,
+        Transform::template process_tile<2, 2, 1, 3>,
+        Transform::template process_tile<2, 2, 1, 4>,
       },
       {
-        Transform::template process_tile<1, 1, 2, 0>,
-        Transform::template process_tile<1, 1, 2, 1>,
-        Transform::template process_tile<1, 1, 2, 2>,
-        Transform::template process_tile<1, 1, 2, 3>,
-        Transform::template process_tile<1, 1, 2, 4>,
+        Transform::template process_tile<2, 2, 2, 0>,
+        Transform::template process_tile<2, 2, 2, 1>,
+        Transform::template process_tile<2, 2, 2, 2>,
+        Transform::template process_tile<2, 2, 2, 3>,
+        Transform::template process_tile<2, 2, 2, 4>,
       },
       {
-        Transform::template process_tile<1, 1, 3, 0>,
-        Transform::template process_tile<1, 1, 3, 1>,
-        Transform::template process_tile<1, 1, 3, 2>,
-        Transform::template process_tile<1, 1, 3, 3>,
-        Transform::template process_tile<1, 1, 3, 4>,
+        Transform::template process_tile<2, 2, 3, 0>,
+        Transform::template process_tile<2, 2, 3, 1>,
+        Transform::template process_tile<2, 2, 3, 2>,
+        Transform::template process_tile<2, 2, 3, 3>,
+        Transform::template process_tile<2, 2, 3, 4>,
       },
       {
-        Transform::template process_tile<1, 1, 4, 0>,
-        Transform::template process_tile<1, 1, 4, 1>,
-        Transform::template process_tile<1, 1, 4, 2>,
-        Transform::template process_tile<1, 1, 4, 3>,
-        Transform::template process_tile<1, 1, 4, 4>,
+        Transform::template process_tile<2, 2, 4, 0>,
+        Transform::template process_tile<2, 2, 4, 1>,
+        Transform::template process_tile<2, 2, 4, 2>,
+        Transform::template process_tile<2, 2, 4, 3>,
+        Transform::template process_tile<2, 2, 4, 4>,
       }
     }
   }

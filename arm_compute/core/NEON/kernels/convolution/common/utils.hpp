@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,13 +25,15 @@
 #pragma once
 
 double TimeInUs(void);
-void PrintMatrix(const float* const m, const int M, const int N, const int row_stride);
+void PrintMatrix(const float *const m, const int M, const int N, const int row_stride);
 
-inline int iceildiv(const int a, const int b) {
-  return (a + b - 1) / b;
+inline int iceildiv(const int a, const int b)
+{
+    return (a + b - 1) / b;
 }
 
 template <typename T>
-inline T roundup(const T a, const T b) {
-  return a + b - (a % b);
+inline T roundup(const T a, const T b)
+{
+    return b * iceildiv(a, b);
 }
