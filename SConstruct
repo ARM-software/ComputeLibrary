@@ -42,7 +42,7 @@ vars.AddVariables(
     BoolVariable("logging", "Logging (this flag is forced to 1 for debug=1)", False),
     EnumVariable("arch", "Target Architecture", "armv7a", allowed_values=("armv7a", "arm64-v8a", "arm64-v8.2-a", "x86_32", "x86_64")),
     EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "bare_metal")),
-    EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile")),
+    EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile", "embed_only")),
     BoolVariable("examples", "Build example programs", True),
     BoolVariable("Werror", "Enable/disable the -Werror compilation flag", True),
     BoolVariable("standalone", "Builds the tests as standalone executables, links statically with libgcc, libstdc++ and libarm_compute", False),
@@ -61,10 +61,16 @@ vars.AddVariables(
 
 env = Environment(platform="posix", variables=vars, ENV = os.environ)
 env.Append(LIBPATH = ["#build/%s" % env['build_dir']])
+Export('env')
+Export('vars')
 
 SConsignFile('build/.%s' % env['build_dir'])
 
 Help(vars.GenerateHelpText(env))
+
+if env['build'] == "embed_only":
+    SConscript('./SConscript', variant_dir='#build/%s' % env['build_dir'], duplicate=0)
+    Return()
 
 if env['neon'] and 'x86' in env['arch']:
     print "Cannot compile NEON for x86"
@@ -231,8 +237,6 @@ if env['logging']:
 env.Append(CPPPATH = ['#/include', "#"])
 env.Append(CXXFLAGS = env['extra_cxx_flags'])
 
-Export('vars')
-Export('env')
 Export('version_at_least')
 
 if env['opencl']:
