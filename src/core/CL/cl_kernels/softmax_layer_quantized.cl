@@ -232,7 +232,6 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_serial(
  * @note Datatype must be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=short
  * @note Fixed point position must be given as a preprocessor argument using -DFIXED_POINT_POSITION=pos. e.g. DFIXED_POINT_POSITION=4
  * @note In case the input is not a multiple of VECTOR_SIZE (2,4,8,16) -DNON_MULTIPLE_OF_VECTOR_SIZE must be passed.
- * @note Beta can be optionally passed at compile time using -DBETA (by default, it is 1.0).
  *
  * @param[in]  src_ptr                            Pointer to the source tensor slice. Supported data types: QS8/QS16/F16/F32
  * @param[in]  src_stride_x                       Stride of the source tensor in X dimension (in bytes)
@@ -288,7 +287,7 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_parallel(
     __local uchar max_local;
 
     uchar4 uchar_min   = (uchar4)0;
-    uchar4 max_val_vec = (uchar4)uchar_min;
+    uchar4 max_val_vec = uchar_min;
 
     // Number of elements per work-item.
     const uint row = width / GRID_SIZE;
@@ -441,8 +440,8 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_parallel(
         int4 data_diff_mult = mult_by_quantized_multiplier_parallel(data_diff);
         data_fp             = ASYMM_EXP_ON_NEGATIVE_VALUES(data_diff_mult, SCALED_DIFF_INT_BITS, 4);
         data_fp             = ASYMM_RESCALE(data_fp, 0, EXP_ACCUMULATION_INT_BITS, 4);
-        uchar4 widx         = convert_uchar4(((uint4)(GRID_SIZE * i * 4) + boundary_workitems * 4 + idx4) < width);
-        data                = select(uchar_min, data, widx);
+        int4 widx           = convert_int4(((uint4)(GRID_SIZE * i * 4) + boundary_workitems * 4 + idx4) < width);
+        data_fp             = select(0, data_fp, widx);
         vstore4(data_diff, 0, (__global int *)offset(&dst, i * GRID_SIZE * 4 + 4, 0));
         sum1D = sum1D + select(0, data_fp, data_diff >= (int4)(DIFF_MIN));
     }
