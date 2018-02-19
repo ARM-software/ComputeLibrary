@@ -103,7 +103,7 @@ DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(z
                                                                                                                        GPUTarget::BIFROST
                                                                                                                      })),
 
-                                                                           framework::dataset::make("Expected", { ConvolutionMethod::DIRECT, ConvolutionMethod::GEMM, ConvolutionMethod::GEMM, ConvolutionMethod::GEMM, ConvolutionMethod::DIRECT })),
+                                                                           framework::dataset::make("Expected", { ConvolutionMethod::GEMM, ConvolutionMethod::GEMM, ConvolutionMethod::GEMM, ConvolutionMethod::GEMM, ConvolutionMethod::GEMM })),
                input_info, weights_info, biases_info, output_info, conv_info, gpu_target, expected)
 {
     ConvolutionMethod is_valid = CLConvolutionLayer::get_convolution_method(&input_info.clone()->set_is_resizable(false),

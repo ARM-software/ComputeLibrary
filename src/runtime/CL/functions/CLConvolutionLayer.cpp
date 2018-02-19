@@ -80,14 +80,14 @@ Status CLConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo 
         case ConvolutionMethod::DIRECT:
         {
             // Validate direct convolution layer
-            CLDirectConvolutionLayerKernel::validate(input, weights, biases, output, conv_info, gpu_target);
+            CLDirectConvolutionLayer::validate(input, weights, biases, output, conv_info);
             break;
         }
         case ConvolutionMethod::GEMM:
         {
             // Validate gemm-based convolution layer
             /* TODO COMPMID-754:  Add validation methods for CLGEMMConvolutionLayer
-            CLGEMMConvolutionLayerKernel::validate(input, weights, biases, output, conv_info, weights_info); */
+            CLGEMMConvolutionLayer::validate(input, weights, biases, output, conv_info, weights_info); */
             break;
         }
         default:
@@ -102,15 +102,13 @@ ConvolutionMethod CLConvolutionLayer::get_convolution_method(const ITensorInfo *
                                                              const WeightsInfo &weights_info, const GPUTarget gpu_target)
 {
     ARM_COMPUTE_UNUSED(input);
+    ARM_COMPUTE_UNUSED(weights);
     ARM_COMPUTE_UNUSED(biases);
     ARM_COMPUTE_UNUSED(output);
     ARM_COMPUTE_UNUSED(conv_info);
     ARM_COMPUTE_UNUSED(weights_info);
+    ARM_COMPUTE_UNUSED(gpu_target);
 
-    if((gpu_target == GPUTarget::BIFROST) && (weights->dimension(0) == 5) && (weights->dimension(1) == 5))
-    {
-        return ConvolutionMethod::DIRECT;
-    }
     return ConvolutionMethod::GEMM;
 }
 
