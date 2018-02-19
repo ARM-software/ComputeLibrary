@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,7 +47,7 @@ public:
     CLDepthwiseConvolutionLayer3x3Kernel &operator=(CLDepthwiseConvolutionLayer3x3Kernel &&) = default;
     /** Initialize the function's source, destination, conv and border_size.
      *
-     * @param[in]  input     Source tensor. DataType supported: QASYMM8/F32.
+     * @param[in]  input     Source tensor. DataType supported: QASYMM8/F16/F32.
      * @param[in]  weights   Weights tensor. A 3D tensor with dimensions [3, 3, IFM]. Data type supported: Same as @p input.
      * @param[in]  biases    (Optional) Biases tensor. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
      *                       Data type supported: Same as @p input.

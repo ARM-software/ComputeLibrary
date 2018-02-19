@@ -51,7 +51,7 @@ BorderSize CLDepthwiseConvolutionLayer3x3Kernel::border_size() const
 
 void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_ERROR_ON(weights->info()->dimension(0) != 3 || weights->info()->dimension(1) != 3);
 
@@ -134,7 +134,15 @@ void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, con
     // Create kernel
     std::string kernel_name;
 
-    if(input->info()->data_type() == DataType::F32 && gpu_target == GPUTarget::BIFROST)
+    if(input->info()->data_type() == DataType::F16)
+    {
+        kernel_name                       = "depthwise_convolution_3x3_f16";
+        num_elems_written_per_iteration_x = 8 / data_size_from_type(input->info()->data_type());
+        num_elems_written_per_iteration_y = 1;
+        num_elems_read_per_iteration_x    = 3 + (num_elems_written_per_iteration_x - 1) * _conv_stride_x;
+        num_elems_read_per_iteration_y    = 3;
+    }
+    else if(input->info()->data_type() == DataType::F32 && gpu_target == GPUTarget::BIFROST)
     {
         if(_conv_stride_x == 1 && _conv_stride_y == 1)
         {

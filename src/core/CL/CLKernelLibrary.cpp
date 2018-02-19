@@ -189,6 +189,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "copy_to_keypoint", "fast_corners.cl" },
     { "deconvolution_upsample", "deconvolution_layer.cl" },
     { "depthwise_convolution_3x3", "depthwise_convolution.cl" },
+    { "depthwise_convolution_3x3_f16", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_quantized", "depthwise_convolution_quantized.cl" },
     { "depthwise_convolution_3x3_stridex1_stridey1_bifrost", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_stridex2_stridey2_bifrost", "depthwise_convolution.cl" },

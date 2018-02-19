@@ -52,7 +52,7 @@ public:
     CLDepthwiseConvolutionLayer3x3();
     /** Initialize the function's source, destination, conv and border_size.
      *
-     * @param[in, out] input     Source tensor. Data type supported: QASYMM8/F32. (Written to only for border filling).
+     * @param[in, out] input     Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
      * @param[in]      weights   Weights tensor. A 3D tensor with shape [3, 3, IFM]. Data type supported: Same as @p input.
      * @param[in]      biases    (Optional) Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
      *                           Data type supported: Same as @p input.

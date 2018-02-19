@@ -564,3 +564,187 @@ __kernel void depthwise_vector_to_tensor(
 }
 
 #endif //defined(CONV_WIDTH) && defined(CONV_HEIGHT) && defined(DATA_TYPE)
+
+#if defined(ARM_COMPUTE_OPENCL_FP16_ENABLED)
+#if defined(CONV_STRIDE_X)
+#if CONV_STRIDE_X == 1
+#define convolution1x3_f16 convolution1x3_stride_1_f16
+#elif CONV_STRIDE_X == 2
+#define convolution1x3_f16 convolution1x3_stride_2_f16
+#elif CONV_STRIDE_X == 3
+#define convolution1x3_f16 convolution1x3_stride_3_f16
+#else /* CONV_STRIDE_X */
+#error "Stride not supported"
+#endif /* CONV_STRIDE_X */
+
+/** Compute a 1D horizontal convolution of size 3 and stride 1 for 16bit floating point type.
+ *
+ * @param[in] left_pixel   Pointer to the left pixel.
+ * @param[in] left_coeff   Weight of the left pixel
+ * @param[in] middle_coeff Weight of the middle pixel
+ * @param[in] right_coeff  Weight of the right pixel
+ *
+ * @return a half4 containing 4 convoluted values.
+ */
+inline half4 convolution1x3_stride_1_f16(__global const uchar *left_pixel,
+                                         const half            left_coeff,
+                                         const half            middle_coeff,
+                                         const half            right_coeff)
+{
+    half8 temp = vload8(0, (__global half *)left_pixel);
+
+    half4 left   = CONVERT(temp.s0123, half4);
+    half4 middle = CONVERT(temp.s1234, half4);
+    half4 right  = CONVERT(temp.s2345, half4);
+
+    return left * (half4)left_coeff + middle * (half4)middle_coeff + right * (half4)right_coeff;
+}
+
+/** Compute a 1D horizontal convolution of size 3 and stride 2 for 16bit floating point type.
+ *
+ * @param[in] left_pixel   Pointer to the left pixel.
+ * @param[in] left_coeff   Weight of the left pixel
+ * @param[in] middle_coeff Weight of the middle pixel
+ * @param[in] right_coeff  Weight of the right pixel
+ *
+ * @return a half4 containing 4 convoluted values.
+ */
+inline half4 convolution1x3_stride_2_f16(__global const uchar *left_pixel,
+                                         const half            left_coeff,
+                                         const half            middle_coeff,
+                                         const half            right_coeff)
+{
+    half8 temp0 = vload8(0, (__global half *)left_pixel);
+    half temp1  = *((__global half *)(left_pixel + 8 * sizeof(half)));
+
+    half4 left   = CONVERT(temp0.s0246, half4);
+    half4 middle = CONVERT(temp0.s1357, half4);
+    half4 right  = CONVERT((half4)(temp0.s246, temp1), half4);
+
+    return left * (half4)left_coeff + middle * (half4)middle_coeff + right * (half4)right_coeff;
+}
+
+/** Compute a 1D horizontal convolution of size 3 and stride 3 for 16bit floating point type.
+ *
+ * @param[in] left_pixel   Pointer to the left pixel.
+ * @param[in] left_coeff   Weight of the left pixel
+ * @param[in] middle_coeff Weight of the middle pixel
+ * @param[in] right_coeff  Weight of the right pixel
+ *
+ * @return a half4 containing 4 convoluted values.
+ */
+inline half4 convolution1x3_stride_3_f16(__global const uchar *left_pixel,
+                                         const half            left_coeff,
+                                         const half            middle_coeff,
+                                         const half            right_coeff)
+{
+    half16 temp0 = vload16(0, (__global half *)left_pixel);
+
+    half4 left   = CONVERT(temp0.s0369, half4);
+    half4 middle = CONVERT(temp0.s147A, half4);
+    half4 right  = CONVERT(temp0.s258B, half4);
+
+    return left * (half4)left_coeff + middle * (half4)middle_coeff + right * (half4)right_coeff;
+}
+
+/** Apply a 3x3 convolution matrix to a single channel F16 input image and return the result.
+ *
+ * Convolution matrix layout:
+ *
+ * [ mat0, mat1, mat2 ]\n
+ * [ mat3, mat4, mat5 ]\n
+ * [ mat6, mat7, mat8 ]\n
+ *
+ * @param[in] src  A pointer to source Image structure
+ * @param[in] mat0 Coefficient from the convolution matrix
+ * @param[in] mat1 Coefficient from the convolution matrix
+ * @param[in] mat2 Coefficient from the convolution matrix
+ * @param[in] mat3 Coefficient from the convolution matrix
+ * @param[in] mat4 Coefficient from the convolution matrix
+ * @param[in] mat5 Coefficient from the convolution matrix
+ * @param[in] mat6 Coefficient from the convolution matrix
+ * @param[in] mat0 Coefficient from the convolution matrix
+ * @param[in] mat7 Coefficient from the convolution matrix
+ * @param[in] mat8 Coefficient from the convolution matrix
+ *
+ * @return a half4 containing 4 convoluted values.
+ */
+inline half4 convolution3x3_f16(
+    Image     *src,
+    const half mat0, const half mat1, const half mat2,
+    const half mat3, const half mat4, const half mat5,
+    const half mat6, const half mat7, const half mat8)
+{
+    half4 pixels;
+
+    pixels = convolution1x3_f16(offset(src, 0, 0), mat0, mat1, mat2);
+    pixels += convolution1x3_f16(offset(src, 0, 1), mat3, mat4, mat5);
+    pixels += convolution1x3_f16(offset(src, 0, 2), mat6, mat7, mat8);
+
+    return pixels;
+}
+
+/** This OpenCL kernel computes the depthwise convolution 3x3
+ *
+ * @param[in] src_ptr                               Pointer to the source image. Supported data types: F16
+ * @param[in] src_stride_x                          Stride of the source image in X dimension (in bytes)
+ * @param[in] src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] src_stride_y                          Stride of the source image in Y dimension (in bytes)
+ * @param[in] src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source image
+ * @param[in] src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
+ * @param[in] src_step_z                            src_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_ptr                               Pointer to the destination tensor. Supported data types: F32
+ * @param[in] dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
+ * @param[in] dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] dst_stride_y                          Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in] dst_step_y                            dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in] dst_step_z                            dst_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
+ * @param[in] weights_ptr                           Pointer to the weights tensor. Supported data types: F32
+ * @param[in] weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
+ * @param[in] weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
+ * @param[in] weights_step_y                        weights_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] weights_stride_z                      Stride of the weights tensor in Z dimension (in bytes)
+ * @param[in] weights_step_z                        weights_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] weights_offset_first_element_in_bytes The offset of the first element in the biases vector
+ * @param[in] biases_ptr                            (Optional) Pointer to the biases vector. Supported data types: F16/F32
+ * @param[in] biases_stride_x                       (Optional) Stride of the biases vector in X dimension (in bytes)
+ * @param[in] biases_step_x                         (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] biases_offset_first_element_in_bytes  (Optional) The offset of the first element in the biases vector
+ */
+__kernel void depthwise_convolution_3x3_f16(
+    TENSOR3D_DECLARATION(src),
+    TENSOR3D_DECLARATION(dst),
+    TENSOR3D_DECLARATION(weights)
+#if defined(HAS_BIAS)
+    ,
+    VECTOR_DECLARATION(biases)
+#endif //defined(HAS_BIAS)
+)
+{
+    Image    src     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(src);
+    Image    dst     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
+    Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT(weights);
+#if defined(HAS_BIAS)
+    Vector biases = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
+#endif //defined(HAS_BIAS)
+
+    uchar3 offset         = (uchar3)(0, 1, 2) * (uchar3)weights_stride_y;
+    half3 weights_values0 = vload3(0, (__global half *)(weights.ptr + offset.s0));
+    half3 weights_values1 = vload3(0, (__global half *)(weights.ptr + offset.s1));
+    half3 weights_values2 = vload3(0, (__global half *)(weights.ptr + offset.s2));
+
+    half4 pixels = convolution3x3_f16(&src, weights_values0.s0, weights_values0.s1, weights_values0.s2,
+                                      weights_values1.s0, weights_values1.s1, weights_values1.s2,
+                                      weights_values2.s0, weights_values2.s1, weights_values2.s2);
+#if defined(HAS_BIAS)
+    pixels += (half4)(*((__global half *)(biases.ptr + get_global_id(2) * biases_stride_x)));
+#endif //defined(HAS_BIAS)
+
+    vstore4(pixels, 0, (__global half *)dst.ptr);
+}
+#endif // defined(CONV_STRIDE_X)
+#endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED)

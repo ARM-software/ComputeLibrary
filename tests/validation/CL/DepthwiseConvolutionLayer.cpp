@@ -42,8 +42,9 @@ namespace validation
 {
 namespace
 {
-constexpr RelativeTolerance<float>   tolerance_f32(0.01f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1); /**< Tolerance value for comparing reference's output against implementation's output for DataType::QASYMM8 */
+RelativeTolerance<half_float::half>  tolerance_f16(half_float::half(0.001)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+constexpr RelativeTolerance<float>   tolerance_f32(0.01f);                   /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);                   /**< Tolerance value for comparing reference's output against implementation's output for DataType::QASYMM8 */
 } // namespace
 
 TEST_SUITE(CL)
@@ -70,6 +71,23 @@ template <typename T>
 using CLDepthwiseConvolutionLayerFixture3x3 = DepthwiseConvolutionLayerValidationFixture<CLTensor, CLAccessor, CLDepthwiseConvolutionLayer3x3, T>;
 
 TEST_SUITE(Float)
+TEST_SUITE(F16)
+TEST_SUITE(W3x3)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::ALL, combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
+                                                                                                                   framework::dataset::make("DataType",
+                                                                                                                           DataType::F16)))
+{
+    validate(CLAccessor(_target), _reference, tolerance_f16);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
+                                                                                                                       framework::dataset::make("DataType",
+                                                                                                                               DataType::F16)))
+{
+    validate(CLAccessor(_target), _reference, tolerance_f16);
+}
+TEST_SUITE_END()
+TEST_SUITE_END()
+
 TEST_SUITE(FP32)
 TEST_SUITE(W3x3)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerFixture3x3<float>, framework::DatasetMode::ALL, combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
