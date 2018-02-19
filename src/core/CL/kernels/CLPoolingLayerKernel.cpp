@@ -61,14 +61,10 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((is_data_type_quantized_asymmetric(input->data_type()) && pool_info.pool_type() == PoolingType::L2),
                                     "Unsupported combination of parameters!");
-    ARM_COMPUTE_RETURN_ERROR_ON(!pool_info.pad_stride_info().padding_is_symmetric());
 
     const bool         is_global_pooling = pool_info.is_global_pooling();
     const unsigned int pool_size_x       = is_global_pooling ? input->tensor_shape().x() : pool_info.pool_size().width;
     const unsigned int pool_size_y       = is_global_pooling ? input->tensor_shape().y() : pool_info.pool_size().height;
-
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_global_pooling && ((pool_info.pad_stride_info().pad().first >= pool_size_x) || (pool_info.pad_stride_info().pad().second >= pool_size_y)),
-                                    "Invalid pool size and pool pad combination!");
 
     // Checks performed when output is configured
     if(output->total_size() != 0)
@@ -92,8 +88,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 
 std::tuple<Status, Window, CLPoolingConfig> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, const PoolingLayerInfo &pool_info)
 {
-    int                 pool_pad_x      = 0;
-    int                 pool_pad_y      = 0;
     int                 pool_stride_x   = 0;
     int                 pool_stride_y   = 0;
     unsigned int        pooled_w        = 0;
@@ -101,8 +95,11 @@ std::tuple<Status, Window, CLPoolingConfig> validate_and_configure_window(ITenso
     int                 pool_size_x     = pool_info.is_global_pooling() ? input->dimension(0) : pool_info.pool_size().width;
     int                 pool_size_y     = pool_info.is_global_pooling() ? input->dimension(1) : pool_info.pool_size().height;
     const PadStrideInfo pad_stride_info = pool_info.pad_stride_info();
-    std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
+    const int pool_pad_right  = pad_stride_info.pad_right();
+    const int pool_pad_top    = pad_stride_info.pad_top();
+    const int pool_pad_left   = pad_stride_info.pad_left();
+    const int pool_pad_bottom = pad_stride_info.pad_bottom();
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
@@ -115,7 +112,7 @@ std::tuple<Status, Window, CLPoolingConfig> validate_and_configure_window(ITenso
 
     auto_init(input, output, pooled_w, pooled_h);
 
-    BorderSize     border_size = BorderSize(pool_pad_y, pool_pad_x);
+    BorderSize     border_size = BorderSize(pool_pad_top, pool_pad_right, pool_pad_bottom, pool_pad_left);
     const DataType data_type   = input->data_type();
 
     const int input_width  = input->dimension(0);
@@ -131,15 +128,15 @@ std::tuple<Status, Window, CLPoolingConfig> validate_and_configure_window(ITenso
     const int num_iterations_x = (pooled_w + num_elems_processed_per_iteration - 1) / num_elems_processed_per_iteration;
 
     // Upper limit for the number of right/bottom border elements that are accessed
-    const int upper_bound_w = ((num_iterations_x - 1) * num_elems_processed_per_iteration * pool_stride_x - pool_pad_x + num_elems_read_per_iteration) - input_width;
-    const int upper_bound_h = ((pooled_h - 1) * pool_stride_y - pool_pad_y + pool_size_y) - input_height;
+    const int upper_bound_w = ((num_iterations_x - 1) * num_elems_processed_per_iteration * pool_stride_x - pool_pad_left + num_elems_read_per_iteration) - input_width;
+    const int upper_bound_h = ((pooled_h - 1) * pool_stride_y - pool_pad_top + pool_size_y) - input_height;
 
-    border_size.right  = std::max(upper_bound_w, pool_pad_x);
-    border_size.bottom = std::max(upper_bound_h, pool_pad_y);
+    border_size.right  = std::max(upper_bound_w, pool_pad_right);
+    border_size.bottom = std::max(upper_bound_h, pool_pad_bottom);
 
     Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
 
-    AccessWindowRectangle input_access(input, -pool_pad_x, -pool_pad_y, num_elems_read_per_iteration, pool_size_y,
+    AccessWindowRectangle input_access(input, -pool_pad_left, -pool_pad_top, num_elems_read_per_iteration, pool_size_y,
                                        pool_stride_x * num_elems_processed_per_iteration, pool_stride_y);
     AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
     bool                   window_changed = update_window_and_padding(win, input_access, output_access);
@@ -162,8 +159,6 @@ BorderSize CLPoolingLayerKernel::border_size() const
 
 void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, const PoolingLayerInfo &pool_info)
 {
-    int                 pool_pad_x      = 0;
-    int                 pool_pad_y      = 0;
     int                 pool_stride_x   = 0;
     int                 pool_stride_y   = 0;
     unsigned int        pooled_w        = 0;
@@ -173,8 +168,9 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     const int           pool_size_y     = pool_info.is_global_pooling() ? input->info()->dimension(1) : pool_info.pool_size().height;
     const PadStrideInfo pad_stride_info = pool_info.pad_stride_info();
     const bool          exclude_padding = pool_info.exclude_padding();
-    std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
+    const int pool_pad_top  = pad_stride_info.pad_top();
+    const int pool_pad_left = pad_stride_info.pad_left();
 
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
@@ -207,11 +203,11 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     if(pool_type != PoolingType::MAX)
     {
         build_opts.add_option_if(exclude_padding, "-DEXCLUDE_PADDING");
-        build_opts.add_option("-DMAX_WIDTH=" + support::cpp11::to_string(input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_x)));
-        build_opts.add_option("-DMAX_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_y)));
+        build_opts.add_option("-DMAX_WIDTH=" + support::cpp11::to_string(input->info()->dimension(0) + (exclude_padding ? 0 : pool_pad_left)));
+        build_opts.add_option("-DMAX_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(1) + (exclude_padding ? 0 : pool_pad_top)));
         build_opts.add_option("-DSTRIDE_Y=" + support::cpp11::to_string(pool_stride_y));
-        build_opts.add_option("-DPAD_X=" + support::cpp11::to_string(pool_pad_x));
-        build_opts.add_option("-DPAD_Y=" + support::cpp11::to_string(pool_pad_y));
+        build_opts.add_option("-DPAD_X=" + support::cpp11::to_string(pool_pad_left));
+        build_opts.add_option("-DPAD_Y=" + support::cpp11::to_string(pool_pad_top));
     }
 
     // Create kernel
@@ -278,8 +274,8 @@ void CLPoolingLayerKernel::run(const Window &window, cl::CommandQueue &queue)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
 
-    unsigned int pool_pad_x, pool_pad_y, pool_stride_x, pool_stride_y = 0;
-    std::tie(pool_pad_x, pool_pad_y)       = _pool_info.pad_stride_info().pad();
+    unsigned int pool_stride_x = 0;
+    unsigned int pool_stride_y = 0;
     std::tie(pool_stride_x, pool_stride_y) = _pool_info.pad_stride_info().stride();
 
     Window window_collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
@@ -289,11 +285,11 @@ void CLPoolingLayerKernel::run(const Window &window, cl::CommandQueue &queue)
     {
         // Upsample input by pool size
         Window in_slice(slice);
-        in_slice.set(Window::DimX, Window::Dimension(in_slice.x().start() - pool_pad_x,
-                                                     (in_slice.x().end() - pool_pad_x) * pool_stride_x,
+        in_slice.set(Window::DimX, Window::Dimension(in_slice.x().start() - _pool_info.pad_stride_info().pad_left(),
+                                                     (in_slice.x().end() - _pool_info.pad_stride_info().pad_left()) * pool_stride_x,
                                                      pool_stride_x * _num_elems_processed_per_iteration));
-        in_slice.set(Window::DimY, Window::Dimension(in_slice.y().start() - pool_pad_y,
-                                                     (in_slice.y().end() - pool_pad_y) * pool_stride_y,
+        in_slice.set(Window::DimY, Window::Dimension(in_slice.y().start() - _pool_info.pad_stride_info().pad_top(),
+                                                     (in_slice.y().end() - _pool_info.pad_stride_info().pad_top()) * pool_stride_y,
                                                      pool_stride_y));
 
         // Set inputs

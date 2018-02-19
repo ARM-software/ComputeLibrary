@@ -121,10 +121,10 @@ void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, con
     const GPUTarget gpu_target = get_arch_from_target(get_target());
 
     // Configure kernel window
-    const unsigned int conv_pad_left   = std::max(conv_info.pad_left(), 1U);
-    const unsigned int conv_pad_top    = std::max(conv_info.pad_top(), 1U);
-    const unsigned int conv_pad_right  = std::max(conv_info.pad_right(), 1U);
-    const unsigned int conv_pad_bottom = std::max(conv_info.pad_bottom(), 1U);
+    const unsigned int conv_pad_left   = conv_info.pad_left();
+    const unsigned int conv_pad_top    = conv_info.pad_top();
+    const unsigned int conv_pad_right  = conv_info.pad_right();
+    const unsigned int conv_pad_bottom = conv_info.pad_bottom();
 
     unsigned int num_elems_read_per_iteration_x    = 0;
     unsigned int num_elems_read_per_iteration_y    = 0;

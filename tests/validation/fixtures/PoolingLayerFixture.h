@@ -164,6 +164,18 @@ public:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class SpecialPoolingLayerValidationFixture : public PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
+{
+public:
+    template <typename...>
+    void setup(TensorShape src_shape, TensorShape dst_shape, PoolingLayerInfo pool_info, DataType data_type)
+    {
+        ARM_COMPUTE_UNUSED(dst_shape);
+        PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(src_shape, pool_info, data_type, 0, QuantizationInfo());
+    }
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
 class GlobalPoolingLayerValidationFixture : public PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
@@ -173,6 +185,7 @@ public:
         PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, PoolingLayerInfo(pool_type), data_type, 0, QuantizationInfo());
     }
 };
+
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

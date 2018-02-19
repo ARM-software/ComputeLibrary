@@ -49,8 +49,8 @@ constexpr AbsoluteTolerance<float> tolerance_fp16(0.01f);  /**< Tolerance for ha
 constexpr AbsoluteTolerance<float> tolerance_fp32(0.001f); /**< Tolerance for floating point tests */
 
 /** Direct convolution data set. */
-const auto data_pad_f32 = concat(concat(combine(framework::dataset::make("PadX", 0),
-                                                combine(framework::dataset::make("PadY", 0),
+const auto data_pad_f32 = concat(concat(combine(framework::dataset::make("PadX", 0, 1),
+                                                combine(framework::dataset::make("PadY", 0, 1),
                                                         framework::dataset::make("KernelSize", 1))),
                                         combine(framework::dataset::make("PadX", 0, 2),
                                                 combine(framework::dataset::make("PadY", 0, 2),

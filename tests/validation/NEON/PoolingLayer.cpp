@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/PaddingCalculator.h"
+#include "tests/datasets/PoolingLayerDataset.h"
 #include "tests/datasets/PoolingTypesDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
@@ -119,8 +120,16 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 template <typename T>
 using NEPoolingLayerFixture = PoolingLayerValidationFixture<Tensor, Accessor, NEPoolingLayer, T>;
 
+template <typename T>
+using NESpecialPoolingLayerFixture = SpecialPoolingLayerValidationFixture<Tensor, Accessor, NEPoolingLayer, T>;
+
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
+FIXTURE_DATA_TEST_CASE(RunSpecial, NESpecialPoolingLayerFixture<float>, framework::DatasetMode::ALL, datasets::PoolingLayerDatasetSpecial() * framework::dataset::make("DataType", DataType::F32))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f32);
+}
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPoolingLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), combine(PoolingLayerDatasetFP, framework::dataset::make("DataType",
                                                                                                     DataType::F32))))
 {

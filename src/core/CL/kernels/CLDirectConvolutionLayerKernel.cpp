@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -126,10 +126,10 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
     unsigned int conv_stride_x   = std::get<0>(conv_info.stride());
     unsigned int conv_stride_y   = std::get<1>(conv_info.stride());
-    unsigned int conv_pad_left   = std::max(conv_info.pad_left(), kernel_size / 2);
-    unsigned int conv_pad_top    = std::max(conv_info.pad_top(), kernel_size / 2);
-    unsigned int conv_pad_right  = std::max(conv_info.pad_right(), kernel_size / 2);
-    unsigned int conv_pad_bottom = std::max(conv_info.pad_bottom(), kernel_size / 2);
+    unsigned int conv_pad_left   = conv_info.pad_left();
+    unsigned int conv_pad_top    = conv_info.pad_top();
+    unsigned int conv_pad_right  = conv_info.pad_right();
+    unsigned int conv_pad_bottom = conv_info.pad_bottom();
 
     unsigned int num_elems_read_per_iteration_x    = 0;
     unsigned int num_elems_read_per_iteration_y    = 0;
@@ -302,17 +302,12 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
 
     _conv_stride_x = std::get<0>(conv_info.stride());
     _conv_stride_y = std::get<1>(conv_info.stride());
+    _border_size   = BorderSize(conv_info.pad_top(), conv_info.pad_right(), conv_info.pad_bottom(), conv_info.pad_left());
 
     _input   = input;
     _weights = weights;
     _output  = output;
     _biases  = biases;
-
-    int conv_pad_left   = std::min(conv_info.pad_left(), kernel_size / 2);
-    int conv_pad_top    = std::min(conv_info.pad_top(), kernel_size / 2);
-    int conv_pad_right  = std::min(conv_info.pad_right(), kernel_size / 2);
-    int conv_pad_bottom = std::min(conv_info.pad_bottom(), kernel_size / 2);
-    _border_size        = BorderSize(conv_pad_top, conv_pad_right, conv_pad_bottom, conv_pad_left);
 
     const GPUTarget gpu_target = get_arch_from_target(get_target());
 
@@ -450,13 +445,13 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     _config_id += "_";
     _config_id += support::cpp11::to_string(kernel_size);
     _config_id += "_";
-    _config_id += support::cpp11::to_string(conv_pad_left);
+    _config_id += support::cpp11::to_string(border_size().left);
     _config_id += "_";
-    _config_id += support::cpp11::to_string(conv_pad_top);
+    _config_id += support::cpp11::to_string(border_size().top);
     _config_id += "_";
-    _config_id += support::cpp11::to_string(conv_pad_right);
+    _config_id += support::cpp11::to_string(border_size().right);
     _config_id += "_";
-    _config_id += support::cpp11::to_string(conv_pad_bottom);
+    _config_id += support::cpp11::to_string(border_size().bottom);
     _config_id += "_";
     _config_id += support::cpp11::to_string(_conv_stride_x);
     _config_id += "_";
