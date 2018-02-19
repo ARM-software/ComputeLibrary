@@ -302,8 +302,7 @@ __kernel void output_stage_quantized(
 
     vals = ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(vals, output_multiplier, output_shift, 16);
     vals = vals + output_offset;
-    vals = clamp(vals, 0, 255);
 
     // Store result in dst
-    vstore16(convert_uchar16(vals), 0, (__global uchar *)dst.ptr);
+    vstore16(convert_uchar16_sat(vals), 0, (__global uchar *)dst.ptr);
 }
