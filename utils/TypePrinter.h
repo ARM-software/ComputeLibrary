@@ -523,13 +523,6 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Channel &channel)
     return os;
 }
 
-inline std::string to_string(const Channel &channel)
-{
-    std::stringstream str;
-    str << channel;
-    return str.str();
-}
-
 /** Formatted output of the BorderMode type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const BorderMode &mode)
 {

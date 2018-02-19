@@ -49,47 +49,24 @@ CLChannelExtractKernel::CLChannelExtractKernel()
 
 void CLChannelExtractKernel::configure(const ICLTensor *input, Channel channel, ICLTensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_ON(input == output);
-
-    set_format_if_unknown(*output->info(), Format::U8);
-
-    // Check if input tensor has a valid format
     ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(input, Format::RGB888, Format::RGBA8888, Format::YUYV422, Format::UYVY422);
     ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(output, Format::U8);
-    ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(output);
-
-    // Check if channel is valid for given format
-    const Format format = input->info()->format();
-    ARM_COMPUTE_ERROR_ON_CHANNEL_NOT_IN_KNOWN_FORMAT(format, channel);
-
-    // Half the processed elements for U,V channels due to sub-sampling of 2
-    _subsampling = 1;
-
-    if(format == Format::YUYV422 || format == Format::UYVY422)
-    {
-        // Check if the width of the tensor shape is even for formats with subsampled channels (UYVY422 and YUYV422)
-        ARM_COMPUTE_ERROR_ON_TENSORS_NOT_EVEN(format, input);
-
-        if(channel != Channel::Y)
-        {
-            _subsampling = 2;
-        }
-    }
-
-    // Calculate output tensor shape using subsampling
-    TensorShape output_shape = calculate_subsampled_shape(input->info()->tensor_shape(), format, channel);
-    set_shape_if_empty(*output->info(), output_shape);
-
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
+    ARM_COMPUTE_ERROR_ON(static_cast<const void *>(input) == static_cast<void *>(output));
 
     _input  = input;
     _output = output;
+
+    // Check format
+    const Format format = input->info()->format();
+    ARM_COMPUTE_ERROR_ON_CHANNEL_NOT_IN_KNOWN_FORMAT(format, channel);
 
     // Create kernel
     std::string           kernel_name = "channel_extract_" + string_from_format(format);
     std::set<std::string> build_opts  = { ("-DCHANNEL_" + string_from_channel(channel)) };
     _kernel                           = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
+
+    // Half the processed elements for U,V channels due to sub-sampling of 2
+    _subsampling = ((Format::YUYV422 == format || Format::UYVY422 == format) && Channel::Y != channel) ? 2 : 1;
 
     // Configure window
     Window                 win = calculate_max_window(*input->info(), Steps(_num_elems_processed_per_iteration));
@@ -106,34 +83,17 @@ void CLChannelExtractKernel::configure(const ICLTensor *input, Channel channel, 
 
 void CLChannelExtractKernel::configure(const ICLMultiImage *input, Channel channel, ICLImage *output)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(output);
-
-    set_format_if_unknown(*output->info(), Format::U8);
-
-    // Check if channel is valid for given format
-    const Format format = input->info()->format();
-    ARM_COMPUTE_ERROR_ON_CHANNEL_NOT_IN_KNOWN_FORMAT(format, channel);
-
-    // Get input plane from the given channel
-    const ICLImage *input_plane = input->cl_plane(plane_idx_from_channel(format, channel));
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input_plane);
-
-    if(Channel::Y == channel && format != Format::YUV444)
-    {
-        // Check if the width of the tensor shape is even for formats with subsampled channels (UYVY422 and YUYV422)
-        ARM_COMPUTE_ERROR_ON_TENSORS_NOT_EVEN(format, input_plane);
-    }
-
-    // Calculate 2x2 subsampled tensor shape
-    TensorShape output_shape = calculate_subsampled_shape(input->cl_plane(0)->info()->tensor_shape(), format, channel);
-    set_shape_if_empty(*output->info(), output_shape);
-
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output_shape, output->info()->tensor_shape());
-
-    // Check if input tensor has a valid format
     ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(input, Format::NV12, Format::NV21, Format::IYUV, Format::YUV444);
     ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(output, Format::U8);
+    ARM_COMPUTE_ERROR_ON(static_cast<const void *>(input) == static_cast<void *>(output));
+
+    // Get format
+    const Format fmt = input->info()->format();
+
+    // Get input plane
+    const ICLImage *input_plane = input->cl_plane(plane_idx_from_channel(fmt, channel));
+    ARM_COMPUTE_ERROR_ON(nullptr == input_plane);
 
     _output      = output;
     _input       = input_plane;
@@ -142,13 +102,13 @@ void CLChannelExtractKernel::configure(const ICLMultiImage *input, Channel chann
     // Create kernel
     std::string           kernel_name;
     std::set<std::string> build_opts;
-    if(Channel::Y == channel || Format::IYUV == format || Format::YUV444 == format)
+    if(Channel::Y == channel || Format::IYUV == fmt || Format::YUV444 == fmt)
     {
         kernel_name = "copy_plane";
     }
     else
     {
-        kernel_name = "channel_extract_" + string_from_format(format);
+        kernel_name = "channel_extract_" + string_from_format(fmt);
         build_opts.insert(("-DCHANNEL_" + string_from_channel(channel)));
     }
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));

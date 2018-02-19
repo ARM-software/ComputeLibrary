@@ -297,33 +297,18 @@ int SimpleTensor<T>::num_channels() const
     switch(_format)
     {
         case Format::U8:
-        case Format::U16:
         case Format::S16:
-        case Format::U32:
+        case Format::U16:
         case Format::S32:
-        case Format::F16:
+        case Format::U32:
         case Format::F32:
             return 1;
-        // Because the U and V channels are subsampled
-        // these formats appear like having only 2 channels:
-        case Format::YUYV422:
-        case Format::UYVY422:
-            return 2;
-        case Format::UV88:
-            return 2;
         case Format::RGB888:
             return 3;
-        case Format::RGBA8888:
-            return 4;
         case Format::UNKNOWN:
             return _num_channels;
-        //Doesn't make sense for planar formats:
-        case Format::NV12:
-        case Format::NV21:
-        case Format::IYUV:
-        case Format::YUV444:
         default:
-            return 0;
+            ARM_COMPUTE_ERROR("NOT SUPPORTED!");
     }
 }
 

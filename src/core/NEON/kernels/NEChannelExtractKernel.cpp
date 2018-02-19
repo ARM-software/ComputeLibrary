@@ -56,68 +56,106 @@ void NEChannelExtractKernel::configure(const ITensor *input, Channel channel, IT
 
     set_format_if_unknown(*output->info(), Format::U8);
 
-    // Check if input tensor has a valid format
     ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(input, Format::RGB888, Format::RGBA8888, Format::UYVY422, Format::YUYV422);
     ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(output, Format::U8);
 
-    ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
-    ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(output);
+    unsigned int num_elems_processed_per_iteration = 8;
 
-    // Check if channel is valid for given format
-    const Format format = input->info()->format();
-    ARM_COMPUTE_ERROR_ON_CHANNEL_NOT_IN_KNOWN_FORMAT(format, channel);
+    // Check format and channel
+    const Format       format      = input->info()->format();
+    const unsigned int subsampling = (format == Format::YUYV422 || format == Format::UYVY422) && channel != Channel::Y ? 2 : 1;
+    TensorShape        output_shape;
 
-    unsigned int subsampling = 1;
-
-    if(format == Format::YUYV422 || format == Format::UYVY422)
+    switch(format)
     {
-        // Check if the width of the tensor shape is even for formats with subsampled channels (UYVY422 and YUYV422)
-        ARM_COMPUTE_ERROR_ON_TENSORS_NOT_EVEN(format, input);
+        case Format::RGB888:
+        case Format::RGBA8888:
+            num_elems_processed_per_iteration = 16;
+            output_shape                      = input->info()->tensor_shape();
 
-        if(channel != Channel::Y)
-        {
-            subsampling = 2;
-        }
+            if(format == Format::RGB888)
+            {
+                _func = &NEChannelExtractKernel::extract_1C_from_3C_img;
+            }
+            else if(format == Format::RGBA8888)
+            {
+                _func = &NEChannelExtractKernel::extract_1C_from_4C_img;
+            }
+
+            switch(channel)
+            {
+                case Channel::R:
+                    _lut_index = 0;
+                    break;
+                case Channel::G:
+                    _lut_index = 1;
+                    break;
+                case Channel::B:
+                    _lut_index = 2;
+                    break;
+                case Channel::A:
+                    if(format == Format::RGBA8888)
+                    {
+                        _lut_index = 3;
+                        _func      = &NEChannelExtractKernel::extract_1C_from_4C_img;
+                        break;
+                    }
+                default:
+                    ARM_COMPUTE_ERROR("Not supported channel for this format.");
+                    break;
+            }
+            break;
+        case Format::YUYV422:
+        case Format::UYVY422:
+            output_shape = input->info()->tensor_shape();
+
+            if(channel != Channel::Y)
+            {
+                output_shape.set(0, output_shape[0] / 2);
+            }
+
+            switch(channel)
+            {
+                case Channel::Y:
+                    num_elems_processed_per_iteration = 16;
+                    _func                             = &NEChannelExtractKernel::extract_1C_from_2C_img;
+                    _lut_index                        = (Format::YUYV422 == format) ? 0 : 1;
+                    break;
+                case Channel::U:
+                    num_elems_processed_per_iteration = 32;
+                    _func                             = &NEChannelExtractKernel::extract_YUYV_uv;
+                    _lut_index                        = (Format::YUYV422 == format) ? 1 : 0;
+                    break;
+                case Channel::V:
+                    num_elems_processed_per_iteration = 32;
+                    _func                             = &NEChannelExtractKernel::extract_YUYV_uv;
+                    _lut_index                        = (Format::YUYV422 == format) ? 3 : 2;
+                    break;
+                default:
+                    ARM_COMPUTE_ERROR("Not supported channel for this format.");
+                    break;
+            }
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Not supported format.");
+            break;
     }
 
-    TensorShape output_shape = calculate_subsampled_shape(input->info()->tensor_shape(), format, channel);
     set_shape_if_empty(*output->info(), output_shape);
 
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output_shape, output->info()->tensor_shape());
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
 
-    _input     = input;
-    _output    = output;
-    _lut_index = channel_idx_from_format(format, channel);
+    _input  = input;
+    _output = output;
 
-    unsigned int num_elems_processed_per_iteration = 16;
-
-    if(format == Format::YUYV422 || format == Format::UYVY422)
-    {
-        _func = &NEChannelExtractKernel::extract_1C_from_2C_img;
-
-        if(channel != Channel::Y) // Channel::U or Channel::V
-        {
-            num_elems_processed_per_iteration = 32;
-            _func                             = &NEChannelExtractKernel::extract_YUYV_uv;
-        }
-    }
-    else // Format::RGB888 or Format::RGBA8888
-    {
-        _func = &NEChannelExtractKernel::extract_1C_from_3C_img;
-
-        if(format == Format::RGBA8888)
-        {
-            _func = &NEChannelExtractKernel::extract_1C_from_4C_img;
-        }
-    }
-
-    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
-
+    Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
     AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
     AccessWindowRectangle  output_access(output->info(), 0, 0, num_elems_processed_per_iteration, 1, 1.f / subsampling, 1.f / subsampling);
+
     update_window_and_padding(win, input_access, output_access);
 
     ValidRegion input_valid_region = input->info()->valid_region();
+
     output_access.set_valid_region(win, ValidRegion(input_valid_region.anchor, output->info()->tensor_shape()));
 
     INEKernel::configure(win);
@@ -130,45 +168,94 @@ void NEChannelExtractKernel::configure(const IMultiImage *input, Channel channel
 
     set_format_if_unknown(*output->info(), Format::U8);
 
-    const Format format = input->info()->format();
-    ARM_COMPUTE_ERROR_ON_CHANNEL_NOT_IN_KNOWN_FORMAT(format, channel);
-
-    // Get input plane
-    const IImage *input_plane = input->plane(plane_idx_from_channel(format, channel));
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input_plane);
-
-    if(Channel::Y == channel && format != Format::YUV444)
+    switch(input->info()->format())
     {
-        // Check if the width of the tensor shape is even for formats with subsampled channels (UYVY422 and YUYV422)
-        ARM_COMPUTE_ERROR_ON_TENSORS_NOT_EVEN(format, input_plane);
+        case Format::NV12:
+        case Format::NV21:
+        case Format::IYUV:
+            switch(channel)
+            {
+                case Channel::Y:
+                    set_shape_if_empty(*output->info(), input->plane(0)->info()->tensor_shape());
+                    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input->plane(0), output);
+                    break;
+                case Channel::U:
+                case Channel::V:
+                    set_shape_if_empty(*output->info(), input->plane(1)->info()->tensor_shape());
+                    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input->plane(1), output);
+                    break;
+                default:
+                    ARM_COMPUTE_ERROR("Unsupported channel for selected format");
+            }
+            break;
+        case Format::YUV444:
+            set_shape_if_empty(*output->info(), input->plane(0)->info()->tensor_shape());
+            ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input->plane(0), output);
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Unsupported format");
     }
 
-    // Calculate 2x2 subsampled tensor shape
-    TensorShape output_shape = calculate_subsampled_shape(input->plane(0)->info()->tensor_shape(), format, channel);
-    set_shape_if_empty(*output->info(), output_shape);
-
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output_shape, output->info()->tensor_shape());
-
-    // Check if input tensor has a valid format
     ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(input, Format::NV12, Format::NV21, Format::IYUV, Format::YUV444);
     ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(output, Format::U8);
 
-    _input     = input_plane;
-    _output    = output;
-    _lut_index = channel_idx_from_format(format, channel);
-
     unsigned int num_elems_processed_per_iteration = 32;
 
-    _func = &NEChannelExtractKernel::copy_plane;
+    const Format &format = input->info()->format();
 
-    if((format == Format::NV12 || format == Format::NV21) && channel != Channel::Y)
+    switch(format)
     {
-        num_elems_processed_per_iteration = 16;
-        _func                             = &NEChannelExtractKernel::extract_1C_from_2C_img;
+        case Format::NV12:
+        case Format::NV21:
+            switch(channel)
+            {
+                case Channel::Y:
+                    _input = input->plane(0);
+                    _func  = &NEChannelExtractKernel::copy_plane;
+                    break;
+                case Channel::U:
+                    _input                            = input->plane(1);
+                    num_elems_processed_per_iteration = 16;
+                    _func                             = &NEChannelExtractKernel::extract_1C_from_2C_img;
+                    _lut_index                        = (Format::NV12 == format) ? 0 : 1;
+                    break;
+                case Channel::V:
+                    _input                            = input->plane(1);
+                    num_elems_processed_per_iteration = 16;
+                    _func                             = &NEChannelExtractKernel::extract_1C_from_2C_img;
+                    _lut_index                        = (Format::NV12 == format) ? 1 : 0;
+                    break;
+                default:
+                    ARM_COMPUTE_ERROR("Not supported channel for this format.");
+                    break;
+            }
+            break;
+        case Format::IYUV:
+        case Format::YUV444:
+            _func = &NEChannelExtractKernel::copy_plane;
+            switch(channel)
+            {
+                case Channel::Y:
+                    _input = input->plane(0);
+                    break;
+                case Channel::U:
+                    _input = input->plane(1);
+                    break;
+                case Channel::V:
+                    _input = input->plane(2);
+                    break;
+                default:
+                    ARM_COMPUTE_ERROR("Not supported channel for this format.");
+                    break;
+            }
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Not supported format.");
+            break;
     }
 
-    Window win = calculate_max_window(*_input->info(), Steps(num_elems_processed_per_iteration));
-
+    _output                    = output;
+    Window                 win = calculate_max_window(*_input->info(), Steps(num_elems_processed_per_iteration));
     AccessWindowHorizontal input_access(_input->info(), 0, num_elems_processed_per_iteration);
     AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
     update_window_and_padding(win, input_access, output_access);
