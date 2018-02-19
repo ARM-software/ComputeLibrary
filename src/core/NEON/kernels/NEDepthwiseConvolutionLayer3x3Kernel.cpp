@@ -272,8 +272,8 @@ void NEDepthwiseConvolutionLayer3x3Kernel::configure_generic()
                                     -conv_pad_top,
                                     (num_x_steps - 1) * input_num_elems_processed + num_elems_read_per_iteration,
                                     _input->info()->tensor_shape().y() + conv_pad_bottom);
-    AccessWindowStatic weights_access(_weights->info(), 0, 0, _weights->info()->dimension(0), _weights->info()->dimension(1));
-    AccessWindowStatic output_access(_output->info(), 0, 0, num_x_steps * _num_elems_written_per_iteration, output_shape.y());
+    AccessWindowStatic     weights_access(_weights->info(), 0, 0, _weights->info()->dimension(0), _weights->info()->dimension(1));
+    AccessWindowHorizontal output_access(_output->info(), 0, _num_elems_written_per_iteration);
 
     update_window_and_padding(win, input_access, weights_access, output_access);
     output_access.set_valid_region(win, ValidRegion(Coordinates(), _output->info()->tensor_shape()));

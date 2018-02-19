@@ -24,6 +24,7 @@
 #ifndef __ARM_COMPUTE_MISC_SHAPE_CALCULATOR_H__
 #define __ARM_COMPUTE_MISC_SHAPE_CALCULATOR_H__
 
+#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/Utils.h"
 

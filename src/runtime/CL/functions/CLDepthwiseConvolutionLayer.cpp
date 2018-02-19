@@ -25,12 +25,14 @@
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/PixelValue.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 using namespace arm_compute::misc;
+using namespace arm_compute::misc::shape_calculator;
 
 CLDepthwiseConvolutionLayer3x3::CLDepthwiseConvolutionLayer3x3()
     : _kernel(), _border_handler()
@@ -81,9 +83,12 @@ void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *w
     bool            append_bias = (biases != nullptr) && !_is_quantized;
     const GPUTarget gpu_target  = CLScheduler::get().target();
 
-    unsigned int conv_w = 0;
-    unsigned int conv_h = 0;
-    std::tie(conv_w, conv_h) = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1), weights_w, weights_h, conv_info);
+    // Calculate output shape
+    TensorShape dwc_output_shape = shape_calculator::compute_depthwise_convolution_shape(*input->info(), *weights->info(), conv_info);
+
+    // Output width and height
+    const unsigned int conv_w = dwc_output_shape.x();
+    const unsigned int conv_h = dwc_output_shape.y();
 
     // Set up intermediate tensors
     const size_t patch_size = weights_w * weights_h + ((append_bias) ? 1 : 0);
@@ -112,15 +117,18 @@ void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *w
     _v2mm_output.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_data_type(v2mm_dt).set_tensor_shape(shape_v2mm_out));
     _v2mm_kernel.set_target(gpu_target);
     _v2mm_kernel.configure(&_input_reshaped, &_weights_reshaped, &_v2mm_output);
+    _output_reshaped.allocator()->init(_v2mm_output.info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(dwc_output_shape));
     _vector_to_tensor_kernel.configure(&_v2mm_output, (_is_quantized) ? &_output_reshaped : output, conv_w, conv_h);
 
     // Output staged configuration
     if(_is_quantized)
     {
-        float multiplier = input->info()->quantization_info().scale * weights->info()->quantization_info().scale / output->info()->quantization_info().scale;
+        const QuantizationInfo output_quant_info = (output->info()->total_size() == 0) ? input->info()->quantization_info() : output->info()->quantization_info();
+
+        float multiplier = input->info()->quantization_info().scale * weights->info()->quantization_info().scale / output_quant_info.scale;
         int   output_multiplier, output_shift;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
-        _output_stage_kernel.configure(&_output_reshaped, biases, output, output_multiplier, output_shift, output->info()->quantization_info().offset);
+        _output_stage_kernel.configure(&_output_reshaped, biases, output, output_multiplier, output_shift, output_quant_info.offset);
         _output_reshaped.allocator()->allocate();
     }
 

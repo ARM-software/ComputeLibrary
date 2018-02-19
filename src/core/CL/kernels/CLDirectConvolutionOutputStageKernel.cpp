@@ -144,7 +144,7 @@ void CLDirectConvolutionLayerOutputStageKernel::configure(ICLTensor *input, cons
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
 
-    // Auto-initialize output output if required
+    // Auto-initialize output if required
     if(output != nullptr)
     {
         // Work out expected output data type

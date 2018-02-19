@@ -99,10 +99,12 @@ void NEDepthwiseConvolutionLayer3x3::configure(ITensor *input, const ITensor *we
     {
         if(_is_quantized)
         {
-            float multiplier = input->info()->quantization_info().scale * weights->info()->quantization_info().scale / output->info()->quantization_info().scale;
+            const QuantizationInfo output_quant_info = (output->info()->total_size() == 0) ? input->info()->quantization_info() : output->info()->quantization_info();
+
+            float multiplier = input->info()->quantization_info().scale * weights->info()->quantization_info().scale / output_quant_info.scale;
             int   output_multiplier, output_shift;
             quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
-            _output_stage_kernel.configure(&_accumulator, biases, output, output_multiplier, output_shift, output->info()->quantization_info().offset);
+            _output_stage_kernel.configure(&_accumulator, biases, output, output_multiplier, output_shift, output_quant_info.offset);
             _accumulator.allocator()->allocate();
         }
         else
@@ -208,10 +210,12 @@ void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weigh
     // Output staged configuration
     if(_is_quantized)
     {
-        float multiplier = input->info()->quantization_info().scale * weights->info()->quantization_info().scale / output->info()->quantization_info().scale;
+        const QuantizationInfo output_quant_info = (output->info()->total_size() == 0) ? input->info()->quantization_info() : output->info()->quantization_info();
+
+        float multiplier = input->info()->quantization_info().scale * weights->info()->quantization_info().scale / output_quant_info.scale;
         int   output_multiplier, output_shift;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
-        _output_stage_kernel.configure(&_output_reshaped, biases, output, output_multiplier, output_shift, output->info()->quantization_info().offset);
+        _output_stage_kernel.configure(&_output_reshaped, biases, output, output_multiplier, output_shift, output_quant_info.offset);
         _output_reshaped.allocator()->allocate();
     }
 

@@ -69,7 +69,7 @@ void CLDepthwiseIm2ColKernel::configure(const ICLTensor *input, ICLTensor *outpu
     build_opts.add_option("-DKERNEL_WIDTH=" + support::cpp11::to_string(kernel_dims.width));
     build_opts.add_option("-DKERNEL_HEIGHT=" + support::cpp11::to_string(kernel_dims.height));
     build_opts.add_option_if(has_bias, "-DHAS_BIAS");
-    build_opts.add_option_if_else(is_data_type_quantized(input->info()->data_type()),
+    build_opts.add_option_if_else(is_data_type_quantized_asymmetric(input->info()->data_type()),
                                   "-DPAD_VALUE=" + support::cpp11::to_string(input->info()->quantization_info().offset),
                                   "-DPAD_VALUE=0");
 
