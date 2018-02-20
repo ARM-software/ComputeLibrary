@@ -363,7 +363,10 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const V
                 const T &target_value    = reinterpret_cast<const T *>(tensor(id))[c];
                 const T &reference_value = reinterpret_cast<const T *>(reference(id))[c];
 
-                if(!compare<U>(target_value, reference_value, tolerance_value))
+                // Truncate numbers to the 4th decimal
+                const T target_truncated_value    = static_cast<T>(static_cast<int>(target_value * 10000) / 10000);
+                const T reference_truncated_value = static_cast<T>(static_cast<int>(target_value * 10000) / 10000);
+                if(!compare<U>(target_truncated_value, reference_truncated_value, tolerance_value))
                 {
                     ARM_COMPUTE_TEST_INFO("id = " << id);
                     ARM_COMPUTE_TEST_INFO("channel = " << c);
