@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,7 +51,7 @@ using CLMobileNetFixture = MobileNetFixture<CLTensor,
       CLPoolingLayer>;
 
 TEST_SUITE(CL)
-TEST_SUITE(SYSTEM_TEST)
+TEST_SUITE(SYSTEM_TESTS)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(MobileNet, CLMobileNetFixture, framework::DatasetMode::ALL,
                                 framework::dataset::make("Batches", { 1, 4, 8 }));

@@ -125,10 +125,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge, GCConvolutionLayerFixture<half>, framework::Dat
     validate(GCAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
 TEST_SUITE_END()
+TEST_SUITE_END()
 
 TEST_SUITE_END()
 TEST_SUITE_END()
-}
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,7 +68,7 @@ using CLMobileNetV1_128_Fixture = MobileNetV1Fixture<CLTensor,
       128>;
 
 TEST_SUITE(CL)
-TEST_SUITE(SYSTEM_TEST)
+TEST_SUITE(SYSTEM_TESTS)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(MobileNetV1_224, CLMobileNetV1_224_Fixture, framework::DatasetMode::ALL,
                                 framework::dataset::make("Batches", { 1, 4, 8 }));

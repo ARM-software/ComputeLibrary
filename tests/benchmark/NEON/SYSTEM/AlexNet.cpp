@@ -65,7 +65,7 @@ using NEAlexNetFixture = AlexNetFixture<ITensor,
       NESoftmaxLayer>;
 
 TEST_SUITE(NEON)
-TEST_SUITE(SYSTEM_TEST)
+TEST_SUITE(SYSTEM_TESTS)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNet, NEAlexNetFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(alex_net_data_types,
