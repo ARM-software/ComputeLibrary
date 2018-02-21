@@ -121,11 +121,6 @@ void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, con
     const GPUTarget gpu_target = get_arch_from_target(get_target());
 
     // Configure kernel window
-    const unsigned int conv_pad_left   = conv_info.pad_left();
-    const unsigned int conv_pad_top    = conv_info.pad_top();
-    const unsigned int conv_pad_right  = conv_info.pad_right();
-    const unsigned int conv_pad_bottom = conv_info.pad_bottom();
-
     unsigned int num_elems_read_per_iteration_x    = 0;
     unsigned int num_elems_read_per_iteration_y    = 0;
     unsigned int num_elems_written_per_iteration_x = 0;
@@ -139,8 +134,22 @@ void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, con
         kernel_name                       = "depthwise_convolution_3x3_f16";
         num_elems_written_per_iteration_x = 8 / data_size_from_type(input->info()->data_type());
         num_elems_written_per_iteration_y = 1;
-        num_elems_read_per_iteration_x    = 3 + (num_elems_written_per_iteration_x - 1) * _conv_stride_x;
         num_elems_read_per_iteration_y    = 3;
+        switch(_conv_stride_x)
+        {
+            case 1:
+                num_elems_read_per_iteration_x = 8;
+                break;
+            case 2:
+                num_elems_read_per_iteration_x = 9;
+                break;
+            case 3:
+                num_elems_read_per_iteration_x = 16;
+                break;
+            default:
+                num_elems_read_per_iteration_x = 3 + (num_elems_written_per_iteration_x - 1) * _conv_stride_x;
+                break;
+        }
     }
     else if(input->info()->data_type() == DataType::F32 && gpu_target == GPUTarget::BIFROST)
     {
@@ -178,18 +187,12 @@ void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, con
         num_elems_read_per_iteration_y    = num_elems_written_per_iteration_y + 2;
     }
 
-    // Calculate right and bottom border
-    int input_width  = input->info()->dimension(0) + conv_pad_left + conv_pad_right;
-    int input_height = input->info()->dimension(1) + conv_pad_top + conv_pad_bottom;
-
-    // Add padding only if necessary or it would always result in a window_changed
-    input_width  = ceil_to_multiple(input_width, num_elems_read_per_iteration_x);
-    input_height = ceil_to_multiple(input_height, num_elems_read_per_iteration_y);
-
     // Create window and update padding
     Window win = calculate_max_window(*output->info(), Steps(num_elems_written_per_iteration_x, num_elems_written_per_iteration_y));
 
-    AccessWindowStatic    input_access(input->info(), -conv_pad_left, -conv_pad_top, input_width, input_height);
+    AccessWindowRectangle input_access(input->info(), -_conv_pad_left, -_conv_pad_top,
+                                       num_elems_read_per_iteration_x, num_elems_read_per_iteration_y,
+                                       _conv_stride_x, _conv_stride_y);
     AccessWindowStatic    weights_access(weights->info(), 0, 0, 3, 3);
     AccessWindowRectangle output_access(output->info(), 0, 0, num_elems_written_per_iteration_x, num_elems_written_per_iteration_y);
 

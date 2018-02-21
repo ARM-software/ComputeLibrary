@@ -238,6 +238,7 @@ void NEDepthwiseConvolutionLayer3x3Kernel::configure_generic()
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(_output->info()->tensor_shape(), output_shape);
 
     const unsigned int conv_stride_x   = _conv_info.stride().first;
+    const unsigned int conv_stride_y   = _conv_info.stride().second;
     const unsigned int conv_pad_top    = _conv_info.pad_top();
     const unsigned int conv_pad_right  = _conv_info.pad_right();
     const unsigned int conv_pad_bottom = _conv_info.pad_bottom();
@@ -264,15 +265,10 @@ void NEDepthwiseConvolutionLayer3x3Kernel::configure_generic()
     // Configure kernel window
     Window win = calculate_max_window(*_output->info(), Steps(_num_elems_written_per_iteration));
 
-    const unsigned int num_x_steps               = (output_shape.x() + _num_elems_written_per_iteration - 1) / _num_elems_written_per_iteration;
-    const int          input_num_elems_processed = get_input_num_elems_processed(_num_elems_written_per_iteration, conv_stride_x);
-
-    AccessWindowStatic input_access(_input->info(),
-                                    -conv_pad_left,
-                                    -conv_pad_top,
-                                    (num_x_steps - 1) * input_num_elems_processed + num_elems_read_per_iteration,
-                                    _input->info()->tensor_shape().y() + conv_pad_bottom);
-    AccessWindowStatic     weights_access(_weights->info(), 0, 0, _weights->info()->dimension(0), _weights->info()->dimension(1));
+    AccessWindowRectangle input_access(_input->info(), -conv_pad_left, -conv_pad_top,
+                                       num_elems_read_per_iteration, 3,
+                                       conv_stride_x, conv_stride_y);
+    AccessWindowStatic     weights_access(_weights->info(), 0, 0, 3, 3);
     AccessWindowHorizontal output_access(_output->info(), 0, _num_elems_written_per_iteration);
 
     update_window_and_padding(win, input_access, weights_access, output_access);

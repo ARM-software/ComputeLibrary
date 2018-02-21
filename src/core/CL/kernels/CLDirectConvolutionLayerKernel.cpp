@@ -241,7 +241,9 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     bool   window_changed = false;
     Window win            = calculate_max_window(*output, Steps(num_elems_written_per_iteration_x, num_elems_written_per_iteration_y));
 
-    AccessWindowRectangle input_access(input, -conv_pad_left, -conv_pad_top, num_elems_read_per_iteration_x, num_elems_read_per_iteration_y, conv_stride_x, conv_stride_y);
+    AccessWindowRectangle input_access(input, -conv_pad_left, -conv_pad_top,
+                                       num_elems_read_per_iteration_x, num_elems_read_per_iteration_y,
+                                       conv_stride_x, conv_stride_y);
     AccessWindowStatic    weights_access(weights, 0, 0, kernel_size, kernel_size);
     AccessWindowRectangle output_access(output, 0, 0, num_elems_written_per_iteration_x, num_elems_written_per_iteration_y);
 

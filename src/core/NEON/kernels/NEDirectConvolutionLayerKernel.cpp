@@ -1053,8 +1053,8 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     // Calculate right and bottom border
     unsigned int kernel_size   = weights->dimension(0);
     const int    conv_stride_x = std::get<0>(conv_info.stride());
+    const int    conv_stride_y = std::get<1>(conv_info.stride());
     const int    input_width   = input->dimension(0);
-    const int    input_height  = input->dimension(1);
 
     switch(kernel_size)
     {
@@ -1135,8 +1135,12 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     border_size.right  = conv_pad_right;
     border_size.bottom = conv_pad_bottom;
 
-    Window                 win = calculate_max_window(*output, Steps(num_elems_written_per_iteration));
-    AccessWindowStatic     input_access(input, -conv_pad_left, -conv_pad_top, input_width + conv_pad_right, input_height + conv_pad_bottom);
+    // Configure window
+    Window win = calculate_max_window(*output, Steps(num_elems_written_per_iteration));
+
+    AccessWindowRectangle input_access(input, -conv_pad_left, -conv_pad_top,
+                                       num_elems_read_per_iteration, kernel_size,
+                                       conv_stride_x, conv_stride_y);
     AccessWindowStatic     weights_access(weights, 0, 0, num_weight_elems_read_per_row, kernel_size);
     AccessWindowHorizontal output_access(output, 0, num_elems_written_per_iteration);
     bool                   window_changed = update_window_and_padding(win, input_access, weights_access, output_access);

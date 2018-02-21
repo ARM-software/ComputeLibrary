@@ -120,7 +120,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerQuantizedFixture<uin
 {
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset(),
                        framework::dataset::make("DataType", DataType::QASYMM8)),
                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
 {
