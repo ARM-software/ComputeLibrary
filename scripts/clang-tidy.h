@@ -1,5 +1,4 @@
 #include <arm_neon.h>
-//FIXME: Remove this file before the release
 
 inline float16x4_t vrsqrts_f16 (float16x4_t, float16x4_t)
 {

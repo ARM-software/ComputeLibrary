@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-#FIXME: Remove this file before the release
-
 import glob
 import collections
 import os

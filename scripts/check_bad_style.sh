@@ -1,5 +1,4 @@
 #!/bin/bash
-#FIXME: Remove this file before the release
 
 set -e
 

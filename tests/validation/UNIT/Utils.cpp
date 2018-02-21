@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -74,15 +74,6 @@ DATA_TEST_CASE(RoundFloatToNearestUp, framework::DatasetMode::ALL, zip(framework
     ARM_COMPUTE_EXPECT(round(value, RoundingPolicy::TO_NEAREST_UP) == result, framework::LogLevel::ERRORS);
 }
 
-//FIXME: Negative tests only work in debug mode
-#if 0
-DISABLED_DATA_TEST_CASE(Index2CoordFail, framework::DatasetMode::ALL, zip(framework::dataset::make("Shape", { TensorShape{}, TensorShape{ 2U }, TensorShape{ 2U } }), framework::dataset::make("Index", { 0, -1, 2 })),
-                        shape, index)
-{
-    ARM_COMPUTE_ASSERT(index2coord(shape, index));
-}
-#endif /* 0 */
-
 DATA_TEST_CASE(Coord2Index, framework::DatasetMode::ALL, zip(zip(framework::dataset::make("Shape", { TensorShape{ 1U }, TensorShape{ 2U }, TensorShape{ 2U, 3U } }),
                                                                  framework::dataset::make("Coordinates", { Coordinates{ 0 }, Coordinates{ 1 }, Coordinates{ 0, 1 } })),
                                                              framework::dataset::make("Index", { 0, 1, 2 })),
@@ -92,15 +83,6 @@ DATA_TEST_CASE(Coord2Index, framework::DatasetMode::ALL, zip(zip(framework::data
 
     ARM_COMPUTE_EXPECT(index == ref_index, framework::LogLevel::ERRORS);
 }
-
-//FIXME: Negative tests only work in debug mode
-#if 0
-DISABLED_DATA_TEST_CASE(Coord2IndexFail, framework::DatasetMode::ALL, zip(framework::dataset::make("Shape", { TensorShape{}, TensorShape{ 2U } }), framework::dataset::make("Coordinates", { Coordinates{ 0 }, Coordinates{} })),
-                        shape, coordinate)
-{
-    ARM_COMPUTE_ASSERT(coord2index(shape, coordinate));
-}
-#endif /* 0 */
 
 TEST_SUITE_END()
 TEST_SUITE_END()

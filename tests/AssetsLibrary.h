@@ -742,7 +742,6 @@ void AssetsLibrary::fill_layer_data(T &&tensor, std::string name) const
         Window window;
         window.use_tensor_dimensions(tensor.shape());
 
-        //FIXME : Replace with normal loop
         execute_window_loop(window, [&](const Coordinates & id)
         {
             stream.read(reinterpret_cast<char *>(tensor(id)), tensor.element_size());
