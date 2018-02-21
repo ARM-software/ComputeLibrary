@@ -124,12 +124,10 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
                        input->fixed_point_position(),
                        input->quantization_info());
 
-    unsigned int conv_stride_x   = std::get<0>(conv_info.stride());
-    unsigned int conv_stride_y   = std::get<1>(conv_info.stride());
-    unsigned int conv_pad_left   = conv_info.pad_left();
-    unsigned int conv_pad_top    = conv_info.pad_top();
-    unsigned int conv_pad_right  = conv_info.pad_right();
-    unsigned int conv_pad_bottom = conv_info.pad_bottom();
+    unsigned int conv_stride_x = std::get<0>(conv_info.stride());
+    unsigned int conv_stride_y = std::get<1>(conv_info.stride());
+    unsigned int conv_pad_left = conv_info.pad_left();
+    unsigned int conv_pad_top  = conv_info.pad_top();
 
     unsigned int num_elems_read_per_iteration_x    = 0;
     unsigned int num_elems_read_per_iteration_y    = 0;
@@ -239,19 +237,11 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
         }
     }
 
-    // Calculate right and bottom border
-    int input_width  = input->dimension(0) + conv_pad_left + conv_pad_right;
-    int input_height = input->dimension(1) + conv_pad_top + conv_pad_bottom;
-
-    // Add padding only if necessary or it would always result in a window_changed
-    input_width  = ceil_to_multiple(input_width, num_elems_read_per_iteration_x);
-    input_height = ceil_to_multiple(input_height, num_elems_read_per_iteration_y);
-
     // Create window and update padding
     bool   window_changed = false;
     Window win            = calculate_max_window(*output, Steps(num_elems_written_per_iteration_x, num_elems_written_per_iteration_y));
 
-    AccessWindowStatic    input_access(input, -conv_pad_left, -conv_pad_top, input_width, input_height);
+    AccessWindowRectangle input_access(input, -conv_pad_left, -conv_pad_top, num_elems_read_per_iteration_x, num_elems_read_per_iteration_y, conv_stride_x, conv_stride_y);
     AccessWindowStatic    weights_access(weights, 0, 0, kernel_size, kernel_size);
     AccessWindowRectangle output_access(output, 0, 0, num_elems_written_per_iteration_x, num_elems_written_per_iteration_y);
 
