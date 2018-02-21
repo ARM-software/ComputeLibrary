@@ -39,7 +39,7 @@ namespace test
 {
 namespace benchmark
 {
-const auto data_types                    = framework::dataset::make("DataType", { DataType::F32, DataType::QASYMM8 });
+const auto data_types                    = framework::dataset::make("DataType", { DataType::F16, DataType::F32, DataType::QASYMM8 });
 using CLDepthwiseConvolutionLayerFixture = DepthwiseConvolutionLayerFixture<CLTensor, CLDepthwiseConvolutionLayer3x3, CLAccessor>;
 
 TEST_SUITE(CL)

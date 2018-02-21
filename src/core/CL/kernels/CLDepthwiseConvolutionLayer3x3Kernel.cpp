@@ -147,6 +147,7 @@ void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, con
     // Configure the local work size for Bifrost with a value obtained
     // via exhaustive autotuning for the MobileNets tensor shapes.
     const GPUTarget gpu_target = get_target();
+    const bool      is_bifrost = gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72);
 
     // Configure kernel window
     unsigned int num_elems_read_per_iteration_x    = 0;
@@ -178,12 +179,31 @@ void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, con
                 num_elems_read_per_iteration_x = 3 + (num_elems_written_per_iteration_x - 1) * _conv_stride_x;
                 break;
         }
+        if(is_bifrost)
+        {
+            if(_conv_stride_x == 1 && _conv_stride_y == 1)
+            {
+                kernel_name                       = "depthwise_convolution_3x3_stridex1_stridey1_bifrost_f16";
+                num_elems_read_per_iteration_x    = 8;
+                num_elems_written_per_iteration_x = 4;
+                num_elems_read_per_iteration_y    = 6;
+                num_elems_written_per_iteration_y = 4;
+            }
+            else if(_conv_stride_x == 2 && _conv_stride_y == 2)
+            {
+                kernel_name                       = "depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16";
+                num_elems_read_per_iteration_x    = 10;
+                num_elems_written_per_iteration_x = 4;
+                num_elems_read_per_iteration_y    = 5;
+                num_elems_written_per_iteration_y = 2;
+            }
+        }
     }
-    else if(input->info()->data_type() == DataType::F32 && gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72))
+    else if(input->info()->data_type() == DataType::F32 && is_bifrost)
     {
         if(_conv_stride_x == 1 && _conv_stride_y == 1)
         {
-            kernel_name                       = "depthwise_convolution_3x3_stridex1_stridey1_bifrost";
+            kernel_name                       = "depthwise_convolution_3x3_stridex1_stridey1_bifrost_f32";
             num_elems_read_per_iteration_x    = 4;
             num_elems_read_per_iteration_y    = 6;
             num_elems_written_per_iteration_x = 2;
@@ -191,7 +211,7 @@ void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, con
         }
         else if(_conv_stride_x == 2 && _conv_stride_y == 2)
         {
-            kernel_name                       = "depthwise_convolution_3x3_stridex2_stridey2_bifrost";
+            kernel_name                       = "depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32";
             num_elems_read_per_iteration_x    = 6;
             num_elems_read_per_iteration_y    = 5;
             num_elems_written_per_iteration_x = 2;

@@ -218,6 +218,22 @@ __kernel void depthwise_convolution_3x3(
         acc.s1 = fma(src0.s3, weights_row0.s2, acc.s1);            \
     })
 
+#define CONVOLUTION1x3_BIFROST4X1_STRIDE1(acc, src0, weights_row0) \
+    ({                                                             \
+        acc.s0 = fma(src0.s0, weights_row0.s0, acc.s0);            \
+        acc.s0 = fma(src0.s1, weights_row0.s1, acc.s0);            \
+        acc.s0 = fma(src0.s2, weights_row0.s2, acc.s0);            \
+        acc.s1 = fma(src0.s1, weights_row0.s0, acc.s1);            \
+        acc.s1 = fma(src0.s2, weights_row0.s1, acc.s1);            \
+        acc.s1 = fma(src0.s3, weights_row0.s2, acc.s1);            \
+        acc.s2 = fma(src0.s2, weights_row0.s0, acc.s2);            \
+        acc.s2 = fma(src0.s3, weights_row0.s1, acc.s2);            \
+        acc.s2 = fma(src0.s4, weights_row0.s2, acc.s2);            \
+        acc.s3 = fma(src0.s3, weights_row0.s0, acc.s3);            \
+        acc.s3 = fma(src0.s4, weights_row0.s1, acc.s3);            \
+        acc.s3 = fma(src0.s5, weights_row0.s2, acc.s3);            \
+    })
+
 #define CONVOLUTION1x3_BIFROST2X1_STRIDE2(acc, src0, src1, weights_row0) \
     ({                                                                   \
         acc.s0 = fma(src0.s0, weights_row0.s0, acc.s0);                  \
@@ -226,6 +242,22 @@ __kernel void depthwise_convolution_3x3(
         acc.s1 = fma(src0.s2, weights_row0.s0, acc.s1);                  \
         acc.s1 = fma(src0.s3, weights_row0.s1, acc.s1);                  \
         acc.s1 = fma(src1.s0, weights_row0.s2, acc.s1);                  \
+    })
+
+#define CONVOLUTION1x3_BIFROST4X1_STRIDE2(acc, src0, src1, weights_row0) \
+    ({                                                                   \
+        acc.s0 = fma(src0.s0, weights_row0.s0, acc.s0);                  \
+        acc.s0 = fma(src0.s1, weights_row0.s1, acc.s0);                  \
+        acc.s0 = fma(src0.s2, weights_row0.s2, acc.s0);                  \
+        acc.s1 = fma(src0.s2, weights_row0.s0, acc.s1);                  \
+        acc.s1 = fma(src0.s3, weights_row0.s1, acc.s1);                  \
+        acc.s1 = fma(src0.s4, weights_row0.s2, acc.s1);                  \
+        acc.s2 = fma(src0.s4, weights_row0.s0, acc.s2);                  \
+        acc.s2 = fma(src0.s5, weights_row0.s1, acc.s2);                  \
+        acc.s2 = fma(src0.s6, weights_row0.s2, acc.s2);                  \
+        acc.s3 = fma(src0.s6, weights_row0.s0, acc.s3);                  \
+        acc.s3 = fma(src0.s7, weights_row0.s1, acc.s3);                  \
+        acc.s3 = fma(src1.s0, weights_row0.s2, acc.s3);                  \
     })
 
 /** This OpenCL kernel is optimized for Bifrost architectures and computes the depthwise convolution 3x3 when both
@@ -260,7 +292,7 @@ __kernel void depthwise_convolution_3x3(
  * @param[in] biases_step_x                         (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] biases_offset_first_element_in_bytes  (Optional) The offset of the first element in the biases vector
  */
-__kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost(
+__kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f32(
     TENSOR3D_DECLARATION(src),
     TENSOR3D_DECLARATION(dst),
     TENSOR3D_DECLARATION(weights)
@@ -287,13 +319,13 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost(
     float3 weights_row1 = vload3(0, (__global float *)(weights_addr + 1 * weights_stride_y));
     float3 weights_row2 = vload3(0, (__global float *)(weights_addr + 2 * weights_stride_y));
 
-    // Note: Since each work-item computes 4x2 elements, we need to load 4 rows from the input tensor
+    // Note: Since each work-item computes 4x2 elements, we need to load 6 rows from the input tensor
     float4 src00 = vload4(0, (__global float *)(src_addr + 0 * src_stride_y)); // Row0
     float4 src10 = vload4(0, (__global float *)(src_addr + 1 * src_stride_y)); // Row1
     float4 src20 = vload4(0, (__global float *)(src_addr + 2 * src_stride_y)); // Row2
     float4 src30 = vload4(0, (__global float *)(src_addr + 3 * src_stride_y)); // Row3
-    float4 src40 = vload4(0, (__global float *)(src_addr + 4 * src_stride_y)); // Row3
-    float4 src50 = vload4(0, (__global float *)(src_addr + 5 * src_stride_y)); // Row3
+    float4 src40 = vload4(0, (__global float *)(src_addr + 4 * src_stride_y)); // Row4
+    float4 src50 = vload4(0, (__global float *)(src_addr + 5 * src_stride_y)); // Row5
 
     CONVOLUTION1x3_BIFROST2X1_STRIDE1(pixels0, src00, weights_row0);
     CONVOLUTION1x3_BIFROST2X1_STRIDE1(pixels0, src10, weights_row1);
@@ -357,7 +389,7 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost(
  * @param[in] biases_step_x                         (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] biases_offset_first_element_in_bytes  (Optional) The offset of the first element in the biases vector
  */
-__kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost(
+__kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32(
     TENSOR3D_DECLARATION(src),
     TENSOR3D_DECLARATION(dst),
     TENSOR3D_DECLARATION(weights)
@@ -694,7 +726,7 @@ inline half4 convolution3x3_f16(
  * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source image
  * @param[in] src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
  * @param[in] src_step_z                            src_stride_z * number of elements along Y processed per workitem(in bytes)
- * @param[in] dst_ptr                               Pointer to the destination tensor. Supported data types: F32
+ * @param[in] dst_ptr                               Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in] dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
  * @param[in] dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] dst_stride_y                          Stride of the destination tensor in Y dimension (in bytes)
@@ -702,7 +734,7 @@ inline half4 convolution3x3_f16(
  * @param[in] dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
  * @param[in] dst_step_z                            dst_stride_z * number of elements along Y processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
- * @param[in] weights_ptr                           Pointer to the weights tensor. Supported data types: F32
+ * @param[in] weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
  * @param[in] weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
  * @param[in] weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in] weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
@@ -747,4 +779,194 @@ __kernel void depthwise_convolution_3x3_f16(
     vstore4(pixels, 0, (__global half *)dst.ptr);
 }
 #endif // defined(CONV_STRIDE_X)
+
+/** This OpenCL kernel is optimized for Bifrost architectures and computes the 16bit floating point depthwise convolution 3x3
+ * when both stride_x and stride_y are equal to 1
+ *
+ * @param[in] src_ptr                               Pointer to the source image. Supported data types: F16
+ * @param[in] src_stride_x                          Stride of the source image in X dimension (in bytes)
+ * @param[in] src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] src_stride_y                          Stride of the source image in Y dimension (in bytes)
+ * @param[in] src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source image
+ * @param[in] src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
+ * @param[in] src_step_z                            src_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_ptr                               Pointer to the destination tensor. Supported data types: same as @p src_ptr
+ * @param[in] dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
+ * @param[in] dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] dst_stride_y                          Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in] dst_step_y                            dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in] dst_step_z                            dst_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
+ * @param[in] weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
+ * @param[in] weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
+ * @param[in] weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
+ * @param[in] weights_step_y                        weights_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] weights_stride_z                      Stride of the weights tensor in Z dimension (in bytes)
+ * @param[in] weights_step_z                        weights_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] weights_offset_first_element_in_bytes The offset of the first element in the biases vector
+ * @param[in] biases_ptr                            (Optional) Pointer to the biases vector. Supported data types: same as @p src_ptr
+ * @param[in] biases_stride_x                       (Optional) Stride of the biases vector in X dimension (in bytes)
+ * @param[in] biases_step_x                         (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] biases_offset_first_element_in_bytes  (Optional) The offset of the first element in the biases vector
+ */
+__kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f16(
+    TENSOR3D_DECLARATION(src),
+    TENSOR3D_DECLARATION(dst),
+    TENSOR3D_DECLARATION(weights)
+#if defined(HAS_BIAS)
+    ,
+    VECTOR_DECLARATION(biases)
+#endif //defined(HAS_BIAS)
+)
+{
+    Image    src     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(src);
+    Image    dst     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
+    Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT(weights);
+
+#ifdef HAS_BIAS
+    Vector biases = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
+
+    half bias = *((__global half *)(vector_offset(&biases, get_global_id(2))));
+#endif /* defined(HAS_BIAS) */
+
+    half4 pixels0 = 0.0f;
+    half4 pixels1 = 0.0f;
+    half4 pixels2 = 0.0f;
+    half4 pixels3 = 0.0f;
+
+    __global uchar *weights_addr = (__global uchar *)weights.ptr;
+    __global uchar *src_addr     = (__global uchar *)offset(&src, 0, 0);
+
+    // Load the weights
+    half3 weights_row0 = vload3(0, (__global half *)(weights_addr + 0 * weights_stride_y));
+    half3 weights_row1 = vload3(0, (__global half *)(weights_addr + 1 * weights_stride_y));
+    half3 weights_row2 = vload3(0, (__global half *)(weights_addr + 2 * weights_stride_y));
+
+    // Note: Since each work-item computes 4x4 elements, we need to load 6 rows from the input tensor
+    half8 src00 = vload8(0, (__global half *)(src_addr + 0 * src_stride_y)); // Row0
+    half8 src10 = vload8(0, (__global half *)(src_addr + 1 * src_stride_y)); // Row1
+    half8 src20 = vload8(0, (__global half *)(src_addr + 2 * src_stride_y)); // Row2
+    half8 src30 = vload8(0, (__global half *)(src_addr + 3 * src_stride_y)); // Row3
+    half8 src40 = vload8(0, (__global half *)(src_addr + 4 * src_stride_y)); // Row4
+    half8 src50 = vload8(0, (__global half *)(src_addr + 5 * src_stride_y)); // Row5
+
+    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels0, src00, weights_row0);
+    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels0, src10, weights_row1);
+    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels0, src20, weights_row2);
+    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels1, src10, weights_row0);
+    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels1, src20, weights_row1);
+    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels1, src30, weights_row2);
+    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels2, src20, weights_row0);
+    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels2, src30, weights_row1);
+    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels2, src40, weights_row2);
+    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels3, src30, weights_row0);
+    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels3, src40, weights_row1);
+    CONVOLUTION1x3_BIFROST4X1_STRIDE1(pixels3, src50, weights_row2);
+
+#ifdef HAS_BIAS
+    pixels0 += (half4)bias;
+    pixels1 += (half4)bias;
+    pixels2 += (half4)bias;
+    pixels3 += (half4)bias;
+#endif /* defined(HAS_BIAS) */
+
+    vstore4(pixels0, 0, (__global half *)(dst.ptr + 0 * dst_stride_y));
+    vstore4(pixels1, 0, (__global half *)(dst.ptr + 1 * dst_stride_y));
+    vstore4(pixels2, 0, (__global half *)(dst.ptr + 2 * dst_stride_y));
+    vstore4(pixels3, 0, (__global half *)(dst.ptr + 3 * dst_stride_y));
+}
+
+/** This OpenCL kernel is optimized for Bifrost architectures and computes 16bit floating point the depthwise convolution 3x3
+ * when both stride_x and stride_y are equal to 2
+ *
+ * @param[in] src_ptr                               Pointer to the source image. Supported data types: F16
+ * @param[in] src_stride_x                          Stride of the source image in X dimension (in bytes)
+ * @param[in] src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] src_stride_y                          Stride of the source image in Y dimension (in bytes)
+ * @param[in] src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] src_offset_first_element_in_bytes     The offset of the first element in the source image
+ * @param[in] src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
+ * @param[in] src_step_z                            src_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_ptr                               Pointer to the destination tensor. Supported data types: same as @p src_ptr
+ * @param[in] dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
+ * @param[in] dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] dst_stride_y                          Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in] dst_step_y                            dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in] dst_step_z                            dst_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
+ * @param[in] weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
+ * @param[in] weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
+ * @param[in] weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
+ * @param[in] weights_step_y                        weights_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] weights_stride_z                      Stride of the weights tensor in Z dimension (in bytes)
+ * @param[in] weights_step_z                        weights_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] weights_offset_first_element_in_bytes The offset of the first element in the biases vector
+ * @param[in] biases_ptr                            (Optional) Pointer to the biases vector. Supported data types: same as @p src_ptr
+ * @param[in] biases_stride_x                       (Optional) Stride of the biases vector in X dimension (in bytes)
+ * @param[in] biases_step_x                         (Optional) biases_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] biases_offset_first_element_in_bytes  (Optional) The offset of the first element in the biases vector
+ */
+__kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16(
+    TENSOR3D_DECLARATION(src),
+    TENSOR3D_DECLARATION(dst),
+    TENSOR3D_DECLARATION(weights)
+#if defined(HAS_BIAS)
+    ,
+    VECTOR_DECLARATION(biases)
+#endif //defined(HAS_BIAS)
+)
+{
+    Image    src     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(src);
+    Image    dst     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
+    Tensor3D weights = CONVERT_TO_TENSOR3D_STRUCT(weights);
+
+#ifdef HAS_BIAS
+    Vector biases = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
+
+    half bias = *((__global half *)(vector_offset(&biases, get_global_id(2))));
+#endif /* defined(HAS_BIAS) */
+
+    half4 pixels0 = 0.0f;
+    half4 pixels1 = 0.0f;
+
+    __global uchar *weights_addr = (__global uchar *)weights.ptr;
+    __global uchar *src_addr     = (__global uchar *)offset(&src, 0, 0);
+
+    // Load the weights
+    half3 weights_row0 = vload3(0, (__global half *)(weights_addr + 0 * weights_stride_y));
+    half3 weights_row1 = vload3(0, (__global half *)(weights_addr + 1 * weights_stride_y));
+    half3 weights_row2 = vload3(0, (__global half *)(weights_addr + 2 * weights_stride_y));
+
+    // Note: Since each work-item computes 2x4 elements, we need to load 5 rows from the input tensor
+    half8 src00 = vload8(0, (__global half *)(src_addr + 0 * src_stride_y)); // Row0
+    half2 src01 = vload2(4, (__global half *)(src_addr + 0 * src_stride_y)); // Row0
+    half8 src10 = vload8(0, (__global half *)(src_addr + 1 * src_stride_y)); // Row1
+    half2 src11 = vload2(4, (__global half *)(src_addr + 1 * src_stride_y)); // Row1
+    half8 src20 = vload8(0, (__global half *)(src_addr + 2 * src_stride_y)); // Row2
+    half2 src21 = vload2(4, (__global half *)(src_addr + 2 * src_stride_y)); // Row2
+    half8 src30 = vload8(0, (__global half *)(src_addr + 3 * src_stride_y)); // Row3
+    half2 src31 = vload2(4, (__global half *)(src_addr + 3 * src_stride_y)); // Row3
+    half8 src40 = vload8(0, (__global half *)(src_addr + 4 * src_stride_y)); // Row4
+    half2 src41 = vload2(4, (__global half *)(src_addr + 4 * src_stride_y)); // Row4
+
+    CONVOLUTION1x3_BIFROST4X1_STRIDE2(pixels0, src00, src01, weights_row0);
+    CONVOLUTION1x3_BIFROST4X1_STRIDE2(pixels0, src10, src11, weights_row1);
+    CONVOLUTION1x3_BIFROST4X1_STRIDE2(pixels0, src20, src21, weights_row2);
+    CONVOLUTION1x3_BIFROST4X1_STRIDE2(pixels1, src20, src21, weights_row0);
+    CONVOLUTION1x3_BIFROST4X1_STRIDE2(pixels1, src30, src31, weights_row1);
+    CONVOLUTION1x3_BIFROST4X1_STRIDE2(pixels1, src40, src41, weights_row2);
+
+#ifdef HAS_BIAS
+    pixels0 += (half4)bias;
+    pixels1 += (half4)bias;
+#endif /* defined(HAS_BIAS) */
+
+    vstore4(pixels0, 0, (__global half *)(dst.ptr + 0 * dst_stride_y));
+    vstore4(pixels1, 0, (__global half *)(dst.ptr + 1 * dst_stride_y));
+}
 #endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED)
