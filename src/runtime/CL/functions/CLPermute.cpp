@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/kernels/CLPermuteKernel.h"
+#include "arm_compute/core/Error.h"
 #include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
@@ -34,4 +35,10 @@ void CLPermute::configure(const ICLTensor *input, ICLTensor *output, const Permu
     auto k = arm_compute::support::cpp14::make_unique<CLPermuteKernel>();
     k->configure(input, output, perm);
     _kernel = std::move(k);
+}
+
+Status CLPermute::validate(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON(CLPermuteKernel::validate(input, output, perm));
+    return Status{};
 }

@@ -30,6 +30,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
@@ -54,13 +55,19 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
                                                          DataType::U32, DataType::S32,
                                                          DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->num_dimensions() < 3), "Invalid input size!");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(
-        (perm.num_dimensions() != 3 && ((perm[0] != 2 && perm[1] != 0 && perm[2] != 1) || (perm[0] != 1 && perm[1] != 2 && perm[2] != 0))) && (perm.num_dimensions() != 4 && ((perm[0] != 2 && perm[1] != 0
-                && perm[2] != 1)
-                || (perm[0] != 1 && perm[1] != 2 && perm[2] != 0))),
-        "Only [2, 0, 1],[1, 2, 0] and [3, 2, 0, 1] permutation is supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(((perm.num_dimensions() == 3 && !(perm[0] == 2 && perm[1] == 0 && perm[2] == 1) && !(perm[0] == 1 && perm[1] == 2 && perm[2] == 0)) || (perm.num_dimensions() == 4
+                                     && !(perm[0] == 3 && perm[1] == 2 && perm[2] == 0 && perm[3] == 1))),
+                                    "Only [2, 0, 1],[1, 2, 0] and [3, 2, 0, 1] permutation is supported");
 
-    ARM_COMPUTE_UNUSED(output);
+    const TensorShape output_shape = misc::shape_calculator::compute_permutation_output_shape(*input, perm);
+
+    // Validate configured output
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    }
     return Status{};
 }
 } // namespace
@@ -112,7 +119,7 @@ void CLPermuteKernel::configure(const ICLTensor *input, ICLTensor *output, const
 
 Status CLPermuteKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(validate_arguments(input, output, perm));
 
     return Status{};

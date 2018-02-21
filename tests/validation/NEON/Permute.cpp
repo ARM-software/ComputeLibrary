@@ -50,6 +50,41 @@ const auto PermuteParametersLarge = combine(datasets::Large4DShapes(),
 TEST_SUITE(NEON)
 TEST_SUITE(Permute)
 
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+                                                framework::dataset::make("InputInfo",{  
+                                                                                        TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     // permutation not supported
+                                                                                        TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     // permutation not supported
+                                                                                        TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     // permutation not supported
+                                                                                        TensorInfo(TensorShape(1U, 7U), 1, DataType::U8),              // invalid input size
+                                                                                        TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     // valid
+                                                                                        TensorInfo(TensorShape(27U, 13U, 37U, 2U), 1, DataType::F32),  // valid
+                                                                                    }),
+                                                framework::dataset::make("OutputInfo", { 
+                                                                                        TensorInfo(TensorShape(5U, 7U, 7U, 3U), 1, DataType::U16),     
+                                                                                        TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),     
+                                                                                        TensorInfo(TensorShape(7U, 7U, 5U, 3U), 1, DataType::U16),
+                                                                                        TensorInfo(TensorShape(5U, 7U), 1, DataType::U8),
+                                                                                        TensorInfo(TensorShape(5U, 7U, 7U, 3U), 1, DataType::U16), 
+                                                                                        TensorInfo(TensorShape(13U, 37U, 27U, 2U), 1, DataType::F32),  
+                                                                                    })),
+                                                framework::dataset::make("PermutationVector", { 
+                                                                                                PermutationVector(2U, 1U, 0U),
+                                                                                                PermutationVector(2U, 2U, 1U),
+                                                                                                PermutationVector(1U, 1U, 1U),
+                                                                                                PermutationVector(2U, 0U, 1U),
+                                                                                                PermutationVector(2U, 0U, 1U), 
+                                                                                                PermutationVector(1U, 2U, 0U),
+                                                                                    })),
+                                                framework::dataset::make("Expected", { false, false, false, false, true, true })),
+                                            input_info, output_info, perm_vect, expected)
+{
+    ARM_COMPUTE_EXPECT(bool(NEPermute::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), perm_vect)) == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Small4DShapes(), framework::dataset::make("DataType", { DataType::S8, DataType::U8, DataType::S16, DataType::U16, DataType::U32, DataType::S32, DataType::F16, DataType::F32 })),
                shape, data_type)
 {
