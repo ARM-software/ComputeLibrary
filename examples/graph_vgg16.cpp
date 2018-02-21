@@ -105,9 +105,6 @@ public:
             label     = argv[4];
         }
 
-        // Initialize graph
-        graph.graph_init(int_target_hint == 2);
-
         graph << target_hint
               << convolution_hint
               << Tensor(TensorInfo(TensorShape(224U, 224U, 3U, 1U), 1, DataType::F32),
@@ -228,6 +225,9 @@ public:
               // Softmax
               << SoftmaxLayer()
               << Tensor(get_output_accessor(label, 5));
+
+        // In order to enable the OpenCL tuner, graph_init() has to be called only when all nodes have been instantiated
+        graph.graph_init(int_target_hint == 2);
     }
     void do_run() override
     {

@@ -88,9 +88,6 @@ public:
             label     = argv[4];
         }
 
-        // Initialize graph
-        graph.graph_init(int_target_hint == 2);
-
         graph << target_hint << Tensor(TensorInfo(TensorShape(299U, 299U, 3U, 1U), 1, DataType::F32),
                                        get_input_accessor(image, std::move(preprocessor), false))
 
@@ -187,6 +184,9 @@ public:
                                   PadStrideInfo(1, 1, 0, 0))
               << ReshapeLayer(TensorShape(1001U)) << SoftmaxLayer()
               << Tensor(get_output_accessor(label, 5));
+
+        // In order to enable the OpenCL tuner, graph_init() has to be called only when all nodes have been instantiated
+        graph.graph_init(int_target_hint == 2);
     }
 
     void do_run() override

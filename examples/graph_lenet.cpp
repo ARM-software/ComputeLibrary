@@ -76,9 +76,6 @@ public:
             batches   = std::strtol(argv[3], nullptr, 0);
         }
 
-        // Initialize graph
-        graph.graph_init(int_target_hint == 2);
-
         //conv1 << pool1 << conv2 << pool2 << fc1 << act1 << fc2 << smx
         graph << target_hint
               << Tensor(TensorInfo(TensorShape(28U, 28U, 1U, batches), 1, DataType::F32), DummyAccessor())
@@ -105,6 +102,9 @@ public:
                   get_weights_accessor(data_path, "/cnn_data/lenet_model/ip2_b.npy"))
               << SoftmaxLayer()
               << Tensor(DummyAccessor(0));
+
+        // In order to enable the OpenCL tuner, graph_init() has to be called only when all nodes have been instantiated
+        graph.graph_init(int_target_hint == 2);
     }
     void do_run() override
     {

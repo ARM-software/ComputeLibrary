@@ -119,9 +119,6 @@ public:
             label     = argv[4];
         }
 
-        // Initialize graph
-        graph.graph_init(int_target_hint == 2);
-
         graph << target_hint
               << arm_compute::graph::Tensor(TensorInfo(TensorShape(224U, 224U, 3U, 1U), 1, DataType::QASYMM8, in_quant_info),
                                             get_weights_accessor(data_path, "/cnn_data/mobilenet_qasymm8_model/" + input))
@@ -168,6 +165,9 @@ public:
               << ReshapeLayer(TensorShape(1001U))
               << SoftmaxLayer()
               << arm_compute::graph::Tensor(get_output_accessor(label, 5));
+
+        // In order to enable the OpenCL tuner, graph_init() has to be called only when all nodes have been instantiated
+        graph.graph_init(int_target_hint == 2);
     }
     void do_run() override
     {
