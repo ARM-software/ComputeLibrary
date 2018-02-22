@@ -97,8 +97,9 @@
 __kernel void depthwise_convolution_3x3_quantized(
     TENSOR3D_DECLARATION(src),
     TENSOR3D_DECLARATION(dst),
-    TENSOR3D_DECLARATION(weights),
+    TENSOR3D_DECLARATION(weights)
 #if defined(HAS_BIAS)
+    ,
     VECTOR_DECLARATION(biases)
 #endif //defined(HAS_BIAS)
 )
