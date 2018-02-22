@@ -1458,7 +1458,13 @@ inline std::string to_string(const GPUTarget &gpu_target)
     return str.str();
 }
 
-/** Formatted output of the DetectionWindow type. */
+/** Formatted output of the DetectionWindow type.
+ *
+ * @param[out] os               Output stream
+ * @param[in]  detection_window Type to output
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const DetectionWindow &detection_window)
 {
     os << "{x=" << detection_window.x << ","
@@ -1471,6 +1477,59 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DetectionWindow &det
     return os;
 }
 
+/** Formatted output of the DetectionWindow type.
+ *
+ * @param[in] detection_window Type to output
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const DetectionWindow &detection_window)
+{
+    std::stringstream str;
+    str << detection_window;
+    return str.str();
+}
+
+/** Formatted output of the Termination type.
+ *
+ * @param[out] os          Output stream
+ * @param[in]  termination Type to output
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const Termination &termination)
+{
+    switch(termination)
+    {
+        case Termination::TERM_CRITERIA_EPSILON:
+            os << "TERM_CRITERIA_EPSILON";
+            break;
+        case Termination::TERM_CRITERIA_ITERATIONS:
+            os << "TERM_CRITERIA_ITERATIONS";
+            break;
+        case Termination::TERM_CRITERIA_BOTH:
+            os << "TERM_CRITERIA_BOTH";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+/** Formatted output of the Termination type.
+ *
+ * @param[in] termination Type to output
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const Termination &termination)
+{
+    std::stringstream str;
+    str << termination;
+    return str.str();
+}
+
 /** Formatted output of the WinogradInfo type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const WinogradInfo &info)
 {
@@ -1480,13 +1539,6 @@ inline ::std::ostream &operator<<(::std::ostream &os, const WinogradInfo &info)
        << "OutputDataLayout=" << info.output_data_layout << "}";
 
     return os;
-}
-
-inline std::string to_string(const DetectionWindow &type)
-{
-    std::stringstream str;
-    str << type;
-    return str.str();
 }
 
 inline std::string to_string(const WinogradInfo &type)

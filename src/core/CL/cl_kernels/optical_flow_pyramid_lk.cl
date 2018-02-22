@@ -167,7 +167,11 @@ __kernel void finalize(
     Keypoint new_point;
     new_point.x               = round(new_point_internal.x);
     new_point.y               = round(new_point_internal.y);
+    new_point.strength        = 0.f;
+    new_point.scale           = 0.f;
+    new_point.orientation     = 0.f;
     new_point.tracking_status = new_point_internal.tracking_status;
+    new_point.error           = 0.f;
 
     // Store new point
     new_points[idx] = new_point;
@@ -352,8 +356,7 @@ void __kernel lktracker_stage0(
  * @param[in]      border_limits                           It stores the right border limit (width - window_dimension - 1, height - window_dimension - 1,)
  * @param[in]      eig_const                               1.0f / (float)(2.0f * window_dimension * window_dimension)
  * @param[in]      level0                                  It is set to 1 if level of pyramid = 0
- * @param[in]      term_iteration                          It is set to 1 if termination = VX_TERM_CRITERIA_ITERATIONS
- * @param[in]      term_epsilon                            It is set to 1 if termination = VX_TERM_CRITERIA_EPSILON
+ * @param[in]      term_epsilon                            It is set to 1 if termination = TERM_CRITERIA_EPSILON
  */
 void __kernel lktracker_stage1(
     IMAGE_DECLARATION(new_image),
@@ -368,7 +371,6 @@ void __kernel lktracker_stage1(
     const float3     border_limits,
     const float      eig_const,
     const int        level0,
-    const int        term_iteration,
     const int        term_epsilon)
 {
     int   idx       = get_global_id(0);
@@ -512,10 +514,7 @@ void __kernel lktracker_stage1(
         // Update previous delta
         prev_delta = delta;
 
-        if(term_iteration == 1)
-        {
-            j++;
-        }
+        j++;
     }
 
     new_points[idx].xy = out_new_point;

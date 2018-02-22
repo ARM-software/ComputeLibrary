@@ -28,6 +28,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/HOGInfo.h"
+#include "arm_compute/core/PyramidInfo.h"
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/TensorShape.h"
@@ -548,6 +549,21 @@ inline T create_HOG(const HOGInfo &hog_info)
     return hog;
 }
 
+/** Create and initialize a Pyramid of the given type.
+ *
+ * @param[in] pyramid_info The PyramidInfo object.
+ *
+ * @return Initialized Pyramid of given type.
+ */
+template <typename T>
+inline T create_pyramid(const PyramidInfo &pyramid_info)
+{
+    T pyramid;
+    pyramid.init_auto_padding(pyramid_info);
+
+    return pyramid;
+}
+
 /** Create a vector of random ROIs.
  *
  * @param[in] shape     The shape of the input tensor.
@@ -616,6 +632,44 @@ inline std::vector<T> generate_random_real(unsigned int num_values, T min, T max
     }
 
     return v;
+}
+
+/** Create a vector of random keypoints for pyramid representation.
+ *
+ * @param[in] shape         The shape of the input tensor.
+ * @param[in] num_keypoints The number of keypoints to be created.
+ * @param[in] seed          The random seed to be used.
+ * @param[in] num_levels    The number of pyramid levels.
+ *
+ * @return A vector that contains the requested number of random keypoints
+ */
+inline std::vector<KeyPoint> generate_random_keypoints(const TensorShape &shape, size_t num_keypoints, std::random_device::result_type seed, size_t num_levels = 1)
+{
+    std::vector<KeyPoint> keypoints;
+    std::mt19937          gen(seed);
+
+    // Calculate distribution bounds
+    const auto min        = static_cast<int>(std::pow(2, num_levels));
+    const auto max_width  = static_cast<int>(shape.x());
+    const auto max_height = static_cast<int>(shape.y());
+
+    ARM_COMPUTE_ERROR_ON(min > max_width || min > max_height);
+
+    // Create distributions
+    std::uniform_int_distribution<> dist_w(min, max_width);
+    std::uniform_int_distribution<> dist_h(min, max_height);
+
+    for(unsigned int i = 0; i < num_keypoints; i++)
+    {
+        KeyPoint keypoint;
+        keypoint.x               = dist_w(gen);
+        keypoint.y               = dist_h(gen);
+        keypoint.tracking_status = 1;
+
+        keypoints.push_back(keypoint);
+    }
+
+    return keypoints;
 }
 
 template <typename T, typename ArrayAccessor_T>
