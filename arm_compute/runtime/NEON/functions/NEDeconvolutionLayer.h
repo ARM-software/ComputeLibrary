@@ -91,6 +91,20 @@ public:
      */
     void configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &info,
                    unsigned int inner_border_right, unsigned int inner_border_top);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEDeconvolutionLayer
+     *
+     * @param[in] input              Input tensor info. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: F32.
+     * @param[in] weights            The 4d weights info with dimensions [width, height, OFM, IFM]. Data type supported: Same as @p input.
+     * @param[in] bias               (Optional) The biases have one dimension. Data type supported: Same as @p input.
+     * @param[in] output             Output tensor info. The output has the same number of dimensions as the @p input.
+     * @param[in] info               Contains padding and policies to be used in the deconvolution, this is decribed in @ref PadStrideInfo.
+     * @param[in] inner_border_right The number of zeros added to right edge of the input.
+     * @param[in] inner_border_top   The number of zeros added to top edge of the input.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, const ITensorInfo *output, const PadStrideInfo &info,
+                           unsigned int inner_border_right, unsigned int inner_border_top);
 
     // Inherited methods overridden:
     void run() override;

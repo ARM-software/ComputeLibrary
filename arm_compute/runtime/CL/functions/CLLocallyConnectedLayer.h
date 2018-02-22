@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,6 +65,20 @@ public:
      * @param[in]  conv_info Contains padding and stride information described in @ref PadStrideInfo.
      */
     void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLLocallyConnectedLayer
+     *
+     * @param[in] input     Input tensor info. 3 lower dimensions represent a single input [width, height, IFM],
+     *                      while every optional dimension from 4 and above represent a batch of inputs.
+     *                      Data types supported: F32.
+     * @param[in] weights   Weights tensor info. Weights are 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM, num_patches]. Data type supported:Same as @p input.
+     * @param[in] biases    Biases tensor info. Shared biases supported. Biases are 2D tensor with dimensions [OFM, num_patches]. Data type supported:Same as @p input.
+     * @param[in] output    Output tensor info. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
+     *                      Data types supported: Same as @p input.
+     * @param[in] conv_info Contains padding and stride information described in @ref PadStrideInfo.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info);
 
     // Inherited methods overridden:
     void run() override;

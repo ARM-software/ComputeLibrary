@@ -47,6 +47,67 @@ namespace
 TEST_SUITE(CL)
 TEST_SUITE(LocallyConnected)
 
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
+    framework::dataset::make("InputInfo",  { TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32, 0), // Mismatching data type input/weights
+                                             TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32, 0), // Mismatching data type input/bias
+                                             TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32, 0), // Mismatching data type input/output
+                                             TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32, 0), // Mismatching shape input/weights
+                                             TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32, 0), // Mismatching shape input/bias
+                                             TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32, 0), // Mismatching shape input/output
+                                             TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32, 0), // Asymmetric padding
+                                             TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32, 0)
+                                           }),
+    framework::dataset::make("WeightsInfo",{ TensorInfo(TensorShape(3U, 3U, 5U, 21U, 275U), 1, DataType::F16, 0),
+                                             TensorInfo(TensorShape(3U, 3U, 5U, 21U, 275U), 1, DataType::F32, 0),
+                                             TensorInfo(TensorShape(3U, 3U, 5U, 21U, 275U), 1, DataType::F32, 0),
+                                             TensorInfo(TensorShape(3U, 3U, 5U, 21U, 274U), 1, DataType::F32, 0),
+                                             TensorInfo(TensorShape(3U, 3U, 5U, 21U, 275U), 1, DataType::F32, 0),
+                                             TensorInfo(TensorShape(3U, 3U, 5U, 21U, 275U), 1, DataType::F32, 0),
+                                             TensorInfo(TensorShape(3U, 3U, 5U, 21U, 275U), 1, DataType::F32, 0),
+                                             TensorInfo(TensorShape(3U, 3U, 5U, 21U, 275U), 1, DataType::F32, 0)
+                                           })),
+    framework::dataset::make("BiasInfo",   { TensorInfo(TensorShape(21U, 275U), 1, DataType::F32, 0),
+                                             TensorInfo(TensorShape(21U, 275U), 1, DataType::F16, 0),
+                                             TensorInfo(TensorShape(21U, 275U), 1, DataType::F32, 0),
+                                             TensorInfo(TensorShape(21U, 275U), 1, DataType::F32, 0),
+                                             TensorInfo(TensorShape(21U, 274U), 1, DataType::F32, 0),
+                                             TensorInfo(TensorShape(21U, 275U), 1, DataType::F32, 0),
+                                             TensorInfo(TensorShape(21U, 275U), 1, DataType::F32, 0),
+                                             TensorInfo(TensorShape(21U, 275U), 1, DataType::F32, 0)
+                                           })),
+    framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32, 0),
+                                             TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32, 0),
+                                             TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F16, 0),
+                                             TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32, 0),
+                                             TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32, 0),
+                                             TensorInfo(TensorShape(11U, 25U, 22U), 1, DataType::F32, 0),
+                                             TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32, 0),
+                                             TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32, 0)
+                                           })),
+    framework::dataset::make("PadStride",  { PadStrideInfo(2, 1, 0, 0),
+                                             PadStrideInfo(2, 1, 0, 0),
+                                             PadStrideInfo(2, 1, 0, 0),
+                                             PadStrideInfo(2, 1, 0, 0),
+                                             PadStrideInfo(2, 1, 0, 0),
+                                             PadStrideInfo(2, 1, 0, 0),
+                                             PadStrideInfo(2, 1, 1, 0, 0, 0, DimensionRoundingType::FLOOR),
+                                             PadStrideInfo(2, 1, 0, 0)
+                                           })),
+    framework::dataset::make("Expected", { false, false, false, false, false, false, false, true })),
+    input_info, weights_info, bias_info, output_info, conv_info, expected)
+{
+    bool is_valid = bool(CLLocallyConnectedLayer::validate(&input_info.clone()->set_is_resizable(false),
+                                                           &weights_info.clone()->set_is_resizable(false),
+                                                           &bias_info.clone()->set_is_resizable(false),
+                                                           &output_info.clone()->set_is_resizable(false),
+                                                           conv_info));
+    ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallLocallyConnectedDataset(), datasets::LargeLocallyConnectedDataset()),
                                                                    framework::dataset::make("DataType", DataType::F32)),
                src_shape, weights_shape, bias_shape, dst_shape, info, data_type)
