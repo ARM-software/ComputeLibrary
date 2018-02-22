@@ -139,7 +139,8 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
         num_elems_processed_per_iteration_y = std::min(static_cast<int>(output->dimension(1)), 4);
 
         // Create kernels according to the architecture, data type and input size.
-        if(gpu_target == GPUTarget::BIFROST && data_type == DataType::F32)
+        GPUTarget arch_target = get_arch_from_target(gpu_target);
+        if(arch_target == GPUTarget::BIFROST && data_type == DataType::F32)
         {
             num_elems_processed_per_iteration_x = (input1->dimension(0) <= 1000 && input0->num_dimensions() == 1) ? 2 : 4;
         }
@@ -199,27 +200,48 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
     const int      fp_pos    = input0->info()->fixed_point_position();
 
     // Get target architecture
-    GPUTarget arch_target = get_arch_from_target(get_target());
+    GPUTarget gpu_target = get_target();
 
     // Configure LWS hint
-    if(arch_target == GPUTarget::BIFROST && input1->info()->dimension(1) == 24)
+    switch(gpu_target)
     {
-        // LWS optimized for the 11x11 AlexNet convolution on Bifrost.
-        _lws_hint = cl::NDRange(2, 2);
-    }
-    else if(output->info()->dimension(1) == 196)
-    {
-        _lws_hint = cl::NDRange(1, 7);
-    }
-    else
-    {
-        _lws_hint = cl::NDRange(8, 8);
+        case GPUTarget::MIDGARD:
+        case GPUTarget::T600:
+        case GPUTarget::T700:
+        case GPUTarget::T800:
+            if(output->info()->dimension(1) == 196)
+            {
+                _lws_hint = cl::NDRange(1, 7);
+            }
+            else
+            {
+                _lws_hint = cl::NDRange(8, 8);
+            }
+            break;
+        case GPUTarget::G71:
+        case GPUTarget::G72:
+            if(input1->info()->dimension(1) == 24)
+            {
+                // LWS optimized for the 11x11 AlexNet convolution on Bifrost.
+                _lws_hint = cl::NDRange(2, 2);
+            }
+            else if(output->info()->dimension(1) == 196)
+            {
+                _lws_hint = cl::NDRange(1, 7);
+            }
+            else
+            {
+                _lws_hint = cl::NDRange(8, 8);
+            }
+            break;
+        default:
+            _lws_hint = cl::NullRange;
     }
 
     ElementsProcessed num_elements_processed{};
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input0->info(), input1->info(), output->info(), is_interleaved_transposed, arch_target, num_elements_processed);
+    auto win_config = validate_and_configure_window(input0->info(), input1->info(), output->info(), is_interleaved_transposed, gpu_target, num_elements_processed);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure(win_config.second);
 
@@ -247,7 +269,8 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
 
         if(data_type == DataType::F32)
         {
-            kernel_name = "gemm_mm_interleaved_transposed_f32_" + string_from_target(arch_target);
+            GPUTarget arch_target = get_arch_from_target(gpu_target);
+            kernel_name           = "gemm_mm_interleaved_transposed_f32_" + string_from_target(arch_target);
         }
         else
         {
@@ -259,7 +282,7 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
         build_opts.add_option("-DCOLS_A=" + support::cpp11::to_string(input0->info()->dimension(0)));
 
         // Create kernels according to the architecture, data type and input size.
-        if(arch_target == GPUTarget::BIFROST && data_type == DataType::F32)
+        if((gpu_target == GPUTarget::G71 || gpu_target == GPUTarget::G72) && data_type == DataType::F32)
         {
             // The first kernel is optimized for the case of 1000 or less output elements (e.g. FC8 of AlexNet and VGG-16, and
             // FC1 of Inception v3). The second kernel is optimized for the case of greater than 1000 output elements (e.g.

@@ -77,8 +77,9 @@ void CLDepthwiseIm2ColKernel::configure(const ICLTensor *input, ICLTensor *outpu
 
     // Configure the local work size for Bifrost with a value obtained
     // via exhaustive autotuning for the MobileNets tensor shapes.
-    const GPUTarget gpu_target = get_arch_from_target(get_target());
-    if(gpu_target == GPUTarget::BIFROST)
+    const GPUTarget gpu_target = get_target();
+
+    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72))
     {
         _lws_hint = cl::NDRange(1, 2, 1);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,13 +34,21 @@ static const std::string default_config_id = "no_config_id";
 /** Available GPU Targets */
 enum class GPUTarget
 {
+    UNKNOWN       = 0x000,
     GPU_ARCH_MASK = 0xF00,
     MIDGARD       = 0x100,
     BIFROST       = 0x200,
     T600          = 0x110,
     T700          = 0x120,
     T800          = 0x130,
-    G70           = 0x210
+    G71           = 0x210,
+    G72           = 0x220,
+    G51           = 0x230,
+    G51BIG        = 0x231,
+    G51LIT        = 0x232,
+    TNOX          = 0x240,
+    TTRX          = 0x250,
+    TBOX          = 0x260
 };
 
 /* Available OpenCL Version */

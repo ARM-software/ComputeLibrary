@@ -838,7 +838,23 @@ size_t CLKernelLibrary::max_local_workgroup_size(const cl::Kernel &kernel) const
 
 cl::NDRange CLKernelLibrary::default_ndrange() const
 {
-    return cl::NDRange(128u, 1);
+    cl::Device  device  = cl::Device::getDefault();
+    GPUTarget   _target = get_target_from_device(device);
+    cl::NDRange default_range;
+
+    switch(_target)
+    {
+        case GPUTarget::MIDGARD:
+        case GPUTarget::T600:
+        case GPUTarget::T700:
+        case GPUTarget::T800:
+            default_range = cl::NDRange(128u, 1);
+            break;
+        default:
+            default_range = cl::NullRange;
+    }
+
+    return default_range;
 }
 
 std::string CLKernelLibrary::get_device_version()

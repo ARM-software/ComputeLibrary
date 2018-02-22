@@ -287,7 +287,7 @@ protected:
  * @param[in,out] queue    OpenCL command queue.
  * @param[in]     kernel   Kernel to enqueue
  * @param[in]     window   Window the kernel has to process.
- * @param[in]     lws_hint Local workgroup size requested, by default (128,1).
+ * @param[in]     lws_hint Local workgroup size requested. Default is based on the device target.
  *
  * @note If any dimension of the lws is greater than the global workgroup size then no lws will be passed.
  */

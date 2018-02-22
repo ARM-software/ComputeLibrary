@@ -75,7 +75,7 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     _kernel_dims = kernel_dims;
 
     const DataType  data_type  = input->info()->data_type();
-    const GPUTarget gpu_target = get_arch_from_target(get_target());
+    const GPUTarget gpu_target = get_target();
 
     // Create kernel
     CLBuildOptions build_opts;
@@ -185,7 +185,7 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
                 vector_size = kernel_dims.width;
             }
             // Local work size and vector size optimized for the 11x11 AlexNet convolution on Bifrost.
-            if(gpu_target == GPUTarget::BIFROST && kernel_dims.width == 11)
+            if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72) && kernel_dims.width == 11)
             {
                 _lws_hint   = cl::NDRange(1, 1, 1);
                 vector_size = 8;

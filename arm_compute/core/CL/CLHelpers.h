@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -103,6 +103,14 @@ std::unique_ptr<Kernel> create_kernel()
     return k;
 }
 
+/** Helper function to get the GPU target from a device name
+ *
+ * @param[in] device_name A device name
+ *
+ * @return the GPU target
+ */
+GPUTarget get_target_from_name(const std::string &device_name);
+
 /** Helper function to get the GPU target from CL device
  *
  * @param[in] device A CL device
@@ -140,5 +148,24 @@ bool fp16_support(const cl::Device &device);
  * @return True if the extension is supported
  */
 bool non_uniform_workgroup_support(const cl::Device &device);
+/** Helper function to check whether a gpu target is equal to the provided targets
+ *
+ * @param[in] target_to_check gpu target to check
+ * @param[in] target          First target to compare against
+ * @param[in] targets         (Optional) Additional targets to compare with
+ *
+ * @return True if the target is equal with at least one of the targets.
+ */
+template <typename... Args>
+bool gpu_target_is_in(GPUTarget target_to_check, GPUTarget target, Args... targets)
+{
+    return (target_to_check == target) | gpu_target_is_in(target_to_check, targets...);
+}
+
+/** Variant of gpu_target_is_in for comparing two targets */
+inline bool gpu_target_is_in(GPUTarget target_to_check, GPUTarget target)
+{
+    return target_to_check == target;
+}
 }
 #endif /* __ARM_COMPUTE_CLHELPERS_H__ */

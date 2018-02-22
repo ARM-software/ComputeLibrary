@@ -98,7 +98,7 @@ DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(z
                                                                                                                         })),
                                                                                framework::dataset::make("GpuTarget", { GPUTarget::BIFROST,
                                                                                                                        GPUTarget::MIDGARD,
-                                                                                                                       GPUTarget::G70,
+                                                                                                                       GPUTarget::G71,
                                                                                                                        GPUTarget::MIDGARD,
                                                                                                                        GPUTarget::BIFROST
                                                                                                                      })),

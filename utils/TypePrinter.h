@@ -1010,8 +1010,29 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GPUTarget &gpu_targe
         case GPUTarget::T800:
             os << "T800";
             break;
-        case GPUTarget::G70:
-            os << "G70";
+        case GPUTarget::G71:
+            os << "G71";
+            break;
+        case GPUTarget::G72:
+            os << "G72";
+            break;
+        case GPUTarget::G51:
+            os << "G51";
+            break;
+        case GPUTarget::G51BIG:
+            os << "G51BIG";
+            break;
+        case GPUTarget::G51LIT:
+            os << "G51LIT";
+            break;
+        case GPUTarget::TNOX:
+            os << "TNOX";
+            break;
+        case GPUTarget::TTRX:
+            os << "TTRX";
+            break;
+        case GPUTarget::TBOX:
+            os << "TBOX";
             break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");

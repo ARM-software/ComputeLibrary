@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,7 +52,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *accum, ITen
                                                         unsigned int &num_elems_processed_per_iteration)
 {
     // Select the vector size to use (8 for Bifrost; 16 for Midgard).
-    num_elems_processed_per_iteration = (gpu_target == GPUTarget::BIFROST) ? 8 : 16;
+    num_elems_processed_per_iteration = gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72) ? 8 : 16;
 
     // Configure kernel window
     Window win = calculate_max_window(*accum, Steps(num_elems_processed_per_iteration));
@@ -81,12 +81,12 @@ void CLGEMMMatrixAccumulateBiasesKernel::configure(ICLTensor *accum, const ICLTe
     _biases = biases;
     _accum  = accum;
 
-    // Get the target architecture
-    GPUTarget    arch_target = get_arch_from_target(get_target());
+    // Get the target gpu
+    GPUTarget    gpu_target  = get_target();
     unsigned int vector_size = 0;
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(accum->info(), biases->info(), arch_target, vector_size);
+    auto win_config = validate_and_configure_window(accum->info(), biases->info(), gpu_target, vector_size);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure(win_config.second);
 
