@@ -49,6 +49,8 @@ ValidRegion AccessWindowStatic::compute_valid_region(const Window &window, Valid
         return input_valid_region;
     }
 
+    ARM_COMPUTE_UNUSED(window);
+
     Coordinates &anchor = input_valid_region.anchor;
     TensorShape &shape  = input_valid_region.shape;
 
@@ -66,14 +68,6 @@ ValidRegion AccessWindowStatic::compute_valid_region(const Window &window, Valid
     if(_info->num_dimensions() > 1)
     {
         shape.set(1, std::min<int>(_end_y, _info->tensor_shape()[1]));
-    }
-
-    // For higher dimension use the intersection of the window size and the
-    // valid region of the input
-    for(size_t d = 2; d < _info->num_dimensions(); ++d)
-    {
-        anchor.set(d, std::max(window[d].start(), input_valid_region.anchor[d]));
-        shape.set(d, std::min<int>(window[d].end(), input_valid_region.shape[d]) - anchor[d]);
     }
 
     return input_valid_region;
