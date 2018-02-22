@@ -176,6 +176,7 @@ private:
     CLTensor _tmp_output;
 
     bool _is_quantized;
+    bool _is_first_run;
 };
 }
 #endif /* __ARM_COMPUTE_CLGEMMCONVOLUTIONLAYER_H__ */

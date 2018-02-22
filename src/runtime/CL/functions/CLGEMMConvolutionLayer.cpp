@@ -95,7 +95,7 @@ void CLConvolutionLayerReshapeWeights::run()
 
 CLGEMMConvolutionLayer::CLGEMMConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(memory_manager), _reshape_weights(), _im2col_kernel(), _mm_gemm(memory_manager), _mm_gemmlowp(memory_manager), _gemmlowp_output_stage(), _col2im_kernel(), _im2col_output(),
-      _interleave_output(), _weights_reshaped(), _weights_transposed(), _gemm_output(), _tmp_output(), _is_quantized(false)
+      _interleave_output(), _weights_reshaped(), _weights_transposed(), _gemm_output(), _tmp_output(), _is_quantized(false), _is_first_run(true)
 {
 }
 
@@ -349,7 +349,12 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 void CLGEMMConvolutionLayer::run()
 {
     // Run weights reshaping (Runs once for every configure)
-    _reshape_weights.run();
+    if(_is_first_run)
+    {
+        _reshape_weights.run();
+
+        _is_first_run = false;
+    }
 
     _memory_group.acquire();
 
