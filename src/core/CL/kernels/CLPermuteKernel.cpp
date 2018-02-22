@@ -54,10 +54,10 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
                                                          DataType::U16, DataType::S16, DataType::QS16,
                                                          DataType::U32, DataType::S32,
                                                          DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->num_dimensions() < 3), "Invalid input size!");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(((perm.num_dimensions() == 3 && !(perm[0] == 2 && perm[1] == 0 && perm[2] == 1) && !(perm[0] == 1 && perm[1] == 2 && perm[2] == 0)) || (perm.num_dimensions() == 4
-                                     && !(perm[0] == 3 && perm[1] == 2 && perm[2] == 0 && perm[3] == 1))),
-                                    "Only [2, 0, 1],[1, 2, 0] and [3, 2, 0, 1] permutation is supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((perm != PermutationVector{ 2U, 0U, 1U })
+                                    && (perm != PermutationVector{ 1U, 2U, 0U })
+                                    && (perm != PermutationVector{ 3U, 2U, 0U, 1U }),
+                                    "Only [2, 0, 1], [1, 2, 0] and [3, 2, 0, 1] permutation is supported");
 
     const TensorShape output_shape = misc::shape_calculator::compute_permutation_output_shape(*input, perm);
 
