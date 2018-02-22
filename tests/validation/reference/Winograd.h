@@ -24,6 +24,8 @@
 #ifndef __ARM_COMPUTE_TEST_WINOGRAD_H__
 #define __ARM_COMPUTE_TEST_WINOGRAD_H__
 
+#include "arm_compute/core/TensorShape.h"
+
 #include "tests/SimpleTensor.h"
 
 namespace arm_compute
@@ -36,6 +38,9 @@ namespace reference
 {
 template <typename T>
 SimpleTensor<T> winograd_input_transform(const SimpleTensor<T> &src, const TensorShape &dst_shape, const PadStrideInfo &conv_info, const Size2D &kernel_dims);
+
+template <typename T>
+SimpleTensor<T> winograd_filter_transform(const SimpleTensor<T> &in, const TensorShape &output_shape);
 } // namespace reference
 } // namespace validation
 } // namespace test

@@ -27,7 +27,6 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/Globals.h"
 #include "tests/IAccessor.h"
@@ -42,8 +41,6 @@
 
 namespace arm_compute
 {
-class NEWinogradLayer;
-
 namespace test
 {
 namespace validation
@@ -219,6 +216,87 @@ protected:
         fill(src, 0, -1.f, 1.f);
 
         return reference::winograd_input_transform<T>(src, output_shape, conv_info, kernel_dims);
+    }
+
+    TensorType      _target{};
+    SimpleTensor<T> _reference{};
+};
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class WinogradFilterTransformValidationFixture : public framework::Fixture
+{
+public:
+    template <typename...>
+    void setup(TensorShape input_shape, bool is_nchw_format, DataType data_type)
+    {
+        TensorShape output_shape = compute_winograd_filter_transform_shape(TensorInfo(input_shape, 1, data_type));
+
+        _target    = compute_target(input_shape, output_shape, is_nchw_format, data_type);
+        _reference = compute_reference(input_shape, output_shape, is_nchw_format, data_type);
+    }
+
+protected:
+    template <typename U>
+    void fill(U &&tensor, int i, float min, float max)
+    {
+        switch(tensor.data_type())
+        {
+            case DataType::F32:
+            {
+                std::uniform_real_distribution<> distribution(min, max);
+                library->fill(tensor, distribution, i);
+                break;
+            }
+            default:
+            {
+                ARM_COMPUTE_ERROR("Not supported");
+                library->fill_tensor_uniform(tensor, i);
+                break;
+            }
+        }
+    }
+
+    TensorType compute_target(const TensorShape &input_shape, const TensorShape &output_shape, bool is_nchw_format, DataType data_type)
+    {
+        ARM_COMPUTE_UNUSED(is_nchw_format);
+
+        // Create tensors
+        TensorType src = create_tensor<TensorType>(input_shape, data_type);
+        TensorType dst = create_tensor<TensorType>(output_shape, data_type);
+
+        // Create and configure function
+        FunctionType filter_transform;
+        filter_transform.configure(&src, &dst);
+
+        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Allocate tensors
+        src.allocator()->allocate();
+        dst.allocator()->allocate();
+
+        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Fill tensors
+        fill(AccessorType(src), 0, -1.f, 1.f);
+
+        filter_transform.run();
+
+        return dst;
+    }
+
+    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, bool is_nchw_format, DataType data_type)
+    {
+        ARM_COMPUTE_ERROR_ON(!is_nchw_format);
+
+        // Create reference
+        SimpleTensor<T> src{ input_shape, data_type, 1 };
+
+        // Fill reference
+        fill(src, 0, -1.f, 1.f);
+
+        return reference::winograd_filter_transform<T>(src, output_shape);
     }
 
     TensorType      _target{};
