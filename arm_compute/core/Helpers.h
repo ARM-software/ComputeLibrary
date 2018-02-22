@@ -622,15 +622,16 @@ bool set_quantization_info_if_empty(ITensorInfo &info, QuantizationInfo quantiza
 
 /** Helper function to calculate the Valid Region for Scale.
  *
- * @param[in] src_info         Input tensor info used to check.
- * @param[in] dst_shape        Shape of the output.
- * @param[in] policy           Interpolation policy.
- * @param[in] border_size      Size of the border.
- * @param[in] border_undefined True if the border is undefined.
+ * @param[in] src_info           Input tensor info used to check.
+ * @param[in] dst_shape          Shape of the output.
+ * @param[in] interpolate_policy Interpolation policy.
+ * @param[in] sampling_policy    Sampling policy.
+ * @param[in] border_undefined   True if the border is undefined.
  *
- * @return The corrispondent valid region
+ * @return The corresponding valid region
  */
-ValidRegion calculate_valid_region_scale(const ITensorInfo &src_info, const TensorShape &dst_shape, InterpolationPolicy policy, BorderSize border_size, bool border_undefined);
+ValidRegion calculate_valid_region_scale(const ITensorInfo &src_info, const TensorShape &dst_shape,
+                                         InterpolationPolicy interpolate_policy, SamplingPolicy sampling_policy, bool border_undefined);
 
 /** Convert a linear index into n-dimensional coordinates.
  *

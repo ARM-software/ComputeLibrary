@@ -142,7 +142,11 @@ void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITe
                               dy_access,
                               output_access);
 
-    output_access.set_valid_region(win, calculate_valid_region_scale(*(input->info()), output->info()->tensor_shape(), policy, border_size(), border_undefined));
+    output_access.set_valid_region(win, calculate_valid_region_scale(*(input->info()),
+                                                                     output->info()->tensor_shape(),
+                                                                     policy,
+                                                                     sampling_policy,
+                                                                     border_undefined));
     INEKernel::configure(win);
 }
 

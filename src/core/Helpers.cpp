@@ -173,3 +173,75 @@ Window arm_compute::calculate_max_window_horizontal(const ValidRegion &valid_reg
 
     return window;
 }
+
+ValidRegion arm_compute::calculate_valid_region_scale(const ITensorInfo &src_info, const TensorShape &dst_shape,
+                                                      InterpolationPolicy interpolate_policy, SamplingPolicy sampling_policy, bool border_undefined)
+{
+    const float scale_x        = static_cast<float>(dst_shape[0]) / src_info.tensor_shape()[0];
+    const float scale_y        = static_cast<float>(dst_shape[1]) / src_info.tensor_shape()[1];
+    const float sampling_point = (sampling_policy == SamplingPolicy::CENTER) ? 0.5f : 0.0f;
+
+    // Get input's valid region start and end points
+    const int valid_start_in_x = src_info.valid_region().anchor[0];
+    const int valid_start_in_y = src_info.valid_region().anchor[1];
+    const int valid_end_in_x   = src_info.valid_region().anchor[0] + src_info.valid_region().shape[0];
+    const int valid_end_in_y   = src_info.valid_region().anchor[1] + src_info.valid_region().shape[1];
+
+    // Initialize output's valid region start and end points
+    auto valid_start_out_x = static_cast<int>(valid_start_in_x * scale_x);
+    auto valid_start_out_y = static_cast<int>(valid_start_in_y * scale_y);
+    auto valid_end_out_x   = std::min<int>(std::ceil(valid_end_in_x * scale_x), dst_shape[0]);
+    auto valid_end_out_y   = std::min<int>(std::ceil(valid_end_in_y * scale_y), dst_shape[1]);
+
+    // Handle valid points in case of the bi-linear interpolation
+    if(border_undefined)
+    {
+        switch(interpolate_policy)
+        {
+            case InterpolationPolicy::NEAREST_NEIGHBOR:
+            {
+                // (start_out + sampling_point) >= (start_in * scale)
+                // start_out = ceil((start_in * scale) - sampling_point)
+                valid_start_out_x = std::ceil(valid_start_in_x * scale_x - sampling_point);
+                valid_start_out_y = std::ceil(valid_start_in_y * scale_y - sampling_point);
+
+                // (end_out - 1 + sampling_point) < (end_in * scale)
+                // end_out   = ceil((end_in * scale) - sampling_point); // <-- ceil(x - 1) strictly less
+                valid_end_out_x = std::ceil(valid_end_in_x * scale_x - sampling_point);
+                valid_end_out_y = std::ceil(valid_end_in_y * scale_y - sampling_point);
+                break;
+            }
+            case InterpolationPolicy::BILINEAR:
+            {
+                // (start_out + sampling_point) >= ((start_in + sampling_point) * scale)
+                // start_out = ceil(((start_in + sampling_point) * scale) - sampling_point)
+                valid_start_out_x = std::ceil((valid_start_in_x + sampling_point) * scale_x - sampling_point);
+                valid_start_out_y = std::ceil((valid_start_in_y + sampling_point) * scale_y - sampling_point);
+
+                // (end_out - 1 + sampling_point) <= ((end_in - 1 + sampling_point) * scale)
+                // end_out   = floor(((end_in - 1 + sampling_point) * scale) - sampling_point + 1)
+                valid_end_out_x = std::floor((valid_end_in_x - 1.f + sampling_point) * scale_x - sampling_point + 1.f);
+                valid_end_out_y = std::floor((valid_end_in_y - 1.f + sampling_point) * scale_y - sampling_point + 1.f);
+                break;
+            }
+            case InterpolationPolicy::AREA:
+                break;
+            default:
+            {
+                ARM_COMPUTE_ERROR("Invalid InterpolationPolicy");
+                break;
+            }
+        }
+    }
+
+    // Setup output valid region
+    ValidRegion valid_region{ Coordinates(), dst_shape, src_info.tensor_shape().num_dimensions() };
+
+    valid_region.anchor.set(0, std::max(0, valid_start_out_x));
+    valid_region.anchor.set(1, std::max(0, valid_start_out_y));
+
+    valid_region.shape.set(0, std::min<size_t>(valid_end_out_x - valid_start_out_x, dst_shape[0]));
+    valid_region.shape.set(1, std::min<size_t>(valid_end_out_y - valid_start_out_y, dst_shape[1]));
+
+    return valid_region;
+}

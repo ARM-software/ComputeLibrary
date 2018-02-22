@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -74,7 +74,16 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        library->fill_tensor_uniform(tensor, 0);
+        if(is_data_type_float(_data_type))
+        {
+            library->fill_tensor_uniform(tensor, 0);
+        }
+        else
+        {
+            // Restrict range for float to avoid any floating point issues
+            std::uniform_real_distribution<> distribution(-5.0f, 5.0f);
+            library->fill(tensor, distribution, 0);
+        }
     }
 
     TensorType compute_target(const TensorShape &shape, const float scale_x, const float scale_y,
