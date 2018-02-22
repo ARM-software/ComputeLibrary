@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2018 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/QAsymm8.h"
 #include "arm_compute/core/Rounding.h"
+#include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorShape.h"
 #include "support/Half.h"
@@ -104,6 +105,13 @@ constexpr float SCALE_PYRAMID_HALF = 0.5f;
 
 /* Constant value used to indicate a ORB scaled pyramid */
 constexpr float SCALE_PYRAMID_ORB = 8.408964152537146130583778358414e-01;
+
+/** Supported tensor data layouts */
+enum class DataLayout
+{
+    NCHW,
+    NHWC
+};
 
 /** Quantization settings (used for QASYMM8 data type) */
 struct QuantizationInfo
@@ -188,6 +196,21 @@ struct ValidRegion
     int end(unsigned int d) const
     {
         return anchor[d] + shape[d];
+    }
+
+    /** Accessor to set the value of anchor and shape for one of the dimensions.
+     *
+     * @param[in] dimension Dimension for which the value is set.
+     * @param[in] start     Value to be set in anchor for the dimension.
+     * @param[in] size      Value to be set in shape for the dimension.
+     *
+     * @return *this.
+     */
+    ValidRegion &set(size_t dimension, int start, size_t size)
+    {
+        anchor.set(dimension, start);
+        shape.set(dimension, size);
+        return *this;
     }
 
     Coordinates anchor;
@@ -513,10 +536,14 @@ public:
     {
         return _stride;
     }
+    bool padding_is_symmetric() const
+    {
+        return (_pad_left == _pad_right) && (_pad_top == _pad_bottom);
+    }
     std::pair<unsigned int, unsigned int> pad() const
     {
         //this accessor should be used only when padding is symmetric
-        ARM_COMPUTE_ERROR_ON(_pad_left != _pad_right || _pad_top != _pad_bottom);
+        ARM_COMPUTE_ERROR_ON(!padding_is_symmetric());
         return std::make_pair(_pad_left, _pad_top);
     }
 
@@ -563,7 +590,7 @@ class PoolingLayerInfo
 public:
     /** Default Constructor */
     PoolingLayerInfo()
-        : _pool_type(PoolingType::MAX), _pool_size(0), _pad_stride_info(PadStrideInfo()), _exclude_padding(false), _is_global_pooling(false)
+        : _pool_type(PoolingType::MAX), _pool_size(Size2D()), _pad_stride_info(PadStrideInfo()), _exclude_padding(false), _is_global_pooling(false)
     {
     }
     /** Default Constructor
@@ -579,6 +606,22 @@ public:
                               unsigned int  pool_size,
                               PadStrideInfo pad_stride_info = PadStrideInfo(),
                               bool          exclude_padding = false)
+        : _pool_type(pool_type), _pool_size(Size2D(pool_size, pool_size)), _pad_stride_info(pad_stride_info), _exclude_padding(exclude_padding), _is_global_pooling(false)
+    {
+    }
+    /** Default Constructor
+     *
+     * @param[in] pool_type       Pooling type @ref PoolingType.
+     * @param[in] pool_size       Pooling size, in elements, across  x and y.
+     * @param[in] pad_stride_info (Optional) Padding and stride information @ref PadStrideInfo
+     * @param[in] exclude_padding (Optional) Strategy when accounting padding in calculations.
+     *                             True will exclude padding while false will not (Used in AVG/L2 pooling to determine the pooling area).
+     *                             Defaults to false;
+     */
+    explicit PoolingLayerInfo(PoolingType   pool_type,
+                              Size2D        pool_size,
+                              PadStrideInfo pad_stride_info = PadStrideInfo(),
+                              bool          exclude_padding = false)
         : _pool_type(pool_type), _pool_size(pool_size), _pad_stride_info(pad_stride_info), _exclude_padding(exclude_padding), _is_global_pooling(false)
     {
     }
@@ -589,14 +632,14 @@ public:
      * @param[in] pool_type Pooling type @ref PoolingType.
      */
     explicit PoolingLayerInfo(PoolingType pool_type)
-        : _pool_type(pool_type), _pool_size(0), _pad_stride_info(PadStrideInfo(1, 1, 0, 0)), _exclude_padding(false), _is_global_pooling(true)
+        : _pool_type(pool_type), _pool_size(Size2D()), _pad_stride_info(PadStrideInfo(1, 1, 0, 0)), _exclude_padding(false), _is_global_pooling(true)
     {
     }
     PoolingType pool_type() const
     {
         return _pool_type;
     }
-    unsigned int pool_size() const
+    const Size2D &pool_size() const
     {
         return _pool_size;
     }
@@ -615,7 +658,7 @@ public:
 
 private:
     PoolingType   _pool_type;
-    unsigned int  _pool_size;
+    Size2D        _pool_size;
     PadStrideInfo _pad_stride_info;
     bool          _exclude_padding;
     bool          _is_global_pooling;
@@ -674,6 +717,7 @@ public:
         LINEAR           /**< Linear ( \f$ f(x)= ax + b \f$ ) */
     };
 
+    ActivationLayerInfo() = default;
     /** Default Constructor
      *
      * @param[in] f The activation function to use.
@@ -682,7 +726,7 @@ public:
      * @param[in] b (Optional) The beta parameter used by some activation functions (@ref ActivationFunction::LINEAR, @ref ActivationFunction::LU_BOUNDED_RELU, @ref ActivationFunction::TANH).
      */
     ActivationLayerInfo(ActivationFunction f, float a = 0.0f, float b = 0.0f)
-        : _act(f), _a(a), _b(b)
+        : _act(f), _a(a), _b(b), _enabled(true)
     {
     }
     ActivationFunction activation() const
@@ -697,11 +741,16 @@ public:
     {
         return _b;
     }
+    bool enabled() const
+    {
+        return _enabled;
+    }
 
 private:
-    ActivationFunction _act;
-    float              _a;
-    float              _b;
+    ActivationFunction _act     = { ActivationLayerInfo::ActivationFunction::LOGISTIC };
+    float              _a       = {};
+    float              _b       = {};
+    bool               _enabled = { false };
 };
 
 /** Normalization Layer Information class */
@@ -824,13 +873,95 @@ private:
     const unsigned int _num_kernels;
 };
 
-/** GEMM Information class. This class stores the necessary information to compute GEMM functions */
+/** GEMM reshape information class. This class stores the necessary information about matrix A and matrix B reshape.
+ *
+ * The matrix A can only be reshaped through @ref CLGEMMInterleave4x4Kernel or  @ref NEGEMMInterleave4x4Kernel or  @ref GCGEMMInterleave4x4Kernel
+ * Note: Optionally just for @ref CLGEMMInterleave4x4Kernel is it possible to set mult_interleave4x4_height, the multiplication factor for the height of the 4x4 interleaved block
+ *
+ * The matrix B can only be reshaped through @ref CLGEMMTranspose1xWKernel or  @ref NEGEMMTranspose1xWKernel or  @ref GCGEMMTranspose1xWKernel
+ * Note: Optionally just for @ref CLGEMMTranspose1xWKernel is it possible to set mult_transpose1xW_width, the multiplication factor for the width of the 1xW transposed block
+ *
+ */
+class GEMMReshapeInfo final
+{
+public:
+    /** Default constructor */
+    GEMMReshapeInfo()
+        : _m(1), _n(1), _k(1), _mult_transpose1xW_width(1), _mult_interleave4x4_height(1)
+    {
+    }
+    /** Constructor
+     *
+     * @param[in] m                         Number of matrix A rows
+     * @param[in] n                         Number of matrix B columns
+     * @param[in] k                         Number of matrix A columns or matrix B rows
+     * @param[in] mult_transpose1xW_width   (Optional) Multiplication factor for the width of the 1xW transposed block
+     * @param[in] mult_interleave4x4_height (Optional) Multiplication factor for the height of the 4x4 interleaved block
+     */
+    GEMMReshapeInfo(int m, int n, int k, int mult_transpose1xW_width = 1, int mult_interleave4x4_height = 1)
+        : _m(m), _n(n), _k(k), _mult_transpose1xW_width(mult_transpose1xW_width), _mult_interleave4x4_height(mult_interleave4x4_height)
+    {
+    }
+    /** Number of matrix A rows
+     *
+     * @return the number of matrix A rows
+     */
+    int m() const
+    {
+        return _m;
+    }
+    /** Number of matrix B columns
+     *
+     * @return the number of matrix B columns
+     */
+    int n() const
+    {
+        return _n;
+    }
+    /** Number of matrix A columns or matrix B rows
+     *
+     * @return the number of matrix A columns or matrix B rows
+     */
+    int k() const
+    {
+        return _k;
+    }
+    /** Multiplication factor for the width of the 1xW transposed block
+     *
+     * @return the multiplication factor for the width of the 1xW transposed block
+     */
+    int mult_transpose1xW_width() const
+    {
+        return _mult_transpose1xW_width;
+    }
+    /** Multiplication factor for the height of the 4x4 interleaved block
+     *
+     * @return the multiplication factor for the height of the 4x4 interleaved block
+     */
+    int mult_interleave4x4_height() const
+    {
+        return _mult_interleave4x4_height;
+    }
+
+private:
+    const int _m;
+    const int _n;
+    const int _k;
+    const int _mult_transpose1xW_width;
+    const int _mult_interleave4x4_height;
+};
+
+/** GEMM information class. This class stores the necessary information to compute GEMM functions
+ *
+ * This object also contains the information about how matrix A and matrix B have been reshaped
+ *
+ */
 class GEMMInfo
 {
 public:
     /** Default constructor */
     GEMMInfo()
-        : _is_a_reshaped(false), _is_b_reshaped(false), _reshape_b_only_on_first_run(false)
+        : _is_a_reshaped(false), _is_b_reshaped(false), _reshape_b_only_on_first_run(false), _reshape_info()
     {
     }
     /** Constructor
@@ -838,9 +969,10 @@ public:
      * @param[in] is_a_reshaped               True if the matrix A has been reshaped
      * @param[in] is_b_reshaped               True if the matrix B has been reshaped
      * @param[in] reshape_b_only_on_first_run Reshape matrix B only for the first run
+     * @param[in] reshape_info                (Optional) GEMM reshape information object
      */
-    GEMMInfo(bool is_a_reshaped, bool is_b_reshaped, bool reshape_b_only_on_first_run)
-        : _is_a_reshaped(is_a_reshaped), _is_b_reshaped(is_b_reshaped), _reshape_b_only_on_first_run(reshape_b_only_on_first_run)
+    GEMMInfo(bool is_a_reshaped, bool is_b_reshaped, bool reshape_b_only_on_first_run, const GEMMReshapeInfo &reshape_info = GEMMReshapeInfo())
+        : _is_a_reshaped(is_a_reshaped), _is_b_reshaped(is_b_reshaped), _reshape_b_only_on_first_run(reshape_b_only_on_first_run), _reshape_info(reshape_info)
     {
     }
     /** Flag which specifies if the matrix A has been reshaped
@@ -869,11 +1001,20 @@ public:
     {
         return _reshape_b_only_on_first_run;
     };
+    /** GEMMReshapeInfo object which stores the necessary information to understand how the matrix A and matrix B have been reshaped
+     *
+     * @return the GEMMReshapeInfo object
+     */
+    const GEMMReshapeInfo &reshape_info() const
+    {
+        return _reshape_info;
+    }
 
 private:
-    const bool _is_a_reshaped;
-    const bool _is_b_reshaped;
-    const bool _reshape_b_only_on_first_run;
+    const bool      _is_a_reshaped;
+    const bool      _is_b_reshaped;
+    const bool      _reshape_b_only_on_first_run;
+    GEMMReshapeInfo _reshape_info;
 };
 
 /** IO formatting information class*/
@@ -916,6 +1057,14 @@ struct IOFormatInfo
     std::string   element_delim;
     std::string   row_delim;
     bool          align_columns;
+};
+
+/** Available ConvolutionMethod*/
+enum class ConvolutionMethod
+{
+    GEMM,    /**< Convolution using GEMM */
+    DIRECT,  /**< Direct convolution */
+    WINOGRAD /**< Convolution using Winograd */
 };
 }
 #endif /* __ARM_COMPUTE_TYPES_H__ */

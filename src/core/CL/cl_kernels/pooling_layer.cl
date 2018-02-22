@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -183,13 +183,13 @@
         res = POOL_OP(res, (VEC_DATA_TYPE(DATA_TYPE, 4))(data00.s25, data01.s03));                                                   \
     })
 
-DATA_TYPE calculate_avg_scale(const int pool_size, const int upper_bound_w, const int upper_bound_h,
+DATA_TYPE calculate_avg_scale(const int pool_size_x, const int pool_size_y, const int upper_bound_w, const int upper_bound_h,
                               const int pad_x, const int pad_y, const int stride_x, const int stride_y)
 {
     int       start_x = get_global_id(0) * stride_x - pad_x;
     int       start_y = get_global_id(1) * stride_y - pad_y;
-    const int end_x   = min(start_x + pool_size, upper_bound_w);
-    const int end_y   = min(start_y + pool_size, upper_bound_h);
+    const int end_x   = min(start_x + pool_size_x, upper_bound_w);
+    const int end_y   = min(start_y + pool_size_y, upper_bound_h);
 #if defined(EXCLUDE_PADDING)
     start_x = max(0, start_x);
     start_y = max(0, start_y);
@@ -249,7 +249,7 @@ __kernel void pooling_layer_2(
 
 #if defined(POOL_AVG) || defined(POOL_L2)
     // Divide by pool region in case of average or l2 pooling
-    res = DIV_OP(res, calculate_avg_scale(2, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y));
+    res = DIV_OP(res, calculate_avg_scale(2, 2, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y));
 #endif /* defined(POOL_AVG) || defined(POOL_L2) */
 
 #if defined(POOL_L2)
@@ -317,7 +317,7 @@ __kernel void pooling_layer_3(
 
 #if defined(POOL_AVG) || defined(POOL_L2)
     // Divide by pool region in case of average pooling
-    res = DIV_OP(res, calculate_avg_scale(3, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y));
+    res = DIV_OP(res, calculate_avg_scale(3, 3, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y));
 #endif /* defined(POOL_AVG) || defined(POOL_L2) */
 
 #if defined(POOL_L2)
@@ -403,7 +403,7 @@ __kernel void pooling_layer_optimized_3(
 }
 #endif // defined(POOLING3x3) && !defined(FIXED_POINT_POSITION)
 
-#if defined(POOL_SIZE)
+#if defined(POOL_SIZE_X) && defined(POOL_SIZE_Y)
 
 // Set the initial value for the pooling operation accordingly with the data type
 #if defined(POOL_AVG) || defined(POOL_L2)
@@ -427,7 +427,7 @@ __kernel void pooling_layer_optimized_3(
  *
  * @note Datatype must be passed using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types are QS8/QS16/F16/F32;
  * @note -DFP16 must be passed at compile time if half float data type is used
- * @note Pool size must be passed using -DPOOL_SIZE e.g. -DPOOL_SIZE=13;
+ * @note Pool sizes must be passed using -DPOOL_SIZE_X and -DPOOL_SIZE_Y e.g. -DPOOL_SIZE_X=13;
  * @note In case of average pooling the following information must be passed at compile time:
  *       -DPOOL_AVG must be provided otherwise max pooling will be performed.
  *       -DMAX_WIDTH and -DMAX_HEIGHT which are the maximum accessible indeces in x and y dimensions (width + pad)
@@ -451,7 +451,7 @@ __kernel void pooling_layer_optimized_3(
  * @param[in]  output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  output_offset_first_element_in_bytes The offset of the first element in the destination image
  */
-__kernel void pooling_layer_N(
+__kernel void pooling_layer_MxN(
     TENSOR3D_DECLARATION(input),
     TENSOR3D_DECLARATION(output))
 {
@@ -464,10 +464,10 @@ __kernel void pooling_layer_N(
     DATA_TYPE sdata = INITIAL_VALUE;
 
     // Load data
-    for(int y = 0; y < POOL_SIZE; y++)
+    for(int y = 0; y < POOL_SIZE_Y; y++)
     {
         int x = 0;
-        for(; x <= ((int)POOL_SIZE - 8); x += 8)
+        for(; x <= ((int)POOL_SIZE_X - 8); x += 8)
         {
             VEC_DATA_TYPE(DATA_TYPE, 8)
             data0 = vload8(0, (__global DATA_TYPE *)tensor3D_offset(&input, x, y, 0));
@@ -479,7 +479,7 @@ __kernel void pooling_layer_N(
         }
 
         // Leftover
-        for(; x < (int)POOL_SIZE; ++x)
+        for(; x < (int)POOL_SIZE_X; ++x)
         {
             DATA_TYPE data0 = *((__global DATA_TYPE *)tensor3D_offset(&input, x, y, 0));
 #if defined(POOL_L2)
@@ -500,7 +500,7 @@ __kernel void pooling_layer_N(
 
 #if defined(POOL_AVG) || defined(POOL_L2)
     // Divide by pool region in case of average pooling
-    res = DIV_OP(res, calculate_avg_scale(POOL_SIZE, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y));
+    res = DIV_OP(res, calculate_avg_scale(POOL_SIZE_X, POOL_SIZE_Y, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y));
 #endif /* defined(POOL_AVG) || defined(POOL_L2) */
 
 #if defined(POOL_L2)
@@ -511,4 +511,4 @@ __kernel void pooling_layer_N(
     // Store result
     *(__global DATA_TYPE *)output.ptr = res;
 }
-#endif // defined(POOL_SIZE)
+#endif // defined(POOL_SIZE_X) && defined(POOL_SIZE_Y)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,17 +35,21 @@ class ITensor;
 class NELogits1DMaxKernel : public INESimpleKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NELogits1DMaxKernel";
+    }
     /** Default constructor */
     NELogits1DMaxKernel();
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F16/F32.
+     * @param[in]  input  Source tensor. Data types supported: QASYMM8/QS8/QS16/F16/F32.
      * @param[out] output Destination tensor. Data types supported: same as @p input
      */
     void configure(const ITensor *input, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NELogits1DMaxKernel
      *
-     * @param[in] input  Source tensor. Data types supported: QS8/QS16/F16/F32
+     * @param[in] input  Source tensor. Data types supported: QASYMM8/QS8/QS16/F16/F32.
      * @param[in] output Destination tensor. Data types supported: same as @p input
      *
      * @return a status
@@ -57,109 +61,71 @@ public:
     BorderSize border_size() const override;
 
 private:
-    using Logits1DMaxFunction = void(const ITensor *in, ITensor *out, const Window &window);
+    using Logits1DMaxFunction = void(const ITensor &in, ITensor &out, const Window &window);
 
 private:
     Logits1DMaxFunction *_func;
     BorderSize           _border_size;
 };
 
-/** Interface for shifting the logits values around the max value and exponentiating the result */
-class NELogits1DShiftExpSumKernel : public INEKernel
+/** Interface for softmax computation for QASYMM8 with pre-computed max. */
+class NELogits1DSoftmaxKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NELogits1DSoftmaxKernel";
+    }
     /** Default constructor */
-    NELogits1DShiftExpSumKernel();
+    NELogits1DSoftmaxKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NELogits1DShiftExpSumKernel(const NELogits1DShiftExpSumKernel &) = delete;
+    NELogits1DSoftmaxKernel(const NELogits1DSoftmaxKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NELogits1DShiftExpSumKernel &operator=(const NELogits1DShiftExpSumKernel &) = delete;
+    NELogits1DSoftmaxKernel &operator=(const NELogits1DSoftmaxKernel &) = delete;
     /** Allow instances of this class to be moved */
-    NELogits1DShiftExpSumKernel(NELogits1DShiftExpSumKernel &&) = default;
+    NELogits1DSoftmaxKernel(NELogits1DSoftmaxKernel &&) = default;
     /** Allow instances of this class to be moved */
-    NELogits1DShiftExpSumKernel &operator=(NELogits1DShiftExpSumKernel &&) = default;
+    NELogits1DSoftmaxKernel &operator=(NELogits1DSoftmaxKernel &&) = default;
     /** Default destructor */
-    ~NELogits1DShiftExpSumKernel() = default;
+    ~NELogits1DSoftmaxKernel() = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F16/F32.
-     * @param[in]  max    Max values tensor. Data types supported: same as @p input.
+     * @param[in]  input  Source tensor. Data types supported: QASYMM8/QS8/QS16/F16/F32.
+     * @param[in]  max    Max values tensor. Same shape as input with dimension 0 set to 1.
+     *                    Data types supported: same as @p input.
      * @param[out] output Destination tensor. Data types supported: same as @p input.
-     * @param[out] sum    Sum of 1D logits tensor. Data types supported: same as @p input.
-     * @param[in]  beta   (Optional) A scaling factor for the exponent. QS8/QS16 only support a beta value of 1.
-     */
-    void configure(const ITensor *input, const ITensor *max, ITensor *output, ITensor *sum, float beta = 1.0f);
-    /** Static function to check if given info will lead to a valid configuration of @ref NELogits1DShiftExpSumKernel
+     * @param[in]  beta   A scaling factor for the exponent.
      *
-     * @param[in] input  Source tensor. Data types supported: QS8/QS16/F16/F32
-     * @param[in] max    Max values tensor. Data types supported: same as @p input
-     * @param[in] output Destination tensor. Data types supported: same as @p input.
-     * @param[in] sum    Sum of 1D logits tensor. Data types supported: same as @p input.
-     * @param[in] beta   (Optional) A scaling factor for the exponent. QS8/QS16 only support a beta value of 1.
+     * @param      tmp    Auxiliary tensor. Must be type F32 and same shape as the input.
+     */
+    void configure(const ITensor *input, const ITensor *max, ITensor *output, const float beta, ITensor *tmp);
+    /** Static function to check if given info will lead to a valid configuration of @ref NELogits1DSoftmaxKernel
+     *
+     * @param[in] input  Source tensor info. Data types supported: QASYMM8/QS8/QS16/F16/F32.
+     * @param[in] max    Max values tensor info. Same shape as input with dimension 0 set to 1.
+     *                   Data types supported: same as @p input.
+     * @param[in] output Destination tensor info. Data types supported: same as @p input.
+     * @param[in] beta   A scaling factor for the exponent.
+     * @param[in] tmp    Tensor info of auxiliary. Must be type F32 and same shape as the input.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *max, const ITensorInfo *output, const ITensorInfo *sum, float beta = 1.0f);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *max,
+                           const ITensorInfo *output, const float beta, const ITensorInfo *tmp);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    using Logits1DShiftExpSumFunction = void(const ITensor *in, const ITensor *max, ITensor *out, ITensor *sum, const Window &window, float beta);
+    using LogitsSoftmaxFunction = void(const ITensor &in, const ITensor &max, void *const tmp, ITensor &out, const float beta,
+                                       const Window &window);
 
-private:
-    Logits1DShiftExpSumFunction *_func;
-    const ITensor               *_input;
-    const ITensor               *_max;
-    ITensor                     *_output;
-    ITensor                     *_sum;
-    float                        _beta;
-};
-
-/** Interface for calculating the final step of the Softmax Layer where each logit value is multiplied by the inverse of the sum of the logits. */
-class NELogits1DNormKernel : public INEKernel
-{
-public:
-    /** Default constructor */
-    NELogits1DNormKernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NELogits1DNormKernel(const NELogits1DNormKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NELogits1DNormKernel &operator=(const NELogits1DNormKernel &) = delete;
-    /** Allow instances of this class to be moved */
-    NELogits1DNormKernel(NELogits1DNormKernel &&) = default;
-    /** Allow instances of this class to be moved */
-    NELogits1DNormKernel &operator=(NELogits1DNormKernel &&) = default;
-    /** Default destructor */
-    ~NELogits1DNormKernel() = default;
-    /** Set the input and output tensors.
-     *
-     * @param[in]  input  Source tensor. Data types supported: QS8/QS16/F16/F32.
-     * @param[in]  sum    Sum tensor. The number of dimensions should be dim(input)-1. Data types supported: same as @p input.
-     * @param[out] output Destination tensor. Data types supported: same as @p input.
-     */
-    void configure(const ITensor *input, const ITensor *sum, ITensor *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref NELogits1DNormKernel
-     *
-     * @param[in] input  Source tensor. Data types supported: QS8/QS16/S32/F16/F32
-     * @param[in] sum    Sum tensor. The number of dimensions should be dim(input)-1. Data types supported: same as @p input.
-     * @param[in] output Destination tensor. Data types supported: same as @p input.
-     *
-     * @return a status
-     */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output);
-
-    // Inherited methods overridden:
-    void run(const Window &window, const ThreadInfo &info) override;
-
-private:
-    using Logits1DNormFunction = void(const ITensor *in, const ITensor *sum, ITensor *out, const Window &window);
-
-private:
-    Logits1DNormFunction *_func;
-    const ITensor        *_input;
-    const ITensor        *_sum;
-    ITensor              *_output;
+    LogitsSoftmaxFunction *_func;
+    const ITensor         *_input;
+    const ITensor         *_max;
+    ITensor               *_output;
+    float                  _beta;
+    ITensor               *_tmp; //Temporary. Used internally
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_NESOFTMAXLAYERKERNEL_H__ */

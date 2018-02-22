@@ -8,7 +8,9 @@ var classarm__compute_1_1_i_g_c_tensor =
     [ "clear", "classarm__compute_1_1_i_g_c_tensor.xhtml#ac8bb3912a3ce86b15842e79d0b421204", null ],
     [ "gc_buffer", "classarm__compute_1_1_i_g_c_tensor.xhtml#a78046d8dc1b472a13fe70d8862f2edaf", null ],
     [ "map", "classarm__compute_1_1_i_g_c_tensor.xhtml#a14c53d2d17be6fa8a2c9861527c7b002", null ],
+    [ "needs_shifting", "classarm__compute_1_1_i_g_c_tensor.xhtml#a61f1b6619df2a9324c6360b077083f39", null ],
     [ "operator=", "classarm__compute_1_1_i_g_c_tensor.xhtml#a53ba7801ed7dbf945a0413addd6dc990", null ],
     [ "operator=", "classarm__compute_1_1_i_g_c_tensor.xhtml#aa49cf1d6ea350774509911cad4903ad6", null ],
+    [ "set_needs_shifting", "classarm__compute_1_1_i_g_c_tensor.xhtml#a69cfba8177b402abe134fdad5fe4c7dc", null ],
     [ "unmap", "classarm__compute_1_1_i_g_c_tensor.xhtml#a1ffeb3b5abb3d61f62b58a391816201c", null ]
 ];

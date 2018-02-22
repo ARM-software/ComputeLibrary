@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,7 +47,7 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_ERROR_ON(weights->info()->dimension(0) != weights->info()->dimension(1));
-    ARM_COMPUTE_ERROR_ON(weights->info()->dimension(0) != 1 && weights->info()->dimension(0) != 3 && weights->info()->dimension(0) != 5);
+    ARM_COMPUTE_ERROR_ON(!info.padding_is_symmetric());
 
     _input        = input;
     _info         = info;
@@ -76,6 +76,8 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
     // setup the function to convolve the upscaled output
     const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
     _conv_f.configure(&_scaled_output, weights, bias, output, conv_info);
+
+    // Allocate auxiliary tensors
     _scaled_output.allocator()->allocate();
 }
 
@@ -113,6 +115,8 @@ void NEDeconvolutionLayer::run()
         }
     }
 
+    // Run convolution layer
     _conv_f.run();
+
     _memory_group.release();
 }

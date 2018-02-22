@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -78,13 +78,11 @@ void NEDequantizationLayerKernel::run(const Window &window, const ThreadInfo &in
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
     Window window_input_output(window);
-    window_input_output.collapse_if_possible(INEKernel::window(), 3);
     window_input_output.set(3, Window::Dimension(0, 1, 1));
 
     Window window_min_max;
     window_min_max.use_tensor_dimensions(_min_max->info()->tensor_shape());
     window_min_max.set(Window::DimX, Window::Dimension(0, 1, 1));
-    window_min_max.collapse_if_possible(INEKernel::window(), 1);
 
     Iterator input(_input, window_input_output);
     Iterator output(_output, window_input_output);

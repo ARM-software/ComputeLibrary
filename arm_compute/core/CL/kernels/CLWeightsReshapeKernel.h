@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,6 @@ public:
     CLWeightsReshapeKernel &operator=(CLWeightsReshapeKernel &&) = default;
     /** Default destructor */
     ~CLWeightsReshapeKernel() = default;
-
     /** Set the input and output of the kernel.
      *
      * @param[in]  input  The input tensor to convert. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] if shared,
@@ -54,6 +53,18 @@ public:
      * @param[out] output The output tensor. Should be a 2D Tensor. Data types supported: Same as @p input
      */
     void configure(const ICLTensor *input, const ICLTensor *biases, ICLTensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLWeightsReshapeKernel
+     *
+     * @param[in] input  The input tensor to convert. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] if shared,
+     *                   and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM,  num_patches] if unshared. Data types supported: QS8/QS16/QASYMM8/F16/F32
+     * @param[in] biases The shared biases tensor to append.  Bias is 1D tensor with dimensions [OFM] if shared and 2D tensor with
+     *                   dimensions [OFM, num_patches] if unshared. Data types supported: Same as @p input
+     *                   @warning Appending biases to weights reshaped matrix is not supported for quantized asymmetric types.
+     * @param[in] output The output tensor. Should be a 2D Tensor. Data types supported: Same as @p input
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

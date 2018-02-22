@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,13 +54,13 @@ public:
         std::string image;     /* Image data */
         std::string label;     /* Label data */
 
-        constexpr float mean_r = 122.68f; /* Mean value to subtract from red channel */
-        constexpr float mean_g = 116.67f; /* Mean value to subtract from green channel */
-        constexpr float mean_b = 104.01f; /* Mean value to subtract from blue channel */
+        // Create a preprocessor object
+        const std::array<float, 3> mean_rgb{ { 122.68f, 116.67f, 104.01f } };
+        std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<CaffePreproccessor>(mean_rgb);
 
-        // Set target. 0 (NEON), 1 (OpenCL). By default it is NEON
-        TargetHint            target_hint      = set_target_hint(argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0);
-        ConvolutionMethodHint convolution_hint = target_hint == TargetHint::NEON ? ConvolutionMethodHint::GEMM : ConvolutionMethodHint::DIRECT;
+        // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
+        const int  int_target_hint = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
+        TargetHint target_hint     = set_target_hint(int_target_hint);
 
         // Parse arguments
         if(argc < 2)
@@ -96,13 +96,12 @@ public:
 
         graph << target_hint
               << Tensor(TensorInfo(TensorShape(224U, 224U, 3U, 1U), 1, DataType::F32),
-                        get_input_accessor(image, mean_r, mean_g, mean_b))
+                        get_input_accessor(image, std::move(preprocessor)))
               << ConvolutionLayer(
                   7U, 7U, 96U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1.0_model/conv1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1.0_model/conv1_b.npy"),
                   PadStrideInfo(2, 2, 0, 0))
-              << convolution_hint
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
               << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)))
               << ConvolutionLayer(
@@ -173,6 +172,9 @@ public:
               << FlattenLayer()
               << SoftmaxLayer()
               << Tensor(get_output_accessor(label, 5));
+
+        // In order to enable the OpenCL tuner, graph_init() has to be called only when all nodes have been instantiated
+        graph.graph_init(int_target_hint == 2);
     }
     void do_run() override
     {

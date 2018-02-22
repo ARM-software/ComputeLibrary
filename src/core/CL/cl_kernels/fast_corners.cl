@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -254,6 +254,9 @@ __kernel void copy_to_keypoint(
             out[id].x               = get_global_id(0) + offset;
             out[id].y               = get_global_id(1) + offset;
             out[id].tracking_status = 1;
+            out[id].scale           = 0.f;
+            out[id].orientation     = 0.f;
+            out[id].error           = 0.f;
         }
     }
 }

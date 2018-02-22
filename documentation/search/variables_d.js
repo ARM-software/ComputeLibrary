@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['name',['name',['../structarm__compute_1_1test_1_1framework_1_1_test_info.xhtml#a9b45b3e13bd9167aab02e17e08916231',1,'arm_compute::test::framework::TestInfo']]],
+  ['name',['name',['../structarm__compute_1_1test_1_1framework_1_1_test_info.xhtml#a9b45b3e13bd9167aab02e17e08916231',1,'arm_compute::test::framework::TestInfo::name()'],['../structarm__compute_1_1test_1_1framework_1_1_scheduler_timer_1_1kernel__info.xhtml#a9b45b3e13bd9167aab02e17e08916231',1,'arm_compute::test::framework::SchedulerTimer::kernel_info::name()']]],
   ['names_5flut',['names_lut',['../structmali__userspace_1_1_counter_mapping.xhtml#a7c6807ec6b2dfbe3ff361f848ad395ee',1,'mali_userspace::CounterMapping']]],
   ['nefixedpointpixelwisemultiplicationfixture_3c_20qint16_5ft_20_3e',['NEFixedPointPixelWiseMultiplicationFixture&lt; qint16_t &gt;',['../namespacearm__compute_1_1test_1_1validation.xhtml#a6c9f6c7580368d1bcbfa2496d2ecdc2a',1,'arm_compute::test::validation']]],
   ['nefixedpointpixelwisemultiplicationfixture_3c_20qint8_5ft_20_3e',['NEFixedPointPixelWiseMultiplicationFixture&lt; qint8_t &gt;',['../namespacearm__compute_1_1test_1_1validation.xhtml#a5aed71d767e6e9e32c343a64d3403c36',1,'arm_compute::test::validation']]],

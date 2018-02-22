@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['k',['k',['../classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#a3f077e40406c116e6e61e54f17d9b8be',1,'arm_compute::GEMMReshapeInfo']]],
   ['kappa',['kappa',['../classarm__compute_1_1_normalization_layer_info.xhtml#a4df91dc0be2437a7d1bfd6d8df72baa8',1,'arm_compute::NormalizationLayerInfo']]],
   ['kbase_5fgpuprop_5fcoherency_5fgroup_5f0',['KBASE_GPUPROP_COHERENCY_GROUP_0',['../hwc_8hpp.xhtml#a1872aed65cec5be955419d3e5da597c2',1,'hwc.hpp']]],
   ['kbase_5fgpuprop_5fcoherency_5fgroup_5f1',['KBASE_GPUPROP_COHERENCY_GROUP_1',['../hwc_8hpp.xhtml#a5f778023dca79cb4b945416d75e178e5',1,'hwc.hpp']]],
@@ -30,10 +31,11 @@ var searchData=
   ['kbase_5fioctl_5fget_5fgpuprops',['KBASE_IOCTL_GET_GPUPROPS',['../hwc_8hpp.xhtml#a2f10ec473c7ff8f58dfebea6eebc6069',1,'hwc.hpp']]],
   ['kbase_5fioctl_5ftype',['KBASE_IOCTL_TYPE',['../hwc_8hpp.xhtml#a10533dc5f7e9204c396f127afbb971be',1,'hwc.hpp']]],
   ['kbase_5fuk_5fgpuprops',['kbase_uk_gpuprops',['../structmali__userspace_1_1kbase__uk__gpuprops.xhtml',1,'mali_userspace']]],
-  ['kernel',['Kernel',['../classarm__compute_1_1_kernel.xhtml#a4d7fb588e6d609d95d8cd491492ed420',1,'arm_compute::Kernel::Kernel()'],['../classarm__compute_1_1_kernel.xhtml#a83af2718294984c1053223a928164a7b',1,'arm_compute::Kernel::Kernel(const Kernel &amp;)=default'],['../classarm__compute_1_1_kernel.xhtml#a1d1e423ba4b26fdf460aa45bbc4457d1',1,'arm_compute::Kernel::Kernel(Kernel &amp;&amp;)=default'],['../classarm__compute_1_1_kernel.xhtml#a8b2bcac315357d36294d68948e51b925',1,'arm_compute::Kernel::Kernel(std::string name, const cl::Program &amp;program)'],['../classarm__compute_1_1_i_c_l_kernel.xhtml#ae5121015ab09ece4d470f50c7ffe198e',1,'arm_compute::ICLKernel::kernel()'],['../classarm__compute_1_1_i_g_c_kernel.xhtml#abca9f85e09acd3e4de49711b62dc8549',1,'arm_compute::IGCKernel::kernel()']]],
   ['kernel',['Kernel',['../classarm__compute_1_1_kernel.xhtml',1,'arm_compute']]],
+  ['kernel',['Kernel',['../classarm__compute_1_1_kernel.xhtml#a4d7fb588e6d609d95d8cd491492ed420',1,'arm_compute::Kernel::Kernel()'],['../classarm__compute_1_1_kernel.xhtml#a83af2718294984c1053223a928164a7b',1,'arm_compute::Kernel::Kernel(const Kernel &amp;)=default'],['../classarm__compute_1_1_kernel.xhtml#a1d1e423ba4b26fdf460aa45bbc4457d1',1,'arm_compute::Kernel::Kernel(Kernel &amp;&amp;)=default'],['../classarm__compute_1_1_kernel.xhtml#a8b2bcac315357d36294d68948e51b925',1,'arm_compute::Kernel::Kernel(std::string name, const cl::Program &amp;program)'],['../classarm__compute_1_1_i_c_l_kernel.xhtml#ae5121015ab09ece4d470f50c7ffe198e',1,'arm_compute::ICLKernel::kernel()'],['../classarm__compute_1_1_i_g_c_kernel.xhtml#abca9f85e09acd3e4de49711b62dc8549',1,'arm_compute::IGCKernel::kernel()']]],
+  ['kernel_5finfo',['kernel_info',['../structarm__compute_1_1test_1_1framework_1_1_scheduler_timer_1_1kernel__info.xhtml',1,'arm_compute::test::framework::SchedulerTimer']]],
   ['kernel_5fsize',['kernel_size',['../classarm__compute_1_1_weights_info.xhtml#a6da544d7a9bf5fe4114e55ddd198dbcc',1,'arm_compute::WeightsInfo']]],
-  ['keypoint',['KeyPoint',['../structarm__compute_1_1_key_point.xhtml',1,'arm_compute']]],
   ['keypoint',['Keypoint',['../struct_keypoint.xhtml',1,'Keypoint'],['../types_8h.xhtml#a29b97e206612aa5366b3bd3d2f7be322',1,'Keypoint():&#160;types.h']]],
+  ['keypoint',['KeyPoint',['../structarm__compute_1_1_key_point.xhtml',1,'arm_compute']]],
   ['keypointarray',['KeyPointArray',['../namespacearm__compute.xhtml#a8856eca9a83e16bb0cb5880e9c6c9fe7',1,'arm_compute']]]
 ];

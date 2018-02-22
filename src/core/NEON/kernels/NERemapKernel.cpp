@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,7 +46,7 @@ namespace
 {
 inline int32x4_t offset_nearest_interpolation(const float *mapx_ptr, const float *mapy_ptr, const float32x4_t &width, const float32x4_t &height, const int32x4_t &stride)
 {
-    static const float32x4_t lowerxy = vdupq_n_f32(-1.0f);
+    const float32x4_t lowerxy = vdupq_n_f32(-1.f);
 
     float32x4_t x = vld1q_f32(mapx_ptr);
     float32x4_t y = vld1q_f32(mapy_ptr);
@@ -113,11 +113,10 @@ void NERemapKernel::configure(const ITensor *input, const ITensor *map_x, const 
     AccessWindowStatic input_access(input->info(), -border_size().left, -border_size().top, access_right, input->info()->dimension(1) + border_size().bottom);
 
     AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal mapx_access(map_x->info(), 0, 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal mapy_access(map_y->info(), 0, 0, num_elems_processed_per_iteration);
 
-    update_window_and_padding(win, input_access,
-                              AccessWindowRectangle(map_x->info(), 0, 0, num_elems_processed_per_iteration, 1),
-                              AccessWindowRectangle(map_y->info(), 0, 0, num_elems_processed_per_iteration, 1),
-                              output_access);
+    update_window_and_padding(win, input_access, mapx_access, mapy_access, output_access);
 
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
@@ -152,27 +151,24 @@ void NERemapKernel::remap_nearest(const Window &window)
         const int32x4_t offset2 = offset_nearest_interpolation(mapx_ptr + 8, mapy_ptr + 8, width, height, in_stride);
         const int32x4_t offset3 = offset_nearest_interpolation(mapx_ptr + 12, mapy_ptr + 12, width, height, in_stride);
 
-        uint8x8_t tmp0 = vdup_n_u8(0);
-        tmp0           = vset_lane_u8(in_ptr[vgetq_lane_s32(offset0, 0)], tmp0, 0);
-        tmp0           = vset_lane_u8(in_ptr[vgetq_lane_s32(offset0, 1)], tmp0, 1);
-        tmp0           = vset_lane_u8(in_ptr[vgetq_lane_s32(offset0, 2)], tmp0, 2);
-        tmp0           = vset_lane_u8(in_ptr[vgetq_lane_s32(offset0, 3)], tmp0, 3);
-        tmp0           = vset_lane_u8(in_ptr[vgetq_lane_s32(offset1, 0)], tmp0, 4);
-        tmp0           = vset_lane_u8(in_ptr[vgetq_lane_s32(offset1, 1)], tmp0, 5);
-        tmp0           = vset_lane_u8(in_ptr[vgetq_lane_s32(offset1, 2)], tmp0, 6);
-        tmp0           = vset_lane_u8(in_ptr[vgetq_lane_s32(offset1, 3)], tmp0, 7);
-
-        uint8x8_t tmp1 = vdup_n_u8(0);
-        tmp1           = vset_lane_u8(in_ptr[vgetq_lane_s32(offset2, 0)], tmp1, 0);
-        tmp1           = vset_lane_u8(in_ptr[vgetq_lane_s32(offset2, 1)], tmp1, 1);
-        tmp1           = vset_lane_u8(in_ptr[vgetq_lane_s32(offset2, 2)], tmp1, 2);
-        tmp1           = vset_lane_u8(in_ptr[vgetq_lane_s32(offset2, 3)], tmp1, 3);
-        tmp1           = vset_lane_u8(in_ptr[vgetq_lane_s32(offset3, 0)], tmp1, 4);
-        tmp1           = vset_lane_u8(in_ptr[vgetq_lane_s32(offset3, 1)], tmp1, 5);
-        tmp1           = vset_lane_u8(in_ptr[vgetq_lane_s32(offset3, 2)], tmp1, 6);
-        tmp1           = vset_lane_u8(in_ptr[vgetq_lane_s32(offset3, 3)], tmp1, 7);
-
-        vst1q_u8(out.ptr(), vcombine_u8(tmp0, tmp1));
+        uint8x16_t tmp = vdupq_n_u8(0);
+        tmp            = vsetq_lane_u8(in_ptr[vgetq_lane_s32(offset0, 0)], tmp, 0);
+        tmp            = vsetq_lane_u8(in_ptr[vgetq_lane_s32(offset0, 1)], tmp, 1);
+        tmp            = vsetq_lane_u8(in_ptr[vgetq_lane_s32(offset0, 2)], tmp, 2);
+        tmp            = vsetq_lane_u8(in_ptr[vgetq_lane_s32(offset0, 3)], tmp, 3);
+        tmp            = vsetq_lane_u8(in_ptr[vgetq_lane_s32(offset1, 0)], tmp, 4);
+        tmp            = vsetq_lane_u8(in_ptr[vgetq_lane_s32(offset1, 1)], tmp, 5);
+        tmp            = vsetq_lane_u8(in_ptr[vgetq_lane_s32(offset1, 2)], tmp, 6);
+        tmp            = vsetq_lane_u8(in_ptr[vgetq_lane_s32(offset1, 3)], tmp, 7);
+        tmp            = vsetq_lane_u8(in_ptr[vgetq_lane_s32(offset2, 0)], tmp, 8);
+        tmp            = vsetq_lane_u8(in_ptr[vgetq_lane_s32(offset2, 1)], tmp, 9);
+        tmp            = vsetq_lane_u8(in_ptr[vgetq_lane_s32(offset2, 2)], tmp, 10);
+        tmp            = vsetq_lane_u8(in_ptr[vgetq_lane_s32(offset2, 3)], tmp, 11);
+        tmp            = vsetq_lane_u8(in_ptr[vgetq_lane_s32(offset3, 0)], tmp, 12);
+        tmp            = vsetq_lane_u8(in_ptr[vgetq_lane_s32(offset3, 1)], tmp, 13);
+        tmp            = vsetq_lane_u8(in_ptr[vgetq_lane_s32(offset3, 2)], tmp, 14);
+        tmp            = vsetq_lane_u8(in_ptr[vgetq_lane_s32(offset3, 3)], tmp, 15);
+        vst1q_u8(out.ptr(), tmp);
     },
     in, out, mapx, mapy);
 }

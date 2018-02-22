@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,10 @@ class ITensor;
 class NEMedian3x3Kernel : public INESimpleKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEMedian3x3Kernel";
+    }
     /** Set the source, destination and border mode of the kernel
      *
      * @param[in]  input            Source tensor. Data type supported: U8

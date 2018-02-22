@@ -38,11 +38,13 @@ var searchData=
   ['window',['Window',['../classarm__compute_1_1_window.xhtml',1,'arm_compute']]],
   ['window_2eh',['Window.h',['../_window_8h.xhtml',1,'']]],
   ['window_2einl',['Window.inl',['../_window_8inl.xhtml',1,'']]],
-  ['winograd3x3f32',['Winograd3x3F32',['../classarm__compute_1_1_winograd3x3_f32.xhtml#ad95a08fe675ee862b2bd0f378c492297',1,'arm_compute::Winograd3x3F32']]],
-  ['winograd3x3f32',['Winograd3x3F32',['../classarm__compute_1_1_winograd3x3_f32.xhtml',1,'arm_compute']]],
+  ['winograd',['WINOGRAD',['../namespacearm__compute.xhtml#a683661ae75dcb7aef16b9c9bde31517da9d024a5762b3a992dec7eb3c49d17ae8',1,'arm_compute']]],
+  ['winogradbase',['WinogradBase',['../classarm__compute_1_1_n_e_winograd_layer_transform_input_kernel.xhtml#aa223aca04dd789990b8422db5631fe61',1,'arm_compute::NEWinogradLayerTransformInputKernel::WinogradBase()'],['../classarm__compute_1_1_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml#aa2895a99d9a1efae7844264931a0d348',1,'arm_compute::NEWinogradLayerBatchedGEMMKernel::WinogradBase()']]],
+  ['winogradconv',['WinogradConv',['../classarm__compute_1_1_n_e_winograd_layer_transform_input_kernel.xhtml#af17b2792d63e38a0eea385635191e836',1,'arm_compute::NEWinogradLayerTransformInputKernel::WinogradConv()'],['../classarm__compute_1_1_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml#acd8461f7d784d4c09b73447f357e6b1a',1,'arm_compute::NEWinogradLayerBatchedGEMMKernel::WinogradConv()']]],
   ['winogradlayerfixture_2eh',['WinogradLayerFixture.h',['../_winograd_layer_fixture_8h.xhtml',1,'']]],
   ['winogradlayervalidationfixture',['WinogradLayerValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_winograd_layer_validation_fixture.xhtml',1,'arm_compute::test::validation']]],
   ['wrap',['WRAP',['../namespacearm__compute.xhtml#a82b8ac759c804bc1fb4e2d21e178fb6fae1c8555fcf0ea2bb648a6fd527d658c0',1,'arm_compute::WRAP()'],['../namespacearm__compute_1_1test_1_1fixed__point__arithmetic.xhtml#a0ada8f647402027261407be09bdf25ffae1c8555fcf0ea2bb648a6fd527d658c0',1,'arm_compute::test::fixed_point_arithmetic::WRAP()']]],
   ['wrap_5fvalidate',['WRAP_VALIDATE',['../_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#a6c21e1e9072e5251356f8a97ffb7b98d',1,'PixelWiseMultiplication.cpp']]],
+  ['wrapper_2eh',['wrapper.h',['../wrapper_8h.xhtml',1,'']]],
   ['write',['write',['../structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_1_1functions.xhtml#a69b97b34f32a6fc05665fc8605806326',1,'arm_compute::test::fixed_point_arithmetic::detail::functions']]]
 ];

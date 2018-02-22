@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -176,13 +176,12 @@ $(document).ready(function(){initNavTree('globals_defs_a.xhtml','');});
 : <a class="el" href="arithmetic__op_8cl.xhtml#af3b709fb668cf93ca09e2a46a2a031a8">arithmetic_op.cl</a>
 </li>
 <li>ADD_OP
-: <a class="el" href="softmax__layer__quantized_8cl.xhtml#a44206a4e5783c7aabacec88aad878c88">softmax_layer_quantized.cl</a>
-, <a class="el" href="activation__layer_8cl.xhtml#aebbeb1f22eca3a3f4c3e019e8f419f39">activation_layer.cl</a>
-, <a class="el" href="batchnormalization__layer_8cl.xhtml#aebbeb1f22eca3a3f4c3e019e8f419f39">batchnormalization_layer.cl</a>
+: <a class="el" href="activation__layer_8cl.xhtml#aebbeb1f22eca3a3f4c3e019e8f419f39">activation_layer.cl</a>
 , <a class="el" href="direct__convolution1x1_8cl.xhtml#aebbeb1f22eca3a3f4c3e019e8f419f39">direct_convolution1x1.cl</a>
 , <a class="el" href="direct__convolution3x3_8cl.xhtml#aebbeb1f22eca3a3f4c3e019e8f419f39">direct_convolution3x3.cl</a>
 , <a class="el" href="normalization__layer_8cl.xhtml#a334426d638df3b4108c366e240cf5504">normalization_layer.cl</a>
 , <a class="el" href="softmax__layer_8cl.xhtml#a44206a4e5783c7aabacec88aad878c88">softmax_layer.cl</a>
+, <a class="el" href="softmax__layer__quantized_8cl.xhtml#a44206a4e5783c7aabacec88aad878c88">softmax_layer_quantized.cl</a>
 </li>
 <li>ADD_SAT_OP_EXPAND
 : <a class="el" href="fixed__point_8h.xhtml#a6b1acbaff6cb3bad4edda9a93dac1f9e">fixed_point.h</a>
@@ -294,6 +293,9 @@ $(document).ready(function(){initNavTree('globals_defs_a.xhtml','');});
 </li>
 <li>ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D
 : <a class="el" href="_validate_8h.xhtml#abbd63a8040ec1e44308da1d3be3732ae">Validate.h</a>
+</li>
+<li>ARM_COMPUTE_ERROR_ON_TENSORS_NOT_EVEN
+: <a class="el" href="_validate_8h.xhtml#a8a6d6f1d01603b27b7b29e1595323aac">Validate.h</a>
 </li>
 <li>ARM_COMPUTE_ERROR_ON_UNALLOCATED_TENSOR_OBJECT
 : <a class="el" href="graph_2_error_8h.xhtml#abfcb2017e44be2d22c147140c552edc3">Error.h</a>
@@ -427,6 +429,9 @@ $(document).ready(function(){initNavTree('globals_defs_a.xhtml','');});
 <li>ARM_COMPUTE_RETURN_ERROR_ON_TENSOR_NOT_2D
 : <a class="el" href="_validate_8h.xhtml#ac8fa80a763f5e67ded3fe6385972c08a">Validate.h</a>
 </li>
+<li>ARM_COMPUTE_RETURN_ERROR_ON_TENSORS_NOT_EVEN
+: <a class="el" href="_validate_8h.xhtml#afa03792380678d33e64ad42c0fdff956">Validate.h</a>
+</li>
 <li>ARM_COMPUTE_RETURN_ERROR_ON_UNCONFIGURED_KERNEL
 : <a class="el" href="_validate_8h.xhtml#afe826628d90b663c6efba849910b0795">Validate.h</a>
 </li>
@@ -454,14 +459,59 @@ $(document).ready(function(){initNavTree('globals_defs_a.xhtml','');});
 <li>ARM_COMPUTE_UNUSED
 : <a class="el" href="core_2_error_8h.xhtml#a4103adbb45806b2f2002d44b91d0d206">Error.h</a>
 </li>
+<li>ASYMM_EXP_ON_INTERVAL_BETWEEN_NEGATIVE_ONE_QUARTER_AND_0_EXCL
+: <a class="el" href="helpers__asymm_8h.xhtml#aeebdcd88f4320931cd4a599ad1527e83">helpers_asymm.h</a>
+</li>
+<li>ASYMM_EXP_ON_INTERVAL_BETWEEN_NEGATIVE_ONE_QUARTER_AND_0_EXCL_IMPL
+: <a class="el" href="helpers__asymm_8h.xhtml#a3d8a3968a069eb8abbc28d31c20f6b8c">helpers_asymm.h</a>
+</li>
+<li>asymm_exp_on_negative_values
+: <a class="el" href="softmax__layer__quantized_8cl.xhtml#a54aedfa17c5ac2567107d5f488b0f4af">softmax_layer_quantized.cl</a>
+</li>
+<li>ASYMM_EXP_ON_NEGATIVE_VALUES
+: <a class="el" href="helpers__asymm_8h.xhtml#a3a4f1b5d8f1cd67ac31bc62c9a6f4aa8">helpers_asymm.h</a>
+</li>
+<li>ASYMM_EXP_ON_NEGATIVE_VALUES_IMPL
+: <a class="el" href="helpers__asymm_8h.xhtml#a4d0a02b30d8cc5725d0a11781b488852">helpers_asymm.h</a>
+</li>
+<li>ASYMM_MASK_IF_NON_ZERO
+: <a class="el" href="helpers__asymm_8h.xhtml#af1d5450c9c4c13a6b7aa52af197b54b2">helpers_asymm.h</a>
+</li>
+<li>ASYMM_MASK_IF_NON_ZERO_IMPL
+: <a class="el" href="helpers__asymm_8h.xhtml#a6dd3d8d22942f0ff3e59b4e32cfd4de3">helpers_asymm.h</a>
+</li>
+<li>ASYMM_MASK_IF_ZERO
+: <a class="el" href="helpers__asymm_8h.xhtml#afc6a76528024472919bb5d50d067578b">helpers_asymm.h</a>
+</li>
+<li>ASYMM_MASK_IF_ZERO_IMPL
+: <a class="el" href="helpers__asymm_8h.xhtml#a8c47a92ec76a1e367b45305c17d9ea88">helpers_asymm.h</a>
+</li>
 <li>ASYMM_MULT
 : <a class="el" href="helpers__asymm_8h.xhtml#a5483aefd5e07244661178bfd3f434448">helpers_asymm.h</a>
+</li>
+<li>asymm_mult
+: <a class="el" href="softmax__layer__quantized_8cl.xhtml#a525a42d38133b1051b8924b456add4a1">softmax_layer_quantized.cl</a>
 </li>
 <li>ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE
 : <a class="el" href="helpers__asymm_8h.xhtml#a86de0ffca367bfcf27a8ae5dd1fdef2d">helpers_asymm.h</a>
 </li>
-<li>ASYMM_MULT_IMP
-: <a class="el" href="helpers__asymm_8h.xhtml#a1e972a3d0cf4cf65b01c079b5e4ab0be">helpers_asymm.h</a>
+<li>ASYMM_MULT_IMPL
+: <a class="el" href="helpers__asymm_8h.xhtml#ad4b199221927cbabbf859e4d2efb688d">helpers_asymm.h</a>
+</li>
+<li>ASYMM_ONE_OVER_ONE_PLUS_X_FOR_X_IN_0_1
+: <a class="el" href="helpers__asymm_8h.xhtml#ae77f34e1316d52c1ee84c35be9efb0d8">helpers_asymm.h</a>
+</li>
+<li>ASYMM_ONE_OVER_ONE_PLUS_X_FOR_X_IN_0_1_IMPL
+: <a class="el" href="helpers__asymm_8h.xhtml#a0e53aa5d4cbcec7a0c0085838f32453d">helpers_asymm.h</a>
+</li>
+<li>asymm_rescale
+: <a class="el" href="softmax__layer__quantized_8cl.xhtml#ad57ea340cdcfeb2e1375b70c3ae59bae">softmax_layer_quantized.cl</a>
+</li>
+<li>ASYMM_RESCALE
+: <a class="el" href="helpers__asymm_8h.xhtml#a98585f1bb84dea90aecbf59785c46151">helpers_asymm.h</a>
+</li>
+<li>ASYMM_RESCALE_IMPL
+: <a class="el" href="helpers__asymm_8h.xhtml#aace85e2a32bacdaa4e2d2055deabfc57">helpers_asymm.h</a>
 </li>
 <li>ASYMM_ROUNDING_DIVIDE_BY_POW2
 : <a class="el" href="helpers__asymm_8h.xhtml#aa43fc359dea64362f3016384f4269845">helpers_asymm.h</a>
@@ -469,13 +519,31 @@ $(document).ready(function(){initNavTree('globals_defs_a.xhtml','');});
 <li>ASYMM_ROUNDING_DIVIDE_BY_POW2_IMPL
 : <a class="el" href="helpers__asymm_8h.xhtml#abf75e242631b23007e4046682aa57ec5">helpers_asymm.h</a>
 </li>
+<li>ASYMM_ROUNDING_HALF_SUM
+: <a class="el" href="helpers__asymm_8h.xhtml#ad47fa44c1566aa4678fe524478490612">helpers_asymm.h</a>
+</li>
+<li>ASYMM_ROUNDING_HALF_SUM_IMPL
+: <a class="el" href="helpers__asymm_8h.xhtml#a8d97c6698c0e44424deae3f3130c55ac">helpers_asymm.h</a>
+</li>
+<li>ASYMM_SATURATING_ROUNDING_MULT_BY_POW2
+: <a class="el" href="helpers__asymm_8h.xhtml#a4cc3ff3a2eeb5f5e9d6743e08f632928">helpers_asymm.h</a>
+</li>
+<li>ASYMM_SATURATING_ROUNDING_MULT_BY_POW2_IMPL
+: <a class="el" href="helpers__asymm_8h.xhtml#a737312bc4a68c79a77cfab4849793bc0">helpers_asymm.h</a>
+</li>
+<li>ASYMM_SELECT_USING_MASK
+: <a class="el" href="helpers__asymm_8h.xhtml#a9bc08a8c1833c5e6055ad6665e3ccf12">helpers_asymm.h</a>
+</li>
+<li>ASYMM_SELECT_USING_MASK_IMPL
+: <a class="el" href="helpers__asymm_8h.xhtml#ab0b4069b25ac886d5cb6eb3b76473f88">helpers_asymm.h</a>
+</li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:48 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:28 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

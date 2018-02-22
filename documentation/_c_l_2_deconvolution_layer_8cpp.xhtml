@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -149,6 +149,9 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
+<tr class="memitem:a8972b2aa4f0dcbc6d198324e56ed7238"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a8972b2aa4f0dcbc6d198324e56ed7238"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8972b2aa4f0dcbc6d198324e56ed7238">CLDeconvolutionLayerFixture4x4</a> = DeconvolutionValidationFixture&lt; CLTensor, CLAccessor, CLDeconvolutionLayer, T, 4, 4 &gt;</td></tr>
+<tr class="separator:a8972b2aa4f0dcbc6d198324e56ed7238"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acc69b037b3a1718f102d0b3dd15c5b11"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:acc69b037b3a1718f102d0b3dd15c5b11"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#acc69b037b3a1718f102d0b3dd15c5b11">CLDeconvolutionLayerFixture3x3</a> = DeconvolutionValidationFixture&lt; CLTensor, CLAccessor, CLDeconvolutionLayer, T, 3, 3 &gt;</td></tr>
 <tr class="separator:acc69b037b3a1718f102d0b3dd15c5b11"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -162,6 +165,8 @@ Functions</h2></td></tr>
 <tr class="separator:a71b2bcfadb2d0be741a44200a2940692"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae82c32c12b2bdc4f6d6c8bf6f90bd7ac"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ae82c32c12b2bdc4f6d6c8bf6f90bd7ac">DATA_TEST_CASE</a> (Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(framework::dataset::make(&quot;InputInfo&quot;,{TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 4), TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 11), TensorInfo(TensorShape(13U, 11U, 4U, 3U), 1, DataType::F32, 0), TensorInfo(TensorShape(32U, 16U, 2U), 1, DataType::F32, 0),}), framework::dataset::make(&quot;WeightsInfo&quot;,{TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::F16, 0), TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32, 0), TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::QS8, 5), TensorInfo(TensorShape(3U, 2U, 2U, 2U), 1, DataType::F32, 11), TensorInfo(TensorShape(3U, 3U, 4U), 1, DataType::F32, 0), TensorInfo(TensorShape(1U, 1U, 2U, 4U), 1, DataType::F32, 0),})), framework::dataset::make(&quot;BiasInfo&quot;,{TensorInfo(TensorShape(1U), 1, DataType::F16, 0), TensorInfo(TensorShape(1U), 1, DataType::F32, 0), TensorInfo(TensorShape(1U), 1, DataType::F32, 5), TensorInfo(TensorShape(25U, 11U), 1, DataType::F32, 11), TensorInfo(TensorShape(1U), 1, DataType::F32, 0), TensorInfo(TensorShape(4U), 1, DataType::F32, 0),})), framework::dataset::make(&quot;OutputInfo&quot;,{TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F16, 0), TensorInfo(TensorShape(25U, 10U, 2U), 1, DataType::F32, 0), TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32, 5), TensorInfo(TensorShape(13U, 13U, 2U), 1, DataType::F32, 0), TensorInfo(TensorShape(11U, 9U, 1U, 3U), 1, DataType::F32, 0), TensorInfo(TensorShape(32U, 16U, 4U), 1, DataType::F32, 0),})), framework::dataset::make(&quot;PadStrideInfo&quot;,{PadStrideInfo(1, 1, 0, 0), PadStrideInfo(1, 1, 0, 0), PadStrideInfo(1, 1, 0, 0), PadStrideInfo(1, 1, 0, 0), PadStrideInfo(1, 1, 1, 1), PadStrideInfo(1, 1, 0, 0),})), framework::dataset::make(&quot;ax&quot;,{1U, 1U, 1U, 1U, 0U, 0U,})), framework::dataset::make(&quot;ay&quot;,{1U, 1U, 1U, 1U, 0U, 0U,})), framework::dataset::make(&quot;Expected&quot;,{false, false, false, false, false, true})), input_info, weights_info, bias_info, output_info, pad_info, ax, ay, expected)</td></tr>
 <tr class="separator:ae82c32c12b2bdc4f6d6c8bf6f90bd7ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc4b3e5f7d193ad1d2f5b3e9bf807cf3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#adc4b3e5f7d193ad1d2f5b3e9bf807cf3">FIXTURE_DATA_TEST_CASE</a> (Run, CLDeconvolutionLayerFixture4x4&lt; float &gt;, framework::DatasetMode::ALL, combine(data4x4, framework::dataset::make(&quot;DataType&quot;, DataType::F32)))</td></tr>
+<tr class="separator:adc4b3e5f7d193ad1d2f5b3e9bf807cf3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a92390b0330bb42ab561e9ec5b1709d4e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a92390b0330bb42ab561e9ec5b1709d4e">FIXTURE_DATA_TEST_CASE</a> (Run, CLDeconvolutionLayerFixture3x3&lt; float &gt;, framework::DatasetMode::ALL, combine(data3x3, framework::dataset::make(&quot;DataType&quot;, DataType::F32)))</td></tr>
 <tr class="separator:a92390b0330bb42ab561e9ec5b1709d4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a957f26e4128a4b65cb6837c2085244d3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a957f26e4128a4b65cb6837c2085244d3">FIXTURE_DATA_TEST_CASE</a> (Run, CLDeconvolutionLayerFixture1x1&lt; float &gt;, framework::DatasetMode::ALL, combine(data1x1, framework::dataset::make(&quot;DataType&quot;, DataType::F32)))</td></tr>
@@ -173,7 +178,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_f7024513cd67abef53e86ee9382ac5ce.xhtml">CL</a></li><li class="navelem"><a class="el" href="_c_l_2_deconvolution_layer_8cpp.xhtml">DeconvolutionLayer.cpp</a></li>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:43 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:22 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

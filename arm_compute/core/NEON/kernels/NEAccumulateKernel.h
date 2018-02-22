@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,10 @@ class ITensor;
 class NEAccumulateKernel : public INESimpleKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEAccumulateKernel";
+    }
     /** Set the input and accumulation tensors
      *
      * @param[in]  input Source tensor. Data type supported: U8.
@@ -63,6 +67,10 @@ public:
 class NEAccumulateWeightedKernel : public INESimpleKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEAccumulateWeightedKernel";
+    }
     /** Default constructor */
     NEAccumulateWeightedKernel();
     /** Set the input and accumulation tensors, and the scale value
@@ -85,6 +93,10 @@ protected:
 class NEAccumulateWeightedFP16Kernel : public NEAccumulateWeightedKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEAccumulateWeightedFP16Kernel";
+    }
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 };
@@ -102,6 +114,10 @@ using NEAccumulateWeightedFP16Kernel = NEAccumulateWeightedKernel;
 class NEAccumulateSquaredKernel : public INESimpleKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEAccumulateSquaredKernel";
+    }
     /** Default constructor */
     NEAccumulateSquaredKernel();
     /** Set the input and accumulation tensors and the shift value.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -72,7 +72,8 @@ public:
     {
     }
 
-    ContainerDataset(ContainerDataset &&) = default;
+    ContainerDataset(const ContainerDataset &) = default;
+    ContainerDataset(ContainerDataset &&)      = default;
 
     /** Type of the dataset. */
     using type = std::tuple<container_value_type>;

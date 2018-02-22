@@ -98,9 +98,6 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     // Validate QuantizationInfo
     ARM_COMPUTE_EXPECT(src.info()->quantization_info() == src_quantization_info, framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(weights.info()->quantization_info() == weights_quantization_info, framework::LogLevel::ERRORS);
-
-    //Validate padding
-    //TODO(COMPMID-415) Need to validate padding?
 }
 
 template <typename T>
@@ -125,10 +122,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge, GCConvolutionLayerFixture<half>, framework::Dat
     validate(GCAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
 TEST_SUITE_END()
+TEST_SUITE_END()
 
 TEST_SUITE_END()
 TEST_SUITE_END()
-}
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

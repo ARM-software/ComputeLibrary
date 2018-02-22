@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,6 +44,9 @@ namespace validation
 namespace
 {
 constexpr AbsoluteTolerance<float> tolerance_fp32(0.001f); /**< Tolerance for floating point tests */
+
+const auto data4x4 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 3)
+                     * framework::dataset::make("PadY", 0, 3) * framework::dataset::make("ax", 0) * framework::dataset::make("ay", 0) * framework::dataset::make("NumKernels", { 1, 3 });
 
 const auto data3x3 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 2)
                      * framework::dataset::make("PadY", 0, 2) * framework::dataset::make("ax", 0) * framework::dataset::make("ay", 0) * framework::dataset::make("NumKernels", { 1, 3 });
@@ -157,6 +160,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
 // *INDENT-ON*
 
 template <typename T>
+using CLDeconvolutionLayerFixture4x4 = DeconvolutionValidationFixture<CLTensor, CLAccessor, CLDeconvolutionLayer, T, 4, 4>;
+
+template <typename T>
 using CLDeconvolutionLayerFixture3x3 = DeconvolutionValidationFixture<CLTensor, CLAccessor, CLDeconvolutionLayer, T, 3, 3>;
 
 template <typename T>
@@ -165,6 +171,15 @@ using CLDeconvolutionLayerFixture1x1 = DeconvolutionValidationFixture<CLTensor, 
 TEST_SUITE(Float)
 
 TEST_SUITE(FP32)
+TEST_SUITE(W4x4)
+
+FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture4x4<float>, framework::DatasetMode::ALL, combine(data4x4, framework::dataset::make("DataType", DataType::F32)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_fp32);
+}
+TEST_SUITE_END()
+
 TEST_SUITE(W3x3)
 
 FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerFixture3x3<float>, framework::DatasetMode::ALL, combine(data3x3, framework::dataset::make("DataType", DataType::F32)))

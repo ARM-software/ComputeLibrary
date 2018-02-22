@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,23 +45,35 @@ BorderSize CLGEMMMatrixVectorMultiplyKernel::border_size() const
 
 void CLGEMMMatrixVectorMultiplyKernel::configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1, output);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input0, input1, output);
+    ARM_COMPUTE_ERROR_ON(is_data_type_quantized_asymmetric(input0->info()->data_type()) && (output->info()->data_type() != DataType::S32));
     ARM_COMPUTE_ERROR_ON(input0->info()->dimension(2) != input1->info()->dimension(1));
 
     _input0 = input0;
     _input1 = input1;
     _output = output;
 
+    // Check if is a quantized operation
+    bool is_quantized = is_data_type_quantized_asymmetric(_input0->info()->data_type());
+
     // Create kernel
-    std::set<std::string> build_opts;
+    CLBuildOptions build_opts;
+    build_opts.add_option_if(!is_quantized, "-DDATA_TYPE=" + get_cl_type_from_data_type(input0->info()->data_type()));
+    build_opts.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(input0->info()->dimension(0)));
+    build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(input0->info()->dimension(1)));
 
-    build_opts.emplace("-DDATA_TYPE=" + get_cl_type_from_data_type(input0->info()->data_type()));
-    build_opts.emplace("-DSRC_WIDTH=" + support::cpp11::to_string(input0->info()->dimension(0)));
-    build_opts.emplace("-DSRC_HEIGHT=" + support::cpp11::to_string(input0->info()->dimension(1)));
+    std::string kernel_name = is_quantized ? std::string("gemm_mv_quantized") : std::string("gemm_mv");
+    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemm_mv", build_opts));
+    // Add static arguments
+    if(is_quantized)
+    {
+        unsigned int idx = num_arguments_per_3D_tensor() + num_arguments_per_2D_tensor() + num_arguments_per_1D_tensor();
+        _kernel.setArg<int>(idx++, -_input0->info()->quantization_info().offset);
+        _kernel.setArg<int>(idx++, -_input1->info()->quantization_info().offset);
+    }
 
     // Configure the local work size for Bifrost with a value obtained
     // via exhaustive autotuning for the MobileNets tensor shapes.

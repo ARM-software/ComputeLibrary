@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,6 +66,34 @@ REGISTER_SIMPLE_OPERATION(NEActivationLayerOperation, NEON, OperationType::Activ
     return std::move(activation);
 }
 
+/* Arithmetic addition */
+REGISTER_SIMPLE_OPERATION(NEArithmeticAdditionOperation, NEON, OperationType::ArithmeticAddition)
+{
+    ARM_COMPUTE_ERROR_ON(ctx.num_inputs() != 2);
+    ARM_COMPUTE_ERROR_ON(ctx.num_outputs() != 1);
+    ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ITensor *>(ctx.input(0)) == nullptr);
+    ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ITensor *>(ctx.input(1)) == nullptr);
+    ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ITensor *>(ctx.output(0)) == nullptr);
+
+    // Extract IO and info
+    auto *in1 = dynamic_cast<arm_compute::ITensor *>(ctx.input(0));
+    auto *in2 = dynamic_cast<arm_compute::ITensor *>(ctx.input(1));
+    auto *out = dynamic_cast<arm_compute::ITensor *>(ctx.output(0));
+
+    auto addition = arm_compute::support::cpp14::make_unique<arm_compute::NEArithmeticAddition>();
+    addition->configure(in1, in2, out, ConvertPolicy::SATURATE);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEArithmeticAddition"
+                               << " Data Type: " << in1->info()->data_type()
+                               << " Input 1 shape: " << in1->info()->tensor_shape()
+                               << " Input 2 shape: " << in2->info()->tensor_shape()
+                               << " Output shape: " << out->info()->tensor_shape()
+                               << std::endl);
+
+    return std::move(addition);
+}
+
 /* Batch Normalization Layer */
 REGISTER_SIMPLE_OPERATION(NEBatchNormalizationLayerOperation, NEON, OperationType::BatchNormalizationLayer)
 {
@@ -79,17 +107,18 @@ REGISTER_SIMPLE_OPERATION(NEBatchNormalizationLayerOperation, NEON, OperationTyp
     ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ITensor *>(ctx.output(0)) == nullptr);
 
     // Extract IO and info
-    auto      *in      = dynamic_cast<arm_compute::ITensor *>(ctx.input(0));
-    auto      *mean    = dynamic_cast<arm_compute::ITensor *>(ctx.input(1));
-    auto      *var     = dynamic_cast<arm_compute::ITensor *>(ctx.input(2));
-    auto      *beta    = dynamic_cast<arm_compute::ITensor *>(ctx.input(3));
-    auto      *gamma   = dynamic_cast<arm_compute::ITensor *>(ctx.input(4));
-    auto      *out     = dynamic_cast<arm_compute::ITensor *>(ctx.output(0));
-    const auto epsilon = ctx.parameter<float>("epsilon");
+    auto      *in       = dynamic_cast<arm_compute::ITensor *>(ctx.input(0));
+    auto      *mean     = dynamic_cast<arm_compute::ITensor *>(ctx.input(1));
+    auto      *var      = dynamic_cast<arm_compute::ITensor *>(ctx.input(2));
+    auto      *beta     = dynamic_cast<arm_compute::ITensor *>(ctx.input(3));
+    auto      *gamma    = dynamic_cast<arm_compute::ITensor *>(ctx.input(4));
+    auto      *out      = dynamic_cast<arm_compute::ITensor *>(ctx.output(0));
+    const auto epsilon  = ctx.parameter<float>("epsilon");
+    const auto act_info = ctx.parameter<ActivationLayerInfo>("act_info");
 
     // Create and configure function
     auto batch_norm = arm_compute::support::cpp14::make_unique<arm_compute::NEBatchNormalizationLayer>();
-    batch_norm->configure(in, out, mean, var, beta, gamma, epsilon);
+    batch_norm->configure(in, out, mean, var, beta, gamma, epsilon, act_info);
 
     // Log info
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEBatchNormalizationLayer"
@@ -101,6 +130,9 @@ REGISTER_SIMPLE_OPERATION(NEBatchNormalizationLayerOperation, NEON, OperationTyp
                                << " Beta shape: " << beta->info()->tensor_shape()
                                << " Gamma shape: " << gamma->info()->tensor_shape()
                                << " Epsilon: " << epsilon
+                               << " Activation function: " << act_info.activation()
+                               << " a: " << act_info.a()
+                               << " b: " << act_info.b()
                                << std::endl);
 
     return std::move(batch_norm);
@@ -149,12 +181,23 @@ REGISTER_SIMPLE_OPERATION(NEDepthwiseConvolutionOperation, NEON, OperationType::
     auto      *biases    = ctx.num_inputs() == 3 ? dynamic_cast<arm_compute::ITensor *>(ctx.input(2)) : nullptr;
     auto      *out       = dynamic_cast<arm_compute::ITensor *>(ctx.output(0));
     const auto conv_info = ctx.parameter<PadStrideInfo>("ConvolutionInfo");
+    const auto opt3x3    = ctx.parameter<bool>("Optimized3x3");
 
     // Create and configure function
     std::unique_ptr<arm_compute::IFunction> func;
-    auto depwthwise_conv = arm_compute::support::cpp14::make_unique<arm_compute::NEDepthwiseConvolutionLayer>();
-    depwthwise_conv->configure(in, weights, biases, out, conv_info);
-    func = std::move(depwthwise_conv);
+    bool                                    run_3x3_opt = opt3x3 && weights->info()->dimension(0) == 3;
+    if(run_3x3_opt)
+    {
+        auto depwthwise_conv = arm_compute::support::cpp14::make_unique<arm_compute::NEDepthwiseConvolutionLayer3x3>();
+        depwthwise_conv->configure(in, weights, biases, out, conv_info);
+        func = std::move(depwthwise_conv);
+    }
+    else
+    {
+        auto depwthwise_conv = arm_compute::support::cpp14::make_unique<arm_compute::NEDepthwiseConvolutionLayer>();
+        depwthwise_conv->configure(in, weights, biases, out, conv_info);
+        func = std::move(depwthwise_conv);
+    }
 
     // Log info
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating NEDepthwiseConvolutionLayer"

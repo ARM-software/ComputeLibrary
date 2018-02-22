@@ -18,6 +18,7 @@ var searchData=
   ['largeimageshapes',['LargeImageShapes',['../classarm__compute_1_1test_1_1datasets_1_1_large_image_shapes.xhtml',1,'arm_compute::test::datasets']]],
   ['largescalelayershapes',['LargeScaleLayerShapes',['../classarm__compute_1_1test_1_1datasets_1_1_large_scale_layer_shapes.xhtml',1,'arm_compute::test::datasets']]],
   ['largeshapes',['LargeShapes',['../classarm__compute_1_1test_1_1datasets_1_1_large_shapes.xhtml',1,'arm_compute::test::datasets']]],
+  ['largeshapesbroadcast',['LargeShapesBroadcast',['../classarm__compute_1_1test_1_1datasets_1_1_large_shapes_broadcast.xhtml',1,'arm_compute::test::datasets']]],
   ['lenet5activationlayerdataset',['LeNet5ActivationLayerDataset',['../classarm__compute_1_1test_1_1datasets_1_1_le_net5_activation_layer_dataset.xhtml',1,'arm_compute::test::datasets']]],
   ['lenet5convolutionlayerdataset',['LeNet5ConvolutionLayerDataset',['../classarm__compute_1_1test_1_1datasets_1_1_le_net5_convolution_layer_dataset.xhtml',1,'arm_compute::test::datasets']]],
   ['lenet5fixture',['LeNet5Fixture',['../classarm__compute_1_1test_1_1_le_net5_fixture.xhtml',1,'arm_compute::test']]],
@@ -30,6 +31,7 @@ var searchData=
   ['loggerregistry',['LoggerRegistry',['../classarm__compute_1_1logging_1_1_logger_registry.xhtml',1,'arm_compute::logging']]],
   ['logleveldecorator',['LogLevelDecorator',['../classarm__compute_1_1logging_1_1_log_level_decorator.xhtml',1,'arm_compute::logging']]],
   ['logmsg',['LogMsg',['../structarm__compute_1_1logging_1_1_log_msg.xhtml',1,'arm_compute::logging']]],
+  ['lubrelu',['lubrelu',['../structarm__compute_1_1detail_1_1lubrelu.xhtml',1,'arm_compute::detail']]],
   ['lut',['Lut',['../classarm__compute_1_1_lut.xhtml',1,'arm_compute']]],
   ['lutaccessor',['LutAccessor',['../classarm__compute_1_1test_1_1_lut_accessor.xhtml',1,'arm_compute::test']]],
   ['lutallocator',['LutAllocator',['../classarm__compute_1_1_lut_allocator.xhtml',1,'arm_compute']]]

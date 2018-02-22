@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -116,7 +116,8 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_i_tensor_info.xh
 
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a>  </div>
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a>  </div>
   <div class="headertitle">
 <div class="title">ITensorInfo Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div>  </div>
 </div><!--header-->
@@ -147,15 +148,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a17394f0f7aea22d9b2d4c6f33bfa69ca"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a17394f0f7aea22d9b2d4c6f33bfa69ca">set_format</a> (<a class="el" href="namespacearm__compute.xhtml#ab4e88c89b3b7ea1735996cc4def22d58">Format</a> <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a57360dd9ca408834c0ea1a8ef70a11f4">format</a>)=0</td></tr>
 <tr class="memdesc:a17394f0f7aea22d9b2d4c6f33bfa69ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the format of an already initialized tensor.  <a href="#a17394f0f7aea22d9b2d4c6f33bfa69ca">More...</a><br /></td></tr>
 <tr class="separator:a17394f0f7aea22d9b2d4c6f33bfa69ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaf359cee0fc728e7c7fb8b692979994b"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#aaf359cee0fc728e7c7fb8b692979994b">set_tensor_shape</a> (<a class="el" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a> shape)=0</td></tr>
-<tr class="memdesc:aaf359cee0fc728e7c7fb8b692979994b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the shape of an already initialized tensor.  <a href="#aaf359cee0fc728e7c7fb8b692979994b">More...</a><br /></td></tr>
-<tr class="separator:aaf359cee0fc728e7c7fb8b692979994b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12a4f1190952613e36b44846962e26bb"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a12a4f1190952613e36b44846962e26bb">set_tensor_shape</a> (const <a class="el" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a> &amp;shape)=0</td></tr>
+<tr class="memdesc:a12a4f1190952613e36b44846962e26bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the shape of an already initialized tensor.  <a href="#a12a4f1190952613e36b44846962e26bb">More...</a><br /></td></tr>
+<tr class="separator:a12a4f1190952613e36b44846962e26bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8d9488caf817e12132f0ca2a4c30deba"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a8d9488caf817e12132f0ca2a4c30deba">set_fixed_point_position</a> (int <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#ab21a362740e892b6e913bd8db03b0e67">fixed_point_position</a>)=0</td></tr>
 <tr class="memdesc:a8d9488caf817e12132f0ca2a4c30deba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the fixed point position to the specified value.  <a href="#a8d9488caf817e12132f0ca2a4c30deba">More...</a><br /></td></tr>
 <tr class="separator:a8d9488caf817e12132f0ca2a4c30deba"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab64a0374b9e2292ed2b55f4f18c98423"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#ab64a0374b9e2292ed2b55f4f18c98423">set_quantization_info</a> (<a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a> <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a3f3e1a3200223e6a304a533b1016e749">quantization_info</a>)=0</td></tr>
-<tr class="memdesc:ab64a0374b9e2292ed2b55f4f18c98423"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the quantization settings (scale and offset) of the tensor.  <a href="#ab64a0374b9e2292ed2b55f4f18c98423">More...</a><br /></td></tr>
-<tr class="separator:ab64a0374b9e2292ed2b55f4f18c98423"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a575d37eaf8a905c8ca3c0250757c2b81"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a575d37eaf8a905c8ca3c0250757c2b81">set_quantization_info</a> (const <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a> &amp;<a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a3f3e1a3200223e6a304a533b1016e749">quantization_info</a>)=0</td></tr>
+<tr class="memdesc:a575d37eaf8a905c8ca3c0250757c2b81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the quantization settings (scale and offset) of the tensor.  <a href="#a575d37eaf8a905c8ca3c0250757c2b81">More...</a><br /></td></tr>
+<tr class="separator:a575d37eaf8a905c8ca3c0250757c2b81"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afc135290818a7ae02d2195c013796fdd"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#afc135290818a7ae02d2195c013796fdd">reset_padding</a> ()=0</td></tr>
 <tr class="memdesc:afc135290818a7ae02d2195c013796fdd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets the padding settings of the tensor.  <a href="#afc135290818a7ae02d2195c013796fdd">More...</a><br /></td></tr>
 <tr class="separator:afc135290818a7ae02d2195c013796fdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -216,9 +217,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a74dfd07380a290c34fe7c8e065029b95"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a74dfd07380a290c34fe7c8e065029b95">valid_region</a> () const =0</td></tr>
 <tr class="memdesc:a74dfd07380a290c34fe7c8e065029b95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Valid region of the tensor.  <a href="#a74dfd07380a290c34fe7c8e065029b95">More...</a><br /></td></tr>
 <tr class="separator:a74dfd07380a290c34fe7c8e065029b95"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acea00276098762fd0e83a3c25d9f88cb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#acea00276098762fd0e83a3c25d9f88cb">set_valid_region</a> (<a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a> <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a74dfd07380a290c34fe7c8e065029b95">valid_region</a>)=0</td></tr>
-<tr class="memdesc:acea00276098762fd0e83a3c25d9f88cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the valid region of the tensor.  <a href="#acea00276098762fd0e83a3c25d9f88cb">More...</a><br /></td></tr>
-<tr class="separator:acea00276098762fd0e83a3c25d9f88cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9586081a29fceb532ab270bd843abee6"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a9586081a29fceb532ab270bd843abee6">set_valid_region</a> (const <a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a> &amp;<a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a74dfd07380a290c34fe7c8e065029b95">valid_region</a>)=0</td></tr>
+<tr class="memdesc:a9586081a29fceb532ab270bd843abee6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the valid region of the tensor.  <a href="#a9586081a29fceb532ab270bd843abee6">More...</a><br /></td></tr>
+<tr class="separator:a9586081a29fceb532ab270bd843abee6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3f3e1a3200223e6a304a533b1016e749"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a3f3e1a3200223e6a304a533b1016e749">quantization_info</a> () const =0</td></tr>
 <tr class="memdesc:a3f3e1a3200223e6a304a533b1016e749"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the quantization settings (scale and offset) of the tensor.  <a href="#a3f3e1a3200223e6a304a533b1016e749">More...</a><br /></td></tr>
 <tr class="separator:a3f3e1a3200223e6a304a533b1016e749"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -229,11 +230,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a4d10e5012a872e7f78f2b539b673049d inherit pub_methods_classarm__compute_1_1misc_1_1_i_cloneable"><td class="memItemLeft" align="right" valign="top">virtual std::unique_ptr&lt; <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1misc_1_1_i_cloneable.xhtml#a4d10e5012a872e7f78f2b539b673049d">clone</a> () const =0</td></tr>
 <tr class="memdesc:a4d10e5012a872e7f78f2b539b673049d inherit pub_methods_classarm__compute_1_1misc_1_1_i_cloneable"><td class="mdescLeft">&#160;</td><td class="mdescRight">Provide a clone of the current object of class T.  <a href="#a4d10e5012a872e7f78f2b539b673049d">More...</a><br /></td></tr>
 <tr class="separator:a4d10e5012a872e7f78f2b539b673049d inherit pub_methods_classarm__compute_1_1misc_1_1_i_cloneable"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:abb92caa923c8ff80bfdf1b408ef49185"><td class="memTemplParams" colspan="2">template&lt;typename... Infos&gt; </td></tr>
+<tr class="memitem:abb92caa923c8ff80bfdf1b408ef49185"><td class="memTemplItemLeft" align="right" valign="top">static std::pair&lt; <a class="el" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a>, <a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#abb92caa923c8ff80bfdf1b408ef49185">broadcast_shape_and_valid_region</a> (const Infos &amp;...infos)</td></tr>
+<tr class="memdesc:abb92caa923c8ff80bfdf1b408ef49185"><td class="mdescLeft">&#160;</td><td class="mdescRight">If infos are broadcast compatible tensor info's, return the broadcasted shape and the intersection of the broadcasted valid regions of the tensors.  <a href="#abb92caa923c8ff80bfdf1b408ef49185">More...</a><br /></td></tr>
+<tr class="separator:abb92caa923c8ff80bfdf1b408ef49185"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Store the tensor's metadata. </p>
 
-<p>Definition at line <a class="el" href="_i_tensor_info_8h_source.xhtml#l00039">39</a> of file <a class="el" href="_i_tensor_info_8h_source.xhtml">ITensorInfo.h</a>.</p>
+<p>Definition at line <a class="el" href="_i_tensor_info_8h_source.xhtml#l00040">40</a> of file <a class="el" href="_i_tensor_info_8h_source.xhtml">ITensorInfo.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="ad998b50febf68540277e121a9c670bfa"></a>
 <div class="memitem">
@@ -292,6 +300,51 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="abb92caa923c8ff80bfdf1b408ef49185"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static std::pair&lt;<a class="el" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a>, <a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a>&gt; broadcast_shape_and_valid_region </td>
+          <td>(</td>
+          <td class="paramtype">const Infos &amp;...&#160;</td>
+          <td class="paramname"><em>infos</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>If infos are broadcast compatible tensor info's, return the broadcasted shape and the intersection of the broadcasted valid regions of the tensors. </p>
+<p>Two tensor info's are broadcast compatible if their shapes are broadcast compatible.</p>
+<p>Two tensor shapes are broadcast compatible if for each dimension, they're equal or one of them is 1.</p>
+<p>If two shapes are compatible, each dimension in the broadcasted shape is the max of the original dimensions.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">infos</td><td><a class="el" href="classarm__compute_1_1_tensor.xhtml" title="Basic implementation of the tensor interface. ">Tensor</a> info's.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The broadcasted shape and valid region, or an empty shape and valid region if the info's are not broadcast compatible. </dd></dl>
+
+<p>Definition at line <a class="el" href="_i_tensor_info_8h_source.xhtml#l00241">241</a> of file <a class="el" href="_i_tensor_info_8h_source.xhtml">ITensorInfo.h</a>.</p>
+
+<p>References <a class="el" href="_tensor_shape_8h_source.xhtml#l00192">TensorShape::broadcast_shape()</a>, <a class="el" href="utility_8h_source.xhtml#l00091">arm_compute::utility::for_each()</a>, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">arm_compute::test::validation::info()</a>, <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">arm_compute::test::fixed_point_arithmetic::detail::max()</a>, and <a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">arm_compute::test::fixed_point_arithmetic::detail::min()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;    {</div><div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;        TensorShape bc_shape = <a class="code" href="classarm__compute_1_1_tensor_shape.xhtml#a58838fbdce5b5330d84e62329b45ff7d">TensorShape::broadcast_shape</a>(infos.tensor_shape()...);</div><div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;        ValidRegion bc_valid_region{ Coordinates(), bc_shape };</div><div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;</div><div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;        <span class="keyword">auto</span> broadcast_valid_region = [&amp;bc_valid_region](<span class="keyword">const</span> ITensorInfo &amp; <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">info</a>)</div><div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;        {</div><div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;            <span class="keywordflow">if</span>(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">info</a>.num_dimensions() != 0)</div><div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;            {</div><div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;                <span class="keywordflow">for</span>(<span class="keywordtype">size_t</span> d = 0; d &lt; bc_valid_region.shape.num_dimensions(); ++d)</div><div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;                {</div><div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;                    <span class="keyword">const</span> <span class="keywordtype">bool</span> is_broadcast = (<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">info</a>.tensor_shape()[d] == 1);</div><div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;</div><div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;                    <span class="keyword">const</span> <span class="keywordtype">int</span>    anchor_max = <a class="code" href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#ad91bb73431b4de1f4946ed949d444849">std::max</a>(bc_valid_region.anchor[d], <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">info</a>.valid_region().anchor[d]);</div><div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;                    <span class="keyword">const</span> <span class="keywordtype">size_t</span> valid_min  = <a class="code" href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#aabcf39e3917f842dbc5fbb0d802f24d5">std::min</a>(bc_valid_region.shape[d], <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">info</a>.valid_region().shape[d]);</div><div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;</div><div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;                    <span class="keywordflow">if</span>(!is_broadcast || (valid_min == 0))</div><div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;                    {</div><div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;                        bc_valid_region.anchor.set(d, anchor_max);</div><div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;                        bc_valid_region.shape.set(d, valid_min);</div><div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;                    }</div><div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;                }</div><div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;            }</div><div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;        };</div><div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;</div><div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;        <a class="code" href="namespacearm__compute_1_1utility.xhtml#a067ebd28103d827b6ec17032e2344064">utility::for_each</a>(broadcast_valid_region, infos...);</div><div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;</div><div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;        <span class="keywordflow">return</span> std::pair&lt;TensorShape, ValidRegion&gt;(bc_shape, bc_valid_region);</div><div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_xhtml_aabcf39e3917f842dbc5fbb0d802f24d5"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#aabcf39e3917f842dbc5fbb0d802f24d5">arm_compute::test::fixed_point_arithmetic::detail::min</a></div><div class="ttdeci">fixed_point&lt; T &gt; min(fixed_point&lt; T &gt; x, fixed_point&lt; T &gt; y)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00884">FixedPoint.h:884</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a096668313a9a819d54a2e65ec21ff0cc"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">arm_compute::test::validation::info</a></div><div class="ttdeci">src info() -&gt; set_format(Format::S16)</div></div>
+<div class="ttc" id="classarm__compute_1_1_tensor_shape_xhtml_a58838fbdce5b5330d84e62329b45ff7d"><div class="ttname"><a href="classarm__compute_1_1_tensor_shape.xhtml#a58838fbdce5b5330d84e62329b45ff7d">arm_compute::TensorShape::broadcast_shape</a></div><div class="ttdeci">static TensorShape broadcast_shape(const Shapes &amp;...shapes)</div><div class="ttdoc">If shapes are broadcast compatible, return the broadcasted shape. </div><div class="ttdef"><b>Definition:</b> <a href="_tensor_shape_8h_source.xhtml#l00192">TensorShape.h:192</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1utility_xhtml_a067ebd28103d827b6ec17032e2344064"><div class="ttname"><a href="namespacearm__compute_1_1utility.xhtml#a067ebd28103d827b6ec17032e2344064">arm_compute::utility::for_each</a></div><div class="ttdeci">void for_each(F &amp;&amp;)</div><div class="ttdoc">Base case of for_each. </div><div class="ttdef"><b>Definition:</b> <a href="utility_8h_source.xhtml#l00091">utility.h:91</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_xhtml_ad91bb73431b4de1f4946ed949d444849"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#ad91bb73431b4de1f4946ed949d444849">arm_compute::test::fixed_point_arithmetic::detail::max</a></div><div class="ttdeci">fixed_point&lt; T &gt; max(fixed_point&lt; T &gt; x, fixed_point&lt; T &gt; y)</div><div class="ttdef"><b>Definition:</b> <a href="tests_2validation_2_fixed_point_8h_source.xhtml#l00889">FixedPoint.h:889</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
 <a class="anchor" id="a7cfb31af63202568efef5214acfbf3ba"></a>
 <div class="memitem">
 <div class="memproto">
@@ -318,7 +371,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#a9a3e72153aeb3ed212e9c3698774e881">TensorInfo</a>, and <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#a9a3e72153aeb3ed212e9c3698774e881">SubTensorInfo</a>.</p>
 
-<p>Referenced by <a class="el" href="_graph_utils_8cpp_source.xhtml#l00179">TopNPredictionsAccessor::access_tensor()</a>, <a class="el" href="_graph_utils_8cpp_source.xhtml#l00231">RandomAccessor::access_tensor()</a>, <a class="el" href="_graph_utils_8cpp_source.xhtml#l00314">NumPyBinLoader::access_tensor()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00215">arm_compute::auto_init_if_empty()</a>, <a class="el" href="_accessor_8h_source.xhtml#l00093">Accessor::data_type()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00159">SubTensorInfo::data_type()</a>, <a class="el" href="_validate_8h_source.xhtml#l00588">arm_compute::error_on_data_type_not_in()</a>, <a class="el" href="_validate_8h_source.xhtml#l00375">arm_compute::error_on_mismatching_data_types()</a>, <a class="el" href="_validate_8h_source.xhtml#l00429">arm_compute::error_on_mismatching_fixed_point()</a>, <a class="el" href="_validate_8h_source.xhtml#l00494">arm_compute::error_on_mismatching_quantization_info()</a>, <a class="el" href="_validate_8h_source.xhtml#l00865">arm_compute::error_on_value_not_representable_in_fixed_point()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00252">arm_compute::set_data_type_if_unknown()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00263">arm_compute::set_fixed_point_position_if_zero()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00241">arm_compute::set_format_if_unknown()</a>, and <a class="el" href="_helpers_8inl_source.xhtml#l00274">arm_compute::set_quantization_info_if_empty()</a>.</p>
+<p>Referenced by <a class="el" href="_graph_utils_8cpp_source.xhtml#l00198">TopNPredictionsAccessor::access_tensor()</a>, <a class="el" href="_graph_utils_8cpp_source.xhtml#l00250">RandomAccessor::access_tensor()</a>, <a class="el" href="_graph_utils_8cpp_source.xhtml#l00333">NumPyBinLoader::access_tensor()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00221">arm_compute::auto_init_if_empty()</a>, <a class="el" href="_accessor_8h_source.xhtml#l00093">Accessor::data_type()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00159">SubTensorInfo::data_type()</a>, <a class="el" href="_validate_8h_source.xhtml#l00620">arm_compute::error_on_data_type_not_in()</a>, <a class="el" href="_validate_8h_source.xhtml#l00407">arm_compute::error_on_mismatching_data_types()</a>, <a class="el" href="_validate_8h_source.xhtml#l00461">arm_compute::error_on_mismatching_fixed_point()</a>, <a class="el" href="_validate_8h_source.xhtml#l00526">arm_compute::error_on_mismatching_quantization_info()</a>, <a class="el" href="_validate_8h_source.xhtml#l00897">arm_compute::error_on_value_not_representable_in_fixed_point()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00258">arm_compute::set_data_type_if_unknown()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00269">arm_compute::set_fixed_point_position_if_zero()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00247">arm_compute::set_format_if_unknown()</a>, and <a class="el" href="_helpers_8inl_source.xhtml#l00280">arm_compute::set_quantization_info_if_empty()</a>.</p>
 
 </div>
 </div>
@@ -355,7 +408,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#a8813441b655b97c00139c6a5a6390e97">TensorInfo</a>, and <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#a8813441b655b97c00139c6a5a6390e97">SubTensorInfo</a>.</p>
 
-<p>Referenced by <a class="el" href="_graph_utils_8cpp_source.xhtml#l00084">PPMAccessor::access_tensor()</a>, <a class="el" href="_graph_utils_8cpp_source.xhtml#l00179">TopNPredictionsAccessor::access_tensor()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00124">arm_compute::misc::shape_calculator::compute_deconvolution_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00042">arm_compute::misc::shape_calculator::compute_interleaved_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00081">arm_compute::misc::shape_calculator::compute_reductionB_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00051">arm_compute::misc::shape_calculator::compute_transpose1xW_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00060">arm_compute::misc::shape_calculator::compute_transpose1xW_with_element_size_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00099">arm_compute::misc::shape_calculator::compute_transposed_shape()</a>, and <a class="el" href="_graph_utils_8cpp_source.xhtml#l00122">TopNPredictionsAccessor::TopNPredictionsAccessor()</a>.</p>
+<p>Referenced by <a class="el" href="_graph_utils_8cpp_source.xhtml#l00119">PPMAccessor::access_tensor()</a>, <a class="el" href="_graph_utils_8cpp_source.xhtml#l00198">TopNPredictionsAccessor::access_tensor()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00150">arm_compute::misc::shape_calculator::compute_deconvolution_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00054">arm_compute::misc::shape_calculator::compute_interleaved_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00097">arm_compute::misc::shape_calculator::compute_reductionB_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00065">arm_compute::misc::shape_calculator::compute_transpose1xW_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00074">arm_compute::misc::shape_calculator::compute_transpose1xW_with_element_size_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00124">arm_compute::misc::shape_calculator::compute_transposed_shape()</a>, and <a class="el" href="_graph_utils_8cpp_source.xhtml#l00141">TopNPredictionsAccessor::TopNPredictionsAccessor()</a>.</p>
 
 </div>
 </div>
@@ -385,7 +438,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#a62b67b578f684c4d516843c9dea86a23">TensorInfo</a>, and <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#a62b67b578f684c4d516843c9dea86a23">SubTensorInfo</a>.</p>
 
-<p>Referenced by <a class="el" href="_graph_utils_8cpp_source.xhtml#l00314">NumPyBinLoader::access_tensor()</a>, <a class="el" href="arm__compute_2core_2_helpers_8h_source.xhtml#l00496">arm_compute::compute_strides()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00060">arm_compute::misc::shape_calculator::compute_transpose1xW_with_element_size_shape()</a>, <a class="el" href="_accessor_8h_source.xhtml#l00078">Accessor::element_size()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00140">SubTensorInfo::element_size()</a>, and <a class="el" href="_graph_utils_8cpp_source.xhtml#l00199">RandomAccessor::RandomAccessor()</a>.</p>
+<p>Referenced by <a class="el" href="_graph_utils_8cpp_source.xhtml#l00333">NumPyBinLoader::access_tensor()</a>, <a class="el" href="arm__compute_2core_2_helpers_8h_source.xhtml#l00496">arm_compute::compute_strides()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00074">arm_compute::misc::shape_calculator::compute_transpose1xW_with_element_size_shape()</a>, <a class="el" href="validation_2_n_e_o_n_2_depthwise_convolution_layer_8cpp_source.xhtml#l00052">arm_compute::test::validation::DATA_TEST_CASE()</a>, <a class="el" href="_accessor_8h_source.xhtml#l00078">Accessor::element_size()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00140">SubTensorInfo::element_size()</a>, and <a class="el" href="_graph_utils_8cpp_source.xhtml#l00218">RandomAccessor::RandomAccessor()</a>.</p>
 
 </div>
 </div>
@@ -451,7 +504,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#a35ccf2eb0c18a15feab2db98b307b78b">TensorInfo</a>, and <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#a35ccf2eb0c18a15feab2db98b307b78b">SubTensorInfo</a>.</p>
 
-<p>Referenced by <a class="el" href="_helpers_8inl_source.xhtml#l00215">arm_compute::auto_init_if_empty()</a>, <a class="el" href="_validate_8h_source.xhtml#l00429">arm_compute::error_on_mismatching_fixed_point()</a>, <a class="el" href="_validate_8h_source.xhtml#l00820">arm_compute::error_on_mismatching_fixed_point_position()</a>, <a class="el" href="_validate_8h_source.xhtml#l00865">arm_compute::error_on_value_not_representable_in_fixed_point()</a>, <a class="el" href="_accessor_8h_source.xhtml#l00113">Accessor::fixed_point_position()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00135">SubTensorInfo::fixed_point_position()</a>, and <a class="el" href="_helpers_8inl_source.xhtml#l00263">arm_compute::set_fixed_point_position_if_zero()</a>.</p>
+<p>Referenced by <a class="el" href="_helpers_8inl_source.xhtml#l00221">arm_compute::auto_init_if_empty()</a>, <a class="el" href="_validate_8h_source.xhtml#l00461">arm_compute::error_on_mismatching_fixed_point()</a>, <a class="el" href="_validate_8h_source.xhtml#l00852">arm_compute::error_on_mismatching_fixed_point_position()</a>, <a class="el" href="_validate_8h_source.xhtml#l00897">arm_compute::error_on_value_not_representable_in_fixed_point()</a>, <a class="el" href="_accessor_8h_source.xhtml#l00113">Accessor::fixed_point_position()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00135">SubTensorInfo::fixed_point_position()</a>, and <a class="el" href="_helpers_8inl_source.xhtml#l00269">arm_compute::set_fixed_point_position_if_zero()</a>.</p>
 
 </div>
 </div>
@@ -541,7 +594,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#aaee6555ace43b03173844b1a228a3fc3">TensorInfo</a>, and <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#aaee6555ace43b03173844b1a228a3fc3">SubTensorInfo</a>.</p>
 
-<p>Referenced by <a class="el" href="validation_2_n_e_o_n_2_depthwise_convolution_layer_8cpp_source.xhtml#l00052">arm_compute::test::validation::DATA_TEST_CASE()</a>, <a class="el" href="validation_2_n_e_o_n_2_g_e_m_m_8cpp_source.xhtml#l00139">arm_compute::test::validation::FIXTURE_DATA_TEST_CASE()</a>, and <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00184">SubTensorInfo::is_resizable()</a>.</p>
+<p>Referenced by <a class="el" href="validation_2_n_e_o_n_2_depthwise_convolution_layer_8cpp_source.xhtml#l00052">arm_compute::test::validation::DATA_TEST_CASE()</a>, <a class="el" href="validation_2_n_e_o_n_2_g_e_m_m_8cpp_source.xhtml#l00140">arm_compute::test::validation::FIXTURE_DATA_TEST_CASE()</a>, and <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00184">SubTensorInfo::is_resizable()</a>.</p>
 
 </div>
 </div>
@@ -571,7 +624,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#a6f13b974eeb528acde66de8d9b3fd95c">TensorInfo</a>, and <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#a6f13b974eeb528acde66de8d9b3fd95c">SubTensorInfo</a>.</p>
 
-<p>Referenced by <a class="el" href="_helpers_8inl_source.xhtml#l00215">arm_compute::auto_init_if_empty()</a>, <a class="el" href="_validate_8h_source.xhtml#l00641">arm_compute::error_on_data_type_channel_not_in()</a>, <a class="el" href="_accessor_8h_source.xhtml#l00098">Accessor::num_channels()</a>, and <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00149">SubTensorInfo::num_channels()</a>.</p>
+<p>Referenced by <a class="el" href="_helpers_8inl_source.xhtml#l00221">arm_compute::auto_init_if_empty()</a>, <a class="el" href="_validate_8h_source.xhtml#l00673">arm_compute::error_on_data_type_channel_not_in()</a>, <a class="el" href="_accessor_8h_source.xhtml#l00098">Accessor::num_channels()</a>, and <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00149">SubTensorInfo::num_channels()</a>.</p>
 
 </div>
 </div>
@@ -601,7 +654,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#a13622133d9b41900a6a3e8f89e59a78b">TensorInfo</a>, and <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#a13622133d9b41900a6a3e8f89e59a78b">SubTensorInfo</a>.</p>
 
-<p>Referenced by <a class="el" href="_shape_calculator_8h_source.xhtml#l00081">arm_compute::misc::shape_calculator::compute_reductionB_shape()</a>, <a class="el" href="arm__compute_2core_2_helpers_8h_source.xhtml#l00474">arm_compute::compute_strides()</a>, and <a class="el" href="_helpers_8inl_source.xhtml#l00135">Iterator::Iterator()</a>.</p>
+<p>Referenced by <a class="el" href="_shape_calculator_8h_source.xhtml#l00097">arm_compute::misc::shape_calculator::compute_reductionB_shape()</a>, and <a class="el" href="arm__compute_2core_2_helpers_8h_source.xhtml#l00474">arm_compute::compute_strides()</a>.</p>
 
 </div>
 </div>
@@ -669,7 +722,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#ab54246abe670b06f5624add7e7022904">TensorInfo</a>, and <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#ab54246abe670b06f5624add7e7022904">SubTensorInfo</a>.</p>
 
-<p>Referenced by <a class="el" href="_helpers_8inl_source.xhtml#l00135">Iterator::Iterator()</a>, and <a class="el" href="_graph_utils_8cpp_source.xhtml#l00122">TopNPredictionsAccessor::TopNPredictionsAccessor()</a>.</p>
+<p>Referenced by <a class="el" href="_graph_utils_8cpp_source.xhtml#l00141">TopNPredictionsAccessor::TopNPredictionsAccessor()</a>.</p>
 
 </div>
 </div>
@@ -699,7 +752,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#a79e20eacb1e963e24a21ebd7369effd7">TensorInfo</a>, and <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#a79e20eacb1e963e24a21ebd7369effd7">SubTensorInfo</a>.</p>
 
-<p>Referenced by <a class="el" href="_graph_utils_8cpp_source.xhtml#l00314">NumPyBinLoader::access_tensor()</a>, <a class="el" href="validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp_source.xhtml#l00192">arm_compute::test::validation::DATA_TEST_CASE()</a>, <a class="el" href="_n_e_o_n_2_accumulate_8cpp_source.xhtml#l00085">arm_compute::test::validation::FIXTURE_DATA_TEST_CASE()</a>, <a class="el" href="_accessor_8h_source.xhtml#l00108">Accessor::padding()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00174">SubTensorInfo::padding()</a>, and <a class="el" href="_graph_utils_8cpp_source.xhtml#l00199">RandomAccessor::RandomAccessor()</a>.</p>
+<p>Referenced by <a class="el" href="_graph_utils_8cpp_source.xhtml#l00333">NumPyBinLoader::access_tensor()</a>, <a class="el" href="validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp_source.xhtml#l00192">arm_compute::test::validation::DATA_TEST_CASE()</a>, <a class="el" href="_n_e_o_n_2_accumulate_8cpp_source.xhtml#l00085">arm_compute::test::validation::FIXTURE_DATA_TEST_CASE()</a>, <a class="el" href="_accessor_8h_source.xhtml#l00108">Accessor::padding()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00174">SubTensorInfo::padding()</a>, and <a class="el" href="_graph_utils_8cpp_source.xhtml#l00218">RandomAccessor::RandomAccessor()</a>.</p>
 
 </div>
 </div>
@@ -729,7 +782,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#ac74736e3863207232a23b7181c1d0f44">TensorInfo</a>, and <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#ac74736e3863207232a23b7181c1d0f44">SubTensorInfo</a>.</p>
 
-<p>Referenced by <a class="el" href="_helpers_8inl_source.xhtml#l00215">arm_compute::auto_init_if_empty()</a>, <a class="el" href="_validate_8h_source.xhtml#l00494">arm_compute::error_on_mismatching_quantization_info()</a>, <a class="el" href="_accessor_8h_source.xhtml#l00118">Accessor::quantization_info()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00209">SubTensorInfo::quantization_info()</a>, and <a class="el" href="_helpers_8inl_source.xhtml#l00274">arm_compute::set_quantization_info_if_empty()</a>.</p>
+<p>Referenced by <a class="el" href="_helpers_8inl_source.xhtml#l00221">arm_compute::auto_init_if_empty()</a>, <a class="el" href="_validate_8h_source.xhtml#l00526">arm_compute::error_on_mismatching_quantization_info()</a>, <a class="el" href="_accessor_8h_source.xhtml#l00118">Accessor::quantization_info()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00209">SubTensorInfo::quantization_info()</a>, and <a class="el" href="_helpers_8inl_source.xhtml#l00280">arm_compute::set_quantization_info_if_empty()</a>.</p>
 
 </div>
 </div>
@@ -797,7 +850,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#a613528bd0feb15ee8d6df06cbdb629f8">TensorInfo</a>, and <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#a613528bd0feb15ee8d6df06cbdb629f8">SubTensorInfo</a>.</p>
 
-<p>Referenced by <a class="el" href="_helpers_8inl_source.xhtml#l00195">arm_compute::auto_init_if_empty()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00077">SubTensorInfo::set_data_type()</a>, and <a class="el" href="_helpers_8inl_source.xhtml#l00252">arm_compute::set_data_type_if_unknown()</a>.</p>
+<p>Referenced by <a class="el" href="_helpers_8inl_source.xhtml#l00201">arm_compute::auto_init_if_empty()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00077">SubTensorInfo::set_data_type()</a>, and <a class="el" href="_helpers_8inl_source.xhtml#l00258">arm_compute::set_data_type_if_unknown()</a>.</p>
 
 </div>
 </div>
@@ -835,7 +888,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#a2732b9eab657cad69807adb815b97c9f">TensorInfo</a>, and <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#a2732b9eab657cad69807adb815b97c9f">SubTensorInfo</a>.</p>
 
-<p>Referenced by <a class="el" href="_helpers_8inl_source.xhtml#l00195">arm_compute::auto_init_if_empty()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00095">SubTensorInfo::set_fixed_point_position()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00263">arm_compute::set_fixed_point_position_if_zero()</a>, and <a class="el" href="_tensor_info_8cpp_source.xhtml#l00103">arm_compute::test::validation::TEST_CASE()</a>.</p>
+<p>Referenced by <a class="el" href="_helpers_8inl_source.xhtml#l00201">arm_compute::auto_init_if_empty()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00095">SubTensorInfo::set_fixed_point_position()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00269">arm_compute::set_fixed_point_position_if_zero()</a>, and <a class="el" href="_tensor_info_8cpp_source.xhtml#l00103">arm_compute::test::validation::TEST_CASE()</a>.</p>
 
 </div>
 </div>
@@ -873,7 +926,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#af501bc12f51874e786b0f28016a99ff7">TensorInfo</a>, and <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#af501bc12f51874e786b0f28016a99ff7">SubTensorInfo</a>.</p>
 
-<p>Referenced by <a class="el" href="_c_l_2_derivative_8cpp_source.xhtml#l00047">arm_compute::test::validation::DATA_TEST_CASE()</a>, <a class="el" href="_n_e_o_n_2_min_max_location_8cpp_source.xhtml#l00081">arm_compute::test::validation::FIXTURE_DATA_TEST_CASE()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00089">SubTensorInfo::set_format()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00241">arm_compute::set_format_if_unknown()</a>, and <a class="el" href="_n_e_o_n_2_min_max_location_8cpp_source.xhtml#l00046">arm_compute::test::validation::validate_configuration()</a>.</p>
+<p>Referenced by <a class="el" href="_c_l_2_derivative_8cpp_source.xhtml#l00047">arm_compute::test::validation::DATA_TEST_CASE()</a>, <a class="el" href="_n_e_o_n_2_min_max_location_8cpp_source.xhtml#l00081">arm_compute::test::validation::FIXTURE_DATA_TEST_CASE()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00089">SubTensorInfo::set_format()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00247">arm_compute::set_format_if_unknown()</a>, and <a class="el" href="_n_e_o_n_2_min_max_location_8cpp_source.xhtml#l00046">arm_compute::test::validation::validate_configuration()</a>.</p>
 
 </div>
 </div>
@@ -948,11 +1001,11 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#a5b0a9fd674f8748506b6944c030bc47e">TensorInfo</a>, and <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#a5b0a9fd674f8748506b6944c030bc47e">SubTensorInfo</a>.</p>
 
-<p>Referenced by <a class="el" href="_helpers_8inl_source.xhtml#l00195">arm_compute::auto_init_if_empty()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00083">SubTensorInfo::set_num_channels()</a>, and <a class="el" href="_tensor_info_8cpp_source.xhtml#l00103">arm_compute::test::validation::TEST_CASE()</a>.</p>
+<p>Referenced by <a class="el" href="_helpers_8inl_source.xhtml#l00201">arm_compute::auto_init_if_empty()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00083">SubTensorInfo::set_num_channels()</a>, and <a class="el" href="_tensor_info_8cpp_source.xhtml#l00103">arm_compute::test::validation::TEST_CASE()</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="ab64a0374b9e2292ed2b55f4f18c98423"></a>
+<a class="anchor" id="a575d37eaf8a905c8ca3c0250757c2b81"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -962,7 +1015,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">virtual <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a>&amp; set_quantization_info </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="structarm__compute_1_1_quantization_info.xhtml">QuantizationInfo</a> &amp;&#160;</td>
           <td class="paramname"><em>quantization_info</em></td><td>)</td>
           <td></td>
         </tr>
@@ -983,13 +1036,13 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Reference to this <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml" title="Store the tensor&#39;s metadata. ">ITensorInfo</a> object </dd></dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#ae3099a4be4777389b60712f43e065403">TensorInfo</a>, and <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#ae3099a4be4777389b60712f43e065403">SubTensorInfo</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#acda9036ad24c455f67f2fea388a0ae13">TensorInfo</a>, and <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#acda9036ad24c455f67f2fea388a0ae13">SubTensorInfo</a>.</p>
 
-<p>Referenced by <a class="el" href="_helpers_8inl_source.xhtml#l00195">arm_compute::auto_init_if_empty()</a>, <a class="el" href="validation_2_c_l_2_g_e_m_m_lowp_8cpp_source.xhtml#l00052">arm_compute::test::validation::DATA_TEST_CASE()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00102">SubTensorInfo::set_quantization_info()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00274">arm_compute::set_quantization_info_if_empty()</a>, <a class="el" href="validation_2fixtures_2_g_e_m_m_lowp_fixture_8h_source.xhtml#l00050">GEMMLowpMatrixMultiplyCoreValidationFixture&lt; TensorType, AccessorType, FunctionType &gt;::setup()</a>, and <a class="el" href="_tensor_info_8cpp_source.xhtml#l00103">arm_compute::test::validation::TEST_CASE()</a>.</p>
+<p>Referenced by <a class="el" href="_helpers_8inl_source.xhtml#l00201">arm_compute::auto_init_if_empty()</a>, <a class="el" href="validation_2_c_l_2_g_e_m_m_lowp_8cpp_source.xhtml#l00052">arm_compute::test::validation::DATA_TEST_CASE()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00102">SubTensorInfo::set_quantization_info()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00280">arm_compute::set_quantization_info_if_empty()</a>, <a class="el" href="validation_2fixtures_2_g_e_m_m_lowp_fixture_8h_source.xhtml#l00050">GEMMLowpMatrixMultiplyCoreValidationFixture&lt; TensorType, AccessorType, FunctionType &gt;::setup()</a>, and <a class="el" href="_tensor_info_8cpp_source.xhtml#l00103">arm_compute::test::validation::TEST_CASE()</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="aaf359cee0fc728e7c7fb8b692979994b"></a>
+<a class="anchor" id="a12a4f1190952613e36b44846962e26bb"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -999,7 +1052,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">virtual <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a>&amp; set_tensor_shape </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a> &amp;&#160;</td>
           <td class="paramname"><em>shape</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1021,13 +1074,13 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Reference to this <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml" title="Store the tensor&#39;s metadata. ">ITensorInfo</a> object </dd></dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#a73e8ce43ba86fece3400cf79d0978811">TensorInfo</a>, and <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#a73e8ce43ba86fece3400cf79d0978811">SubTensorInfo</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#a7b6610e6100c67d39b712df6f4f80dcf">TensorInfo</a>, and <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#a7b6610e6100c67d39b712df6f4f80dcf">SubTensorInfo</a>.</p>
 
-<p>Referenced by <a class="el" href="_helpers_8inl_source.xhtml#l00195">arm_compute::auto_init_if_empty()</a>, and <a class="el" href="_helpers_8inl_source.xhtml#l00230">arm_compute::set_shape_if_empty()</a>.</p>
+<p>Referenced by <a class="el" href="_helpers_8inl_source.xhtml#l00201">arm_compute::auto_init_if_empty()</a>, and <a class="el" href="_helpers_8inl_source.xhtml#l00236">arm_compute::set_shape_if_empty()</a>.</p>
 
 </div>
 </div>
-<a class="anchor" id="acea00276098762fd0e83a3c25d9f88cb"></a>
+<a class="anchor" id="a9586081a29fceb532ab270bd843abee6"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -1037,7 +1090,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">virtual void set_valid_region </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="structarm__compute_1_1_valid_region.xhtml">ValidRegion</a> &amp;&#160;</td>
           <td class="paramname"><em>valid_region</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1057,7 +1110,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#a0cbba4e45a4a1e389606493af3814415">TensorInfo</a>, and <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#a0cbba4e45a4a1e389606493af3814415">SubTensorInfo</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#a43e45363267b6bce4bb6770febe9ce11">TensorInfo</a>, and <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#a43e45363267b6bce4bb6770febe9ce11">SubTensorInfo</a>.</p>
 
 </div>
 </div>
@@ -1087,7 +1140,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#a5f1ca9d674346287cae57a6c5b5c24ec">TensorInfo</a>, and <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#a5f1ca9d674346287cae57a6c5b5c24ec">SubTensorInfo</a>.</p>
 
-<p>Referenced by <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00445">arm_compute::colorconvert_iyuv_to_rgb()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00389">arm_compute::colorconvert_nv12_to_rgb()</a>, <a class="el" href="utils_2_utils_8cpp_source.xhtml#l00107">arm_compute::utils::draw_detection_rectangle()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00135">Iterator::Iterator()</a>, and <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00124">SubTensorInfo::strides_in_bytes()</a>.</p>
+<p>Referenced by <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00445">arm_compute::colorconvert_iyuv_to_rgb()</a>, <a class="el" href="_n_e_color_convert_helper_8inl_source.xhtml#l00389">arm_compute::colorconvert_nv12_to_rgb()</a>, <a class="el" href="utils_2_utils_8cpp_source.xhtml#l00107">arm_compute::utils::draw_detection_rectangle()</a>, and <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00124">SubTensorInfo::strides_in_bytes()</a>.</p>
 
 </div>
 </div>
@@ -1117,7 +1170,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#a269b19ce3f357ac65f41f9951906e38e">TensorInfo</a>, and <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#a269b19ce3f357ac65f41f9951906e38e">SubTensorInfo</a>.</p>
 
-<p>Referenced by <a class="el" href="_graph_utils_8cpp_source.xhtml#l00084">PPMAccessor::access_tensor()</a>, <a class="el" href="_graph_utils_8cpp_source.xhtml#l00314">NumPyBinLoader::access_tensor()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00195">arm_compute::auto_init_if_empty()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00285">arm_compute::calculate_valid_region_scale()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00124">arm_compute::misc::shape_calculator::compute_deconvolution_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00108">arm_compute::misc::shape_calculator::compute_depthwise_convolution_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00092">arm_compute::misc::shape_calculator::compute_im2col_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00042">arm_compute::misc::shape_calculator::compute_interleaved_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00036">arm_compute::misc::shape_calculator::compute_permutation_output_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00071">arm_compute::misc::shape_calculator::compute_reductionA_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00081">arm_compute::misc::shape_calculator::compute_reductionB_shape()</a>, <a class="el" href="arm__compute_2core_2_helpers_8h_source.xhtml#l00474">arm_compute::compute_strides()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00051">arm_compute::misc::shape_calculator::compute_transpose1xW_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00060">arm_compute::misc::shape_calculator::compute_transpose1xW_with_element_size_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00099">arm_compute::misc::shape_calculator::compute_transposed_shape()</a>, <a class="el" href="_accessor_8h_source.xhtml#l00103">Accessor::num_elements()</a>, <a class="el" href="_graph_utils_8cpp_source.xhtml#l00199">RandomAccessor::RandomAccessor()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00230">arm_compute::set_shape_if_empty()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00199">SubTensorInfo::set_valid_region()</a>, and <a class="el" href="_accessor_8h_source.xhtml#l00073">Accessor::shape()</a>.</p>
+<p>Referenced by <a class="el" href="_graph_utils_8cpp_source.xhtml#l00333">NumPyBinLoader::access_tensor()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00201">arm_compute::auto_init_if_empty()</a>, <a class="el" href="_window_8h_source.xhtml#l00377">Window::broadcast_if_dimension_le_one()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00291">arm_compute::calculate_valid_region_scale()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00115">arm_compute::misc::shape_calculator::compute_col2im_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00150">arm_compute::misc::shape_calculator::compute_deconvolution_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00133">arm_compute::misc::shape_calculator::compute_depthwise_convolution_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00178">arm_compute::misc::shape_calculator::compute_fully_connected_reshaped_weights_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00108">arm_compute::misc::shape_calculator::compute_im2col_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00054">arm_compute::misc::shape_calculator::compute_interleaved_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00037">arm_compute::misc::shape_calculator::compute_permutation_output_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00087">arm_compute::misc::shape_calculator::compute_reductionA_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00097">arm_compute::misc::shape_calculator::compute_reductionB_shape()</a>, <a class="el" href="arm__compute_2core_2_helpers_8h_source.xhtml#l00474">arm_compute::compute_strides()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00065">arm_compute::misc::shape_calculator::compute_transpose1xW_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00074">arm_compute::misc::shape_calculator::compute_transpose1xW_with_element_size_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00124">arm_compute::misc::shape_calculator::compute_transposed_shape()</a>, <a class="el" href="_shape_calculator_8h_source.xhtml#l00043">arm_compute::misc::shape_calculator::compute_weights_reshaped_shape()</a>, <a class="el" href="_accessor_8h_source.xhtml#l00103">Accessor::num_elements()</a>, <a class="el" href="_graph_utils_8cpp_source.xhtml#l00062">CaffePreproccessor::preprocess()</a>, <a class="el" href="_graph_utils_8cpp_source.xhtml#l00039">TFPreproccessor::preprocess()</a>, <a class="el" href="_graph_utils_8cpp_source.xhtml#l00218">RandomAccessor::RandomAccessor()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00236">arm_compute::set_shape_if_empty()</a>, <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00199">SubTensorInfo::set_valid_region()</a>, and <a class="el" href="_accessor_8h_source.xhtml#l00073">Accessor::shape()</a>.</p>
 
 </div>
 </div>
@@ -1147,7 +1200,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#af398466b602a02b42d8df19fb66a6c60">TensorInfo</a>, and <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#af398466b602a02b42d8df19fb66a6c60">SubTensorInfo</a>.</p>
 
-<p>Referenced by <a class="el" href="_graph_utils_8cpp_source.xhtml#l00314">NumPyBinLoader::access_tensor()</a>, <a class="el" href="_graph_utils_8cpp_source.xhtml#l00199">RandomAccessor::RandomAccessor()</a>, <a class="el" href="_accessor_8h_source.xhtml#l00083">Accessor::size()</a>, and <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00169">SubTensorInfo::total_size()</a>.</p>
+<p>Referenced by <a class="el" href="_graph_utils_8cpp_source.xhtml#l00333">NumPyBinLoader::access_tensor()</a>, <a class="el" href="_graph_utils_8cpp_source.xhtml#l00218">RandomAccessor::RandomAccessor()</a>, <a class="el" href="_accessor_8h_source.xhtml#l00083">Accessor::size()</a>, and <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00169">SubTensorInfo::total_size()</a>.</p>
 
 </div>
 </div>
@@ -1178,7 +1231,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#a3c20d908342087484d883574d55dd482">TensorInfo</a>, and <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#a3c20d908342087484d883574d55dd482">SubTensorInfo</a>.</p>
 
-<p>Referenced by <a class="el" href="arm__compute_2core_2_helpers_8h_source.xhtml#l00430">arm_compute::calculate_max_enlarged_window()</a>, <a class="el" href="arm__compute_2core_2_helpers_8h_source.xhtml#l00382">arm_compute::calculate_max_window()</a>, <a class="el" href="arm__compute_2core_2_helpers_8h_source.xhtml#l00407">arm_compute::calculate_max_window_horizontal()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00285">arm_compute::calculate_valid_region_scale()</a>, <a class="el" href="validation_2_n_e_o_n_2_depthwise_convolution_layer_8cpp_source.xhtml#l00052">arm_compute::test::validation::DATA_TEST_CASE()</a>, and <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00199">SubTensorInfo::set_valid_region()</a>.</p>
+<p>Referenced by <a class="el" href="arm__compute_2core_2_helpers_8h_source.xhtml#l00430">arm_compute::calculate_max_enlarged_window()</a>, <a class="el" href="arm__compute_2core_2_helpers_8h_source.xhtml#l00382">arm_compute::calculate_max_window()</a>, <a class="el" href="arm__compute_2core_2_helpers_8h_source.xhtml#l00407">arm_compute::calculate_max_window_horizontal()</a>, <a class="el" href="_helpers_8inl_source.xhtml#l00291">arm_compute::calculate_valid_region_scale()</a>, <a class="el" href="validation_2_n_e_o_n_2_depthwise_convolution_layer_8cpp_source.xhtml#l00052">arm_compute::test::validation::DATA_TEST_CASE()</a>, and <a class="el" href="_sub_tensor_info_8h_source.xhtml#l00199">SubTensorInfo::set_valid_region()</a>.</p>
 
 </div>
 </div>
@@ -1191,7 +1244,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a></li>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:45 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:24 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

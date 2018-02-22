@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -154,6 +154,9 @@ Typedefs</h2></td></tr>
 <tr class="memitem:a856bcbd3311a6604c90ab49c939ac151"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a856bcbd3311a6604c90ab49c939ac151"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a856bcbd3311a6604c90ab49c939ac151">NESoftmaxLayerFixedPointFixture</a> = SoftmaxValidationFixedPointFixture&lt; Tensor, Accessor, NESoftmaxLayer, T &gt;</td></tr>
 <tr class="separator:a856bcbd3311a6604c90ab49c939ac151"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d7e2e1bc1b2dd74136710cad1b8df23"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a7d7e2e1bc1b2dd74136710cad1b8df23"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7d7e2e1bc1b2dd74136710cad1b8df23">NESoftmaxLayerQuantizedFixture</a> = SoftmaxValidationQuantizedFixture&lt; Tensor, Accessor, NESoftmaxLayer, T &gt;</td></tr>
+<tr class="separator:a7d7e2e1bc1b2dd74136710cad1b8df23"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
@@ -165,14 +168,18 @@ Functions</h2></td></tr>
 <tr class="separator:a5c06e3e814b1b5aaf75c643d024dd9c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a385fd836467f20e9a135defe639f1c59"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a385fd836467f20e9a135defe639f1c59">FIXTURE_DATA_TEST_CASE</a> (RunLarge, NESoftmaxLayerFixture&lt; float &gt;, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SoftmaxLayerLargeShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::F32)), framework::dataset::make(&quot;Beta&quot;,{1.0f, 2.0f})))</td></tr>
 <tr class="separator:a385fd836467f20e9a135defe639f1c59"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1d58629ca9d74415fbf8ee85047d5cfd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a1d58629ca9d74415fbf8ee85047d5cfd">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NESoftmaxLayerFixedPointFixture&lt; int8_t &gt;, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SoftmaxLayerSmallShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::QS8)), framework::dataset::make(&quot;FractionalBits&quot;, 1, 6)))</td></tr>
-<tr class="separator:a1d58629ca9d74415fbf8ee85047d5cfd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af18a0e9c921881df8facea8113636628"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af18a0e9c921881df8facea8113636628">FIXTURE_DATA_TEST_CASE</a> (RunLarge, NESoftmaxLayerFixedPointFixture&lt; int8_t &gt;, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SoftmaxLayerLargeShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::QS8)), framework::dataset::make(&quot;FractionalBits&quot;, 1, 6)))</td></tr>
-<tr class="separator:af18a0e9c921881df8facea8113636628"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afcde3ed036ada18e9fff16b5e528ca71"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#afcde3ed036ada18e9fff16b5e528ca71">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NESoftmaxLayerFixedPointFixture&lt; int16_t &gt;, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SoftmaxLayerSmallShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::QS16)), framework::dataset::make(&quot;FractionalBits&quot;, 1, 14)))</td></tr>
-<tr class="separator:afcde3ed036ada18e9fff16b5e528ca71"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4c932c9b2f5e8322bc6b0ae572ea9a31"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a4c932c9b2f5e8322bc6b0ae572ea9a31">FIXTURE_DATA_TEST_CASE</a> (RunLarge, NESoftmaxLayerFixedPointFixture&lt; int16_t &gt;, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SoftmaxLayerLargeShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::QS16)), framework::dataset::make(&quot;FractionalBits&quot;, 1, 14)))</td></tr>
-<tr class="separator:a4c932c9b2f5e8322bc6b0ae572ea9a31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac434ab87dad83ce5f8eaddfb1d44b868"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ac434ab87dad83ce5f8eaddfb1d44b868">FIXTURE_DATA_TEST_CASE</a> (RunTiny, NESoftmaxLayerFixedPointFixture&lt; int8_t &gt;, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SoftmaxLayerTinyShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::QS8)), framework::dataset::make(&quot;FractionalBits&quot;, 1, 6)))</td></tr>
+<tr class="separator:ac434ab87dad83ce5f8eaddfb1d44b868"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad81d53e6ebcc542e83b86f13e222a3f4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad81d53e6ebcc542e83b86f13e222a3f4">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NESoftmaxLayerFixedPointFixture&lt; int8_t &gt;, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SoftmaxLayerSmallShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::QS8)), framework::dataset::make(&quot;FractionalBits&quot;, 1, 6)))</td></tr>
+<tr class="separator:ad81d53e6ebcc542e83b86f13e222a3f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a396a16719d51731c5e1c2433919b441d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a396a16719d51731c5e1c2433919b441d">FIXTURE_DATA_TEST_CASE</a> (RunTiny, NESoftmaxLayerFixedPointFixture&lt; int16_t &gt;, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SoftmaxLayerTinyShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::QS16)), framework::dataset::make(&quot;FractionalBits&quot;, 1, 14)))</td></tr>
+<tr class="separator:a396a16719d51731c5e1c2433919b441d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4da0db31282fdfbc320a81c9b3d347a1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a4da0db31282fdfbc320a81c9b3d347a1">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NESoftmaxLayerFixedPointFixture&lt; int16_t &gt;, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SoftmaxLayerSmallShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::QS16)), framework::dataset::make(&quot;FractionalBits&quot;, 1, 14)))</td></tr>
+<tr class="separator:a4da0db31282fdfbc320a81c9b3d347a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac0b59418e54976b26815f8a9fa921218"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ac0b59418e54976b26815f8a9fa921218">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NESoftmaxLayerQuantizedFixture&lt; uint8_t &gt;, framework::DatasetMode::ALL, combine(combine(datasets::SoftmaxLayerSmallShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::QASYMM8)), combine(framework::dataset::make(&quot;QuantizationInfo&quot;,{QuantizationInfo(0.5f,-10)}), framework::dataset::make(&quot;Beta&quot;,{1.0f, 2.0f}))))</td></tr>
+<tr class="separator:ac0b59418e54976b26815f8a9fa921218"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adcd9116db9eb6b65125a4063f68d0afd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#adcd9116db9eb6b65125a4063f68d0afd">FIXTURE_DATA_TEST_CASE</a> (RunLarge, NESoftmaxLayerQuantizedFixture&lt; uint8_t &gt;, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SoftmaxLayerLargeShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::QASYMM8)), combine(framework::dataset::make(&quot;QuantizationInfo&quot;,{QuantizationInfo(0.5f,-10)}), framework::dataset::make(&quot;Beta&quot;,{1.0f, 2.0f}))))</td></tr>
+<tr class="separator:adcd9116db9eb6b65125a4063f68d0afd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -180,7 +187,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_0538a82dae0483a21d0f1e9d7e0a45c6.xhtml">NEON</a></li><li class="navelem"><a class="el" href="validation_2_n_e_o_n_2_softmax_layer_8cpp.xhtml">SoftmaxLayer.cpp</a></li>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:43 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:22 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

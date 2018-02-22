@@ -5,6 +5,10 @@ var dir_4efd0ee2ecda32567e74991b08d544ea =
     [ "Instrument.h", "_instrument_8h.xhtml", "_instrument_8h" ],
     [ "Instruments.cpp", "_instruments_8cpp.xhtml", "_instruments_8cpp" ],
     [ "Instruments.h", "_instruments_8h.xhtml", "_instruments_8h" ],
+    [ "InstrumentsStats.cpp", "_instruments_stats_8cpp.xhtml", null ],
+    [ "InstrumentsStats.h", "_instruments_stats_8h.xhtml", [
+      [ "InstrumentsStats", "classarm__compute_1_1test_1_1framework_1_1_instruments_stats.xhtml", "classarm__compute_1_1test_1_1framework_1_1_instruments_stats" ]
+    ] ],
     [ "MaliCounter.cpp", "_mali_counter_8cpp.xhtml", "_mali_counter_8cpp" ],
     [ "MaliCounter.h", "_mali_counter_8h.xhtml", [
       [ "MaliCounter", "classarm__compute_1_1test_1_1framework_1_1_mali_counter.xhtml", "classarm__compute_1_1test_1_1framework_1_1_mali_counter" ]
@@ -24,6 +28,11 @@ var dir_4efd0ee2ecda32567e74991b08d544ea =
     [ "PMUCounter.cpp", "_p_m_u_counter_8cpp.xhtml", null ],
     [ "PMUCounter.h", "_p_m_u_counter_8h.xhtml", [
       [ "PMUCounter", "classarm__compute_1_1test_1_1framework_1_1_p_m_u_counter.xhtml", "classarm__compute_1_1test_1_1framework_1_1_p_m_u_counter" ]
+    ] ],
+    [ "SchedulerTimer.cpp", "_scheduler_timer_8cpp.xhtml", null ],
+    [ "SchedulerTimer.h", "_scheduler_timer_8h.xhtml", [
+      [ "SchedulerTimer", "classarm__compute_1_1test_1_1framework_1_1_scheduler_timer.xhtml", "classarm__compute_1_1test_1_1framework_1_1_scheduler_timer" ],
+      [ "kernel_info", "structarm__compute_1_1test_1_1framework_1_1_scheduler_timer_1_1kernel__info.xhtml", "structarm__compute_1_1test_1_1framework_1_1_scheduler_timer_1_1kernel__info" ]
     ] ],
     [ "WallClockTimer.cpp", "_wall_clock_timer_8cpp.xhtml", null ],
     [ "WallClockTimer.h", "_wall_clock_timer_8h.xhtml", [

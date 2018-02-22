@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,19 +40,20 @@ namespace test
 namespace validation
 {
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T1, typename T2>
-class PixelWiseMultiplicationValidationFixture : public framework::Fixture
+class PixelWiseMultiplicationBroadcastValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape    shape,
-               DataType       dt_in1,
-               DataType       dt_in2,
-               float          scale,
-               ConvertPolicy  convert_policy,
-               RoundingPolicy rounding_policy)
+    void setup(const TensorShape &shape0,
+               const TensorShape &shape1,
+               DataType           dt_in1,
+               DataType           dt_in2,
+               float              scale,
+               ConvertPolicy      convert_policy,
+               RoundingPolicy     rounding_policy)
     {
-        _target    = compute_target(shape, dt_in1, dt_in2, scale, convert_policy, rounding_policy);
-        _reference = compute_reference(shape, dt_in1, dt_in2, scale, convert_policy, rounding_policy);
+        _target    = compute_target(shape0, shape1, dt_in1, dt_in2, scale, convert_policy, rounding_policy);
+        _reference = compute_reference(shape0, shape1, dt_in1, dt_in2, scale, convert_policy, rounding_policy);
     }
 
 protected:
@@ -62,12 +63,13 @@ protected:
         library->fill_tensor_uniform(tensor, seed_offset);
     }
 
-    TensorType compute_target(const TensorShape &shape, DataType dt_in1, DataType dt_in2, float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy)
+    TensorType compute_target(const TensorShape &shape0, const TensorShape &shape1, DataType dt_in1, DataType dt_in2,
+                              float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy)
     {
         // Create tensors
-        TensorType src1 = create_tensor<TensorType>(shape, dt_in1);
-        TensorType src2 = create_tensor<TensorType>(shape, dt_in2);
-        TensorType dst  = create_tensor<TensorType>(shape, dt_in2);
+        TensorType src1 = create_tensor<TensorType>(shape0, dt_in1);
+        TensorType src2 = create_tensor<TensorType>(shape1, dt_in2);
+        TensorType dst  = create_tensor<TensorType>(TensorShape::broadcast_shape(shape0, shape1), dt_in2);
 
         // Create and configure function
         FunctionType multiply;
@@ -96,11 +98,12 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T2> compute_reference(const TensorShape &shape, DataType dt_in1, DataType dt_in2, float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy)
+    SimpleTensor<T2> compute_reference(const TensorShape &shape0, const TensorShape &shape1, DataType dt_in1, DataType dt_in2,
+                                       float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy)
     {
         // Create reference
-        SimpleTensor<T1> src1{ shape, dt_in1 };
-        SimpleTensor<T2> src2{ shape, dt_in2 };
+        SimpleTensor<T1> src1{ shape0, dt_in1 };
+        SimpleTensor<T2> src2{ shape1, dt_in2 };
 
         // Fill reference
         fill(src1, 0);
@@ -112,6 +115,18 @@ protected:
     TensorType       _target{};
     SimpleTensor<T2> _reference{};
 };
+
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T1, typename T2>
+class PixelWiseMultiplicationValidationFixture : public PixelWiseMultiplicationBroadcastValidationFixture<TensorType, AccessorType, FunctionType, T1, T2>
+{
+public:
+    template <typename...>
+    void setup(const TensorShape &shape, DataType dt_in1, DataType dt_in2, float scale, ConvertPolicy convert_policy, RoundingPolicy rounding_policy)
+    {
+        PixelWiseMultiplicationBroadcastValidationFixture<TensorType, AccessorType, FunctionType, T1, T2>::setup(shape, shape, dt_in1, dt_in2, scale, convert_policy, rounding_policy);
+    }
+};
+
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

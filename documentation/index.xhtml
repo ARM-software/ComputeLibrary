@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -313,6 +313,57 @@ v17.04 (First release of April 2017)
 </pre><dl class="section note"><dt>Note</dt><dd>We're aiming at releasing one major public release with new features per quarter. All releases in between will only contain bug fixes.</dd></dl>
 <h2><a class="anchor" id="S2_2_changelog"></a>
 Changelog</h2>
+<p>v18.02 Public major release</p><ul>
+<li>Various NEON / OpenCL / GLES optimisations.</li>
+<li>Various bug fixes.</li>
+<li>Changed default number of threads on big LITTLE systems.</li>
+<li>Refactored examples and added:<ul>
+<li>graph_mobilenet_qassym8</li>
+<li>graph_resnet</li>
+<li>graph_squeezenet_v1_1</li>
+</ul>
+</li>
+<li>Renamed <a class="el" href="classarm__compute_1_1_c_l_convolution_layer.xhtml">arm_compute::CLConvolutionLayer</a> into <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_convolution_layer.xhtml">arm_compute::CLGEMMConvolutionLayer</a> and created a new <a class="el" href="classarm__compute_1_1_c_l_convolution_layer.xhtml">arm_compute::CLConvolutionLayer</a> to select the fastest convolution method.</li>
+<li>Renamed <a class="el" href="classarm__compute_1_1_n_e_convolution_layer.xhtml">arm_compute::NEConvolutionLayer</a> into <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_convolution_layer.xhtml">arm_compute::NEGEMMConvolutionLayer</a> and created a new <a class="el" href="classarm__compute_1_1_n_e_convolution_layer.xhtml">arm_compute::NEConvolutionLayer</a> to select the fastest convolution method.</li>
+<li>Added in place support to:<ul>
+<li><a class="el" href="classarm__compute_1_1_c_l_activation_layer.xhtml">arm_compute::CLActivationLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_batch_normalization_layer.xhtml">arm_compute::CLBatchNormalizationLayer</a></li>
+</ul>
+</li>
+<li>Added QASYMM8 support to:<ul>
+<li><a class="el" href="classarm__compute_1_1_c_l_activation_layer.xhtml">arm_compute::CLActivationLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer.xhtml">arm_compute::CLDepthwiseConvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer.xhtml">arm_compute::NEDepthwiseConvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_softmax_layer.xhtml">arm_compute::NESoftmaxLayer</a></li>
+</ul>
+</li>
+<li>Added FP16 support to:<ul>
+<li><a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer3x3.xhtml">arm_compute::CLDepthwiseConvolutionLayer3x3</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer.xhtml">arm_compute::CLDepthwiseConvolutionLayer</a></li>
+</ul>
+</li>
+<li>Added broadcasting support to <a class="el" href="classarm__compute_1_1_n_e_arithmetic_addition.xhtml">arm_compute::NEArithmeticAddition</a> / <a class="el" href="classarm__compute_1_1_c_l_arithmetic_addition.xhtml">arm_compute::CLArithmeticAddition</a> / <a class="el" href="classarm__compute_1_1_c_l_pixel_wise_multiplication.xhtml">arm_compute::CLPixelWiseMultiplication</a></li>
+<li>Added fused batched normalization and activation to <a class="el" href="classarm__compute_1_1_c_l_batch_normalization_layer.xhtml">arm_compute::CLBatchNormalizationLayer</a> and <a class="el" href="classarm__compute_1_1_n_e_batch_normalization_layer.xhtml">arm_compute::NEBatchNormalizationLayer</a></li>
+<li>Added support for non-square pooling to <a class="el" href="classarm__compute_1_1_n_e_pooling_layer.xhtml">arm_compute::NEPoolingLayer</a> and <a class="el" href="classarm__compute_1_1_c_l_pooling_layer.xhtml">arm_compute::CLPoolingLayer</a></li>
+<li>New OpenCL kernels / functions:<ul>
+<li><a class="el" href="classarm__compute_1_1_c_l_direct_convolution_layer_output_stage_kernel.xhtml">arm_compute::CLDirectConvolutionLayerOutputStageKernel</a></li>
+</ul>
+</li>
+<li>New NEON kernels / functions<ul>
+<li>Added name() method to all kernels.</li>
+<li>Added support for Winograd 5x5.</li>
+<li><a class="el" href="classarm__compute_1_1_n_e_permute_kernel.xhtml">arm_compute::NEPermuteKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_permute.xhtml">arm_compute::NEPermute</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_input_kernel.xhtml">arm_compute::NEWinogradLayerTransformInputKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_winograd_layer.xhtml">arm_compute::NEWinogradLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_output_kernel.xhtml">arm_compute::NEWinogradLayerTransformOutputKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_winograd_layer.xhtml">arm_compute::NEWinogradLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel.xhtml">arm_compute::NEWinogradLayerTransformWeightsKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_winograd_layer.xhtml">arm_compute::NEWinogradLayer</a></li>
+<li>Renamed arm_compute::NEWinogradLayerKernel into <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml">arm_compute::NEWinogradLayerBatchedGEMMKernel</a></li>
+</ul>
+</li>
+<li>New GLES kernels / functions:<ul>
+<li><a class="el" href="classarm__compute_1_1_g_c_tensor_shift_kernel.xhtml">arm_compute::GCTensorShiftKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_tensor_shift.xhtml">arm_compute::GCTensorShift</a></li>
+</ul>
+</li>
+</ul>
 <p>v18.01 Public maintenance release</p><ul>
 <li>Various bug fixes</li>
 <li>Added some of the missing <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a6813132c943295888972727864ea5c2f">validate()</a> methods</li>
@@ -331,7 +382,7 @@ Changelog</h2>
 <li><a class="el" href="classarm__compute_1_1_g_c_im2_col_kernel.xhtml">arm_compute::GCIm2ColKernel</a></li>
 </ul>
 </li>
-<li>Refactored NEON Winograd (<a class="el" href="classarm__compute_1_1_n_e_winograd_layer_kernel.xhtml">arm_compute::NEWinogradLayerKernel</a>)</li>
+<li>Refactored NEON Winograd (arm_compute::NEWinogradLayerKernel)</li>
 <li>Added <a class="el" href="classarm__compute_1_1_n_e_direct_convolution_layer_output_stage_kernel.xhtml">arm_compute::NEDirectConvolutionLayerOutputStageKernel</a></li>
 <li>Added QASYMM8 support to the following NEON kernels:<ul>
 <li><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml">arm_compute::NEDepthwiseConvolutionLayer3x3Kernel</a></li>
@@ -340,7 +391,7 @@ Changelog</h2>
 </ul>
 </li>
 <li>Added new examples:<ul>
-<li><a class="el" href="graph__cl__mobilenet__qasymm8_8cpp.xhtml">graph_cl_mobilenet_qasymm8.cpp</a></li>
+<li>graph_cl_mobilenet_qasymm8.cpp</li>
 <li><a class="el" href="graph__inception__v3_8cpp.xhtml">graph_inception_v3.cpp</a></li>
 <li><a class="el" href="gc__dc_8cpp.xhtml">gc_dc.cpp</a></li>
 </ul>
@@ -386,7 +437,7 @@ Changelog</h2>
 <li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_offset_contribution_kernel.xhtml">arm_compute::NEGEMMLowpOffsetContributionKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_a_reduction_kernel.xhtml">arm_compute::NEGEMMLowpMatrixAReductionKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_b_reduction_kernel.xhtml">arm_compute::NEGEMMLowpMatrixBReductionKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_multiply_core.xhtml">arm_compute::NEGEMMLowpMatrixMultiplyCore</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_kernel.xhtml">arm_compute::NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point.xhtml">arm_compute::NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_kernel.xhtml">arm_compute::NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale.xhtml">arm_compute::NEGEMMLowpQuantizeDownInt32ToUint8Scale</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_kernel.xhtml">arm_compute::NEWinogradLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_winograd_layer.xhtml">arm_compute::NEWinogradLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_winograd_layer.xhtml">arm_compute::NEWinogradLayer</a> / arm_compute::NEWinogradLayerKernel</li>
 </ul>
 </li>
 <li>New OpenCL kernels / functions<ul>
@@ -504,8 +555,8 @@ Changelog</h2>
 <li><a class="el" href="classarm__compute_1_1_n_e_harris_score_kernel.xhtml">arm_compute::NEHarrisScoreKernel</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_h_o_g_detector_kernel.xhtml">arm_compute::NEHOGDetectorKernel</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_logits1_d_max_kernel.xhtml">arm_compute::NELogits1DMaxKernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_logits1_d_shift_exp_sum_kernel.xhtml">arm_compute::NELogits1DShiftExpSumKernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_logits1_d_norm_kernel.xhtml">arm_compute::NELogits1DNormKernel</a></li>
+<li>arm_compute::NELogits1DShiftExpSumKernel</li>
+<li>arm_compute::NELogits1DNormKernel</li>
 <li><a class="el" href="namespacearm__compute.xhtml#a38cad49e6beaef76bc1ec5064c9e9dba">arm_compute::NENonMaximaSuppression3x3FP16Kernel</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_non_maxima_suppression3x3_kernel.xhtml">arm_compute::NENonMaximaSuppression3x3Kernel</a></li>
 </ul>
@@ -520,7 +571,7 @@ Changelog</h2>
 <li>New NEON kernels / functions:<ul>
 <li><a class="el" href="classarm__compute_1_1_n_e_normalization_layer_kernel.xhtml">arm_compute::NENormalizationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_normalization_layer.xhtml">arm_compute::NENormalizationLayer</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_transpose_kernel.xhtml">arm_compute::NETransposeKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_transpose.xhtml">arm_compute::NETranspose</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_logits1_d_max_kernel.xhtml">arm_compute::NELogits1DMaxKernel</a>, <a class="el" href="classarm__compute_1_1_n_e_logits1_d_shift_exp_sum_kernel.xhtml">arm_compute::NELogits1DShiftExpSumKernel</a>, <a class="el" href="classarm__compute_1_1_n_e_logits1_d_norm_kernel.xhtml">arm_compute::NELogits1DNormKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_softmax_layer.xhtml">arm_compute::NESoftmaxLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_logits1_d_max_kernel.xhtml">arm_compute::NELogits1DMaxKernel</a>, arm_compute::NELogits1DShiftExpSumKernel, arm_compute::NELogits1DNormKernel / <a class="el" href="classarm__compute_1_1_n_e_softmax_layer.xhtml">arm_compute::NESoftmaxLayer</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml">arm_compute::NEIm2ColKernel</a>, <a class="el" href="classarm__compute_1_1_n_e_col2_im_kernel.xhtml">arm_compute::NECol2ImKernel</a>, arm_compute::NEConvolutionLayerWeightsReshapeKernel / <a class="el" href="classarm__compute_1_1_n_e_convolution_layer.xhtml">arm_compute::NEConvolutionLayer</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_accumulate_biases_kernel.xhtml">arm_compute::NEGEMMMatrixAccumulateBiasesKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_fully_connected_layer.xhtml">arm_compute::NEFullyConnectedLayer</a></li>
 <li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_multiply_kernel.xhtml">arm_compute::NEGEMMLowpMatrixMultiplyKernel</a> / arm_compute::NEGEMMLowp</li>
@@ -604,7 +655,7 @@ os: Target OS (linux|android|bare_metal)
     default: linux
     actual: linux
 
-build: Build type (native|cross_compile)
+build: Build type (native|cross_compile|embed_only)
     default: cross_compile
     actual: cross_compile
 
@@ -676,6 +727,7 @@ benchmark_tests: Build benchmark test programs (yes|no)
 <p><b>os:</b> Choose the operating system you are targeting: Linux, Android or bare metal. </p><dl class="section note"><dt>Note</dt><dd>bare metal can only be used for NEON (not OpenCL), only static libraries get built and NEON's multi-threading support is disabled.</dd></dl>
 <p><b>build:</b> you can either build directly on your device (native) or cross compile from your desktop machine (cross-compile). In both cases make sure the compiler is available in your path.</p>
 <dl class="section note"><dt>Note</dt><dd>If you want to natively compile for 32bit on a 64bit ARM device running a 64bit OS then you will have to use cross-compile too.</dd></dl>
+<p>There is also an 'embed_only' option which will generate all the .embed files for the OpenCL kernels and / or OpenGLES compute shaders. This might be useful if using a different build system to compile the library.</p>
 <p><b>Werror:</b> If you are compiling using the same toolchains as the ones used in this guide then there shouldn't be any warning and therefore you should be able to keep Werror=1. If with a different compiler version the library fails to build because of warnings interpreted as errors then, if you are sure the warnings are not important, you might want to try to build with Werror=0 (But please do report the issue either on Github or by an email to <a href="#" onclick="location.href='mai'+'lto:'+'dev'+'el'+'ope'+'r@'+'arm'+'.c'+'om'; return false;">devel<span style="display: none;">.nosp@m.</span>oper<span style="display: none;">.nosp@m.</span>@arm.<span style="display: none;">.nosp@m.</span>com</a> so that the issue can be addressed).</p>
 <p><b>opencl</b> / <b>neon</b> / <b>gles_compute:</b> Choose which SIMD technology you want to target. (NEON for ARM Cortex-A CPUs or OpenCL / GLES_COMPUTE for ARM Mali GPUs)</p>
 <p><b>embed_kernels:</b> For OpenCL / GLES_COMPUTE only: set embed_kernels=1 if you want the OpenCL / GLES_COMPUTE kernels to be built in the library's binaries instead of being read from separate ".cl" / ".cs" files. If embed_kernels is set to 0 then the application can set the path to the folder containing the OpenCL / GLES_COMPUTE kernel files by calling CLKernelLibrary::init() / GCKernelLibrary::init(). By default the path is set to "./cl_kernels" / "./cs_shaders".</p>
@@ -692,7 +744,7 @@ benchmark_tests: Build benchmark test programs (yes|no)
 <p><b>openmp</b> Build in the OpenMP scheduler for NEON.</p>
 <dl class="section note"><dt>Note</dt><dd>Only works when building with g++ not clang++</dd></dl>
 <p><b>cppthreads</b> Build in the C++11 scheduler for NEON.</p>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="classarm__compute_1_1_scheduler.xhtml#aa35fa7aa123444c798c28d4ac8fe7546" title="Sets the user defined scheduler and makes it the active scheduler. ">arm_compute::Scheduler::set</a></dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="classarm__compute_1_1_scheduler.xhtml#a12775a7fbfa126fa4f9f06f8e02d9a8e" title="Sets the user defined scheduler and makes it the active scheduler. ">arm_compute::Scheduler::set</a></dd></dl>
 <h2><a class="anchor" id="S3_2_linux"></a>
 Building for Linux</h2>
 <h3><a class="anchor" id="S3_2_1_library"></a>
@@ -863,7 +915,7 @@ aarch64-linux-gnu-gcc -o libGLESv2.so -Iinclude/linux opengles-3.1-stubs/GLESv2.
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:48 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:27 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

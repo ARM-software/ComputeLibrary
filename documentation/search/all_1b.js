@@ -4,5 +4,6 @@ var searchData=
   ['zip',['zip',['../namespacearm__compute_1_1test_1_1framework_1_1dataset.xhtml#ae3e79edc200b1b7b53d3a1fc100952ab',1,'arm_compute::test::framework::dataset']]],
   ['zipdataset',['ZipDataset',['../classarm__compute_1_1test_1_1framework_1_1dataset_1_1_zip_dataset.xhtml#af228d1e5cd68bd5085756622d761de1e',1,'arm_compute::test::framework::dataset::ZipDataset::ZipDataset(T &amp;&amp;dataset1, U &amp;&amp;dataset2)'],['../classarm__compute_1_1test_1_1framework_1_1dataset_1_1_zip_dataset.xhtml#a5e41b6d07e57d4b5f36c494122664069',1,'arm_compute::test::framework::dataset::ZipDataset::ZipDataset(ZipDataset &amp;&amp;)=default']]],
   ['zipdataset',['ZipDataset',['../classarm__compute_1_1test_1_1framework_1_1dataset_1_1_zip_dataset.xhtml',1,'arm_compute::test::framework::dataset']]],
-  ['zipdataset_2eh',['ZipDataset.h',['../_zip_dataset_8h.xhtml',1,'']]]
+  ['zipdataset_2eh',['ZipDataset.h',['../_zip_dataset_8h.xhtml',1,'']]],
+  ['zipdataset_3c_20shapedataset_2c_20shapedataset_20_3e',['ZipDataset&lt; ShapeDataset, ShapeDataset &gt;',['../classarm__compute_1_1test_1_1framework_1_1dataset_1_1_zip_dataset.xhtml',1,'arm_compute::test::framework::dataset']]]
 ];

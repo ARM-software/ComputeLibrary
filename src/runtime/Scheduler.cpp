@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -142,8 +142,8 @@ IScheduler &Scheduler::get()
 
 std::shared_ptr<IScheduler> Scheduler::_custom_scheduler = nullptr;
 
-void Scheduler::set(std::shared_ptr<IScheduler> &scheduler)
+void Scheduler::set(std::shared_ptr<IScheduler> scheduler)
 {
-    _custom_scheduler = scheduler;
+    _custom_scheduler = std::move(scheduler);
     set(Type::CUSTOM);
 }

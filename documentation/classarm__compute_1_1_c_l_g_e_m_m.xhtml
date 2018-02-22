@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -116,7 +116,8 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_c_l_g_e_m_m.xhtm
 
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a>  </div>
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a>  </div>
   <div class="headertitle">
 <div class="title">CLGEMM Class Reference</div>  </div>
 </div><!--header-->
@@ -148,6 +149,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_function.xhtml#ab921ecc3f3f6ae2b4bd61f3e1998d8c4">~IFunction</a> ()=default</td></tr>
 <tr class="memdesc:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#ab921ecc3f3f6ae2b4bd61f3e1998d8c4">More...</a><br /></td></tr>
 <tr class="separator:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:a3452acd72df092f3f8ebf910d8459fc9"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m.xhtml#a3452acd72df092f3f8ebf910d8459fc9">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *a, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *b, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *c, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output, const float alpha, const float beta, const <a class="el" href="classarm__compute_1_1_g_e_m_m_info.xhtml">GEMMInfo</a> &amp;gemm_info=<a class="el" href="classarm__compute_1_1_g_e_m_m_info.xhtml">GEMMInfo</a>())</td></tr>
+<tr class="memdesc:a3452acd72df092f3f8ebf910d8459fc9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m.xhtml">CLGEMM</a>.  <a href="#a3452acd72df092f3f8ebf910d8459fc9">More...</a><br /></td></tr>
+<tr class="separator:a3452acd72df092f3f8ebf910d8459fc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Basic function to execute GEMM on OpenCL. </p>
@@ -248,12 +255,12 @@ Whilst the first input tensor can be a vector, the second input tensor must be a
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output tensor. Data type supported: same as <code>a</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>Weight of the matrix product </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>Weight of matrix C </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">gemm_info</td><td>(Optional) Specifies if the matrix A and/or matrix B have been reshaped and if the reshape of matrix B should happen only for the first run </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">gemm_info</td><td>(Optional) Specifies if the matrix A and/or matrix B have been reshaped and if the reshape of matrix B should happen only for the first run. <a class="el" href="classarm__compute_1_1_g_e_m_m_info.xhtml" title="GEMM information class. ">GEMMInfo</a> also contains information about the reshaping in case matrix A and matrix B have been already transformed. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Referenced by <a class="el" href="validation_2_g_l_e_s___c_o_m_p_u_t_e_2_g_e_m_m_8cpp_source.xhtml#l00059">arm_compute::test::validation::DATA_TEST_CASE()</a>, <a class="el" href="validation_2_n_e_o_n_2_g_e_m_m_8cpp_source.xhtml#l00139">arm_compute::test::validation::FIXTURE_DATA_TEST_CASE()</a>, and <a class="el" href="validation_2fixtures_2_g_e_m_m_fixture_8h_source.xhtml#l00050">GEMMValidationFixedPointFixture&lt; TensorType, AccessorType, FunctionType, T &gt;::setup()</a>.</p>
+<p>Referenced by <a class="el" href="validation_2_g_l_e_s___c_o_m_p_u_t_e_2_g_e_m_m_8cpp_source.xhtml#l00059">arm_compute::test::validation::DATA_TEST_CASE()</a>, <a class="el" href="validation_2_n_e_o_n_2_g_e_m_m_8cpp_source.xhtml#l00140">arm_compute::test::validation::FIXTURE_DATA_TEST_CASE()</a>, and <a class="el" href="validation_2fixtures_2_g_e_m_m_fixture_8h_source.xhtml#l00050">GEMMValidationFixedPointFixture&lt; TensorType, AccessorType, FunctionType, T &gt;::setup()</a>.</p>
 
 </div>
 </div>
@@ -294,6 +301,85 @@ Whilst the first input tensor can be a vector, the second input tensor must be a
 
 </div>
 </div>
+<a class="anchor" id="a3452acd72df092f3f8ebf910d8459fc9"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a> validate </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *&#160;</td>
+          <td class="paramname"><em>c</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float&#160;</td>
+          <td class="paramname"><em>alpha</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float&#160;</td>
+          <td class="paramname"><em>beta</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_g_e_m_m_info.xhtml">GEMMInfo</a> &amp;&#160;</td>
+          <td class="paramname"><em>gemm_info</em> = <code><a class="el" href="classarm__compute_1_1_g_e_m_m_info.xhtml">GEMMInfo</a>()</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m.xhtml">CLGEMM</a>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>First input tensor (Matrix or <a class="el" href="struct_vector.xhtml" title="Structure to hold Vector information. ">Vector</a> A). Data types supported: QS8/QS16/F16/F32 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>Second input tensor (Matrix B). Data type supported: same as <code>a</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">c</td><td>Third input tensor (Matrix C). It can be a nullptr if just the multiplication between <code>a</code> and <code>b</code> is needed. Data type supported: same as <code>a</code>. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output tensor. Data type supported: same as <code>a</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>Weight of the matrix product </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>Weight of matrix C </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">gemm_info</td><td>(Optional) Specifies if the matrix A and/or matrix B have been reshaped and if the reshape of matrix B should happen only for the first run</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>arm_compute/runtime/CL/functions/<a class="el" href="_c_l_g_e_m_m_8h_source.xhtml">CLGEMM.h</a></li>
 </ul>
@@ -303,7 +389,7 @@ Whilst the first input tensor can be a vector, the second input tensor must be a
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m.xhtml">CLGEMM</a></li>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:44 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:23 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

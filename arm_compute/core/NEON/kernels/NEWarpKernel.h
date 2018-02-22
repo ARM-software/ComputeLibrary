@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -98,6 +98,10 @@ template <InterpolationPolicy interpolation>
 class NEWarpAffineKernel : public INEWarpKernel
 {
 private:
+    const char *name() const override
+    {
+        return "NEWarpAffineKernel";
+    }
     // Inherited methods overridden:
     void warp_undefined(const Window &window) override;
     void warp_constant(const Window &window) override;
@@ -111,6 +115,10 @@ template <InterpolationPolicy interpolation>
 class NEWarpPerspectiveKernel : public INEWarpKernel
 {
 private:
+    const char *name() const override
+    {
+        return "NEWarpPerspectiveKernel";
+    }
     // Inherited methods overridden:
     void warp_undefined(const Window &window) override;
     void warp_constant(const Window &window) override;

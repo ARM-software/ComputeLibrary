@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,11 @@
 
 using namespace arm_compute;
 
+GCDepthwiseConvolutionLayer3x3::GCDepthwiseConvolutionLayer3x3()
+    : _kernel(nullptr), _border_handler(), _shift_handler()
+{
+}
+
 void GCDepthwiseConvolutionLayer3x3::configure(IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, const PadStrideInfo &conv_info)
 {
     auto k = arm_compute::support::cpp14::make_unique<GCDepthwiseConvolutionLayer3x3Kernel>();
@@ -38,4 +43,15 @@ void GCDepthwiseConvolutionLayer3x3::configure(IGCTensor *input, const IGCTensor
 
     // Configure border handler
     _border_handler.configure(input, _kernel->border_size(), BorderMode::CONSTANT, PixelValue(0));
+
+    _shift_handler.configure(input);
+}
+
+void GCDepthwiseConvolutionLayer3x3::run()
+{
+    GCScheduler::get().dispatch(_shift_handler, false);
+    GCScheduler::get().memory_barrier();
+    GCScheduler::get().dispatch(_border_handler, false);
+    GCScheduler::get().memory_barrier();
+    GCScheduler::get().dispatch(*_kernel);
 }

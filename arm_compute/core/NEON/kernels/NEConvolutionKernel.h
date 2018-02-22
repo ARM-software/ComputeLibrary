@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,6 +55,10 @@ template <unsigned int matrix_size>
 class NEConvolutionKernel : public INESimpleKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEConvolutionKernel";
+    }
     /** Default constructor */
     NEConvolutionKernel();
     /** Initialise the kernel's input, output and border mode.
@@ -98,6 +102,10 @@ template <unsigned int matrix_size>
 class NESeparableConvolutionHorKernel : public INESimpleKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NESeparableConvolutionHorKernel";
+    }
     /** Default constructor */
     NESeparableConvolutionHorKernel();
 
@@ -138,6 +146,10 @@ template <unsigned int matrix_size>
 class NESeparableConvolutionVertKernel : public INESimpleKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NESeparableConvolutionVertKernel";
+    }
     /** Default constructor */
     NESeparableConvolutionVertKernel();
 
@@ -200,6 +212,10 @@ using NESeparableConvolution9x9VertKernel = NESeparableConvolutionVertKernel<9>;
 class NEConvolutionRectangleKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEConvolutionRectangleKernel";
+    }
     /** Default constructor */
     NEConvolutionRectangleKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */

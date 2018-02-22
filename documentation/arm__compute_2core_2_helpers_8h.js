@@ -26,6 +26,7 @@ var arm__compute_2core_2_helpers_8h =
     [ "intersect_valid_regions", "arm__compute_2core_2_helpers_8h.xhtml#a133621090cfb0f151340c6e04bd7bcc8", null ],
     [ "operator&", "arm__compute_2core_2_helpers_8h.xhtml#adfe7525e3cd542da6c043a98f93a8d3c", null ],
     [ "permute", "arm__compute_2core_2_helpers_8h.xhtml#a21c3e11887f3acf9284ca763372c7da0", null ],
+    [ "permute", "arm__compute_2core_2_helpers_8h.xhtml#a5045aaec85553032a782c44ab8d26341", null ],
     [ "pixel_area_c1u8_clamp", "arm__compute_2core_2_helpers_8h.xhtml#ab7b3af731907e85fcaf72555c446176b", null ],
     [ "pixel_bilinear_c1", "arm__compute_2core_2_helpers_8h.xhtml#a1c8d639ec2b3086a9506e72605a32333", null ],
     [ "pixel_bilinear_c1_clamp", "arm__compute_2core_2_helpers_8h.xhtml#afa55519774605e5b840fb031fdd7b196", null ],

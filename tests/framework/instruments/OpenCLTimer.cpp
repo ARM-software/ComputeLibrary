@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -142,20 +142,10 @@ Instrument::MeasurementsMap OpenCLTimer::measurements() const
     unsigned int    kernel_number = 0;
     for(auto kernel : kernels)
     {
-        //cl_int status = kernel.event.getInfo(<CL_EVENT_COMMAND_EXECUTION_STATUS>();
-        cl_ulong queued = kernel.event.getProfilingInfo<CL_PROFILING_COMMAND_QUEUED>();
-        cl_ulong submit = kernel.event.getProfilingInfo<CL_PROFILING_COMMAND_SUBMIT>();
-        cl_ulong start  = kernel.event.getProfilingInfo<CL_PROFILING_COMMAND_START>();
-        cl_ulong end    = kernel.event.getProfilingInfo<CL_PROFILING_COMMAND_END>();
+        cl_ulong start = kernel.event.getProfilingInfo<CL_PROFILING_COMMAND_START>();
+        cl_ulong end   = kernel.event.getProfilingInfo<CL_PROFILING_COMMAND_END>();
 
-        std::list<std::string> raw_data =
-        {
-            "queued", support::cpp11::to_string(queued),
-            "submit", support::cpp11::to_string(submit),
-            "start", support::cpp11::to_string(start),
-            "end", support::cpp11::to_string(end),
-        };
-        measurements.emplace(kernel.name + " #" + support::cpp11::to_string(kernel_number++), Measurement((end - start) / _scale_factor, _unit, raw_data));
+        measurements.emplace(kernel.name + " #" + support::cpp11::to_string(kernel_number++), Measurement((end - start) / _scale_factor, _unit));
     }
 
     return measurements;

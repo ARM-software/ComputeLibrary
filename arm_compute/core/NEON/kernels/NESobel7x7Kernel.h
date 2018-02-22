@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,6 +36,10 @@ class ITensor;
 class NESobel7x7HorKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NESobel7x7HorKernel";
+    }
     /** Default constructor */
     NESobel7x7HorKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -79,6 +83,10 @@ private:
 class NESobel7x7VertKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NESobel7x7VertKernel";
+    }
     /** Default constructor */
     NESobel7x7VertKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */

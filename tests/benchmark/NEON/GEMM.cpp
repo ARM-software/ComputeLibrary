@@ -48,15 +48,23 @@ const auto data_types = framework::dataset::make("DataType",
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
     DataType::F32
 });
+const auto reshape_b_only_once = framework::dataset::make("ReshapeBOnlyOnce", { false, true });
 } // namespace
 
 using NEGEMMFixture = GEMMFixture<Tensor, NEGEMM, Accessor>;
 
 TEST_SUITE(NEON)
 
-REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1GEMM, NEGEMMFixture, framework::DatasetMode::ALL, framework::dataset::combine(datasets::GoogLeNetInceptionV1GEMMDataset(), data_types));
-REGISTER_FIXTURE_DATA_TEST_CASE(MatrixMultiplyGEMM, NEGEMMFixture, framework::DatasetMode::ALL, framework::dataset::combine(datasets::MatrixMultiplyGEMMDataset(), data_types));
-REGISTER_FIXTURE_DATA_TEST_CASE(GoogleNetGEMM, NEGEMMFixture, framework::DatasetMode::NIGHTLY, framework::dataset::combine(datasets::GoogleNetGEMMDataset(), data_types));
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1GEMM, NEGEMMFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1GEMMDataset(),
+                                                                                        data_types),
+                                                            reshape_b_only_once));
+REGISTER_FIXTURE_DATA_TEST_CASE(MatrixMultiplyGEMM, NEGEMMFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(datasets::MatrixMultiplyGEMMDataset(),
+                                data_types),
+                                reshape_b_only_once));
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogleNetGEMM, NEGEMMFixture, framework::DatasetMode::NIGHTLY, framework::dataset::combine(framework::dataset::combine(datasets::GoogleNetGEMMDataset(),
+                                data_types),
+                                reshape_b_only_once));
 
 TEST_SUITE_END()
 } // namespace test

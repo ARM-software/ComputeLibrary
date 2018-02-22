@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -135,10 +135,10 @@ Collaboration diagram for BatchNormalizationLayer:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a73024d531321cb97077aacf5f6d26917"><td class="memTemplParams" colspan="2">template&lt;typename AccessorType &gt; </td></tr>
-<tr class="memitem:a73024d531321cb97077aacf5f6d26917"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_batch_normalization_layer.xhtml#a73024d531321cb97077aacf5f6d26917">BatchNormalizationLayer</a> (AccessorType &amp;&amp;mean, AccessorType &amp;&amp;var, AccessorType &amp;&amp;gamma, AccessorType &amp;&amp;beta, float epsilon)</td></tr>
-<tr class="memdesc:a73024d531321cb97077aacf5f6d26917"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <a href="#a73024d531321cb97077aacf5f6d26917">More...</a><br /></td></tr>
-<tr class="separator:a73024d531321cb97077aacf5f6d26917"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac164500b5d7a26fe69f965c150492de5"><td class="memTemplParams" colspan="2">template&lt;typename AccessorType &gt; </td></tr>
+<tr class="memitem:ac164500b5d7a26fe69f965c150492de5"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_batch_normalization_layer.xhtml#ac164500b5d7a26fe69f965c150492de5">BatchNormalizationLayer</a> (AccessorType &amp;&amp;mean, AccessorType &amp;&amp;var, AccessorType &amp;&amp;gamma, AccessorType &amp;&amp;beta, float epsilon, <a class="el" href="classarm__compute_1_1_activation_layer_info.xhtml">ActivationLayerInfo</a> act_info=<a class="el" href="classarm__compute_1_1_activation_layer_info.xhtml">ActivationLayerInfo</a>())</td></tr>
+<tr class="memdesc:ac164500b5d7a26fe69f965c150492de5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <a href="#ac164500b5d7a26fe69f965c150492de5">More...</a><br /></td></tr>
+<tr class="separator:ac164500b5d7a26fe69f965c150492de5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aefee70b3377d4ece56de05e1dff00dd8"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classarm__compute_1_1_i_function.xhtml">arm_compute::IFunction</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_batch_normalization_layer.xhtml#aefee70b3377d4ece56de05e1dff00dd8">instantiate_node</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph_context.xhtml">GraphContext</a> &amp;ctx, <a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_object.xhtml">ITensorObject</a> *input, <a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_object.xhtml">ITensorObject</a> *output) override</td></tr>
 <tr class="memdesc:aefee70b3377d4ece56de05e1dff00dd8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface to be implemented that instantiates the node.  <a href="#aefee70b3377d4ece56de05e1dff00dd8">More...</a><br /></td></tr>
 <tr class="separator:aefee70b3377d4ece56de05e1dff00dd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -149,13 +149,19 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a4f94409d100ac0a28961a82a5cc31d30 inherit pub_methods_classarm__compute_1_1graph_1_1_i_node"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a8d5e69e9a697c2007e241eb413c9833b">TargetHint</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#a4f94409d100ac0a28961a82a5cc31d30">override_target_hint</a> (<a class="el" href="namespacearm__compute_1_1graph.xhtml#a8d5e69e9a697c2007e241eb413c9833b">TargetHint</a> target_hint) const </td></tr>
 <tr class="memdesc:a4f94409d100ac0a28961a82a5cc31d30 inherit pub_methods_classarm__compute_1_1graph_1_1_i_node"><td class="mdescLeft">&#160;</td><td class="mdescRight">Override the existing target hint.  <a href="#a4f94409d100ac0a28961a82a5cc31d30">More...</a><br /></td></tr>
 <tr class="separator:a4f94409d100ac0a28961a82a5cc31d30 inherit pub_methods_classarm__compute_1_1graph_1_1_i_node"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3f5a851dcc0fae248668de12466017c8 inherit pub_methods_classarm__compute_1_1graph_1_1_i_node"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#a3f5a851dcc0fae248668de12466017c8">supports_in_place</a> () const </td></tr>
+<tr class="memdesc:a3f5a851dcc0fae248668de12466017c8 inherit pub_methods_classarm__compute_1_1graph_1_1_i_node"><td class="mdescLeft">&#160;</td><td class="mdescRight">Method to check if the node supports in-place operations.  <a href="#a3f5a851dcc0fae248668de12466017c8">More...</a><br /></td></tr>
+<tr class="separator:a3f5a851dcc0fae248668de12466017c8 inherit pub_methods_classarm__compute_1_1graph_1_1_i_node"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48a1f1a1fdc7328d9d50fb72a2e12be2 inherit pub_methods_classarm__compute_1_1graph_1_1_i_node"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#a48a1f1a1fdc7328d9d50fb72a2e12be2">set_supports_in_place</a> (bool <a class="el" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>)</td></tr>
+<tr class="memdesc:a48a1f1a1fdc7328d9d50fb72a2e12be2 inherit pub_methods_classarm__compute_1_1graph_1_1_i_node"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the value of the _supports_in_place attribute.  <a href="#a48a1f1a1fdc7328d9d50fb72a2e12be2">More...</a><br /></td></tr>
+<tr class="separator:a48a1f1a1fdc7328d9d50fb72a2e12be2 inherit pub_methods_classarm__compute_1_1graph_1_1_i_node"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>BatchNormalization layer node. </p>
 
 <p>Definition at line <a class="el" href="arm__compute_2graph_2nodes_2_batch_normalization_layer_8h_source.xhtml#l00038">38</a> of file <a class="el" href="arm__compute_2graph_2nodes_2_batch_normalization_layer_8h_source.xhtml">BatchNormalizationLayer.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a73024d531321cb97077aacf5f6d26917"></a>
+<a class="anchor" id="ac164500b5d7a26fe69f965c150492de5"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -190,7 +196,13 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>epsilon</em>&#160;</td>
+          <td class="paramname"><em>epsilon</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classarm__compute_1_1_activation_layer_info.xhtml">ActivationLayerInfo</a>&#160;</td>
+          <td class="paramname"><em>act_info</em> = <code><a class="el" href="classarm__compute_1_1_activation_layer_info.xhtml">ActivationLayerInfo</a>()</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -213,14 +225,16 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">gamma</td><td>Gamma values tensor </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>Beta values tensor </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">epsilon</td><td>Epsilon value </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">act_info</td><td>(Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported. </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="arm__compute_2graph_2nodes_2_batch_normalization_layer_8h_source.xhtml#l00050">50</a> of file <a class="el" href="arm__compute_2graph_2nodes_2_batch_normalization_layer_8h_source.xhtml">BatchNormalizationLayer.h</a>.</p>
+<p>Definition at line <a class="el" href="arm__compute_2graph_2nodes_2_batch_normalization_layer_8h_source.xhtml#l00051">51</a> of file <a class="el" href="arm__compute_2graph_2nodes_2_batch_normalization_layer_8h_source.xhtml">BatchNormalizationLayer.h</a>.</p>
 
-<p>References <a class="el" href="classarm__compute_1_1graph_1_1_batch_normalization_layer.xhtml#aefee70b3377d4ece56de05e1dff00dd8">BatchNormalizationLayer::instantiate_node()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        : _mean(std::move(mean)), _var(std::move(var)), _gamma(std::move(gamma)), _beta(std::move(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#ab146b9cbab6e73e7588b240dc709fe01">beta</a>)), _epsilon(epsilon)</div><div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    {</div><div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_ab146b9cbab6e73e7588b240dc709fe01"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#ab146b9cbab6e73e7588b240dc709fe01">arm_compute::test::validation::beta</a></div><div class="ttdeci">beta</div><div class="ttdef"><b>Definition:</b> <a href="validation_2_c_l_2_g_e_m_m_8cpp_source.xhtml#l00112">GEMM.cpp:112</a></div></div>
+<p>References <a class="el" href="classarm__compute_1_1graph_1_1_batch_normalization_layer.xhtml#aefee70b3377d4ece56de05e1dff00dd8">BatchNormalizationLayer::instantiate_node()</a>, and <a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#a48a1f1a1fdc7328d9d50fb72a2e12be2">INode::set_supports_in_place()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        : _mean(std::move(mean)), _var(std::move(var)), _gamma(std::move(gamma)), _beta(std::move(<a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#ab146b9cbab6e73e7588b240dc709fe01">beta</a>)), _epsilon(epsilon), _act_info(act_info)</div><div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    {</div><div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        <a class="code" href="classarm__compute_1_1graph_1_1_i_node.xhtml#a48a1f1a1fdc7328d9d50fb72a2e12be2">set_supports_in_place</a>(<span class="keyword">true</span>);</div><div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_ab146b9cbab6e73e7588b240dc709fe01"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#ab146b9cbab6e73e7588b240dc709fe01">arm_compute::test::validation::beta</a></div><div class="ttdeci">beta</div><div class="ttdef"><b>Definition:</b> <a href="validation_2_c_l_2_g_e_m_m_8cpp_source.xhtml#l00113">GEMM.cpp:113</a></div></div>
+<div class="ttc" id="classarm__compute_1_1graph_1_1_i_node_xhtml_a48a1f1a1fdc7328d9d50fb72a2e12be2"><div class="ttname"><a href="classarm__compute_1_1graph_1_1_i_node.xhtml#a48a1f1a1fdc7328d9d50fb72a2e12be2">arm_compute::graph::INode::set_supports_in_place</a></div><div class="ttdeci">void set_supports_in_place(bool value)</div><div class="ttdoc">Set the value of the _supports_in_place attribute. </div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -275,7 +289,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#aff59544b2bab30c9a3ce1876515e48df">INode</a>.</p>
 
-<p>Referenced by <a class="el" href="arm__compute_2graph_2nodes_2_batch_normalization_layer_8h_source.xhtml#l00050">BatchNormalizationLayer::BatchNormalizationLayer()</a>.</p>
+<p>Referenced by <a class="el" href="arm__compute_2graph_2nodes_2_batch_normalization_layer_8h_source.xhtml#l00051">BatchNormalizationLayer::BatchNormalizationLayer()</a>.</p>
 
 </div>
 </div>
@@ -288,7 +302,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1_batch_normalization_layer.xhtml">BatchNormalizationLayer</a></li>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:46 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:25 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

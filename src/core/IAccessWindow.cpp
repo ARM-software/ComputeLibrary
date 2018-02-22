@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -122,9 +122,10 @@ bool AccessWindowRectangle::update_window_if_needed(Window &window) const
         if(min_y < front_pad_y_available)
         {
             // Not enough padding available, need to shrink the window
-            const int start = adjust_up(min_y, front_pad_y_available, window.y().step() * _scale_y) - _y;
+            int start = adjust_up(min_y, front_pad_y_available, window.y().step() * _scale_y) - _y;
+            start     = std::min<int>(start / _scale_y, window.y().end());
 
-            window.set(1, Window::Dimension(start / _scale_y, window.y().end(), window.y().step()));
+            window.set(1, Window::Dimension(start, window.y().end(), window.y().step()));
             window_modified = true;
         }
 
@@ -143,8 +144,10 @@ bool AccessWindowRectangle::update_window_if_needed(Window &window) const
         if(static_cast<int>(shape[1]) + tail_pad_y_available < max_y)
         {
             // Not enough padding available, need to shrink the window
-            const int end = adjust_down(max_y, shape[1] + tail_pad_y_available, window.y().step() * _scale_y) + window.y().step() * _scale_y - _y - _height;
-            window.set(1, Window::Dimension(window.y().start(), end / _scale_y, window.y().step()));
+            int end = adjust_down(max_y, shape[1] + tail_pad_y_available, window.y().step() * _scale_y) + window.y().step() * _scale_y - _y - _height;
+            end     = std::max<int>(window.y().start(), end / _scale_y);
+
+            window.set(1, Window::Dimension(window.y().start(), end, window.y().step()));
             window_modified = true;
         }
     }
@@ -164,8 +167,10 @@ bool AccessWindowRectangle::update_window_if_needed(Window &window) const
         if(min_x < front_pad_x_available)
         {
             // Not enough padding available, need to shrink the window
-            const int start = adjust_up(min_x, front_pad_x_available, window.x().step() * _scale_x) - _x;
-            window.set(0, Window::Dimension(start / _scale_x, window.x().end(), window.x().step()));
+            int start = adjust_up(min_x, front_pad_x_available, window.x().step() * _scale_x) - _x;
+            start     = std::min<int>(start / _scale_x, window.x().end());
+
+            window.set(0, Window::Dimension(start, window.x().end(), window.x().step()));
             window_modified = true;
         }
 
@@ -181,8 +186,10 @@ bool AccessWindowRectangle::update_window_if_needed(Window &window) const
         if(static_cast<int>(shape[0]) + tail_pad_x_available < max_x)
         {
             // Not enough padding available, need to shrink the window
-            const int end = adjust_down(max_x, shape[0] + tail_pad_x_available, window.x().step() * _scale_x) + window.x().step() * _scale_x - _x - _width;
-            window.set(0, Window::Dimension(window.x().start(), end / _scale_x, window.x().step()));
+            int end = adjust_down(max_x, shape[0] + tail_pad_x_available, window.x().step() * _scale_x) + window.x().step() * _scale_x - _x - _width;
+            end     = std::max<int>(window.x().start(), end / _scale_x);
+
+            window.set(0, Window::Dimension(window.x().start(), end, window.x().step()));
             window_modified = true;
         }
     }
@@ -192,7 +199,7 @@ bool AccessWindowRectangle::update_window_if_needed(Window &window) const
     return window_modified;
 }
 
-bool AccessWindowRectangle::update_padding_if_needed(const Window &window) const
+bool AccessWindowRectangle::update_padding_if_needed(const Window &window)
 {
     // Only update the padding if the tensor allows it
     if(_info == nullptr || !_info->is_resizable())
@@ -200,8 +207,8 @@ bool AccessWindowRectangle::update_padding_if_needed(const Window &window) const
         return false;
     }
 
-    ARM_COMPUTE_ERROR_ON(window.x().step() * _scale_x == 0);
-    ARM_COMPUTE_ERROR_ON(window.y().step() * _scale_y == 0);
+    ARM_COMPUTE_ERROR_ON(_scale_x == 0);
+    ARM_COMPUTE_ERROR_ON(_scale_y == 0);
 
     const int min_x = window.x().start() * _scale_x + _x;
     const int max_x = (window.x().end() - window.x().step()) * _scale_x + _x + _width;

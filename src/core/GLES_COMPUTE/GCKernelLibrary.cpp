@@ -190,6 +190,7 @@ void GCKernel::update_shader_params()
 const std::map<std::string, std::string> GCKernelLibrary::_shader_program_map =
 {
     { "absdiff", "absdiff.cs" },
+    { "tensorshift", "tensor_shift.cs" },
     { "direct_convolution1x1", "direct_convolution1x1.cs" },
     { "direct_convolution3x3", "direct_convolution3x3.cs" },
     { "direct_convolution5x5", "direct_convolution5x5.cs" },
@@ -233,6 +234,10 @@ const std::map<std::string, std::string> GCKernelLibrary::_program_source_map =
     {
         "absdiff.cs",
 #include "./cs_shaders/absdiff.csembed"
+    },
+    {
+        "tensor_shift.cs",
+#include "./cs_shaders/tensor_shift.csembed"
     },
     {
         "convolution_layer.cs",

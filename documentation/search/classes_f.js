@@ -6,5 +6,6 @@ var searchData=
   ['opencltimer',['OpenCLTimer',['../classarm__compute_1_1test_1_1framework_1_1_open_c_l_timer.xhtml',1,'arm_compute::test::framework']]],
   ['operationregistrar',['OperationRegistrar',['../classarm__compute_1_1graph_1_1detail_1_1_operation_registrar.xhtml',1,'arm_compute::graph::detail']]],
   ['operationregistry',['OperationRegistry',['../classarm__compute_1_1graph_1_1_operation_registry.xhtml',1,'arm_compute::graph']]],
+  ['optimizeddepthwiseconvolutionlayerdataset3x3',['OptimizedDepthwiseConvolutionLayerDataset3x3',['../classarm__compute_1_1test_1_1datasets_1_1_optimized_depthwise_convolution_layer_dataset3x3.xhtml',1,'arm_compute::test::datasets']]],
   ['option',['Option',['../classarm__compute_1_1test_1_1framework_1_1_option.xhtml',1,'arm_compute::test::framework']]]
 ];

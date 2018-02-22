@@ -24,8 +24,8 @@ import os.path
 import re
 import subprocess
 
-VERSION = "v18.01"
-SONAME_VERSION="7.0.0"
+VERSION = "v18.02"
+SONAME_VERSION="9.0.0"
 
 Import('env')
 Import('vars')
@@ -123,12 +123,34 @@ def create_version_file(target, source, env):
     with open(target[0].get_path(), "w") as fd:
         fd.write(build_info)
 
-
 arm_compute_env = env.Clone()
-# Don't allow undefined references in the libraries:
-arm_compute_env.Append(LINKFLAGS=['-Wl,--no-undefined','-Wl,--no-allow-shlib-undefined'])
 
+# Generate embed files
 generate_embed = [ arm_compute_env.Command("src/core/arm_compute_version.embed", "", action=create_version_file) ]
+if env['opencl'] and env['embed_kernels']:
+    cl_files = Glob('src/core/CL/cl_kernels/*.cl')
+    cl_files += Glob('src/core/CL/cl_kernels/*.h')
+
+    embed_files = [ f.get_path()+"embed" for f in cl_files ]
+    arm_compute_env.Append(CPPPATH =[Dir("./src/core/CL/").path] )
+
+    generate_embed.append(arm_compute_env.Command(embed_files, cl_files, action=resolve_includes))
+
+if env['gles_compute'] and env['embed_kernels']:
+    cs_files = Glob('src/core/GLES_COMPUTE/cs_shaders/*.cs')
+    cs_files += Glob('src/core/GLES_COMPUTE/cs_shaders/*.h')
+
+    embed_files = [ f.get_path()+"embed" for f in cs_files ]
+    arm_compute_env.Append(CPPPATH =[Dir("./src/core/GLES_COMPUTE/").path] )
+
+    generate_embed.append(arm_compute_env.Command(embed_files, cs_files, action=resolve_includes))
+
+Default(generate_embed)
+if env["build"] == "embed_only":
+    Return()
+
+# Don't allow undefined references in the libraries:
+arm_compute_env.Append(LINKFLAGS=['-Wl,--no-undefined'])
 arm_compute_env.Append(CPPPATH =[Dir("./src/core/").path] )
 
 if env["os"] not in ["android", "bare_metal"]:
@@ -161,24 +183,14 @@ if env['opencl']:
     runtime_files += Glob('src/runtime/CL/*.cpp')
     runtime_files += Glob('src/runtime/CL/functions/*.cpp')
 
-    # Generate embed files
-    if env['embed_kernels']:
-        cl_files = Glob('src/core/CL/cl_kernels/*.cl')
-        cl_files += Glob('src/core/CL/cl_kernels/*.h')
-
-        embed_files = [ f.get_path()+"embed" for f in cl_files ]
-        arm_compute_env.Append(CPPPATH =[Dir("./src/core/CL/").path] )
-
-        generate_embed.append(arm_compute_env.Command(embed_files, cl_files, action=resolve_includes))
-
 if env['neon']:
     core_files += Glob('src/core/NEON/*.cpp')
     core_files += Glob('src/core/NEON/kernels/*.cpp')
 
     # build winograd sources for either v7a / v8a
-    core_files += Glob('src/core/NEON/kernels/winograd/*.cpp')
-    core_files += Glob('src/core/NEON/kernels/winograd/transforms/*.cpp')
-    arm_compute_env.Append(CPPPATH = ["arm_compute/core/NEON/kernels/winograd/"])
+    core_files += Glob('src/core/NEON/kernels/convolution/*/*.cpp')
+    core_files += Glob('src/core/NEON/kernels/convolution/winograd/*/*.cpp')
+    arm_compute_env.Append(CPPPATH = ["arm_compute/core/NEON/kernels/winograd/", "arm_compute/core/NEON/kernels/assembly/"])
 
     if env['arch'] == "armv7a":
         core_files += Glob('src/core/NEON/kernels/arm32/*.cpp')
@@ -198,16 +210,6 @@ if env['gles_compute']:
 
     runtime_files += Glob('src/runtime/GLES_COMPUTE/*.cpp')
     runtime_files += Glob('src/runtime/GLES_COMPUTE/functions/*.cpp')
-
-    # Generate embed files
-    if env['embed_kernels']:
-        cs_files = Glob('src/core/GLES_COMPUTE/cs_shaders/*.cs')
-        cs_files += Glob('src/core/GLES_COMPUTE/cs_shaders/*.h')
-
-        embed_files = [ f.get_path()+"embed" for f in cs_files ]
-        arm_compute_env.Append(CPPPATH =[Dir("./src/core/GLES_COMPUTE/").path] )
-
-        generate_embed.append(arm_compute_env.Command(embed_files, cs_files, action=resolve_includes))
 
 arm_compute_core_a = build_library('arm_compute_core-static', core_files, static=True)
 Export('arm_compute_core_a')
@@ -254,8 +256,6 @@ else:
     alias = arm_compute_env.Alias("arm_compute", [arm_compute_a, arm_compute_so])
 
 Default(alias)
-
-Default(generate_embed)
 
 if env['standalone']:
     Depends([alias,arm_compute_core_a], generate_embed)

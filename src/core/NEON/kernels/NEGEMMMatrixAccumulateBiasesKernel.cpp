@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,6 +39,42 @@
 
 using namespace arm_compute;
 
+namespace
+{
+inline Status validate_arguments(const ITensorInfo *accum, const ITensorInfo *biases)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(accum, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(biases, accum);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(biases, accum);
+    ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != accum->dimension(0));
+
+    return Status{};
+}
+
+inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *accum, ITensorInfo *biases)
+{
+    constexpr unsigned int num_elems_processed_per_iteration = 16;
+
+    // Configure kernel window
+    Window win = calculate_max_window(*accum, Steps(num_elems_processed_per_iteration));
+
+    bool window_changed = update_window_and_padding(win,
+                                                    AccessWindowHorizontal(accum, 0, num_elems_processed_per_iteration),
+                                                    AccessWindowStatic(biases, 0, 0, ceil_to_multiple(biases->dimension(0), num_elems_processed_per_iteration), biases->tensor_shape().y()));
+
+    AccessWindowHorizontal output_access(accum, 0, num_elems_processed_per_iteration);
+
+    // Set the valid region for the accum tensor
+    Coordinates coord;
+    coord.set_num_dimensions(accum->num_dimensions());
+    output_access.set_valid_region(win, ValidRegion(coord, accum->tensor_shape()));
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+} // namespace
+
 NEGEMMMatrixAccumulateBiasesKernel::NEGEMMMatrixAccumulateBiasesKernel()
     : _accum(nullptr), _biases(nullptr)
 {
@@ -46,31 +82,26 @@ NEGEMMMatrixAccumulateBiasesKernel::NEGEMMMatrixAccumulateBiasesKernel()
 
 void NEGEMMMatrixAccumulateBiasesKernel::configure(ITensor *accum, const ITensor *biases)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(accum, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(biases, accum);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(biases, accum);
-    ARM_COMPUTE_ERROR_ON(biases->info()->num_dimensions() > 1);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(accum, biases);
+
+    // Perform validate step
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(accum->info(), biases->info()));
 
     _biases = biases;
     _accum  = accum;
 
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
-
     // Configure kernel window
-    Window win = calculate_max_window(*accum->info(), Steps(num_elems_processed_per_iteration));
+    auto win_config = validate_and_configure_window(accum->info(), biases->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    INEKernel::configure(win_config.second);
+}
 
-    update_window_and_padding(win,
-                              AccessWindowHorizontal(accum->info(), 0, num_elems_processed_per_iteration),
-                              AccessWindowStatic(biases->info(), 0, 0, ceil_to_multiple(biases->info()->dimension(0), num_elems_processed_per_iteration), biases->info()->tensor_shape().y()));
+Status NEGEMMMatrixAccumulateBiasesKernel::validate(const ITensorInfo *accum, const ITensorInfo *biases)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(accum, biases));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(accum->clone().get(), biases->clone().get()).first);
 
-    AccessWindowHorizontal output_access(accum->info(), 0, num_elems_processed_per_iteration);
-
-    // Set the valid region for the accum tensor
-    Coordinates coord;
-    coord.set_num_dimensions(accum->info()->num_dimensions());
-    output_access.set_valid_region(win, ValidRegion(coord, accum->info()->tensor_shape()));
-
-    INEKernel::configure(win);
+    return Status{};
 }
 
 void NEGEMMMatrixAccumulateBiasesKernel::run(const Window &window, const ThreadInfo &info)

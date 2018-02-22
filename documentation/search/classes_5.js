@@ -7,6 +7,7 @@ var searchData=
   ['enumoption',['EnumOption',['../classarm__compute_1_1test_1_1framework_1_1_enum_option.xhtml',1,'arm_compute::test::framework']]],
   ['enumoption_3c_20logformat_20_3e',['EnumOption&lt; LogFormat &gt;',['../classarm__compute_1_1test_1_1framework_1_1_enum_option.xhtml',1,'arm_compute::test::framework']]],
   ['enumoption_3c_20loglevel_20_3e',['EnumOption&lt; LogLevel &gt;',['../classarm__compute_1_1test_1_1framework_1_1_enum_option.xhtml',1,'arm_compute::test::framework']]],
+  ['equalizehistogramvalidationfixture',['EqualizeHistogramValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_equalize_histogram_validation_fixture.xhtml',1,'arm_compute::test::validation']]],
   ['erodevalidationfixture',['ErodeValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_erode_validation_fixture.xhtml',1,'arm_compute::test::validation']]],
   ['example',['Example',['../classarm__compute_1_1utils_1_1_example.xhtml',1,'arm_compute::utils']]]
 ];

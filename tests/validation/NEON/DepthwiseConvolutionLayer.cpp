@@ -82,8 +82,11 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
     validate(bias.info()->valid_region(), bias_valid_region);
 
     // Validate padding
-    const int         step    = 16 >> info.stride().first;
-    const PaddingSize padding = PaddingCalculator(output_shape.x(), step).required_padding();
+    bool              is_optimized_run = NEDepthwiseConvolutionLayer3x3Kernel::is_optimized_execution_possible(input_shape, info, data_type, DataLayout::NCHW);
+    const int         step_non_opt_dwc = 16 >> info.stride().first;
+    const int         step_bias_add    = 16 / src.info()->element_size();
+    const int         step             = is_optimized_run ? step_bias_add : std::max(step_non_opt_dwc, step_bias_add);
+    const PaddingSize padding          = PaddingCalculator(output_shape.x(), step).required_padding();
     validate(dst.info()->padding(), padding);
 }
 
@@ -121,6 +124,12 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEDepthwiseConvolutionLayerFixture3x3<float>, f
 {
     validate(Accessor(_target), _reference, tolerance_f32);
 }
+FIXTURE_DATA_TEST_CASE(RunOptimized, NEDepthwiseConvolutionLayerFixture3x3<float>, framework::DatasetMode::ALL, combine(datasets::OptimizedDepthwiseConvolutionLayerDataset3x3(),
+                                                                                                                        framework::dataset::make("DataType",
+                                                                                                                                DataType::F32)))
+{
+    validate(Accessor(_target), _reference, tolerance_f32);
+}
 TEST_SUITE_END()
 TEST_SUITE_END()
 
@@ -128,9 +137,19 @@ TEST_SUITE_END()
 
 template <typename T>
 using NEDepthwiseConvolutionLayerQuantizedFixture3x3 = DepthwiseConvolutionLayerValidationQuantizedFixture<Tensor, Accessor, NEDepthwiseConvolutionLayer3x3, T>;
+template <typename T>
+using NEDepthwiseConvolutionLayerQuantizedFixture = DepthwiseConvolutionLayerValidationQuantizedFixture<Tensor, Accessor, NEDepthwiseConvolutionLayer, T>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
+TEST_SUITE(Generic)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset(),
+                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, 10) })))
+{
+    validate(Accessor(_target), _reference, tolerance_qasymm8);
+}
+TEST_SUITE_END()
 TEST_SUITE(W3x3)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEDepthwiseConvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
                        framework::dataset::make("DataType", DataType::QASYMM8)),

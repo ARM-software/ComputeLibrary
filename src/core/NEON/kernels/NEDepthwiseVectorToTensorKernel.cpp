@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,45 +37,9 @@
 
 using namespace arm_compute;
 
-NEDepthwiseVectorToTensorKernel::NEDepthwiseVectorToTensorKernel()
-    : _input(nullptr), _output(nullptr), _conv_dims()
+template <typename T>
+void NEDepthwiseVectorToTensorKernel::vector_to_tensor(const Window &window)
 {
-}
-
-void NEDepthwiseVectorToTensorKernel::configure(const ITensor *input, ITensor *output, size_t conv_w, size_t conv_h)
-{
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
-
-    TensorShape output_shape = input->info()->tensor_shape();
-    output_shape.set(0, conv_w);
-    output_shape.set(1, conv_h);
-    output_shape.set(2, input->info()->tensor_shape()[0] / (conv_w * conv_h));
-
-    // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
-
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
-
-    _input     = input;
-    _output    = output;
-    _conv_dims = std::pair<size_t, size_t>(conv_w, conv_h);
-
-    // Configure  kernel window
-    Window win = calculate_max_window(*input->info(), Steps());
-    // The NEDepthwisevectorToTensorKernel doesn't need padding so update_window_and_padding() can be skipped
-    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
-
-    INEKernel::configure(win);
-}
-
-void NEDepthwiseVectorToTensorKernel::run(const Window &window, const ThreadInfo &info)
-{
-    ARM_COMPUTE_UNUSED(info);
-    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-
     // const int input_w         = _input->info()->dimension(0);
     const int output_stride_x = _output->info()->strides_in_bytes().x();
     const int output_stride_y = _output->info()->strides_in_bytes().y();
@@ -97,10 +61,75 @@ void NEDepthwiseVectorToTensorKernel::run(const Window &window, const ThreadInfo
         const int z       = id.x() / patch_size;
         const int index2D = id.x() - z * patch_size;
 
-        auto input_ptr  = reinterpret_cast<float *>(in.ptr());
-        auto output_ptr = reinterpret_cast<float *>(out.ptr() + index2D % _conv_dims.first * output_stride_x + index2D / _conv_dims.first * output_stride_y + z * output_stride_z);
+        auto input_ptr  = reinterpret_cast<T *>(in.ptr());
+        auto output_ptr = reinterpret_cast<T *>(out.ptr() + index2D % _conv_dims.first * output_stride_x + index2D / _conv_dims.first * output_stride_y + z * output_stride_z);
 
         *output_ptr = *input_ptr;
     },
     in, out);
+}
+
+NEDepthwiseVectorToTensorKernel::NEDepthwiseVectorToTensorKernel()
+    : _func(nullptr), _input(nullptr), _output(nullptr), _conv_dims()
+{
+}
+
+void NEDepthwiseVectorToTensorKernel::configure(const ITensor *input, ITensor *output, size_t conv_w, size_t conv_h)
+{
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::S32, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
+
+    TensorShape output_shape = input->info()->tensor_shape();
+    output_shape.set(0, conv_w);
+    output_shape.set(1, conv_h);
+    output_shape.set(2, input->info()->tensor_shape()[0] / (conv_w * conv_h));
+
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+
+    _input     = input;
+    _output    = output;
+    _conv_dims = std::pair<size_t, size_t>(conv_w, conv_h);
+
+    // Set appropriate function to run
+    switch(input->info()->data_type())
+    {
+        case DataType::QASYMM8:
+            _func = &NEDepthwiseVectorToTensorKernel::vector_to_tensor<uint8_t>;
+            break;
+        case DataType::S32:
+            _func = &NEDepthwiseVectorToTensorKernel::vector_to_tensor<int32_t>;
+            break;
+        case DataType::F16:
+            _func = &NEDepthwiseVectorToTensorKernel::vector_to_tensor<half>;
+            break;
+        case DataType::F32:
+            _func = &NEDepthwiseVectorToTensorKernel::vector_to_tensor<float>;
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Unsupported data type");
+    }
+
+    // Configure  kernel window
+    Window win = calculate_max_window(*input->info(), Steps());
+    // The NEDepthwisevectorToTensorKernel doesn't need padding so update_window_and_padding() can be skipped
+    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
+
+    INEKernel::configure(win);
+}
+
+void NEDepthwiseVectorToTensorKernel::run(const Window &window, const ThreadInfo &info)
+{
+    ARM_COMPUTE_UNUSED(info);
+    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+
+    if(_func != nullptr)
+    {
+        (this->*_func)(window);
+    }
 }

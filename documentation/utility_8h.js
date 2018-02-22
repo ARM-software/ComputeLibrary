@@ -6,5 +6,7 @@ var utility_8h =
     [ "for_each", "utility_8h.xhtml#a067ebd28103d827b6ec17032e2344064", null ],
     [ "for_each", "utility_8h.xhtml#a9abd222389b46fd918cd07673c1d836d", null ],
     [ "make_array", "utility_8h.xhtml#aae92fd77ef96d27bc5b5a10258da66cc", null ],
-    [ "make_array", "utility_8h.xhtml#ab7c665e19081aef1a68ec0090b4c7be6", null ]
+    [ "make_array", "utility_8h.xhtml#ab7c665e19081aef1a68ec0090b4c7be6", null ],
+    [ "saturate_cast", "utility_8h.xhtml#a26bf8243169fc3fd2299024c25b0aa0d", null ],
+    [ "sort_indices", "utility_8h.xhtml#a0c1a72cd100958036bb59f0625f0613f", null ]
 ];

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -86,7 +86,7 @@ public:
         return _error_description;
     }
     /** Throws a runtime exception in case it contains a valid error status */
-    void throw_if_error()
+    void throw_if_error() const
     {
         if(!bool(*this))
         {
@@ -96,7 +96,7 @@ public:
 
 private:
     /** Internal throwing function */
-    [[noreturn]] void internal_throw_on_error();
+    [[noreturn]] void internal_throw_on_error() const;
 
 private:
     ErrorCode   _code;

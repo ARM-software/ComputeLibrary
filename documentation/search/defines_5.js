@@ -2,7 +2,8 @@ var searchData=
 [
   ['edge',['EDGE',['../canny_8cl.xhtml#ac243bfa96aa2c28014159ff098bd2324',1,'canny.cl']]],
   ['eigenvalue_5fthr',['EIGENVALUE_THR',['../optical__flow__pyramid__lk_8cl.xhtml#a3955a0fbedb5b3eae9a38801fb01bac5',1,'optical_flow_pyramid_lk.cl']]],
-  ['exp_5fbarrel_5fshifter',['EXP_BARREL_SHIFTER',['../asymm__helper_8h.xhtml#af57b48e64984f51aa7608b41a575f2e8',1,'asymm_helper.h']]],
+  ['exp_5fbarrel_5fshifter',['EXP_BARREL_SHIFTER',['../helpers__asymm_8h.xhtml#ace9ecff421cf885ad2c2d72d87c492cb',1,'helpers_asymm.h']]],
+  ['exp_5fbarrel_5fshifter_5fimpl',['EXP_BARREL_SHIFTER_IMPL',['../helpers__asymm_8h.xhtml#aa12ca21cb9a54d2e4c26d57303fe44a7',1,'helpers_asymm.h']]],
   ['exp_5fop',['EXP_OP',['../activation__layer_8cl.xhtml#abbb9b09cf7ef5835661605d07f4b7a1d',1,'EXP_OP():&#160;activation_layer.cl'],['../softmax__layer_8cl.xhtml#a93cf800667317d96574477b9f0a75234',1,'EXP_OP():&#160;softmax_layer.cl']]],
   ['exp_5fop_5fexpand',['EXP_OP_EXPAND',['../fixed__point_8h.xhtml#a80482c3ae2b0e68658f84f081a6fbdde',1,'fixed_point.h']]],
   ['exp_5fop_5fexpand_5fstr',['EXP_OP_EXPAND_STR',['../fixed__point_8h.xhtml#a368a98fe336caf8c24840c67735cd04e',1,'fixed_point.h']]],

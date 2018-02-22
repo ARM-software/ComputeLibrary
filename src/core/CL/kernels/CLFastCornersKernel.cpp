@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -138,7 +138,7 @@ void CLCopyToArrayKernel::configure(const ICLImage *input, bool update_number, I
 
     // Set static kernel arguments
     unsigned int idx = num_arguments_per_2D_tensor(); // Skip the input and output parameters
-    _kernel.setArg<unsigned int>(idx++, corners->max_num_values());
+    _kernel.setArg<unsigned int>(idx++, _corners->max_num_values());
     _kernel.setArg<cl_uint>(idx++, offset);
     _kernel.setArg(idx++, *_num_buffer);
     _kernel.setArg(idx++, _corners->cl_buffer());

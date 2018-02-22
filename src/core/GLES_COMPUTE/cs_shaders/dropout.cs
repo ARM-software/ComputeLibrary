@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -82,7 +82,7 @@ SHADER_PARAMS_DECLARATION
 
 #ifdef DATA_TYPE_FP32
 TENSOR_DECLARATION(1, srcBuffer, float, src_ptr, src_shift, 2, readonly);
-TENSOR_DECLARATION(2, maskBuffer, float, mask_ptr, mask_shift, 2, );
+TENSOR_DECLARATION(2, maskBuffer, float, mask_ptr, mask_shift, 2, restrict);
 TENSOR_DECLARATION(3, dstBuffer, float, dst_ptr, dst_shift, 2, writeonly);
 
 void main(void)
@@ -111,7 +111,7 @@ void main(void)
 
 #elif defined(DATA_TYPE_FP16)
 TENSOR_DECLARATION(1, srcBuffer, uint, src_ptr, src_shift, 2, readonly);
-TENSOR_DECLARATION(2, maskBuffer, uint, mask_ptr, mask_shift, 2, );
+TENSOR_DECLARATION(2, maskBuffer, uint, mask_ptr, mask_shift, 2, restrict);
 TENSOR_DECLARATION(3, dstBuffer, uint, dst_ptr, dst_shift, 2, writeonly);
 
 void main(void)

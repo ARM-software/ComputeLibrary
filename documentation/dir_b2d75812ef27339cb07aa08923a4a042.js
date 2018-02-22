@@ -62,6 +62,9 @@ var dir_b2d75812ef27339cb07aa08923a4a042 =
     [ "GCSoftmaxLayer.h", "_g_c_softmax_layer_8h.xhtml", [
       [ "GCSoftmaxLayer", "classarm__compute_1_1_g_c_softmax_layer.xhtml", "classarm__compute_1_1_g_c_softmax_layer" ]
     ] ],
+    [ "GCTensorShift.h", "_g_c_tensor_shift_8h.xhtml", [
+      [ "GCTensorShift", "classarm__compute_1_1_g_c_tensor_shift.xhtml", "classarm__compute_1_1_g_c_tensor_shift" ]
+    ] ],
     [ "GCTranspose.h", "_g_c_transpose_8h.xhtml", [
       [ "GCTranspose", "classarm__compute_1_1_g_c_transpose.xhtml", "classarm__compute_1_1_g_c_transpose" ]
     ] ]

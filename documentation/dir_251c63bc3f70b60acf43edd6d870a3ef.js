@@ -49,7 +49,6 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     ] ],
     [ "CLConvolution.h", "_c_l_convolution_8h.xhtml", "_c_l_convolution_8h" ],
     [ "CLConvolutionLayer.h", "_c_l_convolution_layer_8h.xhtml", [
-      [ "CLConvolutionLayerReshapeWeights", "classarm__compute_1_1_c_l_convolution_layer_reshape_weights.xhtml", "classarm__compute_1_1_c_l_convolution_layer_reshape_weights" ],
       [ "CLConvolutionLayer", "classarm__compute_1_1_c_l_convolution_layer.xhtml", "classarm__compute_1_1_c_l_convolution_layer" ]
     ] ],
     [ "CLDeconvolutionLayer.h", "_c_l_deconvolution_layer_8h.xhtml", [
@@ -118,6 +117,10 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     ] ],
     [ "CLGEMM.h", "_c_l_g_e_m_m_8h.xhtml", [
       [ "CLGEMM", "classarm__compute_1_1_c_l_g_e_m_m.xhtml", "classarm__compute_1_1_c_l_g_e_m_m" ]
+    ] ],
+    [ "CLGEMMConvolutionLayer.h", "_c_l_g_e_m_m_convolution_layer_8h.xhtml", [
+      [ "CLConvolutionLayerReshapeWeights", "classarm__compute_1_1_c_l_convolution_layer_reshape_weights.xhtml", "classarm__compute_1_1_c_l_convolution_layer_reshape_weights" ],
+      [ "CLGEMMConvolutionLayer", "classarm__compute_1_1_c_l_g_e_m_m_convolution_layer.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_convolution_layer" ]
     ] ],
     [ "CLGEMMInterleave4x4.h", "_c_l_g_e_m_m_interleave4x4_8h.xhtml", [
       [ "CLGEMMInterleave4x4", "classarm__compute_1_1_c_l_g_e_m_m_interleave4x4.xhtml", "classarm__compute_1_1_c_l_g_e_m_m_interleave4x4" ]

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,19 +48,26 @@ namespace
 template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
 void rgb_to_luminance(const RawTensor &src, RawTensor &dst)
 {
-    const size_t min_size = std::min(src.size(), dst.size());
+    // Ensure in/out tensors have same image dimensions (independent of element size and number of channels)
+    ARM_COMPUTE_ERROR_ON_MSG(src.num_elements() != dst.num_elements(), "Input and output images must have equal dimensions");
 
-    for(size_t i = 0, j = 0; i < min_size; i += 3, ++j)
+    const size_t num_elements = dst.num_elements();
+
+    // Currently, input is always RGB888 (3 U8 channels per element). Output can be U8, U16/S16 or U32
+    // Note that src.data()[i] returns pointer to first channel of element[i], so RGB values have [0,1,2] offsets
+    for(size_t i = 0, j = 0; j < num_elements; i += 3, ++j)
     {
-        reinterpret_cast<T *>(dst.data())[j] = 0.2126f * src.data()[i + 0] + 0.7152f * src.data()[i + 1] + 0.0722f * src.data()[i + 2];
+        reinterpret_cast<T *>(dst.data())[j] = 0.2126f * src.data()[i] + 0.7152f * src.data()[i + 1] + 0.0722f * src.data()[i + 2];
     }
 }
 
 void extract_r_from_rgb(const RawTensor &src, RawTensor &dst)
 {
-    const size_t min_size = std::min(src.size(), dst.size());
+    ARM_COMPUTE_ERROR_ON(src.size() != 3 * dst.size());
 
-    for(size_t i = 0, j = 0; i < min_size; i += 3, ++j)
+    const size_t num_elements = dst.num_elements();
+
+    for(size_t i = 0, j = 0; j < num_elements; i += 3, ++j)
     {
         dst.data()[j] = src.data()[i];
     }
@@ -68,9 +75,23 @@ void extract_r_from_rgb(const RawTensor &src, RawTensor &dst)
 
 void extract_g_from_rgb(const RawTensor &src, RawTensor &dst)
 {
-    const size_t min_size = std::min(src.size(), dst.size());
+    ARM_COMPUTE_ERROR_ON(src.size() != 3 * dst.size());
 
-    for(size_t i = 1, j = 0; i < min_size; i += 3, ++j)
+    const size_t num_elements = dst.num_elements();
+
+    for(size_t i = 1, j = 0; j < num_elements; i += 3, ++j)
+    {
+        dst.data()[j] = src.data()[i];
+    }
+}
+
+void extract_b_from_rgb(const RawTensor &src, RawTensor &dst)
+{
+    ARM_COMPUTE_ERROR_ON(src.size() != 3 * dst.size());
+
+    const size_t num_elements = dst.num_elements();
+
+    for(size_t i = 2, j = 0; j < num_elements; i += 3, ++j)
     {
         dst.data()[j] = src.data()[i];
     }
@@ -320,7 +341,8 @@ const AssetsLibrary::Extractor &AssetsLibrary::get_extractor(Format format, Chan
     static std::map<std::pair<Format, Channel>, Extractor> extractors =
     {
         { std::make_pair(Format::RGB888, Channel::R), extract_r_from_rgb },
-        { std::make_pair(Format::RGB888, Channel::G), extract_g_from_rgb }
+        { std::make_pair(Format::RGB888, Channel::G), extract_g_from_rgb },
+        { std::make_pair(Format::RGB888, Channel::B), extract_b_from_rgb }
     };
 
     const auto it = extractors.find(std::make_pair(format, channel));
@@ -385,7 +407,7 @@ const RawTensor &AssetsLibrary::find_or_create_raw_tensor(const std::string &nam
     }
 
     const RawTensor &src = get(name, format);
-    RawTensor dst(src.shape(), get_channel_format(channel));
+    RawTensor        dst(src.shape(), get_channel_format(channel));
 
     (*get_extractor(format, channel))(src, dst);
 

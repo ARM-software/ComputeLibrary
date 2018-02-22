@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,6 +81,9 @@ void NEFillArrayKernel::run(const Window &window, const ThreadInfo &info)
             p.y               = id.y();
             p.strength        = value;
             p.tracking_status = 1;
+            p.scale           = 0.f;
+            p.orientation     = 0.f;
+            p.error           = 0.f;
 
             if(!_output->push_back(p))
             {

@@ -34,6 +34,8 @@ var searchData=
   ['alexnetpoolinglayerdataset',['AlexNetPoolingLayerDataset',['../classarm__compute_1_1test_1_1datasets_1_1_alex_net_pooling_layer_dataset.xhtml',1,'arm_compute::test::datasets']]],
   ['alexnetwinogradlayerdataset',['AlexNetWinogradLayerDataset',['../classarm__compute_1_1test_1_1datasets_1_1_alex_net_winograd_layer_dataset.xhtml',1,'arm_compute::test::datasets']]],
   ['allocator',['Allocator',['../classarm__compute_1_1_allocator.xhtml',1,'arm_compute']]],
+  ['arithmeticadditionbroadcastvalidationfixedpointfixture',['ArithmeticAdditionBroadcastValidationFixedPointFixture',['../classarm__compute_1_1test_1_1validation_1_1_arithmetic_addition_broadcast_validation_fixed_point_fixture.xhtml',1,'arm_compute::test::validation']]],
+  ['arithmeticadditionbroadcastvalidationfixture',['ArithmeticAdditionBroadcastValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_arithmetic_addition_broadcast_validation_fixture.xhtml',1,'arm_compute::test::validation']]],
   ['arithmeticadditionvalidationfixedpointfixture',['ArithmeticAdditionValidationFixedPointFixture',['../classarm__compute_1_1test_1_1validation_1_1_arithmetic_addition_validation_fixed_point_fixture.xhtml',1,'arm_compute::test::validation']]],
   ['arithmeticadditionvalidationfixture',['ArithmeticAdditionValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_arithmetic_addition_validation_fixture.xhtml',1,'arm_compute::test::validation']]],
   ['arithmeticsubtractionvalidationfixedpointfixture',['ArithmeticSubtractionValidationFixedPointFixture',['../classarm__compute_1_1test_1_1validation_1_1_arithmetic_subtraction_validation_fixed_point_fixture.xhtml',1,'arm_compute::test::validation']]],

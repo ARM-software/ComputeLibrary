@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -207,6 +207,17 @@ struct Measurement
             } v;
         bool is_floating_point; /**< Is the stored value floating point or integer ? */
     };
+
+    /** Compare the stored value with another value
+     *
+     * @param[in] b Value to compare against
+     *
+     * @return The result of stored value < b
+     */
+    bool operator<(const Measurement &b) const
+    {
+        return _value < b.value();
+    }
 
     /** Stream output operator to print the measurement.
      *

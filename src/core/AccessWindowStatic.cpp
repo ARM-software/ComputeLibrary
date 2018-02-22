@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -163,7 +163,7 @@ bool AccessWindowStatic::update_window_if_needed(Window &window) const
     return window_modified;
 }
 
-bool AccessWindowStatic::update_padding_if_needed(const Window &window) const
+bool AccessWindowStatic::update_padding_if_needed(const Window &window)
 {
     ARM_COMPUTE_UNUSED(window);
 

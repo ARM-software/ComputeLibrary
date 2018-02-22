@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,7 +42,7 @@ NELaplacianReconstruct::NELaplacianReconstruct() // NOLINT
 {
 }
 
-void NELaplacianReconstruct::configure(const IPyramid *pyramid, const ITensor *input, ITensor *output, BorderMode border_mode, uint8_t constant_border_value)
+void NELaplacianReconstruct::configure(const IPyramid *pyramid, ITensor *input, ITensor *output, BorderMode border_mode, uint8_t constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON(nullptr == pyramid);
     ARM_COMPUTE_ERROR_ON(input == output);

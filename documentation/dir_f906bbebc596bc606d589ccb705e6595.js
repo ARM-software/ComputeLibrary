@@ -86,6 +86,9 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     [ "CLDirectConvolutionLayerKernel.h", "_c_l_direct_convolution_layer_kernel_8h.xhtml", [
       [ "CLDirectConvolutionLayerKernel", "classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml", "classarm__compute_1_1_c_l_direct_convolution_layer_kernel" ]
     ] ],
+    [ "CLDirectConvolutionLayerOutputStageKernel.h", "_c_l_direct_convolution_layer_output_stage_kernel_8h.xhtml", [
+      [ "CLDirectConvolutionLayerOutputStageKernel", "classarm__compute_1_1_c_l_direct_convolution_layer_output_stage_kernel.xhtml", "classarm__compute_1_1_c_l_direct_convolution_layer_output_stage_kernel" ]
+    ] ],
     [ "CLErodeKernel.h", "_c_l_erode_kernel_8h.xhtml", [
       [ "CLErodeKernel", "classarm__compute_1_1_c_l_erode_kernel.xhtml", "classarm__compute_1_1_c_l_erode_kernel" ]
     ] ],

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,55 +37,76 @@ inline constexpr const Window::Dimension &Window::operator[](size_t dimension) c
     // Precondition: dimension < Coordinates::num_max_dimensions
     return _dims.at(dimension);
 }
+
 inline void Window::set(size_t dimension, const Window::Dimension &dim)
 {
     ARM_COMPUTE_ERROR_ON(dimension >= Coordinates::num_max_dimensions);
     _dims[dimension] = dim;
 }
 
-inline Window Window::collapse_if_possible(const Window &full_window, size_t first) const
+inline Window Window::collapse_if_possible(const Window &full_window, const size_t first,
+                                           const size_t last, bool *has_collapsed) const
 {
-    bool   is_collapsable = false;
-    Window collapsed;
-    for(size_t d = 0; d < Coordinates::num_max_dimensions; ++d)
-    {
-        if(is_collapsable)
-        {
-            collapsed.set(first, Window::Dimension(collapsed[first].end() * _dims[d].start(), collapsed[first].end() * _dims[d].end()));
-        }
-        else
-        {
-            collapsed.set(d, _dims[d]);
-        }
+    Window collapsed(*this);
 
-        if(is_collapsable || d == first) // Try to start collapsing from this dimension
+    bool is_collapsable = true;
+    int  collapsed_end  = _dims[first].end();
+
+    for(size_t d = first + 1; is_collapsable && (d < last); ++d)
+    {
+        // The _dims's dimension must match the full _dims dimension to be collapsable:
+        is_collapsable = (_dims[d].start() == 0) && (full_window[d].start() == 0) && (_dims[d].step() <= 1)
+                         && (full_window[d].end() == _dims[d].end());
+        collapsed_end *= _dims[d].end();
+    }
+
+    if(is_collapsable)
+    {
+        collapsed._dims.at(first).set_end(collapsed_end);
+        for(size_t d = first + 1; is_collapsable && (d < last); ++d)
         {
-            // The _dims's dimension must match the full _dims dimension to be collapsable:
-            is_collapsable = _dims[d].start() == 0 && _dims[d].start() == full_window[d].start()
-                             && full_window[d].end() == _dims[d].end();
-        }
-        else
-        {
-            is_collapsable = false;
+            collapsed.set(d, Dimension());
         }
     }
+
+    if(has_collapsed != nullptr)
+    {
+        *has_collapsed = is_collapsable;
+    }
+
     return collapsed;
 }
 
-inline Window Window::collapse(const Window &full_window, size_t first) const
+inline Window Window::shift_dimensions(unsigned int shift_value) const
 {
-    Window collapsed = collapse_if_possible(full_window, first);
-    // Make sure that the window has collapsed
-    int end   = _dims[first].end();
-    int start = 0;
-    ARM_COMPUTE_UNUSED(start);
-    for(size_t d = first + 1; d < Coordinates::num_max_dimensions; ++d)
+    Window shifted_window;
+    for(size_t n = 0; n < (Coordinates::num_max_dimensions - shift_value); n++)
     {
-        start = end * _dims[d].start();
-        end *= _dims[d].end();
+        shifted_window.set(n, _dims[n + shift_value]);
     }
-    ARM_COMPUTE_ERROR_ON((collapsed[first].end() != end) || (collapsed[first].start() != start));
+    return shifted_window;
+}
+
+inline Window Window::collapse(const Window &full_window, const size_t first, const size_t last) const
+{
+    bool   has_collapsed = false;
+    Window collapsed     = collapse_if_possible(full_window, first, last, &has_collapsed);
+    // Make sure that the window has collapsed
+    ARM_COMPUTE_ERROR_ON(!has_collapsed);
     return collapsed;
+}
+
+inline Window Window::broadcast_if_dimension_le_one(const TensorShape &shape) const
+{
+    Window broadcastWin(*this);
+    for(size_t d = 0; d < TensorShape::num_max_dimensions; ++d)
+    {
+        if(shape[d] <= 1)
+        {
+            broadcastWin.set(d, Dimension(0, 0, 0));
+        }
+    }
+    return broadcastWin;
 }
 
 inline void Window::shift(size_t dimension, int shift_value)
@@ -129,9 +150,8 @@ inline void Window::validate() const
 {
     for(size_t i = 0; i < Coordinates::num_max_dimensions; ++i)
     {
-        ARM_COMPUTE_ERROR_ON(_dims[i].step() == 0);
         ARM_COMPUTE_ERROR_ON(_dims[i].end() < _dims[i].start());
-        ARM_COMPUTE_ERROR_ON((_dims[i].end() - _dims[i].start()) % _dims[i].step());
+        ARM_COMPUTE_ERROR_ON((_dims[i].step() != 0) && (((_dims[i].end() - _dims[i].start()) % _dims[i].step()) != 0));
     }
 }
 

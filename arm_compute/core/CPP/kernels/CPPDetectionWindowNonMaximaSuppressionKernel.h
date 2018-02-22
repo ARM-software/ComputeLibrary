@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,6 +39,10 @@ namespace arm_compute
 class CPPDetectionWindowNonMaximaSuppressionKernel : public ICPPKernel
 {
 public:
+    const char *name() const override
+    {
+        return "CPPDetectionWindowNonMaximaSuppressionKernel";
+    }
     /** Default constructor */
     CPPDetectionWindowNonMaximaSuppressionKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */

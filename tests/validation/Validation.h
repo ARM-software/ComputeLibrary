@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -363,7 +363,10 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const V
                 const T &target_value    = reinterpret_cast<const T *>(tensor(id))[c];
                 const T &reference_value = reinterpret_cast<const T *>(reference(id))[c];
 
-                if(!compare<U>(target_value, reference_value, tolerance_value))
+                // Truncate numbers to the 4th decimal
+                const T target_truncated_value    = static_cast<T>(static_cast<int>(target_value * 10000) / 10000);
+                const T reference_truncated_value = static_cast<T>(static_cast<int>(target_value * 10000) / 10000);
+                if(!compare<U>(target_truncated_value, reference_truncated_value, tolerance_value))
                 {
                     ARM_COMPUTE_TEST_INFO("id = " << id);
                     ARM_COMPUTE_TEST_INFO("channel = " << c);
@@ -473,76 +476,6 @@ void validate_wrap(const IAccessor &tensor, const SimpleTensor<T> &reference, co
     }
 }
 
-/** Check which keypoints from [first1, last1) are missing in [first2, last2) */
-template <typename T, typename U, typename V>
-std::pair<int64_t, int64_t> compare_keypoints(T first1, T last1, U first2, U last2, V tolerance)
-{
-    int64_t num_missing    = 0;
-    int64_t num_mismatches = 0;
-
-    while(first1 != last1)
-    {
-        const auto point = std::find_if(first2, last2, [&](KeyPoint point)
-        {
-            return point.x == first1->x && point.y == first1->y;
-        });
-
-        if(point == last2)
-        {
-            ++num_missing;
-            ARM_COMPUTE_TEST_INFO("Key point not found" << *first1)
-            ARM_COMPUTE_TEST_INFO("keypoint1 = " << *first1)
-        }
-        else if(!validate(point->tracking_status, first1->tracking_status) || !validate(point->strength, first1->strength, tolerance) || !validate(point->scale, first1->scale)
-                || !validate(point->orientation, first1->orientation) || !validate(point->error, first1->error))
-        {
-            ++num_mismatches;
-            ARM_COMPUTE_TEST_INFO("Mismatching keypoint")
-            ARM_COMPUTE_TEST_INFO("keypoint1 = " << *first1)
-            ARM_COMPUTE_TEST_INFO("keypoint2 = " << *point)
-        }
-
-        ++first1;
-    }
-
-    return std::make_pair(num_missing, num_mismatches);
-}
-
-template <typename T, typename U, typename V>
-void validate_keypoints(T target_first, T target_last, U reference_first, U reference_last, V tolerance,
-                        float allowed_missing_percentage, float allowed_mismatch_percentage)
-{
-    const int64_t num_elements_target    = std::distance(target_first, target_last);
-    const int64_t num_elements_reference = std::distance(reference_first, reference_last);
-
-    int64_t num_missing    = 0;
-    int64_t num_mismatches = 0;
-
-    if(num_elements_reference > 0)
-    {
-        std::tie(num_missing, num_mismatches) = compare_keypoints(reference_first, reference_last, target_first, target_last, tolerance);
-
-        const float percent_missing    = static_cast<float>(num_missing) / num_elements_reference * 100.f;
-        const float percent_mismatches = static_cast<float>(num_mismatches) / num_elements_reference * 100.f;
-
-        ARM_COMPUTE_TEST_INFO(num_missing << " keypoints (" << std::fixed << std::setprecision(2) << percent_missing << "%) are missing in target");
-        ARM_COMPUTE_EXPECT(percent_missing <= allowed_missing_percentage, framework::LogLevel::ERRORS);
-
-        ARM_COMPUTE_TEST_INFO(num_mismatches << " keypoints (" << std::fixed << std::setprecision(2) << percent_mismatches << "%) mismatched");
-        ARM_COMPUTE_EXPECT(percent_mismatches <= allowed_mismatch_percentage, framework::LogLevel::ERRORS);
-    }
-
-    if(num_elements_target > 0)
-    {
-        std::tie(num_missing, num_mismatches) = compare_keypoints(target_first, target_last, reference_first, reference_last, tolerance);
-
-        const float percent_missing = static_cast<float>(num_missing) / num_elements_target * 100.f;
-
-        ARM_COMPUTE_TEST_INFO(num_missing << " keypoints (" << std::fixed << std::setprecision(2) << percent_missing << "%) are not part of target");
-        ARM_COMPUTE_EXPECT(percent_missing <= allowed_missing_percentage, framework::LogLevel::ERRORS);
-    }
-}
-
 template <typename T, typename U>
 void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const SimpleTensor<T> &valid_mask, U tolerance_value, float tolerance_number)
 {
@@ -649,6 +582,123 @@ void validate_min_max_loc(const MinMaxLocationValues<T> &target, const MinMaxLoc
         });
 
         ARM_COMPUTE_EXPECT(same_coords != reference.max_loc.end(), framework::LogLevel::ERRORS);
+    }
+}
+
+/** Check which keypoints from [first1, last1) are missing in [first2, last2) */
+template <typename T, typename U, typename V>
+std::pair<int64_t, int64_t> compare_keypoints(T first1, T last1, U first2, U last2, V tolerance, bool check_mismatches = true)
+{
+    /* Keypoint (x,y) should have similar strength (within tolerance) and other properties in both reference and target */
+    const auto compare_props_eq = [&](const KeyPoint & lhs, const KeyPoint & rhs)
+    {
+        return compare<V>(lhs.strength, rhs.strength, tolerance)
+               && lhs.tracking_status == rhs.tracking_status
+               && lhs.scale == rhs.scale
+               && lhs.orientation == rhs.orientation
+               && lhs.error == rhs.error;
+    };
+
+    /* Used to sort KeyPoints by coordinates (x, y) */
+    const auto compare_coords_lt = [](const KeyPoint & lhs, const KeyPoint & rhs)
+    {
+        return std::tie(lhs.x, lhs.y) < std::tie(rhs.x, rhs.y);
+    };
+
+    std::sort(first1, last1, compare_coords_lt);
+    std::sort(first2, last2, compare_coords_lt);
+
+    if(check_mismatches)
+    {
+        ARM_COMPUTE_TEST_INFO("Checking for mismatches: ref count = " << std::distance(first1, last1) << " \ttarget count = " << std::distance(first2, last2));
+    }
+
+    int64_t num_missing    = 0;
+    int64_t num_mismatches = 0;
+    bool    rest_missing   = false;
+
+    while(first1 != last1)
+    {
+        if(first2 == last2)
+        {
+            rest_missing = true;
+            break;
+        }
+
+        if(compare_coords_lt(*first1, *first2))
+        {
+            ++num_missing;
+            ARM_COMPUTE_TEST_INFO("Key point not found");
+            ARM_COMPUTE_TEST_INFO("keypoint1 = " << *first1++);
+        }
+        else
+        {
+            if(!compare_coords_lt(*first2, *first1)) // Equal coordinates
+            {
+                if(check_mismatches && !compare_props_eq(*first1, *first2)) // Check other properties
+                {
+                    ++num_mismatches;
+                    ARM_COMPUTE_TEST_INFO("Mismatching keypoint");
+                    ARM_COMPUTE_TEST_INFO("keypoint1 [ref] = " << *first1);
+                    ARM_COMPUTE_TEST_INFO("keypoint2 [tgt] = " << *first2);
+                }
+                ++first1;
+            }
+            ++first2;
+        }
+    }
+
+    if(rest_missing)
+    {
+        while(first1 != last1)
+        {
+            ++num_missing;
+            ARM_COMPUTE_TEST_INFO("Key point not found");
+            ARM_COMPUTE_TEST_INFO("keypoint1 = " << *first1++);
+        }
+    }
+
+    return std::make_pair(num_missing, num_mismatches);
+}
+
+template <typename T, typename U, typename V>
+void validate_keypoints(T target_first, T target_last, U reference_first, U reference_last, V tolerance, float allowed_missing_percentage, float allowed_mismatch_percentage)
+{
+    const int64_t num_elements_target    = std::distance(target_first, target_last);
+    const int64_t num_elements_reference = std::distance(reference_first, reference_last);
+
+    int64_t num_missing    = 0;
+    int64_t num_mismatches = 0;
+
+    if(num_elements_reference > 0)
+    {
+        std::tie(num_missing, num_mismatches) = compare_keypoints(reference_first, reference_last, target_first, target_last, tolerance);
+
+        const float percent_missing    = static_cast<float>(num_missing) / num_elements_reference * 100.f;
+        const float percent_mismatches = static_cast<float>(num_mismatches) / num_elements_reference * 100.f;
+
+        ARM_COMPUTE_TEST_INFO(num_missing << " keypoints (" << std::fixed << std::setprecision(2) << percent_missing << "%) in ref are missing from target");
+        ARM_COMPUTE_TEST_INFO("Missing (not in tgt): " << num_missing << "/" << num_elements_reference << " = " << std::fixed << std::setprecision(2) << percent_missing
+                              << "% \tMax allowed: " << allowed_missing_percentage << "%");
+        ARM_COMPUTE_EXPECT(percent_missing <= allowed_missing_percentage, framework::LogLevel::ERRORS);
+
+        ARM_COMPUTE_TEST_INFO(num_mismatches << " keypoints (" << std::fixed << std::setprecision(2) << percent_mismatches << "%) mismatched");
+        ARM_COMPUTE_TEST_INFO("Mismatched keypoints: " << num_mismatches << "/" << num_elements_reference << " = " << std::fixed << std::setprecision(2) << percent_mismatches
+                              << "% \tMax allowed: " << allowed_mismatch_percentage << "%");
+        ARM_COMPUTE_EXPECT(percent_mismatches <= allowed_mismatch_percentage, framework::LogLevel::ERRORS);
+    }
+
+    if(num_elements_target > 0)
+    {
+        // Note: no need to check for mismatches a second time (last argument is 'false')
+        std::tie(num_missing, num_mismatches) = compare_keypoints(target_first, target_last, reference_first, reference_last, tolerance, false);
+
+        const float percent_missing = static_cast<float>(num_missing) / num_elements_target * 100.f;
+
+        ARM_COMPUTE_TEST_INFO(num_missing << " keypoints (" << std::fixed << std::setprecision(2) << percent_missing << "%) in target are missing from ref");
+        ARM_COMPUTE_TEST_INFO("Missing (not in ref): " << num_missing << "/" << num_elements_target << " = " << std::fixed << std::setprecision(2) << percent_missing
+                              << "% \tMax allowed: " << allowed_missing_percentage << "%");
+        ARM_COMPUTE_EXPECT(percent_missing <= allowed_missing_percentage, framework::LogLevel::ERRORS);
     }
 }
 

@@ -1,4 +1,4 @@
 var classarm__compute_1_1test_1_1validation_1_1_batch_normalization_layer_validation_fixed_point_fixture =
 [
-    [ "setup", "classarm__compute_1_1test_1_1validation_1_1_batch_normalization_layer_validation_fixed_point_fixture.xhtml#afe3c476be552a5dfe1c3424f9df4307d", null ]
+    [ "setup", "classarm__compute_1_1test_1_1validation_1_1_batch_normalization_layer_validation_fixed_point_fixture.xhtml#a08f022d13db42b94c5f9c35a169ba907", null ]
 ];

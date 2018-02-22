@@ -6,6 +6,7 @@ var classarm__compute_1_1_n_e_min_max_location_kernel =
     [ "~NEMinMaxLocationKernel", "classarm__compute_1_1_n_e_min_max_location_kernel.xhtml#a6ec01aa0ce619004282347747efb471e", null ],
     [ "configure", "classarm__compute_1_1_n_e_min_max_location_kernel.xhtml#ab996eedb0d719f5faa091726e69e73c3", null ],
     [ "is_parallelisable", "classarm__compute_1_1_n_e_min_max_location_kernel.xhtml#a4370ae5fda7bd455a171fc8ed4d3f283", null ],
+    [ "name", "classarm__compute_1_1_n_e_min_max_location_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828", null ],
     [ "operator=", "classarm__compute_1_1_n_e_min_max_location_kernel.xhtml#ab9a7c76bf701e9dbed2fd52ae73e7774", null ],
     [ "operator=", "classarm__compute_1_1_n_e_min_max_location_kernel.xhtml#a27b90206d81f057e8bb3c921f51e5190", null ],
     [ "run", "classarm__compute_1_1_n_e_min_max_location_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]

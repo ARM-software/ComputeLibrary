@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,7 +52,7 @@ CLFastCorners::CLFastCorners(std::shared_ptr<IMemoryManager> memory_manager)
 {
 }
 
-void CLFastCorners::configure(const ICLImage *input, float threshold, bool nonmax_suppression, CLKeyPointArray *const corners,
+void CLFastCorners::configure(const ICLImage *input, float threshold, bool nonmax_suppression, ICLKeyPointArray *corners,
                               unsigned int *num_corners, BorderMode border_mode, uint8_t constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(input);
@@ -76,7 +76,7 @@ void CLFastCorners::configure(const ICLImage *input, float threshold, bool nonma
 
     if(!_non_max)
     {
-        _copy_array_kernel.configure(&_output, update_number, corners, &_num_buffer);
+        _copy_array_kernel.configure(&_output, update_number, _corners, &_num_buffer);
     }
     else
     {
@@ -84,7 +84,7 @@ void CLFastCorners::configure(const ICLImage *input, float threshold, bool nonma
         _memory_group.manage(&_suppr);
 
         _suppr_func.configure(&_output, &_suppr, border_mode);
-        _copy_array_kernel.configure(&_suppr, update_number, corners, &_num_buffer);
+        _copy_array_kernel.configure(&_suppr, update_number, _corners, &_num_buffer);
 
         _suppr.allocator()->allocate();
     }

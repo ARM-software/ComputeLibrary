@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -98,8 +98,8 @@ protected:
         }
         else
         {
-            fill(AccessorType(a), 0, 0, 128);
-            fill(AccessorType(b), 1, 0, 128);
+            fill(AccessorType(a), 0, 0, 255);
+            fill(AccessorType(b), 1, 0, 255);
         }
         fill(AccessorType(c), 2, 0, 0);
 
@@ -124,8 +124,8 @@ protected:
         }
         else
         {
-            fill(a, 0, 0, 128);
-            fill(b, 1, 0, 128);
+            fill(a, 0, 0, 255);
+            fill(b, 1, 0, 255);
         }
 
         return reference::gemmlowp<int32_t, T2>(a, b);

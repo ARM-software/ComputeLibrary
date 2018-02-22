@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,26 +22,10 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/utils/misc/utility.h"
 
 #include <cmath>
 #include <limits>
-
-namespace
-{
-template <typename TpIn, typename TpSat>
-inline TpSat saturate_convert(TpIn a)
-{
-    if(a > std::numeric_limits<TpSat>::max())
-    {
-        a = std::numeric_limits<TpSat>::max();
-    }
-    if(a < std::numeric_limits<TpSat>::min())
-    {
-        a = std::numeric_limits<TpSat>::min();
-    }
-    return static_cast<TpSat>(a);
-}
-} // namespace
 
 namespace arm_compute
 {
@@ -50,7 +34,7 @@ inline qint8_t sqshl_qs8(qint8_t a, int shift)
     qint16_t tmp = static_cast<qint16_t>(a) << shift;
 
     // Saturate the result in case of overflow and cast to qint8_t
-    return saturate_convert<qint16_t, qint8_t>(tmp);
+    return utility::saturate_cast<qint8_t>(tmp);
 }
 
 inline qint16_t sqshl_qs16(qint16_t a, int shift)
@@ -58,7 +42,7 @@ inline qint16_t sqshl_qs16(qint16_t a, int shift)
     qint32_t tmp = static_cast<qint32_t>(a) << shift;
 
     // Saturate the result in case of overflow and cast to qint16_t
-    return saturate_convert<qint32_t, qint16_t>(tmp);
+    return utility::saturate_cast<qint16_t>(tmp);
 }
 
 inline qint8_t sshr_qs8(qint8_t a, int shift)
@@ -101,7 +85,7 @@ inline qint8_t sqadd_qs8(qint8_t a, qint8_t b)
     qint16_t tmp = (static_cast<qint16_t>(a) + static_cast<qint16_t>(b));
 
     // Saturate the result in case of overflow and cast to qint8_t
-    return saturate_convert<qint16_t, qint8_t>(tmp);
+    return utility::saturate_cast<qint8_t>(tmp);
 }
 
 inline qint16_t sqadd_qs16(qint16_t a, qint16_t b)
@@ -110,7 +94,7 @@ inline qint16_t sqadd_qs16(qint16_t a, qint16_t b)
     qint32_t tmp = (static_cast<qint32_t>(a) + static_cast<qint32_t>(b));
 
     // Saturate the result in case of overflow and cast to qint16_t
-    return saturate_convert<qint32_t, qint16_t>(tmp);
+    return utility::saturate_cast<qint16_t>(tmp);
 }
 
 inline qint32_t sqadd_qs32(qint32_t a, qint32_t b)
@@ -119,7 +103,7 @@ inline qint32_t sqadd_qs32(qint32_t a, qint32_t b)
     qint64_t tmp = (static_cast<qint64_t>(a) + static_cast<qint64_t>(b));
 
     // Saturate the result in case of overflow and cast to qint32_t
-    return saturate_convert<qint64_t, qint32_t>(tmp);
+    return utility::saturate_cast<qint32_t>(tmp);
 }
 
 inline qint8_t ssub_qs8(qint8_t a, qint8_t b)
@@ -138,7 +122,7 @@ inline qint8_t sqsub_qs8(qint8_t a, qint8_t b)
     qint16_t tmp = static_cast<qint16_t>(a) - static_cast<qint16_t>(b);
 
     // Saturate the result in case of overflow and cast to qint8_t
-    return saturate_convert<qint16_t, qint8_t>(tmp);
+    return utility::saturate_cast<qint8_t>(tmp);
 }
 
 inline qint16_t sqsub_qs16(qint16_t a, qint16_t b)
@@ -147,7 +131,7 @@ inline qint16_t sqsub_qs16(qint16_t a, qint16_t b)
     qint32_t tmp = static_cast<qint32_t>(a) - static_cast<qint32_t>(b);
 
     // Saturate the result in case of overflow and cast to qint16_t
-    return saturate_convert<qint32_t, qint16_t>(tmp);
+    return utility::saturate_cast<qint16_t>(tmp);
 }
 
 inline qint8_t smul_qs8(qint8_t a, qint8_t b, int fixed_point_position)
@@ -183,7 +167,7 @@ inline qint8_t sqmul_qs8(qint8_t a, qint8_t b, int fixed_point_position)
     // Rounding up
     tmp += round_up_const;
 
-    return saturate_convert<qint16_t, qint8_t>(tmp >> fixed_point_position);
+    return utility::saturate_cast<qint8_t>(tmp >> fixed_point_position);
 }
 
 inline qint16_t sqmul_qs16(qint16_t a, qint16_t b, int fixed_point_position)
@@ -195,7 +179,7 @@ inline qint16_t sqmul_qs16(qint16_t a, qint16_t b, int fixed_point_position)
     // Rounding up
     tmp += round_up_const;
 
-    return saturate_convert<qint32_t, qint16_t>(tmp >> fixed_point_position);
+    return utility::saturate_cast<qint16_t>(tmp >> fixed_point_position);
 }
 
 inline qint16_t sqmull_qs8(qint8_t a, qint8_t b, int fixed_point_position)
@@ -394,7 +378,7 @@ inline float scvt_f32_qs8(qint8_t a, int fixed_point_position)
 inline qint8_t sqcvt_qs8_f32(float a, int fixed_point_position)
 {
     // round_nearest_integer(a * 2^(fixed_point_position))
-    return saturate_convert<float, qint8_t>(a * (1 << fixed_point_position) + ((a >= 0) ? 0.5 : -0.5));
+    return utility::saturate_cast<qint8_t>(a * (1 << fixed_point_position) + ((a >= 0) ? 0.5 : -0.5));
 }
 
 inline float scvt_f32_qs16(qint16_t a, int fixed_point_position)
@@ -405,18 +389,18 @@ inline float scvt_f32_qs16(qint16_t a, int fixed_point_position)
 inline qint16_t sqcvt_qs16_f32(float a, int fixed_point_position)
 {
     // round_nearest_integer(a * 2^(fixed_point_position))
-    return saturate_convert<float, qint16_t>(a * (1 << fixed_point_position) + ((a >= 0) ? 0.5 : -0.5));
+    return utility::saturate_cast<qint16_t>(a * (1 << fixed_point_position) + ((a >= 0) ? 0.5 : -0.5));
 }
 
 inline qint8_t sqmovn_qs16(qint16_t a)
 {
     // Saturate the result in case of overflow and cast to qint8_t
-    return saturate_convert<qint16_t, qint8_t>(a);
+    return utility::saturate_cast<qint8_t>(a);
 }
 
 inline qint16_t sqmovn_qs32(qint32_t a)
 {
     // Saturate the result in case of overflow and cast to qint16_t
-    return saturate_convert<qint32_t, qint16_t>(a);
+    return utility::saturate_cast<qint16_t>(a);
 }
 }

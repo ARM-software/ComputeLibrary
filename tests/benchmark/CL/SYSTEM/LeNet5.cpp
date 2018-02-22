@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,7 +49,7 @@ using CLLeNet5Fixture = LeNet5Fixture<CLTensor,
       CLSoftmaxLayer>;
 
 TEST_SUITE(CL)
-TEST_SUITE(SYSTEM_TEST)
+TEST_SUITE(SYSTEM_TESTS)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5, CLLeNet5Fixture, framework::DatasetMode::ALL,
                                 framework::dataset::make("Batches", { 1, 4, 8 }));

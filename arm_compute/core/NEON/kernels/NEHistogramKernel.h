@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,10 @@ using IImage = ITensor;
 class NEHistogramKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEHistogramKernel";
+    }
     /** Default constructor */
     NEHistogramKernel();
     /** Default destructor */

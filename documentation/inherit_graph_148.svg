@@ -11,10 +11,10 @@
 <polygon fill="white" stroke="none" points="-4,4 -4,-35 129,-35 129,4 -4,4"/>
 <!-- Node1 -->
 <g id="node1" class="node"><title>Node1</title>
-<g id="a_node1"><a xlink:href="structarm__compute_1_1_min_max_location_values.xhtml" target="_top" xlink:title="MinMaxLocationValues\l\&lt; target_type \&gt;">
+<g id="a_node1"><a xlink:href="structmali__userspace_1_1mali__base__gpu__thread__props.xhtml" target="_top" xlink:title="mali_base_gpu_thread\l_props">
 <polygon fill="white" stroke="black" points="-7.10543e-15,-0.5 -7.10543e-15,-30.5 125,-30.5 125,-0.5 -7.10543e-15,-0.5"/>
-<text text-anchor="start" x="8" y="-18.5" font-family="Helvetica,sans-Serif" font-size="10.00">MinMaxLocationValues</text>
-<text text-anchor="middle" x="62.5" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; target_type &gt;</text>
+<text text-anchor="start" x="8" y="-18.5" font-family="Helvetica,sans-Serif" font-size="10.00">mali_base_gpu_thread</text>
+<text text-anchor="middle" x="62.5" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">_props</text>
 </a>
 </g>
 </g>

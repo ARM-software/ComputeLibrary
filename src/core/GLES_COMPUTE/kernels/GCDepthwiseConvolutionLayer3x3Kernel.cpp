@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -173,16 +173,20 @@ void GCDepthwiseConvolutionLayer3x3Kernel::configure(const IGCTensor *input, con
     const int output_padding_bottom = ceil_to_multiple(output_height, num_elems_written_per_iteration_y * _lws[1]) - output_height;
 
     // Calculate input right and bottom border
-    const int input_width    = input->info()->dimension(0);
-    const int input_height   = input->info()->dimension(1);
-    const int padding_right  = ceil_to_multiple(((output_width + output_padding_right) * _conv_stride_x + 2), num_elems_read_per_iteration_x * _lws[0]) - _conv_pad_left - input_width;
-    const int padding_bottom = ceil_to_multiple(((output_height + output_padding_bottom) * _conv_stride_y + 2), num_elems_read_per_iteration_y * _lws[1]) - _conv_pad_top - input_height;
+    const int input_width  = input->info()->dimension(0);
+    const int input_height = input->info()->dimension(1);
+
+    const int input_total_width  = std::max(int(input->info()->padding().left), int(_conv_pad_left)) + input_width + std::max(int(input->info()->padding().right), int(_conv_pad_left));
+    const int input_total_height = std::max(int(input->info()->padding().top), int(_conv_pad_top)) + input_height + std::max(int(input->info()->padding().bottom), int(_conv_pad_top));
+
+    const int input_padding_right  = ceil_to_multiple(input_total_width, num_elems_read_per_iteration_x * _lws[0]) - input_width - _conv_pad_left;
+    const int input_padding_bottom = ceil_to_multiple(input_total_height, num_elems_read_per_iteration_y * _lws[1]) - input_height - _conv_pad_top;
 
     BorderSize border = BorderSize(0, output_padding_right, output_padding_bottom, 0);
 
     Window win = calculate_max_enlarged_window(*output->info(), Steps(num_elems_written_per_iteration_x, num_elems_written_per_iteration_y, num_elems_written_per_iteration_z), border);
 
-    AccessWindowStatic input_access(input->info(), -_conv_pad_left, -_conv_pad_top, input_width + padding_right, input_height + padding_bottom);
+    AccessWindowStatic input_access(input->info(), -_conv_pad_left, -_conv_pad_top, input_width + input_padding_right, input_height + input_padding_bottom);
     AccessWindowStatic weights_access = AccessWindowStatic(nullptr, 0, 0, 0, 0);
     AccessWindowStatic bias_access    = AccessWindowStatic(nullptr, 0, 0, 0, 1);
 
@@ -224,6 +228,8 @@ void GCDepthwiseConvolutionLayer3x3Kernel::run(const Window &window)
 
     _kernel.use();
 
+    _output->set_needs_shifting(true);
+
     // Create input window and adjust
     Window win_in = window;
     win_in.adjust(Window::DimX, -_conv_pad_left, true);
@@ -245,6 +251,8 @@ void GCDepthwiseConvolutionLayer3x3Kernel::run(const Window &window)
         slice_biases.use_tensor_dimensions(_biases->info()->tensor_shape());
         add_1D_tensor_argument(idx, _biases, 4, slice_biases);
     }
+
+    slice_out.shift(Window::DimX, -(_output->info()->padding()).left);
 
     do
     {

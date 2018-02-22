@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -136,9 +136,9 @@ Collaboration diagram for NEIm2Col:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a00a909d8b7a4c625a048b935dc1f77da"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_im2_col.xhtml#a00a909d8b7a4c625a048b935dc1f77da">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;kernel_dims, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;conv_info, bool has_bias)</td></tr>
-<tr class="memdesc:a00a909d8b7a4c625a048b935dc1f77da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure the im2col NEON kernel.  <a href="#a00a909d8b7a4c625a048b935dc1f77da">More...</a><br /></td></tr>
-<tr class="separator:a00a909d8b7a4c625a048b935dc1f77da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af465ef21fb0b6a4629becb6c591a0af4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_im2_col.xhtml#af465ef21fb0b6a4629becb6c591a0af4">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;kernel_dims, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;conv_info, bool has_bias, bool is_fully_connected=false)</td></tr>
+<tr class="memdesc:af465ef21fb0b6a4629becb6c591a0af4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure the im2col NEON kernel.  <a href="#af465ef21fb0b6a4629becb6c591a0af4">More...</a><br /></td></tr>
+<tr class="separator:af465ef21fb0b6a4629becb6c591a0af4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classarm__compute_1_1_i_n_e_simple_function"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1_i_n_e_simple_function')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_n_e_simple_function.xhtml">INESimpleFunction</a></td></tr>
 <tr class="memitem:a4a6528d71f063140db37cdf5cf272960 inherit pub_methods_classarm__compute_1_1_i_n_e_simple_function"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_n_e_simple_function.xhtml#a4a6528d71f063140db37cdf5cf272960">INESimpleFunction</a> ()</td></tr>
 <tr class="memdesc:a4a6528d71f063140db37cdf5cf272960 inherit pub_methods_classarm__compute_1_1_i_n_e_simple_function"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#a4a6528d71f063140db37cdf5cf272960">More...</a><br /></td></tr>
@@ -153,16 +153,16 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a1eaf36a65da0e1f3ef5a89516f91193a"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_im2_col.xhtml#a1eaf36a65da0e1f3ef5a89516f91193a">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output, const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;kernel_dims, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;conv_info, bool has_bias)</td></tr>
-<tr class="memdesc:a1eaf36a65da0e1f3ef5a89516f91193a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_im2_col.xhtml">NEIm2Col</a>.  <a href="#a1eaf36a65da0e1f3ef5a89516f91193a">More...</a><br /></td></tr>
-<tr class="separator:a1eaf36a65da0e1f3ef5a89516f91193a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adcc47f8454d755876fec7b6fac9cbeb8"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_im2_col.xhtml#adcc47f8454d755876fec7b6fac9cbeb8">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output, const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;kernel_dims, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;conv_info, bool has_bias, bool is_fully_connected)</td></tr>
+<tr class="memdesc:adcc47f8454d755876fec7b6fac9cbeb8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_im2_col.xhtml">NEIm2Col</a>.  <a href="#adcc47f8454d755876fec7b6fac9cbeb8">More...</a><br /></td></tr>
+<tr class="separator:adcc47f8454d755876fec7b6fac9cbeb8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Basic function to run <a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml">NEIm2ColKernel</a>. </p>
 
 <p>Definition at line <a class="el" href="_n_e_im2_col_8h_source.xhtml#l00037">37</a> of file <a class="el" href="_n_e_im2_col_8h_source.xhtml">NEIm2Col.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a00a909d8b7a4c625a048b935dc1f77da"></a>
+<a class="anchor" id="af465ef21fb0b6a4629becb6c591a0af4"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -194,7 +194,13 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>has_bias</em>&#160;</td>
+          <td class="paramname"><em>has_bias</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>is_fully_connected</em> = <code>false</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -212,13 +218,14 @@ Static Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">kernel_dims</td><td>The kernel dimensions (width and height). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">conv_info</td><td>Contains padding and stride information described in <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">has_bias</td><td>In case biases are provided expands the matrix with 1. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">is_fully_connected</td><td>Determines whether this kernel will be called by <a class="el" href="classarm__compute_1_1_n_e_fully_connected_layer.xhtml">NEFullyConnectedLayer</a> in order to validate the arguments </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a class="anchor" id="a1eaf36a65da0e1f3ef5a89516f91193a"></a>
+<a class="anchor" id="adcc47f8454d755876fec7b6fac9cbeb8"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -253,7 +260,13 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>has_bias</em>&#160;</td>
+          <td class="paramname"><em>has_bias</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>is_fully_connected</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -275,7 +288,8 @@ Static Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>The output tensor. Data types supported: Same as <code>input</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">kernel_dims</td><td>The kernel dimensions (width and height). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">conv_info</td><td>Contains padding and stride information described in <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">has_bias</td><td>In case biases are provided expands the matrix with 1.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">has_bias</td><td>In case biases are provided expands the matrix with 1. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">is_fully_connected</td><td>Determines whether this kernel will be called by <a class="el" href="classarm__compute_1_1_n_e_fully_connected_layer.xhtml">NEFullyConnectedLayer</a> in order to validate the arguments</td></tr>
   </table>
   </dd>
 </dl>
@@ -294,7 +308,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_im2_col.xhtml">NEIm2Col</a></li>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:46 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:25 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

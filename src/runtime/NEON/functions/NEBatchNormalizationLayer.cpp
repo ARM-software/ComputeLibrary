@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,16 +37,18 @@ NEBatchNormalizationLayer::NEBatchNormalizationLayer()
 {
 }
 
-void NEBatchNormalizationLayer::configure(ITensor *input, ITensor *output, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma, float epsilon)
+void NEBatchNormalizationLayer::configure(ITensor *input, ITensor *output, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma, float epsilon,
+                                          ActivationLayerInfo act_info)
 {
     // Configure kernel
-    _norm_kernel.configure(input, output, mean, var, beta, gamma, epsilon);
+    _norm_kernel.configure(input, output, mean, var, beta, gamma, epsilon, act_info);
 }
 
 Status NEBatchNormalizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *mean, const ITensorInfo *var, const ITensorInfo *beta, const ITensorInfo *gamma,
-                                           float epsilon)
+                                           float epsilon, ActivationLayerInfo act_info)
 {
-    return NEBatchNormalizationLayerKernel::validate(input, output, mean, var, beta, gamma, epsilon);
+    ARM_COMPUTE_RETURN_ON_ERROR(NEBatchNormalizationLayerKernel::validate(input, output, mean, var, beta, gamma, epsilon, act_info));
+    return Status{};
 }
 
 void NEBatchNormalizationLayer::run()

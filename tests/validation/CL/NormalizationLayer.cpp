@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,6 +56,10 @@ const auto NormalizationDataset = combine(combine(combine(combine(datasets::Smal
                                                           framework::dataset::make("NormalizationSize", 3, 9, 2)),
                                                   framework::dataset::make("Beta", { 0.5f, 1.f, 2.f })),
                                           framework::dataset::make("IsScaled", { true }));
+const auto NormalizationDatasetQS = combine(combine(combine(combine(datasets::TinyShapes(), datasets::NormalizationTypes()),
+                                                            framework::dataset::make("NormalizationSize", 3, 9, 2)),
+                                                    framework::dataset::make("Beta", { 0.5f, 1.f, 2.f })),
+                                            framework::dataset::make("IsScaled", { true }));
 const auto NormalizationDatasetFP16 = combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("NormType", { NormType::IN_MAP_1D, NormType::CROSS_MAP })),
                                                               framework::dataset::make("NormalizationSize", 3, 9, 2)),
                                                       framework::dataset::make("Beta", { 0.5f, 1.f, 2.f })),
@@ -142,14 +146,14 @@ using CLNormalizationLayerFixedPointFixture = NormalizationValidationFixedPointF
 TEST_SUITE(Quantized)
 TEST_SUITE(QS8)
 // Testing for fixed point position [1,6) as reciprocal limits the maximum fixed point position to 5
-FIXTURE_DATA_TEST_CASE(RunSmall, CLNormalizationLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(NormalizationDataset, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunTiny, CLNormalizationLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(NormalizationDatasetQS, framework::dataset::make("DataType",
                        DataType::QS8)),
                        framework::dataset::make("FractionalBits", 1, 6)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qs8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLNormalizationLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(NormalizationDataset, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLNormalizationLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(NormalizationDataset, framework::dataset::make("DataType",
                        DataType::QS8)),
                        framework::dataset::make("FractionalBits", 1, 6)))
 {
@@ -160,14 +164,14 @@ TEST_SUITE_END()
 
 TEST_SUITE(QS16)
 // Testing for fixed point position [1,14) as reciprocal limits the maximum fixed point position to 5
-FIXTURE_DATA_TEST_CASE(RunSmall, CLNormalizationLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(NormalizationDataset, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunTiny, CLNormalizationLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(NormalizationDatasetQS, framework::dataset::make("DataType",
                        DataType::QS16)),
                        framework::dataset::make("FractionalBits", 1, 14)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qs16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLNormalizationLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(NormalizationDataset, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLNormalizationLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(NormalizationDataset, framework::dataset::make("DataType",
                        DataType::QS16)),
                        framework::dataset::make("FractionalBits", 1, 14)))
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -85,7 +85,7 @@ public:
      *
      * @return True if the padding has been changed.
      */
-    virtual bool update_padding_if_needed(const Window &window) const = 0;
+    virtual bool update_padding_if_needed(const Window &window) = 0;
     /** Compute the valid region based on access pattern and valid region of the inputs.
      *
      * @note This method assumes that there is no border.
@@ -139,8 +139,8 @@ public:
     }
 
     AccessWindowRectangle(const AccessWindowRectangle &) = delete;
+    AccessWindowRectangle(AccessWindowRectangle &&)      = delete;
     AccessWindowRectangle &operator=(const AccessWindowRectangle &) = delete;
-    AccessWindowRectangle(AccessWindowRectangle &&)                 = default;
     AccessWindowRectangle &operator=(AccessWindowRectangle &&) = default;
     ~AccessWindowRectangle()                                   = default;
 
@@ -168,7 +168,7 @@ public:
     ValidRegion compute_valid_region(const Window &window, ValidRegion input_valid_region, bool border_undefined, BorderSize border_size) const override;
 
     bool update_window_if_needed(Window &window) const override;
-    bool update_padding_if_needed(const Window &window) const override;
+    bool update_padding_if_needed(const Window &window) override;
 
 protected:
     ITensorInfo *_info;

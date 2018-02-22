@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -138,9 +138,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a436c89a6209d7de142e7e5eabb9debd1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_g_e_m_m.xhtml#a436c89a6209d7de142e7e5eabb9debd1">GCGEMM</a> ()</td></tr>
 <tr class="memdesc:a436c89a6209d7de142e7e5eabb9debd1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <a href="#a436c89a6209d7de142e7e5eabb9debd1">More...</a><br /></td></tr>
 <tr class="separator:a436c89a6209d7de142e7e5eabb9debd1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7aa2a3f11f32fe5e794fdb4775ed998d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_g_e_m_m.xhtml#a7aa2a3f11f32fe5e794fdb4775ed998d">configure</a> (const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *a, const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *b, const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *c, <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *output, float alpha, float beta)</td></tr>
-<tr class="memdesc:a7aa2a3f11f32fe5e794fdb4775ed998d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialise the kernel's inputs and output.  <a href="#a7aa2a3f11f32fe5e794fdb4775ed998d">More...</a><br /></td></tr>
-<tr class="separator:a7aa2a3f11f32fe5e794fdb4775ed998d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8184f9bf2e8f4fdc16cfe7812e229d95"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_g_e_m_m.xhtml#a8184f9bf2e8f4fdc16cfe7812e229d95">configure</a> (const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *a, const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *b, const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *c, <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *output, float alpha, float beta, const <a class="el" href="classarm__compute_1_1_g_e_m_m_info.xhtml">GEMMInfo</a> &amp;gemm_info=<a class="el" href="classarm__compute_1_1_g_e_m_m_info.xhtml">GEMMInfo</a>())</td></tr>
+<tr class="memdesc:a8184f9bf2e8f4fdc16cfe7812e229d95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialise the kernel's inputs and output.  <a href="#a8184f9bf2e8f4fdc16cfe7812e229d95">More...</a><br /></td></tr>
+<tr class="separator:a8184f9bf2e8f4fdc16cfe7812e229d95"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad1717410afd0be936c6213a63c8005fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_g_e_m_m.xhtml#ad1717410afd0be936c6213a63c8005fb">run</a> () override</td></tr>
 <tr class="memdesc:ad1717410afd0be936c6213a63c8005fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the kernels contained in the function.  <a href="#ad1717410afd0be936c6213a63c8005fb">More...</a><br /></td></tr>
 <tr class="separator:ad1717410afd0be936c6213a63c8005fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -179,7 +179,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a7aa2a3f11f32fe5e794fdb4775ed998d"></a>
+<a class="anchor" id="a8184f9bf2e8f4fdc16cfe7812e229d95"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -217,7 +217,13 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>beta</em>&#160;</td>
+          <td class="paramname"><em>beta</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_g_e_m_m_info.xhtml">GEMMInfo</a> &amp;&#160;</td>
+          <td class="paramname"><em>gemm_info</em> = <code><a class="el" href="classarm__compute_1_1_g_e_m_m_info.xhtml">GEMMInfo</a>()</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -241,6 +247,7 @@ Whilst the first input tensor can be a vector, the second input tensor must be a
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output tensor. Data type supported: same as <code>a</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>Weight of the matrix product </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>Weight of matrix C </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">gemm_info</td><td>(Optional) Specifies if the matrix A and/or matrix B have been reshaped and if the reshape of matrix B should happen only for the first run </td></tr>
   </table>
   </dd>
 </dl>
@@ -293,7 +300,7 @@ Whilst the first input tensor can be a vector, the second input tensor must be a
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_g_c_g_e_m_m.xhtml">GCGEMM</a></li>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:45 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:24 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

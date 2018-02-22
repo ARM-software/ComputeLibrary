@@ -12,6 +12,7 @@ var arm__compute_2graph_2_types_8h =
     ] ],
     [ "OperationType", "arm__compute_2graph_2_types_8h.xhtml#a9a2c9c31d675b34f6ec35cc1ca89e047", [
       [ "ActivationLayer", "arm__compute_2graph_2_types_8h.xhtml#a9a2c9c31d675b34f6ec35cc1ca89e047a041485a3394541feee82a34d40249d70", null ],
+      [ "ArithmeticAddition", "arm__compute_2graph_2_types_8h.xhtml#a9a2c9c31d675b34f6ec35cc1ca89e047afbf7dbc20cffcbe21ef53e26db6907d8", null ],
       [ "BatchNormalizationLayer", "arm__compute_2graph_2_types_8h.xhtml#a9a2c9c31d675b34f6ec35cc1ca89e047ad0146d2051fad860923cf31f7e00a732", null ],
       [ "ConvolutionLayer", "arm__compute_2graph_2_types_8h.xhtml#a9a2c9c31d675b34f6ec35cc1ca89e047aa252659b59a03bc61e5ec827ab4448b7", null ],
       [ "DepthConvertLayer", "arm__compute_2graph_2_types_8h.xhtml#a9a2c9c31d675b34f6ec35cc1ca89e047ad1f79fa4939c976f90083093a5d6b7e4", null ],

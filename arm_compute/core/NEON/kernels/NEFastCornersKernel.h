@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,6 +38,10 @@ using IImage = ITensor;
 class NEFastCornersKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEFastCornersKernel";
+    }
     /** Constructor */
     NEFastCornersKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */

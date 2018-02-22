@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,6 +65,10 @@ std::unique_ptr<Graph> SubGraph::construct(const GraphContext &ctx, std::unique_
         _input = std::move(input);
     }
     graph->add_tensor_object(std::move(_input));
+
+    // Make sure first and last nodes of the subgraph always do operations out-of-place
+    _nodes.front()->set_supports_in_place(false);
+    _nodes.back()->set_supports_in_place(false);
 
     // Construct nodes
     for(auto &node : _nodes)

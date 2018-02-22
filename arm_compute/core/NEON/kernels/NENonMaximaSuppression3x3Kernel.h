@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,6 +39,10 @@ class ITensor;
 class NENonMaximaSuppression3x3Kernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NENonMaximaSuppression3x3Kernel";
+    }
     /** Default constructor */
     NENonMaximaSuppression3x3Kernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -84,6 +88,10 @@ protected:
 class NENonMaximaSuppression3x3FP16Kernel : public NENonMaximaSuppression3x3Kernel
 {
 public:
+    const char *name() const override
+    {
+        return "NENonMaximaSuppression3x3FP16Kernel";
+    }
     /** Initialise the kernel's sources, destinations and border mode.
      *
      * @param[in]  input            Source tensor. Data types supported: U8/F32.

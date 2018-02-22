@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -88,7 +88,7 @@ protected:
 
         // Create and configure function
         FunctionType conv;
-        conv.configure(&src, &weights, nullptr, &dst, info);
+        conv.configure(&src, &weights, &bias, &dst, info);
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -98,8 +98,8 @@ protected:
         // Allocate tensors
         src.allocator()->allocate();
         weights.allocator()->allocate();
-        bias.allocator()->allocate();
         dst.allocator()->allocate();
+        bias.allocator()->allocate();
 
         ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(!weights.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -109,7 +109,7 @@ protected:
         // Fill tensors
         fill(AccessorType(src), 0, -1.f, 1.f);
         fill(AccessorType(weights), 1, -1.f, 1.f);
-        fill(AccessorType(bias), 2, 0.f, 0.f);
+        fill(AccessorType(bias), 2, -1.f, 1.f);
         fill(AccessorType(dst), 3, -1.f, 1.f);
 
         // Compute NEWinogradLayer function
@@ -128,7 +128,7 @@ protected:
         // Fill reference
         fill(src, 0, -1.f, 1.f);
         fill(weights, 1, -1.f, 1.f);
-        fill(bias, 2, 0.f, 0.f);
+        fill(bias, 2, -1.f, 1.f);
 
         return reference::convolution_layer<T>(src, weights, bias, output_shape, info);
     }

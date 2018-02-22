@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,40 +37,9 @@
 
 using namespace arm_compute;
 
-NEDepthwiseIm2ColKernel::NEDepthwiseIm2ColKernel()
-    : _input(nullptr), _output(nullptr), _kernel_dims(), _conv_info(), _has_bias()
+template <typename T>
+void NEDepthwiseIm2ColKernel::run_generic(const Window &window)
 {
-}
-
-void NEDepthwiseIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias)
-{
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
-    ARM_COMPUTE_ERROR_ON(input->info()->dimension(2) != output->info()->dimension(2));
-    ARM_COMPUTE_ERROR_ON(output->info()->dimension(0) != (kernel_dims.width * kernel_dims.height + ((has_bias) ? 1 : 0)));
-
-    _input       = input;
-    _output      = output;
-    _kernel_dims = kernel_dims;
-    _conv_info   = conv_info;
-    _has_bias    = has_bias;
-
-    // Configure kernel window
-    Window win = calculate_max_window(*input->info(), Steps());
-
-    // The NEDepthwiseIm2ColKernel doesn't need padding so update_window_and_padding() can be skipped
-    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
-
-    INEKernel::configure(win);
-}
-
-void NEDepthwiseIm2ColKernel::run(const Window &window, const ThreadInfo &info)
-{
-    ARM_COMPUTE_UNUSED(info);
-    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-
-    //const int kernel_depth   = _input->info()->dimension(2);
     const int input_w        = _input->info()->dimension(0);
     const int input_h        = _input->info()->dimension(1);
     const int input_stride_x = _input->info()->strides_in_bytes().x();
@@ -101,6 +70,13 @@ void NEDepthwiseIm2ColKernel::run(const Window &window, const ThreadInfo &info)
     const int full_length   = input_w + pad_left + pad_right;
     const int max_initial_x = stride_x * (((full_length - _kernel_dims.width) / stride_x) + 1);
 
+    // Define pad value
+    auto zero = static_cast<T>(0);
+    if(std::is_same<T, uint8_t>::value)
+    {
+        zero = _input->info()->quantization_info().offset;
+    }
+
     execute_window_loop(window_out, [&](const Coordinates & id)
     {
         const int src_pixel_linear = id.y() * stride_x;
@@ -110,7 +86,7 @@ void NEDepthwiseIm2ColKernel::run(const Window &window, const ThreadInfo &info)
 
         // Get pointers
         const uint8_t *const input_ptr  = in.ptr() + id.z() * input_stride_z;
-        auto                 output_ptr = reinterpret_cast<float *>(out.ptr());
+        auto                 output_ptr = reinterpret_cast<T *>(out.ptr());
         const int            height     = src_y + _kernel_dims.height;
         const int            width      = src_x + _kernel_dims.width;
 
@@ -120,19 +96,76 @@ void NEDepthwiseIm2ColKernel::run(const Window &window, const ThreadInfo &info)
             {
                 if(x < 0 || x >= input_w || y < 0 || y >= input_h)
                 {
-                    *output_ptr = 0;
+                    *output_ptr = zero;
                 }
                 else
                 {
-                    *output_ptr = *(reinterpret_cast<const float *>(input_ptr + x * input_stride_x + y * input_stride_y));
+                    *output_ptr = *(reinterpret_cast<const T *>(input_ptr + x * input_stride_x + y * input_stride_y));
                 }
             }
         }
 
         if(_has_bias)
         {
-            *output_ptr = static_cast<float>(1);
+            *output_ptr = static_cast<T>(1);
         }
     },
     in, out);
+}
+
+NEDepthwiseIm2ColKernel::NEDepthwiseIm2ColKernel()
+    : _func(nullptr), _input(nullptr), _output(nullptr), _kernel_dims(), _conv_info(), _has_bias()
+{
+}
+
+void NEDepthwiseIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias)
+{
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    ARM_COMPUTE_ERROR_ON(is_data_type_quantized_asymmetric(input->info()->data_type()) && has_bias);
+    ARM_COMPUTE_ERROR_ON(input->info()->dimension(2) != output->info()->dimension(2));
+    ARM_COMPUTE_ERROR_ON(output->info()->dimension(0) != (kernel_dims.width * kernel_dims.height + ((has_bias) ? 1 : 0)));
+
+    _input       = input;
+    _output      = output;
+    _kernel_dims = kernel_dims;
+    _conv_info   = conv_info;
+    _has_bias    = has_bias;
+
+    // Configure kernel window
+    Window win = calculate_max_window(*input->info(), Steps());
+
+    // Set appropriate function to run
+    switch(input->info()->data_type())
+    {
+        case DataType::QASYMM8:
+            _func = &NEDepthwiseIm2ColKernel::run_generic<uint8_t>;
+            break;
+        case DataType::F16:
+            _func = &NEDepthwiseIm2ColKernel::run_generic<half>;
+            break;
+        case DataType::F32:
+            _func = &NEDepthwiseIm2ColKernel::run_generic<float>;
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Unsupported data type");
+    }
+
+    // The NEDepthwiseIm2ColKernel doesn't need padding so update_window_and_padding() can be skipped
+    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
+
+    INEKernel::configure(win);
+}
+
+void NEDepthwiseIm2ColKernel::run(const Window &window, const ThreadInfo &info)
+{
+    ARM_COMPUTE_UNUSED(info);
+    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
+
+    if(_func != nullptr)
+    {
+        (this->*_func)(window);
+    }
 }

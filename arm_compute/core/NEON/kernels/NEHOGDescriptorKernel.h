@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,6 +36,10 @@ class ITensor;
 class NEHOGOrientationBinningKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEHOGOrientationBinningKernel";
+    }
     /** Default constructor */
     NEHOGOrientationBinningKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -91,6 +95,10 @@ private:
 class NEHOGBlockNormalizationKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEHOGBlockNormalizationKernel";
+    }
     /** Default constructor */
     NEHOGBlockNormalizationKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #ifndef __ARM_COMPUTE_TEST_TYPE_PRINTER_H__
 #define __ARM_COMPUTE_TEST_TYPE_PRINTER_H__
 
+#include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/Dimensions.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/HOGInfo.h"
@@ -290,14 +291,14 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NormType &norm_type)
 inline std::string to_string(const arm_compute::NormalizationLayerInfo &info)
 {
     std::stringstream str;
-    str << info.type();
+    str << info.type() << ":NormSize=" << info.norm_size();
     return str.str();
 }
 
 /** Formatted output of @ref NormalizationLayerInfo. */
 inline ::std::ostream &operator<<(::std::ostream &os, const NormalizationLayerInfo &info)
 {
-    os << info.type();
+    os << info.type() << ":NormSize=" << info.norm_size();
     return os;
 }
 
@@ -520,6 +521,13 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Channel &channel)
     }
 
     return os;
+}
+
+inline std::string to_string(const Channel &channel)
+{
+    std::stringstream str;
+    str << channel;
+    return str.str();
 }
 
 /** Formatted output of the BorderMode type. */
@@ -759,7 +767,7 @@ inline std::string to_string(const PoolingLayerInfo &info)
     if(!info.is_global_pooling())
     {
         str << ","
-            << "PoolSize=" << info.pool_size() << ","
+            << "PoolSize=" << info.pool_size().width << "," << info.pool_size().height << ","
             << "PadStride=" << info.pad_stride_info();
     }
     str << "}";
@@ -924,5 +932,70 @@ inline std::string to_string(const HOGInfo &type)
     return str.str();
 }
 
+inline ::std::ostream &operator<<(::std::ostream &os, const ConvolutionMethod &conv_method)
+{
+    switch(conv_method)
+    {
+        case ConvolutionMethod::GEMM:
+            os << "GEMM";
+            break;
+        case ConvolutionMethod::DIRECT:
+            os << "DIRECT";
+            break;
+        case ConvolutionMethod::WINOGRAD:
+            os << "WINOGRAD";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+inline std::string to_string(const ConvolutionMethod &conv_method)
+{
+    std::stringstream str;
+    str << conv_method;
+    return str.str();
+}
+
+inline ::std::ostream &operator<<(::std::ostream &os, const GPUTarget &gpu_target)
+{
+    switch(gpu_target)
+    {
+        case GPUTarget::GPU_ARCH_MASK:
+            os << "GPU_ARCH_MASK";
+            break;
+        case GPUTarget::MIDGARD:
+            os << "MIDGARD";
+            break;
+        case GPUTarget::BIFROST:
+            os << "BIFROST";
+            break;
+        case GPUTarget::T600:
+            os << "T600";
+            break;
+        case GPUTarget::T700:
+            os << "T700";
+            break;
+        case GPUTarget::T800:
+            os << "T800";
+            break;
+        case GPUTarget::G70:
+            os << "G70";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+inline std::string to_string(const GPUTarget &gpu_target)
+{
+    std::stringstream str;
+    str << gpu_target;
+    return str.str();
+}
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_TEST_TYPE_PRINTER_H__ */

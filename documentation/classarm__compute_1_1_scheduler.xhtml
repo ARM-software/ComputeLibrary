@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -139,9 +139,9 @@ Public Types</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:aa35fa7aa123444c798c28d4ac8fe7546"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_scheduler.xhtml#aa35fa7aa123444c798c28d4ac8fe7546">set</a> (std::shared_ptr&lt; <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml">IScheduler</a> &gt; &amp;scheduler)</td></tr>
-<tr class="memdesc:aa35fa7aa123444c798c28d4ac8fe7546"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the user defined scheduler and makes it the active scheduler.  <a href="#aa35fa7aa123444c798c28d4ac8fe7546">More...</a><br /></td></tr>
-<tr class="separator:aa35fa7aa123444c798c28d4ac8fe7546"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12775a7fbfa126fa4f9f06f8e02d9a8e"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_scheduler.xhtml#a12775a7fbfa126fa4f9f06f8e02d9a8e">set</a> (std::shared_ptr&lt; <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml">IScheduler</a> &gt; scheduler)</td></tr>
+<tr class="memdesc:a12775a7fbfa126fa4f9f06f8e02d9a8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the user defined scheduler and makes it the active scheduler.  <a href="#a12775a7fbfa126fa4f9f06f8e02d9a8e">More...</a><br /></td></tr>
+<tr class="separator:a12775a7fbfa126fa4f9f06f8e02d9a8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acb4f87f1831680d8d1b70e1bef06bb81"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml">IScheduler</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_scheduler.xhtml#acb4f87f1831680d8d1b70e1bef06bb81">get</a> ()</td></tr>
 <tr class="memdesc:acb4f87f1831680d8d1b70e1bef06bb81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Access the scheduler singleton.  <a href="#acb4f87f1831680d8d1b70e1bef06bb81">More...</a><br /></td></tr>
 <tr class="separator:acb4f87f1831680d8d1b70e1bef06bb81"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -217,7 +217,7 @@ Static Public Member Functions</h2></td></tr>
 <p>Access the scheduler singleton. </p>
 <dl class="section return"><dt>Returns</dt><dd>A reference to the scheduler object. </dd></dl>
 
-<p>Referenced by <a class="el" href="_alex_net_network_8h_source.xhtml#l00057">AlexNetNetwork&lt; ITensorType, TensorType, SubTensorType, arm_compute::test::Accessor, ActivationLayerFunction, ConvolutionLayerFunction, DirectConvolutionLayerFunction, FullyConnectedLayerFunction, NormalizationLayerFunction, PoolingLayerFunction, SoftmaxLayerFunction &gt;::init()</a>, <a class="el" href="main_8cpp_source.xhtml#l00063">main()</a>, and <a class="el" href="validation_2fixtures_2_convolution_layer_fixture_8h_source.xhtml#l00057">ConvolutionValidationGenericFixture&lt; TensorType, AccessorType, FunctionType, T &gt;::setup()</a>.</p>
+<p>Referenced by <a class="el" href="_alex_net_network_8h_source.xhtml#l00057">AlexNetNetwork&lt; ITensorType, TensorType, SubTensorType, arm_compute::test::Accessor, ActivationLayerFunction, ConvolutionLayerFunction, DirectConvolutionLayerFunction, FullyConnectedLayerFunction, NormalizationLayerFunction, PoolingLayerFunction, SoftmaxLayerFunction &gt;::init()</a>, <a class="el" href="main_8cpp_source.xhtml#l00063">main()</a>, <a class="el" href="validation_2fixtures_2_convolution_layer_fixture_8h_source.xhtml#l00057">ConvolutionValidationGenericFixture&lt; TensorType, AccessorType, FunctionType, T &gt;::setup()</a>, and <a class="el" href="_scheduler_timer_8cpp_source.xhtml#l00082">SchedulerTimer::start()</a>.</p>
 
 </div>
 </div>
@@ -244,6 +244,8 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Returns the type of the active scheduler. </p>
 <dl class="section return"><dt>Returns</dt><dd>The current scheduler's type. </dd></dl>
+
+<p>Referenced by <a class="el" href="_scheduler_timer_8cpp_source.xhtml#l00082">SchedulerTimer::start()</a>.</p>
 
 </div>
 </div>
@@ -275,7 +277,7 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="aa35fa7aa123444c798c28d4ac8fe7546"></a>
+<a class="anchor" id="a12775a7fbfa126fa4f9f06f8e02d9a8e"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -285,7 +287,7 @@ Static Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">static void set </td>
           <td>(</td>
-          <td class="paramtype">std::shared_ptr&lt; <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml">IScheduler</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">std::shared_ptr&lt; <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml">IScheduler</a> &gt;&#160;</td>
           <td class="paramname"><em>scheduler</em></td><td>)</td>
           <td></td>
         </tr>
@@ -304,6 +306,8 @@ Static Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+<p>Referenced by <a class="el" href="_scheduler_timer_8cpp_source.xhtml#l00082">SchedulerTimer::start()</a>, and <a class="el" href="_scheduler_timer_8cpp_source.xhtml#l00096">SchedulerTimer::stop()</a>.</p>
 
 </div>
 </div>
@@ -349,7 +353,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_scheduler.xhtml">Scheduler</a></li>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:46 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:25 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

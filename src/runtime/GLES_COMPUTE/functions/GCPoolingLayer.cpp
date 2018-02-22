@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,9 +25,16 @@
 
 #include "arm_compute/core/GLES_COMPUTE/IGCTensor.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCPoolingLayerKernel.h"
+#include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
+
 #include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
+
+GCPoolingLayer::GCPoolingLayer()
+    : _kernel(nullptr), _border_handler(), _shift_handler()
+{
+}
 
 void GCPoolingLayer::configure(IGCTensor *input, IGCTensor *output, const PoolingLayerInfo &pool_info)
 {
@@ -39,9 +46,20 @@ void GCPoolingLayer::configure(IGCTensor *input, IGCTensor *output, const Poolin
     // Configure border depending on operation required
     BorderMode border_mode = (PoolingType::MAX == pool_info.pool_type()) ? BorderMode::REPLICATE : BorderMode::CONSTANT;
     _border_handler.configure(input, _kernel->border_size(), border_mode, PixelValue(0.0f));
+
+    _shift_handler.configure(input);
 }
 
 Status GCPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
 {
     return GCPoolingLayerKernel::validate(input, output, pool_info);
+}
+
+void GCPoolingLayer::run()
+{
+    GCScheduler::get().dispatch(_shift_handler, false);
+    GCScheduler::get().memory_barrier();
+    GCScheduler::get().dispatch(_border_handler, false);
+    GCScheduler::get().memory_barrier();
+    GCScheduler::get().dispatch(*_kernel);
 }

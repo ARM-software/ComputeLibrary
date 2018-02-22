@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -123,12 +123,24 @@ $(document).ready(function(){initNavTree('namespacearm__compute_1_1detail.xhtml'
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Data Structures</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1detail_1_1brelu.xhtml">brelu</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bounded RELU activation object.  <a href="structarm__compute_1_1detail_1_1brelu.xhtml#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1detail_1_1compare__dimension.xhtml">compare_dimension</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Functor to compare two <a class="el" href="classarm__compute_1_1_dimensions.xhtml">Dimensions</a> objects and throw an error on mismatch.  <a href="classarm__compute_1_1detail_1_1compare__dimension.xhtml#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1detail_1_1dummy.xhtml">dummy</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dummy activation object.  <a href="structarm__compute_1_1detail_1_1dummy.xhtml#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1detail_1_1get__tensor__info__t.xhtml">get_tensor_info_t</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1detail_1_1get__tensor__info__t_3_01_i_tensor_info_01_5_01_4.xhtml">get_tensor_info_t&lt; ITensorInfo * &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1detail_1_1lubrelu.xhtml">lubrelu</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lower-Upper Bounded RELU activation object.  <a href="structarm__compute_1_1detail_1_1lubrelu.xhtml#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1detail_1_1relu.xhtml">relu</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">RELU activation object.  <a href="structarm__compute_1_1detail_1_1relu.xhtml#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
@@ -1720,7 +1732,7 @@ Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_validate_8h_source.xhtml#l00051">51</a> of file <a class="el" href="_validate_8h_source.xhtml">Validate.h</a>.</p>
 
-<p>Referenced by <a class="el" href="_validate_8h_source.xhtml#l00321">arm_compute::error_on_mismatching_shapes()</a>, and <a class="el" href="_validate_8h_source.xhtml#l00084">compare_dimension&lt; T &gt;::operator()()</a>.</p>
+<p>Referenced by <a class="el" href="_validate_8h_source.xhtml#l00353">arm_compute::error_on_mismatching_shapes()</a>, <a class="el" href="_validate_8h_source.xhtml#l00286">arm_compute::error_on_tensors_not_even()</a>, and <a class="el" href="_validate_8h_source.xhtml#l00084">compare_dimension&lt; T &gt;::operator()()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;{</div><div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> i = upper_dim; i &lt; arm_compute::Dimensions&lt;T&gt;::num_max_dimensions; ++i)</div><div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    {</div><div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;        <span class="keywordflow">if</span>(dim1[i] != dim2[i])</div><div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        {</div><div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div><div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        }</div><div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    }</div><div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;</div><div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div><div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
@@ -2367,7 +2379,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1detail.xhtml">detail</a></li>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:46 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:25 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

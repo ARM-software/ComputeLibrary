@@ -7,7 +7,7 @@ var classarm__compute_1_1_dimensions =
     [ "begin", "classarm__compute_1_1_dimensions.xhtml#aeade0eaf149acac842e98d99d37e39c7", null ],
     [ "cbegin", "classarm__compute_1_1_dimensions.xhtml#a4498730adaf901d945c12841df994bba", null ],
     [ "cend", "classarm__compute_1_1_dimensions.xhtml#adf9b6d55d708c285d58511a780e937fc", null ],
-    [ "collapse", "classarm__compute_1_1_dimensions.xhtml#a8e15e87871211f98c2b566137e38ef99", null ],
+    [ "collapse", "classarm__compute_1_1_dimensions.xhtml#a0c265a91027decdda59e5086c550d0f7", null ],
     [ "collapse_from", "classarm__compute_1_1_dimensions.xhtml#a112cc1d5093b7672bf11569659251a7c", null ],
     [ "end", "classarm__compute_1_1_dimensions.xhtml#ac684b52c6197edff9cccb3abd1e41f59", null ],
     [ "end", "classarm__compute_1_1_dimensions.xhtml#a819e633cd63b404cf9938bc6e755c170", null ],

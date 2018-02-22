@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,9 +37,10 @@ GCBatchNormalizationLayer::GCBatchNormalizationLayer()
 {
 }
 
-void GCBatchNormalizationLayer::configure(const IGCTensor *input, IGCTensor *output, const IGCTensor *mean, const IGCTensor *var, const IGCTensor *beta, const IGCTensor *gamma, float epsilon)
+void GCBatchNormalizationLayer::configure(const IGCTensor *input, IGCTensor *output, const IGCTensor *mean, const IGCTensor *var, const IGCTensor *beta, const IGCTensor *gamma, float epsilon,
+                                          ActivationLayerInfo act_info)
 {
-    _norm_kernel.configure(input, output, mean, var, beta, gamma, epsilon);
+    _norm_kernel.configure(input, output, mean, var, beta, gamma, epsilon, act_info);
 }
 
 void GCBatchNormalizationLayer::run()

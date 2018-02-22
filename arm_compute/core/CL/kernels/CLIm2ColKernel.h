@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,11 +25,11 @@
 #define __ARM_COMPUTE_CLIM2COLKERNEL_H__
 
 #include "arm_compute/core/CL/ICLKernel.h"
+#include "arm_compute/core/Size2D.h"
 
 namespace arm_compute
 {
 class ICLTensor;
-class Size2D;
 
 /** Interface for the im2col reshape kernel.
  *
@@ -77,9 +77,6 @@ public:
      * @param[in]  has_bias    In case biases are provided expands the matrix with 1.
      */
     void configure(const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias);
-
-    // Inherited methods overridden:
-    void run(const Window &window, cl::CommandQueue &queue) override;
     /** Static function to check if given info will lead to a valid configuration of @ref CLIm2ColKernel
      *
      * @param[in] input       The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
@@ -93,6 +90,9 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias);
+
+    // Inherited methods overridden:
+    void run(const Window &window, cl::CommandQueue &queue) override;
 
 private:
     /** Run the reshape kernel optimised for the special case (stride is 1, padding is 0 and kernel's low 3 dimensions are same as input)
@@ -117,6 +117,7 @@ private:
     std::pair<unsigned int, unsigned int> _convolved_dims;
     unsigned int   _num_elems_processed_per_iteration;
     Im2ColFunction _run_func;
+    Size2D         _kernel_dims;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLIM2COLKERNEL_H__ */

@@ -16,6 +16,7 @@ var tests_2_utils_8h =
     [ "promote_t", "tests_2_utils_8h.xhtml#ac20ca549fa27b2eed44367745055a233", null ],
     [ "coord2index", "tests_2_utils_8h.xhtml#a9be4cb7e6ee20063a4a10bc3abb750b9", null ],
     [ "create_HOG", "tests_2_utils_8h.xhtml#ac0cf6098a0e58cdfb4483dfa9347bfc0", null ],
+    [ "create_multi_image", "tests_2_utils_8h.xhtml#a764bac61748afaf8fd0468b2a4cb09be", null ],
     [ "create_tensor", "tests_2_utils_8h.xhtml#a316948014329b50b11a302305a6ab3ab", null ],
     [ "create_tensor", "tests_2_utils_8h.xhtml#a1a1319867418814820134ec77cf09eed", null ],
     [ "fill_array", "tests_2_utils_8h.xhtml#ac35e7a1ad467f5fe8620cbbc5793d53b", null ],

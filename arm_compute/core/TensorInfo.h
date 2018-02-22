@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -217,9 +217,9 @@ public:
     ITensorInfo &set_data_type(DataType data_type) override;
     ITensorInfo &set_num_channels(int num_channels) override;
     ITensorInfo &set_format(Format format) override;
-    ITensorInfo &set_tensor_shape(TensorShape shape) override;
+    ITensorInfo &set_tensor_shape(const TensorShape &shape) override;
     ITensorInfo &set_fixed_point_position(int fixed_point_position) override;
-    ITensorInfo &set_quantization_info(QuantizationInfo quantization_info) override;
+    ITensorInfo &set_quantization_info(const QuantizationInfo &quantization_info) override;
     ITensorInfo &reset_padding() override;
     bool         auto_padding() override;
     bool extend_padding(const PaddingSize &padding) override;
@@ -289,9 +289,9 @@ public:
     {
         return _valid_region;
     }
-    void set_valid_region(ValidRegion valid_region) override
+    void set_valid_region(const ValidRegion &valid_region) override
     {
-        _valid_region = std::move(valid_region);
+        _valid_region = valid_region;
     }
     QuantizationInfo quantization_info() const override
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,8 +58,10 @@ void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<T> &weights, co
     const TB *b_ptr   = bias.data() + b_offset;
     T        *out_ptr = out.data() + o_offset;
 
-    const int half_width_weights  = width_weights / 2;
-    const int half_height_weights = height_weights / 2;
+    const int half_width_weights_start  = width_weights / 2;
+    const int half_width_weights_end    = ((width_weights % 2) == 0) ? (half_width_weights_start - 1) : half_width_weights_start;
+    const int half_height_weights_start = height_weights / 2;
+    const int half_height_weights_end   = ((height_weights % 2) == 0) ? (half_height_weights_start - 1) : half_height_weights_start;
 
     // Reset accumulator
     T acc(0);
@@ -71,15 +73,15 @@ void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<T> &weights, co
         const int offset_slice_in = xi + yi * width_in + ifm * width_in * height_in;
 
         // Compute 2D convolution
-        for(int yk = -half_height_weights; yk <= half_height_weights; ++yk)
+        for(int yk = -half_height_weights_start; yk <= half_height_weights_end; ++yk)
         {
-            for(int xk = -half_width_weights; xk <= half_width_weights; ++xk)
+            for(int xk = -half_width_weights_start; xk <= half_width_weights_end; ++xk)
             {
                 // Check if the pixel is out-of-bound
                 if(is_valid_pixel(xi + xk, 0, width_in) && is_valid_pixel(yi + yk, 0, height_in))
                 {
-                    const int idx = xk + half_width_weights;
-                    const int idy = yk + half_height_weights;
+                    const int idx = xk + half_width_weights_start;
+                    const int idy = yk + half_height_weights_start;
 
                     const T i_value = in_ptr[offset_slice_in + xk + yk * width_in];
                     const T w_value = w_ptr[idx + idy * width_weights + ifm * width_weights * height_weights];
@@ -106,8 +108,10 @@ void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<T> &weights, co
     T       *out_ptr              = out.data() + o_offset;
     int      fixed_point_position = in.fixed_point_position();
 
-    const int half_width_weights  = width_weights / 2;
-    const int half_height_weights = height_weights / 2;
+    const int half_width_weights_start  = width_weights / 2;
+    const int half_width_weights_end    = ((width_weights % 2) == 0) ? (half_width_weights_start - 1) : half_width_weights_start;
+    const int half_height_weights_start = height_weights / 2;
+    const int half_height_weights_end   = ((height_weights % 2) == 0) ? (half_height_weights_start - 1) : half_height_weights_start;
 
     using namespace fixed_point_arithmetic;
     using promoted_type = fixed_point_arithmetic::traits::promote_t<T>;
@@ -122,15 +126,15 @@ void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<T> &weights, co
         const int offset_slice_in = xi + yi * width_in + ifm * width_in * height_in;
 
         // Compute 2D convolution
-        for(int yk = -half_height_weights; yk <= half_height_weights; ++yk)
+        for(int yk = -half_height_weights_start; yk <= half_height_weights_end; ++yk)
         {
-            for(int xk = -half_width_weights; xk <= half_width_weights; ++xk)
+            for(int xk = -half_width_weights_start; xk <= half_width_weights_end; ++xk)
             {
                 // Check if the pixel is out-of-bound
                 if(is_valid_pixel(xi + xk, 0, width_in) && is_valid_pixel(yi + yk, 0, height_in))
                 {
-                    const int idx = xk + half_width_weights;
-                    const int idy = yk + half_height_weights;
+                    const int idx = xk + half_width_weights_start;
+                    const int idy = yk + half_height_weights_start;
 
                     const fixed_point<promoted_type> i_value(in_ptr[offset_slice_in + xk + yk * width_in], fixed_point_position, true);
                     const fixed_point<promoted_type> w_value(w_ptr[idx + idy * width_weights + ifm * width_weights * height_weights], fixed_point_position, true);
@@ -173,8 +177,10 @@ void convolution3d(const SimpleTensor<uint8_t> &in, const SimpleTensor<uint8_t> 
     const float multiplier        = input_scale * weights_scale / output_scale;
     arm_compute::quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
 
-    const int half_width_weights  = width_weights / 2;
-    const int half_height_weights = height_weights / 2;
+    const int half_width_weights_start  = width_weights / 2;
+    const int half_width_weights_end    = ((width_weights % 2) == 0) ? (half_width_weights_start - 1) : half_width_weights_start;
+    const int half_height_weights_start = height_weights / 2;
+    const int half_height_weights_end   = ((height_weights % 2) == 0) ? (half_height_weights_start - 1) : half_height_weights_start;
 
     // Reset accumulator
     int32_t acc(0);
@@ -186,15 +192,15 @@ void convolution3d(const SimpleTensor<uint8_t> &in, const SimpleTensor<uint8_t> 
         const int offset_slice_in = xi + yi * width_in + ifm * width_in * height_in;
 
         // Compute 2D convolution
-        for(int yk = -half_height_weights; yk <= half_height_weights; ++yk)
+        for(int yk = -half_height_weights_start; yk <= half_height_weights_end; ++yk)
         {
-            for(int xk = -half_width_weights; xk <= half_width_weights; ++xk)
+            for(int xk = -half_width_weights_start; xk <= half_width_weights_end; ++xk)
             {
                 // Check if the pixel is out-of-bound
                 if(is_valid_pixel(xi + xk, 0, width_in) && is_valid_pixel(yi + yk, 0, height_in))
                 {
-                    const int idx = xk + half_width_weights;
-                    const int idy = yk + half_height_weights;
+                    const int idx = xk + half_width_weights_start;
+                    const int idy = yk + half_height_weights_start;
 
                     const uint8_t i_value = in_ptr[offset_slice_in + xk + yk * width_in];
                     const uint8_t w_value = w_ptr[idx + idy * width_weights + ifm * width_weights * height_weights];
@@ -233,17 +239,17 @@ SimpleTensor<T> convolution_layer(const SimpleTensor<T> &src, const SimpleTensor
     const int width_weights  = weights.shape().x();
     const int height_weights = weights.shape().y();
     const int depth_weights  = weights.shape().z();
-    const int pad_left       = std::min(static_cast<int>(info.pad_left()), width_weights / 2);
-    const int pad_top        = std::min(static_cast<int>(info.pad_top()), height_weights / 2);
-    const int pad_right      = std::min(static_cast<int>(info.pad_right()), width_weights / 2);
-    const int pad_bottom     = std::min(static_cast<int>(info.pad_bottom()), height_weights / 2);
+    const int pad_left       = info.pad_left();
+    const int pad_top        = info.pad_top();
+    const int stride_xi      = info.stride().first;
+    const int stride_yi      = info.stride().second;
+
+    auto output_wh = scaled_dimensions(width_in, height_in, width_weights, height_weights, info);
 
     const int start_xi    = width_weights / 2 - pad_left;
     const int start_yi    = height_weights / 2 - pad_top;
-    const int end_xi      = width_in + pad_left - width_weights / 2 + pad_right - width_weights / 2;
-    const int end_yi      = height_in + pad_top - height_weights / 2 + pad_bottom - height_weights / 2;
-    const int stride_xi   = info.stride().first;
-    const int stride_yi   = info.stride().second;
+    const int end_xi      = output_wh.first * stride_xi;
+    const int end_yi      = output_wh.second * stride_yi;
     const int num_batches = src.shape().total_size() / (width_in * height_in * depth_in);
 
     for(int r = 0; r < num_batches; ++r)

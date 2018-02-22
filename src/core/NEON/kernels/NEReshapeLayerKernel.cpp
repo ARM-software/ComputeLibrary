@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,7 +46,6 @@ inline void reshape_tensor(const Window &window, const ITensor *input, ITensor *
     const TensorShape &output_shape = output->info()->tensor_shape();
     Coordinates        output_coord{};
 
-    window.collapse_if_possible(window, 3);
     Iterator in(input, window);
 
     execute_window_loop(window, [&](const Coordinates & id)

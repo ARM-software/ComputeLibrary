@@ -5,6 +5,7 @@ var utils_2_utils_8h =
     [ "NPYLoader", "classarm__compute_1_1utils_1_1_n_p_y_loader.xhtml", "classarm__compute_1_1utils_1_1_n_p_y_loader" ],
     [ "draw_detection_rectangle", "utils_2_utils_8h.xhtml#ad1b5373f466a3945e1f0ef1c9943c357", null ],
     [ "fill_random_tensor", "utils_2_utils_8h.xhtml#abe777f4e6d2b0d9964eee32f5ae3fca7", null ],
+    [ "get_mem_free_from_meminfo", "utils_2_utils_8h.xhtml#afb7b08e5c044dba650037628089a4e7c", null ],
     [ "get_typestring", "utils_2_utils_8h.xhtml#a7990fd2b875e2f6d4c1eded54539cb19", null ],
     [ "init_sgemm_output", "utils_2_utils_8h.xhtml#a3ff90da00700526d89a0ee29f85fd804", null ],
     [ "load_trained_data", "utils_2_utils_8h.xhtml#af214346f90d640ac468dd90fa2a275cc", null ],

@@ -38,7 +38,7 @@
 using namespace arm_compute;
 
 GCDepthConcatenateLayerKernel::GCDepthConcatenateLayerKernel()
-    : _input(nullptr), _output(nullptr), _top_bottom(0), _left_right(0)
+    : _input(nullptr), _output(nullptr), _top_bottom(0), _left_right(0), _depth_offset(0)
 {
 }
 
@@ -61,8 +61,9 @@ void GCDepthConcatenateLayerKernel::configure(const IGCTensor *input, unsigned i
     ARM_COMPUTE_ERROR_ON((output->info()->dimension(0) - input->info()->dimension(0)) % 2);
     ARM_COMPUTE_ERROR_ON((output->info()->dimension(1) - input->info()->dimension(1)) % 2);
 
-    _input  = input;
-    _output = output;
+    _input        = input;
+    _output       = output;
+    _depth_offset = depth_offset;
 
     // Add build options
     std::set<std::string> build_opts;
@@ -76,11 +77,8 @@ void GCDepthConcatenateLayerKernel::configure(const IGCTensor *input, unsigned i
     _left_right = (output->info()->dimension(0) - input->info()->dimension(0)) / 2;
     _top_bottom = (output->info()->dimension(1) - input->info()->dimension(1)) / 2;
 
-    const int offset_to_first_elements_in_bytes = depth_offset * output->info()->strides_in_bytes()[2];
-
-    build_opts.emplace("#define OFFSETS_X " + support::cpp11::to_string(_left_right));
-    build_opts.emplace("#define OFFSETS_Y " + support::cpp11::to_string(_top_bottom));
-    build_opts.emplace("#define OFFSETS_Z " + support::cpp11::to_string(offset_to_first_elements_in_bytes));
+    build_opts.emplace("#define OFFSET_X " + support::cpp11::to_string(_left_right));
+    build_opts.emplace("#define OFFSET_Y " + support::cpp11::to_string(_top_bottom));
 
     // Create kernel
     _kernel = static_cast<GCKernel>(GCKernelLibrary::get().create_kernel("concatenate_depth", build_opts));
@@ -118,17 +116,24 @@ void GCDepthConcatenateLayerKernel::run(const Window &window)
 
     _kernel.use();
 
-    Window slice = window.first_slice_window_3D();
+    _output->set_needs_shifting(true);
+
+    Window slice     = window.first_slice_window_3D();
+    Window slice_in  = window.first_slice_window_3D();
+    Window slice_out = window.first_slice_window_3D();
+
+    slice.shift(Window::DimX, -(_output->info()->padding()).left);
+    slice_out.set(Window::DimZ, Window::Dimension(_depth_offset));
 
     do
     {
         unsigned int idx = 0;
-        add_3D_tensor_argument(idx, _input, 1, slice);
-        add_3D_tensor_argument(idx, _output, 2, slice);
+        add_3D_tensor_argument(idx, _input, 1, slice_in);
+        add_3D_tensor_argument(idx, _output, 2, slice_out);
 
         _kernel.update_shader_params();
 
         enqueue(*this, slice);
     }
-    while(window.slide_window_slice_3D(slice));
+    while(window.slide_window_slice_3D(slice) && window.slide_window_slice_3D(slice_in));
 }

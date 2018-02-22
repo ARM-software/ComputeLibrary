@@ -47,8 +47,10 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QASYMM8, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->data_type() == DataType::QASYMM8) && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU),
-                                    "For QASYMM8 only lower/upper bounded relu is supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->data_type() == DataType::QASYMM8) && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
+                                    && (act_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
+                                    && (act_info.activation() != ActivationLayerInfo::ActivationFunction::RELU),
+                                    "For QASYMM8 only relu, lower bounded relu and lower-upper bounded relu are supported");
 
     // Checks performed when output is configured
     if((output != nullptr) && (output->total_size() != 0))
@@ -94,13 +96,15 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 } // namespace
 
 CLActivationLayerKernel::CLActivationLayerKernel()
-    : _input(nullptr), _output(nullptr)
+    : _input(nullptr), _output(nullptr), _run_in_place(false)
 {
 }
 
 void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, ActivationLayerInfo act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input);
+
+    _run_in_place = (output == nullptr) || (output == input);
 
     if(output != nullptr)
     {
@@ -145,12 +149,15 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
         build_opts.emplace(("-DA_VAL=" + support::cpp11::to_string(a_const_int)));
         build_opts.emplace(("-DB_VAL=" + support::cpp11::to_string(b_const_int)));
 
+        const int o1 = input->info()->quantization_info().offset;
+        // Quantized value of 0 corresponds to the offset o1
+        build_opts.emplace(("-DCONST_0=" + support::cpp11::to_string(o1)));
+
         // Set scale and offset of the input and output if they have different quantization info
         if(is_data_type_quantized_asymmetric(dt) && output != nullptr)
         {
             const float s1 = input->info()->quantization_info().scale;
             const float s2 = output->info()->quantization_info().scale;
-            const int   o1 = input->info()->quantization_info().offset;
             const int   o2 = output->info()->quantization_info().offset;
 
             if(o1 != o2 || s1 != s2)
@@ -168,7 +175,7 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
         build_opts.emplace(("-DB_VAL=" + float_to_string_with_full_precision(b_const)));
     }
 
-    build_opts.emplace(output == nullptr ? "-DIN_PLACE" : "");
+    build_opts.emplace((_run_in_place) ? "-DIN_PLACE" : "");
     if(is_data_type_fixed_point(dt))
     {
         build_opts.emplace(("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(fixed_point_position)));
@@ -183,7 +190,7 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
     _output = output;
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), (output == nullptr) ? nullptr : output->info());
+    auto win_config = validate_and_configure_window(input->info(), (_run_in_place) ? nullptr : output->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure(win_config.second);
 
@@ -198,8 +205,9 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
 
 Status CLActivationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
+    const bool run_in_place = (output == nullptr) || (output == input);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, act_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), (output == nullptr) ? nullptr : output->clone().get()).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), (run_in_place) ? nullptr : output->clone().get()).first);
 
     return Status{};
 }
@@ -216,7 +224,7 @@ void CLActivationLayerKernel::run(const Window &window, cl::CommandQueue &queue)
     {
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice);
-        if(_output != nullptr)
+        if(!_run_in_place)
         {
             add_3D_tensor_argument(idx, _output, slice);
         }

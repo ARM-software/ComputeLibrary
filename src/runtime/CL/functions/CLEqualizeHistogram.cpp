@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,7 +68,7 @@ void calculate_cum_dist_and_lut(CLDistribution1D &dist, CLDistribution1D &cum_di
     }
     else
     {
-        const float diff = image_size - num_lowest_pixels;
+        const float diff = image_size - 1;
 
         for(size_t i = 0; i < 256; ++i)
         {

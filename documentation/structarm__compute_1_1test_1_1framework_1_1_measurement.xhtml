@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -136,6 +136,9 @@ Data Structures</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:a3f3a36d64956cb0978a07c53fb44d974"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1test_1_1framework_1_1_measurement.xhtml#a3f3a36d64956cb0978a07c53fb44d974">operator&lt;</a> (const <a class="el" href="structarm__compute_1_1test_1_1framework_1_1_measurement.xhtml">Measurement</a> &amp;b) const </td></tr>
+<tr class="memdesc:a3f3a36d64956cb0978a07c53fb44d974"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compare the stored value with another value.  <a href="#a3f3a36d64956cb0978a07c53fb44d974">More...</a><br /></td></tr>
+<tr class="separator:a3f3a36d64956cb0978a07c53fb44d974"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2ccc04c46bf09fcd434dc103f8ca9b2b"><td class="memTemplParams" colspan="2">template&lt;typename Floating , typename std::enable_if&lt; !std::is_integral&lt; Floating &gt;::value, int &gt;::type  = 0&gt; </td></tr>
 <tr class="memitem:a2ccc04c46bf09fcd434dc103f8ca9b2b"><td class="memTemplItemLeft" align="right" valign="top">&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1test_1_1framework_1_1_measurement.xhtml#a2ccc04c46bf09fcd434dc103f8ca9b2b">Measurement</a> (Floating v, std::string <a class="el" href="structarm__compute_1_1test_1_1framework_1_1_measurement.xhtml#a17407369cfeffaf5df87ff044e43af82">unit</a>, std::list&lt; std::string &gt; raw={})</td></tr>
 <tr class="memdesc:a2ccc04c46bf09fcd434dc103f8ca9b2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor to store a floating point value.  <a href="#a2ccc04c46bf09fcd434dc103f8ca9b2b">More...</a><br /></td></tr>
@@ -213,13 +216,13 @@ Friends</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_measurement_8h_source.xhtml#l00228">228</a> of file <a class="el" href="_measurement_8h_source.xhtml">Measurement.h</a>.</p>
+<p>Definition at line <a class="el" href="_measurement_8h_source.xhtml#l00239">239</a> of file <a class="el" href="_measurement_8h_source.xhtml">Measurement.h</a>.</p>
 
 <p>References <a class="el" href="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a63d8879fa76962b7d0e6cb0364be2e34">Measurement::Value::v</a>, and <a class="el" href="hwc_8hpp_source.xhtml#l00278">value</a>.</p>
-<div class="fragment"><div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;                                                                     {})</div><div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;        : _unit(<a class="code" href="structarm__compute_1_1test_1_1framework_1_1_measurement.xhtml#a17407369cfeffaf5df87ff044e43af82">unit</a>), _raw_data(std::move(raw)), _value(<span class="keyword">true</span>)</div><div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;    {</div><div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;        _value.<a class="code" href="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a63d8879fa76962b7d0e6cb0364be2e34">v</a>.<a class="code" href="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#ab32110eb040749e72f53d1a7ee30c25b">floating_point</a> = <span class="keyword">static_cast&lt;</span><span class="keywordtype">double</span><span class="keyword">&gt;</span>(v);</div><div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;        <span class="keywordflow">if</span>(_raw_data.empty())</div><div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;        {</div><div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;            _raw_data = { _value.<a class="code" href="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#aa48c39f92bc04eded742f5310c74aafe">to_string</a>() };</div><div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;        }</div><div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;    }</div><div class="ttc" id="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value_xhtml_ab32110eb040749e72f53d1a7ee30c25b"><div class="ttname"><a href="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#ab32110eb040749e72f53d1a7ee30c25b">arm_compute::test::framework::Measurement::Value::floating_point</a></div><div class="ttdeci">double floating_point</div><div class="ttdef"><b>Definition:</b> <a href="_measurement_8h_source.xhtml#l00205">Measurement.h:205</a></div></div>
+<div class="fragment"><div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;                                                                     {})</div><div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;        : _unit(<a class="code" href="structarm__compute_1_1test_1_1framework_1_1_measurement.xhtml#a17407369cfeffaf5df87ff044e43af82">unit</a>), _raw_data(std::move(raw)), _value(<span class="keyword">true</span>)</div><div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;    {</div><div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;        _value.<a class="code" href="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a63d8879fa76962b7d0e6cb0364be2e34">v</a>.<a class="code" href="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#ab32110eb040749e72f53d1a7ee30c25b">floating_point</a> = <span class="keyword">static_cast&lt;</span><span class="keywordtype">double</span><span class="keyword">&gt;</span>(v);</div><div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;        <span class="keywordflow">if</span>(_raw_data.empty())</div><div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;        {</div><div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;            _raw_data = { _value.<a class="code" href="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#aa48c39f92bc04eded742f5310c74aafe">to_string</a>() };</div><div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;        }</div><div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;    }</div><div class="ttc" id="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value_xhtml_ab32110eb040749e72f53d1a7ee30c25b"><div class="ttname"><a href="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#ab32110eb040749e72f53d1a7ee30c25b">arm_compute::test::framework::Measurement::Value::floating_point</a></div><div class="ttdeci">double floating_point</div><div class="ttdef"><b>Definition:</b> <a href="_measurement_8h_source.xhtml#l00205">Measurement.h:205</a></div></div>
 <div class="ttc" id="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value_xhtml_a63d8879fa76962b7d0e6cb0364be2e34"><div class="ttname"><a href="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a63d8879fa76962b7d0e6cb0364be2e34">arm_compute::test::framework::Measurement::Value::v</a></div><div class="ttdeci">union arm_compute::test::framework::Measurement::Value::@8 v</div><div class="ttdoc">Stored value. </div></div>
 <div class="ttc" id="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value_xhtml_aa48c39f92bc04eded742f5310c74aafe"><div class="ttname"><a href="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#aa48c39f92bc04eded742f5310c74aafe">arm_compute::test::framework::Measurement::Value::to_string</a></div><div class="ttdeci">std::string to_string() const </div><div class="ttdoc">Convert the value stored to string. </div><div class="ttdef"><b>Definition:</b> <a href="_measurement_8h_source.xhtml#l00070">Measurement.h:70</a></div></div>
-<div class="ttc" id="structarm__compute_1_1test_1_1framework_1_1_measurement_xhtml_a17407369cfeffaf5df87ff044e43af82"><div class="ttname"><a href="structarm__compute_1_1test_1_1framework_1_1_measurement.xhtml#a17407369cfeffaf5df87ff044e43af82">arm_compute::test::framework::Measurement::unit</a></div><div class="ttdeci">const std::string &amp; unit() const </div><div class="ttdoc">Accessor for the unit of the measurement. </div><div class="ttdef"><b>Definition:</b> <a href="_measurement_8h_source.xhtml#l00259">Measurement.h:259</a></div></div>
+<div class="ttc" id="structarm__compute_1_1test_1_1framework_1_1_measurement_xhtml_a17407369cfeffaf5df87ff044e43af82"><div class="ttname"><a href="structarm__compute_1_1test_1_1framework_1_1_measurement.xhtml#a17407369cfeffaf5df87ff044e43af82">arm_compute::test::framework::Measurement::unit</a></div><div class="ttdeci">const std::string &amp; unit() const </div><div class="ttdoc">Accessor for the unit of the measurement. </div><div class="ttdef"><b>Definition:</b> <a href="_measurement_8h_source.xhtml#l00270">Measurement.h:270</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -271,17 +274,55 @@ Friends</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_measurement_8h_source.xhtml#l00245">245</a> of file <a class="el" href="_measurement_8h_source.xhtml">Measurement.h</a>.</p>
+<p>Definition at line <a class="el" href="_measurement_8h_source.xhtml#l00256">256</a> of file <a class="el" href="_measurement_8h_source.xhtml">Measurement.h</a>.</p>
 
 <p>References <a class="el" href="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a63d8879fa76962b7d0e6cb0364be2e34">Measurement::Value::v</a>.</p>
-<div class="fragment"><div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;                                                                    {})</div><div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;        : _unit(<a class="code" href="structarm__compute_1_1test_1_1framework_1_1_measurement.xhtml#a17407369cfeffaf5df87ff044e43af82">unit</a>), _raw_data(std::move(raw)), _value(<span class="keyword">false</span>)</div><div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;    {</div><div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;        _value.<a class="code" href="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a63d8879fa76962b7d0e6cb0364be2e34">v</a>.<a class="code" href="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a5283f2dae5da803262f8deb3c71525f0">integer</a> = <span class="keyword">static_cast&lt;</span><span class="keywordtype">long</span> <span class="keywordtype">long</span> <span class="keywordtype">int</span><span class="keyword">&gt;</span>(v);</div><div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;        <span class="keywordflow">if</span>(_raw_data.empty())</div><div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;        {</div><div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;            _raw_data = { _value.<a class="code" href="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#aa48c39f92bc04eded742f5310c74aafe">to_string</a>() };</div><div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;        }</div><div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;    }</div><div class="ttc" id="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value_xhtml_a63d8879fa76962b7d0e6cb0364be2e34"><div class="ttname"><a href="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a63d8879fa76962b7d0e6cb0364be2e34">arm_compute::test::framework::Measurement::Value::v</a></div><div class="ttdeci">union arm_compute::test::framework::Measurement::Value::@8 v</div><div class="ttdoc">Stored value. </div></div>
+<div class="fragment"><div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;                                                                    {})</div><div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;        : _unit(<a class="code" href="structarm__compute_1_1test_1_1framework_1_1_measurement.xhtml#a17407369cfeffaf5df87ff044e43af82">unit</a>), _raw_data(std::move(raw)), _value(<span class="keyword">false</span>)</div><div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;    {</div><div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;        _value.<a class="code" href="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a63d8879fa76962b7d0e6cb0364be2e34">v</a>.<a class="code" href="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a5283f2dae5da803262f8deb3c71525f0">integer</a> = <span class="keyword">static_cast&lt;</span><span class="keywordtype">long</span> <span class="keywordtype">long</span> <span class="keywordtype">int</span><span class="keyword">&gt;</span>(v);</div><div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;        <span class="keywordflow">if</span>(_raw_data.empty())</div><div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;        {</div><div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;            _raw_data = { _value.<a class="code" href="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#aa48c39f92bc04eded742f5310c74aafe">to_string</a>() };</div><div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;        }</div><div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;    }</div><div class="ttc" id="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value_xhtml_a63d8879fa76962b7d0e6cb0364be2e34"><div class="ttname"><a href="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a63d8879fa76962b7d0e6cb0364be2e34">arm_compute::test::framework::Measurement::Value::v</a></div><div class="ttdeci">union arm_compute::test::framework::Measurement::Value::@8 v</div><div class="ttdoc">Stored value. </div></div>
 <div class="ttc" id="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value_xhtml_a5283f2dae5da803262f8deb3c71525f0"><div class="ttname"><a href="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a5283f2dae5da803262f8deb3c71525f0">arm_compute::test::framework::Measurement::Value::integer</a></div><div class="ttdeci">long long int integer</div><div class="ttdef"><b>Definition:</b> <a href="_measurement_8h_source.xhtml#l00206">Measurement.h:206</a></div></div>
 <div class="ttc" id="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value_xhtml_aa48c39f92bc04eded742f5310c74aafe"><div class="ttname"><a href="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#aa48c39f92bc04eded742f5310c74aafe">arm_compute::test::framework::Measurement::Value::to_string</a></div><div class="ttdeci">std::string to_string() const </div><div class="ttdoc">Convert the value stored to string. </div><div class="ttdef"><b>Definition:</b> <a href="_measurement_8h_source.xhtml#l00070">Measurement.h:70</a></div></div>
-<div class="ttc" id="structarm__compute_1_1test_1_1framework_1_1_measurement_xhtml_a17407369cfeffaf5df87ff044e43af82"><div class="ttname"><a href="structarm__compute_1_1test_1_1framework_1_1_measurement.xhtml#a17407369cfeffaf5df87ff044e43af82">arm_compute::test::framework::Measurement::unit</a></div><div class="ttdeci">const std::string &amp; unit() const </div><div class="ttdoc">Accessor for the unit of the measurement. </div><div class="ttdef"><b>Definition:</b> <a href="_measurement_8h_source.xhtml#l00259">Measurement.h:259</a></div></div>
+<div class="ttc" id="structarm__compute_1_1test_1_1framework_1_1_measurement_xhtml_a17407369cfeffaf5df87ff044e43af82"><div class="ttname"><a href="structarm__compute_1_1test_1_1framework_1_1_measurement.xhtml#a17407369cfeffaf5df87ff044e43af82">arm_compute::test::framework::Measurement::unit</a></div><div class="ttdeci">const std::string &amp; unit() const </div><div class="ttdoc">Accessor for the unit of the measurement. </div><div class="ttdef"><b>Definition:</b> <a href="_measurement_8h_source.xhtml#l00270">Measurement.h:270</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a3f3a36d64956cb0978a07c53fb44d974"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool operator&lt; </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structarm__compute_1_1test_1_1framework_1_1_measurement.xhtml">Measurement</a> &amp;&#160;</td>
+          <td class="paramname"><em>b</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Compare the stored value with another value. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td><a class="el" href="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml">Value</a> to compare against</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The result of stored value &lt; b </dd></dl>
+
+<p>Definition at line <a class="el" href="_measurement_8h_source.xhtml#l00217">217</a> of file <a class="el" href="_measurement_8h_source.xhtml">Measurement.h</a>.</p>
+
+<p>References <a class="el" href="_measurement_8h_source.xhtml#l00288">Measurement::value()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;    {</div><div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;        <span class="keywordflow">return</span> _value &lt; <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7b8004eef325a40dd43eb80755610fff">b</a>.value();</div><div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a7b8004eef325a40dd43eb80755610fff"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a7b8004eef325a40dd43eb80755610fff">arm_compute::test::validation::b</a></div><div class="ttdeci">CLTensor b</div><div class="ttdef"><b>Definition:</b> <a href="validation_2_c_l_2_g_e_m_m_8cpp_source.xhtml#l00120">GEMM.cpp:120</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
 <a class="anchor" id="a0623ef2a13ff9b6728dff006ae6cbc47"></a>
 <div class="memitem">
 <div class="memproto">
@@ -306,8 +347,8 @@ Friends</h2></td></tr>
 <p><a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml" title="Accessor implementation for Tensor objects. ">Accessor</a> for the raw data. </p>
 <dl class="section return"><dt>Returns</dt><dd>The raw data </dd></dl>
 
-<p>Definition at line <a class="el" href="_measurement_8h_source.xhtml#l00268">268</a> of file <a class="el" href="_measurement_8h_source.xhtml">Measurement.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;    {</div><div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;        <span class="keywordflow">return</span> _raw_data;</div><div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;    }</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="_measurement_8h_source.xhtml#l00279">279</a> of file <a class="el" href="_measurement_8h_source.xhtml">Measurement.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;    {</div><div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;        <span class="keywordflow">return</span> _raw_data;</div><div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="a17407369cfeffaf5df87ff044e43af82"></a>
@@ -334,8 +375,10 @@ Friends</h2></td></tr>
 <p><a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml" title="Accessor implementation for Tensor objects. ">Accessor</a> for the unit of the measurement. </p>
 <dl class="section return"><dt>Returns</dt><dd>Unit of the measurement </dd></dl>
 
-<p>Definition at line <a class="el" href="_measurement_8h_source.xhtml#l00259">259</a> of file <a class="el" href="_measurement_8h_source.xhtml">Measurement.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;    {</div><div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;        <span class="keywordflow">return</span> _unit;</div><div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;    }</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="_measurement_8h_source.xhtml#l00270">270</a> of file <a class="el" href="_measurement_8h_source.xhtml">Measurement.h</a>.</p>
+
+<p>Referenced by <a class="el" href="_pretty_printer_8cpp_source.xhtml#l00119">PrettyPrinter::print_measurements()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;    {</div><div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;        <span class="keywordflow">return</span> _unit;</div><div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="a5a69ff08e2ead1fb8b4dbb15cbdf6a09"></a>
@@ -362,10 +405,10 @@ Friends</h2></td></tr>
 <p><a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml" title="Accessor implementation for Tensor objects. ">Accessor</a> for the stored value. </p>
 <dl class="section return"><dt>Returns</dt><dd>The stored value </dd></dl>
 
-<p>Definition at line <a class="el" href="_measurement_8h_source.xhtml#l00277">277</a> of file <a class="el" href="_measurement_8h_source.xhtml">Measurement.h</a>.</p>
+<p>Definition at line <a class="el" href="_measurement_8h_source.xhtml#l00288">288</a> of file <a class="el" href="_measurement_8h_source.xhtml">Measurement.h</a>.</p>
 
-<p>Referenced by <a class="el" href="_j_s_o_n_printer_8cpp_source.xhtml#l00172">JSONPrinter::print_measurements()</a>, and <a class="el" href="_pretty_printer_8cpp_source.xhtml#l00118">PrettyPrinter::print_measurements()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;    {</div><div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;        <span class="keywordflow">return</span> _value;</div><div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;    }</div></div><!-- fragment -->
+<p>Referenced by <a class="el" href="_instruments_stats_8cpp_source.xhtml#l00033">InstrumentsStats::InstrumentsStats()</a>, <a class="el" href="_measurement_8h_source.xhtml#l00217">Measurement::operator&lt;()</a>, and <a class="el" href="_pretty_printer_8cpp_source.xhtml#l00119">PrettyPrinter::print_measurements()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;    {</div><div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;        <span class="keywordflow">return</span> _value;</div><div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <h2 class="groupheader">Friends And Related Function Documentation</h2>
@@ -404,8 +447,8 @@ Friends</h2></td></tr>
 <p>Stream output operator to print the measurement. </p>
 <p>Prints value and unit. </p>
 
-<p>Definition at line <a class="el" href="_measurement_8h_source.xhtml#l00215">215</a> of file <a class="el" href="_measurement_8h_source.xhtml">Measurement.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;    {</div><div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;        os &lt;&lt; measurement._value &lt;&lt; <span class="stringliteral">&quot; &quot;</span> &lt;&lt; measurement._unit;</div><div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;        <span class="keywordflow">return</span> os;</div><div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;    }</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="_measurement_8h_source.xhtml#l00226">226</a> of file <a class="el" href="_measurement_8h_source.xhtml">Measurement.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;    {</div><div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;        os &lt;&lt; measurement._value &lt;&lt; <span class="stringliteral">&quot; &quot;</span> &lt;&lt; measurement._unit;</div><div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;        <span class="keywordflow">return</span> os;</div><div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
@@ -417,7 +460,7 @@ Friends</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test.xhtml">test</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test_1_1framework.xhtml">framework</a></li><li class="navelem"><a class="el" href="structarm__compute_1_1test_1_1framework_1_1_measurement.xhtml">Measurement</a></li>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:47 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:26 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

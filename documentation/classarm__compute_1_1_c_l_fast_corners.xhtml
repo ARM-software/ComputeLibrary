@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -144,9 +144,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a5376467035ae425342d9feb333452d07"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classarm__compute_1_1_c_l_fast_corners.xhtml">CLFastCorners</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_fast_corners.xhtml#a5376467035ae425342d9feb333452d07">operator=</a> (const <a class="el" href="classarm__compute_1_1_c_l_fast_corners.xhtml">CLFastCorners</a> &amp;)=delete</td></tr>
 <tr class="memdesc:a5376467035ae425342d9feb333452d07"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prevent instances of this class from being copied (As this class contains pointers)  <a href="#a5376467035ae425342d9feb333452d07">More...</a><br /></td></tr>
 <tr class="separator:a5376467035ae425342d9feb333452d07"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a25c563ab5edb7241d8f12406ed96b40c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_fast_corners.xhtml#a25c563ab5edb7241d8f12406ed96b40c">configure</a> (const <a class="el" href="namespacearm__compute.xhtml#aa80145f30ddae0c2ccbcaa910e3e71dd">ICLImage</a> *input, float threshold, bool nonmax_suppression, <a class="el" href="namespacearm__compute.xhtml#a55e1c5ed17b7ee3762198a38eb50650a">CLKeyPointArray</a> *corners, unsigned int *num_corners, <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327">BorderMode</a> border_mode, uint8_t constant_border_value=0)</td></tr>
-<tr class="memdesc:a25c563ab5edb7241d8f12406ed96b40c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the function's source, destination, conv and border_mode.  <a href="#a25c563ab5edb7241d8f12406ed96b40c">More...</a><br /></td></tr>
-<tr class="separator:a25c563ab5edb7241d8f12406ed96b40c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac519f19806984be1fddf6c04ea508626"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_fast_corners.xhtml#ac519f19806984be1fddf6c04ea508626">configure</a> (const <a class="el" href="namespacearm__compute.xhtml#aa80145f30ddae0c2ccbcaa910e3e71dd">ICLImage</a> *input, float threshold, bool nonmax_suppression, <a class="el" href="namespacearm__compute.xhtml#adb969f0e554bf563f2fa671399d59280">ICLKeyPointArray</a> *corners, unsigned int *num_corners, <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327">BorderMode</a> border_mode, uint8_t constant_border_value=0)</td></tr>
+<tr class="memdesc:ac519f19806984be1fddf6c04ea508626"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the function's source, destination, conv and border_mode.  <a href="#ac519f19806984be1fddf6c04ea508626">More...</a><br /></td></tr>
+<tr class="separator:ac519f19806984be1fddf6c04ea508626"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad1717410afd0be936c6213a63c8005fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_fast_corners.xhtml#ad1717410afd0be936c6213a63c8005fb">run</a> () override</td></tr>
 <tr class="memdesc:ad1717410afd0be936c6213a63c8005fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the kernels contained in the function.  <a href="#ad1717410afd0be936c6213a63c8005fb">More...</a><br /></td></tr>
 <tr class="separator:ad1717410afd0be936c6213a63c8005fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -211,7 +211,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a25c563ab5edb7241d8f12406ed96b40c"></a>
+<a class="anchor" id="ac519f19806984be1fddf6c04ea508626"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -236,7 +236,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="namespacearm__compute.xhtml#a55e1c5ed17b7ee3762198a38eb50650a">CLKeyPointArray</a> *&#160;</td>
+          <td class="paramtype"><a class="el" href="namespacearm__compute.xhtml#adb969f0e554bf563f2fa671399d59280">ICLKeyPointArray</a> *&#160;</td>
           <td class="paramname"><em>corners</em>, </td>
         </tr>
         <tr>
@@ -278,6 +278,8 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+<p>Referenced by <a class="el" href="_c_l_2_fast_corners_8cpp_source.xhtml#l00056">arm_compute::test::validation::DATA_TEST_CASE()</a>.</p>
 
 </div>
 </div>
@@ -353,7 +355,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_fast_corners.xhtml">CLFastCorners</a></li>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:44 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:23 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

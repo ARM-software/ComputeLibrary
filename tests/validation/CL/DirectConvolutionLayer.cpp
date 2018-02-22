@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,6 @@ namespace validation
 {
 namespace
 {
-// COMPMID-517 Invesitgate the mismatch to see whether it is a real bug
 RelativeTolerance<half>  tolerance_fp16(half(0.2)); /**< Tolerance for floating point tests */
 RelativeTolerance<float> tolerance_fp32(0.02f);     /**< Tolerance for floating point tests */
 constexpr float          tolerance_num = 0.07f;     /**< Tolerance number */
@@ -56,14 +55,14 @@ constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1); /**< Tolerance for qu
 const auto data = combine(datasets::SmallDirectConvolutionShapes(),
                           combine(framework::dataset::make("StrideX", 1, 3),
                                   combine(framework::dataset::make("StrideY", 1, 3),
-                                          combine(concat(combine(framework::dataset::make("PadX", 0),
-                                                                 combine(framework::dataset::make("PadY", 0),
+                                          combine(concat(combine(framework::dataset::make("PadX", 0, 1),
+                                                                 combine(framework::dataset::make("PadY", 0, 1),
                                                                          framework::dataset::make("KernelSize", 1))),
                                                          combine(framework::dataset::make("PadX", 0, 2),
                                                                  combine(framework::dataset::make("PadY", 0, 2),
                                                                          framework::dataset::make("KernelSize", { 3, 5 })))),
                                                   framework::dataset::make("NumKernels", { 1, 4, 8, 16 })))));
-const auto data_fixed_point = combine(datasets::SmallDirectConvolutionShapes(),
+const auto data_fixed_point = combine(datasets::TinyDirectConvolutionShapes(),
                                       combine(framework::dataset::make("StrideX", 1, 3),
                                               combine(framework::dataset::make("StrideY", 1, 3),
                                                       combine(concat(combine(framework::dataset::make("PadX", 0),

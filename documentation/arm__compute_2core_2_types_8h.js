@@ -15,6 +15,7 @@ var arm__compute_2core_2_types_8h =
     [ "ActivationLayerInfo", "classarm__compute_1_1_activation_layer_info.xhtml", "classarm__compute_1_1_activation_layer_info" ],
     [ "NormalizationLayerInfo", "classarm__compute_1_1_normalization_layer_info.xhtml", "classarm__compute_1_1_normalization_layer_info" ],
     [ "WeightsInfo", "classarm__compute_1_1_weights_info.xhtml", "classarm__compute_1_1_weights_info" ],
+    [ "GEMMReshapeInfo", "classarm__compute_1_1_g_e_m_m_reshape_info.xhtml", "classarm__compute_1_1_g_e_m_m_reshape_info" ],
     [ "GEMMInfo", "classarm__compute_1_1_g_e_m_m_info.xhtml", "classarm__compute_1_1_g_e_m_m_info" ],
     [ "IOFormatInfo", "structarm__compute_1_1_i_o_format_info.xhtml", "structarm__compute_1_1_i_o_format_info" ],
     [ "half", "arm__compute_2core_2_types_8h.xhtml#a73e2825fd61d349c5ca2f5313e3c8ea1", null ],
@@ -47,6 +48,15 @@ var arm__compute_2core_2_types_8h =
     [ "ConvertPolicy", "arm__compute_2core_2_types_8h.xhtml#a82b8ac759c804bc1fb4e2d21e178fb6f", [
       [ "WRAP", "arm__compute_2core_2_types_8h.xhtml#a82b8ac759c804bc1fb4e2d21e178fb6fae1c8555fcf0ea2bb648a6fd527d658c0", null ],
       [ "SATURATE", "arm__compute_2core_2_types_8h.xhtml#a82b8ac759c804bc1fb4e2d21e178fb6fa4729d95f983955f0d93a30179deb2b86", null ]
+    ] ],
+    [ "ConvolutionMethod", "arm__compute_2core_2_types_8h.xhtml#a683661ae75dcb7aef16b9c9bde31517d", [
+      [ "GEMM", "arm__compute_2core_2_types_8h.xhtml#a683661ae75dcb7aef16b9c9bde31517da5174aac3927faa9ee34befb7fc87a9e3", null ],
+      [ "DIRECT", "arm__compute_2core_2_types_8h.xhtml#a683661ae75dcb7aef16b9c9bde31517da4c5d06b02c97731aaa976179c62dcf76", null ],
+      [ "WINOGRAD", "arm__compute_2core_2_types_8h.xhtml#a683661ae75dcb7aef16b9c9bde31517da9d024a5762b3a992dec7eb3c49d17ae8", null ]
+    ] ],
+    [ "DataLayout", "arm__compute_2core_2_types_8h.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0", [
+      [ "NCHW", "arm__compute_2core_2_types_8h.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0a6b99f356fe3b30a2a850b5ea897c289f", null ],
+      [ "NHWC", "arm__compute_2core_2_types_8h.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0ad066db54b89b0912e7e7c6da51e2da51", null ]
     ] ],
     [ "DataType", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6", [
       [ "UNKNOWN", "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a696b031073e74bf2cb98e5ef201d4aa3", null ],

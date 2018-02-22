@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,7 +52,7 @@ public:
     CLDepthwiseVectorToTensorKernel &operator=(CLDepthwiseVectorToTensorKernel &&) = default;
     /** Set the input and output of the kernel.
      *
-     * @param[in]  input  The input vector to convert. Data type supported: F32.
+     * @param[in]  input  The input vector to convert. Data type supported: QASYMM8/S32/F16/F32.
      * @param[out] output The output tensor. 3 lower dimensions represent a single input [width, height, IFM]. Data type supported: same as @p input.
      * @param[in]  conv_w The converted tensor's width.
      * @param[in]  conv_h The converted tensor's height.

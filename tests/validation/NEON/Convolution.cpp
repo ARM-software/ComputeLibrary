@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,24 +49,24 @@ namespace
  * while reference performs direct division with scale.
  */
 constexpr AbsoluteTolerance<uint8_t> tolerance_u8(1);
+constexpr AbsoluteTolerance<int16_t> tolerance_s16(1);
 } // namespace
 
 TEST_SUITE(NEON)
 TEST_SUITE(CustomConvolution)
-TEST_SUITE(CustomConvolutionSuqare)
-TEST_SUITE(CustomConvolution3x3)
+TEST_SUITE(Square3x3)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", DataType::U8)),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
                                                                            datasets::BorderModes()),
                                                                    framework::dataset::make("filter_size", { 3 })),
-               shape, data_type, border_mode, filter_size)
+               shape, output_data_type, border_mode, filter_size)
 {
     // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, data_type);
-    Tensor dst = create_tensor<Tensor>(shape, data_type);
+    Tensor src = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor dst = create_tensor<Tensor>(shape, output_data_type);
 
     // Create conv matrix
-    int16_t conv[9];
+    int16_t conv[9] = {};
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -98,6 +98,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
 template <typename T>
 using NEConvolutionFixture = ConvolutionSquareValidationFixture<Tensor, Accessor, NEConvolution3x3, T>;
 
+TEST_SUITE(U8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
                                                                                                                    DataType::U8)),
                                                                                                                    datasets::BorderModes()),
@@ -115,20 +116,41 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<uint8_t>, framework::Datas
     // Validate output
     validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_u8);
 }
-TEST_SUITE_END() /* Custom Convolution3x3 */
+TEST_SUITE_END()
 
-TEST_SUITE(CustomConvolution5x5)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", DataType::U8)),
+TEST_SUITE(S16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                                   DataType::S16)),
+                                                                                                                   datasets::BorderModes()),
+                                                                                                           framework::dataset::make("filter_size", { 3 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_s16);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+                                                                                                                 DataType::S16)),
+                                                                                                                 datasets::BorderModes()),
+                                                                                                         framework::dataset::make("filter_size", { 3 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_s16);
+}
+TEST_SUITE_END()
+TEST_SUITE_END() /* Square3x3 */
+
+TEST_SUITE(Square5x5)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
                                                                            datasets::BorderModes()),
                                                                    framework::dataset::make("filter_size", { 5 })),
-               shape, data_type, border_mode, filter_size)
+               shape, output_data_type, border_mode, filter_size)
 {
     // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, data_type);
-    Tensor dst = create_tensor<Tensor>(shape, data_type);
+    Tensor src = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor dst = create_tensor<Tensor>(shape, output_data_type);
 
     // Create conv matrix
-    int16_t conv[25];
+    int16_t conv[25] = {};
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -160,6 +182,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
 template <typename T>
 using NEConvolutionFixture = ConvolutionSquareValidationFixture<Tensor, Accessor, NEConvolution5x5, T>;
 
+TEST_SUITE(U8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
                                                                                                                    DataType::U8)),
                                                                                                                    datasets::BorderModes()),
@@ -177,20 +200,41 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<uint8_t>, framework::Datas
     // Validate output
     validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_u8);
 }
-TEST_SUITE_END() /* Custom Convolution 5x5 */
+TEST_SUITE_END()
 
-TEST_SUITE(CustomConvolution7x7)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", DataType::U8)),
+TEST_SUITE(S16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                                   DataType::S16)),
+                                                                                                                   datasets::BorderModes()),
+                                                                                                           framework::dataset::make("filter_size", { 5 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_s16);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+                                                                                                                 DataType::S16)),
+                                                                                                                 datasets::BorderModes()),
+                                                                                                         framework::dataset::make("filter_size", { 5 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_s16);
+}
+TEST_SUITE_END()
+TEST_SUITE_END() /* Square5x5 */
+
+TEST_SUITE(Square7x7)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
                                                                            datasets::BorderModes()),
                                                                    framework::dataset::make("filter_size", { 7 })),
-               shape, data_type, border_mode, filter_size)
+               shape, output_data_type, border_mode, filter_size)
 {
     // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, data_type);
-    Tensor dst = create_tensor<Tensor>(shape, data_type);
+    Tensor src = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor dst = create_tensor<Tensor>(shape, output_data_type);
 
     // Create conv matrix
-    int16_t conv[49];
+    int16_t conv[49] = {};
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -222,6 +266,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
 template <typename T>
 using NEConvolutionFixture = ConvolutionSquareValidationFixture<Tensor, Accessor, NEConvolution7x7, T>;
 
+TEST_SUITE(U8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
                                                                                                                    DataType::U8)),
                                                                                                                    datasets::BorderModes()),
@@ -239,20 +284,41 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<uint8_t>, framework::Datas
     // Validate output
     validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_u8);
 }
-TEST_SUITE_END() /* Custom Convolution 7x7 */
+TEST_SUITE_END()
 
-TEST_SUITE(CustomConvolution9x9)
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", DataType::U8)),
+TEST_SUITE(S16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                                   DataType::S16)),
+                                                                                                                   datasets::BorderModes()),
+                                                                                                           framework::dataset::make("filter_size", { 7 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_s16);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+                                                                                                                 DataType::S16)),
+                                                                                                                 datasets::BorderModes()),
+                                                                                                         framework::dataset::make("filter_size", { 7 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_s16);
+}
+TEST_SUITE_END()
+TEST_SUITE_END() /* Square7x7 */
+
+TEST_SUITE(Square9x9)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType", { DataType::U8, DataType::S16 })),
                                                                            datasets::BorderModes()),
                                                                    framework::dataset::make("filter_size", { 9 })),
-               shape, data_type, border_mode, filter_size)
+               shape, output_data_type, border_mode, filter_size)
 {
     // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, data_type);
-    Tensor dst = create_tensor<Tensor>(shape, data_type);
+    Tensor src = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor dst = create_tensor<Tensor>(shape, output_data_type);
 
     // Create conv matrix
-    int16_t conv[81];
+    int16_t conv[81] = {};
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -284,6 +350,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
 template <typename T>
 using NEConvolutionFixture = ConvolutionSquareValidationFixture<Tensor, Accessor, NEConvolution9x9, T>;
 
+TEST_SUITE(U8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
                                                                                                                    DataType::U8)),
                                                                                                                    datasets::BorderModes()),
@@ -301,31 +368,50 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<uint8_t>, framework::Datas
     // Validate output
     validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_u8);
 }
-TEST_SUITE_END() /* Custom Convolution 9x9 */
-TEST_SUITE_END() /* Custom Convolution Square */
+TEST_SUITE_END()
 
-TEST_SUITE(CustomConvolutionRectangle)
+TEST_SUITE(S16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                                   DataType::S16)),
+                                                                                                                   datasets::BorderModes()),
+                                                                                                           framework::dataset::make("filter_size", { 9 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_s16);
+}
 
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+                                                                                                                 DataType::S16)),
+                                                                                                                 datasets::BorderModes()),
+                                                                                                         framework::dataset::make("filter_size", { 9 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_s16);
+}
+TEST_SUITE_END()
+TEST_SUITE_END() /* Square9x9 */
+
+TEST_SUITE(Rectangle)
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("DataType",
-                                                                                           DataType::U8)),
-                                                                                   datasets::BorderModes()),
-                                                                           framework::dataset::make("filter_width", { 3, 5, 7, 9 })),
-                                                                   framework::dataset::make("filter_height", { 3, 5, 7, 9 })),
-               shape, data_type, border_mode, filter_width, filter_height)
+{ DataType::U8, DataType::S16 })),
+datasets::BorderModes()),
+framework::dataset::make("filter_width", { 3, 5, 7, 9 })),
+framework::dataset::make("filter_height", { 3, 5, 7, 9 })),
+shape, output_data_type, border_mode, filter_width, filter_height)
 {
     // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, data_type);
-    Tensor dst = create_tensor<Tensor>(shape, data_type);
+    Tensor src = create_tensor<Tensor>(shape, DataType::U8);
+    Tensor dst = create_tensor<Tensor>(shape, output_data_type);
 
     // Create conv matrix
-    int16_t conv[filter_width * filter_height];
+    std::vector<int16_t> conv(filter_height * filter_width);
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
     NEConvolutionRectangle convolution;
-    convolution.configure(&src, &dst, conv, filter_width, filter_height, 1, border_mode);
+    convolution.configure(&src, &dst, conv.data(), filter_width, filter_height, 1, border_mode);
 
     // Validate valid region
     const ValidRegion dst_valid_region = shape_to_valid_region(shape, (border_mode == BorderMode::UNDEFINED), BorderSize(filter_height / 2, filter_width / 2));
@@ -354,6 +440,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
 template <typename T>
 using NEConvolutionFixture = ConvolutionRectangleValidationFixture<Tensor, Accessor, NEConvolutionRectangle, T>;
 
+TEST_SUITE(U8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
                                                                                                                    DataType::U8)),
                                                                                                                    datasets::BorderModes()),
@@ -374,7 +461,166 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<uint8_t>, framework::Datas
     validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_u8);
 }
 TEST_SUITE_END()
+
+TEST_SUITE(S16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                                   DataType::S16)),
+                                                                                                                   datasets::BorderModes()),
+                                                                                                                   framework::dataset::make("filter_width", { 3, 5, 7, 9 })),
+                                                                                                           framework::dataset::make("filter_height", { 3, 5, 7, 9 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_s16);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+                                                                                                                 DataType::S16)),
+                                                                                                                 datasets::BorderModes()),
+                                                                                                                 framework::dataset::make("filter_width", { 3, 5, 7, 9 })),
+                                                                                                         framework::dataset::make("filter_height", { 3, 5, 7, 9 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_s16);
+}
 TEST_SUITE_END()
+TEST_SUITE_END() /* Rectangle */
+
+TEST_SUITE(Separable5x5)
+template <typename T>
+using NEConvolutionFixture = ConvolutionSeparableValidationFixture<Tensor, Accessor, NEConvolution5x5, T>;
+
+TEST_SUITE(U8)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                                   DataType::U8)),
+                                                                                                                   datasets::BorderModes()),
+                                                                                                           framework::dataset::make("filter_size", { 5 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_u8);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+                                                                                                                 DataType::U8)),
+                                                                                                                 datasets::BorderModes()),
+                                                                                                         framework::dataset::make("filter_size", { 5 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_u8);
+}
+TEST_SUITE_END()
+
+TEST_SUITE(S16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                                   DataType::S16)),
+                                                                                                                   datasets::BorderModes()),
+                                                                                                           framework::dataset::make("filter_size", { 5 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_s16);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+                                                                                                                 DataType::S16)),
+                                                                                                                 datasets::BorderModes()),
+                                                                                                         framework::dataset::make("filter_size", { 5 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_s16);
+}
+TEST_SUITE_END()
+TEST_SUITE_END() /* Separable5x5 */
+
+TEST_SUITE(Separable7x7)
+template <typename T>
+using NEConvolutionFixture = ConvolutionSeparableValidationFixture<Tensor, Accessor, NEConvolution7x7, T>;
+
+TEST_SUITE(U8)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                                   DataType::U8)),
+                                                                                                                   datasets::BorderModes()),
+                                                                                                           framework::dataset::make("filter_size", { 7 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_u8);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+                                                                                                                 DataType::U8)),
+                                                                                                                 datasets::BorderModes()),
+                                                                                                         framework::dataset::make("filter_size", { 7 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_u8);
+}
+TEST_SUITE_END()
+
+TEST_SUITE(S16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                                   DataType::S16)),
+                                                                                                                   datasets::BorderModes()),
+                                                                                                           framework::dataset::make("filter_size", { 7 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_s16);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+                                                                                                                 DataType::S16)),
+                                                                                                                 datasets::BorderModes()),
+                                                                                                         framework::dataset::make("filter_size", { 7 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_s16);
+}
+TEST_SUITE_END()
+TEST_SUITE_END() /* Separable7x7 */
+
+TEST_SUITE(Separable9x9)
+template <typename T>
+using NEConvolutionFixture = ConvolutionSeparableValidationFixture<Tensor, Accessor, NEConvolution9x9, T>;
+
+TEST_SUITE(U8)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                                   DataType::U8)),
+                                                                                                                   datasets::BorderModes()),
+                                                                                                           framework::dataset::make("filter_size", { 9 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_u8);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+                                                                                                                 DataType::U8)),
+                                                                                                                 datasets::BorderModes()),
+                                                                                                         framework::dataset::make("filter_size", { 9 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_u8);
+}
+TEST_SUITE_END()
+
+TEST_SUITE(S16)
+FIXTURE_DATA_TEST_CASE(RunSmall, NEConvolutionFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+                                                                                                                   DataType::S16)),
+                                                                                                                   datasets::BorderModes()),
+                                                                                                           framework::dataset::make("filter_size", { 9 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_s16);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, NEConvolutionFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+                                                                                                                 DataType::S16)),
+                                                                                                                 datasets::BorderModes()),
+                                                                                                         framework::dataset::make("filter_size", { 9 })))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(_height / 2, _width / 2)), tolerance_s16);
+}
+TEST_SUITE_END()
+TEST_SUITE_END() /* Separable9x9 */
+
+TEST_SUITE_END() /* Custom Convolution */
 TEST_SUITE_END()
 } // namespace validation
 } // namespace test

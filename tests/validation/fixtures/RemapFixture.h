@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,7 +50,7 @@ public:
     {
         std::mt19937                           gen(library->seed());
         std::uniform_int_distribution<uint8_t> distribution(0, 255);
-        T                                      constant_border_value = static_cast<T>(distribution(gen));
+        const T                                constant_border_value = static_cast<T>(distribution(gen));
 
         _target    = compute_target(shape, policy, data_type, border_mode, constant_border_value);
         _reference = compute_reference(shape, policy, data_type, border_mode, constant_border_value);
@@ -58,9 +58,10 @@ public:
 
 protected:
     template <typename U>
-    void fill(U &&tensor, int i)
+    void fill(U &&tensor, int i, float min, float max)
     {
-        library->fill_tensor_uniform(tensor, i);
+        std::uniform_int_distribution<> distribution((int)min, (int)max);
+        library->fill(tensor, distribution, i);
     }
 
     TensorType compute_target(const TensorShape &shape, InterpolationPolicy policy, DataType data_type, BorderMode border_mode, T constant_border_value)
@@ -92,9 +93,9 @@ protected:
         ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Fill tensors
-        fill(AccessorType(src), 0);
-        fill(AccessorType(map_x), 1);
-        fill(AccessorType(map_y), 2);
+        fill(AccessorType(src), 0, 0, 255);
+        fill(AccessorType(map_x), 1, -5, shape.x() + 5);
+        fill(AccessorType(map_y), 2, -5, shape.y() + 5);
 
         // Compute function
         remap.run();
@@ -115,9 +116,9 @@ protected:
         _valid_mask = SimpleTensor<T> { shape, data_type };
 
         // Fill reference
-        fill(src, 0);
-        fill(map_x, 1);
-        fill(map_y, 2);
+        fill(src, 0, 0, 255);
+        fill(map_x, 1, -5, shape.x() + 5);
+        fill(map_y, 2, -5, shape.y() + 5);
 
         // Compute reference
         return reference::remap<T>(src, map_x, map_y, _valid_mask, policy, border_mode, constant_border_value);

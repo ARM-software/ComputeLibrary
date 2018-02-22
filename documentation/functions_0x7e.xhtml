@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -232,6 +232,9 @@ $(document).ready(function(){initNavTree('functions_0x7e.xhtml','');});
 <li>~CLDirectConvolutionLayerKernel()
 : <a class="el" href="classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml#a050c832adce3b274f8daacedd0558dc8">CLDirectConvolutionLayerKernel</a>
 </li>
+<li>~CLDirectConvolutionLayerOutputStageKernel()
+: <a class="el" href="classarm__compute_1_1_c_l_direct_convolution_layer_output_stage_kernel.xhtml#acb5d5116dc6d287ed1ba2b96ffcd9de6">CLDirectConvolutionLayerOutputStageKernel</a>
+</li>
 <li>~CLFastCornersKernel()
 : <a class="el" href="classarm__compute_1_1_c_l_fast_corners_kernel.xhtml#a2b06599adac42d0aa917573716356999">CLFastCornersKernel</a>
 </li>
@@ -376,6 +379,9 @@ $(document).ready(function(){initNavTree('functions_0x7e.xhtml','');});
 <li>~GCTensorAllocator()
 : <a class="el" href="classarm__compute_1_1_g_c_tensor_allocator.xhtml#a85db26fae980aed7beed0b6a4d8c24a3">GCTensorAllocator</a>
 </li>
+<li>~GCTensorShiftKernel()
+: <a class="el" href="classarm__compute_1_1_g_c_tensor_shift_kernel.xhtml#a448692e8332b0a7e4a783c70f3a62c0d">GCTensorShiftKernel</a>
+</li>
 <li>~GCWeightsReshapeKernel()
 : <a class="el" href="classarm__compute_1_1_g_c_weights_reshape_kernel.xhtml#a4472e61e5e14b25c7aebe4bd525c5ffe">GCWeightsReshapeKernel</a>
 </li>
@@ -484,6 +490,15 @@ $(document).ready(function(){initNavTree('functions_0x7e.xhtml','');});
 <li>~INEHarrisScoreKernel()
 : <a class="el" href="classarm__compute_1_1_i_n_e_harris_score_kernel.xhtml#af74d3413c9011d560c8a572037f4df9b">INEHarrisScoreKernel</a>
 </li>
+<li>~INEWinogradLayerTransformInputKernel()
+: <a class="el" href="classarm__compute_1_1_i_n_e_winograd_layer_transform_input_kernel.xhtml#a57db7dcc6716d3a676a422bb2839036f">INEWinogradLayerTransformInputKernel&lt; T &gt;</a>
+</li>
+<li>~INEWinogradLayerTransformOutputKernel()
+: <a class="el" href="classarm__compute_1_1_i_n_e_winograd_layer_transform_output_kernel.xhtml#a0bda64948b232256769698cde90fcdb0">INEWinogradLayerTransformOutputKernel&lt; T &gt;</a>
+</li>
+<li>~INEWinogradLayerTransformWeightsKernel()
+: <a class="el" href="classarm__compute_1_1_i_n_e_winograd_layer_transform_weights_kernel.xhtml#a668729f636910fd5f425cee965efee6d">INEWinogradLayerTransformWeightsKernel&lt; T &gt;</a>
+</li>
 <li>~INode()
 : <a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#a1356f0d04912be3ec8d8ce7a2b0cddd2">INode</a>
 </li>
@@ -495,6 +510,9 @@ $(document).ready(function(){initNavTree('functions_0x7e.xhtml','');});
 </li>
 <li>~IPoolManager()
 : <a class="el" href="classarm__compute_1_1_i_pool_manager.xhtml#a772884b3ff6b2c22444ba13616d9d13a">IPoolManager</a>
+</li>
+<li>~IPreprocessor()
+: <a class="el" href="classarm__compute_1_1graph__utils_1_1_i_preprocessor.xhtml#a145ae89877c556306c3b0a8d869b33f3">IPreprocessor</a>
 </li>
 <li>~IPyramid()
 : <a class="el" href="classarm__compute_1_1_i_pyramid.xhtml#a2925d59af502d059fcb2326a6ada7867">IPyramid</a>
@@ -626,11 +644,8 @@ $(document).ready(function(){initNavTree('functions_0x7e.xhtml','');});
 <li>~NELKTrackerKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_l_k_tracker_kernel.xhtml#ab32b5b543a39437043fd3e6df25ec574">NELKTrackerKernel</a>
 </li>
-<li>~NELogits1DNormKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_logits1_d_norm_kernel.xhtml#a1a9bde295eb0b6174872ebc9477a9b4d">NELogits1DNormKernel</a>
-</li>
-<li>~NELogits1DShiftExpSumKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_logits1_d_shift_exp_sum_kernel.xhtml#a095126899a98519c75faf03ec9fa5762">NELogits1DShiftExpSumKernel</a>
+<li>~NELogits1DSoftmaxKernel()
+: <a class="el" href="classarm__compute_1_1_n_e_logits1_d_softmax_kernel.xhtml#ab9491e58324e5d408cfaa93cfb7f8bb6">NELogits1DSoftmaxKernel</a>
 </li>
 <li>~NEMagnitudePhaseKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_magnitude_phase_kernel.xhtml#a1bd4859d9eadb11c47c40235e2b4d044">NEMagnitudePhaseKernel&lt; mag_type, phase_type &gt;</a>
@@ -652,6 +667,9 @@ $(document).ready(function(){initNavTree('functions_0x7e.xhtml','');});
 </li>
 <li>~NENormalizationLayerKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_normalization_layer_kernel.xhtml#adf3fc8e343c72544d6881066bab7fc8a">NENormalizationLayerKernel</a>
+</li>
+<li>~NEPermuteKernel()
+: <a class="el" href="classarm__compute_1_1_n_e_permute_kernel.xhtml#a2547124bd52f012ea88a7ab901e38b6a">NEPermuteKernel</a>
 </li>
 <li>~NEPixelWiseMultiplicationKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#ab299ab73ca304f9e10359a54a763f4d3">NEPixelWiseMultiplicationKernel</a>
@@ -698,8 +716,11 @@ $(document).ready(function(){initNavTree('functions_0x7e.xhtml','');});
 <li>~NEWeightsReshapeKernel()
 : <a class="el" href="classarm__compute_1_1_n_e_weights_reshape_kernel.xhtml#a7337b121d4f8ca7978ed617297e6397b">NEWeightsReshapeKernel</a>
 </li>
-<li>~NEWinogradLayerKernel()
-: <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_kernel.xhtml#ac9989decbb2c46d1f4246dcdcfe4ed1e">NEWinogradLayerKernel</a>
+<li>~NEWinogradLayerBatchedGEMMKernel()
+: <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml#a64dc2c862b018936c5e8ac34c8a6deef">NEWinogradLayerBatchedGEMMKernel&lt; TIn, TOut, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;</a>
+</li>
+<li>~NEWinogradLayerTransformOutputKernel()
+: <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_output_kernel.xhtml#aa795257b6b83a37081c7c2b904a75512">NEWinogradLayerTransformOutputKernel&lt; T, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;</a>
 </li>
 <li>~OffsetMemoryPool()
 : <a class="el" href="classarm__compute_1_1_offset_memory_pool.xhtml#a1f61de334261e99fa99e38e60c4b9e17">OffsetMemoryPool</a>
@@ -761,9 +782,6 @@ $(document).ready(function(){initNavTree('functions_0x7e.xhtml','');});
 <li>~VGG16ActivationLayerDataset()
 : <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_v_g_g16_activation_layer_dataset.xhtml#ab93ae79ab946678bb6f6587b1e84ba8b">VGG16ActivationLayerDataset</a>
 </li>
-<li>~Winograd3x3F32()
-: <a class="el" href="classarm__compute_1_1_winograd3x3_f32.xhtml#a39afe97f3489074b5eabfb447011edce">Winograd3x3F32</a>
-</li>
 <li>~YOLOV2ActivationLayerDataset()
 : <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_y_o_l_o_v2_activation_layer_dataset.xhtml#a925526644b51706ebb910ef741106ed9">YOLOV2ActivationLayerDataset</a>
 </li>
@@ -779,7 +797,7 @@ $(document).ready(function(){initNavTree('functions_0x7e.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:48 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:28 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

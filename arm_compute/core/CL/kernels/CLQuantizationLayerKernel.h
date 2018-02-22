@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,8 +51,8 @@ public:
     ~CLQuantizationLayerKernel() = default;
     /** Set the input, output, min and max.
      *
-     * @param[in]  input   Source tensor. Data types supported: F32.
-     * @param[out] output  Destination tensor. Data types supported: U8.
+     * @param[in]  input   Source tensor with at least 3 dimensions. The dimensions over the third will be interpreted as batches. Data types supported: F32.
+     * @param[out] output  Destination tensor with the same dimensions of input. Output data type must be U8.
      * @param[in]  min_max Pointer to the tensor with shape [2, batches] which stores the minimum and maximum value for each 3D input tensor.
      *                     The dimensions over the second must match the batched dimensions of the input tensor. Data type supported: F32.
      */

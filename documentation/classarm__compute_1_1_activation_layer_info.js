@@ -13,8 +13,10 @@ var classarm__compute_1_1_activation_layer_info =
       [ "SQRT", "classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaa36875f2500a09ee35d0bb7eb8c0b91b0", null ],
       [ "LINEAR", "classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaaaac544aacc3615aada24897a215f5046", null ]
     ] ],
+    [ "ActivationLayerInfo", "classarm__compute_1_1_activation_layer_info.xhtml#ac06d9557031b0febb70869efd793cb38", null ],
     [ "ActivationLayerInfo", "classarm__compute_1_1_activation_layer_info.xhtml#af56abff12f887fddfa02e0bc18a318a1", null ],
     [ "a", "classarm__compute_1_1_activation_layer_info.xhtml#a55beddf67f69fc5312961b1b112560fb", null ],
     [ "activation", "classarm__compute_1_1_activation_layer_info.xhtml#a63e05ce4946dd9807c005c1619fa337a", null ],
-    [ "b", "classarm__compute_1_1_activation_layer_info.xhtml#af28869d53fbe340640044d672b29ba7c", null ]
+    [ "b", "classarm__compute_1_1_activation_layer_info.xhtml#af28869d53fbe340640044d672b29ba7c", null ],
+    [ "enabled", "classarm__compute_1_1_activation_layer_info.xhtml#a1d79980f25d38aba3d6777d0afe544f3", null ]
 ];

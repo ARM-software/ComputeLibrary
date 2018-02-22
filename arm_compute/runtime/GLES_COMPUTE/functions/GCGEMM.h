@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,14 +58,16 @@ public:
      *
      * @note Whilst the first input tensor can be a vector, the second input tensor must be at least a matrix
      *
-     * @param[in]  a      First input tensor  (Matrix or Vector A). Data types supported: F32
-     * @param[in]  b      Second input tensor (Matrix B). Data type supported: same as @p a.
-     * @param[in]  c      Third input tensor  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a.
-     * @param[out] output Output tensor. Data type supported: same as @p a
-     * @param[in]  alpha  Weight of the matrix product
-     * @param[in]  beta   Weight of matrix C
+     * @param[in]  a         First input tensor  (Matrix or Vector A). Data types supported: F32
+     * @param[in]  b         Second input tensor (Matrix B). Data type supported: same as @p a.
+     * @param[in]  c         Third input tensor  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a.
+     * @param[out] output    Output tensor. Data type supported: same as @p a
+     * @param[in]  alpha     Weight of the matrix product
+     * @param[in]  beta      Weight of matrix C
+     * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
+     *                       if the reshape of matrix B should happen only for the first run
      */
-    void configure(const IGCTensor *a, const IGCTensor *b, const IGCTensor *c, IGCTensor *output, float alpha, float beta);
+    void configure(const IGCTensor *a, const IGCTensor *b, const IGCTensor *c, IGCTensor *output, float alpha, float beta, const GEMMInfo &gemm_info = GEMMInfo());
 
     // Inherited methods overridden:
     void run() override;

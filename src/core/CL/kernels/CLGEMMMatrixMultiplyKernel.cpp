@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,24 +36,69 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 #include <set>
 #include <string>
 
 using namespace arm_compute;
+using namespace arm_compute::misc::shape_calculator;
 
 namespace
 {
 using ElementsProcessed = Steps;
 
-inline Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output, bool is_interleaved_transposed)
+inline Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output, bool is_interleaved_transposed, const GEMMReshapeInfo &reshape_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input0, input1, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input0, input1, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input0, input1);
+
     if(!is_interleaved_transposed)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(input0->dimension(0) != input1->dimension(1));
+
+        if(output->total_size() != 0)
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON(input1->dimension(0) != output->dimension(0));
+            ARM_COMPUTE_RETURN_ERROR_ON(input0->dimension(1) != output->dimension(1));
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, output);
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input0, output);
+        }
+    }
+    else
+    {
+        const int m                         = reshape_info.m();
+        const int n                         = reshape_info.n();
+        const int k                         = reshape_info.k();
+        const int mult_transpose1xW_width   = reshape_info.mult_transpose1xW_width();
+        const int mult_interleave4x4_height = reshape_info.mult_interleave4x4_height();
+
+        TensorShape tensor_shape0{ input0->tensor_shape() };
+        tensor_shape0.set(0, k);
+        tensor_shape0.set(1, m);
+
+        TensorShape tensor_shape1{ input1->tensor_shape() };
+        tensor_shape1.set(0, n);
+        tensor_shape1.set(1, k);
+
+        const TensorInfo tensor_info0 = input0->clone()->set_tensor_shape(tensor_shape0);
+        const TensorInfo tensor_info1 = input1->clone()->set_tensor_shape(tensor_shape1);
+
+        const TensorInfo tensor_info_reshaped0 = input0->clone()->set_tensor_shape(compute_interleaved_shape(tensor_info0, mult_interleave4x4_height));
+        const TensorInfo tensor_info_reshaped1 = input1->clone()->set_tensor_shape(compute_transpose1xW_with_element_size_shape(tensor_info1, mult_transpose1xW_width));
+
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input0, &tensor_info_reshaped0);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input1, &tensor_info_reshaped1);
+
+        if(output->total_size() != 0)
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(0) != static_cast<size_t>(n));
+            ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(1) != static_cast<size_t>(m));
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, output);
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input0, output);
+        }
     }
 
     return Status{};
@@ -122,12 +167,19 @@ CLGEMMMatrixMultiplyKernel::CLGEMMMatrixMultiplyKernel()
 {
 }
 
-void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, float alpha, bool is_interleaved_transposed)
+void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output, float alpha, bool is_interleaved_transposed, const GEMMReshapeInfo &reshape_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input0, input1, output);
 
+    // Output tensor auto inizialitation if not yet initialized
+    TensorShape tensor_shape{ input0->info()->tensor_shape() };
+    tensor_shape.set(0, is_interleaved_transposed ? reshape_info.n() : input1->info()->dimension(0));
+    tensor_shape.set(1, is_interleaved_transposed ? reshape_info.m() : input0->info()->dimension(1));
+
+    auto_init_if_empty(*output->info(), input0->info()->clone()->set_tensor_shape(tensor_shape));
+
     // Perform validate step
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(), input1->info(), output->info(), is_interleaved_transposed));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(), input1->info(), output->info(), is_interleaved_transposed, reshape_info));
 
     _input0 = input0;
     _input1 = input1;
@@ -176,7 +228,13 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
     std::string kernel_name;
     if(is_interleaved_transposed)
     {
+        const int mult_transpose1xW_width   = reshape_info.mult_transpose1xW_width();
+        const int mult_interleave4x4_height = reshape_info.mult_interleave4x4_height();
+
         build_opts.add_option("-DCOLS_B=" + support::cpp11::to_string(input1->info()->dimension(0)));
+        build_opts.add_option("-DMULT_TRANSPOSE1XW_WIDTH=" + support::cpp11::to_string(mult_transpose1xW_width));
+        build_opts.add_option("-DMULT_INTERLEAVE4X4_HEIGHT=" + support::cpp11::to_string(mult_interleave4x4_height));
+
         if(data_type == DataType::F32)
         {
             kernel_name = "gemm_mm_interleaved_transposed_f32_" + string_from_target(arch_target);
@@ -230,11 +288,13 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
     _config_id += (is_interleaved_transposed ? support::cpp11::to_string(input1->info()->dimension(0)) : support::cpp11::to_string(input1->info()->dimension(1)));
 }
 
-Status CLGEMMMatrixMultiplyKernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output, float alpha, bool is_interleaved_transposed, GPUTarget gpu_target)
+Status CLGEMMMatrixMultiplyKernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output, float alpha, bool is_interleaved_transposed,
+                                            const GEMMReshapeInfo &reshape_info, GPUTarget gpu_target)
 {
+    // Note: num_elements_processed will be set in validate_and_configure_window()
     ElementsProcessed num_elements_processed{};
     ARM_COMPUTE_UNUSED(alpha);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input0, input1, output, is_interleaved_transposed));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input0, input1, output, is_interleaved_transposed, reshape_info));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input0->clone().get(),
                                                               input1->clone().get(),
                                                               output->clone().get(),

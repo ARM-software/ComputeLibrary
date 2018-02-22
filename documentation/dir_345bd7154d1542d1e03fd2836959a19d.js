@@ -52,7 +52,6 @@ var dir_345bd7154d1542d1e03fd2836959a19d =
     ] ],
     [ "NEConvolution.h", "_n_e_convolution_8h.xhtml", "_n_e_convolution_8h" ],
     [ "NEConvolutionLayer.h", "_n_e_convolution_layer_8h.xhtml", [
-      [ "NEConvolutionLayerReshapeWeights", "classarm__compute_1_1_n_e_convolution_layer_reshape_weights.xhtml", "classarm__compute_1_1_n_e_convolution_layer_reshape_weights" ],
       [ "NEConvolutionLayer", "classarm__compute_1_1_n_e_convolution_layer.xhtml", "classarm__compute_1_1_n_e_convolution_layer" ]
     ] ],
     [ "NEDeconvolutionLayer.h", "_n_e_deconvolution_layer_8h.xhtml", [
@@ -118,6 +117,10 @@ var dir_345bd7154d1542d1e03fd2836959a19d =
     ] ],
     [ "NEGEMM.h", "_n_e_g_e_m_m_8h.xhtml", [
       [ "NEGEMM", "classarm__compute_1_1_n_e_g_e_m_m.xhtml", "classarm__compute_1_1_n_e_g_e_m_m" ]
+    ] ],
+    [ "NEGEMMConvolutionLayer.h", "_n_e_g_e_m_m_convolution_layer_8h.xhtml", [
+      [ "NEConvolutionLayerReshapeWeights", "classarm__compute_1_1_n_e_convolution_layer_reshape_weights.xhtml", "classarm__compute_1_1_n_e_convolution_layer_reshape_weights" ],
+      [ "NEGEMMConvolutionLayer", "classarm__compute_1_1_n_e_g_e_m_m_convolution_layer.xhtml", "classarm__compute_1_1_n_e_g_e_m_m_convolution_layer" ]
     ] ],
     [ "NEGEMMInterleave4x4.h", "_n_e_g_e_m_m_interleave4x4_8h.xhtml", [
       [ "NEGEMMInterleave4x4", "classarm__compute_1_1_n_e_g_e_m_m_interleave4x4.xhtml", "classarm__compute_1_1_n_e_g_e_m_m_interleave4x4" ]
@@ -193,6 +196,9 @@ var dir_345bd7154d1542d1e03fd2836959a19d =
       [ "NENormalizationLayer", "classarm__compute_1_1_n_e_normalization_layer.xhtml", "classarm__compute_1_1_n_e_normalization_layer" ]
     ] ],
     [ "NEOpticalFlow.h", "_n_e_optical_flow_8h.xhtml", "_n_e_optical_flow_8h" ],
+    [ "NEPermute.h", "_n_e_permute_8h.xhtml", [
+      [ "NEPermute", "classarm__compute_1_1_n_e_permute.xhtml", "classarm__compute_1_1_n_e_permute" ]
+    ] ],
     [ "NEPhase.h", "_n_e_phase_8h.xhtml", [
       [ "NEPhase", "classarm__compute_1_1_n_e_phase.xhtml", "classarm__compute_1_1_n_e_phase" ]
     ] ],

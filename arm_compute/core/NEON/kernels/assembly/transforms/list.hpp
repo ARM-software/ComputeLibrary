@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,10 +23,11 @@
  */
 #include "a32_interleave_6way_32bit.hpp"
 #include "a32_transpose_interleave_8way_32bit.hpp"
+#include "a64_block16_interleave4_8bit.hpp"
 #include "a64_interleave_8way_16bit.hpp"
 #include "a64_interleave_8way_32bit.hpp"
-//#include "a64_interleave_8way_half_to_float.hpp"
-//#include "a64_transpose_interleave_12way_16bit.hpp"
-//#include "a64_transpose_interleave_12way_half_to_float.hpp"
+#include "a64_interleave_8way_half_to_float.hpp"
+#include "a64_transpose_interleave_12way_16bit.hpp"
+#include "a64_transpose_interleave_12way_half_to_float.hpp"
 #include "a64_transpose_interleave_24way_16bit.hpp"
 #include "transpose_interleave_common.hpp"

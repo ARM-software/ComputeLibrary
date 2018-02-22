@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -268,5 +268,5 @@ __kernel void copy_plane(
     Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
 
     // Copy plane data
-    vstore16(vload16(0, src.ptr), 0, dst.ptr);
+    vstore8(vload8(0, src.ptr), 0, dst.ptr);
 }

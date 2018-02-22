@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -120,7 +120,8 @@ $(document).ready(function(){initNavTree('_type_printer_8h.xhtml','');});
 <div class="title">TypePrinter.h File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="_dimensions_8h_source.xhtml">arm_compute/core/Dimensions.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="_c_l_types_8h_source.xhtml">arm_compute/core/CL/CLTypes.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_dimensions_8h_source.xhtml">arm_compute/core/Dimensions.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="core_2_error_8h_source.xhtml">arm_compute/core/Error.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_h_o_g_info_8h_source.xhtml">arm_compute/core/HOGInfo.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_size2_d_8h_source.xhtml">arm_compute/core/Size2D.h</a>&quot;</code><br />
@@ -210,6 +211,8 @@ Functions</h2></td></tr>
 <tr class="memitem:aa66be15c012986ebd4c1934b97e08a36"><td class="memItemLeft" align="right" valign="top">inline::std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#aa66be15c012986ebd4c1934b97e08a36">operator&lt;&lt;</a> (::std::ostream &amp;os, const Channel &amp;channel)</td></tr>
 <tr class="memdesc:aa66be15c012986ebd4c1934b97e08a36"><td class="mdescLeft">&#160;</td><td class="mdescRight">Formatted output of the Channel type.  <a href="namespacearm__compute.xhtml#aa66be15c012986ebd4c1934b97e08a36">More...</a><br /></td></tr>
 <tr class="separator:aa66be15c012986ebd4c1934b97e08a36"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a813e71cd70c2bbcbf0743fa83a3608b9"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a813e71cd70c2bbcbf0743fa83a3608b9">to_string</a> (const Channel &amp;channel)</td></tr>
+<tr class="separator:a813e71cd70c2bbcbf0743fa83a3608b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7929032d41d5f23cd1778a70508d0219"><td class="memItemLeft" align="right" valign="top">inline::std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a7929032d41d5f23cd1778a70508d0219">operator&lt;&lt;</a> (::std::ostream &amp;os, const BorderMode &amp;mode)</td></tr>
 <tr class="memdesc:a7929032d41d5f23cd1778a70508d0219"><td class="mdescLeft">&#160;</td><td class="mdescRight">Formatted output of the BorderMode type.  <a href="namespacearm__compute.xhtml#a7929032d41d5f23cd1778a70508d0219">More...</a><br /></td></tr>
 <tr class="separator:a7929032d41d5f23cd1778a70508d0219"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -302,6 +305,14 @@ Functions</h2></td></tr>
 <tr class="memitem:a3cf43a216912b361eaffc3c71452a31e"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a3cf43a216912b361eaffc3c71452a31e">to_string</a> (const HOGInfo &amp;type)</td></tr>
 <tr class="memdesc:a3cf43a216912b361eaffc3c71452a31e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Formatted output of the <a class="el" href="classarm__compute_1_1_h_o_g_info.xhtml" title="Store the HOG&#39;s metadata. ">HOGInfo</a> type.  <a href="namespacearm__compute.xhtml#a3cf43a216912b361eaffc3c71452a31e">More...</a><br /></td></tr>
 <tr class="separator:a3cf43a216912b361eaffc3c71452a31e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abd35c1c3fb716078b1f4a25981defac4"><td class="memItemLeft" align="right" valign="top">inline::std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#abd35c1c3fb716078b1f4a25981defac4">operator&lt;&lt;</a> (::std::ostream &amp;os, const ConvolutionMethod &amp;conv_method)</td></tr>
+<tr class="separator:abd35c1c3fb716078b1f4a25981defac4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a853d44a32a328fb4455f6200a11c4785"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a853d44a32a328fb4455f6200a11c4785">to_string</a> (const ConvolutionMethod &amp;conv_method)</td></tr>
+<tr class="separator:a853d44a32a328fb4455f6200a11c4785"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f4d95d65a62a085e929ab0a1a77add2"><td class="memItemLeft" align="right" valign="top">inline::std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a1f4d95d65a62a085e929ab0a1a77add2">operator&lt;&lt;</a> (::std::ostream &amp;os, const GPUTarget &amp;gpu_target)</td></tr>
+<tr class="separator:a1f4d95d65a62a085e929ab0a1a77add2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee29ccfc095313663fc954f581ddf40a"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#aee29ccfc095313663fc954f581ddf40a">to_string</a> (const GPUTarget &amp;gpu_target)</td></tr>
+<tr class="separator:aee29ccfc095313663fc954f581ddf40a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -309,7 +320,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_cbdb8362360e11eafe2fa3bc74cf0ffd.xhtml">utils</a></li><li class="navelem"><a class="el" href="_type_printer_8h.xhtml">TypePrinter.h</a></li>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:43 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:22 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

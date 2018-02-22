@@ -1,3 +1,9 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$structarm__compute_1_1test_1_1datasets_1_1_depthwise_convolution_layer_dataset_1_1iterator.xhtml" title="DepthwiseConvolutionLayer\lDataset::iterator" alt="" coords="5,5,204,47"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1test_1_1datasets_1_1_depthwise_convolution_layer_dataset.xhtml" title="DepthwiseConvolutionLayer\lDataset" alt="" coords="5,169,204,211"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1datasets_1_1_large_depthwise_convolution_layer_dataset.xhtml" title="LargeDepthwiseConvolution\lLayerDataset" alt="" coords="267,5,465,47"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1test_1_1datasets_1_1_large_depthwise_convolution_layer_dataset3x3.xhtml" title="LargeDepthwiseConvolution\lLayerDataset3x3" alt="" coords="267,71,465,112"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1test_1_1datasets_1_1_mobile_net_depthwise_convolution_layer_dataset.xhtml" title="MobileNetDepthwiseConvolution\lLayerDataset" alt="" coords="253,136,479,177"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1test_1_1datasets_1_1_optimized_depthwise_convolution_layer_dataset3x3.xhtml" title="OptimizedDepthwiseConvolution\lLayerDataset3x3" alt="" coords="252,201,480,243"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1test_1_1datasets_1_1_small_depthwise_convolution_layer_dataset.xhtml" title="SmallDepthwiseConvolution\lLayerDataset" alt="" coords="267,267,465,308"/>
+<area shape="rect" id="node7" href="$classarm__compute_1_1test_1_1datasets_1_1_small_depthwise_convolution_layer_dataset3x3.xhtml" title="SmallDepthwiseConvolution\lLayerDataset3x3" alt="" coords="267,332,465,373"/>
 </map>

@@ -1,3 +1,8 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1graph_1_1_i_operation.xhtml" title="Operation functor interface. " alt="" coords="5,5,93,32"/>
+<area shape="rect" id="node1" href="$classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml" title="Interface for classes that can be used to measure performance. " alt="" coords="5,107,97,133"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1framework_1_1_mali_counter.xhtml" title="Instrument implementation for mali hw counters. " alt="" coords="157,5,256,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1test_1_1framework_1_1_open_c_l_timer.xhtml" title="Instrument creating measurements based on the information returned by clGetEventProfilingInfo for eac..." alt="" coords="153,56,260,83"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1test_1_1framework_1_1_p_m_u_counter.xhtml" title="Implementation of an instrument to count CPU cycles. " alt="" coords="155,107,258,133"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1test_1_1framework_1_1_scheduler_timer.xhtml" title="Instrument creating measurements based on the information returned by clGetEventProfilingInfo for eac..." alt="" coords="145,157,268,184"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1test_1_1framework_1_1_wall_clock_timer.xhtml" title="Implementation of an instrument to measure elapsed wall&#45;clock time in milliseconds. " alt="" coords="149,208,265,235"/>
 </map>

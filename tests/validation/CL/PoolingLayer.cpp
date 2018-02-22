@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/CL/functions/CLPoolingLayer.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/PaddingCalculator.h"
+#include "tests/datasets/PoolingLayerDataset.h"
 #include "tests/datasets/PoolingTypesDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
@@ -43,24 +44,18 @@ namespace validation
 {
 namespace
 {
-/** Failing data set */
-const auto PoolingLayerDatasetSpecial = ((((framework::dataset::make("Shape", TensorShape{ 60U, 52U, 3U, 5U })
-                                            * framework::dataset::make("PoolType", PoolingType::AVG))
-                                           * framework::dataset::make("PoolingSize", 100))
-                                          * framework::dataset::make("PadStride", PadStrideInfo(5, 5, 50, 50)))
-                                         * framework::dataset::make("ExcludePadding", true));
 /** Input data set for floating-point data types */
-const auto PoolingLayerDatasetFP = combine(combine(combine(datasets::PoolingTypes(), framework::dataset::make("PoolingSize", { 2, 3, 4, 7, 9 })),
+const auto PoolingLayerDatasetFP = combine(combine(combine(datasets::PoolingTypes(), framework::dataset::make("PoolingSize", { Size2D(2, 2), Size2D(3, 3), Size2D(7, 7), Size2D(9, 9), Size2D(5, 7), Size2D(7, 9) })),
                                                    framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) })),
                                            framework::dataset::make("ExcludePadding", { true, false }));
 
 /** Input data set for fixed-point data types */
-const auto PoolingLayerDatasetQS = combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }), framework::dataset::make("PoolingSize", { 2, 3 })),
+const auto PoolingLayerDatasetQS = combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }), framework::dataset::make("PoolingSize", { Size2D(2, 2), Size2D(3, 3) })),
                                                    framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) })),
                                            framework::dataset::make("ExcludePadding", { true, false }));
 
 /** Input data set for asymmetric data type */
-const auto PoolingLayerDatasetQASYMM8 = combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }), framework::dataset::make("PoolingSize", { 2, 3 })),
+const auto PoolingLayerDatasetQASYMM8 = combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }), framework::dataset::make("PoolingSize", { Size2D(2, 2), Size2D(3, 3), Size2D(5, 7), Size2D(8, 9) })),
                                                         framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) })),
                                                 framework::dataset::make("ExcludePadding", { true, false }));
 
@@ -110,7 +105,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        PoolingLayerInfo(PoolingType::MAX),
                                                        PoolingLayerInfo(PoolingType::AVG),
                                                       })),
-               framework::dataset::make("Expected", { false, false, false, true, false, false, false, false, false, true })),
+               framework::dataset::make("Expected", { false, false, false, true, false, false, false, true, false, true })),
                input_info, output_info, pool_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLPoolingLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), pool_info)) == expected, framework::LogLevel::ERRORS);
@@ -121,9 +116,12 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 template <typename T>
 using CLPoolingLayerFixture = PoolingLayerValidationFixture<CLTensor, CLAccessor, CLPoolingLayer, T>;
 
+template <typename T>
+using CLSpecialPoolingLayerFixture = SpecialPoolingLayerValidationFixture<CLTensor, CLAccessor, CLPoolingLayer, T>;
+
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSpecial, CLPoolingLayerFixture<float>, framework::DatasetMode::ALL, PoolingLayerDatasetSpecial * framework::dataset::make("DataType", DataType::F32))
+FIXTURE_DATA_TEST_CASE(RunSpecial, CLSpecialPoolingLayerFixture<float>, framework::DatasetMode::ALL, datasets::PoolingLayerDatasetSpecial() * framework::dataset::make("DataType", DataType::F32))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -163,14 +161,14 @@ using CLPoolingLayerFixedPointFixture = PoolingLayerValidationFixedPointFixture<
 
 TEST_SUITE(FixedPoint)
 TEST_SUITE(QS8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetQS,
-                                                                                                                       framework::dataset::make("DataType", DataType::QS8))),
-                                                                                                               framework::dataset::make("FractionalBits", 1, 4)))
+FIXTURE_DATA_TEST_CASE(RunTiny, CLPoolingLayerFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapes(), combine(PoolingLayerDatasetQS,
+                                                                                                                      framework::dataset::make("DataType", DataType::QS8))),
+                                                                                                              framework::dataset::make("FractionalBits", 1, 4)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qs8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLPoolingLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), combine(PoolingLayerDatasetQS,
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetQS,
                                                                                                                    framework::dataset::make("DataType", DataType::QS8))),
                                                                                                                    framework::dataset::make("FractionalBits", 1, 4)))
 {
@@ -180,14 +178,14 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLPoolingLayerFixedPointFixture<int8_t>, framew
 TEST_SUITE_END()
 
 TEST_SUITE(QS16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerFixedPointFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetQS,
-                                                                                                                        framework::dataset::make("DataType", DataType::QS16))),
-                                                                                                                framework::dataset::make("FractionalBits", 1, 12)))
+FIXTURE_DATA_TEST_CASE(RunTiny, CLPoolingLayerFixedPointFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapes(), combine(PoolingLayerDatasetQS,
+                                                                                                                       framework::dataset::make("DataType", DataType::QS16))),
+                                                                                                               framework::dataset::make("FractionalBits", 1, 12)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qs16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLPoolingLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), combine(PoolingLayerDatasetQS,
+FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetQS,
                                                                                                                     framework::dataset::make("DataType", DataType::QS16))),
                                                                                                                     framework::dataset::make("FractionalBits", 1, 12)))
 {

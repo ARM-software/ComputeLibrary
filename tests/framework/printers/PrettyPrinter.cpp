@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "PrettyPrinter.h"
 
 #include "../Framework.h"
+#include "../instruments/InstrumentsStats.h"
 #include "../instruments/Measurement.h"
 
 #include <algorithm>
@@ -121,50 +122,16 @@ void PrettyPrinter::print_measurements(const Profiler::MeasurementsMap &measurem
     {
         *_stream << begin_color("3") << "  " << instrument.first << ":";
 
-        auto add_measurements = [](Measurement::Value a, const Measurement & b)
-        {
-            return a + b.value();
-        };
-
-        auto cmp_measurements = [](const Measurement & a, const Measurement & b)
-        {
-            return a.value() < b.value();
-        };
-
-        int                num_values    = instrument.second.size();
-        const auto         minmax_values = std::minmax_element(instrument.second.begin(), instrument.second.end(), cmp_measurements);
-        Measurement::Value sum_values    = std::accumulate(instrument.second.begin(), instrument.second.end(), Measurement::Value(minmax_values.first->value().is_floating_point), add_measurements);
-
-        // Calculate the median value
-        auto measurements = instrument.second;
-        std::nth_element(measurements.begin(), measurements.begin() + (num_values / 2), measurements.end(), cmp_measurements);
-        const auto median_value = measurements[num_values / 2];
-
-        // Calculate the relative standard deviation
-        auto                            mean_value = sum_values / num_values;
-        std::vector<Measurement::Value> diff(measurements.size(), minmax_values.first->value().is_floating_point);
-        std::transform(measurements.begin(), measurements.end(), diff.begin(), [mean_value](const Measurement & x)
-        {
-            return x.value() - mean_value;
-        });
-        auto sq_sum   = std::inner_product(diff.begin(), diff.end(), diff.begin(), Measurement::Value(minmax_values.first->value().is_floating_point));
-        auto variance = sq_sum / measurements.size();
-        auto rsd      = Measurement::Value::relative_standard_deviation(variance, mean_value);
-
-        if(num_values > 2)
-        {
-            sum_values -= minmax_values.first->value() + minmax_values.second->value();
-            num_values -= 2;
-        }
+        InstrumentsStats stats(instrument.second);
 
         *_stream << "    ";
-        *_stream << "MEDIAN=" << median_value.value() << " " << median_value.unit() << ", ";
-        *_stream << "AVG=" << (sum_values / num_values) << " " << minmax_values.second->unit() << ", ";
-        *_stream << "STDDEV=" << arithmetic_to_string(rsd, 2) << " %, ";
-        if(num_values > 1)
+        *_stream << "AVG=" << stats.mean() << " " << stats.max().unit();
+        if(instrument.second.size() > 1)
         {
-            *_stream << "MIN=" << *minmax_values.first << ", ";
-            *_stream << "MAX=" << *minmax_values.second;
+            *_stream << ", STDDEV=" << arithmetic_to_string(stats.relative_standard_deviation(), 2) << " %";
+            *_stream << ", MIN=" << stats.min() << ", ";
+            *_stream << ", MAX=" << stats.max() << ", ";
+            *_stream << ", MEDIAN=" << stats.median().value() << " " << stats.median().unit();
         }
         *_stream << end_color() << "\n";
     }

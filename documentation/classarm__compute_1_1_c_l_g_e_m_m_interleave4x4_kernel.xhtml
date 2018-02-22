@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -151,9 +151,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a156b6ea0879f0350c72168e647aa58a5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel.xhtml">CLGEMMInterleave4x4Kernel</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel.xhtml#a156b6ea0879f0350c72168e647aa58a5">operator=</a> (<a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel.xhtml">CLGEMMInterleave4x4Kernel</a> &amp;&amp;)=default</td></tr>
 <tr class="memdesc:a156b6ea0879f0350c72168e647aa58a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allow instances of this class to be moved.  <a href="#a156b6ea0879f0350c72168e647aa58a5">More...</a><br /></td></tr>
 <tr class="separator:a156b6ea0879f0350c72168e647aa58a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a074e10cfb217e657b9e81adeca2abc68"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel.xhtml#a074e10cfb217e657b9e81adeca2abc68">configure</a> (const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *input, <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *output)</td></tr>
-<tr class="memdesc:a074e10cfb217e657b9e81adeca2abc68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialise the kernel's input and output.  <a href="#a074e10cfb217e657b9e81adeca2abc68">More...</a><br /></td></tr>
-<tr class="separator:a074e10cfb217e657b9e81adeca2abc68"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2238b6c75a9ca204fc657db2dd1c2aa7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel.xhtml#a2238b6c75a9ca204fc657db2dd1c2aa7">configure</a> (const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *input, <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *output, int mult_interleave4x4_height=1)</td></tr>
+<tr class="memdesc:a2238b6c75a9ca204fc657db2dd1c2aa7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialise the kernel's input and output.  <a href="#a2238b6c75a9ca204fc657db2dd1c2aa7">More...</a><br /></td></tr>
+<tr class="separator:a2238b6c75a9ca204fc657db2dd1c2aa7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a493987e85723a8000eb26d1f00e2ad0e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e">run</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;<a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>, cl::CommandQueue &amp;queue) override</td></tr>
 <tr class="memdesc:a493987e85723a8000eb26d1f00e2ad0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enqueue the OpenCL kernel to process the given window on the passed OpenCL command queue.  <a href="#a493987e85723a8000eb26d1f00e2ad0e">More...</a><br /></td></tr>
 <tr class="separator:a493987e85723a8000eb26d1f00e2ad0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -180,21 +180,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a33e09c946b338fbfc780a9d1c66e68ad inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a33e09c946b338fbfc780a9d1c66e68ad">add_4D_tensor_argument</a> (unsigned int &amp;idx, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *tensor, const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;<a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>)</td></tr>
 <tr class="memdesc:a33e09c946b338fbfc780a9d1c66e68ad inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add the passed 4D tensor's parameters to the object's kernel's arguments starting from the index idx.  <a href="#a33e09c946b338fbfc780a9d1c66e68ad">More...</a><br /></td></tr>
 <tr class="separator:a33e09c946b338fbfc780a9d1c66e68ad inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a99fde125501fae43952af222c91236cd inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a99fde125501fae43952af222c91236cd">num_arguments_per_1D_array</a> () const </td></tr>
-<tr class="memdesc:a99fde125501fae43952af222c91236cd inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of arguments enqueued per 1D array object.  <a href="#a99fde125501fae43952af222c91236cd">More...</a><br /></td></tr>
-<tr class="separator:a99fde125501fae43952af222c91236cd inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a770f45838881fc061294e56d64f34386 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a770f45838881fc061294e56d64f34386">num_arguments_per_1D_tensor</a> () const </td></tr>
-<tr class="memdesc:a770f45838881fc061294e56d64f34386 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of arguments enqueued per 1D tensor object.  <a href="#a770f45838881fc061294e56d64f34386">More...</a><br /></td></tr>
-<tr class="separator:a770f45838881fc061294e56d64f34386 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac734502531e7f95e25b3bf688a304a59 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#ac734502531e7f95e25b3bf688a304a59">num_arguments_per_2D_tensor</a> () const </td></tr>
-<tr class="memdesc:ac734502531e7f95e25b3bf688a304a59 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of arguments enqueued per 2D tensor object.  <a href="#ac734502531e7f95e25b3bf688a304a59">More...</a><br /></td></tr>
-<tr class="separator:ac734502531e7f95e25b3bf688a304a59 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4feaae9c860cddfa843d37c953674a22 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a4feaae9c860cddfa843d37c953674a22">num_arguments_per_3D_tensor</a> () const </td></tr>
-<tr class="memdesc:a4feaae9c860cddfa843d37c953674a22 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of arguments enqueued per 3D tensor object.  <a href="#a4feaae9c860cddfa843d37c953674a22">More...</a><br /></td></tr>
-<tr class="separator:a4feaae9c860cddfa843d37c953674a22 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af24df23a978e1a46ff6714e9b9d3eef9 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#af24df23a978e1a46ff6714e9b9d3eef9">num_arguments_per_4D_tensor</a> () const </td></tr>
-<tr class="memdesc:af24df23a978e1a46ff6714e9b9d3eef9 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of arguments enqueued per 4D tensor object.  <a href="#af24df23a978e1a46ff6714e9b9d3eef9">More...</a><br /></td></tr>
-<tr class="separator:af24df23a978e1a46ff6714e9b9d3eef9 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a50f427a1d9419800972b9e03c4034311 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a50f427a1d9419800972b9e03c4034311 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a50f427a1d9419800972b9e03c4034311">add_argument</a> (unsigned int &amp;idx, T <a class="el" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>)</td></tr>
 <tr class="memdesc:a50f427a1d9419800972b9e03c4034311 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add the passed parameters to the object's kernel's arguments starting from the index idx.  <a href="#a50f427a1d9419800972b9e03c4034311">More...</a><br /></td></tr>
@@ -239,10 +224,25 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a5192c53832168a12f3997ea01101aa06"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel.xhtml#a5192c53832168a12f3997ea01101aa06">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output)</td></tr>
-<tr class="memdesc:a5192c53832168a12f3997ea01101aa06"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel.xhtml">CLGEMMInterleave4x4Kernel</a>.  <a href="#a5192c53832168a12f3997ea01101aa06">More...</a><br /></td></tr>
-<tr class="separator:a5192c53832168a12f3997ea01101aa06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af30bb763640db58f6c74b904fdc930d2"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel.xhtml#af30bb763640db58f6c74b904fdc930d2">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output, int mult_interleave4x4_height)</td></tr>
+<tr class="memdesc:af30bb763640db58f6c74b904fdc930d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel.xhtml">CLGEMMInterleave4x4Kernel</a>.  <a href="#af30bb763640db58f6c74b904fdc930d2">More...</a><br /></td></tr>
+<tr class="separator:af30bb763640db58f6c74b904fdc930d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td colspan="2" onclick="javascript:toggleInherit('pub_static_methods_classarm__compute_1_1_i_c_l_kernel')"><img src="closed.png" alt="-"/>&#160;Static Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml">ICLKernel</a></td></tr>
+<tr class="memitem:a278f0e6c68ca17e71f4c4ff82f360aa0 inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memItemLeft" align="right" valign="top">static constexpr unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a278f0e6c68ca17e71f4c4ff82f360aa0">num_arguments_per_1D_array</a> ()</td></tr>
+<tr class="memdesc:a278f0e6c68ca17e71f4c4ff82f360aa0 inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of arguments enqueued per 1D array object.  <a href="#a278f0e6c68ca17e71f4c4ff82f360aa0">More...</a><br /></td></tr>
+<tr class="separator:a278f0e6c68ca17e71f4c4ff82f360aa0 inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43b6c5e4b57069c5f61e96dff24c212d inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memItemLeft" align="right" valign="top">static constexpr unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a43b6c5e4b57069c5f61e96dff24c212d">num_arguments_per_1D_tensor</a> ()</td></tr>
+<tr class="memdesc:a43b6c5e4b57069c5f61e96dff24c212d inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of arguments enqueued per 1D tensor object.  <a href="#a43b6c5e4b57069c5f61e96dff24c212d">More...</a><br /></td></tr>
+<tr class="separator:a43b6c5e4b57069c5f61e96dff24c212d inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45601e0d46621a5b6f2e417d60e5c800 inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memItemLeft" align="right" valign="top">static constexpr unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a45601e0d46621a5b6f2e417d60e5c800">num_arguments_per_2D_tensor</a> ()</td></tr>
+<tr class="memdesc:a45601e0d46621a5b6f2e417d60e5c800 inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of arguments enqueued per 2D tensor object.  <a href="#a45601e0d46621a5b6f2e417d60e5c800">More...</a><br /></td></tr>
+<tr class="separator:a45601e0d46621a5b6f2e417d60e5c800 inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c9c1e7a7d96743375ca40847f0f12e2 inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memItemLeft" align="right" valign="top">static constexpr unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a6c9c1e7a7d96743375ca40847f0f12e2">num_arguments_per_3D_tensor</a> ()</td></tr>
+<tr class="memdesc:a6c9c1e7a7d96743375ca40847f0f12e2 inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of arguments enqueued per 3D tensor object.  <a href="#a6c9c1e7a7d96743375ca40847f0f12e2">More...</a><br /></td></tr>
+<tr class="separator:a6c9c1e7a7d96743375ca40847f0f12e2 inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a184fdf37587a9314cf12623accea6c73 inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memItemLeft" align="right" valign="top">static constexpr unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a184fdf37587a9314cf12623accea6c73">num_arguments_per_4D_tensor</a> ()</td></tr>
+<tr class="memdesc:a184fdf37587a9314cf12623accea6c73 inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of arguments enqueued per 4D tensor object.  <a href="#a184fdf37587a9314cf12623accea6c73">More...</a><br /></td></tr>
+<tr class="separator:a184fdf37587a9314cf12623accea6c73 inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4b4a20e518c04e657839280cd486a85d inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memItemLeft" align="right" valign="top">static cl::NDRange&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a4b4a20e518c04e657839280cd486a85d">gws_from_window</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;<a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>)</td></tr>
 <tr class="memdesc:a4b4a20e518c04e657839280cd486a85d inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the global work size given an execution window.  <a href="#a4b4a20e518c04e657839280cd486a85d">More...</a><br /></td></tr>
 <tr class="separator:a4b4a20e518c04e657839280cd486a85d inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -253,7 +253,7 @@ Static Public Member Functions</h2></td></tr>
 <p class="formulaDsp">
 \[ \left( \begin{array}{cccc} a00 &amp; a01 &amp; a02 &amp; a03 \\ a10 &amp; a11 &amp; a12 &amp; a13 \\ a20 &amp; a21 &amp; a22 &amp; a23 \\ a30 &amp; a31 &amp; a32 &amp; a33 \\ \end{array} \right) \rightarrow \left( \begin{array}{ccccccccccccccccc} a00 &amp; a10 &amp; a20 &amp; a30 &amp; a01 &amp; a11 &amp; a21 &amp; a31 &amp; a02 &amp; a12 &amp; a22 &amp; a32 &amp; a03 &amp; a13 &amp; a23 &amp; a33 \\ \end{array} \right) \]
 </p>
-<p>After this operation, the output matrix will have the following shape: [ height * 4, ceil(width / 4.0f) ] </p>
+<p>After this operation, the output matrix will have the following shape: [ height * W, ceil(width / W) ] where W = 4 * mult_interleave4x4_height </p>
 
 <p>Definition at line <a class="el" href="_c_l_g_e_m_m_interleave4x4_kernel_8h_source.xhtml#l00052">52</a> of file <a class="el" href="_c_l_g_e_m_m_interleave4x4_kernel_8h_source.xhtml">CLGEMMInterleave4x4Kernel.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -327,7 +327,7 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a074e10cfb217e657b9e81adeca2abc68"></a>
+<a class="anchor" id="a2238b6c75a9ca204fc657db2dd1c2aa7"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -341,7 +341,13 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *&#160;</td>
-          <td class="paramname"><em>output</em>&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>mult_interleave4x4_height</em> = <code>1</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -356,6 +362,7 @@ Static Public Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input tensor. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32 </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output tensor. Data type supported: same as <code>input</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mult_interleave4x4_height</td><td>(Optional) Multiplication factor for the height of the 4x4 interleave block </td></tr>
   </table>
   </dd>
 </dl>
@@ -460,7 +467,7 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a5192c53832168a12f3997ea01101aa06"></a>
+<a class="anchor" id="af30bb763640db58f6c74b904fdc930d2"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -477,7 +484,13 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
-          <td class="paramname"><em>output</em>&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>mult_interleave4x4_height</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -496,7 +509,8 @@ Static Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Input tensor info. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32 </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Output tensor info which stores the interleaved matrix. Data type supported: same as <code>input</code>.</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Output tensor info which stores the interleaved matrix. Data type supported: same as <code>input</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mult_interleave4x4_height</td><td>Multiplication factor for the height of the 4x4 interleave block</td></tr>
   </table>
   </dd>
 </dl>
@@ -513,7 +527,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel.xhtml">CLGEMMInterleave4x4Kernel</a></li>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:44 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:23 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

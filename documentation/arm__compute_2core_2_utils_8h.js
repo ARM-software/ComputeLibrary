@@ -1,9 +1,13 @@
 var arm__compute_2core_2_utils_8h =
 [
+    [ "adjust_odd_shape", "arm__compute_2core_2_utils_8h.xhtml#add7f7487c235331a6518dd16ad1e3b38", null ],
     [ "build_information", "arm__compute_2core_2_utils_8h.xhtml#a64c17a5a42d2499a1626222ff9753b4d", null ],
     [ "calculate_depth_concatenate_shape", "arm__compute_2core_2_utils_8h.xhtml#a075313545533c34978309ed57d18333f", null ],
     [ "calculate_matrix_scale", "arm__compute_2core_2_utils_8h.xhtml#a0101a40c4a6acc2af3b55afa7632f16a", null ],
+    [ "calculate_same_pad", "arm__compute_2core_2_utils_8h.xhtml#afa7962c747457714d0944af80cb07058", null ],
+    [ "calculate_subsampled_shape", "arm__compute_2core_2_utils_8h.xhtml#a9d714e1b7d9d7818309138b7d830ebcb", null ],
     [ "ceil_to_multiple", "arm__compute_2core_2_utils_8h.xhtml#adf0c6059174045f80af46a0f1fb57bc6", null ],
+    [ "channel_idx_from_format", "arm__compute_2core_2_utils_8h.xhtml#afab149f8d8b0f6405303ee8056fa77d3", null ],
     [ "data_size_from_type", "arm__compute_2core_2_utils_8h.xhtml#abb7e0f23a4f2e63f39433f158dad47ab", null ],
     [ "data_type_for_convolution", "arm__compute_2core_2_utils_8h.xhtml#a01adc12d8e07c06cdb0f03c56a455bf3", null ],
     [ "data_type_for_convolution_matrix", "arm__compute_2core_2_utils_8h.xhtml#a3992df9e8723140a53e49dc194d89ef5", null ],
@@ -15,6 +19,8 @@ var arm__compute_2core_2_utils_8h =
     [ "float_to_string_with_full_precision", "arm__compute_2core_2_utils_8h.xhtml#a9cd394c15b73f79ca1d98f5328064be2", null ],
     [ "floor_to_multiple", "arm__compute_2core_2_utils_8h.xhtml#a6959e681668a37a9242d2aae4e8b4375", null ],
     [ "get_promoted_data_type", "arm__compute_2core_2_utils_8h.xhtml#a5e4254e9c71fffafb79b99d972df8f81", null ],
+    [ "has_format_horizontal_subsampling", "arm__compute_2core_2_utils_8h.xhtml#aa2f22cc01532e0236e438324310fdb94", null ],
+    [ "has_format_vertical_subsampling", "arm__compute_2core_2_utils_8h.xhtml#a95358b677c5c17f5cc1e369e4a27e2c2", null ],
     [ "is_data_type_fixed_point", "arm__compute_2core_2_utils_8h.xhtml#ab6bb62694ae8369d18a9c9687040975e", null ],
     [ "is_data_type_float", "arm__compute_2core_2_utils_8h.xhtml#af5982a092e9eb743fce2d6392bdd8897", null ],
     [ "is_data_type_quantized", "arm__compute_2core_2_utils_8h.xhtml#a0bee325b210f81bb89fe1f9e15badf9c", null ],

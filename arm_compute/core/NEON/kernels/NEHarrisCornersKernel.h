@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -84,6 +84,10 @@ template <int32_t block_size>
 class NEHarrisScoreKernel : public INEHarrisScoreKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEHarrisScoreKernel";
+    }
     /** Default constructor */
     NEHarrisScoreKernel();
     // Inherited methods overridden:
@@ -105,6 +109,10 @@ template <int32_t block_size>
 class NEHarrisScoreFP16Kernel : public INEHarrisScoreKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEHarrisScoreFP16Kernel";
+    }
     /** Default constructor */
     NEHarrisScoreFP16Kernel();
     // Inherited methods overridden:

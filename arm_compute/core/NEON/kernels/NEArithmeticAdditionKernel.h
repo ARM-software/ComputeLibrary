@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,6 +35,10 @@ class ITensor;
 class NEArithmeticAdditionKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEArithmeticAdditionKernel";
+    }
     /** Default constructor */
     NEArithmeticAdditionKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -81,6 +85,7 @@ public:
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
+    BorderSize border_size() const override;
 
 private:
     /** Common signature for all the specialised add functions

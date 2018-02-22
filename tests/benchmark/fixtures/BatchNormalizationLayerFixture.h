@@ -40,7 +40,7 @@ class BatchNormalizationLayerFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape tensor_shape, TensorShape param_shape, float epsilon, DataType data_type, int batches)
+    void setup(TensorShape tensor_shape, TensorShape param_shape, float epsilon, ActivationLayerInfo act_info, DataType data_type, int batches)
     {
         // Set batched in source and destination shapes
         const unsigned int fixed_point_position = 4;
@@ -55,7 +55,7 @@ public:
         gamma    = create_tensor<TensorType>(param_shape, data_type, 1, fixed_point_position);
 
         // Create and configure function
-        batch_norm_layer.configure(&src, &dst, &mean, &variance, &beta, &gamma, epsilon);
+        batch_norm_layer.configure(&src, &dst, &mean, &variance, &beta, &gamma, epsilon, act_info);
 
         // Allocate tensors
         src.allocator()->allocate();

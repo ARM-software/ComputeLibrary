@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,12 +27,19 @@
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCDirectConvolutionLayerKernel.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/PixelValue.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
+#include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
 #include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
-void GCDirectConvolutionLayer::configure(const IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, const PadStrideInfo &conv_info)
+GCDirectConvolutionLayer::GCDirectConvolutionLayer()
+    : _kernel(nullptr), _border_handler(), _shift_handler()
+{
+}
+
+void GCDirectConvolutionLayer::configure(IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, const PadStrideInfo &conv_info)
 {
     int kernel_size = weights->info()->dimension(0);
 
@@ -61,4 +68,15 @@ void GCDirectConvolutionLayer::configure(const IGCTensor *input, const IGCTensor
     }
 
     _border_handler.configure(input, _kernel->border_size(), BorderMode::CONSTANT, PixelValue(0));
+
+    _shift_handler.configure(input);
+}
+
+void GCDirectConvolutionLayer::run()
+{
+    GCScheduler::get().dispatch(_shift_handler, false);
+    GCScheduler::get().memory_barrier();
+    GCScheduler::get().dispatch(_border_handler, false);
+    GCScheduler::get().memory_barrier();
+    GCScheduler::get().dispatch(*_kernel);
 }

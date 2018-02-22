@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,6 +47,12 @@ constexpr AbsoluteTolerance<float> tolerance_f32(0.00001f); /**< Tolerance value
 constexpr AbsoluteTolerance<float> tolerance_f16(0.01f);    /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
 constexpr AbsoluteTolerance<float> tolerance_qs8(3.0f);     /**< Tolerance value for comparing reference's output against implementation's output for DataType::QS8 */
 constexpr AbsoluteTolerance<float> tolerance_qs16(6.0f);    /**< Tolerance value for comparing reference's output against implementation's output for DataType::QS16 */
+const auto                         act_infos = framework::dataset::make("ActivationInfo",
+{
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f),
+    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 8.f, 2.f),
+});
 } // namespace
 
 TEST_SUITE(CL)
@@ -80,13 +86,16 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Ran
 
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),    // Window shrink
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),    // Mismatching data types
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),    // Mismatching data types
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),    // Invalid mean/var/beta/gamma shape
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2), // Mismatching fixed point position
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2), // Fused activation with fixed point not supported
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),    // Unsupported fused activation
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),    // Fused activation's a < b
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),
                                                      }),
@@ -94,6 +103,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 3),
+                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 3),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),
@@ -106,16 +118,31 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                      TensorInfo(TensorShape(5U), 1, DataType::F32),
                                                      TensorInfo(TensorShape(2U), 1, DataType::QS8, 2),
                                                      TensorInfo(TensorShape(2U), 1, DataType::QS8, 2),
+                                                     TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                     TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                     TensorInfo(TensorShape(2U), 1, DataType::QS8, 2),
                                                      TensorInfo(TensorShape(2U), 1, DataType::QS8, 2),
                                                    })),
-               framework::dataset::make("Expected", { true, false, false, false, false, false, true, true})),
-               input_info, output_info, mvbg_info, expected)
+                framework::dataset::make("ActivationLayerInfo",{ ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+                                                    ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
+                                                     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f),
+                                                     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f),
+                                                     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f),
+                                                     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f, 2.f),
+                                                     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f, 2.f),
+                                                     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::TANH),
+                                                     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 2.f, 6.f),
+                                                     ActivationLayerInfo(),
+                                                     ActivationLayerInfo(),
+                                                   })),
+               framework::dataset::make("Expected", { true, false, false, false, false, false, false, false, false, true, true})),
+               input_info, output_info, mvbg_info, act_info, expected)
 {
     const auto &mean_info = mvbg_info;
     const auto &var_info = mvbg_info;
     const auto &beta_info = mvbg_info;
     const auto &gamma_info = mvbg_info;
-    bool has_error = bool(CLBatchNormalizationLayer::validate(&input_info.clone()->set_is_resizable(false), (output_info.total_size() == 0) ? nullptr : &output_info.clone()->set_is_resizable(false), &mean_info.clone()->set_is_resizable(false), &var_info.clone()->set_is_resizable(false), &beta_info.clone()->set_is_resizable(false), &gamma_info.clone()->set_is_resizable(false), 1.f));
+    bool has_error = bool(CLBatchNormalizationLayer::validate(&input_info.clone()->set_is_resizable(false), (output_info.total_size() == 0) ? nullptr : &output_info.clone()->set_is_resizable(false), &mean_info.clone()->set_is_resizable(false), &var_info.clone()->set_is_resizable(false), &beta_info.clone()->set_is_resizable(false), &gamma_info.clone()->set_is_resizable(false), 1.f, act_info));
     ARM_COMPUTE_EXPECT(has_error == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
@@ -123,7 +150,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(Random, CLBatchNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(datasets::RandomBatchNormalizationLayerDataset(),
+FIXTURE_DATA_TEST_CASE(Random, CLBatchNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
+                                                                                                                   act_infos),
                                                                                                                    framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
@@ -132,7 +160,8 @@ FIXTURE_DATA_TEST_CASE(Random, CLBatchNormalizationLayerFixture<float>, framewor
 TEST_SUITE_END()
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(Random, CLBatchNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::RandomBatchNormalizationLayerDataset(),
+FIXTURE_DATA_TEST_CASE(Random, CLBatchNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
+                                                                                                                  framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))),
                                                                                                                   framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
@@ -146,7 +175,8 @@ template <typename T>
 using CLBatchNormalizationLayerFixedPointFixture = BatchNormalizationLayerValidationFixedPointFixture<CLTensor, CLAccessor, CLBatchNormalizationLayer, T>;
 
 TEST_SUITE(QS8)
-FIXTURE_DATA_TEST_CASE(Random, CLBatchNormalizationLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
+FIXTURE_DATA_TEST_CASE(Random, CLBatchNormalizationLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
+                       framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
                        framework::dataset::make("DataType", DataType::QS8)),
                        framework::dataset::make("FractionalBits", 1, 6)))
 {
@@ -156,7 +186,8 @@ FIXTURE_DATA_TEST_CASE(Random, CLBatchNormalizationLayerFixedPointFixture<int8_t
 TEST_SUITE_END()
 
 TEST_SUITE(QS16)
-FIXTURE_DATA_TEST_CASE(Random, CLBatchNormalizationLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
+FIXTURE_DATA_TEST_CASE(Random, CLBatchNormalizationLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
+                       framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
                        framework::dataset::make("DataType", DataType::QS16)),
                        framework::dataset::make("FractionalBits", 1, 14)))
 {

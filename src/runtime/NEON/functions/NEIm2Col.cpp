@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -28,14 +28,14 @@
 
 using namespace arm_compute;
 
-void NEIm2Col::configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias)
+void NEIm2Col::configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, bool is_fully_connected)
 {
     auto k = arm_compute::support::cpp14::make_unique<NEIm2ColKernel>();
-    k->configure(input, output, kernel_dims, conv_info, has_bias);
+    k->configure(input, output, kernel_dims, conv_info, has_bias, is_fully_connected);
     _kernel = std::move(k);
 }
 
-Status NEIm2Col::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias)
+Status NEIm2Col::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, bool is_fully_connected)
 {
-    return NEIm2ColKernel::validate(input, output, kernel_dims, conv_info, has_bias);
+    return NEIm2ColKernel::validate(input, output, kernel_dims, conv_info, has_bias, is_fully_connected);
 }

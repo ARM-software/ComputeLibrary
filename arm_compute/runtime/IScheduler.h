@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -70,9 +70,20 @@ public:
      * @return CPU info.
      */
     CPUInfo cpu_info() const;
+    /** Get a hint for the best possible number of execution threads
+     *
+     * @warning In case we can't work out the best number of threads,
+     *          std::thread::hardware_concurrency() is returned else 1 in case of bare metal builds
+     *
+     * @return Best possible number of execution threads to use
+     */
+    unsigned int num_threads_hint() const;
 
 protected:
     CPUInfo _info{};
+
+private:
+    unsigned int _num_threads_hint = {};
 };
 }
 #endif /* __ARM_COMPUTE_ISCHEDULER_H__ */

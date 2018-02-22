@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,6 +41,9 @@ Framework::Framework()
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::NONE), Instrument::make_instrument<WallClockTimer, ScaleFactor::NONE>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::TIME_MS), Instrument::make_instrument<WallClockTimer, ScaleFactor::TIME_MS>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::TIME_S), Instrument::make_instrument<WallClockTimer, ScaleFactor::TIME_S>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::SCHEDULER_TIMER, ScaleFactor::NONE), Instrument::make_instrument<SchedulerTimer, ScaleFactor::NONE>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::SCHEDULER_TIMER, ScaleFactor::TIME_MS), Instrument::make_instrument<SchedulerTimer, ScaleFactor::TIME_MS>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::SCHEDULER_TIMER, ScaleFactor::TIME_S), Instrument::make_instrument<SchedulerTimer, ScaleFactor::TIME_S>);
 #ifdef PMU_ENABLED
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::PMU, ScaleFactor::NONE), Instrument::make_instrument<PMUCounter, ScaleFactor::NONE>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::PMU, ScaleFactor::SCALE_1K), Instrument::make_instrument<PMUCounter, ScaleFactor::SCALE_1K>);

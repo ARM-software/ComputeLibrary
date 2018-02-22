@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -135,18 +135,24 @@ void GCArithmeticAdditionKernel::run(const Window &window)
 
     _kernel.use();
 
-    Window slice = window.first_slice_window_2D();
+    _output->set_needs_shifting(true);
+
+    Window slice    = window.first_slice_window_3D();
+    Window slice_in = window.first_slice_window_3D();
+
+    slice.shift(Window::DimX, -(_output->info()->padding()).left);
+
     do
     {
         unsigned int idx     = 0;
         unsigned int binding = 1; // SSBO binding starts from 1.
-        add_2D_tensor_argument(idx, _input1, binding++, slice);
-        add_2D_tensor_argument(idx, _input2, binding++, slice);
-        add_2D_tensor_argument(idx, _output, binding++, slice);
+        add_3D_tensor_argument(idx, _input1, binding++, slice_in);
+        add_3D_tensor_argument(idx, _input2, binding++, slice_in);
+        add_3D_tensor_argument(idx, _output, binding++, slice);
 
         _kernel.update_shader_params();
 
         enqueue(*this, slice);
     }
-    while(window.slide_window_slice_2D(slice));
+    while(window.slide_window_slice_3D(slice) && window.slide_window_slice_3D(slice_in));
 }

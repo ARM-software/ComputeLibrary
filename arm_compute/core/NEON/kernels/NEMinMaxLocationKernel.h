@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,6 +39,10 @@ using IImage = ITensor;
 class NEMinMaxKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEMinMaxKernel";
+    }
     /** Default constructor */
     NEMinMaxKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -102,6 +106,10 @@ private:
 class NEMinMaxLocationKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEMinMaxLocationKernel";
+    }
     /** Default constructor */
     NEMinMaxLocationKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */

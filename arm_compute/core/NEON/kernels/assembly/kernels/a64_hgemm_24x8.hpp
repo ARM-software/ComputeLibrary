@@ -28,6 +28,7 @@
 // Get the components we need to implement SGEMM.
 // Can select appropriate components dependent on AArch32 vs. AArch64 etc. at build time.
 #include "a64_hgemm_24x8/generic.hpp"
+#include "a64_hgemm_24x8/a55r1.hpp"
 
 // 24x8 HGEMM "strategy" class.  Describes the kernel properties.
 //
@@ -56,7 +57,11 @@ public:
 
     hgemm_24x8(const struct CPUInfo *ci) {
         kernel = a64_hgemm_asimd_24x8;
+        if (ci->CPU == CPUTarget::A55_DOT) {
+            kernel = a64_hgemm_asimd_24x8_a55r1;
+        }
     }
+
 };
 
 #endif // __aarch64__ and FP16_VECTOR_ARITHMETIC

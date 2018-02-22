@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,21 +24,47 @@
 #include "arm_compute/runtime/CL/CLTuner.h"
 
 #include "arm_compute/core/CL/ICLKernel.h"
+#include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
-#include <chrono>
 #include <limits>
 #include <string>
 
 using namespace arm_compute;
 
 CLTuner::CLTuner()
-    : _lws_table()
+    : real_function(nullptr), _lws_table(), _queue(), _queue_profiler(), _kernel_event()
 {
+}
+
+void CLTuner::set_cl_kernel_event(cl_event kernel_event)
+{
+    _kernel_event = kernel_event;
 }
 
 void CLTuner::tune_kernel(ICLKernel &kernel)
 {
+    if(real_function == nullptr)
+    {
+        real_function = CLSymbols::get().clEnqueueNDRangeKernel_ptr;
+
+        // Get the default queue
+        _queue = CLScheduler::get().queue();
+
+        // Check if we can use the OpenCL timer with the default queue
+        cl_command_queue_properties props = _queue.getInfo<CL_QUEUE_PROPERTIES>();
+
+        if((props & CL_QUEUE_PROFILING_ENABLE) == 0)
+        {
+            // Set the queue for profiling
+            _queue_profiler = cl::CommandQueue(CLScheduler::get().context(), props | CL_QUEUE_PROFILING_ENABLE);
+        }
+        else
+        {
+            _queue_profiler = _queue;
+        }
+    }
+
     // Get the configuration ID from the kernel
     const std::string &config_id = kernel.config_id();
 
@@ -49,6 +75,9 @@ void CLTuner::tune_kernel(ICLKernel &kernel)
 
         if(p == _lws_table.end())
         {
+            // Set profiler queue
+            CLScheduler::get().set_queue(_queue_profiler);
+
             // Find the optimal LWS for the kernel
             cl::NDRange opt_lws = find_optimal_lws(kernel);
 
@@ -57,6 +86,9 @@ void CLTuner::tune_kernel(ICLKernel &kernel)
 
             // Set Local-Workgroup-Size
             kernel.set_lws_hint(opt_lws);
+
+            // Restore queue
+            CLScheduler::get().set_queue(_queue);
         }
         else
         {
@@ -68,40 +100,77 @@ void CLTuner::tune_kernel(ICLKernel &kernel)
 
 cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel)
 {
-    cl::CommandQueue q = CLScheduler::get().queue();
+    // Start intercepting enqueues:
+    CLSymbols::get().clEnqueueNDRangeKernel_ptr = Interceptor(*this);
 
-    double min_exec_time = std::numeric_limits<double>::max();
+    cl_ulong min_exec_time = std::numeric_limits<cl_ulong>::max();
 
-    cl::NDRange opt_lws = cl::NDRange(1, 1);
+    cl::NDRange opt_lws = cl::NullRange;
 
-    for(int y = 1; y <= 16; ++y)
+    const int x_step = std::max(1, kernel.window().x().step());
+    const int y_step = std::max(1, kernel.window().y().step());
+    const int z_step = std::max(1, kernel.window().z().step());
+    const int x_end  = kernel.window().x().end() - kernel.window().x().start() / x_step > 1 ? 16 : 1;
+    const int y_end  = kernel.window().y().end() - kernel.window().y().start() / y_step > 1 ? 16 : 1;
+    const int z_end  = kernel.window().z().end() - kernel.window().z().start() / z_step > 1 ? 8 : 1;
+
+    // First run using the default LWS
     {
-        for(int x = 1; x <= 16; ++x)
+        cl::NDRange lws_test = cl::NullRange;
+
+        kernel.set_lws_hint(lws_test);
+
+        // Run the kernel
+        kernel.run(kernel.window(), _queue_profiler);
+
+        CLScheduler::get().sync();
+
+        const cl_ulong start = _kernel_event.getProfilingInfo<CL_PROFILING_COMMAND_START>();
+        const cl_ulong end   = _kernel_event.getProfilingInfo<CL_PROFILING_COMMAND_END>();
+        const cl_ulong diff  = end - start;
+
+        min_exec_time = diff;
+    }
+
+    for(int z = 1; z <= z_end; ++z)
+    {
+        for(int y = 1; y <= y_end; ++y)
         {
-            cl::NDRange lws_test = cl::NDRange(x, y);
-
-            //Set the Local-Workgroup-Size
-            kernel.set_lws_hint(lws_test);
-
-            auto t_start = std::chrono::high_resolution_clock::now();
-
-            // Run
-            kernel.run(kernel.window(), q);
-
-            CLScheduler::get().sync();
-
-            auto t_stop = std::chrono::high_resolution_clock::now();
-
-            std::chrono::duration<double, std::nano> fp_nano = t_stop - t_start;
-
-            // Check the execution time
-            if(fp_nano.count() < min_exec_time)
+            for(int x = 1; x <= x_end; ++x)
             {
-                min_exec_time = fp_nano.count();
-                opt_lws       = cl::NDRange(x, y);
+                cl::NDRange lws_test = cl::NDRange(x, y, z);
+
+                const bool invalid_lws = (x * y * z > static_cast<int>(kernel.get_max_workgroup_size())) || (x == 1 && y == 1 && z == 1);
+
+                if(invalid_lws)
+                {
+                    continue;
+                }
+
+                //Set the Local-Workgroup-Size
+                kernel.set_lws_hint(lws_test);
+
+                // Run the kernel
+                kernel.run(kernel.window(), _queue_profiler);
+
+                CLScheduler::get().sync();
+
+                const cl_ulong start = _kernel_event.getProfilingInfo<CL_PROFILING_COMMAND_START>();
+                const cl_ulong end   = _kernel_event.getProfilingInfo<CL_PROFILING_COMMAND_END>();
+                const cl_ulong diff  = end - start;
+
+                // Check the execution time
+                if(diff < min_exec_time)
+                {
+                    min_exec_time = diff;
+                    opt_lws       = cl::NDRange(x, y, z);
+                }
             }
         }
     }
+
+    // Restore real function
+    CLSymbols::get().clEnqueueNDRangeKernel_ptr = real_function;
 
     return opt_lws;
 }
@@ -115,4 +184,24 @@ void CLTuner::import_lws_table(const std::unordered_map<std::string, cl::NDRange
 const std::unordered_map<std::string, cl::NDRange> &CLTuner::export_lws_table()
 {
     return _lws_table;
+}
+
+Interceptor::Interceptor(CLTuner &tuner)
+    : _tuner(tuner)
+{
+}
+
+cl_int Interceptor::operator()(cl_command_queue command_queue, cl_kernel kernel, cl_uint work_dim, const size_t *gwo, const size_t *gws, const size_t *lws, cl_uint num_events_in_wait_list,
+                               const cl_event *event_wait_list, cl_event *event)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(event != nullptr, "Not supported");
+    ARM_COMPUTE_UNUSED(event);
+
+    cl_event tmp;
+    cl_int   retval = _tuner.real_function(command_queue, kernel, work_dim, gwo, gws, lws, num_events_in_wait_list, event_wait_list, &tmp);
+
+    // Set OpenCL event
+    _tuner.set_cl_kernel_event(tmp);
+
+    return retval;
 }

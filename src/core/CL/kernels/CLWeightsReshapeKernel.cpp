@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,8 +31,41 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 using namespace arm_compute;
+using namespace arm_compute::misc::shape_calculator;
+
+namespace
+{
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
+
+    if(biases != nullptr)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_asymmetric(input->data_type()));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, biases);
+        ARM_COMPUTE_RETURN_ERROR_ON((input->num_dimensions() == 4) && (biases->num_dimensions() != 1));
+        ARM_COMPUTE_RETURN_ERROR_ON((input->num_dimensions() == 5) && (biases->num_dimensions() != 2));
+        ARM_COMPUTE_RETURN_ERROR_ON((input->num_dimensions() == 4) && (biases->dimension(0) != input->tensor_shape()[3]));
+        ARM_COMPUTE_RETURN_ERROR_ON((input->num_dimensions() == 5) && (biases->dimension(0) != input->tensor_shape()[3] || biases->dimension(1) != input->tensor_shape()[4]));
+    }
+
+    // Checks performed when output is configured
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), compute_weights_reshaped_shape(*input, biases != nullptr));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
+    }
+
+    return Status{};
+}
+} // namespace
 
 CLWeightsReshapeKernel::CLWeightsReshapeKernel()
     : _input(nullptr), _biases(nullptr), _output(nullptr)
@@ -41,35 +74,17 @@ CLWeightsReshapeKernel::CLWeightsReshapeKernel()
 
 void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *biases, ICLTensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
-
-    const DataType data_type = input->info()->data_type();
-
-    // Calculate output shape
-    TensorShape output_shape{ input->info()->tensor_shape() };
-    output_shape.collapse(3);
-    const size_t tmp_dim = output_shape[0];
-    output_shape.set(0, output_shape[1]);
-    output_shape.set(1, tmp_dim + (biases != nullptr ? 1 : 0));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output tensor auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(compute_weights_reshaped_shape(*input->info(), (biases != nullptr))));
 
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    // Perform validation step
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(),
+                                                  (biases != nullptr) ? biases->info() : nullptr,
+                                                  output->info()));
 
-    if(biases != nullptr)
-    {
-        ARM_COMPUTE_ERROR_ON(is_data_type_quantized_asymmetric(data_type));
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, biases);
-        ARM_COMPUTE_ERROR_ON((input->info()->num_dimensions() == 4) && (biases->info()->num_dimensions() != 1));
-        ARM_COMPUTE_ERROR_ON((input->info()->num_dimensions() == 5) && (biases->info()->num_dimensions() != 2));
-        ARM_COMPUTE_ERROR_ON((input->info()->num_dimensions() == 4) && (biases->info()->dimension(0) != input->info()->tensor_shape()[3]));
-        ARM_COMPUTE_ERROR_ON((input->info()->num_dimensions() == 5) && (biases->info()->dimension(0) != input->info()->tensor_shape()[3] || biases->info()->dimension(1) != input->info()->tensor_shape()[4]));
-    }
+    const DataType data_type = input->info()->data_type();
 
     _biases = biases;
     _output = output;
@@ -97,6 +112,12 @@ void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *
     // The CLWeightsReshapeKernel doesn't need padding so update_window_and_padding() can be skipped
     output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
     ICLKernel::configure(win);
+}
+
+Status CLWeightsReshapeKernel::validate(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, biases, output));
+    return Status{};
 }
 
 void CLWeightsReshapeKernel::run(const Window &window, cl::CommandQueue &queue)

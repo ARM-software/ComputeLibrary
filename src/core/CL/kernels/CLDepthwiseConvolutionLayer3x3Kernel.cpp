@@ -51,13 +51,15 @@ BorderSize CLDepthwiseConvolutionLayer3x3Kernel::border_size() const
 
 void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_ERROR_ON(weights->info()->dimension(0) != 3 || weights->info()->dimension(1) != 3);
 
+    bool is_qasymm = is_data_type_quantized_asymmetric(input->info()->data_type());
+
     if(biases != nullptr)
     {
-        if(is_data_type_quantized_asymmetric(weights->info()->data_type()))
+        if(is_qasymm)
         {
             ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
         }
@@ -98,82 +100,124 @@ void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, con
     build_opts.add_option("-DCONV_STRIDE_X=" + support::cpp11::to_string(_conv_stride_x));
     build_opts.add_option_if(_biases != nullptr, "-DHAS_BIAS");
 
-    // Create kernel
-    std::string kernel_name = is_data_type_quantized_asymmetric(_input->info()->data_type()) ? "depthwise_convolution_3x3_quantized" : "depthwise_convolution_3x3";
-    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
-
-    // Set static arguments
-    if(is_data_type_quantized_asymmetric(_input->info()->data_type()))
+    if(is_qasymm)
     {
         float multiplier        = _input->info()->quantization_info().scale * _weights->info()->quantization_info().scale / _output->info()->quantization_info().scale;
         int   output_multiplier = 0;
         int   output_shift      = 0;
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
 
-        unsigned int idx = 3 * num_arguments_per_3D_tensor() + ((_biases != nullptr) ? num_arguments_per_1D_tensor() : 0);
-
-        _kernel.setArg(idx++, -_input->info()->quantization_info().offset);
-        _kernel.setArg(idx++, -_weights->info()->quantization_info().offset);
-        _kernel.setArg(idx++, _output->info()->quantization_info().offset);
-        _kernel.setArg(idx++, output_multiplier);
-        _kernel.setArg(idx++, output_shift);
+        build_opts.add_option("-DCONV_STRIDE_Y=" + support::cpp11::to_string(_conv_stride_y));
+        build_opts.add_option("-DINPUT_OFFSET=" + support::cpp11::to_string(-_input->info()->quantization_info().offset));
+        build_opts.add_option("-DWEIGHTS_OFFSET=" + support::cpp11::to_string(-_weights->info()->quantization_info().offset));
+        build_opts.add_option("-DOUTPUT_OFFSET=" + support::cpp11::to_string(_output->info()->quantization_info().offset));
+        build_opts.add_option("-DK_OFFSET=" + support::cpp11::to_string(9 * input->info()->quantization_info().offset * weights->info()->quantization_info().offset));
+        build_opts.add_option("-DOUTPUT_MULTIPLIER=" + support::cpp11::to_string(output_multiplier));
+        build_opts.add_option("-DOUTPUT_SHIFT=" + support::cpp11::to_string(output_shift));
     }
 
     // Configure the local work size for Bifrost with a value obtained
     // via exhaustive autotuning for the MobileNets tensor shapes.
     const GPUTarget gpu_target = get_arch_from_target(get_target());
-    if(gpu_target == GPUTarget::BIFROST)
-    {
-        // Assume uniform padding and striding.
-        const size_t pad    = _conv_pad_left;
-        const size_t stride = _conv_stride_x;
-        const size_t width  = input->info()->dimension(0);
-        if(pad == 1)
-        {
-            const size_t width_by_stride = width / stride;
-            if(width_by_stride == 28) // 56/2 or 28/1
-            {
-                _lws_hint = cl::NDRange(7, 4, 3);
-            }
-            else if(width_by_stride == 14) // 28/2 or 14/1
-            {
-                _lws_hint = cl::NDRange(7, 7, 4);
-            }
-        }
-        else if(pad == 0)
-        {
-            if(width >= 56) // 56 or 112
-            {
-                _lws_hint = cl::NDRange(8, 5, 2);
-            }
-            else if(width >= 14) // 14 or 28
-            {
-                _lws_hint = cl::NDRange(1, 5, 2);
-            }
-            else // 7
-            {
-                _lws_hint = cl::NDRange(1, 1, 2);
-            }
-        }
-    }
 
     // Configure kernel window
-    const unsigned int num_elems_processed_per_iteration = 8 / data_size_from_type(input->info()->data_type());
-    const unsigned int num_elems_written_per_iteration   = num_elems_processed_per_iteration;
-    const unsigned int num_elems_read_per_iteration      = 3 + (num_elems_processed_per_iteration - 1) * _conv_stride_x;
-    const unsigned int num_rows_read_per_iteration       = 3;
+    unsigned int num_elems_read_per_iteration_x    = 0;
+    unsigned int num_elems_read_per_iteration_y    = 0;
+    unsigned int num_elems_written_per_iteration_x = 0;
+    unsigned int num_elems_written_per_iteration_y = 0;
 
-    Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
+    // Create kernel
+    std::string kernel_name;
 
-    AccessWindowRectangle  input_access(input->info(), -border_size().left, -border_size().top, num_elems_read_per_iteration, num_rows_read_per_iteration, _conv_stride_x, _conv_stride_y);
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_written_per_iteration);
-    AccessWindowStatic     weights_access(weights->info(), 0, 0, weights->info()->dimension(0), weights->info()->dimension(1));
+    if(input->info()->data_type() == DataType::F16)
+    {
+        kernel_name                       = "depthwise_convolution_3x3_f16";
+        num_elems_written_per_iteration_x = 8 / data_size_from_type(input->info()->data_type());
+        num_elems_written_per_iteration_y = 1;
+        num_elems_read_per_iteration_y    = 3;
+        switch(_conv_stride_x)
+        {
+            case 1:
+                num_elems_read_per_iteration_x = 8;
+                break;
+            case 2:
+                num_elems_read_per_iteration_x = 9;
+                break;
+            case 3:
+                num_elems_read_per_iteration_x = 16;
+                break;
+            default:
+                num_elems_read_per_iteration_x = 3 + (num_elems_written_per_iteration_x - 1) * _conv_stride_x;
+                break;
+        }
+    }
+    else if(input->info()->data_type() == DataType::F32 && gpu_target == GPUTarget::BIFROST)
+    {
+        if(_conv_stride_x == 1 && _conv_stride_y == 1)
+        {
+            kernel_name                       = "depthwise_convolution_3x3_stridex1_stridey1_bifrost";
+            num_elems_read_per_iteration_x    = 4;
+            num_elems_read_per_iteration_y    = 6;
+            num_elems_written_per_iteration_x = 2;
+            num_elems_written_per_iteration_y = 4;
+        }
+        else if(_conv_stride_x == 2 && _conv_stride_y == 2)
+        {
+            kernel_name                       = "depthwise_convolution_3x3_stridex2_stridey2_bifrost";
+            num_elems_read_per_iteration_x    = 6;
+            num_elems_read_per_iteration_y    = 5;
+            num_elems_written_per_iteration_x = 2;
+            num_elems_written_per_iteration_y = 2;
+        }
+        else
+        {
+            kernel_name                       = "depthwise_convolution_3x3";
+            num_elems_written_per_iteration_x = 8 / data_size_from_type(input->info()->data_type());
+            num_elems_written_per_iteration_y = 1;
+            num_elems_read_per_iteration_x    = 3 + (num_elems_written_per_iteration_x - 1) * _conv_stride_x;
+            num_elems_read_per_iteration_y    = 3;
+        }
+    }
+    else
+    {
+        kernel_name                       = is_qasymm ? "depthwise_convolution_3x3_quantized" : "depthwise_convolution_3x3";
+        num_elems_written_per_iteration_x = 8 / data_size_from_type(input->info()->data_type());
+        num_elems_written_per_iteration_y = (is_qasymm && _conv_stride_y < 3) ? (2 / _conv_stride_y) : 1;
+        num_elems_read_per_iteration_x    = 3 + (num_elems_written_per_iteration_x - 1) * _conv_stride_x;
+        num_elems_read_per_iteration_y    = num_elems_written_per_iteration_y + 2;
+    }
+
+    // Create window and update padding
+    Window win = calculate_max_window(*output->info(), Steps(num_elems_written_per_iteration_x, num_elems_written_per_iteration_y));
+
+    AccessWindowRectangle input_access(input->info(), -_conv_pad_left, -_conv_pad_top,
+                                       num_elems_read_per_iteration_x, num_elems_read_per_iteration_y,
+                                       _conv_stride_x, _conv_stride_y);
+    AccessWindowStatic    weights_access(weights->info(), 0, 0, 3, 3);
+    AccessWindowRectangle output_access(output->info(), 0, 0, num_elems_written_per_iteration_x, num_elems_written_per_iteration_y);
 
     update_window_and_padding(win, input_access, weights_access, output_access);
 
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     ICLKernel::configure(win);
+
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+
+    // Set config_id for enabling LWS tuning
+    _config_id = kernel_name;
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_type(input->info()->data_type()));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(1));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(input->info()->dimension(2));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(0));
+    _config_id += "_";
+    _config_id += support::cpp11::to_string(output->info()->dimension(1));
 }
 
 void CLDepthwiseConvolutionLayer3x3Kernel::run(const Window &window, cl::CommandQueue &queue)

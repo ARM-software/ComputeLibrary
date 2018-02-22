@@ -44,12 +44,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
                                                          DataType::U16, DataType::S16, DataType::QS16,
                                                          DataType::U32, DataType::S32,
                                                          DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_dimensions() < 3, "Invalid input size!");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(
-        (perm.num_dimensions() != 3 && ((perm[0] != 2 && perm[1] != 0 && perm[2] != 1) || (perm[0] != 1 && perm[1] != 2 && perm[2] != 0))) && (perm.num_dimensions() != 4 && ((perm[0] != 2 && perm[1] != 0
-                && perm[2] != 1)
-                || (perm[0] != 1 && perm[1] != 2 && perm[2] != 0))),
-        "Only [2, 0, 1],[1, 2, 0] and [3, 2, 0, 1] permutation is supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(perm.num_dimensions() > 4, "Only up to 4D permutation vectors are supported");
 
     const TensorShape output_shape = misc::shape_calculator::compute_permutation_output_shape(*input, perm);
 
@@ -70,7 +65,8 @@ inline void permute_strides(Dimensions<T> &dimensions, const PermutationVector &
     const auto old_dim = utility::make_array<Dimensions<T>::num_max_dimensions>(dimensions.begin(), dimensions.end());
     for(unsigned int i = 0; i < perm.num_dimensions(); ++i)
     {
-        dimensions[perm[i]] = old_dim[i];
+        T dimension_val = old_dim[i];
+        dimensions.set(perm[i], dimension_val);
     }
 }
 
@@ -79,20 +75,23 @@ inline void permute_strides(Dimensions<T> &dimensions, const PermutationVector &
 template <typename T>
 void CPPPermuteKernel::run_permute(const Window &window)
 {
+    // Permute strides
     Strides strides      = _output->info()->strides_in_bytes();
     Strides perm_strides = strides;
     permute_strides(perm_strides, _perm);
-    const int               output_stride_w = strides[3];
+
+    // Create output window
     Window                  window_out(window);
     const Window::Dimension zero_window = Window::Dimension(0, 0, 0);
     for(size_t d = 0; d <= _perm.num_dimensions(); ++d)
     {
         window_out.set(d, zero_window);
     }
+
     // Create iterators
     Iterator in(_input, window);
     Iterator out(_output, window_out);
-    ARM_COMPUTE_ERROR_ON(_perm.num_dimensions() > _input->info()->num_dimensions());
+
     if(_input->info()->num_dimensions() <= 3)
     {
         execute_window_loop(window, [&](const Coordinates & id)
@@ -104,26 +103,12 @@ void CPPPermuteKernel::run_permute(const Window &window)
     }
     else if(_input->info()->num_dimensions() >= 4)
     {
-        if(_perm.num_dimensions() < _input->info()->num_dimensions())
+        execute_window_loop(window, [&](const Coordinates & id)
         {
-            // special case: perm.size = 3 and tensor size > 3, _perm[3] would be invalid so we handle this with id[3] * output_stride_w instead of id[_perm[3]]
-            ARM_COMPUTE_ERROR_ON(_perm.num_dimensions() < 3);
-            execute_window_loop(window, [&](const Coordinates & id)
-            {
-                const int idx                             = id[0] * perm_strides[0] + id[1] * perm_strides[1] + id[2] * perm_strides[2] + id[3] * output_stride_w;
-                *(reinterpret_cast<T *>(out.ptr() + idx)) = *(reinterpret_cast<const T *>(in.ptr()));
-            },
-            in, out);
-        }
-        else
-        {
-            execute_window_loop(window, [&](const Coordinates & id)
-            {
-                const int idx                             = id[0] * perm_strides[0] + id[1] * perm_strides[1] + id[2] * perm_strides[2] + id[3] * perm_strides[3];
-                *(reinterpret_cast<T *>(out.ptr() + idx)) = *(reinterpret_cast<const T *>(in.ptr()));
-            },
-            in, out);
-        }
+            const int idx                             = id[0] * perm_strides[0] + id[1] * perm_strides[1] + id[2] * perm_strides[2] + id[3] * perm_strides[3];
+            *(reinterpret_cast<T *>(out.ptr() + idx)) = *(reinterpret_cast<const T *>(in.ptr()));
+        },
+        in, out);
     }
 }
 

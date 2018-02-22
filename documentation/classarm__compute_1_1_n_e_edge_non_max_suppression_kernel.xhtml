@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -135,6 +135,9 @@ Collaboration diagram for NEEdgeNonMaxSuppressionKernel:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:ab5656bb5b6334bdbe6e606c715872828"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_edge_non_max_suppression_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">name</a> () const override</td></tr>
+<tr class="memdesc:ab5656bb5b6334bdbe6e606c715872828"><td class="mdescLeft">&#160;</td><td class="mdescRight">Name of the kernel.  <a href="#ab5656bb5b6334bdbe6e606c715872828">More...</a><br /></td></tr>
+<tr class="separator:ab5656bb5b6334bdbe6e606c715872828"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7e3beb7abd77b10e6630ae83f33e558b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_edge_non_max_suppression_kernel.xhtml#a7e3beb7abd77b10e6630ae83f33e558b">NEEdgeNonMaxSuppressionKernel</a> ()</td></tr>
 <tr class="memdesc:a7e3beb7abd77b10e6630ae83f33e558b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <a href="#a7e3beb7abd77b10e6630ae83f33e558b">More...</a><br /></td></tr>
 <tr class="separator:a7e3beb7abd77b10e6630ae83f33e558b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -186,7 +189,7 @@ Public Member Functions</h2></td></tr>
 <dd>
 Hysteresis is computed in <a class="el" href="classarm__compute_1_1_n_e_edge_trace_kernel.xhtml">NEEdgeTraceKernel</a> </dd></dl>
 
-<p>Definition at line <a class="el" href="_n_e_canny_edge_kernel_8h_source.xhtml#l00104">104</a> of file <a class="el" href="_n_e_canny_edge_kernel_8h_source.xhtml">NECannyEdgeKernel.h</a>.</p>
+<p>Definition at line <a class="el" href="_n_e_canny_edge_kernel_8h_source.xhtml#l00112">112</a> of file <a class="el" href="_n_e_canny_edge_kernel_8h_source.xhtml">NECannyEdgeKernel.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a7e3beb7abd77b10e6630ae83f33e558b"></a>
 <div class="memitem">
@@ -374,6 +377,38 @@ Hysteresis is computed in <a class="el" href="classarm__compute_1_1_n_e_edge_tra
 
 </div>
 </div>
+<a class="anchor" id="ab5656bb5b6334bdbe6e606c715872828"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char* name </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Name of the kernel. </p>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="classarm__compute_1_1_kernel.xhtml" title="Kernel class. ">Kernel</a> name </dd></dl>
+
+<p>Implements <a class="el" href="classarm__compute_1_1_i_c_p_p_kernel.xhtml#a1a30ad8f276a2310571c36239554831a">ICPPKernel</a>.</p>
+
+<p>Definition at line <a class="el" href="_n_e_canny_edge_kernel_8h_source.xhtml#l00115">115</a> of file <a class="el" href="_n_e_canny_edge_kernel_8h_source.xhtml">NECannyEdgeKernel.h</a>.</p>
+
+<p>References <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#aa6daa9b04e2035bf007e5e5c3c4396a8">IKernel::border_size()</a>, <a class="el" href="classarm__compute_1_1_n_e_gradient_kernel.xhtml#a49306e1c9421979fc704f3c96096ce8e">NEGradientKernel::configure()</a>, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">arm_compute::test::validation::info()</a>, <a class="el" href="validation_2reference_2_magnitude_8cpp_source.xhtml#l00035">arm_compute::test::validation::reference::magnitude()</a>, <a class="el" href="classarm__compute_1_1_n_e_gradient_kernel.xhtml#ac9fb1a343e29082ecd7ffaa0216dcd35">NEGradientKernel::operator=()</a>, <a class="el" href="reference_2_phase_8cpp_source.xhtml#l00035">arm_compute::test::validation::reference::phase()</a>, <a class="el" href="classarm__compute_1_1_n_e_gradient_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEGradientKernel::run()</a>, and <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">IKernel::window()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;    {</div><div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;        <span class="keywordflow">return</span> <span class="stringliteral">&quot;NEEdgeNonMaxSuppressionKernel&quot;</span>;</div><div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;    }</div></div><!-- fragment -->
+</div>
+</div>
 <a class="anchor" id="a5f1f723a41130cb9ff98478cd958ac28"></a>
 <div class="memitem">
 <div class="memproto">
@@ -484,7 +519,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_edge_non_max_suppression_kernel.xhtml">NEEdgeNonMaxSuppressionKernel</a></li>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:45 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:25 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

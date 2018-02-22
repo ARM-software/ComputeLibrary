@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,6 +49,7 @@ Status CLDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(0) != weights->dimension(1));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(0) < 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(!info.padding_is_symmetric());
 
     const unsigned int stride_x = info.stride().first;
     const unsigned int stride_y = info.stride().second;
@@ -79,7 +80,7 @@ Status CLDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
     const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
 
     ARM_COMPUTE_RETURN_ON_ERROR(CLDeconvolutionLayerUpsample::validate(input, &scale_out_info, BorderSize(inner_border_right, inner_border_top), info));
-    ARM_COMPUTE_RETURN_ON_ERROR(CLDirectConvolutionLayer::validate(&scale_out_info, weights, bias, output, conv_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLConvolutionLayer::validate(&scale_out_info, weights, bias, output, info, WeightsInfo()));
 
     return Status{};
 }

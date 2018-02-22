@@ -42,7 +42,7 @@ vars.AddVariables(
     BoolVariable("logging", "Logging (this flag is forced to 1 for debug=1)", False),
     EnumVariable("arch", "Target Architecture", "armv7a", allowed_values=("armv7a", "arm64-v8a", "arm64-v8.2-a", "x86_32", "x86_64")),
     EnumVariable("os", "Target OS", "linux", allowed_values=("linux", "android", "bare_metal")),
-    EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile")),
+    EnumVariable("build", "Build type", "cross_compile", allowed_values=("native", "cross_compile", "embed_only")),
     BoolVariable("examples", "Build example programs", True),
     BoolVariable("Werror", "Enable/disable the -Werror compilation flag", True),
     BoolVariable("standalone", "Builds the tests as standalone executables, links statically with libgcc, libstdc++ and libarm_compute", False),
@@ -59,10 +59,16 @@ vars.AddVariables(
 
 env = Environment(platform="posix", variables=vars, ENV = os.environ)
 env.Append(LIBPATH = ["#build/%s" % env['build_dir']])
+Export('env')
+Export('vars')
 
 SConsignFile('build/.%s' % env['build_dir'])
 
 Help(vars.GenerateHelpText(env))
+
+if env['build'] == "embed_only":
+    SConscript('./SConscript', variant_dir='#build/%s' % env['build_dir'], duplicate=0)
+    Return()
 
 if env['neon'] and 'x86' in env['arch']:
     print "Cannot compile NEON for x86"
@@ -82,7 +88,7 @@ env.Append(CXXFLAGS = ['-Wno-deprecated-declarations','-Wall','-DARCH_ARM',
          '-Wextra','-Wno-unused-parameter','-pedantic','-Wdisabled-optimization','-Wformat=2',
          '-Winit-self','-Wstrict-overflow=2','-Wswitch-default',
          '-fpermissive','-std=gnu++11','-Wno-vla','-Woverloaded-virtual',
-         '-Wctor-dtor-privacy','-Wsign-promo','-Weffc++','-Wno-format-nonliteral','-Wno-overlength-strings','-Wno-strict-overflow'])
+         '-Wctor-dtor-privacy','-Wsign-promo','-Weffc++','-Wno-format-nonliteral','-Wno-overlength-strings','-Wno-strict-overflow','-Wno-implicit-fallthrough'])
 
 env.Append(CPPDEFINES = ['_GLIBCXX_USE_NANOSLEEP'])
 
@@ -134,8 +140,8 @@ elif env['arch'] == 'arm64-v8a':
     elif env['os'] == 'android':
         prefix = "aarch64-linux-android-"
 elif env['arch'] == 'arm64-v8.2-a':
+    env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
     env.Append(CPPDEFINES = ['ARM_COMPUTE_AARCH64_V8_2'])
-
     if cpp_compiler == 'clang++':
         env.Append(CXXFLAGS = ['-fno-integrated-as'])
 
@@ -229,8 +235,6 @@ if env['logging']:
 env.Append(CPPPATH = ['#/include', "#"])
 env.Append(CXXFLAGS = env['extra_cxx_flags'])
 
-Export('vars')
-Export('env')
 Export('version_at_least')
 
 if env['opencl']:

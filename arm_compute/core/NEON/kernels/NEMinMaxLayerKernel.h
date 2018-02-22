@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,6 +38,10 @@ class ITensor;
 class NEMinMaxLayerKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEMinMaxLayerKernel";
+    }
     /** Default constructor */
     NEMinMaxLayerKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */

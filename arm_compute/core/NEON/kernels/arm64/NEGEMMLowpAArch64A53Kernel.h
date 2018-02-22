@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,6 +37,10 @@ class ITensor;
 class NEGEMMLowpAArch64A53Kernel : public NEGEMMAssemblyBaseKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEGEMMLowpAArch64A53Kernel";
+    }
     /** Default constructor */
     NEGEMMLowpAArch64A53Kernel();
     // Inherited methods overridden:

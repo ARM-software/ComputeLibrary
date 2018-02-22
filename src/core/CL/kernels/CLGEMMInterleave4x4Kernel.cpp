@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,17 +40,16 @@ using namespace arm_compute::misc::shape_calculator;
 
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, int mult_interleave4x4_height)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON(mult_interleave4x4_height < 1);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::U8, DataType::S8,
                                                          DataType::QS16, DataType::U16, DataType::S16, DataType::U32, DataType::S32,
                                                          DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
 
     if(output->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), compute_interleaved_shape(*input));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), compute_interleaved_shape(*input, mult_interleave4x4_height));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
@@ -58,11 +57,11 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, int mult_interleave4x4_height)
 {
-    unsigned int           num_elems_processed_per_iteration_x = max_cl_vector_width / data_size_from_type(input->data_type());
+    constexpr unsigned int num_elems_processed_per_iteration_x = 4;
     constexpr unsigned int num_elems_processed_per_iteration_y = 4;
-    const unsigned int     num_elems_written_per_iteration     = num_elems_processed_per_iteration_x * num_elems_processed_per_iteration_y;
+    const unsigned int     num_elems_written_per_iteration     = num_elems_processed_per_iteration_x * num_elems_processed_per_iteration_y * mult_interleave4x4_height;
     bool                   window_changed                      = false;
 
     // Configure kernel window
@@ -73,7 +72,10 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     // Configure window in case of configured output
     if(output->total_size() != 0)
     {
-        AccessWindowRectangle output_access(output, 0, 0, num_elems_written_per_iteration, 1, 4.f, 0.25f);
+        const float scale_x = 4.0f * static_cast<float>(mult_interleave4x4_height);
+        const float scale_y = 1.0f / (scale_x);
+
+        AccessWindowRectangle output_access(output, 0, 0, num_elems_written_per_iteration, 1, scale_x, scale_y);
         window_changed = window_changed || update_window_and_padding(win, output_access);
         output_access.set_valid_region(win, input->valid_region());
     }
@@ -88,25 +90,42 @@ CLGEMMInterleave4x4Kernel::CLGEMMInterleave4x4Kernel()
 {
 }
 
-void CLGEMMInterleave4x4Kernel::configure(const ICLTensor *input, ICLTensor *output)
+void CLGEMMInterleave4x4Kernel::configure(const ICLTensor *input, ICLTensor *output, int mult_interleave4x4_height)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(compute_interleaved_shape(*input->info())));
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(compute_interleaved_shape(*input->info(), mult_interleave4x4_height)));
 
     // Perform validate step
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), mult_interleave4x4_height));
 
     _input  = input;
     _output = output;
 
+    // Create build options
+    CLBuildOptions build_opts;
+    build_opts.add_option("-DMULT_INTERLEAVE4X4_HEIGHT=" + support::cpp11::to_string(mult_interleave4x4_height));
+    switch(input->info()->element_size())
+    {
+        case 1:
+            build_opts.add_option("-DDATA_TYPE=uchar");
+            break;
+        case 2:
+            build_opts.add_option("-DDATA_TYPE=ushort");
+            break;
+        case 4:
+            build_opts.add_option("-DDATA_TYPE=uint");
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Data type not supported");
+    }
+
     // Create kernel
-    std::string kernel_name = "gemm_interleave4x4_" + support::cpp11::to_string(input->info()->element_size() * 8) + "bit";
-    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemm_interleave4x4", build_opts.options()));
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output->info());
+    auto win_config = validate_and_configure_window(input->info(), output->info(), mult_interleave4x4_height);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure(win_config.second);
 
@@ -119,10 +138,10 @@ void CLGEMMInterleave4x4Kernel::configure(const ICLTensor *input, ICLTensor *out
     _config_id += support::cpp11::to_string(output->info()->dimension(1));
 }
 
-Status CLGEMMInterleave4x4Kernel::validate(const ITensorInfo *input, const ITensorInfo *output)
+Status CLGEMMInterleave4x4Kernel::validate(const ITensorInfo *input, const ITensorInfo *output, int mult_interleave4x4_height)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, mult_interleave4x4_height));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), mult_interleave4x4_height).first);
 
     return Status{};
 }
@@ -143,10 +162,6 @@ void CLGEMMInterleave4x4Kernel::run(const Window &window, cl::CommandQueue &queu
      */
     Window in_slice  = window.first_slice_window_2D();
     Window out_slice = window.first_slice_window_2D();
-
-    // Change x and y steps for the slide of output tensor
-    out_slice.scale(Window::DimX, 4.f);
-    out_slice.scale(Window::DimY, 0.25f);
 
     do
     {

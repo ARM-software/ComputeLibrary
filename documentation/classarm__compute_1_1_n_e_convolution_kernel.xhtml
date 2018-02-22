@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -135,6 +135,9 @@ Collaboration diagram for NEConvolutionKernel&lt; matrix_size &gt;:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:ab5656bb5b6334bdbe6e606c715872828"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_convolution_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828">name</a> () const override</td></tr>
+<tr class="memdesc:ab5656bb5b6334bdbe6e606c715872828"><td class="mdescLeft">&#160;</td><td class="mdescRight">Name of the kernel.  <a href="#ab5656bb5b6334bdbe6e606c715872828">More...</a><br /></td></tr>
+<tr class="separator:ab5656bb5b6334bdbe6e606c715872828"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a230a4894adf8380eca9e8c2aac03e9b8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_convolution_kernel.xhtml#a230a4894adf8380eca9e8c2aac03e9b8">NEConvolutionKernel</a> ()</td></tr>
 <tr class="memdesc:a230a4894adf8380eca9e8c2aac03e9b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <a href="#a230a4894adf8380eca9e8c2aac03e9b8">More...</a><br /></td></tr>
 <tr class="separator:a230a4894adf8380eca9e8c2aac03e9b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -211,6 +214,8 @@ class arm_compute::NEConvolutionKernel&lt; matrix_size &gt;</h3>
 
 <p>Default constructor. </p>
 
+<p>Referenced by <a class="el" href="_n_e_convolution_kernel_8h_source.xhtml#l00058">NEConvolutionKernel&lt; matrix_size &gt;::name()</a>.</p>
+
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -239,6 +244,8 @@ class arm_compute::NEConvolutionKernel&lt; matrix_size &gt;</h3>
 <dl class="section return"><dt>Returns</dt><dd>The width in number of elements of the border. </dd></dl>
 
 <p>Reimplemented from <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#aa6daa9b04e2035bf007e5e5c3c4396a8">IKernel</a>.</p>
+
+<p>Referenced by <a class="el" href="_n_e_convolution_kernel_8h_source.xhtml#l00058">NEConvolutionKernel&lt; matrix_size &gt;::name()</a>, <a class="el" href="_n_e_convolution_kernel_8h_source.xhtml#l00105">NESeparableConvolutionHorKernel&lt; matrix_size &gt;::name()</a>, <a class="el" href="_n_e_convolution_kernel_8h_source.xhtml#l00149">NESeparableConvolutionVertKernel&lt; matrix_size &gt;::name()</a>, and <a class="el" href="_n_e_convolution_kernel_8h_source.xhtml#l00215">NEConvolutionRectangleKernel::name()</a>.</p>
 
 </div>
 </div>
@@ -296,6 +303,40 @@ class arm_compute::NEConvolutionKernel&lt; matrix_size &gt;</h3>
   </dd>
 </dl>
 
+<p>Referenced by <a class="el" href="_n_e_convolution_kernel_8h_source.xhtml#l00058">NEConvolutionKernel&lt; matrix_size &gt;::name()</a>, <a class="el" href="_n_e_convolution_kernel_8h_source.xhtml#l00105">NESeparableConvolutionHorKernel&lt; matrix_size &gt;::name()</a>, <a class="el" href="_n_e_convolution_kernel_8h_source.xhtml#l00149">NESeparableConvolutionVertKernel&lt; matrix_size &gt;::name()</a>, and <a class="el" href="_n_e_convolution_kernel_8h_source.xhtml#l00215">NEConvolutionRectangleKernel::name()</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ab5656bb5b6334bdbe6e606c715872828"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char* name </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Name of the kernel. </p>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="classarm__compute_1_1_kernel.xhtml" title="Kernel class. ">Kernel</a> name </dd></dl>
+
+<p>Implements <a class="el" href="classarm__compute_1_1_i_c_p_p_kernel.xhtml#a1a30ad8f276a2310571c36239554831a">ICPPKernel</a>.</p>
+
+<p>Definition at line <a class="el" href="_n_e_convolution_kernel_8h_source.xhtml#l00058">58</a> of file <a class="el" href="_n_e_convolution_kernel_8h_source.xhtml">NEConvolutionKernel.h</a>.</p>
+
+<p>References <a class="el" href="classarm__compute_1_1_n_e_convolution_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7">NEConvolutionKernel&lt; matrix_size &gt;::border_size()</a>, <a class="el" href="classarm__compute_1_1_n_e_convolution_kernel.xhtml#a8873a8f053f3d2322e297409645c6222">NEConvolutionKernel&lt; matrix_size &gt;::configure()</a>, <a class="el" href="_c_l_2_convolution_8cpp_source.xhtml#l00140">arm_compute::test::validation::conv</a>, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">arm_compute::test::validation::info()</a>, <a class="el" href="classarm__compute_1_1_n_e_convolution_kernel.xhtml#a230a4894adf8380eca9e8c2aac03e9b8">NEConvolutionKernel&lt; matrix_size &gt;::NEConvolutionKernel()</a>, <a class="el" href="classarm__compute_1_1_n_e_convolution_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEConvolutionKernel&lt; matrix_size &gt;::run()</a>, <a class="el" href="_n_e_o_n_2_pixel_wise_multiplication_8cpp_source.xhtml#l00176">arm_compute::test::validation::scale</a>, and <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">IKernel::window()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    {</div><div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        <span class="keywordflow">return</span> <span class="stringliteral">&quot;NEConvolutionKernel&quot;</span>;</div><div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="a112b35dd205c62ea6ed1447ef226da82"></a>
@@ -345,6 +386,8 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 
 <p>Implements <a class="el" href="classarm__compute_1_1_i_c_p_p_kernel.xhtml#af814ff5e96f40f1cccf809b2b4ee19ef">ICPPKernel</a>.</p>
 
+<p>Referenced by <a class="el" href="_n_e_convolution_kernel_8h_source.xhtml#l00058">NEConvolutionKernel&lt; matrix_size &gt;::name()</a>, <a class="el" href="_n_e_convolution_kernel_8h_source.xhtml#l00105">NESeparableConvolutionHorKernel&lt; matrix_size &gt;::name()</a>, <a class="el" href="_n_e_convolution_kernel_8h_source.xhtml#l00149">NESeparableConvolutionVertKernel&lt; matrix_size &gt;::name()</a>, and <a class="el" href="_n_e_convolution_kernel_8h_source.xhtml#l00215">NEConvolutionRectangleKernel::name()</a>.</p>
+
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
@@ -356,7 +399,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_convolution_kernel.xhtml">NEConvolutionKernel</a></li>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:45 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:24 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -250,6 +250,21 @@ std::string arm_compute::lower_string(const std::string &val)
     return res;
 }
 
+PadStrideInfo arm_compute::calculate_same_pad(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info)
+{
+    const auto &strides         = conv_info.stride();
+    const int   out_width       = std::ceil(float(input_shape.x()) / float(strides.first));
+    const int   out_height      = std::ceil(float(input_shape.y()) / float(strides.second));
+    const int   pad_width       = ((out_width - 1) * strides.first + weights_shape.x() - input_shape.x());
+    const int   pad_height      = ((out_height - 1) * strides.second + weights_shape.y() - input_shape.y());
+    const int   same_pad_left   = pad_width / 2;
+    const int   same_pad_top    = pad_height / 2;
+    const int   same_pad_right  = pad_width - same_pad_left;
+    const int   same_pad_bottom = pad_height - same_pad_top;
+
+    return PadStrideInfo(strides.first, strides.second, same_pad_left, same_pad_right, same_pad_top, same_pad_bottom, DimensionRoundingType::CEIL);
+}
+
 TensorShape arm_compute::deconvolution_output_shape(const std::pair<unsigned int, unsigned int> &out_dims, TensorShape input, TensorShape weights)
 {
     TensorShape out_shape(input);

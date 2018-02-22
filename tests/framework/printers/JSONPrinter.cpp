@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -179,26 +179,6 @@ void JSONPrinter::print_measurements(const Profiler::MeasurementsMap &measuremen
     {
         *_stream << R"(")" << i_it->first << R"(" : {)";
 
-        auto add_measurements = [](Measurement::Value a, const Measurement & b)
-        {
-            return a + b.value();
-        };
-
-        auto cmp_measurements = [](const Measurement & a, const Measurement & b)
-        {
-            return a.value() < b.value();
-        };
-
-        int        num_values    = i_it->second.size();
-        const auto minmax_values = std::minmax_element(i_it->second.begin(), i_it->second.end(), cmp_measurements);
-
-        Measurement::Value sum_values = std::accumulate(i_it->second.cbegin(), i_it->second.cend(), Measurement::Value(minmax_values.first->value().is_floating_point), add_measurements);
-        if(num_values > 2)
-        {
-            sum_values -= minmax_values.first->value() + minmax_values.second->value();
-            num_values -= 2;
-        }
-
         auto measurement_to_string = [](const Measurement & measurement)
         {
             if(measurement.raw_data().size() == 1)
@@ -214,14 +194,8 @@ void JSONPrinter::print_measurements(const Profiler::MeasurementsMap &measuremen
                 return str.str();
             }
         };
-        *_stream << R"("avg" : )" << (sum_values / num_values) << ",";
-        if(num_values > 1)
-        {
-            *_stream << R"("min" : )" << minmax_values.first->value() << ",";
-            *_stream << R"("max" : )" << minmax_values.second->value() << ",";
-        }
         *_stream << R"("raw" : [)" << join(i_it->second.begin(), i_it->second.end(), ",", measurement_to_string) << "],";
-        *_stream << R"("unit" : ")" << minmax_values.first->unit() << R"(")";
+        *_stream << R"("unit" : ")" << i_it->second.begin()->unit() << R"(")";
         *_stream << "}";
 
         if(++i_it != i_end)

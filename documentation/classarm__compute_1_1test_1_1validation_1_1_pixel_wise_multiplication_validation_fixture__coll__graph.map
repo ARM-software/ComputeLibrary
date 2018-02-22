@@ -1,3 +1,4 @@
 <map id="PixelWiseMultiplicationValidationFixture&lt; TensorType, AccessorType, FunctionType, T1, T2 &gt;" name="PixelWiseMultiplicationValidationFixture&lt; TensorType, AccessorType, FunctionType, T1, T2 &gt;">
-<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1framework_1_1_fixture.xhtml" title="Abstract fixture class. " alt="" coords="97,5,161,32"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1validation_1_1_pixel_wise_multiplication_broadcast_validation_fixture.xhtml" title="PixelWiseMultiplicationBroadcast\lValidationFixture\&lt; TensorType,\l AccessorType, FunctionType, T1, T2 \&gt;" alt="" coords="117,5,380,61"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1test_1_1framework_1_1_fixture.xhtml" title="Abstract fixture class. " alt="" coords="5,20,69,47"/>
 </map>

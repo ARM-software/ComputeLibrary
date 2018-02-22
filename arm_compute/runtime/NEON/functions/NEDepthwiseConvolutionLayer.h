@@ -35,6 +35,7 @@
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/NEON/functions/NEPermute.h"
 #include "arm_compute/runtime/Tensor.h"
 
 namespace arm_compute
@@ -54,7 +55,7 @@ public:
     NEDepthwiseConvolutionLayer3x3();
     /** Initialize the function's source, destination, kernels and border_size.
      *
-     * @param[in, out] input     Source tensor. Data type supported: QASYMM8, F32. (Written to only for border filling).
+     * @param[in, out] input     Source tensor. Data type supported: QASYMM8/F32. (Written to only for border filling).
      * @param[in]      weights   Weights tensor. These are 3D tensors with shape [3, 3, IFM]. Data type supported: Same as @p input.
      * @param[in]      biases    (Optional) Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
      *                           Data type supported: Same as @p input.
@@ -67,12 +68,20 @@ public:
     void run() override;
 
 private:
-    NEDepthwiseConvolutionLayer3x3Kernel      _kernel;
+    NEDepthwiseConvolutionLayer3x3Kernel      _dwc_kernel;
     NEDirectConvolutionLayerOutputStageKernel _output_stage_kernel;
     NEFillBorderKernel                        _border_handler;
+    NEPermute                                 _permute_input;
+    NEPermute                                 _permute_weights;
+    NEPermute                                 _permute_output;
     Tensor                                    _accumulator;
+    Tensor                                    _input_nhwc;
+    Tensor                                    _weights_hwio;
+    Tensor                                    _output_nhwc;
     bool                                      _has_bias;
     bool                                      _is_quantized;
+    bool                                      _is_optimized;
+    bool                                      _are_weights_reshaped;
 };
 
 /** Basic function to execute a generic depthwise convolution. This function calls the following NEON kernels:
@@ -90,11 +99,11 @@ public:
     NEDepthwiseConvolutionLayer();
     /** Initialize the function's source, destination, weights and convolution information.
      *
-     * @param[in, out] input     Source tensor. Data type supported: F32. (Written to only for border filling).
+     * @param[in, out] input     Source tensor. Data type supported: QASYMM8/F32. (Written to only for border filling).
      * @param[out]     output    Destination tensor. Data type supported: same as @p input.
      * @param[in]      weights   Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM]. Data type supported: Same as @p input.
      * @param[in]      biases    (Optional) Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
-     *                           Data type supported: Same as @p input.
+     *                           Data type supported: Same as @p input, S32 when input is QASYMM8.
      * @param[in]      conv_info Padding and stride information to use for the convolution.
      */
     void configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info);
@@ -103,13 +112,18 @@ public:
     void run() override;
 
 private:
-    NEDepthwiseIm2ColKernel          _im2col_kernel;
-    NEDepthwiseWeightsReshapeKernel  _weights_reshape_kernel;
-    NEGEMMMatrixVectorMultiplyKernel _v2mm_kernel;
-    NEDepthwiseVectorToTensorKernel  _vector_to_tensor_kernel;
-    Tensor                           _input_reshaped;
-    Tensor                           _weights_reshaped;
-    Tensor                           _v2mm_output;
+    NEDepthwiseIm2ColKernel                   _im2col_kernel;
+    NEDepthwiseWeightsReshapeKernel           _weights_reshape_kernel;
+    NEGEMMMatrixVectorMultiplyKernel          _v2mm_kernel;
+    NEDepthwiseVectorToTensorKernel           _vector_to_tensor_kernel;
+    NEDirectConvolutionLayerOutputStageKernel _output_stage_kernel;
+    NEFillBorderKernel                        _v2mm_input_fill_border;
+    NEFillBorderKernel                        _v2mm_weights_fill_border;
+    Tensor                                    _input_reshaped;
+    Tensor                                    _weights_reshaped;
+    Tensor                                    _v2mm_output;
+    Tensor                                    _output_reshaped;
+    bool                                      _is_quantized;
 };
 }
 #endif /* __ARM_COMPUTE_NEDEPTHWISECONVOLUTION_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,16 +42,15 @@ SimpleTensor<T> remap(const SimpleTensor<T> &in, SimpleTensor<float> &map_x, Sim
                       T constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON_MSG(border_mode == BorderMode::REPLICATE, "BorderMode not supported");
-
     SimpleTensor<T> out(in.shape(), in.data_type());
-
+    ARM_COMPUTE_ERROR_ON(out.num_elements() != map_x.num_elements());
     const int width  = in.shape().x();
     const int height = in.shape().y();
-
     for(int idx = 0; idx < out.num_elements(); idx++)
     {
-        valid_mask[idx] = 1;
-        Coordinates src_idx;
+        const Coordinates id_out = index2coord(out.shape(), idx);
+        valid_mask[idx]          = 1;
+        Coordinates src_idx      = id_out; // need to setup all coordinates and not just xy
         src_idx.set(0, static_cast<int>(std::floor(map_x[idx])));
         src_idx.set(1, static_cast<int>(std::floor(map_y[idx])));
         if((0 <= map_y[idx]) && (map_y[idx] < height) && (0 <= map_x[idx]) && (map_x[idx] < width))
@@ -59,11 +58,17 @@ SimpleTensor<T> remap(const SimpleTensor<T> &in, SimpleTensor<float> &map_x, Sim
             switch(policy)
             {
                 case InterpolationPolicy::NEAREST_NEIGHBOR:
+                {
                     out[idx] = tensor_elem_at(in, src_idx, border_mode, constant_border_value);
                     break;
+                }
                 case InterpolationPolicy::BILINEAR:
-                    (valid_bilinear_policy(map_x[idx], map_y[idx], width, height, border_mode)) ? out[idx] = bilinear_policy(in, src_idx, map_x[idx], map_y[idx], border_mode, constant_border_value) : valid_mask[idx] = 0;
+                {
+                    (valid_bilinear_policy(map_x[idx], map_y[idx], width, height, border_mode)) ?
+                    out[idx]        = bilinear_policy(in, src_idx, map_x[idx], map_y[idx], border_mode, constant_border_value) :
+                                      valid_mask[idx] = 0;
                     break;
+                }
                 case InterpolationPolicy::AREA:
                 default:
                     ARM_COMPUTE_ERROR("Interpolation not supported");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,8 @@ using namespace arm_compute;
 
 namespace
 {
+constexpr unsigned int num_elems_processed_per_iteration = 16;
+
 Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale,
                           ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
 {
@@ -50,9 +52,12 @@ Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, 
 
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8, DataType::QS8, DataType::QS16, DataType::S16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, 1, DataType::U8, DataType::QS8, DataType::QS16, DataType::S16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input1, input2);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input1, input2);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(scale < 0, "Scale cannot be negative.");
+
+    const TensorShape &out_shape = TensorShape::broadcast_shape(input1->tensor_shape(), input2->tensor_shape());
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(out_shape.total_size() == 0, "Inputs are not broadcast compatible");
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input1, input2);
 
     if(is_data_type_fixed_point(input1->data_type()))
     {
@@ -62,12 +67,12 @@ Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, 
     }
 
     // Validate in case of configured output
-    if((output != nullptr) && (output->total_size() != 0))
+    if(output->total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::QS8, DataType::QS16, DataType::S16, DataType::F16, DataType::F32);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->data_type() == DataType::U8 && (input1->data_type() != DataType::U8 || input2->data_type() != DataType::U8),
                                         "Output can only be U8 if both inputs are U8");
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input1, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, output->tensor_shape(), 0), "Wrong shape for output");
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input1, output);
         if(is_data_type_fixed_point(input1->data_type()))
         {
@@ -80,18 +85,36 @@ Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *input2, 
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input1, ITensorInfo *input2, ITensorInfo *output)
 {
-    constexpr unsigned int num_elems_processed_per_iteration = 16;
+    const std::pair<TensorShape, ValidRegion> broadcast_pair = ITensorInfo::broadcast_shape_and_valid_region(*input1, *input2);
+    const TensorShape &out_shape    = broadcast_pair.first;
+    const ValidRegion &valid_region = broadcast_pair.second;
 
-    Window win = calculate_max_window(*input1, Steps(num_elems_processed_per_iteration));
+    // Auto initialize output if not initialized
+    {
+        set_shape_if_empty(*output, out_shape);
+
+        if(input1->data_type() == DataType::S16 || input2->data_type() == DataType::S16)
+        {
+            set_format_if_unknown(*output, Format::S16);
+        }
+        else if(input1->data_type() == DataType::F32 || input2->data_type() == DataType::F32)
+        {
+            set_format_if_unknown(*output, Format::F32);
+        }
+    }
+
+    Window win        = calculate_max_window(valid_region, Steps(num_elems_processed_per_iteration));
+    Window win_input1 = win.broadcast_if_dimension_le_one(*input1);
+    Window win_input2 = win.broadcast_if_dimension_le_one(*input2);
 
     AccessWindowHorizontal input1_access(input1, 0, num_elems_processed_per_iteration);
     AccessWindowHorizontal input2_access(input2, 0, num_elems_processed_per_iteration);
     AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
 
-    bool window_changed = update_window_and_padding(win, input1_access, input2_access, output_access);
+    bool window_changed = update_window_and_padding(win_input1, input1_access)
+                          || update_window_and_padding(win_input2, input2_access)
+                          || update_window_and_padding(win, output_access);
 
-    ValidRegion valid_region = intersect_valid_regions(input1->valid_region(),
-                                                       input2->valid_region());
     output_access.set_valid_region(win, valid_region);
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
@@ -108,23 +131,12 @@ void CLPixelWiseMultiplicationKernel::configure(const ICLTensor *input1, const I
                                                 ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
-
-    // Auto initialize output if not initialized
-    {
-        set_shape_if_empty(*output->info(), input1->info()->tensor_shape());
-
-        if(input1->info()->data_type() == DataType::S16 || input2->info()->data_type() == DataType::S16)
-        {
-            set_format_if_unknown(*output->info(), Format::S16);
-        }
-        else if(input1->info()->data_type() == DataType::F32 || input2->info()->data_type() == DataType::F32)
-        {
-            set_format_if_unknown(*output->info(), Format::F32);
-        }
-    }
-
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input1->info(), input2->info(), output->info(),
                                                   scale, overflow_policy, rounding_policy));
+
+    // Configure kernel window
+    auto win_config = validate_and_configure_window(input1->info(), input2->info(), output->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
 
     _input1 = input1;
     _input2 = input2;
@@ -207,15 +219,13 @@ void CLPixelWiseMultiplicationKernel::configure(const ICLTensor *input1, const I
         _kernel.setArg(idx++, scale);
     }
 
-    // Configure kernel window
-    auto win_config = validate_and_configure_window(input1->info(), input2->info(), output->info());
-    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure(win_config.second);
 }
 
 Status CLPixelWiseMultiplicationKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale,
                                                  ConvertPolicy overflow_policy, RoundingPolicy rounding_policy)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input1, input2, output);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input1, input2, output, scale, overflow_policy, rounding_policy));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input1->clone().get(), input2->clone().get(), output->clone().get()).first);
 
@@ -227,16 +237,47 @@ void CLPixelWiseMultiplicationKernel::run(const Window &window, cl::CommandQueue
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
-    Window collapsed = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
-    Window slice     = collapsed.first_slice_window_3D();
+    const TensorShape &in_shape1 = _input1->info()->tensor_shape();
+    const TensorShape &in_shape2 = _input2->info()->tensor_shape();
+    const TensorShape &out_shape = _output->info()->tensor_shape();
+
+    bool can_collapse = true;
+    if(std::min(in_shape1.total_size(), in_shape2.total_size()) > 1)
+    {
+        can_collapse = (std::min(in_shape1.num_dimensions(), in_shape2.num_dimensions()) > Window::DimZ);
+        for(size_t d = Window::DimZ; can_collapse && (d < out_shape.num_dimensions()); ++d)
+        {
+            can_collapse = (in_shape1[d] == in_shape2[d]);
+        }
+    }
+
+    bool   has_collapsed = false;
+    Window collapsed     = can_collapse ? window.collapse_if_possible(ICLKernel::window(), Window::DimZ, &has_collapsed) : window;
+
+    const TensorShape &in_shape1_collapsed = has_collapsed ? in_shape1.collapsed_from(Window::DimZ) : in_shape1;
+    const TensorShape &in_shape2_collapsed = has_collapsed ? in_shape2.collapsed_from(Window::DimZ) : in_shape2;
+
+    Window slice        = collapsed.first_slice_window_3D();
+    Window slice_input1 = slice.broadcast_if_dimension_le_one(in_shape1_collapsed);
+    Window slice_input2 = slice.broadcast_if_dimension_le_one(in_shape2_collapsed);
 
     do
     {
         unsigned int idx = 0;
-        add_3D_tensor_argument(idx, _input1, slice);
-        add_3D_tensor_argument(idx, _input2, slice);
+        add_3D_tensor_argument(idx, _input1, slice_input1);
+        add_3D_tensor_argument(idx, _input2, slice_input2);
         add_3D_tensor_argument(idx, _output, slice);
         enqueue(queue, *this, slice);
+
+        collapsed.slide_window_slice_3D(slice_input1);
+        collapsed.slide_window_slice_3D(slice_input2);
     }
     while(collapsed.slide_window_slice_3D(slice));
+}
+
+BorderSize CLPixelWiseMultiplicationKernel::border_size() const
+{
+    const unsigned int replicateSize = _output->info()->dimension(0) - std::min(_input1->info()->dimension(0), _input2->info()->dimension(0));
+    const unsigned int border        = std::min<unsigned int>(num_elems_processed_per_iteration - 1U, replicateSize);
+    return BorderSize(0, border, 0, 0);
 }

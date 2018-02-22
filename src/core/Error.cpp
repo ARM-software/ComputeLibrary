@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,7 +56,7 @@ void arm_compute::error(const char *function, const char *file, const int line, 
     va_end(args);
     throw std::runtime_error(err.error_description());
 }
-void Status::internal_throw_on_error()
+void Status::internal_throw_on_error() const
 {
     throw std::runtime_error(_error_description);
 }

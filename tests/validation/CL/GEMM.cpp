@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,7 @@
 #include "tests/PaddingCalculator.h"
 #include "tests/datasets/LargeGEMMDataset.h"
 #include "tests/datasets/SmallGEMMDataset.h"
+#include "tests/datasets/TinyGEMMDataset.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
@@ -84,7 +85,7 @@ TEST_SUITE_END() // FP32
 TEST_SUITE(Quantized)
 TEST_SUITE(QS8)
 using CLGEMMInterleave4x4Fixture = GEMMInterleave4x4ValidationFixedPointFixture<CLTensor, CLAccessor, CLGEMMInterleave4x4, int8_t>;
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMInterleave4x4Fixture, framework::DatasetMode::PRECOMMIT, data_interleave *
+FIXTURE_DATA_TEST_CASE(RunTiny, CLGEMMInterleave4x4Fixture, framework::DatasetMode::PRECOMMIT, data_interleave *
                        framework::dataset::make("DataType", DataType::QS8)
                        * framework::dataset::make("FractionalBits", 1, 7))
 {
@@ -95,7 +96,7 @@ TEST_SUITE_END()
 
 TEST_SUITE(QS16)
 using CLGEMMInterleave4x4Fixture = GEMMInterleave4x4ValidationFixedPointFixture<CLTensor, CLAccessor, CLGEMMInterleave4x4, int16_t>;
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMInterleave4x4Fixture, framework::DatasetMode::PRECOMMIT, data_interleave *
+FIXTURE_DATA_TEST_CASE(RunTiny, CLGEMMInterleave4x4Fixture, framework::DatasetMode::PRECOMMIT, data_interleave *
                        framework::dataset::make("DataType", DataType::QS16)
                        * framework::dataset::make("FractionalBits", 1, 14))
 {
@@ -148,7 +149,7 @@ TEST_SUITE(Quantized)
 TEST_SUITE(QS8)
 using CLGEMMTranspose1xW        = CLSynthetizeFunctionWithZeroConstantBorder<CLGEMMTranspose1xWKernel, 16>;
 using CLGEMMTranspose1xWFixture = GEMMTranspose1xWValidationFixedPointFixture<CLTensor, CLAccessor, CLGEMMTranspose1xW, int8_t>;
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMTranspose1xWFixture, framework::DatasetMode::PRECOMMIT, data_transpose *
+FIXTURE_DATA_TEST_CASE(RunTiny, CLGEMMTranspose1xWFixture, framework::DatasetMode::PRECOMMIT, data_transpose *
                        framework::dataset::make("DataType", DataType::QS8)
                        * framework::dataset::make("FractionalBits", 1, 7))
 {
@@ -160,7 +161,7 @@ TEST_SUITE_END()
 TEST_SUITE(QS16)
 using CLGEMMTranspose1xW        = CLSynthetizeFunctionWithZeroConstantBorder<CLGEMMTranspose1xWKernel, 8>;
 using CLGEMMTranspose1xWFixture = GEMMTranspose1xWValidationFixedPointFixture<CLTensor, CLAccessor, CLGEMMTranspose1xW, int16_t>;
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMTranspose1xWFixture, framework::DatasetMode::PRECOMMIT, data_transpose *
+FIXTURE_DATA_TEST_CASE(RunTiny, CLGEMMTranspose1xWFixture, framework::DatasetMode::PRECOMMIT, data_transpose *
                        framework::dataset::make("DataType", DataType::QS16)
                        * framework::dataset::make("FractionalBits", 1, 14))
 {
@@ -207,15 +208,15 @@ using CLGEMMFixedPointFixture = GEMMValidationFixedPointFixture<CLTensor, CLAcce
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QS8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallGEMMDataset(),
-                                                                                                                     framework::dataset::make("DataType",
-                                                                                                                             DataType::QS8)),
-                                                                                                             framework::dataset::make("FractionalBits", 1, 7)))
+FIXTURE_DATA_TEST_CASE(RunTiny, CLGEMMFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::TinyGEMMDataset(),
+                                                                                                                    framework::dataset::make("DataType",
+                                                                                                                            DataType::QS8)),
+                                                                                                            framework::dataset::make("FractionalBits", 1, 7)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_q);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeGEMMDataset(),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallGEMMDataset(),
                                                                                                                    framework::dataset::make("DataType",
                                                                                                                            DataType::QS8)),
                                                                                                            framework::dataset::make("FractionalBits", 1, 7)))
@@ -226,15 +227,15 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMFixedPointFixture<int8_t>, framework::Dat
 TEST_SUITE_END()
 
 TEST_SUITE(QS16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallGEMMDataset(),
-                                                                                                                      framework::dataset::make("DataType",
-                                                                                                                              DataType::QS16)),
-                                                                                                              framework::dataset::make("FractionalBits", 1, 14)))
+FIXTURE_DATA_TEST_CASE(RunTiny, CLGEMMFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::TinyGEMMDataset(),
+                                                                                                                     framework::dataset::make("DataType",
+                                                                                                                             DataType::QS16)),
+                                                                                                             framework::dataset::make("FractionalBits", 1, 14)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_q);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeGEMMDataset(),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallGEMMDataset(),
                                                                                                                     framework::dataset::make("DataType",
                                                                                                                             DataType::QS16)),
                                                                                                             framework::dataset::make("FractionalBits", 1, 14)))

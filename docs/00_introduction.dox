@@ -189,6 +189,43 @@ If there is more than one release in a month then an extra sequential number is 
 
 @subsection S2_2_changelog Changelog
 
+v18.02 Public major release
+ - Various NEON / OpenCL / GLES optimisations.
+ - Various bug fixes.
+ - Changed default number of threads on big LITTLE systems.
+ - Refactored examples and added:
+    - graph_mobilenet_qassym8
+    - graph_resnet
+    - graph_squeezenet_v1_1
+ - Renamed @ref arm_compute::CLConvolutionLayer into @ref arm_compute::CLGEMMConvolutionLayer and created a new @ref arm_compute::CLConvolutionLayer to select the fastest convolution method.
+ - Renamed @ref arm_compute::NEConvolutionLayer into @ref arm_compute::NEGEMMConvolutionLayer and created a new @ref arm_compute::NEConvolutionLayer to select the fastest convolution method.
+ - Added in place support to:
+    - @ref arm_compute::CLActivationLayer
+    - @ref arm_compute::CLBatchNormalizationLayer
+ - Added QASYMM8 support to:
+    - @ref arm_compute::CLActivationLayer
+    - @ref arm_compute::CLDepthwiseConvolutionLayer
+    - @ref arm_compute::NEDepthwiseConvolutionLayer
+    - @ref arm_compute::NESoftmaxLayer
+ - Added FP16 support to:
+    - @ref arm_compute::CLDepthwiseConvolutionLayer3x3
+    - @ref arm_compute::CLDepthwiseConvolutionLayer
+ - Added broadcasting support to @ref arm_compute::NEArithmeticAddition / @ref arm_compute::CLArithmeticAddition / @ref arm_compute::CLPixelWiseMultiplication
+ - Added fused batched normalization and activation to @ref arm_compute::CLBatchNormalizationLayer and @ref arm_compute::NEBatchNormalizationLayer
+ - Added support for non-square pooling to @ref arm_compute::NEPoolingLayer and @ref arm_compute::CLPoolingLayer
+ - New OpenCL kernels / functions:
+    - @ref arm_compute::CLDirectConvolutionLayerOutputStageKernel
+ - New NEON kernels / functions
+    - Added name() method to all kernels.
+    - Added support for Winograd 5x5.
+    - @ref arm_compute::NEPermuteKernel / @ref arm_compute::NEPermute
+    - @ref arm_compute::NEWinogradLayerTransformInputKernel / @ref arm_compute::NEWinogradLayer
+    - @ref arm_compute::NEWinogradLayerTransformOutputKernel / @ref arm_compute::NEWinogradLayer
+    - @ref arm_compute::NEWinogradLayerTransformWeightsKernel / @ref arm_compute::NEWinogradLayer
+    - Renamed arm_compute::NEWinogradLayerKernel into @ref arm_compute::NEWinogradLayerBatchedGEMMKernel
+ - New GLES kernels / functions:
+    - @ref arm_compute::GCTensorShiftKernel / @ref arm_compute::GCTensorShift
+
 v18.01 Public maintenance release
  - Various bug fixes
  - Added some of the missing validate() methods
@@ -205,7 +242,7 @@ v18.01 Public maintenance release
     - @ref arm_compute::GCGEMMInterleave4x4Kernel
     - @ref arm_compute::GCGEMMTranspose1xWKernel
     - @ref arm_compute::GCIm2ColKernel
- - Refactored NEON Winograd (@ref arm_compute::NEWinogradLayerKernel)
+ - Refactored NEON Winograd (arm_compute::NEWinogradLayerKernel)
  - Added @ref arm_compute::NEDirectConvolutionLayerOutputStageKernel
  - Added QASYMM8 support to the following NEON kernels:
     - @ref arm_compute::NEDepthwiseConvolutionLayer3x3Kernel
@@ -256,7 +293,7 @@ v17.12 Public major release
     - @ref arm_compute::NEGEMMLowpOffsetContributionKernel / @ref arm_compute::NEGEMMLowpMatrixAReductionKernel / @ref arm_compute::NEGEMMLowpMatrixBReductionKernel / @ref arm_compute::NEGEMMLowpMatrixMultiplyCore
     - @ref arm_compute::NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel / @ref arm_compute::NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
     - @ref arm_compute::NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel / @ref arm_compute::NEGEMMLowpQuantizeDownInt32ToUint8Scale
-    - @ref arm_compute::NEWinogradLayerKernel / @ref arm_compute::NEWinogradLayer
+    - @ref arm_compute::NEWinogradLayer / arm_compute::NEWinogradLayerKernel
 
  - New OpenCL kernels / functions
     - @ref arm_compute::CLGEMMLowpOffsetContributionKernel / @ref arm_compute::CLGEMMLowpMatrixAReductionKernel / @ref arm_compute::CLGEMMLowpMatrixBReductionKernel / @ref arm_compute::CLGEMMLowpMatrixMultiplyCore
@@ -360,8 +397,8 @@ v17.04 Public bug fixes release
  -  @ref arm_compute::NEHarrisScoreKernel
  -  @ref arm_compute::NEHOGDetectorKernel
  -  @ref arm_compute::NELogits1DMaxKernel
- -  @ref arm_compute::NELogits1DShiftExpSumKernel
- -  @ref arm_compute::NELogits1DNormKernel
+ -  arm_compute::NELogits1DShiftExpSumKernel
+ -  arm_compute::NELogits1DNormKernel
  -  @ref arm_compute::NENonMaximaSuppression3x3FP16Kernel
  -  @ref arm_compute::NENonMaximaSuppression3x3Kernel
 
@@ -374,7 +411,7 @@ v17.03.1 First Major public release of the sources
  - New NEON kernels / functions:
    - @ref arm_compute::NENormalizationLayerKernel / @ref arm_compute::NENormalizationLayer
    - @ref arm_compute::NETransposeKernel / @ref arm_compute::NETranspose
-   - @ref arm_compute::NELogits1DMaxKernel, @ref arm_compute::NELogits1DShiftExpSumKernel, @ref arm_compute::NELogits1DNormKernel / @ref arm_compute::NESoftmaxLayer
+   - @ref arm_compute::NELogits1DMaxKernel, arm_compute::NELogits1DShiftExpSumKernel, arm_compute::NELogits1DNormKernel / @ref arm_compute::NESoftmaxLayer
    - @ref arm_compute::NEIm2ColKernel, @ref arm_compute::NECol2ImKernel, arm_compute::NEConvolutionLayerWeightsReshapeKernel / @ref arm_compute::NEConvolutionLayer
    - @ref arm_compute::NEGEMMMatrixAccumulateBiasesKernel / @ref arm_compute::NEFullyConnectedLayer
    - @ref arm_compute::NEGEMMLowpMatrixMultiplyKernel / arm_compute::NEGEMMLowp
@@ -447,7 +484,7 @@ To see the build options available simply run ```scons -h```:
 		default: linux
 		actual: linux
 
-	build: Build type (native|cross_compile)
+	build: Build type (native|cross_compile|embed_only)
 		default: cross_compile
 		actual: cross_compile
 
@@ -524,6 +561,8 @@ To see the build options available simply run ```scons -h```:
 @b build: you can either build directly on your device (native) or cross compile from your desktop machine (cross-compile). In both cases make sure the compiler is available in your path.
 
 @note If you want to natively compile for 32bit on a 64bit ARM device running a 64bit OS then you will have to use cross-compile too.
+
+There is also an 'embed_only' option which will generate all the .embed files for the OpenCL kernels and / or OpenGLES compute shaders. This might be useful if using a different build system to compile the library.
 
 @b Werror: If you are compiling using the same toolchains as the ones used in this guide then there shouldn't be any warning and therefore you should be able to keep Werror=1. If with a different compiler version the library fails to build because of warnings interpreted as errors then, if you are sure the warnings are not important, you might want to try to build with Werror=0 (But please do report the issue either on Github or by an email to developer@arm.com so that the issue can be addressed).
 

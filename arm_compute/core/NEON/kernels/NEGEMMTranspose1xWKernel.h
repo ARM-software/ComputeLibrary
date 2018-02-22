@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2018 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -68,6 +68,10 @@ class ITensor;
 class NEGEMMTranspose1xWKernel : public INESimpleKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEGEMMTranspose1xWKernel";
+    }
     /** Initialise the kernel's input and output.
      *
      * @param[in]  input  Input tensor. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32

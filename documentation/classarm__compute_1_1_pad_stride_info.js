@@ -8,6 +8,7 @@ var classarm__compute_1_1_pad_stride_info =
     [ "pad_left", "classarm__compute_1_1_pad_stride_info.xhtml#a377481844bf0459e5ef871cc72d72496", null ],
     [ "pad_right", "classarm__compute_1_1_pad_stride_info.xhtml#afaaf8f4d7fa22fe9a3f4ff41567cd886", null ],
     [ "pad_top", "classarm__compute_1_1_pad_stride_info.xhtml#a2a86593e913939d9eadad26c2df65138", null ],
+    [ "padding_is_symmetric", "classarm__compute_1_1_pad_stride_info.xhtml#ab7c9c24c109a9e571e9cd8ab3fc502ed", null ],
     [ "round", "classarm__compute_1_1_pad_stride_info.xhtml#a3d7de69b5d597f77362f3279c6ec1c44", null ],
     [ "stride", "classarm__compute_1_1_pad_stride_info.xhtml#ad2f1ea50a9e215ad8ef612a724a4866a", null ]
 ];

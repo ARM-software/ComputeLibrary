@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,4 +37,8 @@ void NEGEMMTranspose1xW::configure(const ITensor *input, ITensor *output)
     auto k = arm_compute::support::cpp14::make_unique<NEGEMMTranspose1xWKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
+}
+Status NEGEMMTranspose1xW::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    return NEGEMMTranspose1xWKernel::validate(input, output);
 }

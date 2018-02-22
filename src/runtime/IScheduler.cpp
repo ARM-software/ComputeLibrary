@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,18 +27,73 @@
 #include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
+#include <fstream>
+#include <map>
 #include <sched.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 
+#ifndef BARE_METAL
+#include <regex>
+#include <thread>
+#endif /* BARE_METAL */
+
 namespace
 {
+unsigned int get_threads_hint()
+{
+    unsigned int num_threads_hint = 1;
+
+#ifndef BARE_METAL
+    std::map<std::string, unsigned int> cpu_part_occurrence_map;
+
+    // CPU part regex
+    std::regex  cpu_part_rgx(R"(.*CPU part.+?(?=:).+?(?=\w+)(\w+).*)");
+    std::smatch cpu_part_match;
+
+    // Read cpuinfo and get occurrence of each core
+    std::ifstream cpuinfo;
+    cpuinfo.open("/proc/cpuinfo", std::ios::in);
+    if(cpuinfo.is_open())
+    {
+        std::string line;
+        while(bool(getline(cpuinfo, line)))
+        {
+            if(std::regex_search(line.cbegin(), line.cend(), cpu_part_match, cpu_part_rgx))
+            {
+                std::string cpu_part = cpu_part_match[1];
+                if(cpu_part_occurrence_map.find(cpu_part) != cpu_part_occurrence_map.end())
+                {
+                    cpu_part_occurrence_map[cpu_part]++;
+                }
+                else
+                {
+                    cpu_part_occurrence_map[cpu_part] = 1;
+                }
+            }
+        }
+    }
+
+    // Get min number of threads
+    auto min_common_cores = std::min_element(cpu_part_occurrence_map.begin(), cpu_part_occurrence_map.end(),
+                                             [](const std::pair<std::string, unsigned int> &p1, const std::pair<std::string, unsigned int> &p2)
+    {
+        return p1.second < p2.second;
+    });
+
+    // Set thread hint
+    num_threads_hint = cpu_part_occurrence_map.empty() ? std::thread::hardware_concurrency() : min_common_cores->second;
+#endif /* BARE_METAL */
+
+    return num_threads_hint;
+}
+
 unsigned int get_cpu_impl()
 {
 #ifndef BARE_METAL
     int fd = open("/proc/cpuinfo", 0); // NOLINT
-    std::array<char, 1200> buff{ {} };
+    std::array<char, 3000> buff{ {} };
     char *pos     = nullptr;
     char *end     = nullptr;
     bool  foundid = false;
@@ -50,7 +105,7 @@ unsigned int get_cpu_impl()
         return 0;
     }
 
-    int charsread = read(fd, buff.data(), 1200);
+    int charsread = read(fd, buff.data(), 3000);
     pos           = buff.data();
     end           = buff.data() + charsread;
 
@@ -129,6 +184,10 @@ namespace arm_compute
 {
 IScheduler::IScheduler()
 {
+    // Work out the best possible number of execution threads
+    _num_threads_hint = get_threads_hint();
+
+    // Work out the CPU implementation
     switch(get_cpu_impl())
     {
         case 0xd0f:
@@ -160,5 +219,10 @@ void IScheduler::set_target(CPUTarget target)
 CPUInfo IScheduler::cpu_info() const
 {
     return _info;
+}
+
+unsigned int IScheduler::num_threads_hint() const
+{
+    return _num_threads_hint;
 }
 } // namespace arm_compute

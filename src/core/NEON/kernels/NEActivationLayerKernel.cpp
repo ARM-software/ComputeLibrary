@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -109,8 +109,9 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (output != nullptr) ? output->info() : nullptr));
 
-    ARM_COMPUTE_ERROR_ON_MSG((input->info()->data_type() == DataType::QASYMM8) && (activation_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU),
-                             "For QASYMM8 only lower/upper bounded relu is supported");
+    ARM_COMPUTE_ERROR_ON_MSG((input->info()->data_type() == DataType::QASYMM8) && (activation_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
+                             && (activation_info.activation() != ActivationLayerInfo::ActivationFunction::RELU),
+                             "For QASYMM8 only relu and lower/upper bounded relu are supported");
 
     // Activation functions : FP32
     static std::map<ActivationFunction, ActivationFunctionExecutorPtr> act_map_f32 =
@@ -179,6 +180,7 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
     static std::map<ActivationFunction, ActivationFunctionExecutorPtr> act_map_qasymm8 =
     {
         { ActivationFunction::LU_BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LU_BOUNDED_RELU, qasymm8_t> },
+        { ActivationFunction::RELU, &NEActivationLayerKernel::activation<ActivationFunction::RELU, qasymm8_t> },
     };
 
     switch(input->info()->data_type())
@@ -359,8 +361,16 @@ typename std::enable_if<std::is_same<T, float>::value, void>::type NEActivationL
         const auto input_ptr  = reinterpret_cast<const float *>(input.ptr());
         const auto output_ptr = reinterpret_cast<float *>(output.ptr());
 
-        const float32x4x4_t in  = vld4q_f32(input_ptr);
-        float32x4x4_t       tmp = { {} };
+        const float32x4x4_t in =
+        {
+            {
+                vld1q_f32(input_ptr),
+                vld1q_f32(input_ptr + 4),
+                vld1q_f32(input_ptr + 8),
+                vld1q_f32(input_ptr + 12)
+            }
+        };
+        float32x4x4_t tmp = { {} };
 
         switch(F)
         {
@@ -489,7 +499,10 @@ typename std::enable_if<std::is_same<T, float>::value, void>::type NEActivationL
                 break;
         }
 
-        vst4q_f32(output_ptr, tmp);
+        vst1q_f32(output_ptr, tmp.val[0]);
+        vst1q_f32(output_ptr + 4, tmp.val[1]);
+        vst1q_f32(output_ptr + 8, tmp.val[2]);
+        vst1q_f32(output_ptr + 12, tmp.val[3]);
     },
     input, output);
 }
@@ -561,12 +574,14 @@ typename std::enable_if<std::is_same<T, int8_t>::value, void>::type NEActivation
 template <ActivationLayerInfo::ActivationFunction F, typename T>
 typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type NEActivationLayerKernel::activation(const Window &window)
 {
-    Iterator               input(_input, window);
-    Iterator               output(_output, window);
-    const QuantizationInfo qi_in  = _input->info()->quantization_info();
-    const QuantizationInfo qi_out = _output->info()->quantization_info();
-    const qasymm8x16_t     a      = vdupq_n_u8(sqcvt_qasymm8_f32(_act_info.a(), qi_in.scale, qi_in.offset));
-    const qasymm8x16_t     b      = vdupq_n_u8(sqcvt_qasymm8_f32(_act_info.b(), qi_in.scale, qi_in.offset));
+    Iterator                  input(_input, window);
+    Iterator                  output(_output, window);
+    const QuantizationInfo    qi_in   = _input->info()->quantization_info();
+    const QuantizationInfo    qi_out  = _output->info()->quantization_info();
+    const qasymm8x16_t        a       = vdupq_n_u8(sqcvt_qasymm8_f32(_act_info.a(), qi_in.scale, qi_in.offset));
+    const qasymm8x16_t        b       = vdupq_n_u8(sqcvt_qasymm8_f32(_act_info.b(), qi_in.scale, qi_in.offset));
+    static const qasymm8x16_t CONST_0 = vdupq_n_u8(sqcvt_qasymm8_f32(0.f, qi_in.scale, qi_in.offset));
+
     // Initialise scale/offset for re-quantization
     float       s  = qi_in.scale / qi_out.scale;
     float       o  = -qi_in.offset * s + qi_out.offset;
@@ -586,6 +601,12 @@ typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type NEActivat
             case ActivationFunction::LU_BOUNDED_RELU:
                 // Perform activation
                 tmp = vminq_u8(a, vmaxq_u8(b, in));
+                // Re-quantize to new output space
+                tmp = vmlaq_qasymm8(tmp, vs, vo);
+                break;
+            case ActivationFunction::RELU:
+                // Perform activation
+                tmp = vmaxq_u8(CONST_0, in);
                 // Re-quantize to new output space
                 tmp = vmlaq_qasymm8(tmp, vs, vo);
                 break;

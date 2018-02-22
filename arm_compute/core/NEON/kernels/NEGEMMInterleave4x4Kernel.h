@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,6 +52,10 @@ class ITensor;
 class NEGEMMInterleave4x4Kernel : public INESimpleKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEGEMMInterleave4x4Kernel";
+    }
     /* Constructor */
     NEGEMMInterleave4x4Kernel();
     /** Initialise the kernel's input and output.

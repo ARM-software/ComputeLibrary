@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -93,17 +93,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datase
     CLLogits1DMaxShiftExpSumKernel::ParallelReductionInfo reduction_info = CLLogits1DMaxShiftExpSumKernel::is_parallel_reduction(shape.x());
 
     // Validate src padding
-    // Legacy path used only by quantized asymmetric data type
-    if(is_data_type_quantized_asymmetric(data_type))
-    {
-        const PaddingSize padding_src = PaddingCalculator(shape.x(), 16).required_padding();
-        validate(src.info()->padding(), padding_src);
-    }
-    else
-    {
-        const PaddingSize padding_src = PaddingCalculator(shape.x(), std::get<1>(reduction_info)).required_padding();
-        validate(src.info()->padding(), padding_src);
-    }
+    const PaddingSize padding_src = PaddingCalculator(shape.x(), std::get<1>(reduction_info)).required_padding();
+    validate(src.info()->padding(), padding_src);
 
     // Validate dst padding
     const PaddingSize padding_dst = PaddingCalculator(shape.x(), 16).required_padding();
@@ -188,14 +179,14 @@ using CLSoftmaxLayerFixedPointFixture = SoftmaxValidationFixedPointFixture<CLTen
 TEST_SUITE(FixedPoint)
 TEST_SUITE(QS8)
 // Testing for fixed point position [1,6) as reciprocal limits the maximum fixed point position to 5
-FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(datasets::SoftmaxLayerSmallShapes(), framework::dataset::make("DataType",
-                                                                                                                       DataType::QS8)),
-                                                                                                               framework::dataset::make("FractionalBits", 1, 6)))
+FIXTURE_DATA_TEST_CASE(RunTiny, CLSoftmaxLayerFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(datasets::SoftmaxLayerTinyShapes(), framework::dataset::make("DataType",
+                                                                                                                      DataType::QS8)),
+                                                                                                              framework::dataset::make("FractionalBits", 1, 6)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fixed_point);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLSoftmaxLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SoftmaxLayerLargeShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SoftmaxLayerSmallShapes(), framework::dataset::make("DataType",
                                                                                                                    DataType::QS8)),
                                                                                                                    framework::dataset::make("FractionalBits", 1, 6)))
 {
@@ -206,15 +197,15 @@ TEST_SUITE_END()
 
 TEST_SUITE(QS16)
 // Testing for fixed point position [1,14) as reciprocal limits the maximum fixed point position to 14
-FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerFixedPointFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(datasets::SoftmaxLayerSmallShapes(),
-                                                                                                                        framework::dataset::make("DataType",
-                                                                                                                                DataType::QS16)),
-                                                                                                                framework::dataset::make("FractionalBits", 1, 14)))
+FIXTURE_DATA_TEST_CASE(RunTiny, CLSoftmaxLayerFixedPointFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(datasets::SoftmaxLayerTinyShapes(),
+                                                                                                                       framework::dataset::make("DataType",
+                                                                                                                               DataType::QS16)),
+                                                                                                               framework::dataset::make("FractionalBits", 1, 14)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fixed_point);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLSoftmaxLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SoftmaxLayerLargeShapes(),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SoftmaxLayerSmallShapes(),
                                                                                                                     framework::dataset::make("DataType",
                                                                                                                             DataType::QS16)),
                                                                                                                     framework::dataset::make("FractionalBits", 1, 14)))

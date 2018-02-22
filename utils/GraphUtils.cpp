@@ -23,8 +23,9 @@
  */
 
 #include "utils/GraphUtils.h"
-#include "utils/Utils.h"
+
 #include "arm_compute/runtime/SubTensor.h"
+#include "utils/Utils.h"
 
 #ifdef ARM_COMPUTE_CL
 #include "arm_compute/core/CL/OpenCL.h"
@@ -34,6 +35,41 @@
 #include <iomanip>
 
 using namespace arm_compute::graph_utils;
+
+void TFPreproccessor::preprocess(ITensor &tensor)
+{
+    Window window;
+    window.use_tensor_dimensions(tensor.info()->tensor_shape());
+
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        const float value                                     = *reinterpret_cast<float *>(tensor.ptr_to_element(id));
+        float       res                                       = value / 255.f;      // Normalize to [0, 1]
+        res                                                   = (res - 0.5f) * 2.f; // Map to [-1, 1]
+        *reinterpret_cast<float *>(tensor.ptr_to_element(id)) = res;
+    });
+}
+
+CaffePreproccessor::CaffePreproccessor(std::array<float, 3> mean, bool bgr)
+    : _mean(mean), _bgr(bgr)
+{
+    if(_bgr)
+    {
+        std::swap(_mean[0], _mean[2]);
+    }
+}
+
+void CaffePreproccessor::preprocess(ITensor &tensor)
+{
+    Window window;
+    window.use_tensor_dimensions(tensor.info()->tensor_shape());
+
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        const float value                                     = *reinterpret_cast<float *>(tensor.ptr_to_element(id)) - _mean[id.z()];
+        *reinterpret_cast<float *>(tensor.ptr_to_element(id)) = value;
+    });
+}
 
 PPMWriter::PPMWriter(std::string name, unsigned int maximum)
     : _name(std::move(name)), _iterator(0), _maximum(maximum)
@@ -75,28 +111,14 @@ bool DummyAccessor::access_tensor(ITensor &tensor)
     return ret;
 }
 
-PPMAccessor::PPMAccessor(std::string ppm_path, bool bgr,
-                         float mean_r, float mean_g, float mean_b,
-                         float std_r, float std_g, float std_b)
-    : _ppm_path(std::move(ppm_path)), _bgr(bgr), _mean_r(mean_r), _mean_g(mean_g), _mean_b(mean_b), _std_r(std_r), _std_g(std_g), _std_b(std_b)
+PPMAccessor::PPMAccessor(std::string ppm_path, bool bgr, std::unique_ptr<IPreprocessor> preprocessor)
+    : _ppm_path(std::move(ppm_path)), _bgr(bgr), _preprocessor(std::move(preprocessor))
 {
 }
 
 bool PPMAccessor::access_tensor(ITensor &tensor)
 {
     utils::PPMLoader ppm;
-    const float      mean[3] =
-    {
-        _bgr ? _mean_b : _mean_r,
-        _mean_g,
-        _bgr ? _mean_r : _mean_b
-    };
-    const float std[3] =
-    {
-        _bgr ? _std_b : _std_r,
-        _std_g,
-        _bgr ? _std_r : _std_b
-    };
 
     // Open PPM file
     ppm.open(_ppm_path);
@@ -107,15 +129,11 @@ bool PPMAccessor::access_tensor(ITensor &tensor)
     // Fill the tensor with the PPM content (BGR)
     ppm.fill_planar_tensor(tensor, _bgr);
 
-    // Subtract the mean value from each channel
-    Window window;
-    window.use_tensor_dimensions(tensor.info()->tensor_shape());
-
-    execute_window_loop(window, [&](const Coordinates & id)
+    // Preprocess tensor
+    if(_preprocessor)
     {
-        const float value                                     = *reinterpret_cast<float *>(tensor.ptr_to_element(id)) - mean[id.z()];
-        *reinterpret_cast<float *>(tensor.ptr_to_element(id)) = value / std[id.z()];
-    });
+        _preprocessor->preprocess(tensor);
+    }
 
     return true;
 }
@@ -207,7 +225,7 @@ void RandomAccessor::fill(ITensor &tensor, D &&distribution)
 {
     std::mt19937 gen(_seed);
 
-    if(tensor.info()->padding().empty() && !dynamic_cast<SubTensor*>(&tensor))
+    if(tensor.info()->padding().empty() && (dynamic_cast<SubTensor *>(&tensor) == nullptr))
     {
         for(size_t offset = 0; offset < tensor.info()->total_size(); offset += tensor.info()->element_size())
         {
@@ -331,26 +349,39 @@ bool NumPyBinLoader::access_tensor(ITensor &tensor)
     std::string expect_typestr = arm_compute::utils::get_typestring(tensor.info()->data_type());
     ARM_COMPUTE_ERROR_ON_MSG(typestr != expect_typestr, "Typestrings mismatch");
 
-    // Validate tensor shape
-    ARM_COMPUTE_ERROR_ON_MSG(shape.size() != tensor_shape.num_dimensions(), "Tensor ranks mismatch");
-
-    if(fortran_order)
+    // Reverse vector in case of non fortran order
+    if(!fortran_order)
     {
-        for(size_t i = 0; i < shape.size(); ++i)
+        std::reverse(shape.begin(), shape.end());
+    }
+
+    // Correct dimensions (Needs to match TensorShape dimension corrections)
+    if(shape.size() != tensor_shape.num_dimensions())
+    {
+        for(int i = static_cast<int>(shape.size()) - 1; i > 0; --i)
         {
-            ARM_COMPUTE_ERROR_ON_MSG(tensor_shape[i] != shape[i], "Tensor dimensions mismatch");
+            if(shape[i] == 1)
+            {
+                shape.pop_back();
+            }
+            else
+            {
+                break;
+            }
         }
     }
-    else
+
+    // Validate tensor ranks
+    ARM_COMPUTE_ERROR_ON_MSG(shape.size() != tensor_shape.num_dimensions(), "Tensor ranks mismatch");
+
+    // Validate shapes
+    for(size_t i = 0; i < shape.size(); ++i)
     {
-        for(size_t i = 0; i < shape.size(); ++i)
-        {
-            ARM_COMPUTE_ERROR_ON_MSG(tensor_shape[i] != shape[shape.size() - i - 1], "Tensor dimensions mismatch");
-        }
+        ARM_COMPUTE_ERROR_ON_MSG(tensor_shape[i] != shape[i], "Tensor dimensions mismatch");
     }
 
     // Read data
-    if(tensor.info()->padding().empty() && !dynamic_cast<SubTensor*>(&tensor))
+    if(tensor.info()->padding().empty() && (dynamic_cast<SubTensor *>(&tensor) == nullptr))
     {
         // If tensor has no padding read directly from stream.
         stream.read(reinterpret_cast<char *>(tensor.buffer()), tensor.info()->total_size());

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,14 +60,16 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((is_data_type_quantized_asymmetric(input->data_type()) && pool_info.pool_type() == PoolingType::L2),
                                     "Unsupported combination of parameters!");
+    ARM_COMPUTE_RETURN_ERROR_ON(!pool_info.pad_stride_info().padding_is_symmetric());
 
     const bool         is_global_pooling = pool_info.is_global_pooling();
-    const unsigned int pool_size         = is_global_pooling ? input->tensor_shape().x() : pool_info.pool_size();
+    const unsigned int pool_size         = is_global_pooling ? input->tensor_shape().x() : pool_info.pool_size().width;
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_global_pooling && (input->tensor_shape().x() != input->tensor_shape().y()),
                                     "Global pooling is supported only with rectangular inputs!");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_global_pooling && ((pool_info.pad_stride_info().pad().first >= pool_size) || (pool_info.pad_stride_info().pad().second >= pool_size)),
                                     "Invalid pool size and pool pad combination!");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(pool_info.pool_size().width != pool_info.pool_size().height, "Invalid Pool size, width not equal to height!");
 
     // Checks performed when output is configured
     if(output->total_size() != 0)
@@ -97,7 +99,7 @@ std::tuple<Status, Window, GCPoolingConfig> validate_and_configure_window(ITenso
     int                 pool_stride_y   = 0;
     unsigned int        pooled_w        = 0;
     unsigned int        pooled_h        = 0;
-    int                 pool_size       = pool_info.pool_size();
+    int                 pool_size       = pool_info.pool_size().width;
     const PadStrideInfo pad_stride_info = pool_info.pad_stride_info();
     std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
@@ -196,11 +198,14 @@ std::tuple<Status, Window, GCPoolingConfig> validate_and_configure_window(ITenso
         const int output_height         = output->dimension(1);
         const int output_padding_right  = ceil_to_multiple(output_width, num_elems_processed_per_iteration) - output_width;
         const int output_padding_bottom = ceil_to_multiple(output_height, 1) - output_height;
-        const int input_padding_right   = ceil_to_multiple(input_width + 2 * border_size.right, num_elems_processed_per_iteration) - (input_width + 2 * border_size.right);
-        const int input_padding_bottom  = ceil_to_multiple(input_height + 2 * border_size.bottom, 1) - (input_height + 2 * border_size.bottom);
+
+        const int input_total_width    = std::max(int(input->padding().left), int(pool_pad_x)) + input_width + std::max(int(input->padding().right), int(pool_pad_x));
+        const int input_padding_right  = ceil_to_multiple(input_total_width, num_elems_processed_per_iteration) - input_width - pool_pad_x;
+        const int input_total_height   = std::max(int(input->padding().top), int(pool_pad_y)) + input_height + std::max(int(input->padding().bottom), int(pool_pad_y));
+        const int input_padding_bottom = input_total_height - input_height - pool_pad_y;
 
         // Configure kernel window
-        AccessWindowStatic input_access(input, -pool_pad_x, -pool_pad_y, input_width + border_size.right + input_padding_right, input_height + border_size.bottom + input_padding_bottom);
+        AccessWindowStatic input_access(input, -pool_pad_x, -pool_pad_y, input_width + input_padding_right, input_height + input_padding_bottom);
         AccessWindowStatic output_access(output, 0, 0, output_width + output_padding_right, output_height + output_padding_bottom);
         bool               window_changed = update_window_and_padding(win, input_access, output_access);
         output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
@@ -229,7 +234,7 @@ void GCPoolingLayerKernel::configure(const IGCTensor *input, IGCTensor *output, 
     unsigned int        pooled_w        = 0;
     unsigned int        pooled_h        = 0;
     const PoolingType   pool_type       = pool_info.pool_type();
-    int                 pool_size       = pool_info.pool_size();
+    int                 pool_size       = pool_info.pool_size().width;
     const PadStrideInfo pad_stride_info = pool_info.pad_stride_info();
     const bool          exclude_padding = pool_info.exclude_padding();
     std::tie(pool_pad_x, pool_pad_y)       = pad_stride_info.pad();
@@ -338,13 +343,19 @@ void GCPoolingLayerKernel::run(const Window &window)
 
     _kernel.use();
 
+    _output->set_needs_shifting(true);
+
     Window window_collapsed = window.collapse_if_possible(IGCKernel::window(), Window::DimZ);
-    Window slice            = window_collapsed.first_slice_window_3D();
+
+    Window slice         = window_collapsed.first_slice_window_3D();
+    Window slice_in_orig = window_collapsed.first_slice_window_3D();
+
+    slice.shift(Window::DimX, -(_output->info()->padding()).left);
 
     do
     {
         // Upsample input by pool size
-        Window in_slice(slice); // NOLINT
+        Window in_slice(slice_in_orig); // NOLINT
         in_slice.set(Window::DimX, Window::Dimension(in_slice.x().start() - pool_pad_x, in_slice.x().end() * pool_stride_x, pool_stride_x * _num_elems_processed_per_iteration));
         in_slice.set(Window::DimY, Window::Dimension(in_slice.y().start() - pool_pad_y, in_slice.y().end() * pool_stride_y, pool_stride_y));
 
@@ -356,5 +367,5 @@ void GCPoolingLayerKernel::run(const Window &window)
         _kernel.update_shader_params();
         enqueue(*this, slice);
     }
-    while(window_collapsed.slide_window_slice_3D(slice));
+    while(window_collapsed.slide_window_slice_3D(slice) && window_collapsed.slide_window_slice_3D(slice_in_orig));
 }

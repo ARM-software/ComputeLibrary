@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,6 +58,16 @@ public:
     // Inherited methods overridden:
     void tune_kernel(ICLKernel &kernel) override;
 
+    /** Set the OpenCL kernel event
+     *
+     * @note The interceptor can use this function to store the event associated to the OpenCL kernel
+     *
+     * @param[in] kernel_event The OpenCL kernel event
+     */
+    void set_cl_kernel_event(cl_event kernel_event);
+
+    std::function<decltype(clEnqueueNDRangeKernel)> real_function;
+
 private:
     /** Find optimal LWS using brute-force approach
      *
@@ -68,6 +78,36 @@ private:
     cl::NDRange find_optimal_lws(ICLKernel &kernel);
 
     std::unordered_map<std::string, cl::NDRange> _lws_table;
+    cl::CommandQueue _queue;
+    cl::CommandQueue _queue_profiler;
+    cl::Event        _kernel_event;
+};
+
+/* Function to be used to intercept kernel enqueues and store their OpenCL Event */
+class Interceptor
+{
+public:
+    explicit Interceptor(CLTuner &tuner);
+
+    /** clEnqueueNDRangeKernel interface
+     *
+     * @param[in] command_queue           A valid command-queue. The kernel will be queued for execution on the device associated with command_queue.
+     * @param[in] kernel                  A valid kernel object. The OpenCL context associated with kernel and command_queue must be the same.
+     * @param[in] work_dim                The number of dimensions used to specify the global work-items and work-items in the work-group. work_dim must be greater than zero and less than or equal to CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS.
+     * @param[in] gwo                     Global-Workgroup-Offset. It can be used to specify an array of work_dim unsigned values that describe the offset used to calculate the global ID of a work-item. If global_work_offset is NULL, the global IDs start at offset (0, 0, ... 0).
+     * @param[in] gws                     Global-Workgroup-Size. Points to an array of work_dim unsigned values that describe the number of global work-items in work_dim dimensions that will execute the kernel function.
+     * @param[in] lws                     Local-Workgroup-Size. Points to an array of work_dim unsigned values that describe the number of work-items that make up a work-group
+     * @param[in] num_events_in_wait_list Number of events in the waiting list
+     * @param[in] event_wait_list         Event waiting list
+     * @param[in] event                   OpenCL kernel event
+     *
+     * @return the OpenCL status
+     */
+    cl_int operator()(cl_command_queue command_queue, cl_kernel kernel, cl_uint work_dim, const size_t *gwo, const size_t *gws, const size_t *lws, cl_uint num_events_in_wait_list,
+                      const cl_event *event_wait_list, cl_event *event);
+
+private:
+    CLTuner &_tuner;
 };
 }
 #endif /*__ARM_COMPUTE_CLTUNER_H__ */

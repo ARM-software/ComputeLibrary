@@ -895,7 +895,11 @@ void init_sgemm_output(T &dst, T &src0, T &src1, arm_compute::DataType dt)
 {
     dst.allocator()->init(TensorInfo(TensorShape(src1.info()->dimension(0), src0.info()->dimension(1)), 1, dt));
 }
-
+/** This function returns the amount of memory free reading from /proc/meminfo
+ *
+ * @return The free memory in kB
+ */
+uint64_t get_mem_free_from_meminfo();
 } // namespace utils
 } // namespace arm_compute
 #endif /* __UTILS_UTILS_H__*/

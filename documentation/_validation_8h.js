@@ -7,7 +7,7 @@ var _validation_8h =
     [ "compare< AbsoluteTolerance< U > >", "structarm__compute_1_1test_1_1validation_1_1compare_3_01_absolute_tolerance_3_01_u_01_4_01_4.xhtml", "structarm__compute_1_1test_1_1validation_1_1compare_3_01_absolute_tolerance_3_01_u_01_4_01_4" ],
     [ "compare< RelativeTolerance< U > >", "structarm__compute_1_1test_1_1validation_1_1compare_3_01_relative_tolerance_3_01_u_01_4_01_4.xhtml", "structarm__compute_1_1test_1_1validation_1_1compare_3_01_relative_tolerance_3_01_u_01_4_01_4" ],
     [ "compare_dimensions", "_validation_8h.xhtml#a45ccb6e2ccc0be8a60e694a6b75e4679", null ],
-    [ "compare_keypoints", "_validation_8h.xhtml#ad9d72a667b386098e095317fd50501fb", null ],
+    [ "compare_keypoints", "_validation_8h.xhtml#ace0d3bcb3a52d88fdd312957ed7f18fd", null ],
     [ "operator<<", "_validation_8h.xhtml#ab6d7586446a24baaa269c5f9a65ecd7f", null ],
     [ "operator<<", "_validation_8h.xhtml#a5e05c35e20ad8ca67a4fbdd57e33ac8c", null ],
     [ "validate", "_validation_8h.xhtml#a7730e17dc901bdffefcf45b08bab135f", null ],

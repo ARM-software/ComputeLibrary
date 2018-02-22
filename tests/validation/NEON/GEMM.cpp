@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,6 +32,7 @@
 #include "tests/PaddingCalculator.h"
 #include "tests/datasets/LargeGEMMDataset.h"
 #include "tests/datasets/SmallGEMMDataset.h"
+#include "tests/datasets/TinyGEMMDataset.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
@@ -210,15 +211,15 @@ using NEGEMMFixedPointFixture = GEMMValidationFixedPointFixture<Tensor, Accessor
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QS8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallGEMMDataset(),
-                                                                                                                     framework::dataset::make("DataType",
-                                                                                                                             DataType::QS8)),
-                                                                                                             framework::dataset::make("FractionalBits", 1, 7)))
+FIXTURE_DATA_TEST_CASE(RunTiny, NEGEMMFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::TinyGEMMDataset(),
+                                                                                                                    framework::dataset::make("DataType",
+                                                                                                                            DataType::QS8)),
+                                                                                                            framework::dataset::make("FractionalBits", 1, 7)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_q);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeGEMMDataset(),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallGEMMDataset(),
                                                                                                                    framework::dataset::make("DataType",
                                                                                                                            DataType::QS8)),
                                                                                                            framework::dataset::make("FractionalBits", 1, 7)))
@@ -229,15 +230,15 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMFixedPointFixture<int8_t>, framework::Dat
 TEST_SUITE_END()
 
 TEST_SUITE(QS16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallGEMMDataset(),
-                                                                                                                      framework::dataset::make("DataType",
-                                                                                                                              DataType::QS16)),
-                                                                                                              framework::dataset::make("FractionalBits", 1, 14)))
+FIXTURE_DATA_TEST_CASE(RunTiny, NEGEMMFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::TinyGEMMDataset(),
+                                                                                                                     framework::dataset::make("DataType",
+                                                                                                                             DataType::QS16)),
+                                                                                                             framework::dataset::make("FractionalBits", 1, 14)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_q);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeGEMMDataset(),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallGEMMDataset(),
                                                                                                                     framework::dataset::make("DataType",
                                                                                                                             DataType::QS16)),
                                                                                                             framework::dataset::make("FractionalBits", 1, 14)))

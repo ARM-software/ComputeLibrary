@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -114,11 +114,28 @@ private:
     std::vector<TensorShape> _dst_shapes{};
 };
 
+class TinyFullyConnectedLayerDataset final : public FullyConnectedLayerDataset
+{
+public:
+    TinyFullyConnectedLayerDataset()
+    {
+        // Conv -> FC
+        add_config(TensorShape(8U, 1U, 1U), TensorShape(8U, 16U), TensorShape(16U), TensorShape(16U));
+        // Conv -> FC
+        add_config(TensorShape(1U, 1U, 1U, 3U), TensorShape(1U, 10U), TensorShape(10U), TensorShape(10U, 3U));
+        // FC -> FC
+        add_config(TensorShape(1U), TensorShape(1U, 10U), TensorShape(10U), TensorShape(10U));
+        // FC -> FC (batched)
+        add_config(TensorShape(1U, 3U), TensorShape(1U, 10U), TensorShape(10U), TensorShape(10U, 3U));
+    }
+};
 class SmallFullyConnectedLayerDataset final : public FullyConnectedLayerDataset
 {
 public:
     SmallFullyConnectedLayerDataset()
     {
+        // Conv -> FC
+        add_config(TensorShape(8U, 1U, 1U), TensorShape(8U, 16U), TensorShape(16U), TensorShape(16U));
         // Conv -> FC
         add_config(TensorShape(1U, 1U, 1U, 3U), TensorShape(1U, 10U), TensorShape(10U), TensorShape(10U, 3U));
         // Conv -> FC

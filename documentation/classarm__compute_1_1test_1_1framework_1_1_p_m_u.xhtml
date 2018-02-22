@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -158,7 +158,7 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Class provides access to CPU hardware counters. </p>
 
-<p>Definition at line <a class="el" href="_p_m_u_8h_source.xhtml#l00042">42</a> of file <a class="el" href="_p_m_u_8h_source.xhtml">PMU.h</a>.</p>
+<p>Definition at line <a class="el" href="_p_m_u_8h_source.xhtml#l00043">43</a> of file <a class="el" href="_p_m_u_8h_source.xhtml">PMU.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="af16eae86d803112e6466140aaced812b"></a>
 <div class="memitem">
@@ -279,12 +279,12 @@ Public Member Functions</h2></td></tr>
 <p>Get the counter value. </p>
 <dl class="section return"><dt>Returns</dt><dd>Counter value casted to the specified type. </dd></dl>
 
-<p>Definition at line <a class="el" href="_p_m_u_8h_source.xhtml#l00084">84</a> of file <a class="el" href="_p_m_u_8h_source.xhtml">PMU.h</a>.</p>
+<p>Definition at line <a class="el" href="_p_m_u_8h_source.xhtml#l00085">85</a> of file <a class="el" href="_p_m_u_8h_source.xhtml">PMU.h</a>.</p>
 
 <p>References <a class="el" href="core_2_error_8h_source.xhtml#l00238">ARM_COMPUTE_ERROR</a>, and <a class="el" href="hwc_8hpp_source.xhtml#l00278">value</a>.</p>
 
 <p>Referenced by <a class="el" href="_p_m_u_counter_8cpp_source.xhtml#l00043">PMUCounter::stop()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;{</div><div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    T             <a class="code" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>{};</div><div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    <span class="keyword">const</span> ssize_t result = read(_fd, &amp;<a class="code" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>, <span class="keyword">sizeof</span>(T));</div><div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;</div><div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    <span class="keywordflow">if</span>(result == -1)</div><div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    {</div><div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;        <a class="code" href="core_2_error_8h.xhtml#a05b19c75afe9c24200a62b9724734bbd">ARM_COMPUTE_ERROR</a>(<span class="stringliteral">&quot;Can&#39;t get PMU counter value: %d&quot;</span>, errno);</div><div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    }</div><div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;</div><div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>;</div><div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;}</div><div class="ttc" id="core_2_error_8h_xhtml_a05b19c75afe9c24200a62b9724734bbd"><div class="ttname"><a href="core_2_error_8h.xhtml#a05b19c75afe9c24200a62b9724734bbd">ARM_COMPUTE_ERROR</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR(...)</div><div class="ttdoc">Print the given message then throw an std::runtime_error. </div><div class="ttdef"><b>Definition:</b> <a href="core_2_error_8h_source.xhtml#l00238">Error.h:238</a></div></div>
+<div class="fragment"><div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;{</div><div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    T             <a class="code" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>{};</div><div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    <span class="keyword">const</span> ssize_t result = read(_fd, &amp;<a class="code" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>, <span class="keyword">sizeof</span>(T));</div><div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;</div><div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    <span class="keywordflow">if</span>(result == -1)</div><div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    {</div><div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;        <a class="code" href="core_2_error_8h.xhtml#a05b19c75afe9c24200a62b9724734bbd">ARM_COMPUTE_ERROR</a>(<span class="stringliteral">&quot;Can&#39;t get PMU counter value: %d&quot;</span>, errno);</div><div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    }</div><div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;</div><div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;    <span class="keywordflow">return</span> <a class="code" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>;</div><div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;}</div><div class="ttc" id="core_2_error_8h_xhtml_a05b19c75afe9c24200a62b9724734bbd"><div class="ttname"><a href="core_2_error_8h.xhtml#a05b19c75afe9c24200a62b9724734bbd">ARM_COMPUTE_ERROR</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR(...)</div><div class="ttdoc">Print the given message then throw an std::runtime_error. </div><div class="ttdef"><b>Definition:</b> <a href="core_2_error_8h_source.xhtml#l00238">Error.h:238</a></div></div>
 <div class="ttc" id="hwc_8hpp_xhtml_a0f61d63b009d0880a89c843bd50d8d76"><div class="ttname"><a href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a></div><div class="ttdeci">void * value</div><div class="ttdef"><b>Definition:</b> <a href="hwc_8hpp_source.xhtml#l00278">hwc.hpp:278</a></div></div>
 </div><!-- fragment -->
 </div>
@@ -370,7 +370,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test.xhtml">test</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test_1_1framework.xhtml">framework</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1test_1_1framework_1_1_p_m_u.xhtml">PMU</a></li>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:47 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:26 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,14 @@ public:
      * @param[out] output Output tensor. Data type supported: same as @p input
      */
     void configure(const ITensor *input, ITensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMTranspose1xW
+     *
+     * @param[in] input  First input tensor. Data type supported: U8/S8/QS8/U16/S16/F16/U32/S32/F32/
+     * @param[in] output Output tensor. Data type supported: same as @p input
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 };
 }
 #endif /*__ARM_COMPUTE_NEGEMMTRANSPOSE1XW_H__ */

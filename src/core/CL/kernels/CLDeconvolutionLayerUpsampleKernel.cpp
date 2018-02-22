@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,12 +42,12 @@ Status CLDeconvolutionLayerUpsampleKernel::validate(const ITensorInfo *input, co
                                                     const PadStrideInfo &info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_UNUSED(info);
 
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(0) == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(1) == 0);
+    ARM_COMPUTE_RETURN_ERROR_ON(!info.padding_is_symmetric());
 
     for(size_t i = 2; i < Coordinates::num_max_dimensions; ++i)
     {
@@ -79,9 +79,8 @@ void CLDeconvolutionLayerUpsampleKernel::configure(const ICLTensor *input, ICLTe
     constexpr unsigned int num_elems_processed_per_iteration = 1;
 
     // Configure kernel window
-    Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
-
-    AccessWindowHorizontal output_access(output->info(), 0, 0, num_elems_processed_per_iteration);
+    Window                 win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     ICLKernel::configure(win);

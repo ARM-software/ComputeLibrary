@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,10 @@ class ITensor;
 class NEGaussian5x5HorKernel : public INESimpleKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEGaussian5x5HorKernel";
+    }
     /** Default constructor */
     NEGaussian5x5HorKernel();
 
@@ -57,6 +61,10 @@ private:
 class NEGaussian5x5VertKernel : public INESimpleKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEGaussian5x5VertKernel";
+    }
     /** Initialise the kernel's source, destination and border mode.
      *
      * @param[in]  input            Source tensor. Data type supported: S16.

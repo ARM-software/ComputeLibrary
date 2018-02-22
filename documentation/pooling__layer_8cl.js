@@ -7,7 +7,7 @@ var pooling__layer_8cl =
     [ "POOLING3x3_STRIDE3", "pooling__layer_8cl.xhtml#aba30215e4df370ff8935f83046e696ea", null ],
     [ "POW2_OP", "pooling__layer_8cl.xhtml#a03898439d164d74f8c35bafb67262d95", null ],
     [ "SQRT_OP", "pooling__layer_8cl.xhtml#ac9af19bec38fe50b4b9585c0e5c0ccca", null ],
-    [ "calculate_avg_scale", "pooling__layer_8cl.xhtml#a89667fe8f529db8f7abc465f6476414b", null ],
+    [ "calculate_avg_scale", "pooling__layer_8cl.xhtml#ac8f27d6ce33043a58fc6bd17b41f8153", null ],
     [ "pooling_layer_2", "pooling__layer_8cl.xhtml#a2d95de36199fd06803ffb62f5ff1df08", null ],
     [ "pooling_layer_3", "pooling__layer_8cl.xhtml#af5751970a4d8c62febdc6c63d6d4fd1d", null ]
 ];

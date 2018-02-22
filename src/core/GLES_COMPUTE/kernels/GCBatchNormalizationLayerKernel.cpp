@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,7 +42,7 @@ GCBatchNormalizationLayerKernel::GCBatchNormalizationLayerKernel()
 }
 
 void GCBatchNormalizationLayerKernel::configure(const IGCTensor *input, IGCTensor *output, const IGCTensor *mean, const IGCTensor *var, const IGCTensor *beta, const IGCTensor *gamma,
-                                                float epsilon)
+                                                float epsilon, ActivationLayerInfo act_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
@@ -54,7 +54,14 @@ void GCBatchNormalizationLayerKernel::configure(const IGCTensor *input, IGCTenso
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output, mean, var, beta, gamma);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(mean, var, beta, gamma);
-    ARM_COMPUTE_ERROR_ON(input->info()->dimension(2) != mean->info()->dimension(0));
+    if(act_info.enabled())
+    {
+        ARM_COMPUTE_ERROR_ON(input->info()->data_type() != DataType::F32 && input->info()->data_type() != DataType::F16);
+        ARM_COMPUTE_ERROR_ON(act_info.activation() != ActivationLayerInfo::ActivationLayerInfo::ActivationFunction::RELU
+                             && act_info.activation() != ActivationLayerInfo::ActivationLayerInfo::ActivationFunction::BOUNDED_RELU
+                             && act_info.activation() != ActivationLayerInfo::ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU);
+        ARM_COMPUTE_ERROR_ON(act_info.b() > act_info.a());
+    }
 
     _input   = input;
     _output  = output;
@@ -78,6 +85,13 @@ void GCBatchNormalizationLayerKernel::configure(const IGCTensor *input, IGCTenso
     build_opts.emplace(("#define LOCAL_SIZE_X " + support::cpp11::to_string(1)));
     build_opts.emplace(("#define LOCAL_SIZE_Y " + support::cpp11::to_string(1)));
     build_opts.emplace(("#define LOCAL_SIZE_Z " + support::cpp11::to_string(1)));
+
+    if(act_info.enabled())
+    {
+        build_opts.emplace("#define " + string_from_activation_func(act_info.activation()));
+        build_opts.emplace("#define A_VAL " + float_to_string_with_full_precision(act_info.a()));
+        build_opts.emplace("#define B_VAL " + float_to_string_with_full_precision(act_info.b()));
+    }
 
     // Create kernel
     _kernel = static_cast<GCKernel>(GCKernelLibrary::get().create_kernel("batchnormalization_layer", build_opts));
@@ -105,7 +119,10 @@ void GCBatchNormalizationLayerKernel::run(const Window &window)
 
     _kernel.use();
 
-    Window slice = window.first_slice_window_3D();
+    _output->set_needs_shifting(true);
+
+    Window slice    = window.first_slice_window_3D();
+    Window slice_in = window.first_slice_window_3D();
 
     Window vector_slice = window.first_slice_window_1D();
     vector_slice.set(Window::DimX, Window::Dimension(0, 0, 0));
@@ -116,14 +133,16 @@ void GCBatchNormalizationLayerKernel::run(const Window &window)
     add_1D_tensor_argument(idx, _beta, 5, vector_slice);
     add_1D_tensor_argument(idx, _gamma, 6, vector_slice);
 
+    slice.shift(Window::DimX, -(_output->info()->padding()).left);
+
     do
     {
         idx = 0;
-        add_3D_tensor_argument(idx, _input, 1, slice);
+        add_3D_tensor_argument(idx, _input, 1, slice_in);
         add_3D_tensor_argument(idx, _output, 2, slice);
 
         _kernel.update_shader_params();
         enqueue(*this, slice);
     }
-    while(window.slide_window_slice_3D(slice));
+    while(window.slide_window_slice_3D(slice) && window.slide_window_slice_3D(slice_in));
 }

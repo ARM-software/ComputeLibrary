@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -69,6 +69,7 @@ SimpleTensor<T> non_maxima_suppression(const SimpleTensor<T> &src, BorderMode bo
 }
 
 template SimpleTensor<float> non_maxima_suppression(const SimpleTensor<float> &src, BorderMode border_mode, float constant_border_value);
+template SimpleTensor<uint8_t> non_maxima_suppression(const SimpleTensor<uint8_t> &src, BorderMode border_mode, uint8_t constant_border_value);
 } // namespace reference
 } // namespace validation
 } // namespace test

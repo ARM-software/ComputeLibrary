@@ -1,5 +1,6 @@
 var benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp =
 [
+    [ "NEConvolutionLayerFixture", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#a4a53a6134331fcb3ced6240186a91597", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#abe7167f9af260495f067dd8f36251a3b", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#adc3f7b3f1d06144af1980e8705253583", null ],
     [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#a9cc3e01ede750344f389191184d4682d", null ],

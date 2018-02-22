@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -70,7 +70,7 @@ bool AccessWindowAutoPadding::update_window_if_needed(Window &window) const
     return false;
 }
 
-bool AccessWindowAutoPadding::update_padding_if_needed(const Window &window) const
+bool AccessWindowAutoPadding::update_padding_if_needed(const Window &window)
 {
     ARM_COMPUTE_UNUSED(window);
 

@@ -2,7 +2,7 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
 [
     [ "arm32", "dir_c26a7e526887430ce25a4d0cc5a3865b.xhtml", "dir_c26a7e526887430ce25a4d0cc5a3865b" ],
     [ "arm64", "dir_03f3c81b7006d2ea95b3332b67d1fe9e.xhtml", "dir_03f3c81b7006d2ea95b3332b67d1fe9e" ],
-    [ "convolution", "dir_0e0f32791a0a83efc50a36fd47fb0641.xhtml", "dir_0e0f32791a0a83efc50a36fd47fb0641" ],
+    [ "detail", "dir_6b58bd0be07bddcf3022ab9b026cbf38.xhtml", "dir_6b58bd0be07bddcf3022ab9b026cbf38" ],
     [ "NEAbsoluteDifferenceKernel.h", "_n_e_absolute_difference_kernel_8h.xhtml", [
       [ "NEAbsoluteDifferenceKernel", "classarm__compute_1_1_n_e_absolute_difference_kernel.xhtml", "classarm__compute_1_1_n_e_absolute_difference_kernel" ]
     ] ],
@@ -197,6 +197,9 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     [ "NENormalizationLayerKernel.h", "_n_e_normalization_layer_kernel_8h.xhtml", [
       [ "NENormalizationLayerKernel", "classarm__compute_1_1_n_e_normalization_layer_kernel.xhtml", "classarm__compute_1_1_n_e_normalization_layer_kernel" ]
     ] ],
+    [ "NEPermuteKernel.h", "_n_e_permute_kernel_8h.xhtml", [
+      [ "NEPermuteKernel", "classarm__compute_1_1_n_e_permute_kernel.xhtml", "classarm__compute_1_1_n_e_permute_kernel" ]
+    ] ],
     [ "NEPixelWiseMultiplicationKernel.h", "_n_e_pixel_wise_multiplication_kernel_8h.xhtml", [
       [ "NEPixelWiseMultiplicationKernel", "classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml", "classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel" ]
     ] ],
@@ -237,8 +240,7 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     ] ],
     [ "NESoftmaxLayerKernel.h", "_n_e_softmax_layer_kernel_8h.xhtml", [
       [ "NELogits1DMaxKernel", "classarm__compute_1_1_n_e_logits1_d_max_kernel.xhtml", "classarm__compute_1_1_n_e_logits1_d_max_kernel" ],
-      [ "NELogits1DShiftExpSumKernel", "classarm__compute_1_1_n_e_logits1_d_shift_exp_sum_kernel.xhtml", "classarm__compute_1_1_n_e_logits1_d_shift_exp_sum_kernel" ],
-      [ "NELogits1DNormKernel", "classarm__compute_1_1_n_e_logits1_d_norm_kernel.xhtml", "classarm__compute_1_1_n_e_logits1_d_norm_kernel" ]
+      [ "NELogits1DSoftmaxKernel", "classarm__compute_1_1_n_e_logits1_d_softmax_kernel.xhtml", "classarm__compute_1_1_n_e_logits1_d_softmax_kernel" ]
     ] ],
     [ "NETableLookupKernel.h", "_n_e_table_lookup_kernel_8h.xhtml", [
       [ "NETableLookupKernel", "classarm__compute_1_1_n_e_table_lookup_kernel.xhtml", "classarm__compute_1_1_n_e_table_lookup_kernel" ]
@@ -258,7 +260,13 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
       [ "NEWeightsReshapeKernel", "classarm__compute_1_1_n_e_weights_reshape_kernel.xhtml", "classarm__compute_1_1_n_e_weights_reshape_kernel" ]
     ] ],
     [ "NEWinogradLayerKernel.h", "_n_e_winograd_layer_kernel_8h.xhtml", [
-      [ "Winograd3x3F32", "classarm__compute_1_1_winograd3x3_f32.xhtml", "classarm__compute_1_1_winograd3x3_f32" ],
-      [ "NEWinogradLayerKernel", "classarm__compute_1_1_n_e_winograd_layer_kernel.xhtml", "classarm__compute_1_1_n_e_winograd_layer_kernel" ]
+      [ "INEWinogradLayerTransformInputKernel", "classarm__compute_1_1_i_n_e_winograd_layer_transform_input_kernel.xhtml", "classarm__compute_1_1_i_n_e_winograd_layer_transform_input_kernel" ],
+      [ "NEWinogradLayerTransformInputKernel", "classarm__compute_1_1_n_e_winograd_layer_transform_input_kernel.xhtml", "classarm__compute_1_1_n_e_winograd_layer_transform_input_kernel" ],
+      [ "INEWinogradLayerTransformOutputKernel", "classarm__compute_1_1_i_n_e_winograd_layer_transform_output_kernel.xhtml", "classarm__compute_1_1_i_n_e_winograd_layer_transform_output_kernel" ],
+      [ "NEWinogradLayerTransformOutputKernel", "classarm__compute_1_1_n_e_winograd_layer_transform_output_kernel.xhtml", "classarm__compute_1_1_n_e_winograd_layer_transform_output_kernel" ],
+      [ "INEWinogradLayerTransformWeightsKernel", "classarm__compute_1_1_i_n_e_winograd_layer_transform_weights_kernel.xhtml", "classarm__compute_1_1_i_n_e_winograd_layer_transform_weights_kernel" ],
+      [ "NEWinogradLayerTransformWeightsKernel", "classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel.xhtml", "classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel" ],
+      [ "INEWinogradLayerBatchedGEMMKernel", "classarm__compute_1_1_i_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml", "classarm__compute_1_1_i_n_e_winograd_layer_batched_g_e_m_m_kernel" ],
+      [ "NEWinogradLayerBatchedGEMMKernel", "classarm__compute_1_1_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml", "classarm__compute_1_1_n_e_winograd_layer_batched_g_e_m_m_kernel" ]
     ] ]
 ];

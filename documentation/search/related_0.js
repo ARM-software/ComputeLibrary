@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['newinogradlayerkernel',['NEWinogradLayerKernel',['../classarm__compute_1_1_winograd3x3_f32.xhtml#a20382f2c4f5f8cfd34896c7efe2506b1',1,'arm_compute::Winograd3x3F32']]]
+  ['operator_3c_3c',['operator&lt;&lt;',['../structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a7a4338759c5836029ef531ae45f57007',1,'arm_compute::test::framework::Measurement::Value::operator&lt;&lt;()'],['../structarm__compute_1_1test_1_1framework_1_1_measurement.xhtml#ae0068ee19905d634193a92821067606c',1,'arm_compute::test::framework::Measurement::operator&lt;&lt;()']]]
 ];

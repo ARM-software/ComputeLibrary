@@ -5,5 +5,6 @@ var searchData=
   ['offsets_5fs',['offsets_s',['../fast__corners_8cl.xhtml#a8d09117e1c8a726efc8d9ec9d9d8ed8a',1,'fast_corners.cl']]],
   ['orientation',['orientation',['../structarm__compute_1_1_key_point.xhtml#a0e3266fc15309697502533db62b682af',1,'arm_compute::KeyPoint::orientation()'],['../struct_keypoint.xhtml#a0e3266fc15309697502533db62b682af',1,'Keypoint::orientation()']]],
   ['outname',['outname',['../namespacecaffe__data__extractor.xhtml#a9e3448e9350a8c3d5e421ecb1e64ba50',1,'caffe_data_extractor']]],
+  ['output_5fdata_5ftype',['output_data_type',['../namespacearm__compute_1_1test_1_1validation.xhtml#aa30f40707893f8201695a2c20e2d8c7d',1,'arm_compute::test::validation']]],
   ['output_5fshape',['output_shape',['../namespacearm__compute_1_1test_1_1validation.xhtml#a7fc93f37dac131a1a40b7921f9df3a9a',1,'arm_compute::test::validation']]]
 ];

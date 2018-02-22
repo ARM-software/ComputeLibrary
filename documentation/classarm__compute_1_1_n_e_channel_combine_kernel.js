@@ -7,6 +7,7 @@ var classarm__compute_1_1_n_e_channel_combine_kernel =
     [ "configure", "classarm__compute_1_1_n_e_channel_combine_kernel.xhtml#a39ee07b7b99e5ede71d07248b2c8ec76", null ],
     [ "configure", "classarm__compute_1_1_n_e_channel_combine_kernel.xhtml#a2152066cff4fb48815bb07a360086ddc", null ],
     [ "is_parallelisable", "classarm__compute_1_1_n_e_channel_combine_kernel.xhtml#a4370ae5fda7bd455a171fc8ed4d3f283", null ],
+    [ "name", "classarm__compute_1_1_n_e_channel_combine_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828", null ],
     [ "operator=", "classarm__compute_1_1_n_e_channel_combine_kernel.xhtml#af7fa6b6b40f275e2f6f0afdf42aa6130", null ],
     [ "operator=", "classarm__compute_1_1_n_e_channel_combine_kernel.xhtml#a4dfea5b19ebe5e46148a63af9fdbc5db", null ],
     [ "run", "classarm__compute_1_1_n_e_channel_combine_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82", null ]

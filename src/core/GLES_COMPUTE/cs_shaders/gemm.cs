@@ -508,7 +508,7 @@ void main()
     vec4 acc3 = vec4(0.0f);
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 
-    for(; int(CURRENT_ITEM_OFFSET_IN_BYTES(src0_iter)) < int(end_row_vec_a - uint(2));
+    for(; int(CURRENT_ITEM_OFFSET_IN_BYTES(src0_iter)) <= int(end_row_vec_a - uint(4));
         TENSOR_ITERATOR_ADVANCE_IN_BYTES(src0_iter, 2 * 2), TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, uint(2) * src1_attrs.stride_y))
     {
         vec2 a0 = LOAD_UNPACK2_CURRENT_ITEM_HALF(src0_ptr, src0_iter);
@@ -548,7 +548,7 @@ void main()
         vec2 a1 = LOAD_UNPACK2_HALF(src0_ptr, IMAGE_OFFSET(src0_iter, 0, 1));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
-        vec  a2 = LOAD_UNPACK2_HALF(src0_ptr, IMAGE_OFFSET(src0_iter, 0, 2));
+        vec2 a2 = LOAD_UNPACK2_HALF(src0_ptr, IMAGE_OFFSET(src0_iter, 0, 2));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
 #if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
         vec2 a3 = LOAD_UNPACK2_HALF(src0_ptr, IMAGE_OFFSET(src0_iter, 0, 3));
@@ -614,7 +614,7 @@ void main()
     vec4 acc3 = vec4(0.0f);
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 
-    for(; int(CURRENT_ITEM_OFFSET_IN_BYTES(src0_iter)) < int(end_row_vec_a - uint(16));
+    for(; int(CURRENT_ITEM_OFFSET_IN_BYTES(src0_iter)) <= int(end_row_vec_a - uint(16));
         TENSOR_ITERATOR_ADVANCE_IN_BYTES(src0_iter, uint(8) * src0_attrs.stride_x), TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, uint(8) * src1_attrs.stride_y))
     {
         vec4 a0[2] = LOAD_UNPACK8_CURRENT_ITEM_HALF(src0_ptr, src0_iter);
@@ -728,7 +728,7 @@ void main()
     acc[0] = vec4(0.0f);
     acc[1] = vec4(0.0f);
 
-    for(; int(CURRENT_ITEM_OFFSET_IN_BYTES(src0_iter)) < int(end_row_vec_a - uint(16));
+    for(; int(CURRENT_ITEM_OFFSET_IN_BYTES(src0_iter)) <= int(end_row_vec_a - uint(16));
         TENSOR_ITERATOR_ADVANCE_IN_BYTES(src0_iter, uint(8) * src0_attrs.stride_x), TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, uint(8) * src1_attrs.stride_y))
     {
         vec4 a[2] = LOAD_UNPACK8_CURRENT_ITEM_HALF(src0_ptr, src0_iter);
@@ -822,7 +822,7 @@ void main(void)
     VectorIterator biases_iter = CONVERT_TO_VECTOR_ITERATOR(biases_attrs, biases_shift);
 
     vec4 u[2] = LOAD_UNPACK8_CURRENT_ITEM_HALF(accum_ptr, accum_iter);
-    vec4 v[2] = LOAD_UNPACK8_CURRENT_ITEM_HALF(biases_ptr, bias_iter);
+    vec4 v[2] = LOAD_UNPACK8_CURRENT_ITEM_HALF(biases_ptr, biases_iter);
 
     vec4 r[2];
     r[0] = u[0] + v[0];
@@ -881,7 +881,6 @@ void main()
     c30[0] = vec4(0.0f);
     c30[1] = vec4(0.0f);
 
-    // FIXME: loop unrolling really needed for GLES?
     for(; (int(CURRENT_ITEM_OFFSET_IN_BYTES(src1_iter)) >> 1) <= (end_row_mtx_b - 16); TENSOR_ITERATOR_ADVANCE_IN_BYTES(src0_iter, 16), TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, 32))
     {
         /* Load values from matrix A (interleaved) and matrix B (transposed) */

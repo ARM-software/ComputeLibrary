@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -97,5 +97,5 @@ void CLDequantizationLayerKernel::run(const Window &window, cl::CommandQueue &qu
         add_1D_tensor_argument(idx, _min_max, min_max_slice);
         enqueue(queue, *this, slice);
     }
-    while(window.slide_window_slice_3D(slice) && min_max_window.slide_window_slice_1D(min_max_slice));
+    while(window_collapsed.slide_window_slice_3D(slice) && min_max_window.slide_window_slice_1D(min_max_slice));
 }

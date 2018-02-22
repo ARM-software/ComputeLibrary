@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,8 +42,9 @@ using namespace arm_compute::misc::shape_calculator;
 
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, int mult_transpose1xW_width)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON(mult_transpose1xW_width < 1);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::U8, DataType::S8,
                                                          DataType::QS16, DataType::U16, DataType::S16, DataType::U32, DataType::S32,
                                                          DataType::F16, DataType::F32);
@@ -51,7 +52,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
     if(output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(),
-                                                           compute_transpose1xW_with_element_size_shape(*input));
+                                                           compute_transpose1xW_with_element_size_shape(*input, mult_transpose1xW_width));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
@@ -59,11 +60,11 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, unsigned int &num_elems_processed_per_iteration)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, unsigned int &num_elems_processed_per_iteration, int mult_transpose1xW_width)
 {
     num_elems_processed_per_iteration = 16 / input->element_size();
 
-    const int scale_x        = num_elems_processed_per_iteration;
+    const int scale_x        = num_elems_processed_per_iteration * mult_transpose1xW_width;
     bool      window_changed = false;
 
     // Configure kernel window
@@ -90,24 +91,31 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 }
 } // namespace
 
-void CLGEMMTranspose1xWKernel::configure(const ICLTensor *input, ICLTensor *output)
+void CLGEMMTranspose1xWKernel::configure(const ICLTensor *input, ICLTensor *output, int mult_transpose1xW_width)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output tensor auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(compute_transpose1xW_with_element_size_shape(*input->info())));
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(compute_transpose1xW_with_element_size_shape(*input->info(), mult_transpose1xW_width)));
 
     // Perform validate step
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), mult_transpose1xW_width));
 
     _input  = input;
     _output = output;
 
     // Configure kernel window
+    // Note: num_elems_processed_per_iteration will be set in validate_and_configure_window()
     unsigned int num_elems_processed_per_iteration = 1;
-    auto         win_config                        = validate_and_configure_window(input->info(), output->info(), num_elems_processed_per_iteration);
+    auto         win_config                        = validate_and_configure_window(input->info(), output->info(), num_elems_processed_per_iteration, mult_transpose1xW_width);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure(win_config.second);
+
+    // Create build options
+    CLBuildOptions build_opts;
+    build_opts.add_option("-DELEMENT_SIZE=" + support::cpp11::to_string(input->info()->element_size()));
+    build_opts.add_option("-DTRANSPOSE_W=" + support::cpp11::to_string(num_elems_processed_per_iteration));
+    build_opts.add_option("-DMULT_TRANSPOSE1XW_WIDTH=" + support::cpp11::to_string(mult_transpose1xW_width));
 
     /*
      * Following an example of how the transposition1xW works when the input data type is F32
@@ -117,18 +125,18 @@ void CLGEMMTranspose1xWKernel::configure(const ICLTensor *input, ICLTensor *outp
      *         |a20 a21 a22 a23| = | a00 a01 a02 a03 || a10 a11 a12 a13 || a20 a21 a22 a23 || a30 a31 a32 a33 |
      *         |a30 a31 a32 a33|
      *
-     * The output matrix will have the following shape: [ height * W, ceil(width / W) ], where W = (16 / element size of the tensor)
+     * The output matrix will have the following shape: [ height * W, ceil(width / W) ], where W = (16 / element size of the tensor) * mult_transpose1xW_width
      */
     // Create kernel
-    std::string kernel_name = "gemm_transpose1x" + support::cpp11::to_string(num_elems_processed_per_iteration);
-    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
+    std::string kernel_name = "gemm_transpose1xW";
+    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 }
 
-Status CLGEMMTranspose1xWKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
+Status CLGEMMTranspose1xWKernel::validate(const ITensorInfo *input, const ITensorInfo *output, int mult_transpose1xW_width)
 {
     unsigned int num_elems_processed_per_iteration = 1;
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), num_elems_processed_per_iteration).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, mult_transpose1xW_width));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), num_elems_processed_per_iteration, mult_transpose1xW_width).first);
 
     return Status{};
 }

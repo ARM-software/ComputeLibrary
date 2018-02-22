@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -118,7 +118,7 @@ class SmallDepthwiseConvolutionLayerDataset final : public DepthwiseConvolutionL
 public:
     SmallDepthwiseConvolutionLayerDataset()
     {
-        add_config(TensorShape(7U, 7U, 3U), TensorShape(3U, 3U, 3U), TensorShape(5U, 5U, 3U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(7U, 7U, 1U), TensorShape(3U, 3U, 1U), TensorShape(5U, 5U, 1U), PadStrideInfo(1, 1, 0, 0));
         add_config(TensorShape(23U, 27U, 5U), TensorShape(3U, 5U, 5U), TensorShape(11U, 23U, 5U), PadStrideInfo(2, 1, 0, 0));
         add_config(TensorShape(33U, 27U, 7U), TensorShape(7U, 3U, 7U), TensorShape(10U, 13U, 7U), PadStrideInfo(3, 2, 1, 0));
         add_config(TensorShape(33U, 27U, 11U), TensorShape(3U, 3U, 11U), TensorShape(31U, 14U, 11U), PadStrideInfo(1, 2, 0, 1));
@@ -154,10 +154,14 @@ class SmallDepthwiseConvolutionLayerDataset3x3 final : public DepthwiseConvoluti
 public:
     SmallDepthwiseConvolutionLayerDataset3x3()
     {
+        add_config(TensorShape(3U, 3U, 2U), TensorShape(3U, 3U, 2U), TensorShape(1U, 1U, 2U), PadStrideInfo(1, 1, 0, 0));
         add_config(TensorShape(7U, 7U, 3U, 2U), TensorShape(3U, 3U, 3U), TensorShape(5U, 5U, 3U, 2U), PadStrideInfo(1, 1, 0, 0));
         add_config(TensorShape(33U, 27U, 11U), TensorShape(3U, 3U, 11U), TensorShape(11U, 14U, 11U), PadStrideInfo(3, 2, 1, 1));
         add_config(TensorShape(21U, 31U, 9U, 4U), TensorShape(3U, 3U, 9U), TensorShape(21U, 15U, 9U, 4U), PadStrideInfo(1, 2, 1, 0));
         add_config(TensorShape(33U, 27U, 11U, 3U), TensorShape(3U, 3U, 11U), TensorShape(31U, 14U, 11U, 3U), PadStrideInfo(1, 2, 0, 1));
+        // Asymmetric padding
+        add_config(TensorShape(33U, 27U, 11U), TensorShape(3U, 3U, 11U), TensorShape(16U, 13U, 11U), PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 11U), TensorShape(3U, 3U, 11U), TensorShape(18U, 14U, 11U), PadStrideInfo(2, 2, 3, 1, 2, 1, DimensionRoundingType::FLOOR));
     }
 };
 
@@ -172,6 +176,23 @@ public:
         add_config(TensorShape(233U, 277U, 55U), TensorShape(3U, 3U, 55U), TensorShape(231U, 138U, 55U), PadStrideInfo(1, 2, 0, 0));
         add_config(TensorShape(333U, 277U, 77U, 5U), TensorShape(3U, 3U, 77U), TensorShape(166U, 93U, 77U, 5U), PadStrideInfo(2, 3, 0, 1));
         add_config(TensorShape(177U, 311U, 22U), TensorShape(3U, 3U, 22U), TensorShape(89U, 311U, 22U), PadStrideInfo(2, 1, 1, 1));
+    }
+};
+class OptimizedDepthwiseConvolutionLayerDataset3x3 final : public DepthwiseConvolutionLayerDataset
+{
+public:
+    OptimizedDepthwiseConvolutionLayerDataset3x3()
+    {
+        // Stride 1
+        add_config(TensorShape(7U, 7U, 16U), TensorShape(3U, 3U, 16U), TensorShape(5U, 5U, 16U), PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL));
+        add_config(TensorShape(7U, 7U, 16U), TensorShape(3U, 3U, 16U), TensorShape(7U, 7U, 16U), PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL));
+        add_config(TensorShape(28U, 28U, 16U), TensorShape(3U, 3U, 16U), TensorShape(26U, 26U, 16U), PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL));
+        add_config(TensorShape(28U, 28U, 16U), TensorShape(3U, 3U, 16U), TensorShape(28U, 28U, 16U), PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL));
+        // Stride 2
+        add_config(TensorShape(7U, 7U, 32U), TensorShape(3U, 3U, 32U), TensorShape(3U, 3U, 32U), PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL));
+        add_config(TensorShape(7U, 7U, 32U), TensorShape(3U, 3U, 32U), TensorShape(4U, 4U, 32U), PadStrideInfo(2, 2, 1, 1, 1, 1, DimensionRoundingType::CEIL));
+        add_config(TensorShape(8U, 8U, 32U), TensorShape(3U, 3U, 32U), TensorShape(3U, 3U, 32U), PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL));
+        add_config(TensorShape(8U, 8U, 32U), TensorShape(3U, 3U, 32U), TensorShape(4U, 4U, 32U), PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::CEIL));
     }
 };
 } // namespace datasets

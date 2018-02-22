@@ -27,7 +27,8 @@ var dir_e13277e8d7d14f3f15e64267bfca6477 =
       [ "SmallDepthwiseConvolutionLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_small_depthwise_convolution_layer_dataset.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_small_depthwise_convolution_layer_dataset" ],
       [ "LargeDepthwiseConvolutionLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_large_depthwise_convolution_layer_dataset.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_large_depthwise_convolution_layer_dataset" ],
       [ "SmallDepthwiseConvolutionLayerDataset3x3", "classarm__compute_1_1test_1_1datasets_1_1_small_depthwise_convolution_layer_dataset3x3.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_small_depthwise_convolution_layer_dataset3x3" ],
-      [ "LargeDepthwiseConvolutionLayerDataset3x3", "classarm__compute_1_1test_1_1datasets_1_1_large_depthwise_convolution_layer_dataset3x3.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_large_depthwise_convolution_layer_dataset3x3" ]
+      [ "LargeDepthwiseConvolutionLayerDataset3x3", "classarm__compute_1_1test_1_1datasets_1_1_large_depthwise_convolution_layer_dataset3x3.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_large_depthwise_convolution_layer_dataset3x3" ],
+      [ "OptimizedDepthwiseConvolutionLayerDataset3x3", "classarm__compute_1_1test_1_1datasets_1_1_optimized_depthwise_convolution_layer_dataset3x3.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_optimized_depthwise_convolution_layer_dataset3x3" ]
     ] ],
     [ "DepthwiseSeparableConvolutionLayerDataset.h", "_depthwise_separable_convolution_layer_dataset_8h.xhtml", [
       [ "DepthwiseSeparableConvolutionLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_depthwise_separable_convolution_layer_dataset.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_depthwise_separable_convolution_layer_dataset" ],
@@ -39,6 +40,7 @@ var dir_e13277e8d7d14f3f15e64267bfca6477 =
     [ "FullyConnectedLayerDataset.h", "_fully_connected_layer_dataset_8h.xhtml", [
       [ "FullyConnectedLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_fully_connected_layer_dataset.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_fully_connected_layer_dataset" ],
       [ "iterator", "structarm__compute_1_1test_1_1datasets_1_1_fully_connected_layer_dataset_1_1iterator.xhtml", "structarm__compute_1_1test_1_1datasets_1_1_fully_connected_layer_dataset_1_1iterator" ],
+      [ "TinyFullyConnectedLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_tiny_fully_connected_layer_dataset.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_tiny_fully_connected_layer_dataset" ],
       [ "SmallFullyConnectedLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_small_fully_connected_layer_dataset.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_small_fully_connected_layer_dataset" ],
       [ "LargeFullyConnectedLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_large_fully_connected_layer_dataset.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_large_fully_connected_layer_dataset" ]
     ] ],
@@ -98,7 +100,8 @@ var dir_e13277e8d7d14f3f15e64267bfca6477 =
     ] ],
     [ "PoolingLayerDataset.h", "_pooling_layer_dataset_8h.xhtml", [
       [ "PoolingLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_pooling_layer_dataset.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_pooling_layer_dataset" ],
-      [ "iterator", "structarm__compute_1_1test_1_1datasets_1_1_pooling_layer_dataset_1_1iterator.xhtml", "structarm__compute_1_1test_1_1datasets_1_1_pooling_layer_dataset_1_1iterator" ]
+      [ "iterator", "structarm__compute_1_1test_1_1datasets_1_1_pooling_layer_dataset_1_1iterator.xhtml", "structarm__compute_1_1test_1_1datasets_1_1_pooling_layer_dataset_1_1iterator" ],
+      [ "PoolingLayerDatasetSpecial", "classarm__compute_1_1test_1_1datasets_1_1_pooling_layer_dataset_special.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_pooling_layer_dataset_special" ]
     ] ],
     [ "PoolingTypesDataset.h", "_pooling_types_dataset_8h.xhtml", [
       [ "PoolingTypes", "classarm__compute_1_1test_1_1datasets_1_1_pooling_types.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_pooling_types" ]
@@ -146,5 +149,11 @@ var dir_e13277e8d7d14f3f15e64267bfca6477 =
       [ "ThresholdDataset", "classarm__compute_1_1test_1_1datasets_1_1_threshold_dataset.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_threshold_dataset" ],
       [ "iterator", "structarm__compute_1_1test_1_1datasets_1_1_threshold_dataset_1_1iterator.xhtml", "structarm__compute_1_1test_1_1datasets_1_1_threshold_dataset_1_1iterator" ],
       [ "MixedThresholdDataset", "classarm__compute_1_1test_1_1datasets_1_1_mixed_threshold_dataset.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_mixed_threshold_dataset" ]
+    ] ],
+    [ "TinyConvolutionLayerDataset.h", "_tiny_convolution_layer_dataset_8h.xhtml", [
+      [ "TinyConvolutionLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_tiny_convolution_layer_dataset.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_tiny_convolution_layer_dataset" ]
+    ] ],
+    [ "TinyGEMMDataset.h", "_tiny_g_e_m_m_dataset_8h.xhtml", [
+      [ "TinyGEMMDataset", "classarm__compute_1_1test_1_1datasets_1_1_tiny_g_e_m_m_dataset.xhtml", "classarm__compute_1_1test_1_1datasets_1_1_tiny_g_e_m_m_dataset" ]
     ] ]
 ];

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,6 +44,9 @@ InstrumentsDescription instrument_type_from_name(const std::string &name)
         { "wall_clock_timer", std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::NONE) },
         { "wall_clock_timer_ms", std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::TIME_MS) },
         { "wall_clock_timer_s", std::pair<InstrumentType, ScaleFactor>(InstrumentType::WALL_CLOCK_TIMER, ScaleFactor::TIME_S) },
+        { "scheduler_timer", std::pair<InstrumentType, ScaleFactor>(InstrumentType::SCHEDULER_TIMER, ScaleFactor::NONE) },
+        { "scheduler_timer_ms", std::pair<InstrumentType, ScaleFactor>(InstrumentType::SCHEDULER_TIMER, ScaleFactor::TIME_MS) },
+        { "scheduler_timer_s", std::pair<InstrumentType, ScaleFactor>(InstrumentType::SCHEDULER_TIMER, ScaleFactor::TIME_S) },
         { "pmu", std::pair<InstrumentType, ScaleFactor>(InstrumentType::PMU, ScaleFactor::NONE) },
         { "pmu_k", std::pair<InstrumentType, ScaleFactor>(InstrumentType::PMU, ScaleFactor::SCALE_1K) },
         { "pmu_m", std::pair<InstrumentType, ScaleFactor>(InstrumentType::PMU, ScaleFactor::SCALE_1M) },

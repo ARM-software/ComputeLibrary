@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2018 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,23 +29,23 @@ layout(local_size_x = LOCAL_SIZE_X, local_size_y = LOCAL_SIZE_Y, local_size_z = 
 // We DO have to use highp for DATA_TYPE_FP16 float here to calculate the coordinates of source tensor. float is highp by default, but we still write it down here to make it more clearly, and mediump is only used for src/dst tensor in shader body.
 precision highp float;
 
-/** Performs an affine transformation on an image interpolating with the NEAREAST NEIGHBOUR method. Input and output are single channel FP16.
+/** Performs an affine transformation on an tensor interpolating with the NEAREAST NEIGHBOUR method. Input and output are single channel FP16.
  *
  * @param[in]  src_ptr      Pointer to the source tensor. Supported data types: FP16.
  * @param[in]  src_attrs    The attributes of the source tensor
  * @param[out] dst_ptr      Pointer to the destination tensor. Supported data types: FP16. (Must be the same as the input)
  * @param[in]  dst_attrs    The attributes of the destination tensor
- * @param[in]  input_width  Input image width
- * @param[in]  input_height Input image height
+ * @param[in]  input_width  Input tensor width
+ * @param[in]  input_height Input tensor height
  * @param[in]  scale        The scale factor along x/y dimension
  */
 SHADER_PARAMS_DECLARATION
 {
-    ImageAttributes src_attrs;
-    ImageAttributes dst_attrs;
-    float           input_width;
-    float           input_height;
-    vec2            scale;
+    Tensor3DAttributes src_attrs;
+    Tensor3DAttributes dst_attrs;
+    float              input_width;
+    float              input_height;
+    vec2               scale;
 };
 
 #if defined(DATA_TYPE_FP16)
@@ -75,8 +75,8 @@ vec4[2] clamp_to_border_with_size(vec4[2] coords, float width, float height, flo
 
 void main()
 {
-    ImageIterator src_iter = CONVERT_TO_IMAGE_ITERATOR_NO_STEP(src_attrs, src_shift);
-    ImageIterator dst_iter = CONVERT_TO_IMAGE_ITERATOR(dst_attrs, dst_shift);
+    Tensor3DIterator src_iter = CONVERT_TO_TENSOR3D_ITERATOR_NO_STEP(src_attrs, src_shift);
+    Tensor3DIterator dst_iter = CONVERT_TO_TENSOR3D_ITERATOR(dst_attrs, dst_shift);
 
     vec4[2] tc = clamp_to_border_with_size(transform_nearest(vec2(gl_GlobalInvocationID.x << uint(2), gl_GlobalInvocationID.y), scale), input_width, input_height, float(BORDER_SIZE));
 
@@ -85,7 +85,7 @@ void main()
 
     for(int i = 0; i < 4; i++)
     {
-        uint offset_in_bytes = image_offset_in_bytes(src_iter, int(tc[0][i]), int(tc[1][i]));
+        uint offset_in_bytes = tensor3D_offset_in_bytes(src_iter, int(tc[0][i]), int(tc[1][i]), int(gl_GlobalInvocationID.z));
 
         s = LOAD_UNPACK2_HALF(src_ptr, uint(offset_in_bytes >> src_shift));
 
@@ -107,15 +107,15 @@ TENSOR_DECLARATION(2, dstBuffer, uvec4, dst_ptr, dst_shift, 4, writeonly);
 
 void main()
 {
-    ImageIterator src_iter = CONVERT_TO_IMAGE_ITERATOR_NO_STEP(src_attrs, src_shift);
-    ImageIterator dst_iter = CONVERT_TO_IMAGE_ITERATOR(dst_attrs, dst_shift);
+    Tensor3DIterator src_iter = CONVERT_TO_TENSOR3D_ITERATOR_NO_STEP(src_attrs, src_shift);
+    Tensor3DIterator dst_iter = CONVERT_TO_TENSOR3D_ITERATOR(dst_attrs, dst_shift);
 
     uvec2 tc = uvec2(gl_GlobalInvocationID.x << uint(2), gl_GlobalInvocationID.y >> uint(1));
 
     mediump vec4 s = vec4(0.0f);
     mediump      vec4[2] d;
 
-    s = LOAD_UNPACK4_HALF(src_ptr, IMAGE_OFFSET(src_iter, int(tc[0]), int(tc[1])));
+    s = LOAD_UNPACK4_HALF(src_ptr, TENSOR3D_OFFSET(src_iter, int(tc[0]), int(tc[1]), int(gl_GlobalInvocationID.z)));
 
     d[0] = vec4(s.x, s.x, s.y, s.y);
     d[1] = vec4(s.z, s.z, s.w, s.w);

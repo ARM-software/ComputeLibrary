@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,16 +37,59 @@
 
 using namespace arm_compute;
 
+namespace
+{
+template <typename T>
+void weights_reshape(const ITensor *input, const ITensor *bias, ITensor *output, const Window &window)
+{
+    const int input_w         = input->info()->dimension(0);
+    const int output_stride_x = output->info()->strides_in_bytes().x();
+    const int output_stride_y = output->info()->strides_in_bytes().y();
+
+    Window window_in(window);
+    // The first three dimensions of the input are increased by the inner loops
+    window_in.set(Window::DimX, Window::Dimension(0, input->info()->dimension(0), input->info()->dimension(0)));
+    window_in.set(Window::DimY, Window::Dimension(0, input->info()->dimension(1), 1));
+    window_in.set(Window::DimZ, Window::Dimension(0, input->info()->dimension(2), 1));
+
+    // Setup output window
+    Window window_out;
+    window_out.set(Window::DimX, Window::Dimension(0, 0, 0));
+    window_out.set(Window::DimY, Window::Dimension(0, 0, 0));
+
+    Iterator in(input, window_in);
+    Iterator out(output, window_out);
+
+    execute_window_loop(window_in, [&](const Coordinates & id)
+    {
+        auto input_ptr  = reinterpret_cast<T *>(in.ptr());
+        auto output_ptr = reinterpret_cast<T *>(out.ptr() + id.y() * input_w * output_stride_x + id.z() * output_stride_y);
+
+        for(int i = 0; i < input_w; ++i, ++input_ptr)
+        {
+            *(output_ptr + i) = *input_ptr;
+        }
+
+        if(bias != nullptr)
+        {
+            *(output_ptr + input_w) = *(reinterpret_cast<T *>(bias->ptr_to_element(Coordinates(id.z()))));
+        }
+    },
+    in, out);
+}
+} // namespace
+
 NEDepthwiseWeightsReshapeKernel::NEDepthwiseWeightsReshapeKernel()
-    : _input(nullptr), _output(nullptr), _biases(nullptr)
+    : _func(nullptr), _input(nullptr), _output(nullptr), _biases(nullptr)
 {
 }
 
 void NEDepthwiseWeightsReshapeKernel::configure(const ITensor *input, ITensor *output, const ITensor *biases)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    ARM_COMPUTE_ERROR_ON(is_data_type_quantized_asymmetric(input->info()->data_type()) && (biases != nullptr));
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(2) != output->info()->dimension(1));
     ARM_COMPUTE_ERROR_ON(output->info()->dimension(0) != (input->info()->dimension(0) * input->info()->dimension(1) + ((biases != nullptr) ? 1 : 0)));
 
@@ -62,6 +105,30 @@ void NEDepthwiseWeightsReshapeKernel::configure(const ITensor *input, ITensor *o
     _output = output;
     _biases = biases;
 
+    switch(_input->info()->element_size())
+    {
+        case 4:
+        {
+            _func = &weights_reshape<uint32_t>;
+            break;
+        }
+        case 2:
+        {
+            _func = &weights_reshape<uint16_t>;
+            break;
+        }
+        case 1:
+        {
+            _func = &weights_reshape<uint8_t>;
+            break;
+        }
+        default:
+        {
+            ARM_COMPUTE_ERROR_ON("Element size not supported");
+            break;
+        }
+    }
+
     // Configure  kernel window
     Window win = calculate_max_window(*input->info(), Steps());
     // The NEDepthwiseWeightsReshapeKernel doesn't need padding so update_window_and_padding() can be skipped
@@ -74,39 +141,10 @@ void NEDepthwiseWeightsReshapeKernel::run(const Window &window, const ThreadInfo
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
-    const int input_w         = _input->info()->dimension(0);
-    const int output_stride_x = _output->info()->strides_in_bytes().x();
-    const int output_stride_y = _output->info()->strides_in_bytes().y();
-
-    Window window_in(window);
-    // The first three dimensions of the input are increased by the inner loops
-    window_in.set(Window::DimX, Window::Dimension(0, _input->info()->dimension(0), _input->info()->dimension(0)));
-    window_in.set(Window::DimY, Window::Dimension(0, _input->info()->dimension(1), 1));
-    window_in.set(Window::DimZ, Window::Dimension(0, _input->info()->dimension(2), 1));
-
-    // Setup output window
-    Window window_out;
-    window_out.set(Window::DimX, Window::Dimension(0, 0, 0));
-    window_out.set(Window::DimY, Window::Dimension(0, 0, 0));
-
-    Iterator in(_input, window_in);
-    Iterator out(_output, window_out);
-
-    execute_window_loop(window_in, [&](const Coordinates & id)
+    if(_func != nullptr)
     {
-        auto input_ptr  = reinterpret_cast<float *>(in.ptr());
-        auto output_ptr = reinterpret_cast<float *>(out.ptr() + id.y() * input_w * output_stride_x + id.z() * output_stride_y);
-
-        for(int i = 0; i < input_w; ++i, ++input_ptr)
-        {
-            *(output_ptr + i) = *input_ptr;
-        }
-
-        if(_biases != nullptr)
-        {
-            *(output_ptr + input_w) = *(reinterpret_cast<float *>(_biases->ptr_to_element(Coordinates(id.z()))));
-        }
-    },
-    in, out);
+        (*_func)(_input, _biases, _output, window);
+    }
 }

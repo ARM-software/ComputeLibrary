@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,6 +58,16 @@ public:
      * @return The updated target hint
      */
     TargetHint override_target_hint(TargetHint target_hint) const;
+    /** Method to check if the node supports in-place operations.
+     *
+     * @return True if the node supports in-place operations, false otherwise.
+     */
+    virtual bool supports_in_place() const;
+    /** Set the value of the _supports_in_place attribute.
+     *
+     * @param[in] value Boolean value to assign to _supports_in_place.
+     */
+    void set_supports_in_place(bool value);
 
 protected:
     /** Interface to be implement that override the hints
@@ -70,6 +80,7 @@ protected:
 
 protected:
     TargetHint _target_hint{ TargetHint::DONT_CARE };
+    bool       _supports_in_place{ false };
 };
 } // namespace graph
 } // namespace arm_compute

@@ -7,6 +7,7 @@ var searchData=
   ['saturate',['SATURATE',['../namespacearm__compute.xhtml#a82b8ac759c804bc1fb4e2d21e178fb6fa4729d95f983955f0d93a30179deb2b86',1,'arm_compute::SATURATE()'],['../namespacearm__compute_1_1test_1_1fixed__point__arithmetic.xhtml#a0ada8f647402027261407be09bdf25ffa4729d95f983955f0d93a30179deb2b86',1,'arm_compute::test::fixed_point_arithmetic::SATURATE()']]],
   ['scale_5f1k',['SCALE_1K',['../namespacearm__compute_1_1test_1_1framework.xhtml#a3a01a70ad3a22d8b80c413e8a5977100a31b560df072eca60895ba6d4541c41a2',1,'arm_compute::test::framework']]],
   ['scale_5f1m',['SCALE_1M',['../namespacearm__compute_1_1test_1_1framework.xhtml#a3a01a70ad3a22d8b80c413e8a5977100ade0343867b7ffbd33367905039d496f5',1,'arm_compute::test::framework']]],
+  ['scheduler_5ftimer',['SCHEDULER_TIMER',['../namespacearm__compute_1_1test_1_1framework.xhtml#aac6b258eb313f96447f4f0e273431005ab714cb9b955131aefa9d36f9898e5b9a',1,'arm_compute::test::framework']]],
   ['signed',['SIGNED',['../namespacearm__compute.xhtml#af00a42ecad444bbda75cde1b64bd7e72a6898b46a1cde8a1572e2722c44c5ab07',1,'arm_compute']]],
   ['sizet',['SIZET',['../namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6abd7ef6d4f35bc7d05c559b65032f15d1',1,'arm_compute']]],
   ['soft_5frelu',['SOFT_RELU',['../classarm__compute_1_1_activation_layer_info.xhtml#a56297e0f7b215eea46c818cb7528d9eaadcc44a50c791a591c74e00ecdda7c58d',1,'arm_compute::ActivationLayerInfo']]],

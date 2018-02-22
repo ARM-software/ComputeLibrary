@@ -9,5 +9,5 @@ var classarm__compute_1_1_status =
     [ "operator bool", "classarm__compute_1_1_status.xhtml#a420e60e9788bfa3b52aa3aab72ea3a5e", null ],
     [ "operator=", "classarm__compute_1_1_status.xhtml#a78472b791f38ec7cdd75ee9de6e1e349", null ],
     [ "operator=", "classarm__compute_1_1_status.xhtml#a0e94f86f3b38636473259a2156673d0d", null ],
-    [ "throw_if_error", "classarm__compute_1_1_status.xhtml#a906d5d31f94bfe3a499e19983127aff5", null ]
+    [ "throw_if_error", "classarm__compute_1_1_status.xhtml#aa7d8800a4d8aa8ad934293b280d446fd", null ]
 ];

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -72,6 +72,7 @@ public:
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
+    BorderSize border_size() const override;
 
 private:
     const ICLTensor *_input1; /**< Source tensor 1 */

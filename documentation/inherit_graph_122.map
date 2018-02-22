@@ -1,6 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1_i_tensor_allocator.xhtml" title="Interface to allocate tensors. " alt="" coords="5,56,128,83"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1_c_l_tensor_allocator.xhtml" title="Basic implementation of a CL memory tensor allocator. " alt="" coords="179,5,312,32"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1_g_c_tensor_allocator.xhtml" title="Basic implementation of a GLES memory tensor allocator. " alt="" coords="176,56,315,83"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1_tensor_allocator.xhtml" title="Basic implementation of a CPU memory tensor allocator. " alt="" coords="186,107,305,133"/>
+<area shape="rect" id="node2" href="$structarm__compute_1_1test_1_1framework_1_1dataset_1_1is__container_3_01std_1_1vector_3_01_v_00_01_a_01_4_01_4.xhtml" title="Vector is considered a container. " alt="" coords="141,5,283,47"/>
+<area shape="rect" id="node3" href="$structarm__compute_1_1test_1_1validation_1_1is__floating__point_3_01half_01_4.xhtml" title="is_floating_point\&lt;\l half \&gt;" alt="" coords="144,71,280,112"/>
+<area shape="rect" id="node4" href="$structarm__compute_1_1traits_1_1is__contained_3_01_t_00_01std_1_1tuple_3_01_t_00_01_ts_8_8_8_01_4_01_4.xhtml" title="is_contained\&lt; T, std\l::tuple\&lt; T, Ts... \&gt; \&gt;" alt="" coords="136,136,288,177"/>
 </map>

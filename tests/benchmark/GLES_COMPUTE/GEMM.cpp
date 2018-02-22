@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,16 +40,24 @@ namespace test
 {
 namespace
 {
-const auto data_types = framework::dataset::make("DataType", { DataType::F32 });
+const auto data_types          = framework::dataset::make("DataType", { DataType::F32 });
+const auto reshape_b_only_once = framework::dataset::make("ReshapeBOnlyOnce", { false });
 } // namespace
 
 using GCGEMMFixture = GEMMFixture<GCTensor, GCGEMM, GCAccessor>;
 
 TEST_SUITE(GC)
 
-REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1GEMM, GCGEMMFixture, framework::DatasetMode::ALL, framework::dataset::combine(datasets::GoogLeNetInceptionV1GEMMDataset(), data_types));
-REGISTER_FIXTURE_DATA_TEST_CASE(MatrixMultiplyGEMM, GCGEMMFixture, framework::DatasetMode::ALL, framework::dataset::combine(datasets::MatrixMultiplyGEMMDataset(), data_types));
-REGISTER_FIXTURE_DATA_TEST_CASE(GoogleNetGEMM, GCGEMMFixture, framework::DatasetMode::NIGHTLY, framework::dataset::combine(datasets::GoogleNetGEMMDataset(), data_types));
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1GEMM, GCGEMMFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1GEMMDataset(),
+                                                                                        data_types),
+                                                            reshape_b_only_once));
+REGISTER_FIXTURE_DATA_TEST_CASE(MatrixMultiplyGEMM, GCGEMMFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(datasets::MatrixMultiplyGEMMDataset(),
+                                data_types),
+                                reshape_b_only_once));
+REGISTER_FIXTURE_DATA_TEST_CASE(GoogleNetGEMM, GCGEMMFixture, framework::DatasetMode::NIGHTLY, framework::dataset::combine(framework::dataset::combine(datasets::GoogleNetGEMMDataset(),
+                                data_types),
+                                reshape_b_only_once));
 
 TEST_SUITE_END()
 } // namespace test

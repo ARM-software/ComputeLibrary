@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,14 +43,12 @@ namespace validation
 {
 namespace
 {
-constexpr AbsoluteTolerance<float> tolerance_exp_qs8(0.0f);          /**< Tolerance value for comparing reference's output against implementation's output  (exponential) for DataType::QS8 */
-constexpr AbsoluteTolerance<float> tolerance_exp_qs16(1.0f);         /**< Tolerance value for comparing reference's output against implementation's output  (exponential) for DataType::QS16 */
-constexpr AbsoluteTolerance<float> tolerance_invsqrt_qs8(4.0f);      /**< Tolerance value for comparing reference's output against implementation's output (inverse square-root) for DataType::QS8 */
-constexpr AbsoluteTolerance<float> tolerance_invsqrt_qs16(5.0f);     /**< Tolerance value for comparing reference's output against implementation's output (inverse square-root) for DataType::QS16 */
-constexpr AbsoluteTolerance<float> tolerance_log_qs8(5.0f);          /**< Tolerance value for comparing reference's output against implementation's output (logarithm) for DataType::QS8 */
-constexpr AbsoluteTolerance<float> tolerance_log_qs16(7.0f);         /**< Tolerance value for comparing reference's output against implementation's output (logarithm) for DataType::QS16 */
-constexpr AbsoluteTolerance<float> tolerance_reciprocal_qs8(3);      /**< Tolerance value for comparing reference's output against implementation's output (reciprocal) for DataType::QS8 */
-constexpr AbsoluteTolerance<float> tolerance_reciprocal_qs16(11.0f); /**< Tolerance value for comparing reference's output against implementation's output (reciprocal) for DataType::QS16 */
+constexpr AbsoluteTolerance<float> tolerance_exp_qs8(0.0f);      /**< Tolerance value for comparing reference's output against implementation's output  (exponential) for DataType::QS8 */
+constexpr AbsoluteTolerance<float> tolerance_exp_qs16(1.0f);     /**< Tolerance value for comparing reference's output against implementation's output  (exponential) for DataType::QS16 */
+constexpr AbsoluteTolerance<float> tolerance_invsqrt_qs8(4.0f);  /**< Tolerance value for comparing reference's output against implementation's output (inverse square-root) for DataType::QS8 */
+constexpr AbsoluteTolerance<float> tolerance_invsqrt_qs16(5.0f); /**< Tolerance value for comparing reference's output against implementation's output (inverse square-root) for DataType::QS16 */
+constexpr AbsoluteTolerance<float> tolerance_log_qs8(5.0f);      /**< Tolerance value for comparing reference's output against implementation's output (logarithm) for DataType::QS8 */
+constexpr AbsoluteTolerance<float> tolerance_log_qs16(7.0f);     /**< Tolerance value for comparing reference's output against implementation's output (logarithm) for DataType::QS16 */
 } // namespace
 
 TEST_SUITE(NEON)
@@ -92,17 +90,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFixedPointFixture<int8_t>, framework::Dataset
     validate(Accessor(_target), _reference, tolerance_log_qs8, 0);
 }
 TEST_SUITE_END()
-
-TEST_SUITE(Reciprocal)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::Small1DShapes(), framework::dataset::make("DataType",
-                                                                                                                   DataType::QS8)),
-                                                                                                           framework::dataset::make("FixedPointOp", FixedPointOp::RECIPROCAL)),
-                                                                                                   framework::dataset::make("FractionalBits", 1, 6)))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_reciprocal_qs8, 0);
-}
-TEST_SUITE_END()
 TEST_SUITE_END()
 
 TEST_SUITE(QS16)
@@ -137,17 +124,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEFixedPointFixture<int16_t>, framework::Datase
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_log_qs16, 0);
-}
-TEST_SUITE_END()
-
-TEST_SUITE(Reciprocal)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEFixedPointFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::Small1DShapes(), framework::dataset::make("DataType",
-                                                                                                                    DataType::QS16)),
-                                                                                                            framework::dataset::make("FixedPointOp", FixedPointOp::RECIPROCAL)),
-                                                                                                    framework::dataset::make("FractionalBits", 1, 14)))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_reciprocal_qs16, 0);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()

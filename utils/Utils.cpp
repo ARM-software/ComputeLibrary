@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -190,6 +190,40 @@ std::tuple<std::vector<unsigned long>, bool, std::string> parse_npy_header(std::
     }
 
     return std::make_tuple(shape, fortran_order, typestr);
+}
+
+/** This function returns the amount of memory free reading from /proc/meminfo
+ *
+ * @return The free memory in kB
+ */
+uint64_t get_mem_free_from_meminfo()
+{
+    std::string   line_attribute;
+    std::ifstream file_meminfo("/proc/meminfo");
+
+    if(file_meminfo.is_open())
+    {
+        while(!(file_meminfo >> line_attribute).fail())
+        {
+            //Test if is the line containing MemFree
+            if(line_attribute == "MemFree:")
+            {
+                uint64_t mem_available;
+                if(!(file_meminfo >> mem_available).fail())
+                {
+                    return mem_available;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+            // if it's not MemFree ignore rest of the line
+            file_meminfo.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+    }
+    // Nothing found or an error during opening the file
+    return 0;
 }
 } // namespace utils
 } // namespace arm_compute

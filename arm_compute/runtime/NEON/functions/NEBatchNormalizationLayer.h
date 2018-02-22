@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "arm_compute/core/NEON/kernels/NEBatchNormalizationLayerKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
 
 namespace arm_compute
 {
@@ -45,37 +46,42 @@ public:
     NEBatchNormalizationLayer();
     /** Set the input and output tensors.
      *
-     * @note If the output tensor is a nullptr, the batch normalization function will be performed in-place
+     * @note If the output tensor is a nullptr or is equal to the input, the batch normalization function will be performed in-place
      *
-     * @param[in, out] input   Source tensor. In case of @p output tensor = nullptr, this tensor will store the result.
-     *                         3 lower dimensions represent a single input with dimensions [width, height, FM].
-     *                         The rest are optional and used for representing batches. Data types supported: QS8/QS16/F16/F32.
-     * @param[out]     output  Destination tensor. Output will have the same number of dimensions as input. Data type supported: same as @p input
-     * @param[in]      mean    Mean values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]      var     Variance values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]      beta    Beta values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]      gamma   Gamma values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]      epsilon Small value to avoid division with zero.
+     * @param[in, out] input    Source tensor. In case of @p output tensor = nullptr, this tensor will store the result.
+     *                          3 lower dimensions represent a single input with dimensions [width, height, FM].
+     *                          The rest are optional and used for representing batches. Data types supported: QS8/QS16/F16/F32.
+     * @param[out]     output   Destination tensor. Output will have the same number of dimensions as input. Data type supported: same as @p input
+     * @param[in]      mean     Mean values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in]      var      Variance values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in]      beta     Beta values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in]      gamma    Gamma values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in]      epsilon  Small value to avoid division with zero.
+     * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
+     *                          Data types supported: F32
      */
-    void configure(ITensor *input, ITensor *output, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma, float epsilon);
+    void configure(ITensor *input, ITensor *output, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma, float epsilon,
+                   ActivationLayerInfo act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEBatchNormalizationLayer
      *
-     * @param[in] input   Source tensor info. In case of @p output tensor = nullptr, this tensor will store the result.
-     *                    3 lower dimensions represent a single input with dimensions [width, height, FM].
-     *                    The rest are optional and used for representing batches. Data types supported: QS8/QS16/F16/F32.
-     * @param[in] output  Destination tensor info. Output will have the same number of dimensions as input. Data type supported: same as @p input
-     * @param[in] mean    Mean values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in] var     Variance values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in] beta    Beta values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in] gamma   Gamma values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in] epsilon Small value to avoid division with zero.
+     * @param[in] input    Source tensor info. In case of @p output tensor = nullptr, this tensor will store the result.
+     *                     3 lower dimensions represent a single input with dimensions [width, height, FM].
+     *                     The rest are optional and used for representing batches. Data types supported: QS8/QS16/F16/F32.
+     * @param[in] output   Destination tensor info. Output will have the same number of dimensions as input. Data type supported: same as @p input
+     * @param[in] mean     Mean values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in] var      Variance values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in] beta     Beta values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in] gamma    Gamma values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in] epsilon  Small value to avoid division with zero.
+     * @param[in] act_info (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
+     *                     Data types supported: F32
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output,
                            const ITensorInfo *mean, const ITensorInfo *var,
                            const ITensorInfo *beta, const ITensorInfo *gamma,
-                           float epsilon);
+                           float epsilon, ActivationLayerInfo act_info);
 
     // Inherited methods overridden:
     void run() override;

@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -132,9 +132,9 @@ Collaboration diagram for BatchNormalizationLayerValidationFixedPointFixture&lt;
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:afe3c476be552a5dfe1c3424f9df4307d"><td class="memTemplParams" colspan="2">template&lt;typename... &gt; </td></tr>
-<tr class="memitem:afe3c476be552a5dfe1c3424f9df4307d"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1test_1_1validation_1_1_batch_normalization_layer_validation_fixed_point_fixture.xhtml#afe3c476be552a5dfe1c3424f9df4307d">setup</a> (<a class="el" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a> shape0, <a class="el" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a> shape1, float epsilon, <a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6">DataType</a> dt, int fractional_bits)</td></tr>
-<tr class="separator:afe3c476be552a5dfe1c3424f9df4307d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a08f022d13db42b94c5f9c35a169ba907"><td class="memTemplParams" colspan="2">template&lt;typename... &gt; </td></tr>
+<tr class="memitem:a08f022d13db42b94c5f9c35a169ba907"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1test_1_1validation_1_1_batch_normalization_layer_validation_fixed_point_fixture.xhtml#a08f022d13db42b94c5f9c35a169ba907">setup</a> (<a class="el" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a> shape0, <a class="el" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a> shape1, float epsilon, <a class="el" href="classarm__compute_1_1_activation_layer_info.xhtml">ActivationLayerInfo</a> act_info, <a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6">DataType</a> dt, int fractional_bits)</td></tr>
+<tr class="separator:a08f022d13db42b94c5f9c35a169ba907"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classarm__compute_1_1test_1_1framework_1_1_fixture"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1test_1_1framework_1_1_fixture')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_fixture.xhtml">Fixture</a></td></tr>
 <tr class="memitem:a4fc01d736fe50cf5b977f755b675f11d inherit pub_methods_classarm__compute_1_1test_1_1framework_1_1_fixture"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1test_1_1framework_1_1_fixture.xhtml#a4fc01d736fe50cf5b977f755b675f11d">setup</a> ()</td></tr>
 <tr class="memdesc:a4fc01d736fe50cf5b977f755b675f11d inherit pub_methods_classarm__compute_1_1test_1_1framework_1_1_fixture"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setup function.  <a href="#a4fc01d736fe50cf5b977f755b675f11d">More...</a><br /></td></tr>
@@ -150,7 +150,7 @@ class arm_compute::test::validation::BatchNormalizationLayerValidationFixedPoint
 
 <p>Definition at line <a class="el" href="validation_2fixtures_2_batch_normalization_layer_fixture_8h_source.xhtml#l00044">44</a> of file <a class="el" href="validation_2fixtures_2_batch_normalization_layer_fixture_8h_source.xhtml">BatchNormalizationLayerFixture.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="afe3c476be552a5dfe1c3424f9df4307d"></a>
+<a class="anchor" id="a08f022d13db42b94c5f9c35a169ba907"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -174,6 +174,12 @@ class arm_compute::test::validation::BatchNormalizationLayerValidationFixedPoint
           <td></td>
           <td class="paramtype">float&#160;</td>
           <td class="paramname"><em>epsilon</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classarm__compute_1_1_activation_layer_info.xhtml">ActivationLayerInfo</a>&#160;</td>
+          <td class="paramname"><em>act_info</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -202,8 +208,8 @@ class arm_compute::test::validation::BatchNormalizationLayerValidationFixedPoint
 
 <p>Definition at line <a class="el" href="validation_2fixtures_2_batch_normalization_layer_fixture_8h_source.xhtml#l00048">48</a> of file <a class="el" href="validation_2fixtures_2_batch_normalization_layer_fixture_8h_source.xhtml">BatchNormalizationLayerFixture.h</a>.</p>
 
-<p>References <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af3c1de77fd86df539395c75c17ec230e">arm_compute::test::validation::ARM_COMPUTE_EXPECT()</a>, <a class="el" href="validation_2reference_2_batch_normalization_layer_8cpp_source.xhtml#l00039">arm_compute::test::validation::reference::batch_normalization_layer()</a>, <a class="el" href="validation_2_c_l_2_g_e_m_m_8cpp_source.xhtml#l00112">arm_compute::test::validation::beta</a>, <a class="el" href="_c_l_2_convolution_8cpp_source.xhtml#l00123">arm_compute::test::validation::dst</a>, <a class="el" href="namespacearm__compute_1_1test_1_1framework.xhtml#aca1fd1d8935433e6ba2e3918214e07f9a6f3a603fac4d817f1848c3173b243b57">arm_compute::test::framework::ERRORS</a>, <a class="el" href="arm__compute_2core_2_utils_8h_source.xhtml#l00735">arm_compute::is_data_type_float()</a>, <a class="el" href="main_8cpp_source.xhtml#l00059">arm_compute::test::library</a>, <a class="el" href="_c_l_2_convolution_8cpp_source.xhtml#l00133">arm_compute::test::validation::src</a>, and <a class="el" href="namespacearm__compute.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aa4c614360da93c0a041b22e537de151eb">arm_compute::U</a>.</p>
-<div class="fragment"><div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    {</div><div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        _fractional_bits = fractional_bits;</div><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        _data_type       = dt;</div><div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        _target          = compute_target(shape0, shape1, epsilon, dt, fractional_bits);</div><div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        _reference       = compute_reference(shape0, shape1, epsilon, dt, fractional_bits);</div><div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    }</div></div><!-- fragment -->
+<p>References <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af3c1de77fd86df539395c75c17ec230e">arm_compute::test::validation::ARM_COMPUTE_EXPECT()</a>, <a class="el" href="validation_2reference_2_batch_normalization_layer_8cpp_source.xhtml#l00041">arm_compute::test::validation::reference::batch_normalization_layer()</a>, <a class="el" href="validation_2_c_l_2_g_e_m_m_8cpp_source.xhtml#l00113">arm_compute::test::validation::beta</a>, <a class="el" href="_c_l_2_convolution_8cpp_source.xhtml#l00137">arm_compute::test::validation::dst</a>, <a class="el" href="namespacearm__compute_1_1test_1_1framework.xhtml#aca1fd1d8935433e6ba2e3918214e07f9a6f3a603fac4d817f1848c3173b243b57">arm_compute::test::framework::ERRORS</a>, <a class="el" href="arm__compute_2core_2_utils_8h_source.xhtml#l00970">arm_compute::is_data_type_float()</a>, <a class="el" href="main_8cpp_source.xhtml#l00059">arm_compute::test::library</a>, <a class="el" href="_c_l_2_convolution_8cpp_source.xhtml#l00147">arm_compute::test::validation::src</a>, and <a class="el" href="namespacearm__compute.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aa4c614360da93c0a041b22e537de151eb">arm_compute::U</a>.</p>
+<div class="fragment"><div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    {</div><div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        _fractional_bits = fractional_bits;</div><div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        _data_type       = dt;</div><div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        _target          = compute_target(shape0, shape1, epsilon, act_info, dt, fractional_bits);</div><div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        _reference       = compute_reference(shape0, shape1, epsilon, act_info, dt, fractional_bits);</div><div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
@@ -215,7 +221,7 @@ class arm_compute::test::validation::BatchNormalizationLayerValidationFixedPoint
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test.xhtml">test</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml">validation</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1test_1_1validation_1_1_batch_normalization_layer_validation_fixed_point_fixture.xhtml">BatchNormalizationLayerValidationFixedPointFixture</a></li>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:48 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:27 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

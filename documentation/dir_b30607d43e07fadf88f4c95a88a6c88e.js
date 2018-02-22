@@ -45,6 +45,9 @@ var dir_b30607d43e07fadf88f4c95a88a6c88e =
     [ "ReshapeLayer.h", "arm__compute_2graph_2nodes_2_reshape_layer_8h.xhtml", [
       [ "ReshapeLayer", "classarm__compute_1_1graph_1_1_reshape_layer.xhtml", "classarm__compute_1_1graph_1_1_reshape_layer" ]
     ] ],
+    [ "ResidualLayer.h", "_residual_layer_8h.xhtml", [
+      [ "ResidualLayer", "classarm__compute_1_1graph_1_1_residual_layer.xhtml", "classarm__compute_1_1graph_1_1_residual_layer" ]
+    ] ],
     [ "SoftmaxLayer.h", "arm__compute_2graph_2nodes_2_softmax_layer_8h.xhtml", [
       [ "SoftmaxLayer", "classarm__compute_1_1graph_1_1_softmax_layer.xhtml", "classarm__compute_1_1graph_1_1_softmax_layer" ]
     ] ]

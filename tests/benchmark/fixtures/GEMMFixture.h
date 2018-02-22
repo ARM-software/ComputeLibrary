@@ -40,7 +40,7 @@ class GEMMFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape shape_dst, float alpha, float beta, DataType data_type)
+    void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape shape_dst, float alpha, float beta, DataType data_type, bool reshape_b_only_on_first_run)
     {
         constexpr int fixed_point_position = 4;
 
@@ -51,7 +51,7 @@ public:
         dst = create_tensor<TensorType>(shape_dst, data_type, 1, fixed_point_position);
 
         // Create and configure function
-        gemm.configure(&a, &b, &c, &dst, alpha, beta);
+        gemm.configure(&a, &b, &c, &dst, alpha, beta, GEMMInfo(false, false, reshape_b_only_on_first_run));
 
         // Allocate tensors
         a.allocator()->allocate();

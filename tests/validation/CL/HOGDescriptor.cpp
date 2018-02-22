@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,7 @@ namespace validation
 {
 namespace
 {
-AbsoluteTolerance<float> tolerance(1e-2f);
+RelativeTolerance<float> tolerance(0.001f);
 } // namespace
 
 TEST_SUITE(CL)

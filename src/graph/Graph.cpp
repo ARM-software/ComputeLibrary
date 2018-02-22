@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,6 +62,7 @@ public:
     std::unique_ptr<INode>                      _current_node{ nullptr };
     ITensorObject                              *_current_output{ nullptr };
     bool                                        _info_enabled{ false };
+    CLTuner                                     _tuner{};
 
 private:
     ITensorObject *_current_input{ nullptr };
@@ -76,10 +77,22 @@ Graph::~Graph() //NOLINT
 Graph::Graph()
     : _pimpl{ new Private() }
 {
+    graph_init();
+}
+
+void Graph::graph_init(const bool use_cl_tuner)
+{
     // Check if OpenCL is available and initialize the scheduler
     if(opencl_is_available())
     {
-        arm_compute::CLScheduler::get().default_init();
+        if(use_cl_tuner)
+        {
+            arm_compute::CLScheduler::get().default_init(&_pimpl->_tuner);
+        }
+        else
+        {
+            arm_compute::CLScheduler::get().default_init();
+        }
     }
 }
 
@@ -119,6 +132,11 @@ void Graph::Private::configure(GraphHints _next_hints)
         _previous_hints = _current_hints; // For the first node just assume the previous node was of the same type as this one
     }
 
+    if(_current_node->supports_in_place())
+    {
+        _current_output = _current_input;
+    }
+
     //Automatic output configuration ?
     if(_current_output == nullptr)
     {
@@ -140,8 +158,12 @@ void Graph::Private::configure(GraphHints _next_hints)
     _ctx.hints()                                 = _current_hints;
     std::unique_ptr<arm_compute::IFunction> func = _current_node->instantiate_node(_ctx, _current_input, _current_output);
 
-    // Allocate current input
-    _current_input->allocate();
+    // If the operation is done in-place, do not allocate or it will prevent following layers from performing the configuration
+    if(!_current_node->supports_in_place())
+    {
+        // Allocate current input
+        _current_input->allocate();
+    }
 
     // Map input if needed
     if(_current_input->target() == TargetHint::OPENCL)
@@ -215,9 +237,23 @@ void Graph::add_tensor_object(std::unique_ptr<ITensorObject> tensor)
         _pimpl->_graph_output->allocate();
     }
 }
+
 bool Graph::opencl_is_available()
 {
     return arm_compute::opencl_is_available();
+}
+
+arm_compute::GPUTarget Graph::gpu_target()
+{
+    // Check if OpenCL is available before returning the GPU target
+    if(opencl_is_available())
+    {
+        return arm_compute::CLScheduler::get().target();
+    }
+    else
+    {
+        return GPUTarget::MIDGARD;
+    }
 }
 
 void Graph::set_temp(TensorInfo &&tmp)

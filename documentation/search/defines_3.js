@@ -40,5 +40,7 @@ var searchData=
   ['convert_5fup',['CONVERT_UP',['../depth__convert_8cl.xhtml#a9bed30cda5ab157322d2f0bbdff46d28',1,'depth_convert.cl']]],
   ['convertq_5fdown_5fimpl',['CONVERTQ_DOWN_IMPL',['../fixed__point_8h.xhtml#acad65c9300736f277c3b8419326f1413',1,'fixed_point.h']]],
   ['convertq_5fdown_5fsat_5fimpl',['CONVERTQ_DOWN_SAT_IMPL',['../fixed__point_8h.xhtml#a107bff3ea73b2344cf3bc9795177f5b9',1,'fixed_point.h']]],
-  ['convertq_5fup_5fimpl',['CONVERTQ_UP_IMPL',['../fixed__point_8h.xhtml#a91019976b3e97e493e0b00ff9e92a5d3',1,'fixed_point.h']]]
+  ['convertq_5fup_5fimpl',['CONVERTQ_UP_IMPL',['../fixed__point_8h.xhtml#a91019976b3e97e493e0b00ff9e92a5d3',1,'fixed_point.h']]],
+  ['convolution1x3_5fbifrost2x1_5fstride1',['CONVOLUTION1x3_BIFROST2X1_STRIDE1',['../depthwise__convolution_8cl.xhtml#aa5ab4cf85fe56de3821727cfcef327d9',1,'depthwise_convolution.cl']]],
+  ['convolution1x3_5fbifrost2x1_5fstride2',['CONVOLUTION1x3_BIFROST2X1_STRIDE2',['../depthwise__convolution_8cl.xhtml#a31cbdd6b28ee6331839432f69d87fdcb',1,'depthwise_convolution.cl']]]
 ];

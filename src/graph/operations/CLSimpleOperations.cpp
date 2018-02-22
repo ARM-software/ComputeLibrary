@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,6 +66,34 @@ REGISTER_SIMPLE_OPERATION(CLActivationLayerOperation, OPENCL, OperationType::Act
     return std::move(activation);
 }
 
+/* Arithmetic addition */
+REGISTER_SIMPLE_OPERATION(CLArithmeticAdditionOperation, OPENCL, OperationType::ArithmeticAddition)
+{
+    ARM_COMPUTE_ERROR_ON(ctx.num_inputs() != 2);
+    ARM_COMPUTE_ERROR_ON(ctx.num_outputs() != 1);
+    ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ICLTensor *>(ctx.input(0)) == nullptr);
+    ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ICLTensor *>(ctx.input(1)) == nullptr);
+    ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ICLTensor *>(ctx.output(0)) == nullptr);
+
+    // Extract IO and info
+    auto *in1 = dynamic_cast<arm_compute::ICLTensor *>(ctx.input(0));
+    auto *in2 = dynamic_cast<arm_compute::ICLTensor *>(ctx.input(1));
+    auto *out = dynamic_cast<arm_compute::ICLTensor *>(ctx.output(0));
+
+    auto addition = arm_compute::support::cpp14::make_unique<arm_compute::CLArithmeticAddition>();
+    addition->configure(in1, in2, out, ConvertPolicy::SATURATE);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLArithmeticAddition"
+                               << " Data Type: " << in1->info()->data_type()
+                               << " Input 1 shape: " << in1->info()->tensor_shape()
+                               << " Input 2 shape: " << in2->info()->tensor_shape()
+                               << " Output shape: " << out->info()->tensor_shape()
+                               << std::endl);
+
+    return std::move(addition);
+}
+
 /* Batch Normalization Layer */
 REGISTER_SIMPLE_OPERATION(CLBatchNormalizationLayerOperation, OPENCL, OperationType::BatchNormalizationLayer)
 {
@@ -79,17 +107,18 @@ REGISTER_SIMPLE_OPERATION(CLBatchNormalizationLayerOperation, OPENCL, OperationT
     ARM_COMPUTE_ERROR_ON(dynamic_cast<arm_compute::ICLTensor *>(ctx.output(0)) == nullptr);
 
     // Extract IO and info
-    auto      *in      = dynamic_cast<arm_compute::ICLTensor *>(ctx.input(0));
-    auto      *mean    = dynamic_cast<arm_compute::ICLTensor *>(ctx.input(1));
-    auto      *var     = dynamic_cast<arm_compute::ICLTensor *>(ctx.input(2));
-    auto      *beta    = dynamic_cast<arm_compute::ICLTensor *>(ctx.input(3));
-    auto      *gamma   = dynamic_cast<arm_compute::ICLTensor *>(ctx.input(4));
-    auto      *out     = dynamic_cast<arm_compute::ICLTensor *>(ctx.output(0));
-    const auto epsilon = ctx.parameter<float>("epsilon");
+    auto      *in       = dynamic_cast<arm_compute::ICLTensor *>(ctx.input(0));
+    auto      *mean     = dynamic_cast<arm_compute::ICLTensor *>(ctx.input(1));
+    auto      *var      = dynamic_cast<arm_compute::ICLTensor *>(ctx.input(2));
+    auto      *beta     = dynamic_cast<arm_compute::ICLTensor *>(ctx.input(3));
+    auto      *gamma    = dynamic_cast<arm_compute::ICLTensor *>(ctx.input(4));
+    auto      *out      = dynamic_cast<arm_compute::ICLTensor *>(ctx.output(0));
+    const auto epsilon  = ctx.parameter<float>("epsilon");
+    const auto act_info = ctx.parameter<ActivationLayerInfo>("act_info");
 
     // Create and configure function
     auto batch_norm = arm_compute::support::cpp14::make_unique<arm_compute::CLBatchNormalizationLayer>();
-    batch_norm->configure(in, out, mean, var, beta, gamma, epsilon);
+    batch_norm->configure(in, out, mean, var, beta, gamma, epsilon, act_info);
 
     // Log info
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiating CLBatchNormalizationLayer"
@@ -101,6 +130,9 @@ REGISTER_SIMPLE_OPERATION(CLBatchNormalizationLayerOperation, OPENCL, OperationT
                                << " Beta shape: " << beta->info()->tensor_shape()
                                << " Gamma shape: " << gamma->info()->tensor_shape()
                                << " Epsilon: " << epsilon
+                               << " Activation function: " << act_info.activation()
+                               << " a: " << act_info.a()
+                               << " b: " << act_info.b()
                                << std::endl);
 
     return std::move(batch_norm);

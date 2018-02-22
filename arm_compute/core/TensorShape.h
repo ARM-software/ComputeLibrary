@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/Dimensions.h"
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/utils/misc/utility.h"
 
 #include <algorithm>
 #include <array>
@@ -70,26 +71,30 @@ public:
      *
      * @param[in] dimension Dimension for which the value is set.
      * @param[in] value     Value to be set for the dimension.
+     *
+     * @return *this.
      */
-    void set(size_t dimension, size_t value)
+    TensorShape &set(size_t dimension, size_t value)
     {
         // Clear entire shape if one dimension is zero
         if(value == 0)
         {
             _num_dimensions = 0;
             std::fill(_id.begin(), _id.end(), 0);
-            return;
         }
+        else
+        {
+            // Make sure all empty dimensions are filled with 1
+            std::fill(_id.begin() + _num_dimensions, _id.end(), 1);
 
-        // Make sure all empty dimensions are filled with 1
-        std::fill(_id.begin() + _num_dimensions, _id.end(), 1);
+            // Set the specified dimension and increase the number of dimensions if
+            // necessary
+            Dimensions::set(dimension, value);
 
-        // Set the specified dimension and increase the number of dimensions if
-        // necessary
-        Dimensions::set(dimension, value);
-
-        // Correct number dimensions to ignore trailing dimensions of size 1
-        apply_dimension_correction();
+            // Correct number dimensions to ignore trailing dimensions of size 1
+            apply_dimension_correction();
+        }
+        return *this;
     }
 
     /** Accessor to remove the dimension n from the tensor shape.
@@ -128,6 +133,19 @@ public:
         std::fill(_id.begin() + _num_dimensions, _id.end(), 1);
     }
 
+    /** Return a copy with collapsed dimensions starting from a given point.
+     *
+     * @param[in] start Starting point of collapsing dimensions.
+     *
+     * @return A copy with collapse dimensions starting from start.
+     */
+    TensorShape collapsed_from(size_t start) const
+    {
+        TensorShape copy(*this);
+        copy.collapse(num_dimensions(), start);
+        return copy;
+    }
+
     /** Collapses all dimensions to a single linear total size.
      *
      * @return The total tensor size in terms of elements.
@@ -158,6 +176,50 @@ public:
     {
         ARM_COMPUTE_ERROR_ON(dimension > TensorShape::num_max_dimensions);
         return std::accumulate(_id.begin(), _id.begin() + dimension, 1, std::multiplies<size_t>());
+    }
+
+    /** If shapes are broadcast compatible, return the broadcasted shape.
+     *
+     * Two tensor shapes are broadcast compatible if for each dimension, they're equal or one of them is 1.
+     *
+     * If two shapes are compatible, each dimension in the broadcasted shape is the max of the original dimensions.
+     *
+     * @param[in] shapes Tensor shapes.
+     *
+     * @return The broadcasted shape or an empty shape if the shapes are not broadcast compatible.
+     */
+    template <typename... Shapes>
+    static TensorShape broadcast_shape(const Shapes &... shapes)
+    {
+        TensorShape bc_shape;
+
+        auto broadcast = [&bc_shape](const TensorShape & other)
+        {
+            if(bc_shape.num_dimensions() == 0)
+            {
+                bc_shape = other;
+            }
+            else if(other.num_dimensions() != 0)
+            {
+                for(size_t d = 0; d < TensorShape::num_max_dimensions; ++d)
+                {
+                    const size_t dim_min = std::min(bc_shape[d], other[d]);
+                    const size_t dim_max = std::max(bc_shape[d], other[d]);
+
+                    if((dim_min != 1) && (dim_min != dim_max))
+                    {
+                        bc_shape = TensorShape{ 0U };
+                        break;
+                    }
+
+                    bc_shape.set(d, dim_max);
+                }
+            }
+        };
+
+        utility::for_each(broadcast, shapes...);
+
+        return bc_shape;
     }
 
 private:

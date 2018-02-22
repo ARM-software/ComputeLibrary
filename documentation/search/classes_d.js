@@ -28,6 +28,7 @@ var searchData=
   ['minmaxlocationvalues_3c_20target_5ftype_20_3e',['MinMaxLocationValues&lt; target_type &gt;',['../structarm__compute_1_1_min_max_location_values.xhtml',1,'arm_compute']]],
   ['mixedthresholddataset',['MixedThresholdDataset',['../classarm__compute_1_1test_1_1datasets_1_1_mixed_threshold_dataset.xhtml',1,'arm_compute::test::datasets']]],
   ['mobilenetactivationlayerdataset',['MobileNetActivationLayerDataset',['../classarm__compute_1_1test_1_1datasets_1_1_mobile_net_activation_layer_dataset.xhtml',1,'arm_compute::test::datasets']]],
+  ['mobilenetbatchnormalizationlayerdataset',['MobileNetBatchNormalizationLayerDataset',['../classarm__compute_1_1test_1_1datasets_1_1_mobile_net_batch_normalization_layer_dataset.xhtml',1,'arm_compute::test::datasets']]],
   ['mobilenetdepthwiseconvolutionlayerdataset',['MobileNetDepthwiseConvolutionLayerDataset',['../classarm__compute_1_1test_1_1datasets_1_1_mobile_net_depthwise_convolution_layer_dataset.xhtml',1,'arm_compute::test::datasets']]],
   ['mobilenetdepthwiseseparableconvolutionlayerdataset',['MobileNetDepthwiseSeparableConvolutionLayerDataset',['../classarm__compute_1_1test_1_1datasets_1_1_mobile_net_depthwise_separable_convolution_layer_dataset.xhtml',1,'arm_compute::test::datasets']]],
   ['mobilenetfixture',['MobileNetFixture',['../classarm__compute_1_1test_1_1_mobile_net_fixture.xhtml',1,'arm_compute::test']]],

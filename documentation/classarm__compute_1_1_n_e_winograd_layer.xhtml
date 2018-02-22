@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -116,7 +116,8 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_n_e_winograd_lay
 
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a>  </div>
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a>  </div>
   <div class="headertitle">
 <div class="title">NEWinogradLayer Class Reference</div>  </div>
 </div><!--header-->
@@ -154,12 +155,24 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_function.xhtml#ab921ecc3f3f6ae2b4bd61f3e1998d8c4">~IFunction</a> ()=default</td></tr>
 <tr class="memdesc:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#ab921ecc3f3f6ae2b4bd61f3e1998d8c4">More...</a><br /></td></tr>
 <tr class="separator:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:a335bf64c1920fdae58bac90b420e688f"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer.xhtml#a335bf64c1920fdae58bac90b420e688f">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *weights, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *biases, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;conv_info)</td></tr>
+<tr class="memdesc:a335bf64c1920fdae58bac90b420e688f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_convolution_layer.xhtml">NEGEMMConvolutionLayer</a>.  <a href="#a335bf64c1920fdae58bac90b420e688f">More...</a><br /></td></tr>
+<tr class="separator:a335bf64c1920fdae58bac90b420e688f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Basic function to simulate a convolution layer. </p>
-<p>This function calls the following NEON kernels: </p>
+<p>This function calls the following NEON kernels:</p><ol type="1">
+<li><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel.xhtml">NEWinogradLayerTransformWeightsKernel</a> (executed only once in the first call to the <a class="el" href="classarm__compute_1_1_n_e_winograd_layer.xhtml#ad1717410afd0be936c6213a63c8005fb" title="Run the kernels contained in the function. ">run()</a> method )</li>
+<li><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_input_kernel.xhtml">NEWinogradLayerTransformInputKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_output_kernel.xhtml">NEWinogradLayerTransformOutputKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml">NEWinogradLayerBatchedGEMMKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_p_p_permute.xhtml">CPPPermute</a> (three times: weights, input and output) </li>
+</ol>
 
-<p>Definition at line <a class="el" href="_n_e_winograd_layer_8h_source.xhtml#l00042">42</a> of file <a class="el" href="_n_e_winograd_layer_8h_source.xhtml">NEWinogradLayer.h</a>.</p>
+<p>Definition at line <a class="el" href="_n_e_winograd_layer_8h_source.xhtml#l00047">47</a> of file <a class="el" href="_n_e_winograd_layer_8h_source.xhtml">NEWinogradLayer.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="adcda6eb217e5e505b0355e21f8e286ab"></a>
 <div class="memitem">
@@ -253,7 +266,7 @@ Public Member Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor. 3 lower dimensions represent a single input [width, height, IFM], while every optional dimension from 4 and above represent a batch of inputs. Data types supported: F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">weights</td><td>Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: Same as <code>input</code>. Currently only 3x3 kernels are supported. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">biases</td><td>Not supported, biases will be ignored. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">biases</td><td>Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as <code>weights</code>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs. Data types supported: Same as <code>input</code>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">conv_info</td><td>Contains padding and stride information described in <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a>. Currently only unit strides are supported. </td></tr>
   </table>
@@ -325,6 +338,71 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a335bf64c1920fdae58bac90b420e688f"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a> validate </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>weights</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>biases</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;&#160;</td>
+          <td class="paramname"><em>conv_info</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_convolution_layer.xhtml">NEGEMMConvolutionLayer</a>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor. 3 lower dimensions represent a single input [width, height, IFM], while every optional dimension from 4 and above represent a batch of inputs. Data types supported: F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">weights</td><td>Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported:Same as <code>input</code>. Currently only 3x3 kernels are supported. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">biases</td><td>Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as <code>weights</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs. Data types supported: Same as <code>input</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">conv_info</td><td>Contains padding and stride information described in <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a>. Currently only unit strides are supported.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>arm_compute/runtime/NEON/functions/<a class="el" href="_n_e_winograd_layer_8h_source.xhtml">NEWinogradLayer.h</a></li>
 </ul>
@@ -334,7 +412,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer.xhtml">NEWinogradLayer</a></li>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:46 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:25 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -5,6 +5,8 @@ var searchData=
   ['_5fend_5fx',['_end_x',['../classarm__compute_1_1_access_window_static.xhtml#a1cd2ac1bcf5024756e4c48ac8d43ed97',1,'arm_compute::AccessWindowStatic']]],
   ['_5fend_5fy',['_end_y',['../classarm__compute_1_1_access_window_static.xhtml#a85980789df8ce8a43eed2535663e5eca',1,'arm_compute::AccessWindowStatic']]],
   ['_5finfo',['_info',['../classarm__compute_1_1_access_window_static.xhtml#acea88797992fa16318f75073ff478f45',1,'arm_compute::AccessWindowStatic']]],
+  ['_5foutput_5ftile_5fcols',['_output_tile_cols',['../classarm__compute_1_1_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml#a5915e138cff9372cd4438c0208181e77',1,'arm_compute::NEWinogradLayerBatchedGEMMKernel']]],
+  ['_5foutput_5ftile_5frows',['_output_tile_rows',['../classarm__compute_1_1_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml#a418b17d4e8cf867d837ce92b9919241a',1,'arm_compute::NEWinogradLayerBatchedGEMMKernel']]],
   ['_5freference',['_reference',['../structarm__compute_1_1test_1_1validation_1_1compare__base.xhtml#a9cdfbe0f92ba33d9d5c84bc06600640c',1,'arm_compute::test::validation::compare_base']]],
   ['_5fshift',['_shift',['../classarm__compute_1_1test_1_1validation_1_1_accumulate_squared_validation_fixture.xhtml#afee82e52ade4d6cf07d45ca2e3feb8f4',1,'arm_compute::test::validation::AccumulateSquaredValidationFixture']]],
   ['_5fstart_5fx',['_start_x',['../classarm__compute_1_1_access_window_static.xhtml#a482da54e3056fdd14c12bd1490febd2a',1,'arm_compute::AccessWindowStatic']]],

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,6 +40,10 @@ class ITensor;
 class NEDepthwiseVectorToTensorKernel : public INEKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEDepthwiseVectorToTensorKernel";
+    }
     /** Default constructor */
     NEDepthwiseVectorToTensorKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
@@ -52,7 +56,7 @@ public:
     NEDepthwiseVectorToTensorKernel &operator=(NEDepthwiseVectorToTensorKernel &&) = default;
     /** Set the input and output of the kernel.
      *
-     * @param[in]  input  The input vector to convert. Data type supported: F32.
+     * @param[in]  input  The input vector to convert. Data type supported: QASYMM8/S32/F32.
      * @param[out] output The output tensor. 3 lower dimensions represent a single input [width, height, IFM]. Data type supported: same as @p input.
      * @param[in]  conv_w The converted tensor's width.
      * @param[in]  conv_h The converted tensor's height.
@@ -63,8 +67,22 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    const ITensor *_input;
-    ITensor       *_output;
+    /** Template function to run the vector to tensor reshape used for the depthwise convolution layer case
+     *
+     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
+     */
+    template <typename T>
+    void vector_to_tensor(const Window &window);
+    /** Common signature for all the specialised depthwise vector to tensor functions
+     *
+     * @param[in] window Region on which to execute the kernel.
+     */
+    using DepthwiseVectorToTensorFunctionPtr = void (NEDepthwiseVectorToTensorKernel::*)(const Window &window);
+
+private:
+    DepthwiseVectorToTensorFunctionPtr _func;
+    const ITensor                     *_input;
+    ITensor                           *_output;
     std::pair<size_t, size_t> _conv_dims;
 };
 } // arm_compute

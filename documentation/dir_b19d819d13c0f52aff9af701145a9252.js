@@ -64,6 +64,9 @@ var dir_b19d819d13c0f52aff9af701145a9252 =
       [ "GCLogits1DShiftExpSumKernel", "classarm__compute_1_1_g_c_logits1_d_shift_exp_sum_kernel.xhtml", "classarm__compute_1_1_g_c_logits1_d_shift_exp_sum_kernel" ],
       [ "GCLogits1DNormKernel", "classarm__compute_1_1_g_c_logits1_d_norm_kernel.xhtml", "classarm__compute_1_1_g_c_logits1_d_norm_kernel" ]
     ] ],
+    [ "GCTensorShiftKernel.h", "_g_c_tensor_shift_kernel_8h.xhtml", [
+      [ "GCTensorShiftKernel", "classarm__compute_1_1_g_c_tensor_shift_kernel.xhtml", "classarm__compute_1_1_g_c_tensor_shift_kernel" ]
+    ] ],
     [ "GCTransposeKernel.h", "_g_c_transpose_kernel_8h.xhtml", [
       [ "GCTransposeKernel", "classarm__compute_1_1_g_c_transpose_kernel.xhtml", "classarm__compute_1_1_g_c_transpose_kernel" ]
     ] ],

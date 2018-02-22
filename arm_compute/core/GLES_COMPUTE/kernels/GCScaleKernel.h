@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 #ifndef __ARM_COMPUTE_GCSCALEKERNEL_H__
 #define __ARM_COMPUTE_GCSCALEKERNEL_H__
 
-#include "arm_compute/core/GLES_COMPUTE/IGCSimple2DKernel.h"
+#include "arm_compute/core/GLES_COMPUTE/IGCSimple3DKernel.h"
 #include "arm_compute/core/Types.h"
 
 namespace arm_compute
@@ -32,7 +32,7 @@ namespace arm_compute
 class IGCTensor;
 
 /** Interface for the scale kernel */
-class GCScaleKernel : public IGCSimple2DKernel
+class GCScaleKernel : public IGCSimple3DKernel
 {
 public:
     /** Initialise the kernel's inputs, output and interpolation policy
@@ -47,6 +47,7 @@ public:
     void configure(const IGCTensor *input, IGCTensor *output, InterpolationPolicy policy, bool border_undefined, SamplingPolicy sampling_policy = SamplingPolicy::CENTER);
 
     // Inherited methods overridden:
+    void run(const Window &window) override;
     BorderSize border_size() const override;
 };
 } // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,7 +42,7 @@ CLLaplacianReconstruct::CLLaplacianReconstruct() // NOLINT
 {
 }
 
-void CLLaplacianReconstruct::configure(const CLPyramid *pyramid, const ICLTensor *input, ICLTensor *output, BorderMode border_mode, uint8_t constant_border_value)
+void CLLaplacianReconstruct::configure(const CLPyramid *pyramid, ICLTensor *input, ICLTensor *output, BorderMode border_mode, uint8_t constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON(nullptr == pyramid);
     ARM_COMPUTE_ERROR_ON(input == output);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,8 +42,9 @@ class MobileNetDepthwiseConvolutionLayerDataset final : public DepthwiseConvolut
 public:
     MobileNetDepthwiseConvolutionLayerDataset()
     {
-        add_config(TensorShape(7U, 7U, 1024U), TensorShape(3U, 3U, 1024U), TensorShape(3U, 3U, 1024U), PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(7U, 7U, 1024U), TensorShape(3U, 3U, 1024U), TensorShape(7U, 7U, 1024U), PadStrideInfo(1, 1, 1, 1));
         add_config(TensorShape(14U, 14U, 512U), TensorShape(3U, 3U, 512U), TensorShape(7U, 7U, 512U), PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(14U, 14U, 512U), TensorShape(3U, 3U, 512U), TensorShape(14U, 14U, 512U), PadStrideInfo(1, 1, 1, 1));
         add_config(TensorShape(28U, 28U, 256U), TensorShape(3U, 3U, 256U), TensorShape(14U, 14U, 256U), PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
         add_config(TensorShape(28U, 28U, 256U), TensorShape(3U, 3U, 256U), TensorShape(28U, 28U, 256U), PadStrideInfo(1, 1, 1, 1));
         add_config(TensorShape(56U, 56U, 128U), TensorShape(3U, 3U, 128U), TensorShape(28U, 28U, 128U), PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR));

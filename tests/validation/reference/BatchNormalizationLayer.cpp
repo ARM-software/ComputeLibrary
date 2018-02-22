@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,8 @@
  */
 #include "BatchNormalizationLayer.h"
 
+#include "ActivationLayer.h"
+
 #include "tests/validation/FixedPoint.h"
 #include "tests/validation/Helpers.h"
 
@@ -37,8 +39,9 @@ namespace reference
 // Batch Normalization Layer for fixed point type
 template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type *>
 SimpleTensor<T> batch_normalization_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &mean, const SimpleTensor<T> &var, const SimpleTensor<T> &beta, const SimpleTensor<T> &gamma, float epsilon,
-                                          int fixed_point_position)
+                                          ActivationLayerInfo act_info, int fixed_point_position)
 {
+    ARM_COMPUTE_UNUSED(act_info);
     SimpleTensor<T> result(src.shape(), src.data_type());
 
     const auto cols       = static_cast<int>(src.shape()[0]);
@@ -79,7 +82,7 @@ SimpleTensor<T> batch_normalization_layer(const SimpleTensor<T> &src, const Simp
 // Batch Normalization Layer for floating point type
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type *>
 SimpleTensor<T> batch_normalization_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &mean, const SimpleTensor<T> &var, const SimpleTensor<T> &beta, const SimpleTensor<T> &gamma, float epsilon,
-                                          int fixed_point_position)
+                                          ActivationLayerInfo act_info, int fixed_point_position)
 {
     ARM_COMPUTE_UNUSED(fixed_point_position);
 
@@ -103,21 +106,28 @@ SimpleTensor<T> batch_normalization_layer(const SimpleTensor<T> &src, const Simp
                     const float numerator   = src[pos] - mean[i];
                     const float x_bar       = numerator / denominator;
                     result[pos]             = beta[i] + x_bar * gamma[i];
+                    ;
                 }
             }
         }
     }
+
+    if(act_info.enabled())
+    {
+        result = activation_layer(result, act_info);
+    }
+
     return result;
 }
 template SimpleTensor<float> batch_normalization_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &mean, const SimpleTensor<float> &var, const SimpleTensor<float> &beta,
-                                                       const SimpleTensor<float> &gamma, float epsilon, int fixed_point_position);
+                                                       const SimpleTensor<float> &gamma, float epsilon, ActivationLayerInfo act_info, int fixed_point_position);
 template SimpleTensor<int8_t> batch_normalization_layer(const SimpleTensor<int8_t> &src, const SimpleTensor<int8_t> &mean, const SimpleTensor<int8_t> &var, const SimpleTensor<int8_t> &beta,
-                                                        const SimpleTensor<int8_t> &gamma, float epsilon, int fixed_point_position);
+                                                        const SimpleTensor<int8_t> &gamma, float epsilon, ActivationLayerInfo act_info, int fixed_point_position);
 template SimpleTensor<int16_t> batch_normalization_layer(const SimpleTensor<int16_t> &src, const SimpleTensor<int16_t> &mean, const SimpleTensor<int16_t> &var, const SimpleTensor<int16_t> &beta,
-                                                         const SimpleTensor<int16_t> &gamma, float epsilon, int fixed_point_position);
+                                                         const SimpleTensor<int16_t> &gamma, float epsilon, ActivationLayerInfo act_info, int fixed_point_position);
 template SimpleTensor<half> batch_normalization_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &mean, const SimpleTensor<half> &var,
                                                       const SimpleTensor<half> &beta,
-                                                      const SimpleTensor<half> &gamma, float epsilon, int fixed_point_position);
+                                                      const SimpleTensor<half> &gamma, float epsilon, ActivationLayerInfo act_info, int fixed_point_position);
 
 } // namespace reference
 } // namespace validation

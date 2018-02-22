@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,15 +23,18 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEFullyConnectedLayer.h"
 
+#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include <algorithm>
 #include <cmath>
 
-namespace arm_compute
-{
+using namespace arm_compute;
+using namespace arm_compute::misc::shape_calculator;
+
 NEFullyConnectedLayerReshapeWeights::NEFullyConnectedLayerReshapeWeights(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _transpose_kernel(), _transpose1xW_kernel(), _transpose_output(), _transpose_weights(false), _is_batched_fc_layer(false)
 {
@@ -39,13 +42,10 @@ NEFullyConnectedLayerReshapeWeights::NEFullyConnectedLayerReshapeWeights(std::sh
 
 void NEFullyConnectedLayerReshapeWeights::configure(const ITensor *input, ITensor *output, bool transpose_weights, bool is_batched_fc_layer)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON(input->info()->num_dimensions() > 2);
-    ARM_COMPUTE_ERROR_ON(output == nullptr);
-    ARM_COMPUTE_ERROR_ON(!transpose_weights && !is_batched_fc_layer);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    const DataType data_type            = input->info()->data_type();
-    const int      fixed_point_position = input->info()->fixed_point_position();
+    // Perform validate step
+    ARM_COMPUTE_ERROR_THROW_ON(NEFullyConnectedLayerReshapeWeights::validate(input->info(), output->info(), transpose_weights, is_batched_fc_layer));
 
     _transpose_weights   = transpose_weights;
     _is_batched_fc_layer = is_batched_fc_layer;
@@ -56,8 +56,7 @@ void NEFullyConnectedLayerReshapeWeights::configure(const ITensor *input, ITenso
         if(_is_batched_fc_layer)
         {
             // Initialize the output tensor for transpose
-            TensorShape shape_transposed(input->info()->dimension(1), input->info()->dimension(0));
-            _transpose_output.allocator()->init(TensorInfo(shape_transposed, 1, data_type, fixed_point_position));
+            _transpose_output.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_transposed_shape(*input->info())));
             _memory_group.manage(&_transpose_output);
             _transpose_kernel.configure(input, &_transpose_output);
 
@@ -79,11 +78,39 @@ void NEFullyConnectedLayerReshapeWeights::configure(const ITensor *input, ITenso
             // Configure transpose 1xW kernel
             _transpose1xW_kernel.configure(input, output);
         }
+    }
+}
+
+Status NEFullyConnectedLayerReshapeWeights::validate(const ITensorInfo *input, const ITensorInfo *output, bool transpose_weights, bool is_batched_fc_layer)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 2);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!transpose_weights && !is_batched_fc_layer, "Configuration transpose_weights=false & is_batched_fc_layer=false not supported");
+
+    if(transpose_weights)
+    {
+        if(is_batched_fc_layer)
+        {
+            std::unique_ptr<ITensorInfo> use_output = output->clone();
+            use_output->set_is_resizable(true).reset_padding().set_tensor_shape(compute_transposed_shape(*input));
+
+            ARM_COMPUTE_RETURN_ON_ERROR(NETransposeKernel::validate(input, use_output.get()));
+            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMTranspose1xWKernel::validate(use_output.get(), output));
+        }
         else
         {
-            ARM_COMPUTE_ERROR("Configuration transpose_weights=false & is_batched_fc_layer=false not supported");
+            ARM_COMPUTE_RETURN_ON_ERROR(NETransposeKernel::validate(input, output));
         }
     }
+    else
+    {
+        if(is_batched_fc_layer)
+        {
+            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMTranspose1xWKernel::validate(input, output));
+        }
+    }
+
+    return Status{};
 }
 
 void NEFullyConnectedLayerReshapeWeights::run()
@@ -122,25 +149,24 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
     // Weights: flat(In) x Out
     // Biases: Out
     // Output: Out x B (B can be multi-dimensional)
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
 
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, weights, output);
+    // Perform validate step
+    ARM_COMPUTE_ERROR_THROW_ON(NEFullyConnectedLayer::validate(input->info(),
+                                                               weights->info(),
+                                                               biases != nullptr ? biases->info() : nullptr,
+                                                               output->info(),
+                                                               transpose_weights,
+                                                               are_weights_reshaped));
 
-    const DataType data_type            = input->info()->data_type();
-    const int      fixed_point_position = input->info()->fixed_point_position();
-    const int      num_batch_dimensions = std::max(0, static_cast<int>(output->info()->tensor_shape().num_dimensions()) - 1);
-    const int      num_input_dimensions = input->info()->tensor_shape().num_dimensions() - num_batch_dimensions;
-    const size_t   linear_input_size    = input->info()->tensor_shape().total_size_lower(num_input_dimensions);
+    const int    num_batch_dimensions = std::max(0, static_cast<int>(output->info()->tensor_shape().num_dimensions()) - 1);
+    const int    num_input_dimensions = input->info()->tensor_shape().num_dimensions() - num_batch_dimensions;
+    const size_t linear_input_size    = input->info()->tensor_shape().total_size_lower(num_input_dimensions);
 
     _linearize_input      = (input->info()->tensor_shape().x() != linear_input_size) || (num_input_dimensions > 1 && linear_input_size == 1);
     _are_weights_reshaped = are_weights_reshaped;
     _accumulate_biases    = biases != nullptr;
     _is_batched_fc_layer  = num_batch_dimensions > 0;
-
-    // Check if number of batches match
-    ARM_COMPUTE_ERROR_ON(input->info()->tensor_shape().total_size_upper(num_input_dimensions) != output->info()->tensor_shape().total_size_upper(1));
-    ARM_COMPUTE_ERROR_ON(weights->info()->num_dimensions() > 2);
 
     const size_t   interleave_width = 16 / input->info()->element_size();
     const ITensor *weights_to_use   = weights;
@@ -149,65 +175,33 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
     {
         weights_to_use = &_reshape_weights_output;
 
-        TensorShape reshaped_weights_shape(weights->info()->tensor_shape());
-
-        // Transpose weights if the user hasn't done it
-        if(transpose_weights)
-        {
-            const size_t shape_x = reshaped_weights_shape.x();
-            reshaped_weights_shape.set(0, reshaped_weights_shape.y());
-            reshaped_weights_shape.set(1, shape_x);
-        }
-
-        // If the we run multiple batches we need 1xW transpose, too.
-        if(_is_batched_fc_layer)
-        {
-            const float shape_x = reshaped_weights_shape.x();
-            reshaped_weights_shape.set(0, reshaped_weights_shape.y() * interleave_width);
-            reshaped_weights_shape.set(1, static_cast<unsigned int>(std::ceil(shape_x / interleave_width)));
-        }
-
-        _reshape_weights_output.allocator()->init(TensorInfo(reshaped_weights_shape, 1, data_type, fixed_point_position));
+        _reshape_weights_output.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_fully_connected_reshaped_weights_shape(weights->info(),
+                                                  transpose_weights,
+                                                  _is_batched_fc_layer, interleave_width)));
 
         // Reshape the weights
         _reshape_weights_kernel.configure(weights, &_reshape_weights_output, transpose_weights, _is_batched_fc_layer);
-    }
-
-    // Check correct shape of weights
-    if(_is_batched_fc_layer)
-    {
-        // Transpose + Transpose1xW
-        ARM_COMPUTE_ERROR_ON(weights_to_use->info()->tensor_shape().x() != linear_input_size * interleave_width);
-        ARM_COMPUTE_ERROR_ON(weights_to_use->info()->tensor_shape().y() != static_cast<unsigned int>(std::ceil(static_cast<float>(output->info()->tensor_shape().x()) / interleave_width)));
-    }
-    else
-    {
-        // Transpose
-        ARM_COMPUTE_ERROR_ON(weights_to_use->info()->tensor_shape().x() != output->info()->tensor_shape().x());
-        ARM_COMPUTE_ERROR_ON(weights_to_use->info()->tensor_shape().y() != linear_input_size);
     }
 
     const ITensor *multiply_input = input;
 
     if(_linearize_input)
     {
-        TensorShape shape_im2col(input->info()->tensor_shape());
-        shape_im2col.collapse(num_input_dimensions);
-        _im2col_output.allocator()->init(TensorInfo(shape_im2col, 1, data_type, fixed_point_position));
+        _im2col_output.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_im2col_shape(input->info(), num_input_dimensions)));
 
         // Configure im2col kernel
         _memory_group.manage(&_im2col_output);
-        _im2col_kernel.configure(input, &_im2col_output, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false);
+        _im2col_kernel.configure(input, &_im2col_output, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false, true);
 
         multiply_input = &_im2col_output;
     }
 
+    int m = multiply_input->info()->dimension(1);
+    int k = multiply_input->info()->dimension(0);
+
     if(_is_batched_fc_layer)
     {
-        TensorShape shape_interleaved(multiply_input->info()->tensor_shape());
-        shape_interleaved.set(0, shape_interleaved.x() * 4);
-        shape_interleaved.set(1, std::ceil(shape_interleaved.y() / 4.f));
-        _interleave4x4_output.allocator()->init(TensorInfo(shape_interleaved, 1, data_type, fixed_point_position));
+        _interleave4x4_output.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_interleaved_shape(*multiply_input->info())));
 
         // Configure interleave4x4 kernel
         _memory_group.manage(&_interleave4x4_output);
@@ -217,13 +211,10 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
     }
 
     // Configure matrix multiply kernel
-    _mm_kernel.configure(multiply_input, weights_to_use, output, 1.0f);
+    _mm_kernel.configure(multiply_input, weights_to_use, output, 1.0f, _is_batched_fc_layer, GEMMReshapeInfo(m, 0 /* no transpose */, k));
 
     if(_accumulate_biases)
     {
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
-        ARM_COMPUTE_ERROR_ON(biases->info()->tensor_shape().x() != output->info()->tensor_shape().x());
-
         // Configure accumulate biases kernel
         _accumulate_biases_kernel.configure(output, biases);
     }
@@ -244,6 +235,88 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
     {
         _interleave4x4_output.allocator()->allocate();
     }
+}
+
+Status NEFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, bool transpose_weights, bool are_weights_reshaped)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, weights, output);
+
+    const int    num_batch_dimensions = std::max(0, static_cast<int>(output->tensor_shape().num_dimensions()) - 1);
+    const int    num_input_dimensions = input->tensor_shape().num_dimensions() - num_batch_dimensions;
+    const size_t linear_input_size    = input->tensor_shape().total_size_lower(num_input_dimensions);
+
+    const bool linearize_input     = (input->tensor_shape().x() != linear_input_size) || (num_input_dimensions > 1 && linear_input_size == 1);
+    const bool accumulate_biases   = biases != nullptr;
+    const bool is_batched_fc_layer = num_batch_dimensions > 0;
+
+    ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape().total_size_upper(num_input_dimensions) != output->tensor_shape().total_size_upper(1));
+    ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 2);
+
+    const size_t                 interleave_width       = 16 / input->element_size();
+    const ITensorInfo           *weights_to_use         = weights;
+    std::unique_ptr<ITensorInfo> reshape_weights_output = input->clone();
+
+    if(!are_weights_reshaped && (transpose_weights || is_batched_fc_layer))
+    {
+        reshape_weights_output->set_tensor_shape(compute_fully_connected_reshaped_weights_shape(weights, transpose_weights, is_batched_fc_layer, interleave_width));
+
+        ARM_COMPUTE_RETURN_ON_ERROR(NEFullyConnectedLayerReshapeWeights::validate(weights, reshape_weights_output.get(), transpose_weights, is_batched_fc_layer));
+
+        weights_to_use = reshape_weights_output.get();
+    }
+
+    // Check correct shape of weights
+    if(is_batched_fc_layer)
+    {
+        // Transpose + Transpose1xW
+        ARM_COMPUTE_RETURN_ERROR_ON(weights_to_use->tensor_shape().x() != linear_input_size * interleave_width);
+        ARM_COMPUTE_RETURN_ERROR_ON(weights_to_use->tensor_shape().y() != static_cast<unsigned int>(std::ceil(static_cast<float>(output->tensor_shape().x()) / interleave_width)));
+    }
+    else
+    {
+        // Transpose
+        ARM_COMPUTE_RETURN_ERROR_ON(weights_to_use->tensor_shape().x() != output->tensor_shape().x());
+        ARM_COMPUTE_RETURN_ERROR_ON(weights_to_use->tensor_shape().y() != linear_input_size);
+    }
+
+    const ITensorInfo           *multiply_input       = input;
+    std::unique_ptr<ITensorInfo> im2col_output        = input->clone();
+    std::unique_ptr<ITensorInfo> interleave4x4_output = input->clone();
+
+    if(linearize_input)
+    {
+        im2col_output->set_tensor_shape(compute_im2col_shape(input, num_input_dimensions));
+
+        ARM_COMPUTE_RETURN_ON_ERROR(NEIm2ColKernel::validate(input, im2col_output.get(), Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false, true));
+
+        multiply_input = im2col_output.get();
+    }
+
+    int m = multiply_input->dimension(1);
+    int k = multiply_input->dimension(0);
+
+    if(is_batched_fc_layer)
+    {
+        interleave4x4_output->set_tensor_shape(compute_interleaved_shape(*multiply_input));
+
+        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMInterleave4x4Kernel::validate(multiply_input, interleave4x4_output.get()));
+
+        multiply_input = interleave4x4_output.get();
+    }
+
+    ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMMatrixMultiplyKernel::validate(multiply_input, weights_to_use, output, 1.0f, is_batched_fc_layer, GEMMReshapeInfo(m, 0 /* no transpose */, k)));
+
+    if(accumulate_biases)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
+        ARM_COMPUTE_RETURN_ERROR_ON(biases->tensor_shape().x() != output->tensor_shape().x());
+
+        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMMatrixAccumulateBiasesKernel::validate(output, biases));
+    }
+
+    return Status{};
 }
 
 void NEFullyConnectedLayer::run()
@@ -280,4 +353,3 @@ void NEFullyConnectedLayer::run()
 
     _memory_group.release();
 }
-} // namespace arm_compute

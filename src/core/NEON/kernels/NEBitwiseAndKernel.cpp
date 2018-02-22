@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 
@@ -32,6 +33,7 @@
 #include <cstdint>
 
 using namespace arm_compute;
+using namespace arm_compute::wrapper;
 
 namespace arm_compute
 {
@@ -40,12 +42,14 @@ class Coordinates;
 
 namespace
 {
-inline void bitwise_and_U8_U8_U8(const uint8_t *__restrict input1, const uint8_t *__restrict input2, uint8_t *__restrict output)
+template <typename T, int S>
+inline void bitwise_and(const T *__restrict input1, const T *__restrict input2, T *__restrict output)
 {
-    const uint8x16_t val1 = vld1q_u8(input1);
-    const uint8x16_t val2 = vld1q_u8(input2);
+    using type      = typename wrapper::traits::neon_vector<T, S>::type;
+    const type val1 = vloadq(static_cast<const T *>(input1));
+    const type val2 = vloadq(static_cast<const T *>(input2));
 
-    vst1q_u8(output, vandq_u8(val1, val2));
+    vstore(static_cast<T *>(output), vand(val1, val2));
 }
 } // namespace
 
@@ -104,7 +108,7 @@ void NEBitwiseAndKernel::run(const Window &window, const ThreadInfo &info)
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
-        bitwise_and_U8_U8_U8(input1.ptr(), input2.ptr(), output.ptr());
+        bitwise_and<uint8_t, 16>(input1.ptr(), input2.ptr(), output.ptr());
     },
     input1, input2, output);
 }

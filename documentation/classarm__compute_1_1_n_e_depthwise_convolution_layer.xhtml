@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -159,7 +159,7 @@ Public Member Functions</h2></td></tr>
 <li><a class="el" href="classarm__compute_1_1_n_e_fill_border_kernel.xhtml">NEFillBorderKernel</a> (if pad_x or pad_y &gt; 0) </li>
 </ol>
 
-<p>Definition at line <a class="el" href="_n_e_depthwise_convolution_layer_8h_source.xhtml#l00086">86</a> of file <a class="el" href="_n_e_depthwise_convolution_layer_8h_source.xhtml">NEDepthwiseConvolutionLayer.h</a>.</p>
+<p>Definition at line <a class="el" href="_n_e_depthwise_convolution_layer_8h_source.xhtml#l00095">95</a> of file <a class="el" href="_n_e_depthwise_convolution_layer_8h_source.xhtml">NEDepthwiseConvolutionLayer.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="aaa71284f868a7571de11d6230081a008"></a>
 <div class="memitem">
@@ -224,10 +224,10 @@ Public Member Functions</h2></td></tr>
 <p>Initialize the function's source, destination, weights and convolution information. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">input</td><td>Source tensor. Data type supported: F32. (Written to only for border filling). </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">input</td><td>Source tensor. Data type supported: QASYMM8/F32. (Written to only for border filling). </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor. Data type supported: same as <code>input</code>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">weights</td><td>Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM]. Data type supported: Same as <code>input</code>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">biases</td><td>(Optional) Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed. Data type supported: Same as <code>input</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">biases</td><td>(Optional) Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed. Data type supported: Same as <code>input</code>, S32 when input is QASYMM8. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">conv_info</td><td>Padding and stride information to use for the convolution. </td></tr>
   </table>
   </dd>
@@ -281,7 +281,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer.xhtml">NEDepthwiseConvolutionLayer</a></li>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:45 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:24 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

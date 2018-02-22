@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,11 @@
 #ifndef __ARM_COMPUTE_GCPOOLINGLAYER_H__
 #define __ARM_COMPUTE_GCPOOLINGLAYER_H__
 
-#include "arm_compute/runtime/GLES_COMPUTE/IGCSimpleFunction.h"
+#include "arm_compute/core/GLES_COMPUTE/IGCKernel.h"
+#include "arm_compute/core/GLES_COMPUTE/kernels/GCFillBorderKernel.h"
+#include "arm_compute/core/GLES_COMPUTE/kernels/GCPoolingLayerKernel.h"
+#include "arm_compute/core/GLES_COMPUTE/kernels/GCTensorShiftKernel.h"
+#include "arm_compute/runtime/IFunction.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Types.h"
@@ -38,9 +42,10 @@ class IGCTensor;
  * -# @ref GCFillBorderKernel (executed if padding size is different from zero)
  * -# @ref GCPoolingLayerKernel
  */
-class GCPoolingLayer : public IGCSimpleFunction
+class GCPoolingLayer : public IFunction
 {
 public:
+    GCPoolingLayer();
     /** Set the input and output tensors.
      *
      * @param[in,out] input     Source tensor. (Written to only when padding != 0) Data types supported: F16/F32.
@@ -57,6 +62,13 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info);
+
+    void run() override final;
+
+private:
+    std::unique_ptr<IGCKernel> _kernel;
+    GCFillBorderKernel         _border_handler;
+    GCTensorShiftKernel        _shift_handler;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_GCPOOLINGLAYER_H__ */

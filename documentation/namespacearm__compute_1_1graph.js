@@ -29,6 +29,7 @@ var namespacearm__compute_1_1graph =
     [ "PoolingLayer", "classarm__compute_1_1graph_1_1_pooling_layer.xhtml", "classarm__compute_1_1graph_1_1_pooling_layer" ],
     [ "QuantizationLayer", "classarm__compute_1_1graph_1_1_quantization_layer.xhtml", "classarm__compute_1_1graph_1_1_quantization_layer" ],
     [ "ReshapeLayer", "classarm__compute_1_1graph_1_1_reshape_layer.xhtml", "classarm__compute_1_1graph_1_1_reshape_layer" ],
+    [ "ResidualLayer", "classarm__compute_1_1graph_1_1_residual_layer.xhtml", "classarm__compute_1_1graph_1_1_residual_layer" ],
     [ "SoftmaxLayer", "classarm__compute_1_1graph_1_1_softmax_layer.xhtml", "classarm__compute_1_1graph_1_1_softmax_layer" ],
     [ "SubGraph", "classarm__compute_1_1graph_1_1_sub_graph.xhtml", "classarm__compute_1_1graph_1_1_sub_graph" ],
     [ "SubTensor", "classarm__compute_1_1graph_1_1_sub_tensor.xhtml", "classarm__compute_1_1graph_1_1_sub_tensor" ],

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,16 +46,18 @@ public:
     GCBatchNormalizationLayer();
     /** Set the input and output tensors.
      *
-     * @param[in]  input   Source tensor. 3 lower dimensions represent a single input with dimensions [width, height, FM].
-     *                     The rest are optional and used for representing batches. Data types supported: F16/F32.
-     * @param[out] output  Destination tensor. Output will have the same number of dimensions as input. Data type supported: same as @p input
-     * @param[in]  mean    Mean values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]  var     Variance values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]  beta    Beta values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]  gamma   Gamma values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]  epsilon Small value to avoid division with zero.
+     * @param[in]  input    Source tensor. 3 lower dimensions represent a single input with dimensions [width, height, FM].
+     *                      The rest are optional and used for representing batches. Data types supported: F16/F32.
+     * @param[out] output   Destination tensor. Output will have the same number of dimensions as input. Data type supported: same as @p input
+     * @param[in]  mean     Mean values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in]  var      Variance values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in]  beta     Beta values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in]  gamma    Gamma values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in]  epsilon  Small value to avoid division with zero.
+     * @param[in]  act_info (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
      */
-    void configure(const IGCTensor *input, IGCTensor *output, const IGCTensor *mean, const IGCTensor *var, const IGCTensor *beta, const IGCTensor *gamma, float epsilon);
+    void configure(const IGCTensor *input, IGCTensor *output, const IGCTensor *mean, const IGCTensor *var, const IGCTensor *beta, const IGCTensor *gamma, float epsilon,
+                   ActivationLayerInfo act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run() override;

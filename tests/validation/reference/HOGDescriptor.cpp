@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,17 +40,16 @@ namespace
 template <typename T>
 void hog_orientation_compute(const SimpleTensor<T> &mag, const SimpleTensor<T> &phase, std::vector<T> &bins, const HOGInfo &hog_info)
 {
-    const size_t num_bins    = hog_info.num_bins();
-    const size_t cell_height = hog_info.cell_size().height;
-    const size_t cell_width  = hog_info.cell_size().width;
+    const Size2D &cell_size = hog_info.cell_size();
+    const size_t  num_bins  = hog_info.num_bins();
 
     float phase_scale = (PhaseType::SIGNED == hog_info.phase_type() ? num_bins / 360.0f : num_bins / 180.0f);
     phase_scale *= (PhaseType::SIGNED == hog_info.phase_type() ? 360.0f / 255.0f : 1.0f);
 
     int row_idx = 0;
-    for(size_t yc = 0; yc < cell_height; ++yc)
+    for(size_t yc = 0; yc < cell_size.height; ++yc)
     {
-        for(size_t xc = 0; xc < cell_height; xc++)
+        for(size_t xc = 0; xc < cell_size.width; xc++)
         {
             const float mag_value   = mag[(row_idx + xc)];
             const float phase_value = phase[(row_idx + xc)] * phase_scale + 0.5f;
@@ -65,7 +64,7 @@ void hog_orientation_compute(const SimpleTensor<T> &mag, const SimpleTensor<T> &
             bins[(hidx + 1) % num_bins] += mag_value * w1;
         }
 
-        row_idx += cell_width;
+        row_idx += cell_size.width;
     }
 }
 
@@ -117,31 +116,33 @@ void hog_block_normalization_compute(SimpleTensor<T> &block, SimpleTensor<T> &de
 template <typename T, typename U, typename V>
 void hog_orientation_binning(const SimpleTensor<T> &mag, const SimpleTensor<U> &phase, SimpleTensor<V> &hog_space, const HOGInfo &hog_info)
 {
-    const size_t cell_width   = hog_info.cell_size().width;
-    const size_t cell_height  = hog_info.cell_size().height;
+    const Size2D &cell_size = hog_info.cell_size();
+
+    const size_t num_bins     = hog_info.num_bins();
     const size_t shape_width  = hog_space.shape().x() * hog_info.cell_size().width;
     const size_t shape_height = hog_space.shape().y() * hog_info.cell_size().height;
 
-    SimpleTensor<V> mag_cell(TensorShape(cell_width, cell_height), DataType::F32);
-    SimpleTensor<V> phase_cell(TensorShape(cell_width, cell_height), DataType::F32);
+    TensorShape cell_shape(cell_size.width, cell_size.height);
+
+    SimpleTensor<V> mag_cell(cell_shape, DataType::F32);
+    SimpleTensor<V> phase_cell(cell_shape, DataType::F32);
 
     int cell_idx = 0;
     int y_offset = 0;
-    int x_offset = 0;
 
     // Traverse shape
-    for(auto sy = cell_height - 1; sy < shape_height; sy += cell_height)
+    for(auto sy = cell_size.height; sy <= shape_height; sy += cell_size.height)
     {
-        x_offset = 0;
-        for(auto sx = cell_width - 1; sx < shape_width; sx += cell_width)
+        int x_offset = 0;
+        for(auto sx = cell_size.width; sx <= shape_width; sx += cell_size.width)
         {
             int row_idx  = 0;
             int elem_idx = 0;
 
             // Traverse cell
-            for(auto y = 0u; y < cell_height; ++y)
+            for(auto y = 0u; y < cell_size.height; ++y)
             {
-                for(auto x = 0u; x < cell_width; ++x)
+                for(auto x = 0u; x < cell_size.width; ++x)
                 {
                     int shape_idx        = x + row_idx + x_offset + y_offset;
                     mag_cell[elem_idx]   = mag[shape_idx];
@@ -153,48 +154,46 @@ void hog_orientation_binning(const SimpleTensor<T> &mag, const SimpleTensor<U> &
             }
 
             // Partition magnitude values into bins based on phase values
-            std::vector<V> bins(hog_info.num_bins());
+            std::vector<V> bins(num_bins);
             hog_orientation_compute(mag_cell, phase_cell, bins, hog_info);
 
-            for(size_t i = 0; i < hog_info.num_bins(); ++i)
+            for(size_t i = 0; i < num_bins; ++i)
             {
-                hog_space[cell_idx * hog_info.num_bins() + i] = bins[i];
+                hog_space[cell_idx * num_bins + i] = bins[i];
             }
 
-            x_offset += cell_width;
+            x_offset += cell_size.width;
             cell_idx++;
         }
 
-        y_offset += (cell_height * shape_width);
+        y_offset += (cell_size.height * shape_width);
     }
 }
 
 template <typename T>
 void hog_block_normalization(SimpleTensor<T> &desc, const SimpleTensor<T> &hog_space, const HOGInfo &hog_info)
 {
-    const Size2D cells_per_block        = hog_info.num_cells_per_block();
-    const Size2D cells_per_block_stride = hog_info.num_cells_per_block_stride();
+    const Size2D  cells_per_block        = hog_info.num_cells_per_block();
+    const Size2D  cells_per_block_stride = hog_info.num_cells_per_block_stride();
+    const Size2D &block_size             = hog_info.block_size();
+    const Size2D &block_stride           = hog_info.block_stride();
+    const size_t  num_bins               = hog_info.num_bins();
 
-    const size_t block_width         = hog_info.block_size().width;
-    const size_t block_height        = hog_info.block_size().height;
-    const size_t block_stride_width  = hog_info.block_stride().width;
-    const size_t block_stride_height = hog_info.block_stride().height;
-    const size_t shape_width         = hog_space.shape().x() * hog_info.cell_size().width;
-    const size_t shape_height        = hog_space.shape().y() * hog_info.cell_size().height;
+    const size_t shape_width          = hog_space.shape().x() * hog_info.cell_size().width;
+    const size_t shape_height         = hog_space.shape().y() * hog_info.cell_size().height;
+    const size_t num_bins_per_block_x = cells_per_block.width * num_bins;
 
-    const size_t num_bins     = hog_info.num_bins();
-    const size_t num_channels = cells_per_block.area() * num_bins;
-
-    SimpleTensor<T> block(TensorShape{ 1u, 1u }, DataType::F32, num_channels);
+    // Tensor representing single block
+    SimpleTensor<T> block(TensorShape{ 1u, 1u }, DataType::F32, cells_per_block.area() * num_bins);
 
     int block_idx      = 0;
     int block_y_offset = 0;
 
     // Traverse shape
-    for(auto sy = block_width - 1; sy < shape_height; sy += block_stride_height)
+    for(auto sy = block_size.height; sy <= shape_height; sy += block_stride.height)
     {
         int block_x_offset = 0;
-        for(auto sx = block_height - 1; sx < shape_width; sx += block_stride_width)
+        for(auto sx = block_size.width; sx <= shape_width; sx += block_stride.width)
         {
             int cell_y_offset = 0;
             int elem_idx      = 0;
@@ -202,17 +201,11 @@ void hog_block_normalization(SimpleTensor<T> &desc, const SimpleTensor<T> &hog_s
             // Traverse block
             for(auto y = 0u; y < cells_per_block.height; ++y)
             {
-                int cell_x_offset = 0;
-                for(auto x = 0u; x < cells_per_block.width; ++x)
+                for(auto x = 0u; x < num_bins_per_block_x; ++x)
                 {
-                    for(auto bin = 0u; bin < num_bins; ++bin)
-                    {
-                        int idx         = bin + cell_x_offset + cell_y_offset + block_x_offset + block_y_offset;
-                        block[elem_idx] = hog_space[idx];
-                        elem_idx++;
-                    }
-
-                    cell_x_offset += num_bins;
+                    int idx         = x + cell_y_offset + block_x_offset + block_y_offset;
+                    block[elem_idx] = hog_space[idx];
+                    elem_idx++;
                 }
 
                 cell_y_offset += hog_space.shape().x() * num_bins;
@@ -232,9 +225,6 @@ void hog_block_normalization(SimpleTensor<T> &desc, const SimpleTensor<T> &hog_s
 template <typename T, typename U>
 SimpleTensor<T> hog_descriptor(const SimpleTensor<U> &src, BorderMode border_mode, U constant_border_value, const HOGInfo &hog_info)
 {
-    SimpleTensor<int16_t> _mag;
-    SimpleTensor<uint8_t> _phase;
-
     SimpleTensor<int16_t> grad_x;
     SimpleTensor<int16_t> grad_y;
 
@@ -253,12 +243,11 @@ SimpleTensor<T> hog_descriptor(const SimpleTensor<U> &src, BorderMode border_mod
     // Calculate derivative
     std::tie(grad_x, grad_y) = derivative<int16_t>(src, border_mode, constant_border_value, GradientDimension::GRAD_XY);
 
-    // Calculate magnitude and phase
-    _mag   = magnitude(grad_x, grad_y, MagnitudeType::L2NORM);
-    _phase = phase(grad_x, grad_y, hog_info.phase_type());
-
     // For each cell create histogram based on magnitude and phase
-    hog_orientation_binning(_mag, _phase, hog_space, hog_info);
+    hog_orientation_binning(magnitude(grad_x, grad_y, MagnitudeType::L2NORM),
+                            phase(grad_x, grad_y, hog_info.phase_type()),
+                            hog_space,
+                            hog_info);
 
     // Normalize histograms based on block size
     hog_block_normalization(desc, hog_space, hog_info);

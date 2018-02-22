@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -148,6 +148,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aec01ee4402c9101ea8f4e6ca8fa35e22"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#aec01ee4402c9101ea8f4e6ca8fa35e22">operator=</a> (<a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a> &amp;&amp;)=delete</td></tr>
 <tr class="memdesc:aec01ee4402c9101ea8f4e6ca8fa35e22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prevent instances from being move assigned.  <a href="#aec01ee4402c9101ea8f4e6ca8fa35e22">More...</a><br /></td></tr>
 <tr class="separator:aec01ee4402c9101ea8f4e6ca8fa35e22"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a049136304344524f3d13c052c6fe1f7d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#a049136304344524f3d13c052c6fe1f7d">graph_init</a> (const bool use_cl_tuner=false)</td></tr>
+<tr class="memdesc:a049136304344524f3d13c052c6fe1f7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the graph.  <a href="#a049136304344524f3d13c052c6fe1f7d">More...</a><br /></td></tr>
+<tr class="separator:a049136304344524f3d13c052c6fe1f7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a13a43e6d814de94978c515cb084873b1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#a13a43e6d814de94978c515cb084873b1">run</a> ()</td></tr>
 <tr class="memdesc:a13a43e6d814de94978c515cb084873b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes the graph.  <a href="#a13a43e6d814de94978c515cb084873b1">More...</a><br /></td></tr>
 <tr class="separator:a13a43e6d814de94978c515cb084873b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -167,13 +170,16 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:aa8e898112793d13b363806c4332f1832"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#aa8e898112793d13b363806c4332f1832">opencl_is_available</a> ()</td></tr>
-<tr class="memdesc:aa8e898112793d13b363806c4332f1832"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finalizes the current node's configuration.  <a href="#aa8e898112793d13b363806c4332f1832">More...</a><br /></td></tr>
+<tr class="memdesc:aa8e898112793d13b363806c4332f1832"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if the OpenCL target is available.  <a href="#aa8e898112793d13b363806c4332f1832">More...</a><br /></td></tr>
 <tr class="separator:aa8e898112793d13b363806c4332f1832"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab0094e1bc5c4a6c433c654786c83993c"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3">GPUTarget</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#ab0094e1bc5c4a6c433c654786c83993c">gpu_target</a> ()</td></tr>
+<tr class="memdesc:ab0094e1bc5c4a6c433c654786c83993c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the GPU target.  <a href="#ab0094e1bc5c4a6c433c654786c83993c">More...</a><br /></td></tr>
+<tr class="separator:ab0094e1bc5c4a6c433c654786c83993c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml" title="Graph class. ">Graph</a> class. </p>
 
-<p>Definition at line <a class="el" href="_graph_8h_source.xhtml#l00043">43</a> of file <a class="el" href="_graph_8h_source.xhtml">Graph.h</a>.</p>
+<p>Definition at line <a class="el" href="_graph_8h_source.xhtml#l00044">44</a> of file <a class="el" href="_graph_8h_source.xhtml">Graph.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="afc5ef9d72cc2c509814200791eaef62c"></a>
 <div class="memitem">
@@ -284,7 +290,7 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Referenced by <a class="el" href="_graph_8h_source.xhtml#l00138">arm_compute::graph::operator&lt;&lt;()</a>.</p>
+<p>Referenced by <a class="el" href="_graph_8h_source.xhtml#l00147">arm_compute::graph::operator&lt;&lt;()</a>.</p>
 
 </div>
 </div>
@@ -306,6 +312,55 @@ Static Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">tensor</td><td><a class="el" href="classarm__compute_1_1graph_1_1_tensor.xhtml" title="Tensor class. ">Tensor</a> to add </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="ab0094e1bc5c4a6c433c654786c83993c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3">GPUTarget</a> gpu_target </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Returns the GPU target. </p>
+
+</div>
+</div>
+<a class="anchor" id="a049136304344524f3d13c052c6fe1f7d"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void graph_init </td>
+          <td>(</td>
+          <td class="paramtype">const bool&#160;</td>
+          <td class="paramname"><em>use_cl_tuner</em> = <code>false</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Initialize the graph. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">use_cl_tuner</td><td>Use the <a class="el" href="classarm__compute_1_1_c_l_tuner.xhtml" title="Basic implementation of the OpenCL tuner interface. ">CLTuner</a> if this value is true </td></tr>
   </table>
   </dd>
 </dl>
@@ -351,9 +406,9 @@ Static Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Finalizes the current node's configuration. </p>
+<p>Check if the OpenCL target is available. </p>
 
-<p>Referenced by <a class="el" href="_graph_utils_8h_source.xhtml#l00263">arm_compute::graph_utils::set_target_hint()</a>.</p>
+<p>Referenced by <a class="el" href="_graph_utils_8h_source.xhtml#l00276">arm_compute::graph_utils::set_target_hint()</a>.</p>
 
 </div>
 </div>
@@ -459,7 +514,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph.xhtml">graph</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">Graph</a></li>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:46 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:25 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

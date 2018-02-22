@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,6 +27,7 @@
 #include "MaliCounter.h"
 #include "OpenCLTimer.h"
 #include "PMUCounter.h"
+#include "SchedulerTimer.h"
 #include "WallClockTimer.h"
 
 #include <sstream>
@@ -48,6 +49,7 @@ enum class InstrumentType : unsigned int
     PMU_INSTRUCTION_COUNTER = 0x0202,
     MALI                    = 0x0300,
     OPENCL_TIMER            = 0x0400,
+    SCHEDULER_TIMER         = 0x0500,
 };
 
 using InstrumentsDescription = std::pair<InstrumentType, ScaleFactor>;
@@ -77,6 +79,22 @@ inline ::std::stringstream &operator<<(::std::stringstream &stream, InstrumentsD
                     break;
                 case ScaleFactor::TIME_S:
                     stream << "WALL_CLOCK_TIMER_S";
+                    break;
+                default:
+                    throw std::invalid_argument("Unsupported instrument scale");
+            }
+            break;
+        case InstrumentType::SCHEDULER_TIMER:
+            switch(instrument.second)
+            {
+                case ScaleFactor::NONE:
+                    stream << "SCHEDULER_TIMER";
+                    break;
+                case ScaleFactor::TIME_MS:
+                    stream << "SCHEDULER_TIMER_MS";
+                    break;
+                case ScaleFactor::TIME_S:
+                    stream << "SCHEDULER_TIMER_S";
                     break;
                 default:
                     throw std::invalid_argument("Unsupported instrument scale");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,6 +34,10 @@ class ITensor;
 class NEGEMMAArch64Kernel : public NEGEMMAssemblyBaseKernel
 {
 public:
+    const char *name() const override
+    {
+        return "NEGEMMAArch64Kernel";
+    }
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 

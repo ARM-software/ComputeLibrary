@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2018 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -1456,8 +1456,8 @@ void NEConvolutionRectangleKernel::configure(const ITensor *input, ITensor *outp
     constexpr unsigned int num_elems_read_per_iteration      = 16;
     constexpr unsigned int num_elems_written_per_iteration   = 8;
 
-    Window                 win           = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration), border_undefined, _border_size);
-    AccessWindowHorizontal output_access = AccessWindowHorizontal(output->info(), 0, num_elems_written_per_iteration);
+    Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration), border_undefined, _border_size);
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_written_per_iteration);
 
     update_window_and_padding(win,
                               AccessWindowRectangle(input->info(), -_border_size.left, -_border_size.top, num_elems_read_per_iteration, height),

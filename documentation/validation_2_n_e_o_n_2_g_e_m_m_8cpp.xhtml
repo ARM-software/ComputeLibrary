@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -132,6 +132,7 @@ $(document).ready(function(){initNavTree('validation_2_n_e_o_n_2_g_e_m_m_8cpp.xh
 <code>#include &quot;<a class="el" href="_padding_calculator_8h_source.xhtml">tests/PaddingCalculator.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_large_g_e_m_m_dataset_8h_source.xhtml">tests/datasets/LargeGEMMDataset.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_small_g_e_m_m_dataset_8h_source.xhtml">tests/datasets/SmallGEMMDataset.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_tiny_g_e_m_m_dataset_8h_source.xhtml">tests/datasets/TinyGEMMDataset.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_asserts_8h_source.xhtml">tests/framework/Asserts.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="tests_2framework_2_macros_8h_source.xhtml">tests/framework/Macros.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_datasets_8h_source.xhtml">tests/framework/datasets/Datasets.h</a>&quot;</code><br />
@@ -193,14 +194,14 @@ Functions</h2></td></tr>
 <tr class="separator:a27bbd7ce9130e3429b2adcdc305efe0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a34d0cf04b80a88b56a3f142d82cc86b8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a34d0cf04b80a88b56a3f142d82cc86b8">FIXTURE_DATA_TEST_CASE</a> (RunLarge, NEGEMMFixture&lt; float &gt;, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMDataset(), framework::dataset::make(&quot;DataType&quot;, DataType::F32)))</td></tr>
 <tr class="separator:a34d0cf04b80a88b56a3f142d82cc86b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0e05a4242089ce41d9880f78ce2b51b7"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a0e05a4242089ce41d9880f78ce2b51b7">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NEGEMMFixedPointFixture&lt; int8_t &gt;, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallGEMMDataset(), framework::dataset::make(&quot;DataType&quot;, DataType::QS8)), framework::dataset::make(&quot;FractionalBits&quot;, 1, 7)))</td></tr>
-<tr class="separator:a0e05a4242089ce41d9880f78ce2b51b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af9ba011a71bca259faaa90a9a68e54bc"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af9ba011a71bca259faaa90a9a68e54bc">FIXTURE_DATA_TEST_CASE</a> (RunLarge, NEGEMMFixedPointFixture&lt; int8_t &gt;, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeGEMMDataset(), framework::dataset::make(&quot;DataType&quot;, DataType::QS8)), framework::dataset::make(&quot;FractionalBits&quot;, 1, 7)))</td></tr>
-<tr class="separator:af9ba011a71bca259faaa90a9a68e54bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a17430c974457953501238162026e9825"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a17430c974457953501238162026e9825">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NEGEMMFixedPointFixture&lt; int16_t &gt;, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallGEMMDataset(), framework::dataset::make(&quot;DataType&quot;, DataType::QS16)), framework::dataset::make(&quot;FractionalBits&quot;, 1, 14)))</td></tr>
-<tr class="separator:a17430c974457953501238162026e9825"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a143d8f9422caf32b8ac1d532b9bb4232"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a143d8f9422caf32b8ac1d532b9bb4232">FIXTURE_DATA_TEST_CASE</a> (RunLarge, NEGEMMFixedPointFixture&lt; int16_t &gt;, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeGEMMDataset(), framework::dataset::make(&quot;DataType&quot;, DataType::QS16)), framework::dataset::make(&quot;FractionalBits&quot;, 1, 14)))</td></tr>
-<tr class="separator:a143d8f9422caf32b8ac1d532b9bb4232"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7a60923dc2623645cff2c9011c9a2be6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7a60923dc2623645cff2c9011c9a2be6">FIXTURE_DATA_TEST_CASE</a> (RunTiny, NEGEMMFixedPointFixture&lt; int8_t &gt;, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::TinyGEMMDataset(), framework::dataset::make(&quot;DataType&quot;, DataType::QS8)), framework::dataset::make(&quot;FractionalBits&quot;, 1, 7)))</td></tr>
+<tr class="separator:a7a60923dc2623645cff2c9011c9a2be6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad2a1319dcf8b1d24cce63a68284b2966"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad2a1319dcf8b1d24cce63a68284b2966">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NEGEMMFixedPointFixture&lt; int8_t &gt;, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallGEMMDataset(), framework::dataset::make(&quot;DataType&quot;, DataType::QS8)), framework::dataset::make(&quot;FractionalBits&quot;, 1, 7)))</td></tr>
+<tr class="separator:ad2a1319dcf8b1d24cce63a68284b2966"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a650aaa776f2c1c1a7bc93d3036c7a036"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a650aaa776f2c1c1a7bc93d3036c7a036">FIXTURE_DATA_TEST_CASE</a> (RunTiny, NEGEMMFixedPointFixture&lt; int16_t &gt;, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::TinyGEMMDataset(), framework::dataset::make(&quot;DataType&quot;, DataType::QS16)), framework::dataset::make(&quot;FractionalBits&quot;, 1, 14)))</td></tr>
+<tr class="separator:a650aaa776f2c1c1a7bc93d3036c7a036"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3cf39ef180183102a59386256a1fba24"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a3cf39ef180183102a59386256a1fba24">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NEGEMMFixedPointFixture&lt; int16_t &gt;, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallGEMMDataset(), framework::dataset::make(&quot;DataType&quot;, DataType::QS16)), framework::dataset::make(&quot;FractionalBits&quot;, 1, 14)))</td></tr>
+<tr class="separator:a3cf39ef180183102a59386256a1fba24"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -208,7 +209,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_0538a82dae0483a21d0f1e9d7e0a45c6.xhtml">NEON</a></li><li class="navelem"><a class="el" href="validation_2_n_e_o_n_2_g_e_m_m_8cpp.xhtml">GEMM.cpp</a></li>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:43 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:22 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

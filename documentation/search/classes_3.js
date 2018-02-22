@@ -1,9 +1,11 @@
 var searchData=
 [
+  ['caffepreproccessor',['CaffePreproccessor',['../classarm__compute_1_1graph__utils_1_1_caffe_preproccessor.xhtml',1,'arm_compute::graph_utils']]],
   ['cartesianproductdataset',['CartesianProductDataset',['../classarm__compute_1_1test_1_1framework_1_1dataset_1_1_cartesian_product_dataset.xhtml',1,'arm_compute::test::framework::dataset']]],
   ['cartesianproductdataset_3c_20framework_3a_3adataset_3a_3ainitializerlistdataset_3c_20tensorshape_20_3e_2c_20framework_3a_3adataset_3a_3asingletondataset_3c_20activationlayerinfo_20_3e_20_3e',['CartesianProductDataset&lt; framework::dataset::InitializerListDataset&lt; TensorShape &gt;, framework::dataset::SingletonDataset&lt; ActivationLayerInfo &gt; &gt;',['../classarm__compute_1_1test_1_1framework_1_1dataset_1_1_cartesian_product_dataset.xhtml',1,'arm_compute::test::framework::dataset']]],
   ['cartesianproductdataset_3c_20framework_3a_3adataset_3a_3ainitializerlistdataset_3c_20tensorshape_20_3e_2c_20framework_3a_3adataset_3a_3asingletondataset_3c_20normalizationlayerinfo_20_3e_20_3e',['CartesianProductDataset&lt; framework::dataset::InitializerListDataset&lt; TensorShape &gt;, framework::dataset::SingletonDataset&lt; NormalizationLayerInfo &gt; &gt;',['../classarm__compute_1_1test_1_1framework_1_1dataset_1_1_cartesian_product_dataset.xhtml',1,'arm_compute::test::framework::dataset']]],
   ['cartesianproductdataset_3c_20framework_3a_3adataset_3a_3asingletondataset_3c_20tensorshape_20_3e_2c_20framework_3a_3adataset_3a_3asingletondataset_3c_20activationlayerinfo_20_3e_20_3e',['CartesianProductDataset&lt; framework::dataset::SingletonDataset&lt; TensorShape &gt;, framework::dataset::SingletonDataset&lt; ActivationLayerInfo &gt; &gt;',['../classarm__compute_1_1test_1_1framework_1_1dataset_1_1_cartesian_product_dataset.xhtml',1,'arm_compute::test::framework::dataset']]],
+  ['channelextractvalidationfixture',['ChannelExtractValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_channel_extract_validation_fixture.xhtml',1,'arm_compute::test::validation']]],
   ['clabsolutedifference',['CLAbsoluteDifference',['../classarm__compute_1_1_c_l_absolute_difference.xhtml',1,'arm_compute']]],
   ['clabsolutedifferencekernel',['CLAbsoluteDifferenceKernel',['../classarm__compute_1_1_c_l_absolute_difference_kernel.xhtml',1,'arm_compute']]],
   ['claccessor',['CLAccessor',['../classarm__compute_1_1test_1_1_c_l_accessor.xhtml',1,'arm_compute::test']]],
@@ -74,6 +76,7 @@ var searchData=
   ['cldilatekernel',['CLDilateKernel',['../classarm__compute_1_1_c_l_dilate_kernel.xhtml',1,'arm_compute']]],
   ['cldirectconvolutionlayer',['CLDirectConvolutionLayer',['../classarm__compute_1_1_c_l_direct_convolution_layer.xhtml',1,'arm_compute']]],
   ['cldirectconvolutionlayerkernel',['CLDirectConvolutionLayerKernel',['../classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml',1,'arm_compute']]],
+  ['cldirectconvolutionlayeroutputstagekernel',['CLDirectConvolutionLayerOutputStageKernel',['../classarm__compute_1_1_c_l_direct_convolution_layer_output_stage_kernel.xhtml',1,'arm_compute']]],
   ['cldistribution1d',['CLDistribution1D',['../classarm__compute_1_1_c_l_distribution1_d.xhtml',1,'arm_compute']]],
   ['cledgenonmaxsuppressionkernel',['CLEdgeNonMaxSuppressionKernel',['../classarm__compute_1_1_c_l_edge_non_max_suppression_kernel.xhtml',1,'arm_compute']]],
   ['cledgetracekernel',['CLEdgeTraceKernel',['../classarm__compute_1_1_c_l_edge_trace_kernel.xhtml',1,'arm_compute']]],
@@ -100,6 +103,7 @@ var searchData=
   ['clgaussianpyramidorb',['CLGaussianPyramidOrb',['../classarm__compute_1_1_c_l_gaussian_pyramid_orb.xhtml',1,'arm_compute']]],
   ['clgaussianpyramidvertkernel',['CLGaussianPyramidVertKernel',['../classarm__compute_1_1_c_l_gaussian_pyramid_vert_kernel.xhtml',1,'arm_compute']]],
   ['clgemm',['CLGEMM',['../classarm__compute_1_1_c_l_g_e_m_m.xhtml',1,'arm_compute']]],
+  ['clgemmconvolutionlayer',['CLGEMMConvolutionLayer',['../classarm__compute_1_1_c_l_g_e_m_m_convolution_layer.xhtml',1,'arm_compute']]],
   ['clgemminterleave4x4',['CLGEMMInterleave4x4',['../classarm__compute_1_1_c_l_g_e_m_m_interleave4x4.xhtml',1,'arm_compute']]],
   ['clgemminterleave4x4kernel',['CLGEMMInterleave4x4Kernel',['../classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel.xhtml',1,'arm_compute']]],
   ['clgemmlowpmatrixareductionkernel',['CLGEMMLowpMatrixAReductionKernel',['../classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_a_reduction_kernel.xhtml',1,'arm_compute']]],

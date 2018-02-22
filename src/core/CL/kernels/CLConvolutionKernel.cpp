@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,8 +63,8 @@ void CLConvolutionKernel<matrix_size>::configure(const ICLTensor *input, ICLTens
     _input  = input;
     _output = output;
 
-    std::stringstream     kernel_name;
-    std::set<std::string> options;
+    std::stringstream kernel_name;
+    CLBuildOptions    build_opts;
     kernel_name << "convolution" << matrix_size << "x" << matrix_size << "_static";
 
     if(scale == 0)
@@ -76,19 +76,19 @@ void CLConvolutionKernel<matrix_size>::configure(const ICLTensor *input, ICLTens
     {
         std::stringstream mat_str;
         mat_str << "-DMAT" << i << "=" << conv[i];
-        options.insert(mat_str.str());
+        build_opts.add_option(mat_str.str());
     }
 
-    options.insert("-DSCALE=" + support::cpp11::to_string(scale));
+    build_opts.add_option("-DSCALE=" + support::cpp11::to_string(scale));
 
     DataType data_type = data_type_for_convolution_matrix(conv, matrix_size * matrix_size);
-    options.insert("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
 
     std::stringstream out_type;
     out_type << "-DDATA_TYPE_OUT=" << get_cl_type_from_data_type(output->info()->data_type());
-    options.insert(out_type.str());
+    build_opts.add_option(out_type.str());
 
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name.str(), options));
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name.str(), build_opts.options()));
 
     // Configure kernel window
     constexpr unsigned int num_elems_processed_per_iteration = 8;

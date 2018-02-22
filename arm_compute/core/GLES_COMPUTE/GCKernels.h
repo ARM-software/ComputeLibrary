@@ -47,6 +47,7 @@
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCPoolingLayerKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCScaleKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCSoftmaxLayerKernel.h"
+#include "arm_compute/core/GLES_COMPUTE/kernels/GCTensorShiftKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCTransposeKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCWeightsReshapeKernel.h"
 

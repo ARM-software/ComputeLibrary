@@ -59,6 +59,10 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
             ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::QS32 && bias->data_type() != DataType::QS16, "Wrong data type for bias");
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, bias);
         }
+        else if(is_data_type_quantized_asymmetric(input->data_type()))
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::S32);
+        }
         else
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, bias);
@@ -68,7 +72,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
     }
     else
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(!is_data_type_quantized(input->data_type()), "Calling output stage kernel with floating point arguments");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_data_type_float(input->data_type()), "Calling output stage kernel with floating point arguments");
     }
 
     // Checks performed when output is configured
@@ -447,8 +451,10 @@ void NEDirectConvolutionLayerOutputStageKernel::configure(ITensor *input, const 
             break;
         }
         case DataType::S32:
+        {
             _func = (bias == nullptr) ? &output_stage<int32_t, uint8_t, false, false> : &output_stage<int32_t, uint8_t, false, true>;
             break;
+        }
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
         {

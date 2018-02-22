@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -200,6 +200,7 @@ $(document).ready(function(){initNavTree('functions_func_i.xhtml','');});
 , <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_mali_counter.xhtml#a501ef37fef441a0a6a8ea8b8e30a7181">MaliCounter</a>
 , <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_open_c_l_timer.xhtml#a501ef37fef441a0a6a8ea8b8e30a7181">OpenCLTimer</a>
 , <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_p_m_u_counter.xhtml#a501ef37fef441a0a6a8ea8b8e30a7181">PMUCounter</a>
+, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_scheduler_timer.xhtml#a501ef37fef441a0a6a8ea8b8e30a7181">SchedulerTimer</a>
 , <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_wall_clock_timer.xhtml#a501ef37fef441a0a6a8ea8b8e30a7181">WallClockTimer</a>
 </li>
 <li>IDistribution1D()
@@ -297,7 +298,7 @@ $(document).ready(function(){initNavTree('functions_func_i.xhtml','');});
 , <a class="el" href="classarm__compute_1_1_c_l_pyramid.xhtml#a0dd473fd109df68b4747ebf0f586a115">CLPyramid</a>
 , <a class="el" href="classarm__compute_1_1_multi_image.xhtml#a32c7d923aa5aad1ef6afe95204c7d723">MultiImage</a>
 , <a class="el" href="classarm__compute_1_1_pyramid.xhtml#a0dd473fd109df68b4747ebf0f586a115">Pyramid</a>
-, <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#a4b7391b7025befbe44b743723feb4a9b">TensorInfo</a>
+, <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#a9a30265f100a459de985a9f3f91db76c">TensorInfo</a>
 </li>
 <li>init_image()
 : <a class="el" href="classarm__compute_1_1utils_1_1_p_p_m_loader.xhtml#a69f2a0e263d4f77d1e166de9cd2746f7">PPMLoader</a>
@@ -328,10 +329,17 @@ $(document).ready(function(){initNavTree('functions_func_i.xhtml','');});
 , <a class="el" href="classarm__compute_1_1graph_1_1_pooling_layer.xhtml#aefee70b3377d4ece56de05e1dff00dd8">PoolingLayer</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_quantization_layer.xhtml#aefee70b3377d4ece56de05e1dff00dd8">QuantizationLayer</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_reshape_layer.xhtml#aefee70b3377d4ece56de05e1dff00dd8">ReshapeLayer</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_residual_layer.xhtml#aefee70b3377d4ece56de05e1dff00dd8">ResidualLayer</a>
 , <a class="el" href="classarm__compute_1_1graph_1_1_softmax_layer.xhtml#aefee70b3377d4ece56de05e1dff00dd8">SoftmaxLayer</a>
 </li>
 <li>Instrument()
 : <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml#a44dfdf6c9c53e1b5c5eddfc58c31dc54">Instrument</a>
+</li>
+<li>InstrumentsStats()
+: <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_instruments_stats.xhtml#a948b96537414305a030be8150cac2522">InstrumentsStats</a>
+</li>
+<li>Interceptor()
+: <a class="el" href="classarm__compute_1_1_interceptor.xhtml#a73c995c7b1e42301794f86190a4aa7a1">Interceptor</a>
 </li>
 <li>InterpolationPolicies()
 : <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_interpolation_policies.xhtml#a451cb01285a7eab7aad63106cbb83784">InterpolationPolicies</a>
@@ -370,6 +378,9 @@ $(document).ready(function(){initNavTree('functions_func_i.xhtml','');});
 : <a class="el" href="classarm__compute_1_1utils_1_1_n_p_y_loader.xhtml#a2f57f54d8c03b615bb31eee091d8a88a">NPYLoader</a>
 , <a class="el" href="classarm__compute_1_1utils_1_1_p_p_m_loader.xhtml#a2f57f54d8c03b615bb31eee091d8a88a">PPMLoader</a>
 </li>
+<li>is_optimized_execution_possible()
+: <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml#aceef5ed4bcd2b3691a06aea1b852446b">NEDepthwiseConvolutionLayer3x3Kernel</a>
+</li>
 <li>is_parallel_reduction()
 : <a class="el" href="classarm__compute_1_1_c_l_logits1_d_max_shift_exp_sum_kernel.xhtml#aa987e6098fbce0b56c1d0b345758a8ac">CLLogits1DMaxShiftExpSumKernel</a>
 </li>
@@ -385,6 +396,9 @@ $(document).ready(function(){initNavTree('functions_func_i.xhtml','');});
 , <a class="el" href="classarm__compute_1_1_n_e_fill_array_kernel.xhtml#a4370ae5fda7bd455a171fc8ed4d3f283">NEFillArrayKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_integral_image_kernel.xhtml#a4370ae5fda7bd455a171fc8ed4d3f283">NEIntegralImageKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_min_max_location_kernel.xhtml#a4370ae5fda7bd455a171fc8ed4d3f283">NEMinMaxLocationKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_input_kernel.xhtml#a4370ae5fda7bd455a171fc8ed4d3f283">NEWinogradLayerTransformInputKernel&lt; T, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;</a>
+, <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_output_kernel.xhtml#a4370ae5fda7bd455a171fc8ed4d3f283">NEWinogradLayerTransformOutputKernel&lt; T, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;</a>
+, <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel.xhtml#a4370ae5fda7bd455a171fc8ed4d3f283">NEWinogradLayerTransformWeightsKernel&lt; T, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;</a>
 </li>
 <li>is_required()
 : <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_option.xhtml#a56603b3aba78712e979f0989a4831457">Option</a>
@@ -413,7 +427,7 @@ $(document).ready(function(){initNavTree('functions_func_i.xhtml','');});
 : <a class="el" href="structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_1_1functions.xhtml#a49abe87ad33d2900c2255e4b79322207">functions</a>
 </li>
 <li>ISimpleLifetimeManager()
-: <a class="el" href="classarm__compute_1_1_i_simple_lifetime_manager.xhtml#aed5acf29c2c4f3815c0d7ea94d3e9795">ISimpleLifetimeManager</a>
+: <a class="el" href="classarm__compute_1_1_i_simple_lifetime_manager.xhtml#a011196c118f00760877e8113b6256148">ISimpleLifetimeManager</a>
 </li>
 <li>isless()
 : <a class="el" href="structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_1_1functions.xhtml#ac4dcad0e940cf826063ba1f6ea659c07">functions</a>
@@ -428,10 +442,10 @@ $(document).ready(function(){initNavTree('functions_func_i.xhtml','');});
 : <a class="el" href="structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_1_1functions.xhtml#a866dbf3e096ad4a487820a8945be3dfe">functions</a>
 </li>
 <li>ITensorAllocator()
-: <a class="el" href="classarm__compute_1_1_i_tensor_allocator.xhtml#af97d553d2aa86688c92db8ed9a67cf0e">ITensorAllocator</a>
+: <a class="el" href="classarm__compute_1_1_i_tensor_allocator.xhtml#ae82acbc677aa7d77c6a3f5e3547ef917">ITensorAllocator</a>
 </li>
 <li>Iterator()
-: <a class="el" href="classarm__compute_1_1_iterator.xhtml#a45381773d6cba2ad9e9d2d04515fa40b">Iterator</a>
+: <a class="el" href="classarm__compute_1_1_iterator.xhtml#a92d6469b972ef1e52b55b1ad7da70b02">Iterator</a>
 </li>
 <li>iterator()
 : <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_batch_normalization_layer_dataset_1_1iterator.xhtml#a7ea2bf1d7c7e46882560d5c6dc771747">BatchNormalizationLayerDataset::iterator</a>
@@ -449,12 +463,12 @@ $(document).ready(function(){initNavTree('functions_func_i.xhtml','');});
 , <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_r_o_i_pooling_layer_dataset_1_1iterator.xhtml#aed379ab5a5e14fcb24b87834339ad63b">ROIPoolingLayerDataset::iterator</a>
 , <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_scale_layer_dataset_1_1iterator.xhtml#a715dd4232d962e7a4cb36b48f433625c">ScaleLayerDataset::iterator</a>
 , <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_threshold_dataset_1_1iterator.xhtml#ac70db220aab7af772a9c31a50e4a8b2a">ThresholdDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_cartesian_product_dataset_1_1iterator.xhtml#acb3b5c956de1c36eb15a8fc1fa40a20b">CartesianProductDataset&lt; T, U &gt;::iterator</a>
+, <a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_cartesian_product_dataset_1_1iterator.xhtml#ae209542a19b7564587940c6606fa4181">CartesianProductDataset&lt; T, U &gt;::iterator</a>
 , <a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_container_dataset_1_1iterator.xhtml#a0ceb4c44b179fa8d4d0f465ad5ce54e8">ContainerDataset&lt; T &gt;::iterator</a>
 , <a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_initializer_list_dataset_1_1iterator.xhtml#aca6a8613ae6d8960ace1c8894676ed3c">InitializerListDataset&lt; T &gt;::iterator</a>
 , <a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset_1_1iterator.xhtml#a78cc7b5e65362760bcd99d070d163e94">JoinDataset&lt; T, U &gt;::iterator</a>
 , <a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_range_dataset_1_1iterator.xhtml#aa37b0870ac5c83d3181958225612be23">RangeDataset&lt; T &gt;::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_singleton_dataset_1_1iterator.xhtml#acb3b5c956de1c36eb15a8fc1fa40a20b">SingletonDataset&lt; T &gt;::iterator</a>
+, <a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_singleton_dataset_1_1iterator.xhtml#ae209542a19b7564587940c6606fa4181">SingletonDataset&lt; T &gt;::iterator</a>
 , <a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_zip_dataset_1_1iterator.xhtml#a81fdfd452825aa691b6f619ab4f4b349">ZipDataset&lt; T, U &gt;::iterator</a>
 </li>
 </ul>
@@ -463,7 +477,7 @@ $(document).ready(function(){initNavTree('functions_func_i.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:48 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:28 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -20,6 +20,6 @@ var searchData=
   ['true',['True',['../namespacecaffe__data__extractor.xhtml#a643a20c0c59588a0f741a6095e2025fd',1,'caffe_data_extractor.True()'],['../namespacetensorflow__data__extractor.xhtml#a643a20c0c59588a0f741a6095e2025fd',1,'tensorflow_data_extractor.True()']]],
   ['type',['type',['../namespacecaffe__data__extractor.xhtml#a7aead736a07eaf25623ad7bfa1f0ee2d',1,'caffe_data_extractor.type()'],['../namespacetensorflow__data__extractor.xhtml#a7aead736a07eaf25623ad7bfa1f0ee2d',1,'tensorflow_data_extractor.type()'],['../namespacemali__userspace.xhtml#ad44b615021ed3ccb734fcaf583ef4a03',1,'mali_userspace::type()']]],
   ['type_5fmax',['type_max',['../minmaxloc_8cl.xhtml#a4464d6f922ea17b4a9ca6a2cec7ddb75',1,'minmaxloc.cl']]],
-  ['type_5fmin',['type_min',['../minmaxloc_8cl.xhtml#a538b4b63f40e7b12891774e03a4f0dec',1,'type_min():&#160;minmaxloc.cl'],['../softmax__layer_8cl.xhtml#a538b4b63f40e7b12891774e03a4f0dec',1,'type_min():&#160;softmax_layer.cl'],['../softmax__layer__quantized_8cl.xhtml#a4701bcd6d0c0472d7d3e8017a24f2be6',1,'type_min():&#160;softmax_layer_quantized.cl']]],
+  ['type_5fmin',['type_min',['../minmaxloc_8cl.xhtml#a538b4b63f40e7b12891774e03a4f0dec',1,'type_min():&#160;minmaxloc.cl'],['../softmax__layer_8cl.xhtml#a538b4b63f40e7b12891774e03a4f0dec',1,'type_min():&#160;softmax_layer.cl']]],
   ['type_5fmin_5f',['type_min_',['../softmax__layer_8cl.xhtml#af7a08044d0e491a0ee1520a24a107a2b',1,'softmax_layer.cl']]]
 ];

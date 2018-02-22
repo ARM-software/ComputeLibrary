@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,8 +46,9 @@ public:
         std::string  data_path;   /** Path to the trainable data */
         unsigned int batches = 4; /** Number of batches */
 
-        // Set target. 0 (NEON), 1 (OpenCL). By default it is NEON
-        TargetHint target_hint = set_target_hint(argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0);
+        // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
+        const int  int_target_hint = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
+        TargetHint target_hint     = set_target_hint(int_target_hint);
 
         // Parse arguments
         if(argc < 2)
@@ -100,7 +101,10 @@ public:
                   get_weights_accessor(data_path, "/cnn_data/lenet_model/ip2_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/lenet_model/ip2_b.npy"))
               << SoftmaxLayer()
-              << Tensor(DummyAccessor());
+              << Tensor(DummyAccessor(0));
+
+        // In order to enable the OpenCL tuner, graph_init() has to be called only when all nodes have been instantiated
+        graph.graph_init(int_target_hint == 2);
     }
     void do_run() override
     {

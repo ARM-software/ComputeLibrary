@@ -12,7 +12,7 @@ var searchData=
   ['max_5fthread_5fgroup_5fsplit',['max_thread_group_split',['../structmali__userspace_1_1mali__base__gpu__thread__props.xhtml#a828689db84137183c4de480f57545dda',1,'mali_userspace::mali_base_gpu_thread_props']]],
   ['max_5fthreads',['max_threads',['../structmali__userspace_1_1mali__base__gpu__thread__props.xhtml#a74a3cfba2d330c3dd81a66dd96319b40',1,'mali_userspace::mali_base_gpu_thread_props']]],
   ['max_5fworkgroup_5fsize',['max_workgroup_size',['../structmali__userspace_1_1mali__base__gpu__thread__props.xhtml#a1007b008fc65c152a21e0da8741dd369',1,'mali_userspace::mali_base_gpu_thread_props']]],
-  ['measurements',['measurements',['../structarm__compute_1_1test_1_1framework_1_1_test_result.xhtml#a148bf915f9e0545fc2666ee2a777f563',1,'arm_compute::test::framework::TestResult']]],
+  ['measurements',['measurements',['../structarm__compute_1_1test_1_1framework_1_1_scheduler_timer_1_1kernel__info.xhtml#a5f061b503cb1681c0b047c04d645e24e',1,'arm_compute::test::framework::SchedulerTimer::kernel_info::measurements()'],['../structarm__compute_1_1test_1_1framework_1_1_test_result.xhtml#a148bf915f9e0545fc2666ee2a777f563',1,'arm_compute::test::framework::TestResult::measurements()']]],
   ['mem_5ffeatures',['mem_features',['../structmali__userspace_1_1gpu__raw__gpu__props.xhtml#a7645072a122013ef5bb935199fc2d2f3',1,'mali_userspace::gpu_raw_gpu_props']]],
   ['min',['min',['../structarm__compute_1_1_min_max_location_values.xhtml#a21e09e76b74538cd95089523f48468b0',1,'arm_compute::MinMaxLocationValues']]],
   ['min_5fdist',['min_dist',['../structarm__compute_1_1test_1_1validation_1_1_harris_corners_parameters.xhtml#aa464047f090200f942a1e47c29fff783',1,'arm_compute::test::validation::HarrisCornersParameters']]],

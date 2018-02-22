@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,8 +25,10 @@
 #define __ARM_COMPUTE_GCDEPTHWISECONVOLUTION_H__
 
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCDepthwiseConvolutionLayer3x3Kernel.h"
+#include "arm_compute/core/GLES_COMPUTE/kernels/GCFillBorderKernel.h"
+#include "arm_compute/core/GLES_COMPUTE/kernels/GCTensorShiftKernel.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/GLES_COMPUTE/IGCSimpleFunction.h"
+#include "arm_compute/runtime/IFunction.h"
 
 namespace arm_compute
 {
@@ -38,9 +40,11 @@ class IGCTensor;
  * -# @ref GCFillBorderKernel (if pad_x or pad_y > 0)
  *
  */
-class GCDepthwiseConvolutionLayer3x3 : public IGCSimpleFunction
+class GCDepthwiseConvolutionLayer3x3 : public IFunction
 {
 public:
+    /** Default constructor */
+    GCDepthwiseConvolutionLayer3x3();
     /** Initialize the function's source, destination, conv and border_size.
      *
      * @param[in, out] input     Source tensor. Data type supported: F16. (Written to only for border filling).
@@ -51,6 +55,14 @@ public:
      * @param[in]      conv_info Padding and stride information to use for the convolution.
      */
     void configure(IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, const PadStrideInfo &conv_info);
+
+    // Inherited methods overridden:
+    void run() override final;
+
+private:
+    std::unique_ptr<IGCKernel> _kernel;
+    GCFillBorderKernel         _border_handler;
+    GCTensorShiftKernel        _shift_handler;
 };
 }
 #endif /*__ARM_COMPUTE_GCDEPTHWISECONVOLUTION_H__ */

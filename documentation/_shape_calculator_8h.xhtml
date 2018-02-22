@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.01</span>
+   &#160;<span id="projectnumber">18.02</span>
    </div>
   </td>
  </tr>
@@ -120,7 +120,8 @@ $(document).ready(function(){initNavTree('_shape_calculator_8h.xhtml','');});
 <div class="title">ShapeCalculator.h File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="_i_tensor_info_8h_source.xhtml">arm_compute/core/ITensorInfo.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="arm__compute_2core_2_helpers_8h_source.xhtml">arm_compute/core/Helpers.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_i_tensor_info_8h_source.xhtml">arm_compute/core/ITensorInfo.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="arm__compute_2core_2_utils_8h_source.xhtml">arm_compute/core/Utils.h</a>&quot;</code><br />
 </div>
 <p><a href="_shape_calculator_8h_source.xhtml">Go to the source code of this file.</a></p>
@@ -139,24 +140,34 @@ Namespaces</h2></td></tr>
 Functions</h2></td></tr>
 <tr class="memitem:a593fb7ecc281425b190cd6f20164b1a3"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a593fb7ecc281425b190cd6f20164b1a3">compute_permutation_output_shape</a> (const ITensorInfo &amp;input, const PermutationVector &amp;perm)</td></tr>
 <tr class="separator:a593fb7ecc281425b190cd6f20164b1a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4bf459b95015d89d6fccb22c15f3b4f5"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a4bf459b95015d89d6fccb22c15f3b4f5">compute_interleaved_shape</a> (const ITensorInfo &amp;a)</td></tr>
-<tr class="separator:a4bf459b95015d89d6fccb22c15f3b4f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c26be6728535f0d86399791dee71132"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a3c26be6728535f0d86399791dee71132">compute_weights_reshaped_shape</a> (const ITensorInfo &amp;weights, bool has_bias=false)</td></tr>
+<tr class="separator:a3c26be6728535f0d86399791dee71132"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abda73d5a6ce1a003535523fc1111c1c2"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#abda73d5a6ce1a003535523fc1111c1c2">compute_interleaved_shape</a> (const ITensorInfo &amp;a, int mult_interleave4x4_height=1)</td></tr>
+<tr class="separator:abda73d5a6ce1a003535523fc1111c1c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a70a2ef9fd754b5798a0a92656f8b5fcf"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a70a2ef9fd754b5798a0a92656f8b5fcf">compute_transpose1xW_shape</a> (const ITensorInfo &amp;b)</td></tr>
 <tr class="separator:a70a2ef9fd754b5798a0a92656f8b5fcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a68eacb752d795a850ba6bfe7b226f29c"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a68eacb752d795a850ba6bfe7b226f29c">compute_transpose1xW_with_element_size_shape</a> (const ITensorInfo &amp;b)</td></tr>
-<tr class="separator:a68eacb752d795a850ba6bfe7b226f29c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5797726a8fbee3b11b92757c2f0031d6"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a5797726a8fbee3b11b92757c2f0031d6">compute_transpose1xW_with_element_size_shape</a> (const ITensorInfo &amp;b, int mult_transpose1xW_width=1)</td></tr>
+<tr class="separator:a5797726a8fbee3b11b92757c2f0031d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a60ce6c017f70d978b48b101ce314969e"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a60ce6c017f70d978b48b101ce314969e">compute_reductionA_shape</a> (const ITensorInfo &amp;b)</td></tr>
 <tr class="separator:a60ce6c017f70d978b48b101ce314969e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a69f9b3191aafc4905f9d029ff9d48fea"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a69f9b3191aafc4905f9d029ff9d48fea">compute_reductionB_shape</a> (const ITensorInfo &amp;a)</td></tr>
 <tr class="separator:a69f9b3191aafc4905f9d029ff9d48fea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a198e3937aafccfdf3cb6327a87fc1aec"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a198e3937aafccfdf3cb6327a87fc1aec">compute_im2col_shape</a> (const ITensorInfo &amp;input)</td></tr>
 <tr class="separator:a198e3937aafccfdf3cb6327a87fc1aec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a560bd8b86a795d8db099ddddaa6df41b"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a560bd8b86a795d8db099ddddaa6df41b">compute_col2im_shape</a> (const ITensorInfo &amp;input, std::pair&lt; unsigned int, unsigned int &gt; convolved_dims)</td></tr>
+<tr class="separator:a560bd8b86a795d8db099ddddaa6df41b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a69cb11b5b37f94a6bea9eaad9d13cccf"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a69cb11b5b37f94a6bea9eaad9d13cccf">compute_transposed_shape</a> (const ITensorInfo &amp;input)</td></tr>
 <tr class="separator:a69cb11b5b37f94a6bea9eaad9d13cccf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8cf251400728a619fd1026788988da34"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a8cf251400728a619fd1026788988da34">compute_depthwise_convolution_shape</a> (const ITensorInfo &amp;input, const ITensorInfo &amp;weights, PadStrideInfo conv_info)</td></tr>
 <tr class="separator:a8cf251400728a619fd1026788988da34"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa05837651dbee5634edf3da2cb8532c9"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#aa05837651dbee5634edf3da2cb8532c9">compute_deconvolution_shape</a> (const ITensorInfo &amp;input, unsigned int sx, unsigned int sy, unsigned int inner_border_right, unsigned int inner_border_top, const PadStrideInfo &amp;info)</td></tr>
 <tr class="separator:aa05837651dbee5634edf3da2cb8532c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7585cd5e5c5b7f1146760396ce7fa540"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a7585cd5e5c5b7f1146760396ce7fa540">compute_im2col_shape</a> (const ITensorInfo *input, const int num_input_dimensions=3)</td></tr>
+<tr class="separator:a7585cd5e5c5b7f1146760396ce7fa540"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac18940223de1db7f6ed6c49119be7cd8"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#ac18940223de1db7f6ed6c49119be7cd8">compute_interleave_custom_shape</a> (const TensorShape &amp;input, const int x_interleave, const int y_interleave)</td></tr>
+<tr class="separator:ac18940223de1db7f6ed6c49119be7cd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a734391819bbd2b0fa8400c06b7956d9e"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1misc_1_1shape__calculator.xhtml#a734391819bbd2b0fa8400c06b7956d9e">compute_fully_connected_reshaped_weights_shape</a> (const ITensorInfo *input, bool transpose_weights, bool is_batched_fc_layer, const int interleave)</td></tr>
+<tr class="separator:a734391819bbd2b0fa8400c06b7956d9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -164,7 +175,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_7b0825b7536eda12b63e5d87347b1c7d.xhtml">utils</a></li><li class="navelem"><a class="el" href="dir_cab437ca4f6ec1fbc573ae83f91b2654.xhtml">misc</a></li><li class="navelem"><a class="el" href="_shape_calculator_8h.xhtml">ShapeCalculator.h</a></li>
-    <li class="footer">Generated on Wed Jan 24 2018 14:30:42 for Compute Library by
+    <li class="footer">Generated on Thu Feb 22 2018 15:45:21 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

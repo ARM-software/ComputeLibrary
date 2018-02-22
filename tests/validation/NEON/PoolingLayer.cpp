@@ -27,6 +27,7 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/PaddingCalculator.h"
+#include "tests/datasets/PoolingLayerDataset.h"
 #include "tests/datasets/PoolingTypesDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
 #include "tests/framework/Asserts.h"
@@ -44,17 +45,19 @@ namespace validation
 namespace
 {
 /** Input data set for float data types */
-const auto PoolingLayerDatasetFP = combine(combine(combine(datasets::PoolingTypes(), framework::dataset::make("PoolingSize", { 2, 3, 7, 9 })),
+
+const auto PoolingLayerDatasetFP = combine(combine(combine(datasets::PoolingTypes(), framework::dataset::make("PoolingSize", { Size2D(2, 2), Size2D(3, 3), Size2D(7, 7), Size2D(9, 9), Size2D(4, 4), Size2D(3, 7), Size2D(7, 8) })),
                                                    framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) })),
                                            framework::dataset::make("ExcludePadding", { true, false }));
 
 /** Input data set for quantized data types */
-const auto PoolingLayerDatasetQS = combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }), framework::dataset::make("PoolingSize", { 2, 3 })),
+const auto PoolingLayerDatasetQS = combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }), framework::dataset::make("PoolingSize", { Size2D(2, 2), Size2D(3, 3) })),
                                                    framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) })),
                                            framework::dataset::make("ExcludePadding", { false }));
 
 /** Input data set for asymmetric data type */
-const auto PoolingLayerDatasetQASYMM8 = combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }), framework::dataset::make("PoolingSize", { 2, 3, 9 })),
+
+const auto PoolingLayerDatasetQASYMM8 = combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }), framework::dataset::make("PoolingSize", { Size2D(2, 2), Size2D(3, 3), Size2D(4, 4), Size2D(9, 9), Size2D(3, 7), Size2D(7, 8) })),
                                                         framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) })),
                                                 framework::dataset::make("ExcludePadding", { true, false }));
 
@@ -103,7 +106,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                             PoolingLayerInfo(PoolingType::MAX),
                                             PoolingLayerInfo(PoolingType::AVG),
                                            })),
-    framework::dataset::make("Expected", { false, false, false, false, false, false, false, false, false, true })),
+    framework::dataset::make("Expected", { false, false, false, false, false, false, true, false, false, true })),
     input_info, output_info, pool_info, expected)
 {
     bool is_valid = bool(NEPoolingLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), pool_info));
@@ -115,8 +118,16 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 template <typename T>
 using NEPoolingLayerFixture = PoolingLayerValidationFixture<Tensor, Accessor, NEPoolingLayer, T>;
 
+template <typename T>
+using NESpecialPoolingLayerFixture = SpecialPoolingLayerValidationFixture<Tensor, Accessor, NEPoolingLayer, T>;
+
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
+FIXTURE_DATA_TEST_CASE(RunSpecial, NESpecialPoolingLayerFixture<float>, framework::DatasetMode::ALL, datasets::PoolingLayerDatasetSpecial() * framework::dataset::make("DataType", DataType::F32))
+{
+    // Validate output
+    validate(Accessor(_target), _reference, tolerance_f32);
+}
 FIXTURE_DATA_TEST_CASE(RunSmall, NEPoolingLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), combine(PoolingLayerDatasetFP, framework::dataset::make("DataType",
                                                                                                     DataType::F32))))
 {
@@ -154,14 +165,14 @@ using NEPoolingLayerFixedPointFixture = PoolingLayerValidationFixedPointFixture<
 
 TEST_SUITE(FixedPoint)
 TEST_SUITE(QS8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEPoolingLayerFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetQS,
-                                                                                                                       framework::dataset::make("DataType", DataType::QS8))),
-                                                                                                               framework::dataset::make("FractionalBits", 1, 5)))
+FIXTURE_DATA_TEST_CASE(RunTiny, NEPoolingLayerFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapes(), combine(PoolingLayerDatasetQS,
+                                                                                                                      framework::dataset::make("DataType", DataType::QS8))),
+                                                                                                              framework::dataset::make("FractionalBits", 1, 5)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qs8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEPoolingLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), combine(PoolingLayerDatasetQS,
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPoolingLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetQS,
                                                                                                                    framework::dataset::make("DataType", DataType::QS8))),
                                                                                                                    framework::dataset::make("FractionalBits", 1, 5)))
 {
@@ -171,14 +182,14 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEPoolingLayerFixedPointFixture<int8_t>, framew
 TEST_SUITE_END()
 
 TEST_SUITE(QS16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEPoolingLayerFixedPointFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetQS,
-                                                                                                                        framework::dataset::make("DataType", DataType::QS16))),
-                                                                                                                framework::dataset::make("FractionalBits", 1, 13)))
+FIXTURE_DATA_TEST_CASE(RunTiny, NEPoolingLayerFixedPointFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapes(), combine(PoolingLayerDatasetQS,
+                                                                                                                       framework::dataset::make("DataType", DataType::QS16))),
+                                                                                                               framework::dataset::make("FractionalBits", 1, 13)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qs16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEPoolingLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), combine(PoolingLayerDatasetQS,
+FIXTURE_DATA_TEST_CASE(RunSmall, NEPoolingLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetQS,
                                                                                                                     framework::dataset::make("DataType", DataType::QS16))),
                                                                                                                     framework::dataset::make("FractionalBits", 1, 13)))
 {

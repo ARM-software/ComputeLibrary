@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -117,19 +117,16 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     TensorShape output_shape = get_output_shape(input->tensor_shape(), weights->tensor_shape(), conv_info);
 
     // Output auto inizialitation if not yet initialized
-    //input->clone()->set_tensor_shape(output_shape) doesn't work with subtensors for grouped direct convolutions (AlexNet).
     auto_init_if_empty(*output, output_shape,
                        1,
                        input->data_type(),
                        input->fixed_point_position(),
                        input->quantization_info());
 
-    unsigned int conv_stride_x   = std::get<0>(conv_info.stride());
-    unsigned int conv_stride_y   = std::get<1>(conv_info.stride());
-    unsigned int conv_pad_left   = std::max(conv_info.pad_left(), kernel_size / 2);
-    unsigned int conv_pad_top    = std::max(conv_info.pad_top(), kernel_size / 2);
-    unsigned int conv_pad_right  = std::max(conv_info.pad_right(), kernel_size / 2);
-    unsigned int conv_pad_bottom = std::max(conv_info.pad_bottom(), kernel_size / 2);
+    unsigned int conv_stride_x = std::get<0>(conv_info.stride());
+    unsigned int conv_stride_y = std::get<1>(conv_info.stride());
+    unsigned int conv_pad_left = conv_info.pad_left();
+    unsigned int conv_pad_top  = conv_info.pad_top();
 
     unsigned int num_elems_read_per_iteration_x    = 0;
     unsigned int num_elems_read_per_iteration_y    = 0;
@@ -239,19 +236,13 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
         }
     }
 
-    // Calculate right and bottom border
-    int input_width  = input->dimension(0) + conv_pad_left + conv_pad_right;
-    int input_height = input->dimension(1) + conv_pad_top + conv_pad_bottom;
-
-    // Add padding only if necessary or it would always result in a window_changed
-    input_width  = ceil_to_multiple(input_width, num_elems_read_per_iteration_x);
-    input_height = ceil_to_multiple(input_height, num_elems_read_per_iteration_y);
-
     // Create window and update padding
     bool   window_changed = false;
     Window win            = calculate_max_window(*output, Steps(num_elems_written_per_iteration_x, num_elems_written_per_iteration_y));
 
-    AccessWindowStatic    input_access(input, -conv_pad_left, -conv_pad_top, input_width, input_height);
+    AccessWindowRectangle input_access(input, -conv_pad_left, -conv_pad_top,
+                                       num_elems_read_per_iteration_x, num_elems_read_per_iteration_y,
+                                       conv_stride_x, conv_stride_y);
     AccessWindowStatic    weights_access(weights, 0, 0, kernel_size, kernel_size);
     AccessWindowRectangle output_access(output, 0, 0, num_elems_written_per_iteration_x, num_elems_written_per_iteration_y);
 
@@ -285,7 +276,6 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     TensorShape output_shape = get_output_shape(input->info()->tensor_shape(), weights->info()->tensor_shape(), conv_info);
 
     // Output auto inizialitation if not yet initialized
-    //input->clone()->set_tensor_shape(output_shape) doesn't work with subtensors for grouped direct convolutions (AlexNet).
     auto_init_if_empty(*output->info(),
                        output_shape,
                        1,
@@ -302,17 +292,12 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
 
     _conv_stride_x = std::get<0>(conv_info.stride());
     _conv_stride_y = std::get<1>(conv_info.stride());
+    _border_size   = BorderSize(conv_info.pad_top(), conv_info.pad_right(), conv_info.pad_bottom(), conv_info.pad_left());
 
     _input   = input;
     _weights = weights;
     _output  = output;
     _biases  = biases;
-
-    int conv_pad_left   = std::min(conv_info.pad_left(), kernel_size / 2);
-    int conv_pad_top    = std::min(conv_info.pad_top(), kernel_size / 2);
-    int conv_pad_right  = std::min(conv_info.pad_right(), kernel_size / 2);
-    int conv_pad_bottom = std::min(conv_info.pad_bottom(), kernel_size / 2);
-    _border_size        = BorderSize(conv_pad_top, conv_pad_right, conv_pad_bottom, conv_pad_left);
 
     const GPUTarget gpu_target = get_arch_from_target(get_target());
 
@@ -450,13 +435,13 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     _config_id += "_";
     _config_id += support::cpp11::to_string(kernel_size);
     _config_id += "_";
-    _config_id += support::cpp11::to_string(conv_pad_left);
+    _config_id += support::cpp11::to_string(border_size().left);
     _config_id += "_";
-    _config_id += support::cpp11::to_string(conv_pad_top);
+    _config_id += support::cpp11::to_string(border_size().top);
     _config_id += "_";
-    _config_id += support::cpp11::to_string(conv_pad_right);
+    _config_id += support::cpp11::to_string(border_size().right);
     _config_id += "_";
-    _config_id += support::cpp11::to_string(conv_pad_bottom);
+    _config_id += support::cpp11::to_string(border_size().bottom);
     _config_id += "_";
     _config_id += support::cpp11::to_string(_conv_stride_x);
     _config_id += "_";

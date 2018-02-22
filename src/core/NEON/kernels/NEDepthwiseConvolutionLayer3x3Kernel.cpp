@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/NEON/kernels/NEDepthwiseConvolutionLayer3x3Kernel.h"
-#include "arm_compute/core/NEON/kernels/convolution/NEDirectConvolutionDetail.h"
+#include "arm_compute/core/NEON/kernels/detail/NEDirectConvolutionDetail.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/AccessWindowTranspose.h"
@@ -34,13 +34,16 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 using namespace arm_compute::detail;
 using namespace arm_compute::misc::shape_calculator;
+using namespace depthwise;
 
 namespace
 {
@@ -143,7 +146,7 @@ inline void convolve_3x3(const Window &window, unsigned int num_elems_written_pe
 } // namespace
 
 NEDepthwiseConvolutionLayer3x3Kernel::NEDepthwiseConvolutionLayer3x3Kernel()
-    : _border_size(0), _input(), _output(), _weights(), _conv_info(), _num_elems_written_per_iteration(0)
+    : _border_size(0), _input(), _output(), _weights(), _conv_info(), _convolver(nullptr), _num_elems_written_per_iteration(0), _run_optimized(false)
 {
 }
 
@@ -152,35 +155,99 @@ BorderSize NEDepthwiseConvolutionLayer3x3Kernel::border_size() const
     return _border_size;
 }
 
-void NEDepthwiseConvolutionLayer3x3Kernel::configure(const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info)
+void NEDepthwiseConvolutionLayer3x3Kernel::configure(const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info, DataLayout data_layout)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
-    ARM_COMPUTE_ERROR_ON(weights->info()->dimension(0) != 3 || weights->info()->dimension(1) != 3);
+
+    _input     = input;
+    _output    = output;
+    _weights   = weights;
+    _conv_info = conv_info;
+    _convolver = nullptr;
+
+    _run_optimized = NEDepthwiseConvolutionLayer3x3Kernel::is_optimized_execution_possible(input->info()->tensor_shape(),
+                                                                                           conv_info,
+                                                                                           input->info()->data_type(),
+                                                                                           data_layout);
+
+    (_run_optimized) ? configure_optimized() : configure_generic();
+}
+
+void NEDepthwiseConvolutionLayer3x3Kernel::run(const Window &window, const ThreadInfo &info)
+{
+    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
+    ARM_COMPUTE_UNUSED(info);
+
+    (_run_optimized) ? run_optimized(window, info) : run_generic(window, info);
+}
+
+bool NEDepthwiseConvolutionLayer3x3Kernel::is_optimized_execution_possible(TensorShape input_shape, PadStrideInfo conv_info, DataType dt, DataLayout data_layout)
+{
+    // Reshape input shape if in NHWC format
+    TensorShape in_shape{ input_shape };
+    if(data_layout == DataLayout::NHWC)
+    {
+        in_shape.set(Window::DimX, input_shape.y());
+        in_shape.set(Window::DimY, input_shape.z());
+        in_shape.set(Window::DimZ, input_shape.x());
+    }
+
+    // Check supported data type
+    bool supported_datatype = (dt == DataType::F32);
+
+    // Check for supported strides
+    const auto &strides           = conv_info.stride();
+    bool        supported_strides = (strides.first == strides.second) && ((strides.first == 1) || (strides.first == 2));
+
+    // Check for supported padding
+    const auto    pad_top           = conv_info.pad_top();
+    const auto    pad_right         = conv_info.pad_right();
+    const auto    pad_bottom        = conv_info.pad_bottom();
+    const auto    pad_left          = conv_info.pad_left();
+    PadStrideInfo same_pad          = calculate_same_pad(in_shape, TensorShape(3U, 3U), conv_info);
+    bool          is_same_padding   = (pad_top == same_pad.pad_top()) && (pad_right == same_pad.pad_right()) && (pad_bottom == same_pad.pad_bottom()) && (pad_left == same_pad.pad_left());
+    bool          is_valid_padding  = (pad_top == 0) && (pad_right == 0) && (pad_bottom == 0) && (pad_left == 0);
+    bool          supported_padding = is_same_padding || is_valid_padding;
+
+    return supported_datatype && supported_strides && supported_padding;
+}
+
+void NEDepthwiseConvolutionLayer3x3Kernel::generate_convolver()
+{
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(_input, 1, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(_input, _weights);
+    ARM_COMPUTE_ERROR_ON(_weights->info()->dimension(1) != 3 || _weights->info()->dimension(2) != 3);
+
+    _convolver = create_convolver_object(_input->info()->tensor_shape(), _conv_info,
+                                         _weights->buffer(), _input->buffer(), _output->buffer());
+}
+
+void NEDepthwiseConvolutionLayer3x3Kernel::configure_generic()
+{
+    ARM_COMPUTE_ERROR_ON(_weights->info()->dimension(0) != 3 || _weights->info()->dimension(1) != 3);
 
     // Get convolved dimensions
-    const TensorShape output_shape = compute_depthwise_convolution_shape(*input->info(), *weights->info(), conv_info);
-    const DataType    output_dt    = (input->info()->data_type() == DataType::QASYMM8) ? DataType::S32 : input->info()->data_type();
+    const TensorShape output_shape = compute_depthwise_convolution_shape(*_input->info(), *_weights->info(), _conv_info);
+    const DataType    output_dt    = (_input->info()->data_type() == DataType::QASYMM8) ? DataType::S32 : _input->info()->data_type();
 
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(),
-                       input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape).set_data_type(output_dt));
+    auto_init_if_empty(*_output->info(),
+                       _input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape).set_data_type(output_dt));
 
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(_output->info()->tensor_shape(), output_shape);
 
-    _input                           = input;
-    _output                          = output;
-    _weights                         = weights;
-    _conv_info                       = conv_info;
-    const unsigned int conv_stride_x = conv_info.stride().first;
-    const unsigned int conv_stride_y = conv_info.stride().second;
-    const unsigned int conv_pad_left = conv_info.pad_left();
-    const unsigned int conv_pad_top  = conv_info.pad_top();
+    const unsigned int conv_stride_x   = _conv_info.stride().first;
+    const unsigned int conv_stride_y   = _conv_info.stride().second;
+    const unsigned int conv_pad_top    = _conv_info.pad_top();
+    const unsigned int conv_pad_right  = _conv_info.pad_right();
+    const unsigned int conv_pad_bottom = _conv_info.pad_bottom();
+    const unsigned int conv_pad_left   = _conv_info.pad_left();
 
     ARM_COMPUTE_ERROR_ON(conv_stride_x < 1 || conv_stride_x > 3);
 
     unsigned int num_elems_read_per_iteration = 0;
-    switch(input->info()->data_type())
+    switch(_input->info()->data_type())
     {
         case DataType::QASYMM8:
             num_elems_read_per_iteration     = 16;
@@ -193,31 +260,51 @@ void NEDepthwiseConvolutionLayer3x3Kernel::configure(const ITensor *input, const
         default:
             ARM_COMPUTE_ERROR("Data type not supported.");
     }
-    _border_size = BorderSize(conv_pad_top, conv_info.pad_right(), conv_info.pad_bottom(), conv_pad_left);
+    _border_size = BorderSize(conv_pad_top, conv_pad_right, conv_pad_bottom, conv_pad_left);
 
     // Configure kernel window
-    Window win = calculate_max_window(*output->info(), Steps(_num_elems_written_per_iteration));
+    Window win = calculate_max_window(*_output->info(), Steps(_num_elems_written_per_iteration));
 
-    const unsigned int num_x_steps               = (output_shape.x() + _num_elems_written_per_iteration - 1) / _num_elems_written_per_iteration;
-    const int          input_num_elems_processed = get_input_num_elems_processed(_num_elems_written_per_iteration, conv_stride_x);
-
-    AccessWindowStatic input_access(input->info(),
-                                    -conv_pad_left,
-                                    -conv_pad_top,
-                                    (num_x_steps - 1) * input_num_elems_processed + num_elems_read_per_iteration,
-                                    conv_stride_y * (output_shape.y() - 1) + 2);
-    AccessWindowStatic weights_access(weights->info(), 0, 0, weights->info()->dimension(0), weights->info()->dimension(1));
-    AccessWindowStatic output_access(output->info(), 0, 0, num_x_steps * _num_elems_written_per_iteration, output_shape.y());
+    AccessWindowRectangle input_access(_input->info(), -conv_pad_left, -conv_pad_top,
+                                       num_elems_read_per_iteration, 3,
+                                       conv_stride_x, conv_stride_y);
+    AccessWindowStatic     weights_access(_weights->info(), 0, 0, 3, 3);
+    AccessWindowHorizontal output_access(_output->info(), 0, _num_elems_written_per_iteration);
 
     update_window_and_padding(win, input_access, weights_access, output_access);
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
+    output_access.set_valid_region(win, ValidRegion(Coordinates(), _output->info()->tensor_shape()));
 
     INEKernel::configure(win);
 }
 
-void NEDepthwiseConvolutionLayer3x3Kernel::run(const Window &window, const ThreadInfo &info)
+void NEDepthwiseConvolutionLayer3x3Kernel::configure_optimized()
 {
-    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
+    ARM_COMPUTE_ERROR_ON(_weights->info()->dimension(1) != 3 || _weights->info()->dimension(2) != 3);
+
+    _border_size = BorderSize(0, 0);
+    _convolver   = create_convolver_object(_input->info()->tensor_shape(), _conv_info,
+                                           _weights->buffer(), _input->buffer(), _output->buffer());
+
+    // Auto-configure output
+    bool        same_padding = _conv_info.has_padding();
+    TensorShape output_shape{ _input->info()->tensor_shape() };
+
+    output_shape.set(1, _convolver->output_size(output_shape.y(), same_padding)); // Set width
+    output_shape.set(2, _convolver->output_size(output_shape.z(), same_padding)); // Set height
+
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*_output->info(),
+                       _input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape));
+
+    // Configure window
+    Window win;
+    auto   win_last = _convolver->get_window();
+    win.set(Window::DimX, Window::Dimension(0, win_last, 1));
+    INEKernel::configure(win);
+}
+
+void NEDepthwiseConvolutionLayer3x3Kernel::run_generic(const Window &window, const ThreadInfo &info)
+{
     ARM_COMPUTE_UNUSED(info);
 
     switch(_input->info()->data_type())
@@ -230,5 +317,55 @@ void NEDepthwiseConvolutionLayer3x3Kernel::run(const Window &window, const Threa
             break;
         default:
             ARM_COMPUTE_ERROR("Not implemented");
+    }
+}
+
+void NEDepthwiseConvolutionLayer3x3Kernel::run_optimized(const Window &window, const ThreadInfo &info)
+{
+    ARM_COMPUTE_UNUSED(info);
+    ARM_COMPUTE_ERROR_ON(!_convolver);
+
+    const size_t start = window.x().start();
+    const size_t end   = window.x().end();
+    _convolver->run(start, end);
+}
+
+std::unique_ptr<depthwise::IDepthwiseConvolution> NEDepthwiseConvolutionLayer3x3Kernel::create_convolver_object(TensorShape    shape,
+                                                                                                                PadStrideInfo  conv_info,
+                                                                                                                const uint8_t *w_ptr,
+                                                                                                                uint8_t       *in_ptr,
+                                                                                                                uint8_t       *out_ptr)
+{
+    const int  in_rows      = shape.z();
+    const int  in_cols      = shape.y();
+    const int  n_batches    = shape[3];
+    const int  n_channels   = shape.x();
+    const bool padding_same = conv_info.has_padding();
+
+    const auto stride_x = conv_info.stride().first;
+    switch(stride_x)
+    {
+        case 1:
+            return arm_compute::support::cpp14::make_unique<DepthwiseConvolution<2, 2, 3, 3, 1, 1, float, float>>(
+                       n_batches,
+                       in_rows,
+                       in_cols,
+                       n_channels,
+                       padding_same,
+                       reinterpret_cast<const float *>(w_ptr),
+                       reinterpret_cast<float *>(in_ptr),
+                       reinterpret_cast<float *>(out_ptr));
+        case 2:
+            return arm_compute::support::cpp14::make_unique<DepthwiseConvolution<2, 2, 3, 3, 2, 2, float, float>>(
+                       n_batches,
+                       in_rows,
+                       in_cols,
+                       n_channels,
+                       padding_same,
+                       reinterpret_cast<const float *>(w_ptr),
+                       reinterpret_cast<float *>(in_ptr),
+                       reinterpret_cast<float *>(out_ptr));
+        default:
+            return nullptr;
     }
 }

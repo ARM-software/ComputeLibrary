@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,14 +37,15 @@ namespace reference
 {
 namespace
 {
-TensorShape calculate_output_shape(TensorShape shape, PoolingLayerInfo info)
+TensorShape calculate_output_shape(TensorShape shape, const PoolingLayerInfo &info)
 {
-    TensorShape dst_shape = shape;
-    const int   pool_size = info.is_global_pooling() ? shape.x() : info.pool_size();
+    TensorShape dst_shape   = shape;
+    const int   pool_size_x = info.is_global_pooling() ? shape.x() : info.pool_size().width;
+    const int   pool_size_y = info.is_global_pooling() ? shape.y() : info.pool_size().height;
     const std::pair<unsigned int, unsigned int> scaled_dims = arm_compute::scaled_dimensions(shape.x(),
                                                                                              shape.y(),
-                                                                                             pool_size,
-                                                                                             pool_size,
+                                                                                             pool_size_x,
+                                                                                             pool_size_y,
                                                                                              info.pad_stride_info());
     dst_shape.set(0, scaled_dims.first);
     dst_shape.set(1, scaled_dims.second);
@@ -54,16 +55,19 @@ TensorShape calculate_output_shape(TensorShape shape, PoolingLayerInfo info)
 } // namespace
 
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
-SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info)
+SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, const PoolingLayerInfo &info)
 {
     ARM_COMPUTE_ERROR_ON(info.is_global_pooling() && (src.shape().x() != src.shape().y()));
 
-    const int   pool_size       = info.is_global_pooling() ? src.shape().x() : info.pool_size();
+    const int   pool_size_x     = info.is_global_pooling() ? src.shape().x() : info.pool_size().width;
+    const int   pool_size_y     = info.is_global_pooling() ? src.shape().y() : info.pool_size().height;
     PoolingType type            = info.pool_type();
     int         pool_stride_x   = info.pad_stride_info().stride().first;
     int         pool_stride_y   = info.pad_stride_info().stride().second;
-    int         pad_x           = info.pad_stride_info().pad().first;
-    int         pad_y           = info.pad_stride_info().pad().second;
+    int         pad_left        = info.pad_stride_info().pad_left();
+    int         pad_top         = info.pad_stride_info().pad_top();
+    int         pad_right       = info.pad_stride_info().pad_right();
+    int         pad_bottom      = info.pad_stride_info().pad_bottom();
     bool        exclude_padding = info.exclude_padding();
 
     const auto w_src      = static_cast<int>(src.shape()[0]);
@@ -84,10 +88,10 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info)
             {
                 for(int w = 0; w < w_dst; ++w)
                 {
-                    int wstart = w * pool_stride_x - pad_x;
-                    int hstart = h * pool_stride_y - pad_y;
-                    int wend   = std::min(wstart + pool_size, w_src);
-                    int hend   = std::min(hstart + pool_size, h_src);
+                    int wstart = w * pool_stride_x - pad_left;
+                    int hstart = h * pool_stride_y - pad_top;
+                    int wend   = std::min(wstart + pool_size_x, w_src);
+                    int hend   = std::min(hstart + pool_size_y, h_src);
                     wstart     = std::max(wstart, 0);
                     hstart     = std::max(hstart, 0);
 
@@ -118,10 +122,10 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info)
                 for(int w = 0; w < w_dst; ++w)
                 {
                     T   avg_val(0);
-                    int wstart = w * pool_stride_x - pad_x;
-                    int hstart = h * pool_stride_y - pad_y;
-                    int wend   = std::min(wstart + pool_size, w_src + pad_x);
-                    int hend   = std::min(hstart + pool_size, h_src + pad_y);
+                    int wstart = w * pool_stride_x - pad_left;
+                    int hstart = h * pool_stride_y - pad_top;
+                    int wend   = std::min(wstart + pool_size_x, w_src + pad_right);
+                    int hend   = std::min(hstart + pool_size_y, h_src + pad_bottom);
                     int pool   = (hend - hstart) * (wend - wstart);
                     wstart     = std::max(wstart, 0);
                     hstart     = std::max(hstart, 0);
@@ -165,16 +169,19 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info)
 }
 
 template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type>
-SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info)
+SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, const PoolingLayerInfo &info)
 {
     ARM_COMPUTE_ERROR_ON(info.is_global_pooling() && (src.shape().x() != src.shape().y()));
 
-    const int   pool_size       = info.is_global_pooling() ? src.shape().x() : info.pool_size();
+    const int   pool_size_x     = info.is_global_pooling() ? src.shape().x() : info.pool_size().width;
+    const int   pool_size_y     = info.is_global_pooling() ? src.shape().y() : info.pool_size().height;
     PoolingType type            = info.pool_type();
     int         pool_stride_x   = info.pad_stride_info().stride().first;
     int         pool_stride_y   = info.pad_stride_info().stride().second;
-    int         pad_x           = info.pad_stride_info().pad().first;
-    int         pad_y           = info.pad_stride_info().pad().second;
+    int         pad_left        = info.pad_stride_info().pad_left();
+    int         pad_top         = info.pad_stride_info().pad_top();
+    int         pad_right       = info.pad_stride_info().pad_right();
+    int         pad_bottom      = info.pad_stride_info().pad_bottom();
     bool        exclude_padding = info.exclude_padding();
 
     const auto w_src      = static_cast<int>(src.shape()[0]);
@@ -195,10 +202,10 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info)
             {
                 for(int w = 0; w < w_dst; ++w)
                 {
-                    int wstart = w * pool_stride_x - pad_x;
-                    int hstart = h * pool_stride_y - pad_y;
-                    int wend   = std::min(wstart + pool_size, w_src);
-                    int hend   = std::min(hstart + pool_size, h_src);
+                    int wstart = w * pool_stride_x - pad_left;
+                    int hstart = h * pool_stride_y - pad_top;
+                    int wend   = std::min(wstart + pool_size_x, w_src);
+                    int hend   = std::min(hstart + pool_size_y, h_src);
                     wstart     = std::max(wstart, 0);
                     hstart     = std::max(hstart, 0);
 
@@ -228,10 +235,10 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info)
             {
                 for(int w = 0; w < w_dst; ++w)
                 {
-                    int wstart = w * pool_stride_x - pad_x;
-                    int hstart = h * pool_stride_y - pad_y;
-                    int wend   = std::min(wstart + pool_size, w_src + pad_x);
-                    int hend   = std::min(hstart + pool_size, h_src + pad_y);
+                    int wstart = w * pool_stride_x - pad_left;
+                    int hstart = h * pool_stride_y - pad_top;
+                    int wend   = std::min(wstart + pool_size_x, w_src + pad_right);
+                    int hend   = std::min(hstart + pool_size_y, h_src + pad_bottom);
                     int pool   = (hend - hstart) * (wend - wstart);
                     wstart     = std::max(wstart, 0);
                     hstart     = std::max(hstart, 0);
@@ -284,7 +291,7 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, PoolingLayerInfo info)
 }
 
 template <>
-SimpleTensor<uint8_t> pooling_layer<uint8_t>(const SimpleTensor<uint8_t> &src, PoolingLayerInfo info)
+SimpleTensor<uint8_t> pooling_layer<uint8_t>(const SimpleTensor<uint8_t> &src, const PoolingLayerInfo &info)
 {
     SimpleTensor<float>   src_tmp = convert_from_asymmetric(src);
     SimpleTensor<float>   dst_tmp = pooling_layer<float>(src_tmp, info);
@@ -292,10 +299,10 @@ SimpleTensor<uint8_t> pooling_layer<uint8_t>(const SimpleTensor<uint8_t> &src, P
     return dst;
 }
 
-template SimpleTensor<float> pooling_layer(const SimpleTensor<float> &src, PoolingLayerInfo info);
-template SimpleTensor<half> pooling_layer(const SimpleTensor<half> &src, PoolingLayerInfo info);
-template SimpleTensor<qint8_t> pooling_layer(const SimpleTensor<qint8_t> &src, PoolingLayerInfo info);
-template SimpleTensor<qint16_t> pooling_layer(const SimpleTensor<qint16_t> &src, PoolingLayerInfo info);
+template SimpleTensor<float> pooling_layer(const SimpleTensor<float> &src, const PoolingLayerInfo &info);
+template SimpleTensor<half> pooling_layer(const SimpleTensor<half> &src, const PoolingLayerInfo &info);
+template SimpleTensor<qint8_t> pooling_layer(const SimpleTensor<qint8_t> &src, const PoolingLayerInfo &info);
+template SimpleTensor<qint16_t> pooling_layer(const SimpleTensor<qint16_t> &src, const PoolingLayerInfo &info);
 } // namespace reference
 } // namespace validation
 } // namespace test

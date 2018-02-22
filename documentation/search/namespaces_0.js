@@ -29,10 +29,12 @@ var searchData=
   ['shape_5fcalculator',['shape_calculator',['../namespacearm__compute_1_1misc_1_1shape__calculator.xhtml',1,'arm_compute::misc']]],
   ['support',['support',['../namespacearm__compute_1_1support.xhtml',1,'arm_compute']]],
   ['test',['test',['../namespacearm__compute_1_1test.xhtml',1,'arm_compute']]],
-  ['traits',['traits',['../namespacearm__compute_1_1test_1_1traits.xhtml',1,'arm_compute::test']]],
-  ['traits',['traits',['../namespacearm__compute_1_1traits.xhtml',1,'arm_compute']]],
   ['traits',['traits',['../namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits.xhtml',1,'arm_compute::test::fixed_point_arithmetic']]],
+  ['traits',['traits',['../namespacearm__compute_1_1traits.xhtml',1,'arm_compute']]],
+  ['traits',['traits',['../namespacearm__compute_1_1test_1_1traits.xhtml',1,'arm_compute::test']]],
+  ['traits',['traits',['../namespacearm__compute_1_1wrapper_1_1traits.xhtml',1,'arm_compute::wrapper']]],
   ['utility',['utility',['../namespacearm__compute_1_1utility.xhtml',1,'arm_compute']]],
   ['utils',['utils',['../namespacearm__compute_1_1utils.xhtml',1,'arm_compute']]],
-  ['validation',['validation',['../namespacearm__compute_1_1test_1_1validation.xhtml',1,'arm_compute::test']]]
+  ['validation',['validation',['../namespacearm__compute_1_1test_1_1validation.xhtml',1,'arm_compute::test']]],
+  ['wrapper',['wrapper',['../namespacearm__compute_1_1wrapper.xhtml',1,'arm_compute']]]
 ];
