@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -98,7 +98,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
     const BorderSize border_size(border_mode == BorderMode::UNDEFINED ? 0 : 1);
 
     // Validate valid region
-    const ValidRegion dst_valid_region = calculate_valid_region_scale(*(src.info()), shape_scaled, policy, border_size, (border_mode == BorderMode::UNDEFINED));
+    const ValidRegion dst_valid_region = calculate_valid_region_scale(*(src.info()), shape_scaled, policy, sampling_policy, (border_mode == BorderMode::UNDEFINED));
     validate(dst.info()->valid_region(), dst_valid_region);
 
     // Validate padding
@@ -123,7 +123,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleFixture<float>, framework::DatasetMode::
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);
-    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, BorderSize(1), (_border_mode == BorderMode::UNDEFINED));
+    const ValidRegion valid_region = shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(1));
 
     // Validate output
     validate(CLAccessor(_target), _reference, valid_region, tolerance_f32, tolerance_num_f32);
@@ -135,7 +135,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleFixture<float>, framework::DatasetMode::
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);
-    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, BorderSize(1), (_border_mode == BorderMode::UNDEFINED));
+    const ValidRegion valid_region = shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(1));
 
     // Validate output
     validate(CLAccessor(_target), _reference, valid_region, tolerance_f32, tolerance_num_f32);
@@ -149,7 +149,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleFixture<half>, framework::DatasetMode::A
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);
-    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, BorderSize(1), (_border_mode == BorderMode::UNDEFINED));
+    const ValidRegion valid_region = shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(1));
 
     // Validate output
     validate(CLAccessor(_target), _reference, valid_region, tolerance_f16);
@@ -162,7 +162,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleFixture<half>, framework::DatasetMode::N
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);
-    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, BorderSize(1), (_border_mode == BorderMode::UNDEFINED));
+    const ValidRegion valid_region = shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(1));
 
     // Validate output
     validate(CLAccessor(_target), _reference, valid_region, tolerance_f16);
@@ -179,7 +179,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleFixture<uint8_t>, framework::DatasetMode
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);
-    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, BorderSize(1), (_border_mode == BorderMode::UNDEFINED));
+    const ValidRegion valid_region = shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(1));
 
     // Validate output
     validate(CLAccessor(_target), _reference, valid_region, tolerance_u8);
@@ -191,7 +191,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleFixture<uint8_t>, framework::DatasetMode
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);
-    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, BorderSize(1), (_border_mode == BorderMode::UNDEFINED));
+    const ValidRegion valid_region = shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(1));
 
     // Validate output
     validate(CLAccessor(_target), _reference, valid_region, tolerance_u8);
@@ -205,7 +205,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleFixture<int16_t>, framework::DatasetMode
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);
-    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, BorderSize(1), (_border_mode == BorderMode::UNDEFINED));
+    const ValidRegion valid_region = shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(1));
 
     // Validate output
     validate(CLAccessor(_target), _reference, valid_region, tolerance_s16);
@@ -218,7 +218,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleFixture<int16_t>, framework::DatasetMode
 {
     //Create valid region
     TensorInfo        src_info(_shape, 1, _data_type);
-    const ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, BorderSize(1), (_border_mode == BorderMode::UNDEFINED));
+    const ValidRegion valid_region = shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(1));
 
     // Validate output
     validate(CLAccessor(_target), _reference, valid_region, tolerance_s16);

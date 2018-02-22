@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -102,7 +102,7 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
     output_access.set_valid_region(win, calculate_valid_region_scale(*(input->info()),
                                                                      output->info()->tensor_shape(),
                                                                      policy,
-                                                                     border,
+                                                                     sampling_policy,
                                                                      border_undefined));
 
     ICLKernel::configure(win);

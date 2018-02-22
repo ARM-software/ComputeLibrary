@@ -51,7 +51,6 @@ void GCScaleKernel::configure(const IGCTensor *input, IGCTensor *output, Interpo
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON(output == input);
     ARM_COMPUTE_ERROR_ON(policy != InterpolationPolicy::NEAREST_NEIGHBOR);
-    ARM_COMPUTE_UNUSED(sampling_policy);
 
     _input  = input;
     _output = output;
@@ -123,7 +122,7 @@ void GCScaleKernel::configure(const IGCTensor *input, IGCTensor *output, Interpo
     output_access.set_valid_region(win, calculate_valid_region_scale(*(input->info()),
                                                                      output->info()->tensor_shape(),
                                                                      policy,
-                                                                     border,
+                                                                     sampling_policy,
                                                                      border_undefined));
 
     IGCKernel::configure(win);
