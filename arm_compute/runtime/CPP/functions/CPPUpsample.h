@@ -21,11 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CPPFUNCTIONS_H__
-#define __ARM_COMPUTE_CPPFUNCTIONS_H__
+#ifndef __ARM_COMPUTE_CPPUPSAMPLE_H__
+#define __ARM_COMPUTE_CPPUPSAMPLE_H__
 
-/* Header regrouping all the CPP functions */
-#include "arm_compute/runtime/CPP/functions/CPPPermute.h"
-#include "arm_compute/runtime/CPP/functions/CPPUpsample.h"
+#include "arm_compute/runtime/CPP/ICPPSimpleFunction.h"
 
-#endif /* __ARM_COMPUTE_CPPFUNCTIONS_H__ */
+#include "arm_compute/core/Types.h"
+
+namespace arm_compute
+{
+class ITensor;
+
+/** Basic function to run @ref CPPUpsample */
+class CPPUpsample : public ICPPSimpleFunction
+{
+public:
+    /** Configure the upsample CPP kernel
+     *
+     * @param[in]  input              The input tensor to upsample. Data types supported: F32
+     * @param[out] output             The output tensor. Data types supported: Same as @p input
+     * @param[in]  info               Padding information
+     * @param[in]  inner_border_right The number of zeros added to right edge of the input.
+     * @param[in]  inner_border_top   The number of zeros added to top edge of the input.
+     */
+    void configure(const ITensor *input, ITensor *output, const PadStrideInfo &info, unsigned int inner_border_right, unsigned int inner_border_top);
+};
+}
+#endif /* __ARM_COMPUTE_CPPUPSAMPLE_H__ */

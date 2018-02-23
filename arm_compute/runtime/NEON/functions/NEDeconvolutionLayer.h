@@ -24,6 +24,7 @@
 #ifndef __ARM_COMPUTE_NEDECONVOLUTIONLAYER_H__
 #define __ARM_COMPUTE_NEDECONVOLUTIONLAYER_H__
 
+#include "arm_compute/runtime/CPP/functions/CPPUpsample.h"
 #include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEDirectConvolutionLayer.h"
 
@@ -97,6 +98,7 @@ public:
 private:
     MemoryGroup        _memory_group;
     NEConvolutionLayer _conv_f;
+    CPPUpsample        _upsample_f;
     Tensor             _scaled_output;
     ITensor           *_input;
     PadStrideInfo      _info;

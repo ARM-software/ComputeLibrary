@@ -34,6 +34,7 @@ using namespace arm_compute::misc::shape_calculator;
 NEDeconvolutionLayer::NEDeconvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager) // NOLINT
     : _memory_group(std::move(memory_manager)),
       _conv_f(),
+      _upsample_f(),
       _scaled_output(),
       _input(nullptr),
       _info(),
@@ -79,41 +80,17 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
 
     // Allocate auxiliary tensors
     _scaled_output.allocator()->allocate();
+
+    // configure upsample function
+    _upsample_f.configure(input, &_scaled_output, info, inner_border_right, inner_border_top);
 }
 
 void NEDeconvolutionLayer::run()
 {
     _memory_group.acquire();
 
-    // Initialize _scaled_output buffer
-    const int width_in      = _input->info()->dimension(0);
-    const int height_in     = _input->info()->dimension(1);
-    const int width_scaled  = _scaled_output.info()->dimension(0);
-    const int height_scaled = _scaled_output.info()->dimension(1);
-    const int num_2d_slices = _input->info()->tensor_shape().total_size() / (width_in * height_in);
-    const int stride_x      = _info.stride().first;
-    const int stride_y      = _info.stride().second;
-
-    std::fill_n(_scaled_output.buffer(), _scaled_output.info()->total_size(), 0);
-
-    // scaled_output is the input for the forward convolution. We copy the input elements to scaled_output
-    // and insert rows and columns with zeroes depending on the stride values.
-    for(int slice = 0; slice < num_2d_slices; ++slice)
-    {
-        const int start_x = _info.pad().first;
-        const int start_y = _inner_border.second + _info.pad().second;
-        const int end_y   = height_scaled - _info.pad().second;
-        const int end_x   = width_scaled - _inner_border.first - _info.pad().first;
-
-        for(int yi = start_y, in_y = 0; yi < end_y; yi += stride_y, in_y++)
-        {
-            for(int xi = start_x, in_x = 0; xi < end_x; xi += stride_x, in_x++)
-            {
-                const auto in = *(reinterpret_cast<float *>(_input->buffer() + _input->info()->offset_element_in_bytes(Coordinates(in_x, in_y, slice))));
-                *(reinterpret_cast<float *>(_scaled_output.buffer() + _scaled_output.info()->offset_element_in_bytes(Coordinates(xi, yi, slice)))) = in;
-            }
-        }
-    }
+    // Run upsample kernel
+    _upsample_f.run();
 
     // Run convolution layer
     _conv_f.run();
