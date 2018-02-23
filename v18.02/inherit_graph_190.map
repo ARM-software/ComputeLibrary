@@ -1,0 +1,16 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__compute_1_1test_1_1framework_1_1_option.xhtml" title="Abstract base class for a command line option. " alt="" coords="5,224,69,251"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1framework_1_1_enum_list_option.xhtml" title="Implementation of an option that accepts any number of values from a fixed set. " alt="" coords="145,5,305,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1test_1_1framework_1_1_list_option.xhtml" title="Implementation of an option that accepts any number of values. " alt="" coords="163,56,286,83"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml" title="Implementation of an option that accepts a single value. " alt="" coords="152,107,297,133"/>
+<area shape="rect" id="node6" href="$classarm__compute_1_1test_1_1framework_1_1_enum_list_option.xhtml" title="EnumListOption\&lt; Instruments\lDescription \&gt;" alt="" coords="117,158,332,199"/>
+<area shape="rect" id="node7" href="$classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml" title="SimpleOption\&lt; bool \&gt;" alt="" coords="142,224,307,251"/>
+<area shape="rect" id="node9" href="$classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml" title="SimpleOption\&lt; int \&gt;" alt="" coords="147,275,302,301"/>
+<area shape="rect" id="node10" href="$classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml" title="SimpleOption\&lt; LogFormat \&gt;" alt="" coords="121,325,328,352"/>
+<area shape="rect" id="node12" href="$classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml" title="SimpleOption\&lt; LogLevel \&gt;" alt="" coords="127,376,322,403"/>
+<area shape="rect" id="node14" href="$classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml" title="SimpleOption\&lt; std::\lstring \&gt;" alt="" coords="149,427,300,469"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1test_1_1framework_1_1_enum_option.xhtml" title="Implementation of a simple option that accepts a value from a fixed set. " alt="" coords="411,107,549,133"/>
+<area shape="rect" id="node8" href="$classarm__compute_1_1test_1_1framework_1_1_toggle_option.xhtml" title="Implementation of an option that can be either true or false. " alt="" coords="428,224,532,251"/>
+<area shape="rect" id="node11" href="$classarm__compute_1_1test_1_1framework_1_1_enum_option.xhtml" title="EnumOption\&lt; LogFormat \&gt;" alt="" coords="380,325,580,352"/>
+<area shape="rect" id="node13" href="$classarm__compute_1_1test_1_1framework_1_1_enum_option.xhtml" title="EnumOption\&lt; LogLevel \&gt;" alt="" coords="387,376,573,403"/>
+</map>

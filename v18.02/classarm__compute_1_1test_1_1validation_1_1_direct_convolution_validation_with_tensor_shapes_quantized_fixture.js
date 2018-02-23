@@ -1,0 +1,4 @@
+var classarm__compute_1_1test_1_1validation_1_1_direct_convolution_validation_with_tensor_shapes_quantized_fixture =
+[
+    [ "setup", "classarm__compute_1_1test_1_1validation_1_1_direct_convolution_validation_with_tensor_shapes_quantized_fixture.xhtml#a0a5ae5ad5e0b43ef9051908a4dc21624", null ]
+];

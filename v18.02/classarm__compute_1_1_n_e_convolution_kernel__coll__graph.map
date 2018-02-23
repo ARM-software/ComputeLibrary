@@ -1,0 +1,5 @@
+<map id="NEConvolutionKernel&lt; matrix_size &gt;" name="NEConvolutionKernel&lt; matrix_size &gt;">
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_simple_kernel.xhtml" title="Interface for simple NEON kernels having 1 tensor input and 1 tensor output. " alt="" coords="19,155,146,181"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="38,80,127,107"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="51,5,115,32"/>
+</map>

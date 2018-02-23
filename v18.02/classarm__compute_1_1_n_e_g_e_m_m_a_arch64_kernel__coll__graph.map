@@ -1,0 +1,5 @@
+<map id="NEGEMMAArch64Kernel" name="NEGEMMAArch64Kernel">
+<area shape="rect" id="node2" href="$classarm__compute_1_1_n_e_g_e_m_m_assembly_base_kernel.xhtml" title="Base class for GEMM NEON kernels implemented in Assembly. " alt="" coords="5,155,219,181"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="71,80,153,107"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="80,5,144,32"/>
+</map>

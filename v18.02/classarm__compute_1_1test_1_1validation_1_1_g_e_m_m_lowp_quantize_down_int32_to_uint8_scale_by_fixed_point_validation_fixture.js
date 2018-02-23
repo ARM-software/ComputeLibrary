@@ -1,0 +1,4 @@
+var classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_validation_fixture =
+[
+    [ "setup", "classarm__compute_1_1test_1_1validation_1_1_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_validation_fixture.xhtml#a843769c054c25031f97ce64c831607a3", null ]
+];

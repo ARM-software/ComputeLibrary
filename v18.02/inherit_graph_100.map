@@ -1,0 +1,5 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_lut_allocator.xhtml" title="Basic interface to allocate LUTs&#39;. " alt="" coords="5,31,107,57"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_c_l_lut_allocator.xhtml" title="Basic implementation of a CL memory LUT allocator. " alt="" coords="155,5,269,32"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_lut_allocator.xhtml" title="Basic implementation of a CPU memory LUT allocator. " alt="" coords="163,56,261,83"/>
+</map>

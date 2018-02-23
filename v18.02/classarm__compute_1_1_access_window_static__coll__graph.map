@@ -1,0 +1,6 @@
+<map id="AccessWindowStatic" name="AccessWindowStatic">
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_access_window.xhtml" title="Interface describing methods to update access window and padding based on kernel parameters. " alt="" coords="5,171,123,197"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_tensor_info.xhtml" title="Store the tensor&#39;s metadata. " alt="" coords="147,171,237,197"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1misc_1_1_i_cloneable.xhtml" title="ICloneable\&lt; ITensorInfo \&gt;" alt="" coords="99,95,285,121"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1misc_1_1_i_cloneable.xhtml" title="Clonable Interface. " alt="" coords="129,5,255,32"/>
+</map>
