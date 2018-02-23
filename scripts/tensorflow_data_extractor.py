@@ -41,7 +41,7 @@ if __name__ == "__main__":
         saver.restore(sess, args.modelFile)
         print('Model restored.')
         # Save trainable variables to numpy arrays
-        for t in tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES):
+        for t in tf.get_collection(tf.GraphKeys.MODEL_VARIABLES):
             varname = t.name
             if os.path.sep in t.name:
                 varname = varname.replace(os.path.sep, '_')
