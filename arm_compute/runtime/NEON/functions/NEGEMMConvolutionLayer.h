@@ -36,6 +36,7 @@
 #include "arm_compute/core/NEON/kernels/NEWeightsReshapeKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/NEON/AssemblyHelper.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpOutputStage.h"
 #include "arm_compute/runtime/Tensor.h"
@@ -149,22 +150,14 @@ private:
      * @param[in]  reshape_info   (Optional) GEMM reshape info. If is_interleaved_transposed = true, this object must contain the information to understand how the matrix A and matrix B have been reshaped
      */
     void configure_mm(const ITensor *input, const ITensor *weights, ITensor *output, bool is_interleaved, const GEMMReshapeInfo &reshape_info = GEMMReshapeInfo());
-    /** Prepare the appropriate assembly optimized kernel
-     *
-     * @param[in] ci CPU information
-     * @param[in] M  M parameter of matrix multiplication
-     * @param[in] N  N parameter of matrix multiplication
-     * @param[in] K  K parameter of matrix multiplication
-     */
-    void configure_asm_mm(const struct CPUInfo &ci, int M, int N, int K);
 
 private:
+    AssemblyKernelGlueF32                               _asm_glue;
     MemoryGroup                                         _memory_group;
     NEIm2ColKernel                                      _input_im2col_kernel;
     NEGEMMInterleave4x4Kernel                           _input_interleave_kernel;
     NEConvolutionLayerReshapeWeights                    _reshape_weights;
     NEGEMMMatrixMultiplyKernel                          _mm_kernel;
-    std::unique_ptr<NEGEMMAssemblyBaseKernel>           _mm_optimised_kernel;
     NEGEMMLowpMatrixMultiplyCore                        _mm_gemmlowp;
     NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint _gemmlowp_output_stage;
     NECol2ImKernel                                      _output_col2im_kernel;

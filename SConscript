@@ -194,6 +194,8 @@ if env['neon']:
     core_files += Glob('src/core/NEON/*.cpp')
     core_files += Glob('src/core/NEON/kernels/*.cpp')
 
+    core_files += Glob('src/core/NEON/kernels/arm_gemm/*.cpp')
+
     # build winograd sources for either v7a / v8a
     core_files += Glob('src/core/NEON/kernels/convolution/*/*.cpp')
     core_files += Glob('src/core/NEON/kernels/convolution/winograd/*/*.cpp')
@@ -202,10 +204,11 @@ if env['neon']:
     graph2_files += Glob('src/graph2/backends/NEON/*.cpp')
 
     if env['arch'] == "armv7a":
-        core_files += Glob('src/core/NEON/kernels/arm32/*.cpp')
+        core_files += Glob('src/core/NEON/kernels/arm_gemm/kernels/a32_*/*.cpp')
+
 
     if "arm64-v8" in env['arch']:
-        core_files += Glob('src/core/NEON/kernels/arm64/*.cpp')
+        core_files += Glob('src/core/NEON/kernels/arm_gemm/kernels/a64_*/*.cpp')
 
     runtime_files += Glob('src/runtime/NEON/*.cpp')
     runtime_files += Glob('src/runtime/NEON/functions/*.cpp')

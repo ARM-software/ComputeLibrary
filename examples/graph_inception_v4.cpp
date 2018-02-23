@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "arm_compute/core/Error.h"
 #include "arm_compute/graph2.h"
 #include "support/ToolchainSupport.h"
 #include "utils/GraphUtils.h"
@@ -43,6 +44,9 @@ class InceptionV4Example final : public Example
 public:
     void do_setup(int argc, char **argv) override
     {
+        // Disabled the test for now because the process gets killed on Linux Firefly 32 bit even when using ConvolutionMethodHint::DIRECT.
+        // Needs to review/rework to run the code below.
+#if __aarch64__
         std::string data_path; /* Path to the trainable data */
         std::string image;     /* Image data */
         std::string label;     /* Label data */
@@ -90,7 +94,6 @@ public:
 
         graph << target_hint << InputLayer(TensorDescriptor(TensorShape(299U, 299U, 3U, 1U), DataType::F32),
                                            get_input_accessor(image, std::move(preprocessor), false))
-
               // Conv2d_1a_3x3
               << ConvolutionLayer(3U, 3U, 32U,
                                   get_weights_accessor(data_path, "/cnn_data/inceptionv4_model/Conv2d_1a_3x3_weights.npy"),
@@ -157,11 +160,18 @@ public:
 
         // Finalize graph
         graph.finalize(target_hint, enable_tuning, enable_memory_management);
+#else  /* __aarch64__ */
+        using namespace arm_compute;
+        ARM_COMPUTE_UNUSED(argc);
+        ARM_COMPUTE_UNUSED(argv);
+#endif /* __aarch64__ */
     }
 
     void do_run() override
     {
+#if __aarch64__
         graph.run();
+#endif /* __aarch64__ */
     }
 
 private:

@@ -195,6 +195,12 @@ If there is more than one release in a month then an extra sequential number is 
 
 @subsection S2_2_changelog Changelog
 
+v18.05 Public maintenance release
+ - Major redesign in the interface for the neon kernels implemented in assembly.
+ - Removed arm_compute::NEGEMMLowpAArch64A53Kernel / arm_compute::NEGEMMLowpAArch64Kernel / arm_compute::NEGEMMLowpAArch64V8P4Kernel / arm_compute::NEGEMMInterleavedBlockedKernel / arm_compute::NEGEMMLowpAssemblyMatrixMultiplyCore / arm_compute::NEHGEMMAArch64FP16Kernel
+ - Added NEGEMMAssemblyWrapper and AssemblyKernelGlue which are used to execute assembly kernels in neon functions.
+ - Minor changes to the CPUInfo type to make it compatible with the new assembly gemm interface.
+
 v18.03 Public maintenance release
  - Various bug fixes.
  - Fixed bug in @ref NEActivationLayer
@@ -301,8 +307,8 @@ v17.12 Public major release
     - @ref GCTransposeKernel / @ref GCTranspose
 
  - New NEON kernels / functions
-    - @ref NEGEMMLowpAArch64A53Kernel / @ref NEGEMMLowpAArch64Kernel / @ref NEGEMMLowpAArch64V8P4Kernel / NEGEMMInterleavedBlockedKernel / @ref NEGEMMLowpAssemblyMatrixMultiplyCore
-    - @ref NEHGEMMAArch64FP16Kernel
+    - arm_compute::NEGEMMLowpAArch64A53Kernel / arm_compute::NEGEMMLowpAArch64Kernel / arm_compute::NEGEMMLowpAArch64V8P4Kernel / arm_compute::NEGEMMInterleavedBlockedKernel / arm_compute::NEGEMMLowpAssemblyMatrixMultiplyCore
+    - arm_compute::NEHGEMMAArch64FP16Kernel
     - @ref NEDepthwiseConvolutionLayer3x3Kernel / @ref NEDepthwiseIm2ColKernel / @ref NEGEMMMatrixVectorMultiplyKernel / @ref NEDepthwiseVectorToTensorKernel / @ref NEDepthwiseConvolutionLayer
     - @ref NEGEMMLowpOffsetContributionKernel / @ref NEGEMMLowpMatrixAReductionKernel / @ref NEGEMMLowpMatrixBReductionKernel / @ref NEGEMMLowpMatrixMultiplyCore
     - @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel / @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
@@ -340,7 +346,7 @@ v17.09 Public major release
  - New validation and benchmark frameworks (Boost and Google frameworks replaced by homemade framework).
  - Most machine learning functions support both fixed point 8 and 16 bit (QS8, QS16) for both NEON and OpenCL.
  - New NEON kernels / functions:
-    - @ref NEGEMMAssemblyBaseKernel @ref NEGEMMAArch64Kernel
+    - arm_compute::NEGEMMAssemblyBaseKernel arm_compute::NEGEMMAArch64Kernel
     - @ref NEDequantizationLayerKernel / @ref NEDequantizationLayer
     - @ref NEFloorKernel / @ref NEFloor
     - @ref NEL2NormalizeLayerKernel / @ref NEL2NormalizeLayer

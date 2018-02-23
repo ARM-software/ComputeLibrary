@@ -23,9 +23,6 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEGEMMConvolutionLayer.h"
 
-#include "arm_compute/core/NEON/kernels/arm32/NEGEMMAArch32Kernel.h"
-#include "arm_compute/core/NEON/kernels/arm64/NEGEMMAArch64Kernel.h"
-#include "arm_compute/core/NEON/kernels/arm64/NEGEMMAArch64NativeKernel.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Utils.h"
@@ -33,13 +30,6 @@
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "support/ToolchainSupport.h"
-
-namespace arm_compute
-{
-#include "arm_compute/core/NEON/kernels/assembly/gemm_interleaved.hpp"
-#include "arm_compute/core/NEON/kernels/assembly/kernels/a32_sgemm_8x6.hpp"
-#include "arm_compute/core/NEON/kernels/assembly/kernels/a64_sgemm_12x8.hpp"
-} // namespace arm_compute
 
 #include <cmath>
 #include <tuple>
@@ -226,8 +216,8 @@ Status validate_and_initialize_values(const ITensorInfo *input, const ITensorInf
 } // namespace
 
 NEGEMMConvolutionLayer::NEGEMMConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager)
-    : _memory_group(memory_manager), _input_im2col_kernel(), _input_interleave_kernel(), _reshape_weights(), _mm_kernel(), _mm_optimised_kernel(nullptr), _mm_gemmlowp(memory_manager),
-      _gemmlowp_output_stage(), _output_col2im_kernel(), _input_im2col_reshaped(), _input_interleaved_reshaped(), _weights_reshaped(), _gemm_output(), _tmp_output(), _workspace(), _append_bias(false),
+    : _asm_glue(), _memory_group(memory_manager), _input_im2col_kernel(), _input_interleave_kernel(), _reshape_weights(), _mm_kernel(), _mm_gemmlowp(memory_manager), _gemmlowp_output_stage(),
+      _output_col2im_kernel(), _input_im2col_reshaped(), _input_interleaved_reshaped(), _weights_reshaped(), _gemm_output(), _tmp_output(), _workspace(), _append_bias(false),
       _is_fully_connected_convolution(false), _are_weights_reshaped(false), _is_quantized(false), _is_interleaved(false)
 {
 }
@@ -256,25 +246,6 @@ void NEGEMMConvolutionLayer::configure_mm(const ITensor *input, const ITensor *w
     }
 }
 
-void NEGEMMConvolutionLayer::configure_asm_mm(const struct CPUInfo &ci, int M, int N, int K)
-{
-    ARM_COMPUTE_UNUSED(ci);
-    ARM_COMPUTE_UNUSED(M);
-    ARM_COMPUTE_UNUSED(N);
-    ARM_COMPUTE_UNUSED(K);
-#if defined(__arm__) || defined(__aarch64__)
-#if defined(__arm__)
-    GemmInterleaved<sgemm_8x6, float, float> gemm(&ci, M, N, K, false, false);
-#elif defined(__aarch64__)
-    GemmInterleaved<sgemm_12x8, float, float> gemm(&ci, M, N, K, false, false);
-#endif /* defined(__arm__) || defined(__aarch64__) */
-
-    constexpr size_t alignment = 4096;
-    _workspace.allocator()->init(TensorInfo(TensorShape{ (gemm.get_working_size() + alignment - 1) * NEScheduler::get().num_threads() }, 1, DataType::U8));
-    _memory_group.manage(&_workspace);
-#endif /* defined(__arm__) || defined(__aarch64__) */
-}
-
 void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info)
 {
     // Perform validate step
@@ -298,20 +269,11 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     const unsigned int fixed_point_position = input->info()->fixed_point_position();
     const ITensor     *biases_to_use        = (_append_bias) ? biases : nullptr;
 
-#if defined(__arm__)
-    if(NEScheduler::get().cpu_info().CPU == CPUTarget::ARMV7 && dt == DataType::F32)
-    {
-        _mm_optimised_kernel = support::cpp14::make_unique<NEGEMMAArch32Kernel>();
-    }
-#elif defined(__aarch64__)
-    if(NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV8 && dt == DataType::F32)
-    {
-        _mm_optimised_kernel = support::cpp14::make_unique<NEGEMMAArch64Kernel>();
-    }
-#endif /* defined(__arm__) || defined(__aarch64__) */
+    bool run_optimised =
+        (NEScheduler::get().cpu_info().CPU == CPUTarget::ARMV7 && dt == DataType::F32) || (NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV8 && dt == DataType::F32);
 
     // Reshape weights if needed
-    if(_mm_optimised_kernel != nullptr)
+    if(run_optimised)
     {
         if(_are_weights_reshaped)
         {
@@ -378,7 +340,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     _memory_group.manage(&_input_im2col_reshaped);
 
     // Create tensor (interleave) to prepare input tensor for GEMM
-    if(!_is_fully_connected_convolution && _mm_optimised_kernel == nullptr)
+    if(!_is_fully_connected_convolution && !run_optimised)
     {
         TensorShape shape_interleaved(shape_im2col);
         shape_interleaved.set(0, shape_interleaved.x() * 4);
@@ -403,29 +365,10 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     _input_im2col_kernel.configure(input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, _append_bias);
 
     // Configure matrix multiply
-    if(_mm_optimised_kernel != nullptr)
+    if(run_optimised)
     {
-        struct CPUInfo ci = NEScheduler::get().cpu_info();
-
-        const int M = _gemm_output.info()->tensor_shape().y();
-        const int N = _gemm_output.info()->tensor_shape().x();
-        const int K = _input_im2col_reshaped.info()->tensor_shape().x();
-
-#if defined(__aarch64__)
-        if((N <= 128) && (K <= 128))
-        {
-            _mm_optimised_kernel = support::cpp14::make_unique<NEGEMMAArch64NativeKernel>();
-        }
-        else
-#endif /* defined(__aarch64__) */
-        {
-            configure_asm_mm(ci, M, N, K);
-        }
-
-        // Configure matrix multiplication kernel
-        _mm_optimised_kernel->configure(&_input_im2col_reshaped, weights, &_gemm_output, &_workspace);
-
-        _workspace.allocator()->allocate();
+        run_optimised = setup_assembly_kernel(&_input_im2col_reshaped, weights, nullptr, &_gemm_output, 1.f, 0.f, _workspace, _memory_group, _asm_glue);
+        ARM_COMPUTE_ERROR_ON_MSG(run_optimised == false, "setup_assembly_kernel failed.");
     }
     else
     {
@@ -615,9 +558,9 @@ void NEGEMMConvolutionLayer::run()
     NEScheduler::get().schedule(&_input_im2col_kernel, Window::DimY);
 
     // Runs matrix multiply on reshaped matrices
-    if(_mm_optimised_kernel != nullptr)
+    if(_asm_glue._optimised_kernel != nullptr)
     {
-        NEScheduler::get().schedule(_mm_optimised_kernel.get(), Window::DimY);
+        _asm_glue.run();
     }
     else
     {

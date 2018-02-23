@@ -152,9 +152,9 @@ GCKernel::GCKernel(std::string name, GLuint program)
     ARM_COMPUTE_GL_CHECK(glGenBuffers(1, &_shader_params_ubo_name));
 
     _shader_params_index = ARM_COMPUTE_GL_CHECK(glGetUniformBlockIndex(_program, _shader_params_name));
-    ARM_COMPUTE_ERROR_ON_MSG((_shader_params_index == GL_INVALID_INDEX), "Failed to get index of %s", _shader_params_name);
+    ARM_COMPUTE_ERROR_ON_MSG(_shader_params_index == GL_INVALID_INDEX, "Failed to get index of %s", _shader_params_name);
     ARM_COMPUTE_GL_CHECK(glGetActiveUniformBlockiv(_program, _shader_params_index, GL_UNIFORM_BLOCK_DATA_SIZE, &_shader_params_size));
-    ARM_COMPUTE_ERROR_ON_MSG((_shader_params_size == 0), "Failed to get size of %s", _shader_params_name);
+    ARM_COMPUTE_ERROR_ON_MSG(_shader_params_size == 0, "Failed to get size of %s", _shader_params_name);
 }
 
 void GCKernel::cleanup()

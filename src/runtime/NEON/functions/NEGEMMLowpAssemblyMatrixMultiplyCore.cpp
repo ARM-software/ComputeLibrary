@@ -1,4 +1,4 @@
-/* Copyright (c) 2017 ARM Limited.
+/* Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,13 +25,9 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMAssemblyBaseKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMTranspose1xWKernel.h"
-#include "arm_compute/core/NEON/kernels/arm64/NEGEMMLowpAArch64A53Kernel.h"
-#include "arm_compute/core/NEON/kernels/arm64/NEGEMMLowpAArch64Kernel.h"
-#include "arm_compute/core/NEON/kernels/arm64/NEGEMMLowpAArch64V8P4Kernel.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
@@ -39,20 +35,11 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "support/ToolchainSupport.h"
 
-namespace arm_compute
-{
-#include "arm_compute/core/NEON/kernels/assembly/gemm_interleaved.hpp"
-#include "arm_compute/core/NEON/kernels/assembly/kernels/a64_gemm_s16_12x8.hpp"
-#include "arm_compute/core/NEON/kernels/assembly/kernels/a64_gemm_s8_12x8.hpp"
-#include "arm_compute/core/NEON/kernels/assembly/kernels/a64_gemm_s8_4x4.hpp"
-#include "arm_compute/core/NEON/kernels/assembly/kernels/a64_gemm_u16_12x8.hpp"
-#include "arm_compute/core/NEON/kernels/assembly/kernels/a64_gemm_u8_4x4.hpp"
-} // namespace arm_compute
-
 using namespace arm_compute;
 
 NEGEMMLowpAssemblyMatrixMultiplyCore::NEGEMMLowpAssemblyMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _mm_kernel(nullptr), _mtx_a_reshape_kernel(nullptr), _mtx_b_reshape_kernel(nullptr), _tmp_a(), _tmp_b(), _workspace()
+    : _memory_group(std::move(memory_manager)), _asm_glue_unsigned(), _asm_glue_signed(), _mm_kernel(nullptr), _mtx_a_reshape_kernel(nullptr), _mtx_b_reshape_kernel(nullptr), _tmp_a(), _tmp_b(),
+      _workspace()
 {
 }
 
@@ -65,89 +52,28 @@ void NEGEMMLowpAssemblyMatrixMultiplyCore::configure(const ITensor *a, const ITe
     ARM_COMPUTE_ERROR_ON_MSG((a)->info()->dimension(1) != (output)->info()->dimension(1), "The output matrix must have the same number of rows as the matrix A");
     ARM_COMPUTE_ERROR_ON_MSG((b)->info()->dimension(0) != (output)->info()->dimension(0), "The output matrix must have the same number of columns as the matrix B");
 
+    bool run_optimised = false;
 #ifdef __aarch64__
-    const int            M                   = output->info()->tensor_shape().y();
-    const int            N                   = output->info()->tensor_shape().x();
-    const int            K                   = a->info()->tensor_shape().x();
-    constexpr size_t     workspace_alignment = 4096;
-    const struct CPUInfo ci                  = NEScheduler::get().cpu_info();
+    switch(a->info()->data_type())
+    {
+        case DataType::S8:
+        {
+            run_optimised = setup_assembly_kernel(a, b, nullptr, output, 1.f, 1.f, _workspace, _memory_group, _asm_glue_signed);
+            break;
+        }
+        case DataType::U8:
+        {
+            run_optimised = setup_assembly_kernel(a, b, nullptr, output, 1.f, 1.f, _workspace, _memory_group, _asm_glue_unsigned);
+            break;
+        }
+        default:
+        {
+            ARM_COMPUTE_ERROR("Datatype not supported");
+            break;
+        }
+    }
 #endif /* __aarch64__ */
-
-#ifdef ARM_COMPUTE_AARCH64_V8_2
-    if(ci.CPU == CPUTarget::A75_DOT || ci.CPU == CPUTarget::A55_DOT)
-    {
-        // Configure matrix multiply kernel
-        GemmInterleaved<gemm_s8_12x8, int8_t, int32_t> gemm(&ci, M, N, K, false, false);
-        _workspace.allocator()->init(TensorInfo(TensorShape{ (gemm.get_working_size() + workspace_alignment - 1) * NEScheduler::get().num_threads() }, 1, DataType::U8));
-        _memory_group.manage(&_workspace);
-
-        // Configure matrix multiplication kernel
-        auto k = arm_compute::support::cpp14::make_unique<NEGEMMLowpAArch64V8P4Kernel>();
-        k->configure(a, b, output, &_workspace, 1.f, 1.f);
-        _mm_kernel = std::move(k);
-        _workspace.allocator()->allocate();
-    }
-    else
-#elif defined(ARM_COMPUTE_AARCH64_V8A)
-    if(ci.CPU == CPUTarget::A53)
-    {
-        switch(a->info()->data_type())
-        {
-            case DataType::S8:
-            {
-                // Configure matrix multiply kernel
-                GemmInterleaved<gemm_s16_12x8, int8_t, int32_t> gemm(&ci, M, N, K, false, false);
-                _workspace.allocator()->init(TensorInfo(TensorShape{ (gemm.get_working_size() + workspace_alignment - 1) * NEScheduler::get().num_threads() }, 1, DataType::U8));
-            }
-            break;
-            case DataType::U8:
-            {
-                // Configure matrix multiply kernel
-                GemmInterleaved<gemm_u16_12x8, uint8_t, uint32_t> gemm(&ci, M, N, K, false, false);
-                _workspace.allocator()->init(TensorInfo(TensorShape{ (gemm.get_working_size() + workspace_alignment - 1) * NEScheduler::get().num_threads() }, 1, DataType::U8));
-            }
-            break;
-            default:
-                ARM_COMPUTE_ERROR("Datatype not supported");
-        }
-
-        _memory_group.manage(&_workspace);
-        // Configure matrix multiplication kernel
-        auto k = arm_compute::support::cpp14::make_unique<NEGEMMLowpAArch64A53Kernel>();
-        k->configure(a, b, output, &_workspace, 1.f, 1.f);
-        _mm_kernel = std::move(k);
-        _workspace.allocator()->allocate();
-    }
-    else if(1) // Generic v8a kernel
-    {
-        switch(a->info()->data_type())
-        {
-            case DataType::S8:
-            {
-                // Configure matrix multiply kernel
-                GemmInterleaved<gemm_s8_4x4, int8_t, int32_t> gemm(&ci, M, N, K, false, false);
-                _workspace.allocator()->init(TensorInfo(TensorShape{ (gemm.get_working_size() + workspace_alignment - 1) * NEScheduler::get().num_threads() }, 1, DataType::U8));
-            }
-            break;
-            case DataType::U8:
-            {
-                // Configure matrix multiply kernel
-                GemmInterleaved<gemm_u8_4x4, uint8_t, uint32_t> gemm(&ci, M, N, K, false, false);
-                _workspace.allocator()->init(TensorInfo(TensorShape{ (gemm.get_working_size() + workspace_alignment - 1) * NEScheduler::get().num_threads() }, 1, DataType::U8));
-            }
-            break;
-            default:
-                ARM_COMPUTE_ERROR("Datatype not supported");
-        }
-        _memory_group.manage(&_workspace);
-        // Configure matrix multiplication kernel
-        auto k = arm_compute::support::cpp14::make_unique<NEGEMMLowpAArch64Kernel>();
-        k->configure(a, b, output, &_workspace, 1.f, 1.f);
-        _mm_kernel = std::move(k);
-        _workspace.allocator()->allocate();
-    }
-    else
-#endif /* ARM_COMPUTE_AARCH64_V8_2 */
+    if(!run_optimised)
     {
         // The interleaved output matrix will have the following shape: [ a_height * 4, ceil(a_width / 4.0f) ]
         TensorShape shape_tmp_a = a->info()->tensor_shape();
@@ -206,7 +132,18 @@ void NEGEMMLowpAssemblyMatrixMultiplyCore::run()
         NEScheduler::get().schedule(_mtx_b_reshape_kernel.get(), Window::DimY);
     }
 
-    NEScheduler::get().schedule(_mm_kernel.get(), Window::DimY);
+    if(_asm_glue_unsigned._optimised_kernel != nullptr)
+    {
+        _asm_glue_unsigned.run();
+    }
+    else if(_asm_glue_signed._optimised_kernel != nullptr)
+    {
+        _asm_glue_signed.run();
+    }
+    else
+    {
+        NEScheduler::get().schedule(_mm_kernel.get(), Window::DimY);
+    }
 
     _memory_group.release();
 }

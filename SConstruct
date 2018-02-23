@@ -135,19 +135,19 @@ if env['arch'] == 'armv7a':
         env.Append(CXXFLAGS = ['-mfloat-abi=softfp'])
 elif env['arch'] == 'arm64-v8a':
     env.Append(CXXFLAGS = ['-march=armv8-a'])
-    env.Append(CPPDEFINES = ['ARM_COMPUTE_AARCH64_V8A'])
+    env.Append(CPPDEFINES = ['ARM_COMPUTE_AARCH64_V8A','NO_DOT_IN_TOOLCHAIN'])
     if env['os'] == 'linux':
         prefix = "aarch64-linux-gnu-"
     elif env['os'] == 'bare_metal':
         prefix = "aarch64-elf-"
     elif env['os'] == 'android':
         prefix = "aarch64-linux-android-"
+        env.Append(CXXFLAGS = ['-no-integrated-as'])
 elif env['arch'] == 'arm64-v8.2-a':
     env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
-    env.Append(CPPDEFINES = ['ARM_COMPUTE_AARCH64_V8_2'])
+    env.Append(CPPDEFINES = ['ARM_COMPUTE_AARCH64_V8_2','NO_DOT_IN_TOOLCHAIN'])
     if 'clang++' in cpp_compiler:
         env.Append(CXXFLAGS = ['-fno-integrated-as'])
-
     if env['os'] == 'linux':
         prefix = "aarch64-linux-gnu-"
     elif env['os'] == 'bare_metal':

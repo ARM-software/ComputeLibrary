@@ -26,37 +26,20 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/NEON/kernels/arm32/NEGEMMAArch32Kernel.h"
-#include "arm_compute/core/NEON/kernels/arm64/NEGEMMAArch64Kernel.h"
-#include "arm_compute/core/NEON/kernels/arm64/NEGEMVAArch64Kernel.h"
-#include "arm_compute/core/NEON/kernels/arm64/NEHGEMMAArch64FP16Kernel.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/runtime/NEON/AssemblyHelper.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "support/ToolchainSupport.h"
-
-namespace arm_compute
-{
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wswitch-default"
-#pragma GCC diagnostic ignored "-Weffc++"
-#include "arm_compute/core/NEON/kernels/assembly/gemm_interleaved.hpp"
-#include "arm_compute/core/NEON/kernels/assembly/gemv_transposed.hpp"
-#include "arm_compute/core/NEON/kernels/assembly/kernels/a32_sgemm_8x6.hpp"
-#include "arm_compute/core/NEON/kernels/assembly/kernels/a64_hgemm_24x8.hpp"
-#include "arm_compute/core/NEON/kernels/assembly/kernels/a64_sgemm_12x8.hpp"
-#include "arm_compute/core/NEON/kernels/assembly/kernels/a64_sgemv_trans.hpp"
-#pragma GCC diagnostic pop
-} // namespace arm_compute
 
 #include <cmath>
 
 namespace arm_compute
 {
 NEGEMM::NEGEMM(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _mm_optimised_kernel(nullptr), _ma_kernel(), _tmp_a(), _tmp_b(), _workspace(),
+    : _memory_group(std::move(memory_manager)), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _asm_glue(), _ma_kernel(), _tmp_a(), _tmp_b(), _workspace(),
       _run_vector_matrix_multiplication(false), _run_addition(false), _is_first_run(true), _reshape_b_only_on_first_run(false)
 {
 }
@@ -82,42 +65,13 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
     // Check if we need to reshape the matrix B only on the first run
     _reshape_b_only_on_first_run      = gemm_info.reshape_b_only_on_first_run();
     _run_vector_matrix_multiplication = a->info()->dimension(1) < 2;
+    const bool run_optimised          = setup_assembly_kernel(a, b, c, d, alpha, beta, _workspace, _memory_group, _asm_glue);
 
     // Check if the first input tensor is a vector.
     // If so, all the kernels for reshaping the tensors can be skipped
     if(_run_vector_matrix_multiplication)
     {
-#if defined(__aarch64__)
-        if(NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV8 && a->info()->data_type() == DataType::F32 && (c == nullptr || beta == 0.f))
-        {
-            _mm_optimised_kernel = support::cpp14::make_unique<NEGEMVAArch64Kernel>();
-        }
-
-        if(_mm_optimised_kernel != nullptr)
-        {
-            struct CPUInfo ci = NEScheduler::get().cpu_info();
-
-            const int N = d->info()->tensor_shape().x();
-            const int K = a->info()->tensor_shape().x();
-
-            size_t workbench_size = 0;
-
-            if(a->info()->data_type() == DataType::F32)
-            {
-                workbench_size = GemvTransposed<sgemv_trans, sgemv_trans::operand_type, sgemv_trans::result_type>(&ci, N, K).get_working_size();
-            }
-
-            constexpr size_t alignment = 4096;
-            ARM_COMPUTE_ERROR_ON_MSG(workbench_size == 0, "size cannot be 0");
-            _workspace.allocator()->init(TensorInfo(TensorShape{ (workbench_size + alignment - 1) * NEScheduler::get().num_threads() }, 1, DataType::S8));
-            _memory_group.manage(&_workspace);
-
-            // Configure matrix multiplication kernel
-            _mm_optimised_kernel->configure(a, b, d, &_workspace, alpha, 0.f, false /* is_transposed_0 */, false /* is_transposed_1 */);
-            _workspace.allocator()->allocate();
-        }
-        else
-#endif /* defined(__aarch64__) */
+        if(!run_optimised)
         {
             // Configure the matrix multiply kernel
             _mm_kernel.configure(a, b, d, alpha, false);
@@ -132,65 +86,7 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
     }
     else
     {
-#if defined(__arm__)
-        if(NEScheduler::get().cpu_info().CPU == CPUTarget::ARMV7 && a->info()->data_type() == DataType::F32 && (c == nullptr || beta == 0.f))
-        {
-            _mm_optimised_kernel = support::cpp14::make_unique<NEGEMMAArch32Kernel>();
-        }
-#elif defined(__aarch64__)
-        if(NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV8 && a->info()->data_type() == DataType::F32 && (c == nullptr || beta == 0.f))
-        {
-            _mm_optimised_kernel = support::cpp14::make_unique<NEGEMMAArch64Kernel>();
-        }
-        else if(a->info()->data_type() == DataType::F16 && (c == nullptr || beta == 0.f))
-        {
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-            _mm_optimised_kernel = support::cpp14::make_unique<NEHGEMMAArch64FP16Kernel>();
-#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-            ARM_COMPUTE_ERROR("Recompile the library with arch=arm64-v8.2-a to enable support for FP16.");
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-        }
-#endif /* defined(__arm__) || defined(__aarch64__) */
-
-#if defined(__arm__) || defined(__aarch64__)
-        if(_mm_optimised_kernel != nullptr)
-        {
-            struct CPUInfo ci = NEScheduler::get().cpu_info();
-
-            const int M = d->info()->tensor_shape().y();
-            const int N = d->info()->tensor_shape().x();
-            const int K = a->info()->tensor_shape().x();
-
-            size_t workbench_size = 0;
-
-#if defined(__arm__)
-            workbench_size = GemmInterleaved<sgemm_8x6, sgemm_8x6::operand_type, sgemm_8x6::result_type>(&ci, M, N, K, false, false).get_working_size();
-#elif defined(__aarch64__)
-            if(a->info()->data_type() == DataType::F32)
-            {
-                workbench_size = GemmInterleaved<sgemm_12x8, sgemm_12x8::operand_type, sgemm_12x8::result_type>(&ci, M, N, K, false, false).get_working_size();
-            }
-            else if(a->info()->data_type() == DataType::F16)
-            {
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-                workbench_size = GemmInterleaved<hgemm_24x8, hgemm_24x8::operand_type, hgemm_24x8::result_type>(&ci, M, N, K, false, false).get_working_size();
-#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-                ARM_COMPUTE_ERROR("Recompile the library with arch=arm64-v8.2-a to enable support for FP16.");
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-            }
-#endif /* defined(__arm__) || defined(__aarch64__) */
-
-            constexpr size_t alignment = 4096;
-            ARM_COMPUTE_ERROR_ON_MSG(workbench_size == 0, "size cannot be 0");
-            _workspace.allocator()->init(TensorInfo(TensorShape{ (workbench_size + alignment - 1) * NEScheduler::get().num_threads() }, 1, DataType::S8));
-            _memory_group.manage(&_workspace);
-
-            // Configure matrix multiplication kernel
-            _mm_optimised_kernel->configure(a, b, d, &_workspace, alpha, 0.f, false /* is_transposed_0 */, false /* is_transposed_1 */);
-            _workspace.allocator()->allocate();
-        }
-        else
-#endif /* defined(__arm__) || defined(__aarch64__) */
+        if(!run_optimised)
         {
             TensorShape shape_tmp_a = a->info()->tensor_shape();
             TensorShape shape_tmp_b = b->info()->tensor_shape();
@@ -243,9 +139,9 @@ void NEGEMM::run()
 {
     _memory_group.acquire();
 
-    if(_mm_optimised_kernel != nullptr)
+    if(_asm_glue._optimised_kernel != nullptr)
     {
-        NEScheduler::get().schedule(_mm_optimised_kernel.get(), Window::DimY);
+        _asm_glue.run();
         _memory_group.release();
     }
     else
