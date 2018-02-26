@@ -26,8 +26,8 @@ For each release we provide some pre-built binaries of the library [here](https:
 These binaries have been built using the following toolchains:
             - Linux armv7a: gcc-linaro-arm-linux-gnueabihf-4.9-2014.07_linux
             - Linux arm64-v8a: gcc-linaro-4.9-2016.02-x86_64_aarch64-linux-gnu
-            - Android armv7a: clang++ / gnustl NDK r14
-            - Android am64-v8a: clang++ / gnustl NDK r14
+            - Android armv7a: clang++ / gnustl NDK r16b
+            - Android am64-v8a: clang++ / gnustl NDK r16b
 
 @warning Make sure to use a compatible toolchain to build your application or you will get some std::bad_alloc errors at runtime.
 
@@ -108,6 +108,8 @@ You should have the following file organisation:
 	│       │   └── OMPScheduler.h --> OpenMP scheduler (Alternative to the CPPScheduler)
 	│       ├── Memory manager files (LifetimeManager, PoolManager, etc.)
 	│       └── Basic implementations of the generic object interfaces (Array, Image, Tensor, etc.)
+	├── data -> Contains test images and reference data dumps used by validation tests
+	├── docs -> Contains Doxyfile and Doxygen sources used to generate the HTML pages in the documentation folder.
 	├── documentation
 	│   ├── index.xhtml
 	│   └── ...
@@ -155,6 +157,8 @@ You should have the following file organisation:
 	│   │   ├── Benchmark specific files
 	│   │   ├── CL --> OpenCL benchmarking tests
 	│   │   ├── GLES_COMPUTE --> GLES benchmarking tests
+	│   │   ├── fixtures
+	│   │   │   └── Fixtures to initialise and run the runtime Functions.
 	│   │   └── NEON --> NEON benchmarking tests
 	│   ├── datasets
 	│   │   └── Datasets for all the validation / benchmark tests, layer configurations for various networks, etc.
@@ -744,18 +748,17 @@ or
 @subsection S3_3_android Building for Android
 
 For Android, the library was successfully built and tested using Google's standalone toolchains:
- - NDK r14 arm-linux-androideabi-4.9 for armv7a (clang++)
- - NDK r14 aarch64-linux-android-4.9 for arm64-v8a (clang++)
+ - clang++ from NDK r16b for armv7a
+ - clang++ from NDK r16b for arm64-v8a
 
 Here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_toolchain.html">create your Android standalone toolchains from the NDK</a>
 
-- Download the NDK r14 from here: https://developer.android.com/ndk/downloads/index.html
+- Download the NDK r16b from here: https://developer.android.com/ndk/downloads/index.html
 - Make sure you have Python 2 installed on your machine.
 - Generate the 32 and/or 64 toolchains by running the following commands:
 
-
-	$NDK/build/tools/make_standalone_toolchain.py --arch arm64 --install-dir $MY_TOOLCHAINS/aarch64-linux-android-4.9 --stl gnustl --api 21
-	$NDK/build/tools/make_standalone_toolchain.py --arch arm --install-dir $MY_TOOLCHAINS/arm-linux-androideabi-4.9 --stl gnustl --api 21
+	$NDK/build/tools/make_standalone_toolchain.py --arch arm64 --install-dir $MY_TOOLCHAINS/aarch64-linux-android-ndk-r16b --stl gnustl --api 21
+	$NDK/build/tools/make_standalone_toolchain.py --arch arm --install-dir $MY_TOOLCHAINS/arm-linux-android-ndk-r16b --stl gnustl --api 21
 
 @attention Due to some NDK issues make sure you use clang++ & gnustl
 
