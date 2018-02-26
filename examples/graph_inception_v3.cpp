@@ -38,9 +38,9 @@ using namespace arm_compute::graph_utils;
 /** Example demonstrating how to implement InceptionV3's network using the Compute Library's graph API
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Path to the weights folder, [optional] image, [optional] labels )
+ * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL, 2 = OpenCL with Tuner), [optional] Path to the weights folder, [optional] image, [optional] labels )
  */
-class InceptionV3Example : public Example
+class InceptionV3Example final : public Example
 {
 public:
     void do_setup(int argc, char **argv) override
@@ -206,7 +206,6 @@ private:
                                      bool         is_name_different = false)
     {
         std::string total_path = "/cnn_data/inceptionv3_model/" + param_path + "_";
-        std::cout << total_path << std::endl;
 
         // This is due to a naming issue in the tf model
         std::string conv_id0 = "_0a_";
@@ -719,7 +718,7 @@ private:
 /** Main program for Inception V3
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] image, [optional] labels )
+ * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL, 2 = OpenCL with Tuner), [optional] Path to the weights folder, [optional] image, [optional] labels )
  */
 int main(int argc, char **argv)
 {
