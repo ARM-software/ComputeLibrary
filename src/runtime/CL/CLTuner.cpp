@@ -27,13 +27,66 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
+#include <fstream>
+#include <iostream>
 #include <limits>
 #include <string>
 
 using namespace arm_compute;
 
-CLTuner::CLTuner()
-    : real_function(nullptr), _lws_table(), _queue(), _queue_profiler(), _kernel_event()
+namespace
+{
+/* Function to be used to intercept kernel enqueues and store their OpenCL Event */
+class Interceptor
+{
+public:
+    explicit Interceptor(CLTuner &tuner);
+
+    /** clEnqueueNDRangeKernel interface
+     *
+     * @param[in] command_queue           A valid command-queue. The kernel will be queued for execution on the device associated with command_queue.
+     * @param[in] kernel                  A valid kernel object. The OpenCL context associated with kernel and command_queue must be the same.
+     * @param[in] work_dim                The number of dimensions used to specify the global work-items and work-items in the work-group. work_dim must be greater than zero and less than or equal to CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS.
+     * @param[in] gwo                     Global-Workgroup-Offset. It can be used to specify an array of work_dim unsigned values that describe the offset used to calculate the global ID of a work-item. If global_work_offset is NULL, the global IDs start at offset (0, 0, ... 0).
+     * @param[in] gws                     Global-Workgroup-Size. Points to an array of work_dim unsigned values that describe the number of global work-items in work_dim dimensions that will execute the kernel function.
+     * @param[in] lws                     Local-Workgroup-Size. Points to an array of work_dim unsigned values that describe the number of work-items that make up a work-group
+     * @param[in] num_events_in_wait_list Number of events in the waiting list
+     * @param[in] event_wait_list         Event waiting list
+     * @param[in] event                   OpenCL kernel event
+     *
+     * @return the OpenCL status
+     */
+    cl_int operator()(cl_command_queue command_queue, cl_kernel kernel, cl_uint work_dim, const size_t *gwo, const size_t *gws, const size_t *lws, cl_uint num_events_in_wait_list,
+                      const cl_event *event_wait_list, cl_event *event);
+
+private:
+    CLTuner &_tuner;
+};
+
+Interceptor::Interceptor(CLTuner &tuner)
+    : _tuner(tuner)
+{
+}
+
+cl_int Interceptor::operator()(cl_command_queue command_queue, cl_kernel kernel, cl_uint work_dim, const size_t *gwo, const size_t *gws, const size_t *lws, cl_uint num_events_in_wait_list,
+                               const cl_event *event_wait_list, cl_event *event)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(event != nullptr, "Not supported");
+    ARM_COMPUTE_UNUSED(event);
+
+    cl_event tmp;
+    cl_int   retval = _tuner.real_clEnqueueNDRangeKernel(command_queue, kernel, work_dim, gwo, gws, lws, num_events_in_wait_list, event_wait_list, &tmp);
+
+    // Set OpenCL event
+    _tuner.set_cl_kernel_event(tmp);
+
+    return retval;
+}
+
+} // namespace
+
+CLTuner::CLTuner(bool tune_new_kernels)
+    : real_clEnqueueNDRangeKernel(nullptr), _lws_table(), _queue(), _queue_profiler(), _kernel_event(), _tune_new_kernels(tune_new_kernels)
 {
 }
 
@@ -42,11 +95,53 @@ void CLTuner::set_cl_kernel_event(cl_event kernel_event)
     _kernel_event = kernel_event;
 }
 
+void CLTuner::set_tune_new_kernels(bool tune_new_kernels)
+{
+    _tune_new_kernels = tune_new_kernels;
+}
+
 void CLTuner::tune_kernel(ICLKernel &kernel)
 {
-    if(real_function == nullptr)
+    // Get the configuration ID from the kernel
+    const std::string &config_id = kernel.config_id();
+
+    // Check if we need to find the Optimal LWS. If config_id is equal to default_config_id, the kernel does not require to be tuned
+    if(config_id != arm_compute::default_config_id)
     {
-        real_function = CLSymbols::get().clEnqueueNDRangeKernel_ptr;
+        auto p = _lws_table.find(config_id);
+
+        if(p == _lws_table.end())
+        {
+            if(_tune_new_kernels)
+            {
+                // Find the optimal LWS for the kernel
+                cl::NDRange opt_lws = find_optimal_lws(kernel);
+
+                // Insert the optimal LWS in the table
+                add_lws_to_table(config_id, opt_lws);
+
+                // Set Local-Workgroup-Size
+                kernel.set_lws_hint(opt_lws);
+            }
+        }
+        else
+        {
+            // Set Local-Workgroup-Size
+            kernel.set_lws_hint(p->second);
+        }
+    }
+}
+
+void CLTuner::add_lws_to_table(const std::string &kernel_id, cl::NDRange optimal_lws)
+{
+    _lws_table.emplace(kernel_id, optimal_lws);
+}
+
+cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel)
+{
+    if(real_clEnqueueNDRangeKernel == nullptr)
+    {
+        real_clEnqueueNDRangeKernel = CLSymbols::get().clEnqueueNDRangeKernel_ptr;
 
         // Get the default queue
         _queue = CLScheduler::get().queue();
@@ -64,42 +159,9 @@ void CLTuner::tune_kernel(ICLKernel &kernel)
             _queue_profiler = _queue;
         }
     }
+    // Set profiler queue
+    CLScheduler::get().set_queue(_queue_profiler);
 
-    // Get the configuration ID from the kernel
-    const std::string &config_id = kernel.config_id();
-
-    // Check if we need to find the Optimal LWS. If config_id is equal to default_config_id, the kernel does not require to be tuned
-    if(config_id != arm_compute::default_config_id)
-    {
-        auto p = _lws_table.find(config_id);
-
-        if(p == _lws_table.end())
-        {
-            // Set profiler queue
-            CLScheduler::get().set_queue(_queue_profiler);
-
-            // Find the optimal LWS for the kernel
-            cl::NDRange opt_lws = find_optimal_lws(kernel);
-
-            // Insert the optimal LWS in the table
-            _lws_table.emplace(config_id, opt_lws);
-
-            // Set Local-Workgroup-Size
-            kernel.set_lws_hint(opt_lws);
-
-            // Restore queue
-            CLScheduler::get().set_queue(_queue);
-        }
-        else
-        {
-            // Set Local-Workgroup-Size
-            kernel.set_lws_hint(p->second);
-        }
-    }
-}
-
-cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel)
-{
     // Start intercepting enqueues:
     CLSymbols::get().clEnqueueNDRangeKernel_ptr = Interceptor(*this);
 
@@ -170,7 +232,10 @@ cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel)
     }
 
     // Restore real function
-    CLSymbols::get().clEnqueueNDRangeKernel_ptr = real_function;
+    CLSymbols::get().clEnqueueNDRangeKernel_ptr = real_clEnqueueNDRangeKernel;
+
+    // Restore queue
+    CLScheduler::get().set_queue(_queue);
 
     return opt_lws;
 }
@@ -181,27 +246,74 @@ void CLTuner::import_lws_table(const std::unordered_map<std::string, cl::NDRange
     _lws_table = lws_table;
 }
 
-const std::unordered_map<std::string, cl::NDRange> &CLTuner::export_lws_table()
+const std::unordered_map<std::string, cl::NDRange> &CLTuner::export_lws_table() const
 {
     return _lws_table;
 }
 
-Interceptor::Interceptor(CLTuner &tuner)
-    : _tuner(tuner)
+CLFileTuner::CLFileTuner(std::string file_path, bool update_file, bool tune_new_kernels)
+    : CLTuner(tune_new_kernels), filename(std::move(file_path)), _update_file(update_file)
 {
+    std::ifstream fs(filename);
+    if(fs.is_open())
+    {
+        std::string line;
+        while(!std::getline(fs, line).fail())
+        {
+            std::istringstream ss(line);
+            std::string        token;
+            if(!std::getline(ss, token, ';'))
+            {
+                continue;
+            }
+            std::string kernel_id = token;
+            cl::NDRange lws(1, 1, 1);
+            bool        lws_is_valid = true;
+            for(int i = 0; i < 3; i++)
+            {
+                if(std::getline(ss, token, ';').fail())
+                {
+                    lws_is_valid = false;
+                    break;
+                }
+                lws.get()[i] = support::cpp11::stoi(token);
+            }
+            if(!lws_is_valid)
+            {
+                continue; // Skip this kernel
+            }
+
+            // If all dimensions are 0: reset to NullRange (i.e nullptr)
+            if(lws[0] == 0 && lws[1] == 0 && lws[2] == 0)
+            {
+                lws = cl::NullRange;
+            }
+            add_lws_to_table(kernel_id, lws);
+        }
+        fs.close();
+    }
 }
 
-cl_int Interceptor::operator()(cl_command_queue command_queue, cl_kernel kernel, cl_uint work_dim, const size_t *gwo, const size_t *gws, const size_t *lws, cl_uint num_events_in_wait_list,
-                               const cl_event *event_wait_list, cl_event *event)
+void CLFileTuner::save_to_file() const
 {
-    ARM_COMPUTE_ERROR_ON_MSG(event != nullptr, "Not supported");
-    ARM_COMPUTE_UNUSED(event);
+    const std::unordered_map<std::string, cl::NDRange> &table = export_lws_table();
+    std::ofstream fs(filename);
+    for(auto kernel_data : table)
+    {
+        fs << kernel_data.first << ";" << kernel_data.second[0] << ";" << kernel_data.second[1] << ";" << kernel_data.second[2] << std::endl;
+    }
+    fs.close();
+}
 
-    cl_event tmp;
-    cl_int   retval = _tuner.real_function(command_queue, kernel, work_dim, gwo, gws, lws, num_events_in_wait_list, event_wait_list, &tmp);
+CLFileTuner::~CLFileTuner()
+{
+    if(_update_file)
+    {
+        save_to_file();
+    }
+}
 
-    // Set OpenCL event
-    _tuner.set_cl_kernel_event(tmp);
-
-    return retval;
+void CLFileTuner::set_update_file(bool update_file)
+{
+    _update_file = update_file;
 }
