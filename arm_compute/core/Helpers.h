@@ -588,6 +588,16 @@ bool set_format_if_unknown(ITensorInfo &info, Format format);
  */
 bool set_data_type_if_unknown(ITensorInfo &info, DataType data_type);
 
+/* Set the data layout to the specified value if
+ * the current data layout is unknown.
+ *
+ * @param[in,out] info        Tensor info used to check and assign.
+ * @param[in]     data_layout New data layout.
+ *
+ * @return True if the data type has been changed.
+ */
+bool set_data_layout_if_unknown(ITensorInfo &info, DataLayout data_layout);
+
 /* Set the fixed point position to the specified value if
  * the current fixed point position is 0 and the data type is QS8 or QS16
  *
@@ -637,6 +647,15 @@ inline Coordinates index2coords(const TensorShape &shape, int index);
  * @return linead index
  */
 inline int coords2index(const TensorShape &shape, const Coordinates &coord);
+
+/* Get the index of the given dimension.
+ *
+ * @param[in] info        Tensor info used to check and assign.
+ * @param[in] data_layout New data layout.
+ *
+ * @return The int conversion of the requested data layout index.
+ */
+inline int get_data_layout_dimension_index(const ITensorInfo &info, const DataLayoutDimension data_layout_dimension);
 } // namespace arm_compute
 
 #include "arm_compute/core/Helpers.inl"

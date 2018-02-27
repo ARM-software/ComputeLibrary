@@ -220,6 +220,7 @@ public:
     ITensorInfo &set_tensor_shape(const TensorShape &shape) override;
     ITensorInfo &set_fixed_point_position(int fixed_point_position) override;
     ITensorInfo &set_quantization_info(const QuantizationInfo &quantization_info) override;
+    ITensorInfo &set_data_layout(const DataLayout &data_layout) override;
     ITensorInfo &reset_padding() override;
     bool         auto_padding() override;
     bool extend_padding(const PaddingSize &padding) override;
@@ -297,6 +298,10 @@ public:
     {
         return _quantization_info;
     }
+    DataLayout data_layout() const override
+    {
+        return _data_layout;
+    }
 
 private:
     /** Calculates strides, offset and total size resulting from the specified padding around the XY plane.
@@ -317,6 +322,7 @@ private:
     ValidRegion      _valid_region;
     PaddingSize      _padding;
     QuantizationInfo _quantization_info;
+    DataLayout       _data_layout;
 };
 }
 #endif /*__ARM_COMPUTE_TENSORINFO_H__ */

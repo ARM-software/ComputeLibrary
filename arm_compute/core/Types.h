@@ -109,8 +109,18 @@ constexpr float SCALE_PYRAMID_ORB = 8.408964152537146130583778358414e-01;
 /** Supported tensor data layouts */
 enum class DataLayout
 {
+    UNKNOWN,
     NCHW,
     NHWC
+};
+
+/** Supported tensor data layout dimensions */
+enum class DataLayoutDimension
+{
+    CHANNEL,
+    HEIGHT,
+    WIDTH,
+    BATCHES
 };
 
 /** Quantization settings (used for QASYMM8 data type) */

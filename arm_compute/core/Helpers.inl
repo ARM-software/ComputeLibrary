@@ -227,6 +227,7 @@ inline bool auto_init_if_empty(ITensorInfo &info_sink, const ITensorInfo &info_s
         info_sink.set_tensor_shape(info_source.tensor_shape());
         info_sink.set_fixed_point_position(info_source.fixed_point_position());
         info_sink.set_quantization_info(info_source.quantization_info());
+        info_sink.set_data_layout(info_source.data_layout());
         return true;
     }
 
@@ -260,6 +261,17 @@ inline bool set_data_type_if_unknown(ITensorInfo &info, DataType data_type)
     if(info.data_type() == DataType::UNKNOWN)
     {
         info.set_data_type(data_type);
+        return true;
+    }
+
+    return false;
+}
+
+inline bool set_data_layout_if_unknown(ITensorInfo &info, DataLayout data_layout)
+{
+    if(info.data_layout() == DataLayout::UNKNOWN)
+    {
+        info.set_data_layout(data_layout);
         return true;
     }
 
@@ -356,5 +368,34 @@ inline int coords2index(const TensorShape &shape, const Coordinates &coord)
     }
 
     return index;
+}
+
+inline int get_data_layout_dimension_index(const ITensorInfo &info, const DataLayoutDimension data_layout_dimension)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(info.data_layout() == DataLayout::UNKNOWN, "Cannot retrieve the dimension index for an unknown layout!");
+
+    /* Return the index based on the data layout
+     * [N C H W]
+     * [3 2 1 0]
+     * [N H W C]
+    */
+    switch(data_layout_dimension)
+    {
+        case DataLayoutDimension::CHANNEL:
+            return (info.data_layout() == DataLayout::NCHW) ? 2 : 0;
+            break;
+        case DataLayoutDimension::HEIGHT:
+            return (info.data_layout() == DataLayout::NCHW) ? 1 : 2;
+            break;
+        case DataLayoutDimension::WIDTH:
+            return (info.data_layout() == DataLayout::NCHW) ? 0 : 1;
+            break;
+        case DataLayoutDimension::BATCHES:
+            return 3;
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Data layout index not supported!");
+            break;
+    }
 }
 } // namespace arm_compute

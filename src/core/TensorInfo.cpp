@@ -34,7 +34,7 @@ using namespace arm_compute;
 
 TensorInfo::TensorInfo()
     : _total_size(0), _fixed_point_position(0), _offset_first_element_in_bytes(0), _strides_in_bytes(), _num_channels(0), _tensor_shape(), _data_type(DataType::UNKNOWN), _format(Format::UNKNOWN),
-      _is_resizable{ true }, _valid_region{ Coordinates(), _tensor_shape }, _padding{ 0 }, _quantization_info()
+      _is_resizable{ true }, _valid_region{ Coordinates(), _tensor_shape }, _padding{ 0 }, _quantization_info(), _data_layout(DataLayout::NCHW)
 {
 }
 
@@ -53,6 +53,7 @@ TensorInfo::TensorInfo(const ITensorInfo &info)
     _valid_region                  = info.valid_region();
     _padding                       = info.padding();
     _quantization_info             = info.quantization_info();
+    _data_layout                   = info.data_layout();
 }
 
 TensorInfo::TensorInfo(Format format)
@@ -381,6 +382,12 @@ ITensorInfo &TensorInfo::set_fixed_point_position(int fixed_point_position)
 ITensorInfo &TensorInfo::set_quantization_info(const QuantizationInfo &quantization_info)
 {
     _quantization_info = quantization_info;
+    return *this;
+}
+
+ITensorInfo &TensorInfo::set_data_layout(const DataLayout &data_layout)
+{
+    _data_layout = data_layout;
     return *this;
 }
 
