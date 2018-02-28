@@ -73,7 +73,11 @@ cl_int Interceptor::operator()(cl_command_queue command_queue, cl_kernel kernel,
 {
     ARM_COMPUTE_ERROR_ON_MSG(event != nullptr, "Not supported");
     ARM_COMPUTE_UNUSED(event);
-
+    if(_tuner.kernel_event_is_set())
+    {
+        // If the event is already set it means the kernel enqueue is sliced: given that we only time the first slice we can save time by skipping the other enqueues.
+        return CL_SUCCESS;
+    }
     cl_event tmp;
     cl_int   retval = _tuner.real_clEnqueueNDRangeKernel(command_queue, kernel, work_dim, gwo, gws, lws, num_events_in_wait_list, event_wait_list, &tmp);
 
@@ -90,6 +94,10 @@ CLTuner::CLTuner(bool tune_new_kernels)
 {
 }
 
+bool CLTuner::kernel_event_is_set() const
+{
+    return _kernel_event() != nullptr;
+}
 void CLTuner::set_cl_kernel_event(cl_event kernel_event)
 {
     _kernel_event = kernel_event;
@@ -163,9 +171,6 @@ cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel)
             _queue_profiler = _queue;
         }
     }
-    // Set profiler queue
-    CLScheduler::get().set_queue(_queue_profiler);
-
     // Start intercepting enqueues:
     CLSymbols::get().clEnqueueNDRangeKernel_ptr = Interceptor(*this);
 
@@ -189,11 +194,12 @@ cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel)
         // Run the kernel
         kernel.run(kernel.window(), _queue_profiler);
 
-        CLScheduler::get().sync();
+        _queue_profiler.finish();
 
         const cl_ulong start = _kernel_event.getProfilingInfo<CL_PROFILING_COMMAND_START>();
         const cl_ulong end   = _kernel_event.getProfilingInfo<CL_PROFILING_COMMAND_END>();
         const cl_ulong diff  = end - start;
+        _kernel_event        = nullptr;
 
         min_exec_time = diff;
     }
@@ -219,11 +225,12 @@ cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel)
                 // Run the kernel
                 kernel.run(kernel.window(), _queue_profiler);
 
-                CLScheduler::get().sync();
+                _queue_profiler.finish();
 
                 const cl_ulong start = _kernel_event.getProfilingInfo<CL_PROFILING_COMMAND_START>();
                 const cl_ulong end   = _kernel_event.getProfilingInfo<CL_PROFILING_COMMAND_END>();
                 const cl_ulong diff  = end - start;
+                _kernel_event        = nullptr;
 
                 // Check the execution time
                 if(diff < min_exec_time)
@@ -237,9 +244,6 @@ cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel)
 
     // Restore real function
     CLSymbols::get().clEnqueueNDRangeKernel_ptr = real_clEnqueueNDRangeKernel;
-
-    // Restore queue
-    CLScheduler::get().set_queue(_queue);
 
     return opt_lws;
 }
@@ -258,7 +262,7 @@ const std::unordered_map<std::string, cl::NDRange> &CLTuner::lws_table() const
 void CLTuner::load_from_file(const std::string &filename)
 {
     std::ifstream fs;
-    fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    fs.exceptions(std::ifstream::badbit);
     fs.open(filename, std::ios::in);
     if(fs.is_open())
     {
@@ -267,9 +271,9 @@ void CLTuner::load_from_file(const std::string &filename)
         {
             std::istringstream ss(line);
             std::string        token;
-            if(!std::getline(ss, token, ';'))
+            if(std::getline(ss, token, ';').fail())
             {
-                ARM_COMPUTE_ERROR("Malformed row '%s' (Should be of the form 'kernel_id;lws[0];lws[1];lws[2]')", ss.str().c_str());
+                ARM_COMPUTE_ERROR("Malformed row '%s' in %s (Should be of the form 'kernel_id;lws[0];lws[1];lws[2]')", ss.str().c_str(), filename.c_str());
             }
             std::string kernel_id = token;
             cl::NDRange lws(1, 1, 1);
@@ -277,7 +281,7 @@ void CLTuner::load_from_file(const std::string &filename)
             {
                 if(std::getline(ss, token, ';').fail())
                 {
-                    ARM_COMPUTE_ERROR("Malformed row '%s' (Should be of the form 'kernel_id;lws[0];lws[1];lws[2]')", ss.str().c_str());
+                    ARM_COMPUTE_ERROR("Malformed row '%s' in %s (Should be of the form 'kernel_id;lws[0];lws[1];lws[2]')", ss.str().c_str(), filename.c_str());
                 }
                 lws.get()[i] = support::cpp11::stoi(token);
             }

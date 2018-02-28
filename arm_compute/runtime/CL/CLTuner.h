@@ -100,6 +100,12 @@ public:
     // Inherited methods overridden:
     void tune_kernel(ICLKernel &kernel) override;
 
+    /** Is the kernel_event set ?
+     *
+     * @return true if the kernel_event is set.
+     */
+    bool kernel_event_is_set() const;
+
 private:
     /** Find optimal LWS using brute-force approach
      *
