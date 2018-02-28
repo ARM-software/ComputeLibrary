@@ -99,6 +99,10 @@ void CLTuner::set_tune_new_kernels(bool tune_new_kernels)
 {
     _tune_new_kernels = tune_new_kernels;
 }
+bool CLTuner::tune_new_kernels() const
+{
+    return _tune_new_kernels;
+}
 
 void CLTuner::tune_kernel(ICLKernel &kernel)
 {
@@ -246,15 +250,16 @@ void CLTuner::import_lws_table(const std::unordered_map<std::string, cl::NDRange
     _lws_table = lws_table;
 }
 
-const std::unordered_map<std::string, cl::NDRange> &CLTuner::export_lws_table() const
+const std::unordered_map<std::string, cl::NDRange> &CLTuner::lws_table() const
 {
     return _lws_table;
 }
 
-CLFileTuner::CLFileTuner(std::string file_path, bool update_file, bool tune_new_kernels)
-    : CLTuner(tune_new_kernels), filename(std::move(file_path)), _update_file(update_file)
+void CLTuner::load_from_file(const std::string &filename)
 {
-    std::ifstream fs(filename);
+    std::ifstream fs;
+    fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    fs.open(filename, std::ios::in);
     if(fs.is_open())
     {
         std::string line;
@@ -264,23 +269,17 @@ CLFileTuner::CLFileTuner(std::string file_path, bool update_file, bool tune_new_
             std::string        token;
             if(!std::getline(ss, token, ';'))
             {
-                continue;
+                ARM_COMPUTE_ERROR("Malformed row '%s' (Should be of the form 'kernel_id;lws[0];lws[1];lws[2]')", ss.str().c_str());
             }
             std::string kernel_id = token;
             cl::NDRange lws(1, 1, 1);
-            bool        lws_is_valid = true;
             for(int i = 0; i < 3; i++)
             {
                 if(std::getline(ss, token, ';').fail())
                 {
-                    lws_is_valid = false;
-                    break;
+                    ARM_COMPUTE_ERROR("Malformed row '%s' (Should be of the form 'kernel_id;lws[0];lws[1];lws[2]')", ss.str().c_str());
                 }
                 lws.get()[i] = support::cpp11::stoi(token);
-            }
-            if(!lws_is_valid)
-            {
-                continue; // Skip this kernel
             }
 
             // If all dimensions are 0: reset to NullRange (i.e nullptr)
@@ -294,26 +293,14 @@ CLFileTuner::CLFileTuner(std::string file_path, bool update_file, bool tune_new_
     }
 }
 
-void CLFileTuner::save_to_file() const
+void CLTuner::save_to_file(const std::string &filename) const
 {
-    const std::unordered_map<std::string, cl::NDRange> &table = export_lws_table();
-    std::ofstream fs(filename);
-    for(auto kernel_data : table)
+    std::ofstream fs;
+    fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    fs.open(filename, std::ios::out);
+    for(auto kernel_data : _lws_table)
     {
         fs << kernel_data.first << ";" << kernel_data.second[0] << ";" << kernel_data.second[1] << ";" << kernel_data.second[2] << std::endl;
     }
     fs.close();
-}
-
-CLFileTuner::~CLFileTuner()
-{
-    if(_update_file)
-    {
-        save_to_file();
-    }
-}
-
-void CLFileTuner::set_update_file(bool update_file)
-{
-    _update_file = update_file;
 }

@@ -47,11 +47,16 @@ public:
     /** Destructor */
     ~CLTuner() = default;
 
-    /* Setter for tune_new_kernels option
+    /** Setter for tune_new_kernels option
      *
      * @param[in] tune_new_kernels Find the optimal local workgroup size for kernels which are not present in the table ?
      */
     void set_tune_new_kernels(bool tune_new_kernels);
+    /** Tune kernels that are not in the LWS table
+     *
+     * @return True if tuning of new kernels is enabled.
+     */
+    bool tune_new_kernels() const;
     /** Manually add a LWS for a kernel
      *
      * @param[in] kernel_id   Unique identifiant of the kernel
@@ -64,11 +69,11 @@ public:
      */
     void import_lws_table(const std::unordered_map<std::string, cl::NDRange> &lws_table);
 
-    /** Export LWS table
+    /** Give read access to the LWS table
      *
      * return The lws table as unordered_map container
      */
-    const std::unordered_map<std::string, cl::NDRange> &export_lws_table() const;
+    const std::unordered_map<std::string, cl::NDRange> &lws_table() const;
 
     /** Set the OpenCL kernel event
      *
@@ -79,6 +84,18 @@ public:
     void set_cl_kernel_event(cl_event kernel_event);
 
     std::function<decltype(clEnqueueNDRangeKernel)> real_clEnqueueNDRangeKernel;
+
+    /** Load the LWS table from file
+     *
+     * @param[in] filename Load the LWS table from this file.(Must exist)
+     */
+    void load_from_file(const std::string &filename);
+
+    /** Save the content of the LWS table to file
+     *
+     * @param[in] filename Save the LWS table to this file. (Content will be overwritten)
+     */
+    void save_to_file(const std::string &filename) const;
 
     // Inherited methods overridden:
     void tune_kernel(ICLKernel &kernel) override;
@@ -97,36 +114,6 @@ private:
     cl::CommandQueue _queue_profiler;
     cl::Event        _kernel_event;
     bool             _tune_new_kernels;
-};
-
-class CLFileTuner : public CLTuner
-{
-public:
-    /** Constructor
-     *
-     * @param[in] file_path        File to load/store the tuning information from
-     * @param[in] update_file      If true, save the new LWS table to the file on exit.
-     * @param[in] tune_new_kernels Find the optimal local workgroup size for kernels which are not present in the table ?
-     */
-    CLFileTuner(std::string file_path = "acl_tuner.csv", bool update_file = false, bool tune_new_kernels = false);
-
-    /** Save the content of the LWS table to file
-     */
-    void save_to_file() const;
-    /* Setter for update_file option
-     *
-     * @param[in] update_file If true, save the new LWS table to the file on exit.
-     */
-    void set_update_file(bool update_file);
-    /** Destructor
-     *
-     * Will save the LWS table to the file if the CLFileTuner was created with update_file enabled.
-     */
-    ~CLFileTuner();
-    const std::string filename;
-
-private:
-    bool _update_file;
 };
 }
 #endif /*__ARM_COMPUTE_CLTUNER_H__ */
