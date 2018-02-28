@@ -32,6 +32,7 @@
 #include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Size2D.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "support/ToolchainSupport.h"

@@ -655,7 +655,7 @@ inline int coords2index(const TensorShape &shape, const Coordinates &coord);
  *
  * @return The int conversion of the requested data layout index.
  */
-inline int get_data_layout_dimension_index(const ITensorInfo &info, const DataLayoutDimension data_layout_dimension);
+inline size_t get_data_layout_dimension_index(const DataLayout data_layout, const DataLayoutDimension data_layout_dimension);
 } // namespace arm_compute
 
 #include "arm_compute/core/Helpers.inl"

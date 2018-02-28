@@ -370,9 +370,9 @@ inline int coords2index(const TensorShape &shape, const Coordinates &coord)
     return index;
 }
 
-inline int get_data_layout_dimension_index(const ITensorInfo &info, const DataLayoutDimension data_layout_dimension)
+inline size_t get_data_layout_dimension_index(const DataLayout data_layout, const DataLayoutDimension data_layout_dimension)
 {
-    ARM_COMPUTE_ERROR_ON_MSG(info.data_layout() == DataLayout::UNKNOWN, "Cannot retrieve the dimension index for an unknown layout!");
+    ARM_COMPUTE_ERROR_ON_MSG(data_layout == DataLayout::UNKNOWN, "Cannot retrieve the dimension index for an unknown layout!");
 
     /* Return the index based on the data layout
      * [N C H W]
@@ -382,13 +382,13 @@ inline int get_data_layout_dimension_index(const ITensorInfo &info, const DataLa
     switch(data_layout_dimension)
     {
         case DataLayoutDimension::CHANNEL:
-            return (info.data_layout() == DataLayout::NCHW) ? 2 : 0;
+            return (data_layout == DataLayout::NCHW) ? 2 : 0;
             break;
         case DataLayoutDimension::HEIGHT:
-            return (info.data_layout() == DataLayout::NCHW) ? 1 : 2;
+            return (data_layout == DataLayout::NCHW) ? 1 : 2;
             break;
         case DataLayoutDimension::WIDTH:
-            return (info.data_layout() == DataLayout::NCHW) ? 0 : 1;
+            return (data_layout == DataLayout::NCHW) ? 0 : 1;
             break;
         case DataLayoutDimension::BATCHES:
             return 3;

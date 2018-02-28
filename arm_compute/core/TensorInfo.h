@@ -28,6 +28,7 @@
 
 #include "ITensorInfo.h"
 #include "arm_compute/core/Coordinates.h"
+#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -227,6 +228,10 @@ public:
     size_t dimension(size_t index) const override
     {
         return _tensor_shape[index];
+    }
+    size_t dimension(DataLayoutDimension dimension) const override
+    {
+        return get_data_layout_dimension_index(_data_layout, dimension);
     }
     const Strides &strides_in_bytes() const override
     {

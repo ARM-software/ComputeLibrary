@@ -132,6 +132,13 @@ public:
      * @return Dimension of the requested dimension
      */
     virtual size_t dimension(size_t index) const = 0;
+    /** Return the size of the requested data layout dimension
+     *
+     * @param[in] dimension DataLayoutDimension of the dimension
+     *
+     * @return Dimension of the requested dimension
+     */
+    virtual size_t dimension(DataLayoutDimension dimension) const = 0;
     /** The strides in bytes for accessing each dimension of the tensor
      *
      * @return Strides in bytes for each tensor dimension

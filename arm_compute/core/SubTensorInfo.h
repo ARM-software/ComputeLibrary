@@ -127,6 +127,11 @@ public:
     {
         return _tensor_shape[index];
     }
+    size_t dimension(DataLayoutDimension dimension) const override
+    {
+        ARM_COMPUTE_ERROR_ON(_parent == nullptr);
+        return get_data_layout_dimension_index(_parent->data_layout(), dimension);
+    }
     const Strides &strides_in_bytes() const override
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
