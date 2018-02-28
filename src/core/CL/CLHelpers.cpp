@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -167,22 +167,9 @@ const std::string &string_from_target(GPUTarget target)
 
 GPUTarget get_target_from_device(cl::Device &device)
 {
-    size_t name_size = 0;
-
     // Query device name size
-    cl_int err = clGetDeviceInfo(device.get(), CL_DEVICE_NAME, 0, nullptr, &name_size);
-    ARM_COMPUTE_ERROR_ON_MSG((err != 0) || (name_size == 0), "clGetDeviceInfo failed to return valid information");
-    ARM_COMPUTE_UNUSED(err);
-
-    std::vector<char> name_buffer(name_size);
-
-    // Query device name
-    err = clGetDeviceInfo(device.get(), CL_DEVICE_NAME, name_size, name_buffer.data(), nullptr);
-    ARM_COMPUTE_ERROR_ON_MSG(err != 0, "clGetDeviceInfo failed to return valid information");
-    ARM_COMPUTE_UNUSED(err);
-
+    std::string device_name = device.getInfo<CL_DEVICE_NAME>();
     std::regex  mali_regex(R"(Mali-([TG])(\d+))");
-    std::string device_name(name_buffer.begin(), name_buffer.end());
     std::smatch name_parts;
     const bool  found_mali = std::regex_search(device_name, name_parts, mali_regex);
 
@@ -224,20 +211,7 @@ bool fp16_support(const cl::Device &device)
 
 CLVersion get_cl_version(const cl::Device &device)
 {
-    std::vector<char> version;
-    size_t            version_size = 0;
-    cl_int            err          = clGetDeviceInfo(device.get(), CL_DEVICE_VERSION, 0, nullptr, &version_size);
-    ARM_COMPUTE_ERROR_ON_MSG((err != 0) || (version_size == 0), "clGetDeviceInfo failed to return valid information");
-    ARM_COMPUTE_UNUSED(err);
-
-    // Resize vector
-    version.resize(version_size);
-    // Query version
-    err = clGetDeviceInfo(device.get(), CL_DEVICE_VERSION, version_size, version.data(), nullptr);
-    ARM_COMPUTE_ERROR_ON_MSG(err != 0, "clGetDeviceInfo failed to return valid information");
-    ARM_COMPUTE_UNUSED(err);
-
-    std::string version_str(version.begin(), version.end());
+    std::string version_str = device.getInfo<CL_DEVICE_VERSION>();
     if(version_str.find("OpenCL 2") != std::string::npos)
     {
         return CLVersion::CL20;
