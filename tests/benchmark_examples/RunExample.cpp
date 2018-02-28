@@ -41,6 +41,8 @@
 #include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
 #endif /* ARM_COMPUTE_GC */
 
+#include <libgen.h>
+
 using namespace arm_compute;
 using namespace arm_compute::test;
 
@@ -140,7 +142,7 @@ int run_example(int argc, char **argv, Example &example)
     }
     framework.set_throw_errors(options.throw_errors->value());
     arm_compute::test::framework::detail::TestSuiteRegistrar suite{ "Examples" };
-    framework.add_test_case<ExampleTest>(argv[0], framework::DatasetMode::ALL, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE);
+    framework.add_test_case<ExampleTest>(basename(argv[0]), framework::DatasetMode::ALL, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE);
 
     //func(argc, argv);
     bool success = framework.run();
