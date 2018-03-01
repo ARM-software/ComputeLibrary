@@ -33,6 +33,7 @@
 #include "tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1ConvolutionLayerDataset.h"
 #include "tests/datasets/system_tests/googlenet/inceptionv4/GoogLeNetInceptionV4ConvolutionLayerDataset.h"
 #include "tests/datasets/system_tests/lenet5/LeNet5ConvolutionLayerDataset.h"
+#include "tests/datasets/system_tests/mobilenet/MobileNetConvolutionLayerDataset.h"
 #include "tests/datasets/system_tests/squeezenet/SqueezeNetConvolutionLayerDataset.h"
 #include "tests/datasets/system_tests/vgg/vgg16/VGG16ConvolutionLayerDataset.h"
 #include "tests/datasets/system_tests/yolo/v2/YOLOV2ConvolutionLayerDataset.h"
@@ -95,6 +96,10 @@ REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4ConvolutionLayer, NEGEMMConv
 
 REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetConvolutionLayer, NEGEMMConvolutionLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetConvolutionLayerDataset(), data_types),
+                                                            framework::dataset::make("Batches", 1)));
+
+REGISTER_FIXTURE_DATA_TEST_CASE(MobileNetConvolutionLayer, NEGEMMConvolutionLayerFixture, framework::DatasetMode::ALL,
+                                framework::dataset::combine(framework::dataset::combine(datasets::MobileNetConvolutionLayerDataset(), data_types),
                                                             framework::dataset::make("Batches", 1)));
 
 TEST_SUITE(NIGHTLY)
