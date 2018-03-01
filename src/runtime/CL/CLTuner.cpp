@@ -27,6 +27,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
+#include <cerrno>
 #include <fstream>
 #include <iostream>
 #include <limits>
@@ -264,37 +265,38 @@ void CLTuner::load_from_file(const std::string &filename)
     std::ifstream fs;
     fs.exceptions(std::ifstream::badbit);
     fs.open(filename, std::ios::in);
-    if(fs.is_open())
+    if(!fs.is_open())
     {
-        std::string line;
-        while(!std::getline(fs, line).fail())
+        ARM_COMPUTE_ERROR("Failed to open '%s' (%s [%d])", filename.c_str(), strerror(errno), errno);
+    }
+    std::string line;
+    while(!std::getline(fs, line).fail())
+    {
+        std::istringstream ss(line);
+        std::string        token;
+        if(std::getline(ss, token, ';').fail())
         {
-            std::istringstream ss(line);
-            std::string        token;
+            ARM_COMPUTE_ERROR("Malformed row '%s' in %s (Should be of the form 'kernel_id;lws[0];lws[1];lws[2]')", ss.str().c_str(), filename.c_str());
+        }
+        std::string kernel_id = token;
+        cl::NDRange lws(1, 1, 1);
+        for(int i = 0; i < 3; i++)
+        {
             if(std::getline(ss, token, ';').fail())
             {
                 ARM_COMPUTE_ERROR("Malformed row '%s' in %s (Should be of the form 'kernel_id;lws[0];lws[1];lws[2]')", ss.str().c_str(), filename.c_str());
             }
-            std::string kernel_id = token;
-            cl::NDRange lws(1, 1, 1);
-            for(int i = 0; i < 3; i++)
-            {
-                if(std::getline(ss, token, ';').fail())
-                {
-                    ARM_COMPUTE_ERROR("Malformed row '%s' in %s (Should be of the form 'kernel_id;lws[0];lws[1];lws[2]')", ss.str().c_str(), filename.c_str());
-                }
-                lws.get()[i] = support::cpp11::stoi(token);
-            }
-
-            // If all dimensions are 0: reset to NullRange (i.e nullptr)
-            if(lws[0] == 0 && lws[1] == 0 && lws[2] == 0)
-            {
-                lws = cl::NullRange;
-            }
-            add_lws_to_table(kernel_id, lws);
+            lws.get()[i] = support::cpp11::stoi(token);
         }
-        fs.close();
+
+        // If all dimensions are 0: reset to NullRange (i.e nullptr)
+        if(lws[0] == 0 && lws[1] == 0 && lws[2] == 0)
+        {
+            lws = cl::NullRange;
+        }
+        add_lws_to_table(kernel_id, lws);
     }
+    fs.close();
 }
 
 void CLTuner::save_to_file(const std::string &filename) const
