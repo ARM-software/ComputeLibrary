@@ -99,10 +99,10 @@ default_c_compiler = 'gcc' if env['os'] != 'android' else 'clang'
 cpp_compiler = os.environ.get('CXX', default_cpp_compiler)
 c_compiler = os.environ.get('CC', default_c_compiler)
 
-if env['os'] == 'android' and ( cpp_compiler != 'clang++' or c_compiler != 'clang'):
+if env['os'] == 'android' and ( 'clang++' not in cpp_compiler or 'clang' not in c_compiler ):
     print "WARNING: Only clang is officially supported to build the Compute Library for Android"
 
-if cpp_compiler == 'clang++':
+if 'clang++' in cpp_compiler:
     env.Append(CXXFLAGS = ['-Wno-format-nonliteral','-Wno-deprecated-increment-bool','-Wno-vla-extension','-Wno-mismatched-tags'])
 else:
     env.Append(CXXFLAGS = ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel'])
@@ -111,7 +111,7 @@ if env['cppthreads']:
     env.Append(CPPDEFINES = [('ARM_COMPUTE_CPP_SCHEDULER', 1)])
 
 if env['openmp']:
-    if cpp_compiler == 'clang++':
+    if 'clang++' in cpp_compiler:
         print "Clang does not support OpenMP. Use scheduler=cpp."
         Exit(1)
 
@@ -144,7 +144,7 @@ elif env['arch'] == 'arm64-v8a':
 elif env['arch'] == 'arm64-v8.2-a':
     env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
     env.Append(CPPDEFINES = ['ARM_COMPUTE_AARCH64_V8_2'])
-    if cpp_compiler == 'clang++':
+    if 'clang++' in cpp_compiler:
         env.Append(CXXFLAGS = ['-fno-integrated-as'])
 
     if env['os'] == 'linux':
@@ -177,7 +177,7 @@ if not GetOption("help"):
         print("ERROR: Compiler '%s' not found" % env['CXX'])
         Exit(1)
 
-    if cpp_compiler == 'g++':
+    if 'clang++' not in cpp_compiler:
         if env['arch'] == 'arm64-v8.2-a' and not version_at_least(compiler_ver, '6.2.1'):
             print "GCC 6.2.1 or newer is required to compile armv8.2-a code"
             Exit(1)
