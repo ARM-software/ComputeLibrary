@@ -32,6 +32,7 @@
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "tests/validation/Helpers.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/BatchNormalizationLayerFixture.h"
 
@@ -59,18 +60,25 @@ TEST_SUITE(BatchNormalizationLayer)
 template <typename T>
 using GCBatchNormalizationLayerFixture = BatchNormalizationLayerValidationFixture<GCTensor, GCAccessor, GCBatchNormalizationLayer, T>;
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
-                                                                           combine(framework::dataset::make("UseBeta", { false, true }),
-                                                                                   framework::dataset::make("UseGamma", { false, true }))),
-                                                                   framework::dataset::make("DataType", { DataType::F32 })),
-               shape0, shape1, epsilon, use_beta, use_gamma, dt)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
+                                                                                   combine(framework::dataset::make("UseBeta", { false, true }),
+                                                                                           framework::dataset::make("UseGamma", { false, true }))),
+                                                                           framework::dataset::make("DataType", { DataType::F32 })),
+                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+               shape0, shape1, epsilon, use_beta, use_gamma, dt, data_layout)
 {
     // Set fixed point position data type allowed
     int fixed_point_position = (arm_compute::is_data_type_fixed_point(dt)) ? 3 : 0;
 
+    TensorShape src_dst_shapes = shape0;
+    if(data_layout == DataLayout::NHWC)
+    {
+        permute(src_dst_shapes, PermutationVector(2U, 0U, 1U));
+    }
+
     // Create tensors
-    GCTensor src   = create_tensor<GCTensor>(shape0, dt, 1, fixed_point_position);
-    GCTensor dst   = create_tensor<GCTensor>(shape0, dt, 1, fixed_point_position);
+    GCTensor src   = create_tensor<GCTensor>(src_dst_shapes, dt, 1, fixed_point_position, QuantizationInfo(), data_layout);
+    GCTensor dst   = create_tensor<GCTensor>(src_dst_shapes, dt, 1, fixed_point_position, QuantizationInfo(), data_layout);
     GCTensor mean  = create_tensor<GCTensor>(shape1, dt, 1, fixed_point_position);
     GCTensor var   = create_tensor<GCTensor>(shape1, dt, 1, fixed_point_position);
     GCTensor beta  = create_tensor<GCTensor>(shape1, dt, 1, fixed_point_position);
@@ -83,17 +91,18 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(datas
     norm.configure(&src, &dst, &mean, &var, beta_ptr, gamma_ptr, epsilon);
 
     // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape0);
+    const ValidRegion valid_region = shape_to_valid_region(src_dst_shapes);
     validate(dst.info()->valid_region(), valid_region);
 }
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(Random, GCBatchNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
+FIXTURE_DATA_TEST_CASE(Random, GCBatchNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
                                                                                                                   combine(framework::dataset::make("UseBeta", { false, true }),
                                                                                                                           framework::dataset::make("UseGamma", { false, true }))),
                                                                                                                   act_infos),
-                                                                                                                  framework::dataset::make("DataType", DataType::F16)))
+                                                                                                                  framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW })))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f16, 0);
@@ -101,11 +110,12 @@ FIXTURE_DATA_TEST_CASE(Random, GCBatchNormalizationLayerFixture<half>, framework
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(Random, GCBatchNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
+FIXTURE_DATA_TEST_CASE(Random, GCBatchNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
                                                                                                                    combine(framework::dataset::make("UseBeta", { false, true }),
                                                                                                                            framework::dataset::make("UseGamma", { false, true }))),
                                                                                                                    act_infos),
-                                                                                                                   framework::dataset::make("DataType", DataType::F32)))
+                                                                                                                   framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW })))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f, 0);

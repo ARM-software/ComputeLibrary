@@ -45,14 +45,20 @@ class BatchNormalizationLayerValidationFixedPointFixture : public framework::Fix
 {
 public:
     template <typename...>
-    void setup(TensorShape shape0, TensorShape shape1, float epsilon, bool use_beta, bool use_gamma, ActivationLayerInfo act_info, DataType dt, int fractional_bits)
+    void setup(TensorShape shape0, TensorShape shape1, float epsilon, bool use_beta, bool use_gamma, ActivationLayerInfo act_info, DataType dt, DataLayout data_layout, int fractional_bits)
     {
         _fractional_bits = fractional_bits;
         _data_type       = dt;
         _use_beta        = use_beta;
         _use_gamma       = use_gamma;
-        _target          = compute_target(shape0, shape1, epsilon, act_info, dt, fractional_bits);
-        _reference       = compute_reference(shape0, shape1, epsilon, act_info, dt, fractional_bits);
+
+        if(data_layout == DataLayout::NHWC)
+        {
+            permute(shape0, PermutationVector(2U, 0U, 1U));
+        }
+
+        _target    = compute_target(shape0, shape1, epsilon, act_info, dt, data_layout, fractional_bits);
+        _reference = compute_reference(shape0, shape1, epsilon, act_info, dt, data_layout, fractional_bits);
     }
 
 protected:
@@ -119,11 +125,11 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape &shape0, const TensorShape &shape1, float epsilon, ActivationLayerInfo act_info, DataType dt, int fixed_point_position)
+    TensorType compute_target(const TensorShape &shape0, const TensorShape &shape1, float epsilon, ActivationLayerInfo act_info, DataType dt, DataLayout data_layout, int fixed_point_position)
     {
         // Create tensors
-        TensorType src   = create_tensor<TensorType>(shape0, dt, 1, fixed_point_position);
-        TensorType dst   = create_tensor<TensorType>(shape0, dt, 1, fixed_point_position);
+        TensorType src   = create_tensor<TensorType>(shape0, dt, 1, fixed_point_position, QuantizationInfo(), data_layout);
+        TensorType dst   = create_tensor<TensorType>(shape0, dt, 1, fixed_point_position, QuantizationInfo(), data_layout);
         TensorType mean  = create_tensor<TensorType>(shape1, dt, 1, fixed_point_position);
         TensorType var   = create_tensor<TensorType>(shape1, dt, 1, fixed_point_position);
         TensorType beta  = create_tensor<TensorType>(shape1, dt, 1, fixed_point_position);
@@ -166,10 +172,10 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape0, const TensorShape &shape1, float epsilon, ActivationLayerInfo act_info, DataType dt, int fixed_point_position)
+    SimpleTensor<T> compute_reference(const TensorShape &shape0, const TensorShape &shape1, float epsilon, ActivationLayerInfo act_info, DataType dt, DataLayout data_layout, int fixed_point_position)
     {
         // Create reference
-        SimpleTensor<T> ref_src{ shape0, dt, 1, fixed_point_position };
+        SimpleTensor<T> ref_src{ shape0, dt, 1, fixed_point_position, QuantizationInfo(), data_layout };
         SimpleTensor<T> ref_mean{ shape1, dt, 1, fixed_point_position };
         SimpleTensor<T> ref_var{ shape1, dt, 1, fixed_point_position };
         SimpleTensor<T> ref_beta{ shape1, dt, 1, fixed_point_position };
@@ -194,9 +200,9 @@ class BatchNormalizationLayerValidationFixture : public BatchNormalizationLayerV
 {
 public:
     template <typename...>
-    void setup(TensorShape shape0, TensorShape shape1, float epsilon, bool use_beta, bool use_gamma, ActivationLayerInfo act_info, DataType dt)
+    void setup(TensorShape shape0, TensorShape shape1, float epsilon, bool use_beta, bool use_gamma, ActivationLayerInfo act_info, DataType dt, DataLayout data_layout)
     {
-        BatchNormalizationLayerValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(shape0, shape1, epsilon, use_beta, use_gamma, act_info, dt, 0);
+        BatchNormalizationLayerValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(shape0, shape1, epsilon, use_beta, use_gamma, act_info, dt, data_layout, 0);
     }
 };
 } // namespace validation

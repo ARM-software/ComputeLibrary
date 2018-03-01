@@ -119,7 +119,15 @@ private:
      * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
      */
     template <bool fused_activation>
-    void batch_normalization_fp16(const Window &window);
+    void batch_normalization_fp16_nchw(const Window &window);
+    /** Template function to run batch normalization on fp16 on tensors with NHWC format
+     *
+     * @tparam fused_activation Boolean that flags if its a fused activation or not
+     *
+     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
+     */
+    template <bool fused_activation>
+    void batch_normalization_fp16_nhwc(const Window &window);
     /** Template function to run batch normalization on fp32
      *
      * @tparam fused_activation Boolean that flags if its a fused activation or not
@@ -128,7 +136,16 @@ private:
      * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
      */
     template <bool fused_activation, typename F>
-    void batch_normalization_fp32(const Window &window);
+    void batch_normalization_fp32_nchw(const Window &window);
+    /** Template function to run batch normalization on fp32 on tensors with NHWC format
+     *
+     * @tparam fused_activation Boolean that flags if its a fused activation or not
+     * @tparam F                Activation function functor to run
+     *
+     * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
+     */
+    template <bool fused_activation, typename F>
+    void batch_normalization_fp32_nhwc(const Window &window);
     /** Common signature for all the batch normalization functions
      *
      * @param[in] window Region on which to execute the kernel.

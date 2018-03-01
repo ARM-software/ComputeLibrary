@@ -42,15 +42,19 @@ class BatchNormalizationLayerFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape tensor_shape, TensorShape param_shape, float epsilon, bool use_gamma, bool use_beta, ActivationLayerInfo act_info, DataType data_type, int batches)
+    void setup(TensorShape tensor_shape, TensorShape param_shape, float epsilon, bool use_gamma, bool use_beta, ActivationLayerInfo act_info, DataType data_type, DataLayout data_layout, int batches)
     {
         // Set batched in source and destination shapes
         const unsigned int fixed_point_position = 4;
         tensor_shape.set(tensor_shape.num_dimensions(), batches);
+        if(data_layout == DataLayout::NHWC)
+        {
+            permute(tensor_shape, PermutationVector(2U, 0U, 1U));
+        }
 
         // Create tensors
-        src      = create_tensor<TensorType>(tensor_shape, data_type, 1, fixed_point_position);
-        dst      = create_tensor<TensorType>(tensor_shape, data_type, 1, fixed_point_position);
+        src      = create_tensor<TensorType>(tensor_shape, data_type, 1, fixed_point_position, QuantizationInfo(), data_layout);
+        dst      = create_tensor<TensorType>(tensor_shape, data_type, 1, fixed_point_position, QuantizationInfo(), data_layout);
         mean     = create_tensor<TensorType>(param_shape, data_type, 1, fixed_point_position);
         variance = create_tensor<TensorType>(param_shape, data_type, 1, fixed_point_position);
         beta     = create_tensor<TensorType>(param_shape, data_type, 1, fixed_point_position);
