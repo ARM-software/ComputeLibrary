@@ -42,7 +42,7 @@ class PoolingLayerFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape src_shape, TensorShape dst_shape, PoolingLayerInfo info, DataType data_type, int batches)
+    void setup(TensorShape src_shape, TensorShape dst_shape, PoolingLayerInfo info, DataType data_type, DataLayout data_layout, int batches)
     {
         // Set batched in source and destination shapes
         const unsigned int fixed_point_position = 4;
@@ -50,8 +50,8 @@ public:
         dst_shape.set(dst_shape.num_dimensions(), batches);
 
         // Create tensors
-        src = create_tensor<TensorType>(src_shape, data_type, 1, fixed_point_position);
-        dst = create_tensor<TensorType>(dst_shape, data_type, 1, fixed_point_position);
+        src = create_tensor<TensorType>(src_shape, data_type, 1, fixed_point_position, QuantizationInfo(), data_layout);
+        dst = create_tensor<TensorType>(dst_shape, data_type, 1, fixed_point_position, QuantizationInfo(), data_layout);
 
         // Create and configure function
         pool_layer.configure(&src, &dst, info);

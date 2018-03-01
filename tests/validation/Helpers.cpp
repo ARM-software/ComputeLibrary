@@ -119,7 +119,8 @@ HarrisCornersParameters harris_corners_parameters()
 SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint8_t> &src)
 {
     const QuantizationInfo &quantization_info = src.quantization_info();
-    SimpleTensor<float>     dst{ src.shape(), DataType::F32, 1, 0 };
+    SimpleTensor<float>     dst{ src.shape(), DataType::F32, 1, 0, QuantizationInfo(), src.data_layout() };
+
     for(int i = 0; i < src.num_elements(); ++i)
     {
         dst[i] = quantization_info.dequantize(src[i]);

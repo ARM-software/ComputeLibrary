@@ -47,14 +47,20 @@ class PoolingLayerValidationGenericFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, PoolingLayerInfo pool_info, DataType data_type, int fractional_bits, QuantizationInfo quantization_info)
+    void setup(TensorShape shape, PoolingLayerInfo pool_info, DataType data_type, DataLayout data_layout, int fractional_bits, QuantizationInfo quantization_info)
     {
         _fractional_bits   = fractional_bits;
         _quantization_info = quantization_info;
         _pool_info         = pool_info;
 
-        _target    = compute_target(shape, pool_info, data_type, fractional_bits, quantization_info);
-        _reference = compute_reference(shape, pool_info, data_type, fractional_bits, quantization_info);
+        // Change shape in case of NHWC.
+        if(data_layout == DataLayout::NHWC)
+        {
+            permute(shape, PermutationVector(2U, 0U, 1U));
+        }
+
+        _target    = compute_target(shape, pool_info, data_type, data_layout, fractional_bits, quantization_info);
+        _reference = compute_reference(shape, pool_info, data_type, data_layout, fractional_bits, quantization_info);
     }
 
 protected:
@@ -79,10 +85,10 @@ protected:
     }
 
     TensorType compute_target(const TensorShape &shape, PoolingLayerInfo info,
-                              DataType data_type, int fixed_point_position, QuantizationInfo quantization_info)
+                              DataType data_type, DataLayout data_layout, int fixed_point_position, QuantizationInfo quantization_info)
     {
         // Create tensors
-        TensorType src = create_tensor<TensorType>(shape, data_type, 1, fixed_point_position, quantization_info);
+        TensorType src = create_tensor<TensorType>(shape, data_type, 1, fixed_point_position, quantization_info, data_layout);
         TensorType dst;
 
         // Create and configure function
@@ -109,10 +115,10 @@ protected:
     }
 
     SimpleTensor<T> compute_reference(const TensorShape &shape, PoolingLayerInfo info,
-                                      DataType data_type, int fixed_point_position, QuantizationInfo quantization_info)
+                                      DataType data_type, DataLayout data_layout, int fixed_point_position, QuantizationInfo quantization_info)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, data_type, 1, fixed_point_position, quantization_info };
+        SimpleTensor<T> src{ shape, data_type, 1, fixed_point_position, quantization_info, data_layout };
 
         // Fill reference
         fill(src);
@@ -132,10 +138,10 @@ class PoolingLayerValidationFixture : public PoolingLayerValidationGenericFixtur
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, PoolingType pool_type, Size2D pool_size, PadStrideInfo pad_stride_info, bool exclude_padding, DataType data_type)
+    void setup(TensorShape shape, PoolingType pool_type, Size2D pool_size, PadStrideInfo pad_stride_info, bool exclude_padding, DataType data_type, DataLayout data_layout)
     {
         PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, PoolingLayerInfo(pool_type, pool_size, pad_stride_info, exclude_padding),
-                                                                                               data_type, 0, QuantizationInfo());
+                                                                                               data_type, data_layout, 0, QuantizationInfo());
     }
 };
 
@@ -147,7 +153,7 @@ public:
     void setup(TensorShape shape, PoolingType pool_type, Size2D pool_size, PadStrideInfo pad_stride_info, bool exclude_padding, DataType data_type, int fractional_bits)
     {
         PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, PoolingLayerInfo(pool_type, pool_size, pad_stride_info, exclude_padding),
-                                                                                               data_type, fractional_bits, QuantizationInfo());
+                                                                                               data_type, DataLayout::NCHW, fractional_bits, QuantizationInfo());
     }
 };
 
@@ -156,10 +162,11 @@ class PoolingLayerValidationQuantizedFixture : public PoolingLayerValidationGene
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, PoolingType pool_type, Size2D pool_size, PadStrideInfo pad_stride_info, bool exclude_padding, DataType data_type, QuantizationInfo quantization_info)
+    void setup(TensorShape shape, PoolingType pool_type, Size2D pool_size, PadStrideInfo pad_stride_info, bool exclude_padding, DataType data_type,
+               QuantizationInfo quantization_info, DataLayout data_layout = DataLayout::NCHW)
     {
         PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, PoolingLayerInfo(pool_type, pool_size, pad_stride_info, exclude_padding),
-                                                                                               data_type, 0, quantization_info);
+                                                                                               data_type, data_layout, 0, quantization_info);
     }
 };
 
@@ -171,7 +178,7 @@ public:
     void setup(TensorShape src_shape, TensorShape dst_shape, PoolingLayerInfo pool_info, DataType data_type)
     {
         ARM_COMPUTE_UNUSED(dst_shape);
-        PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(src_shape, pool_info, data_type, 0, QuantizationInfo());
+        PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(src_shape, pool_info, data_type, DataLayout::NCHW, 0, QuantizationInfo());
     }
 };
 
@@ -180,9 +187,9 @@ class GlobalPoolingLayerValidationFixture : public PoolingLayerValidationGeneric
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, PoolingType pool_type, DataType data_type)
+    void setup(TensorShape shape, PoolingType pool_type, DataType data_type, DataLayout data_layout = DataLayout::NCHW)
     {
-        PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, PoolingLayerInfo(pool_type), data_type, 0, QuantizationInfo());
+        PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, PoolingLayerInfo(pool_type), data_type, DataLayout::NCHW, 0, QuantizationInfo());
     }
 };
 

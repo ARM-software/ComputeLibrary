@@ -47,7 +47,8 @@ namespace benchmark
 {
 namespace
 {
-const auto data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32 });
+const auto data_types   = framework::dataset::make("DataType", { DataType::F16, DataType::F32 });
+const auto data_layouts = framework::dataset::make("DataLayout", { DataLayout::NCHW });
 } // namespace
 
 using CLPoolingLayerFixture = PoolingLayerFixture<CLTensor, CLPoolingLayer, CLAccessor>;
@@ -55,74 +56,88 @@ using CLPoolingLayerFixture = PoolingLayerFixture<CLTensor, CLPoolingLayer, CLAc
 TEST_SUITE(CL)
 
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetPoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetPoolingLayerDataset(),
-                                                                                        data_types),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::AlexNetPoolingLayerDataset(),
+                                                                                                                    data_types),
+                                                                                        data_layouts),
                                                             framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5PoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::LeNet5PoolingLayerDataset(),
-                                                                                        data_types),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::LeNet5PoolingLayerDataset(),
+                                                                                                                    data_types),
+                                                                                        data_layouts),
                                                             framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1PoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1PoolingLayerDataset(),
-                                                                                        data_types),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1PoolingLayerDataset(),
+                                                                                                                    data_types),
+                                                                                        data_layouts),
                                                             framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4PoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4PoolingLayerDataset(),
-                                                                                        data_types),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4PoolingLayerDataset(),
+                                                                                                                    data_types),
+                                                                                        data_layouts),
                                                             framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetPoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetPoolingLayerDataset(),
-                                                                                        data_types),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetPoolingLayerDataset(),
+                                                                                                                    data_types),
+                                                                                        data_layouts),
                                                             framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(VGG16PoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::VGG16PoolingLayerDataset(),
-                                                                                        data_types),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::VGG16PoolingLayerDataset(),
+                                                                                                                    data_types),
+                                                                                        data_layouts),
                                                             framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2PoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::ALL,
-                                framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2PoolingLayerDataset(),
-                                                                                        data_types),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2PoolingLayerDataset(),
+                                                                                                                    data_types),
+                                                                                        data_layouts),
                                                             framework::dataset::make("Batches", 1)));
 
 TEST_SUITE(NIGHTLY)
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetPoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::NIGHTLY,
-                                framework::dataset::combine(framework::dataset::combine(datasets::AlexNetPoolingLayerDataset(),
-                                                                                        data_types),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::AlexNetPoolingLayerDataset(),
+                                                                                                                    data_types),
+                                                                                        data_layouts),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(LeNet5PoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::NIGHTLY,
-                                framework::dataset::combine(framework::dataset::combine(datasets::LeNet5PoolingLayerDataset(),
-                                                                                        data_types),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::LeNet5PoolingLayerDataset(),
+                                                                                                                    data_types),
+                                                                                        data_layouts),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV1PoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::NIGHTLY,
-                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1PoolingLayerDataset(),
-                                                                                        data_types),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1PoolingLayerDataset(),
+                                                                                                                    data_types),
+                                                                                        data_layouts),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4PoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::NIGHTLY,
-                                framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4PoolingLayerDataset(),
-                                                                                        data_types),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV4PoolingLayerDataset(),
+                                                                                                                    data_types),
+                                                                                        data_layouts),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(SqueezeNetPoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::NIGHTLY,
-                                framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetPoolingLayerDataset(),
-                                                                                        data_types),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::SqueezeNetPoolingLayerDataset(),
+                                                                                                                    data_types),
+                                                                                        data_layouts),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(VGG16PoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::NIGHTLY,
-                                framework::dataset::combine(framework::dataset::combine(datasets::VGG16PoolingLayerDataset(),
-                                                                                        data_types),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::VGG16PoolingLayerDataset(),
+                                                                                                                    data_types),
+                                                                                        data_layouts),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2PoolingLayer, CLPoolingLayerFixture, framework::DatasetMode::NIGHTLY,
-                                framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2PoolingLayerDataset(),
-                                                                                        data_types),
+                                framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::YOLOV2PoolingLayerDataset(),
+                                                                                                                    data_types),
+                                                                                        data_layouts),
                                                             framework::dataset::make("Batches", { 4, 8 })));
 TEST_SUITE_END()
 TEST_SUITE_END()

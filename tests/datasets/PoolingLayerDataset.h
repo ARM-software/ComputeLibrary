@@ -55,7 +55,7 @@ public:
             std::stringstream description;
             description << "In=" << *_src_it << ":";
             description << "Out=" << *_dst_it << ":";
-            description << "Info=" << *_infos_it;
+            description << "Info=" << *_infos_it << ":";
             return description.str();
         }
 
@@ -116,6 +116,7 @@ public:
         add_config(TensorShape(60U, 52U, 3U, 2U), TensorShape(13U, 11U, 32U), PoolingLayerInfo(PoolingType::AVG, Size2D(100, 100), PadStrideInfo(5, 5, 50, 50), true));
         // Asymmetric padding
         add_config(TensorShape(112U, 112U, 32U), TensorShape(56U, 56U, 32U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR)));
+        add_config(TensorShape(14U, 14U, 832U), TensorShape(7U, 7U, 832U), PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL)));
     }
 };
 } // namespace datasets
