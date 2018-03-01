@@ -193,6 +193,14 @@ If there is more than one release in a month then an extra sequential number is 
 
 @subsection S2_2_changelog Changelog
 
+v18.03 Public maintenance release
+ - Various bug fixes.
+ - Fixed bug in @ref arm_compute::NEActivationLayer
+ - Fix in @ref arm_compute::CLTuner when using batches.
+ - Updated recommended NDK version to r16b (And fixed warnings).
+ - Fixed bug in validation code.
+ - Added Inception v4 graph example.
+
 v18.02 Public major release
  - Various NEON / OpenCL / GLES optimisations.
  - Various bug fixes.
