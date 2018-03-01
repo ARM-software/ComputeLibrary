@@ -56,19 +56,13 @@ inline Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *i
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input0, input1);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_data_type_fixed_point(input0->data_type()) && (reshape_info.depth_output_gemm3d() != 1), "GEMM3D only supports floating point data types");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input0->num_dimensions() > 4, "The number of dimensions for the matrix A must be <= 4");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->num_dimensions() > 3, "The number of dimensions for the matrix B must be <= 3");
 
     if(!is_interleaved_transposed)
     {
         ARM_COMPUTE_RETURN_ERROR_ON(input0->dimension(0) != input1->dimension(1));
-
-        if(output->total_size() != 0)
-        {
-            ARM_COMPUTE_RETURN_ERROR_ON(input1->dimension(0) != output->dimension(0));
-            ARM_COMPUTE_RETURN_ERROR_ON(input0->dimension(1) != output->dimension(1));
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, output);
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input0, output);
-        }
     }
     else
     {
@@ -94,14 +88,14 @@ inline Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *i
 
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input0, &tensor_info_reshaped0);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input1, &tensor_info_reshaped1);
+    }
 
-        if(output->total_size() != 0)
-        {
-            ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(0) != static_cast<size_t>(n));
-            ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(1) != static_cast<size_t>(m));
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, output);
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input0, output);
-        }
+    if(output->total_size() != 0)
+    {
+        const TensorInfo tensor_info_output = output->clone()->set_tensor_shape(compute_mm_shape(*input0, *input1, is_interleaved_transposed, reshape_info));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &tensor_info_output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input0, output);
     }
 
     return Status{};
@@ -113,6 +107,7 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
 {
     bool   window_changed = false;
     Window win{};
+    Window win_out{};
 
     const DataType data_type                           = input0->data_type();
     unsigned int &num_elems_processed_per_iteration_x = num_elements_processed[0];
@@ -121,29 +116,54 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
     // Output tensor auto inizialitation if not yet initialized
     auto_init_if_empty(*output, input0->clone()->set_tensor_shape(compute_mm_shape(*input0, *input1, is_interleaved_transposed, reshape_info)));
 
+    TensorInfo tmp_info(*output);
+
+    if(reshape_info.depth_output_gemm3d() != 1)
+    {
+        // Since the output tensor has to be reinterpreted as 3D and the execute window is based on a 2D GEMM,
+        // the window needs to be constructed on the 2D collapsed version of the tensor
+        TensorShape tmp_shape(output->tensor_shape());
+        tmp_shape.collapse(2U, 1U);
+        tmp_info.set_tensor_shape(tmp_shape);
+    }
+
     if(is_interleaved_transposed)
     {
         // Configure kernel window
         num_elems_processed_per_iteration_x = max_cl_vector_width / data_size_from_type(data_type);
         num_elems_processed_per_iteration_y = 4;
 
-        win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
+        // Note: bottom paddings are calculated manually as the output can be reinterpreted as 3D tensor
+        // The only way to set properly the paddings, it is to set those explicitly through the AccessWindowStatic
+        const int m          = reshape_info.m();
+        const int bottom_pad = (num_elems_processed_per_iteration_y - (m % num_elems_processed_per_iteration_y)) % num_elems_processed_per_iteration_y;
+
+        win     = calculate_max_window(tmp_info, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
+        win_out = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
 
         AccessWindowRectangle input0_access(input0, 0, 0, num_elems_processed_per_iteration_y, 1, 1.f, 0.25f);
         AccessWindowStatic    input1_access(input1, 0, 0,
                                             ceil_to_multiple(input1->dimension(0), num_elems_processed_per_iteration_x),
                                             ceil_to_multiple(input1->dimension(1), num_elems_processed_per_iteration_y));
-        AccessWindowRectangle output_access(output, 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
+        AccessWindowStatic output_access(output, 0, 0,
+                                         ceil_to_multiple(output->dimension(0), num_elems_processed_per_iteration_x),
+                                         output->dimension(1) + bottom_pad);
 
-        window_changed = update_window_and_padding(win, input0_access, input1_access, output_access);
+        window_changed = update_window_and_padding(win, input0_access, input1_access) || // window used by the execute_window_loop
+                         update_window_and_padding(win_out, output_access);              // window used to update the padding requirements of output tensor
 
-        output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->tensor_shape()));
+        output_access.set_valid_region(win_out, ValidRegion(Coordinates(0, 0), output->tensor_shape()));
     }
     else // The input tensors have not been reshaped
     {
         // Special case for 1xN, 2xN, 3xN and 4xN input0 tensor. num_elems_processed_per_iteration_x is set up for the default case.
         num_elems_processed_per_iteration_x = max_cl_vector_width / data_size_from_type(data_type);
         num_elems_processed_per_iteration_y = std::min(static_cast<int>(output->dimension(1)), 4);
+
+        // Note: bottom paddings are calculated manually as the output can be reinterpreted as 3D tensor
+        // The only way to set properly the paddings, it is to set those explicitly through the AccessWindowStatic
+        const int m          = input0->tensor_shape()[1];
+        const int bottom_pad = (num_elems_processed_per_iteration_y - (m % num_elems_processed_per_iteration_y)) % num_elems_processed_per_iteration_y;
 
         // Create kernels according to the architecture, data type and input size.
         GPUTarget arch_target = get_arch_from_target(gpu_target);
@@ -153,17 +173,21 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
         }
 
         // Configure window
-        win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
+        win     = calculate_max_window(tmp_info, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
+        win_out = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
 
-        AccessWindowStatic    input0_access(input0, 0, 0, input0->dimension(0), ceil_to_multiple(input0->dimension(1), num_elems_processed_per_iteration_y));
-        AccessWindowStatic    input1_access(input1, 0, 0, ceil_to_multiple(input1->dimension(0), num_elems_processed_per_iteration_x), input1->dimension(1));
-        AccessWindowRectangle output_access(output, 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
+        AccessWindowStatic input0_access(input0, 0, 0, input0->dimension(0), ceil_to_multiple(input0->dimension(1), num_elems_processed_per_iteration_y));
+        AccessWindowStatic input1_access(input1, 0, 0, ceil_to_multiple(input1->dimension(0), num_elems_processed_per_iteration_x), input1->dimension(1));
+        AccessWindowStatic output_access(output, 0, 0,
+                                         ceil_to_multiple(output->dimension(0), num_elems_processed_per_iteration_x),
+                                         output->dimension(1) + bottom_pad);
 
-        window_changed = update_window_and_padding(win, input0_access, input1_access, output_access);
+        window_changed = update_window_and_padding(win, input0_access, input1_access) || // window used by the execute_window_loop
+                         update_window_and_padding(win_out, output_access);              // window used to update the padding requirements of output tensor
 
         Coordinates coord;
         coord.set_num_dimensions(output->num_dimensions());
-        output_access.set_valid_region(win, ValidRegion(coord, output->tensor_shape()));
+        output_access.set_valid_region(win_out, ValidRegion(coord, output->tensor_shape()));
     }
 
     // Collapse along the Z direction
@@ -178,7 +202,7 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
 } // namespace
 
 CLGEMMMatrixMultiplyKernel::CLGEMMMatrixMultiplyKernel()
-    : _input0(nullptr), _input1(nullptr), _output(nullptr), _slide_matrix_b(true)
+    : _input0(nullptr), _input1(nullptr), _output(nullptr), _slide_matrix_b(true), _is_gemm3d(false)
 {
 }
 
@@ -194,9 +218,14 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
     _output         = output;
     _slide_matrix_b = _input1->info()->num_dimensions() >= _input0->info()->num_dimensions();
 
-    const DataType  data_type  = input0->info()->data_type();
-    const int       fp_pos     = input0->info()->fixed_point_position();
-    const GPUTarget gpu_target = get_target();
+    const DataType data_type = input0->info()->data_type();
+    const int      fp_pos    = input0->info()->fixed_point_position();
+
+    // Get target architecture
+    GPUTarget gpu_target = get_target();
+
+    // Check if the output has to be reinterpreted as 3D
+    _is_gemm3d = (reshape_info.depth_output_gemm3d() != 1) && is_data_type_float(data_type);
 
     ElementsProcessed num_elements_processed{};
 
@@ -216,6 +245,9 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
                                       "-DALPHA=" + support::cpp11::to_string((data_type == DataType::QS8 ? sqcvt_qs8_f32(alpha, fp_pos) : sqcvt_qs16_f32(alpha, fp_pos))),
                                       "-DALPHA=" + float_to_string_with_full_precision(alpha));
     }
+    build_opts.add_option_if(_is_gemm3d, "-DREINTERPRET_OUTPUT_AS_3D");
+    build_opts.add_option_if(_is_gemm3d, "-DHEIGHT_GEMM3D=" + support::cpp11::to_string(output->info()->dimension(1)));
+    build_opts.add_option_if(_is_gemm3d, "-DDEPTH_GEMM3D=" + support::cpp11::to_string(output->info()->dimension(2)));
 
     // Do not slide matrix B if _slide_matrix_b = false
     build_opts.add_option_if(!_slide_matrix_b, "-DMATRIX_B_DEPTH=" + support::cpp11::to_string(input1->info()->dimension(2)));
@@ -285,6 +317,7 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
     // Set config_id for enabling LWS tuning
     _config_id = "gemm_";
     _config_id += (is_interleaved_transposed ? "reshaped_" : "");
+    _config_id += (_is_gemm3d ? "3d_" : "");
     _config_id += lower_string(string_from_data_type(input0->info()->data_type()));
     _config_id += "_";
     _config_id += support::cpp11::to_string(output->info()->dimension(1));
@@ -333,6 +366,13 @@ void CLGEMMMatrixMultiplyKernel::run(const Window &window, cl::CommandQueue &que
 
     slice_matrix_b.set(Window::DimX, Window::Dimension(0, 1, 1));
     slice_matrix_b.set(Window::DimY, Window::Dimension(0, 1, 1));
+
+    if(_is_gemm3d)
+    {
+        // Pass bottom paddings to the kernel if the output has to be reinterpreted as 3D tensor
+        const unsigned int idx0 = 3 * num_arguments_per_2D_tensor() + 3;
+        _kernel.setArg<cl_uint>(idx0, static_cast<unsigned int>(_output->info()->padding().bottom));
+    }
 
     do
     {

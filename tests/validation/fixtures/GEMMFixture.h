@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -85,7 +85,12 @@ protected:
 
         // Create and configure function
         FunctionType gemm;
-        gemm.configure(&a, &b, &c, &dst, alpha, beta);
+        // The GEMMinfo includes the values of the depth in case of reinterpreted 3d output.
+        // If the output shape has the same number of dimensions of the input the method called is a 2D matrix multiplication (depth_output_reinterpreted_as_3D = 1),
+        // in the other case we have to use the reinterpreted version of GEMM (depth_output_reinterpreted_as_3D = depth of the 3D output).
+        bool is_output_reinterpreted_as_3D = output_shape.num_dimensions() > shape_a.num_dimensions();
+        gemm.configure(&a, &b, &c, &dst, alpha, beta,
+                       GEMMInfo(false, false, false, is_output_reinterpreted_as_3D ? output_shape[2] : 1));
 
         ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);

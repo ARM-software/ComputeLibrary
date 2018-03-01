@@ -360,11 +360,26 @@ inline TensorShape compute_rnn_shape(const ITensorInfo *input, const unsigned in
 }
 inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo &input1, bool is_interleaved_transposed, const GEMMReshapeInfo &reshape_info)
 {
-    TensorShape tensor_shape{ input0.tensor_shape() };
-    tensor_shape.set(0, is_interleaved_transposed ? reshape_info.n() : input1.dimension(0));
-    tensor_shape.set(1, is_interleaved_transposed ? reshape_info.m() : input0.dimension(1));
+    ARM_COMPUTE_ERROR_ON_MSG(input0.num_dimensions() > 4, "The number of dimensions for the matrix A must be <= 4");
 
-    return tensor_shape;
+    const bool is_gemm3d = reshape_info.depth_output_gemm3d() != 1;
+
+    // If the output of GEMM has to be reinterpreted as 3D, the number of input0 rows (M) is obtained collapsing the second and third
+    // dimension of the output tensor
+    const int dim0 = is_interleaved_transposed ? reshape_info.n() : input1.dimension(0);
+    const int dim1 = is_interleaved_transposed ? reshape_info.m() / reshape_info.depth_output_gemm3d() : input0.dimension(1) / reshape_info.depth_output_gemm3d();
+    const int dim2 = input0.tensor_shape()[2];
+    const int dim3 = input0.tensor_shape()[3];
+
+    TensorShape output_shape{ input0.tensor_shape() };
+
+    output_shape.set(0, dim0);
+    output_shape.set(1, dim1);
+    output_shape.set(2, is_gemm3d ? reshape_info.depth_output_gemm3d() : dim2);
+    output_shape.set(3, is_gemm3d ? dim2 : dim3);
+    output_shape.set(4, is_gemm3d ? dim3 : 1);
+
+    return output_shape;
 }
 
 template <typename T>

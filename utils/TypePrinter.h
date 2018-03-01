@@ -952,7 +952,6 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GEMMInfo &info)
     os << "{is_a_reshaped=" << info.is_a_reshaped() << ",";
     os << "is_b_reshaped=" << info.is_b_reshaped() << ",";
     os << "reshape_b_only_on_first_run=" << info.reshape_b_only_on_first_run() << ",";
-    os << "reshape_info=" << info.reshape_info();
     os << "}";
 
     return os;

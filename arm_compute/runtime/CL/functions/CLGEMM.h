@@ -24,7 +24,6 @@
 #ifndef __ARM_COMPUTE_CLGEMM_H__
 #define __ARM_COMPUTE_CLGEMM_H__
 
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixAdditionKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
@@ -34,16 +33,14 @@
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 
-#include <memory>
-
 namespace arm_compute
 {
 class ICLTensor;
 
 /** Basic function to execute GEMM on OpenCL. This function calls the following OpenCL kernels:
  *
- *  -# @ref CLGEMMInterleave4x4Kernel (if the output tensor is a matrix)
- *  -# @ref CLGEMMTranspose1xWKernel (if the output tensor is a matrix)
+ *  -# @ref CLGEMMInterleave4x4Kernel (only if the reshaped GEMM is selected by the heuristic model)
+ *  -# @ref CLGEMMTranspose1xWKernel (only if the reshaped GEMM is selected by the heuristic model)
  *  -# @ref CLGEMMMatrixMultiplyKernel
  *  -# @ref CLGEMMMatrixAdditionKernel (if c != nullptr and beta != 0.0)
  *
