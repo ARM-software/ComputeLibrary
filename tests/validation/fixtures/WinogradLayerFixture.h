@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/Globals.h"
@@ -35,6 +36,7 @@
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/ConvolutionLayer.h"
 #include "tests/validation/reference/Utils.h"
+#include "tests/validation/reference/Winograd.h"
 
 #include <random>
 
@@ -46,6 +48,8 @@ namespace test
 {
 namespace validation
 {
+using namespace arm_compute::misc::shape_calculator;
+
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
 class WinogradLayerValidationFixture : public framework::Fixture
 {
@@ -139,6 +143,87 @@ protected:
     DataType        _data_type{};
 };
 
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+class WinogradInputTransformValidationFixture : public framework::Fixture
+{
+public:
+    template <typename...>
+    void setup(TensorShape input_shape, PadStrideInfo conv_info, Size2D kernel_dims, bool is_nchw_format, DataType data_type)
+    {
+        TensorShape output_shape = compute_winograd_input_transform_shape(TensorInfo(input_shape, 1, data_type), conv_info, kernel_dims);
+
+        _target    = compute_target(input_shape, output_shape, conv_info, kernel_dims, is_nchw_format, data_type);
+        _reference = compute_reference(input_shape, output_shape, conv_info, kernel_dims, is_nchw_format, data_type);
+    }
+
+protected:
+    template <typename U>
+    void fill(U &&tensor, int i, float min, float max)
+    {
+        switch(tensor.data_type())
+        {
+            case DataType::F32:
+            {
+                std::uniform_real_distribution<> distribution(min, max);
+                library->fill(tensor, distribution, i);
+                break;
+            }
+            default:
+            {
+                ARM_COMPUTE_ERROR("Not supported");
+                library->fill_tensor_uniform(tensor, i);
+                break;
+            }
+        }
+    }
+
+    TensorType compute_target(const TensorShape &input_shape, const TensorShape &output_shape, const PadStrideInfo &conv_info, const Size2D &kernel_dims, bool is_nchw_format, DataType data_type)
+    {
+        ARM_COMPUTE_UNUSED(is_nchw_format);
+
+        // Create tensors
+        TensorType src = create_tensor<TensorType>(input_shape, data_type);
+        TensorType dst = create_tensor<TensorType>(output_shape, data_type);
+
+        // Create and configure function
+        FunctionType transf;
+        transf.configure(&src, &dst, conv_info, kernel_dims);
+
+        ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Allocate tensors
+        src.allocator()->allocate();
+        dst.allocator()->allocate();
+
+        ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+        // Fill tensors
+        fill(AccessorType(src), 0, -1.f, 1.f);
+
+        // Compute CLWinogradInputTransform function
+        transf.run();
+
+        return dst;
+    }
+
+    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, const PadStrideInfo &conv_info, const Size2D &kernel_dims, bool is_nchw_format, DataType data_type)
+    {
+        ARM_COMPUTE_UNUSED(is_nchw_format);
+
+        // Create reference
+        SimpleTensor<T> src{ input_shape, data_type };
+
+        // Fill reference
+        fill(src, 0, -1.f, 1.f);
+
+        return reference::winograd_input_transform<T>(src, output_shape, conv_info, kernel_dims);
+    }
+
+    TensorType      _target{};
+    SimpleTensor<T> _reference{};
+};
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

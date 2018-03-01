@@ -109,5 +109,6 @@
 #include "arm_compute/core/CL/kernels/CLWarpAffineKernel.h"
 #include "arm_compute/core/CL/kernels/CLWarpPerspectiveKernel.h"
 #include "arm_compute/core/CL/kernels/CLWeightsReshapeKernel.h"
+#include "arm_compute/core/CL/kernels/CLWinogradInputTransformKernel.h"
 
 #endif /* __ARM_COMPUTE_CLKERNELS_H__ */

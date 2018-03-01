@@ -194,6 +194,24 @@ inline TensorShape compute_fully_connected_reshaped_weights_shape(const ITensorI
 
     return output_shape;
 }
+
+inline TensorShape compute_winograd_input_transform_shape(const ITensorInfo &input, const PadStrideInfo &conv_info, const Size2D &kernel_size)
+{
+    // Compute height
+    const unsigned int num_tiles_x = std::ceil((input.tensor_shape().x() - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right()) / 2.f);
+    const unsigned int num_tiles_y = std::ceil((input.tensor_shape().y() - (kernel_size.height - 1) + conv_info.pad_top() + conv_info.pad_bottom()) / 2.f);
+
+    const unsigned int width  = input.tensor_shape()[get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::CHANNEL)];
+    const unsigned int height = num_tiles_x * num_tiles_y;
+    const unsigned int depth  = 16; // COMPMID-990
+
+    TensorShape output_shape{ input.tensor_shape() };
+    output_shape.set(0, width);
+    output_shape.set(1, height);
+    output_shape.set(2, depth);
+
+    return output_shape;
+}
 } // namespace shape_calculator
 } // namespace misc
 } // namespace arm_compute

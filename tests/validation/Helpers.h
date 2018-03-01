@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -232,6 +232,34 @@ SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint8_t> &src);
  * @return Quantized tensor.
  */
 SimpleTensor<uint8_t> convert_to_asymmetric(const SimpleTensor<float> &src, const QuantizationInfo &quantization_info);
+
+/** Matrix multiply between 2 float simple tensors
+ *
+ * @param[in]  a   Input tensor A
+ * @param[in]  b   Input tensor B
+ * @param[out] out Output tensor
+ *
+ */
+void matrix_multiply(const SimpleTensor<float> &a, const SimpleTensor<float> &b, SimpleTensor<float> &out);
+
+/** Transpose matrix
+ *
+ * @param[in]  in  Input tensor
+ * @param[out] out Output tensor
+ *
+ */
+void transpose_matrix(const SimpleTensor<float> &in, SimpleTensor<float> &out);
+
+/** Get a 2D tile from a tensor
+ *
+ * @note In case of out-of-bound reads, the tile will be filled with zeros
+ *
+ * @param[in]  in    Input tensor
+ * @param[out] tile  Tile
+ * @param[in]  coord Coordinates
+ */
+template <typename T>
+void get_tile(const SimpleTensor<T> &in, SimpleTensor<T> &tile, const Coordinates &coord);
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
