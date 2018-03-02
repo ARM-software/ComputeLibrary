@@ -1,0 +1,4 @@
+var classarm__compute_1_1test_1_1datasets_1_1_goog_le_net_inception_v4_direct_convolution_layer_dataset =
+[
+    [ "GoogLeNetInceptionV4DirectConvolutionLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_goog_le_net_inception_v4_direct_convolution_layer_dataset.xhtml#a90f7d9e9a8a5c2f6e835731554319481", null ]
+];

@@ -1,0 +1,5 @@
+var searchData=
+[
+  ['join',['join',['../namespacearm__compute_1_1test.xhtml#aa18932675cbb5eb9c9dbf8ff4d7106c7',1,'arm_compute::test::join(T first, T last, const std::string &amp;separator)'],['../namespacearm__compute_1_1test.xhtml#a898a0423aace06af0f3a18a26a972a1a',1,'arm_compute::test::join(T &amp;&amp;first, T &amp;&amp;last, const std::string &amp;separator, UnaryOp &amp;&amp;op)'],['../namespacearm__compute_1_1test.xhtml#a69835710fc772315f4e65ce156034530',1,'arm_compute::test::join(T &amp;&amp;first, T &amp;&amp;last, const std::string &amp;separator)']]],
+  ['joindataset',['JoinDataset',['../classarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset.xhtml#ae929c52276f7a2d81b8dc23d9dade80d',1,'arm_compute::test::framework::dataset::JoinDataset::JoinDataset(T &amp;&amp;dataset1, U &amp;&amp;dataset2)'],['../classarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset.xhtml#ac2138992352383adbee46bd24b72729a',1,'arm_compute::test::framework::dataset::JoinDataset::JoinDataset(JoinDataset &amp;&amp;)=default']]]
+];

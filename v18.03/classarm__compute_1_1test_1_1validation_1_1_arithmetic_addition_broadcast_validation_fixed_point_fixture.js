@@ -1,0 +1,4 @@
+var classarm__compute_1_1test_1_1validation_1_1_arithmetic_addition_broadcast_validation_fixed_point_fixture =
+[
+    [ "setup", "classarm__compute_1_1test_1_1validation_1_1_arithmetic_addition_broadcast_validation_fixed_point_fixture.xhtml#a99bfd14c5ab96c4edc6dcefa16560318", null ]
+];

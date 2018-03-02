@@ -1,0 +1,6 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_multi_h_o_g.xhtml" title="Interface for storing multiple HOG data&#45;objects. " alt="" coords="5,31,91,57"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_l_multi_h_o_g.xhtml" title="Interface for storing multiple HOG data&#45;objects. " alt="" coords="139,5,240,32"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_multi_h_o_g.xhtml" title="CPU implementation of multi HOG data&#45;object. " alt="" coords="148,56,231,83"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_c_l_multi_h_o_g.xhtml" title="Basic implementation of the CL multi HOG data&#45;objects. " alt="" coords="288,5,387,32"/>
+</map>

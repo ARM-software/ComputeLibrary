@@ -1,0 +1,5 @@
+<map id="RawTensor" name="RawTensor">
+<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1_simple_tensor.xhtml" title="SimpleTensor\&lt; uint8_t \&gt;" alt="" coords="5,171,187,197"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1test_1_1_i_accessor.xhtml" title="Common interface to provide information and access to tensor like structures. " alt="" coords="68,5,151,32"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1test_1_1_simple_tensor.xhtml" title="Simple tensor object that stores elements in a consecutive chunk of memory. " alt="" coords="112,81,256,108"/>
+</map>

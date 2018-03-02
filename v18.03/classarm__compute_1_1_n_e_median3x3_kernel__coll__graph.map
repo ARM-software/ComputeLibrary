@@ -1,0 +1,5 @@
+<map id="NEMedian3x3Kernel" name="NEMedian3x3Kernel">
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_c_p_p_simple_kernel.xhtml" title="Interface for simple NEON kernels having 1 tensor input and 1 tensor output. " alt="" coords="16,155,143,181"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_i_c_p_p_kernel.xhtml" title="Common interface for all kernels implemented in C++. " alt="" coords="35,80,124,107"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_kernel.xhtml" title="Common information for all the kernels. " alt="" coords="47,5,111,32"/>
+</map>

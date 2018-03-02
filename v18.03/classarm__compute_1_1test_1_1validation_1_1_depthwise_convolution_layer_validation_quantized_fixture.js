@@ -1,0 +1,4 @@
+var classarm__compute_1_1test_1_1validation_1_1_depthwise_convolution_layer_validation_quantized_fixture =
+[
+    [ "setup", "classarm__compute_1_1test_1_1validation_1_1_depthwise_convolution_layer_validation_quantized_fixture.xhtml#a246545e80b0d8f313577522ab5fd55f6", null ]
+];
