@@ -111,5 +111,6 @@
 #include "arm_compute/core/CL/kernels/CLWeightsReshapeKernel.h"
 #include "arm_compute/core/CL/kernels/CLWinogradFilterTransformKernel.h"
 #include "arm_compute/core/CL/kernels/CLWinogradInputTransformKernel.h"
+#include "arm_compute/core/CL/kernels/CLWinogradOutputTransformKernel.h"
 
 #endif /* __ARM_COMPUTE_CLKERNELS_H__ */

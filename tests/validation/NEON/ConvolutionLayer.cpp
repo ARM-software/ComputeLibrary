@@ -109,10 +109,12 @@ TEST_SUITE_END()
 
 TEST_SUITE(WinogradLayer)
 template <typename T>
-using NEWinogradLayerFixture = WinogradLayerValidationFixture<Tensor, Accessor, NEWinogradLayer, T>;
+using NEWinogradConvolutionLayerFixture = WinogradConvolutionLayerValidationFixture<Tensor, Accessor, NEWinogradLayer, T>;
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEWinogradLayerFixture<float>, framework::DatasetMode::PRECOMMIT, datasets::SmallWinogradLayerDataset())
+FIXTURE_DATA_TEST_CASE(RunSmall, NEWinogradConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(framework::dataset::concat(datasets::SmallWinogradConvolutionLayer3x3Dataset(),
+                                                                                                                      datasets::SmallWinogradConvolutionLayer5x5Dataset()),
+                                                                                                                      framework::dataset::make("DataType", { DataType::F32 })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);

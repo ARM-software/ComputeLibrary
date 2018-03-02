@@ -41,6 +41,9 @@ SimpleTensor<T> winograd_input_transform(const SimpleTensor<T> &src, const Tenso
 
 template <typename T>
 SimpleTensor<T> winograd_filter_transform(const SimpleTensor<T> &in, const TensorShape &output_shape);
+
+template <typename T>
+SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const TensorShape &output_shape, const Size2D &kernel_dims, const Size2D &num_tiles);
 } // namespace reference
 } // namespace validation
 } // namespace test

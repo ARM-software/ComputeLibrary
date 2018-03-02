@@ -40,6 +40,6 @@ void CLWinogradInputTransform::configure(ICLTensor *input, ICLTensor *output, co
 
 Status CLWinogradInputTransform::validate(const ITensorInfo *input, const ITensorInfo *output, const PadStrideInfo &conv_info, const Size2D &kernel_dims)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON(CLWinogradInputTransformKernel::validate(input, output, conv_info, kernel_dims));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLWinogradInputTransformKernel::validate(input, output, conv_info, kernel_dims));
     return Status{};
 }

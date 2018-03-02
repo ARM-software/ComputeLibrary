@@ -76,7 +76,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     AccessWindowRectangle input_access(input, 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
     AccessWindowStatic    output_access(output, 0, 0, output->dimension(0), output->dimension(1));
     window_changed = update_window_and_padding(win, input_access, output_access);
-    output_access.set_valid_region(win, input->valid_region());
+    output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->tensor_shape()));
 
     Window win_collapsed = win.collapse(win, Window::DimZ);
 

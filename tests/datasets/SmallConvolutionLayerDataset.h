@@ -37,10 +37,10 @@ namespace test
 {
 namespace datasets
 {
-class SmallWinogradLayerDataset final : public ConvolutionLayerDataset
+class SmallWinogradConvolutionLayer3x3Dataset final : public ConvolutionLayerDataset
 {
 public:
-    SmallWinogradLayerDataset()
+    SmallWinogradConvolutionLayer3x3Dataset()
     {
         // Kernel size 3
         // Batch size 1
@@ -48,8 +48,14 @@ public:
         // Batch size 4
         add_config(TensorShape(23U, 27U, 5U, 4U), TensorShape(3U, 3U, 5U, 21U), TensorShape(21U), TensorShape(21U, 25U, 21U, 4U), PadStrideInfo(1, 1, 0, 0));
         add_config(TensorShape(8U, 8U, 2U), TensorShape(3U, 3U, 2U, 1U), TensorShape(1U), TensorShape(8U, 8U, 1U), PadStrideInfo(1, 1, 1, 1));
+    }
+};
 
-        // Kernel size 5
+class SmallWinogradConvolutionLayer5x5Dataset final : public ConvolutionLayerDataset
+{
+public:
+    SmallWinogradConvolutionLayer5x5Dataset()
+    {
         add_config(TensorShape(8U, 8U, 2U), TensorShape(5U, 5U, 2U, 1U), TensorShape(1U), TensorShape(4U, 4U, 1U), PadStrideInfo(1, 1, 0, 0));
         add_config(TensorShape(8U, 8U, 2U), TensorShape(5U, 5U, 2U), TensorShape(1U), TensorShape(8U, 8U, 1U), PadStrideInfo(1, 1, 2, 2));
     }
