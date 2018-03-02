@@ -1,5 +1,12 @@
 var NAVTREEINDEX26 =
 {
+"classarm__compute_1_1_h_o_g_info.xhtml#a0279e383beb758e477ce0673c5db8d57":[5,0,0,319,9],
+"classarm__compute_1_1_h_o_g_info.xhtml#a10dcbc6006d1e12ba2cd1ae524c66122":[5,0,0,319,2],
+"classarm__compute_1_1_h_o_g_info.xhtml#a13a9a6f5cfa21b3ab15b1e4315311aeb":[5,0,0,319,5],
+"classarm__compute_1_1_h_o_g_info.xhtml#a3f48ffe9fe37db10eb23de67101c1500":[5,0,0,319,18],
+"classarm__compute_1_1_h_o_g_info.xhtml#a4b7434680a85c2ac14df737ac7cca91e":[5,0,0,319,7],
+"classarm__compute_1_1_h_o_g_info.xhtml#a649a86d58ff88cfd8523d6cb71d64332":[5,0,0,319,14],
+"classarm__compute_1_1_h_o_g_info.xhtml#a64f60c469394d4f5f621546fc3108590":[5,0,0,319,17],
 "classarm__compute_1_1_h_o_g_info.xhtml#a6a21c3fbc2803bbf3d975bec8977307f":[5,0,0,319,3],
 "classarm__compute_1_1_h_o_g_info.xhtml#a75215e8ba07a5ec88ee8c902e306e887":[5,0,0,319,10],
 "classarm__compute_1_1_h_o_g_info.xhtml#a8f6435e0a7c016e3cb0fc94b33067e50":[5,0,0,319,8],
@@ -242,12 +249,5 @@ var NAVTREEINDEX26 =
 "classarm__compute_1_1_i_lut_allocator.xhtml#a8522d89f5f58b6c744e230b6b0641a4b":[5,0,0,353,7],
 "classarm__compute_1_1_i_lut_allocator.xhtml#a9c34313e5cddaebce855b939e42efc32":[5,0,0,353,1],
 "classarm__compute_1_1_i_lut_allocator.xhtml#aac782da1f912bceb5d8ad00c8dc892ac":[5,0,0,353,6],
-"classarm__compute_1_1_i_lut_allocator.xhtml#acb80847d132eba25605f9fc43a42f652":[5,0,0,353,0],
-"classarm__compute_1_1_i_lut_allocator.xhtml#afc1c53ed4dcc1a723b9b9dcf67c578a1":[5,0,0,353,5],
-"classarm__compute_1_1_i_memory_group.xhtml":[5,0,0,354],
-"classarm__compute_1_1_i_memory_group.xhtml#a9bd7b2a6304e2332de8a1fcfefb0111e":[5,0,0,354,0],
-"classarm__compute_1_1_i_memory_group.xhtml#aa4f0ba2c065527f486249f37350a235c":[5,0,0,354,2],
-"classarm__compute_1_1_i_memory_group.xhtml#aab0a52fdd148a54108e7bf49287d7c47":[5,0,0,354,3],
-"classarm__compute_1_1_i_memory_group.xhtml#accdbc89f54447d25dfc018d38070f4ea":[5,0,0,354,1],
-"classarm__compute_1_1_i_memory_manager.xhtml":[5,0,0,355]
+"classarm__compute_1_1_i_lut_allocator.xhtml#acb80847d132eba25605f9fc43a42f652":[5,0,0,353,0]
 };

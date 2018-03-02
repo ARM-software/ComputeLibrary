@@ -1,5 +1,6 @@
 var NAVTREEINDEX23 =
 {
+"classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a45eeb3e3b7cb65fe9c7eaaddbe994aa3":[5,0,0,200,2],
 "classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e":[5,0,0,200,8],
 "classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a74ef68d081d36f65088a107084a9a174":[5,0,0,200,1],
 "classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#adf693cc1bc9aaacdfaa73e1309f4c0b3":[5,0,0,200,7],
@@ -248,6 +249,5 @@ var NAVTREEINDEX23 =
 "classarm__compute_1_1_c_l_tensor_allocator.xhtml#a74c9c61e0615334fdeb176f21828a98f":[5,0,0,233,9],
 "classarm__compute_1_1_c_l_tensor_allocator.xhtml#a7f4714c4a9320d1760102ef78a984241":[5,0,0,233,5],
 "classarm__compute_1_1_c_l_tensor_allocator.xhtml#aba115eb9c458f9e99b8c3fa3975a74a3":[5,0,0,233,10],
-"classarm__compute_1_1_c_l_tensor_allocator.xhtml#ae1746928cddc235a148f11132f0fa8f2":[5,0,0,233,11],
-"classarm__compute_1_1_c_l_tensor_allocator.xhtml#ae19b319fe4b1ddecacd35d45d9c4aa9b":[5,0,0,233,1]
+"classarm__compute_1_1_c_l_tensor_allocator.xhtml#ae1746928cddc235a148f11132f0fa8f2":[5,0,0,233,11]
 };

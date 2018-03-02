@@ -163,7 +163,7 @@ CPPScheduler::CPPScheduler()
 
 void CPPScheduler::set_num_threads(unsigned int num_threads)
 {
-    _num_threads = num_threads == 0 ? std::thread::hardware_concurrency() : num_threads;
+    _num_threads = num_threads == 0 ? num_threads_hint() : num_threads;
     _threads.resize(_num_threads - 1);
 }
 

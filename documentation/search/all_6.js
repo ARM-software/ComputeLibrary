@@ -106,7 +106,6 @@ var searchData=
   ['expected_5ffailure_5fregister_5ffixture_5fdata_5ftest_5fcase',['EXPECTED_FAILURE_REGISTER_FIXTURE_DATA_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#ab6166845bcdb8aab8d7b349a8b442ccf',1,'Macros.h']]],
   ['expected_5ffailure_5fregister_5ffixture_5ftest_5fcase',['EXPECTED_FAILURE_REGISTER_FIXTURE_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#a8b3c06c9e7676202a34f711b1a7625fc',1,'Macros.h']]],
   ['expected_5ffailure_5ftest_5fcase',['EXPECTED_FAILURE_TEST_CASE',['../tests_2framework_2_macros_8h.xhtml#ab2f6de5ffb4b88069f9c0a148b364e25',1,'Macros.h']]],
-  ['export_5flws_5ftable',['export_lws_table',['../classarm__compute_1_1_c_l_tuner.xhtml#adc1bcaa09c238a061fee596d4631aaab',1,'arm_compute::CLTuner']]],
   ['expq_5fimpl',['EXPQ_IMPL',['../fixed__point_8h.xhtml#ae64808afdc06c77889f1bb0565905949',1,'fixed_point.h']]],
   ['extend_5fpadding',['extend_padding',['../classarm__compute_1_1_i_tensor_info.xhtml#a0cd5aea514f03afb48ebe22581ea4c66',1,'arm_compute::ITensorInfo::extend_padding()'],['../classarm__compute_1_1_sub_tensor_info.xhtml#af53d8203ecc37896ca4579d1ee3fdffc',1,'arm_compute::SubTensorInfo::extend_padding()'],['../classarm__compute_1_1_tensor_info.xhtml#af53d8203ecc37896ca4579d1ee3fdffc',1,'arm_compute::TensorInfo::extend_padding()']]]
 ];

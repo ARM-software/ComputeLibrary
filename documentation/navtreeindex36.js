@@ -1,5 +1,9 @@
 var NAVTREEINDEX36 =
 {
+"classarm__compute_1_1test_1_1_batch_normalization_layer_fixture.xhtml#a4adab6322a0276f34a7d656d49fc865c":[5,0,0,8,13,3],
+"classarm__compute_1_1test_1_1_batch_normalization_layer_fixture.xhtml#a7a0ea2fd1c0a23d8b2ab0f6d52650915":[5,0,0,8,13,1],
+"classarm__compute_1_1test_1_1_batch_normalization_layer_fixture.xhtml#ad55f80ed3cd8b6c4f247763b747016af":[5,0,0,8,13,2],
+"classarm__compute_1_1test_1_1_c_l_accessor.xhtml":[5,0,0,8,14],
 "classarm__compute_1_1test_1_1_c_l_accessor.xhtml#a0189be0971a32a0171c51b90a1ab1020":[5,0,0,8,14,5],
 "classarm__compute_1_1test_1_1_c_l_accessor.xhtml#a2df95f7046b81e69a1265a42202ea068":[5,0,0,8,14,13],
 "classarm__compute_1_1test_1_1_c_l_accessor.xhtml#a35ccf2eb0c18a15feab2db98b307b78b":[5,0,0,8,14,8],
@@ -245,9 +249,5 @@ var NAVTREEINDEX36 =
 "classarm__compute_1_1test_1_1_softmax_layer_fixture.xhtml#a8e81f3e3a398b216ac76aaa32d884220":[5,0,0,8,47,1],
 "classarm__compute_1_1test_1_1_softmax_layer_fixture.xhtml#ad55f80ed3cd8b6c4f247763b747016af":[5,0,0,8,47,2],
 "classarm__compute_1_1test_1_1_tensor_cache.xhtml":[5,0,0,8,48],
-"classarm__compute_1_1test_1_1_tensor_cache.xhtml#a00b2f7f657ef8060c64fce93abac54e1":[5,0,0,8,48,0],
-"classarm__compute_1_1test_1_1_tensor_cache.xhtml#a77d062d1fc4b239c215c4534deee8a2f":[5,0,0,8,48,3],
-"classarm__compute_1_1test_1_1_tensor_cache.xhtml#a8a342abc82aa86a51f668dd6a7f89934":[5,0,0,8,48,1],
-"classarm__compute_1_1test_1_1_tensor_cache.xhtml#ab9838ae8ffe3b1f98e1330d3ee260f98":[5,0,0,8,48,2],
-"classarm__compute_1_1test_1_1benchmark_1_1_depth_concatenate_layer_fixture.xhtml":[5,0,0,8,0,0]
+"classarm__compute_1_1test_1_1_tensor_cache.xhtml#a00b2f7f657ef8060c64fce93abac54e1":[5,0,0,8,48,0]
 };

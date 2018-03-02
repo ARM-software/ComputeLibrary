@@ -1,5 +1,9 @@
 var NAVTREEINDEX39 =
 {
+"classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml#afc7df496e6026b91c3f48da6821c86a9":[5,0,0,8,4,11,0],
+"classarm__compute_1_1test_1_1framework_1_1_instruments_stats.xhtml":[5,0,0,8,4,12],
+"classarm__compute_1_1test_1_1framework_1_1_instruments_stats.xhtml#a155015b9a1c2f991a2089c6e78425d1a":[5,0,0,8,4,12,5],
+"classarm__compute_1_1test_1_1framework_1_1_instruments_stats.xhtml#a3281a4429af640fd91dbcfea65350fee":[5,0,0,8,4,12,2],
 "classarm__compute_1_1test_1_1framework_1_1_instruments_stats.xhtml#a5378e6e486090c47ac55da43a654e93d":[5,0,0,8,4,12,1],
 "classarm__compute_1_1test_1_1framework_1_1_instruments_stats.xhtml#a948b96537414305a030be8150cac2522":[5,0,0,8,4,12,0],
 "classarm__compute_1_1test_1_1framework_1_1_instruments_stats.xhtml#a9d5b954f8e4b47bda9d41a6c47fd0735":[5,0,0,8,4,12,4],
@@ -245,9 +249,5 @@ var NAVTREEINDEX39 =
 "classarm__compute_1_1test_1_1networks_1_1_mobile_net_network.xhtml#ac8bb3912a3ce86b15842e79d0b421204":[5,0,0,8,5,2,2],
 "classarm__compute_1_1test_1_1networks_1_1_mobile_net_network.xhtml#acaefe811b78a2fdc4a0dba0c4029c3ef":[5,0,0,8,5,2,0],
 "classarm__compute_1_1test_1_1networks_1_1_mobile_net_network.xhtml#ad55f80ed3cd8b6c4f247763b747016af":[5,0,0,8,5,2,8],
-"classarm__compute_1_1test_1_1networks_1_1_mobile_net_network.xhtml#ae3ad9a7ab50bae85c5020f337adc7869":[5,0,0,8,5,2,6],
-"classarm__compute_1_1test_1_1networks_1_1_mobile_net_v1_network.xhtml":[5,0,0,8,5,3],
-"classarm__compute_1_1test_1_1networks_1_1_mobile_net_v1_network.xhtml#a13a43e6d814de94978c515cb084873b1":[5,0,0,8,5,3,7],
-"classarm__compute_1_1test_1_1networks_1_1_mobile_net_v1_network.xhtml#a1466ef70729f3c8b5da5ebfec3f53f26":[5,0,0,8,5,3,5],
-"classarm__compute_1_1test_1_1networks_1_1_mobile_net_v1_network.xhtml#a3a41262ce9aed70a248ecefae646013b":[5,0,0,8,5,3,3]
+"classarm__compute_1_1test_1_1networks_1_1_mobile_net_network.xhtml#ae3ad9a7ab50bae85c5020f337adc7869":[5,0,0,8,5,2,6]
 };

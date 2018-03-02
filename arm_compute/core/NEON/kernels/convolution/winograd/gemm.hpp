@@ -65,11 +65,11 @@ inline void BlockedGemm(
   const int c_row_stride
 ) {
   // Array access methods
-  const auto A = [a, M, K, a_row_stride] (const int i, const int j) -> TIn {
+  const auto A = [a, a_row_stride] (const int i, const int j) -> TIn {
     return a[i*a_row_stride + j];
   };
 
-  const auto B = [b, K, N, b_row_stride] (const int i, const int j) -> TIn {
+  const auto B = [b, b_row_stride] (const int i, const int j) -> TIn {
     return b[i*b_row_stride + j];
   };
 

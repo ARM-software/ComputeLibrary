@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -102,6 +102,7 @@ class SmallReshapeLayerDataset final : public ReshapeLayerDataset
 public:
     SmallReshapeLayerDataset()
     {
+        add_config(TensorShape(3U), TensorShape(1U, 1U, 3U));
         add_config(TensorShape(16U), TensorShape(4U, 2U, 2U));
         add_config(TensorShape(2U, 2U, 8U), TensorShape(4U, 8U));
         add_config(TensorShape(3U, 3U, 16U), TensorShape(144U));

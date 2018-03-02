@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,6 +64,9 @@ void CLDepthConcatenateLayer::configure(std::vector<ICLTensor *> inputs_vector, 
 
         depth_offset += inputs_vector.at(i)->info()->dimension(2);
     }
+
+    // Set valid region from shape
+    output->info()->set_valid_region(ValidRegion(Coordinates(), output_shape));
 }
 
 void CLDepthConcatenateLayer::run()

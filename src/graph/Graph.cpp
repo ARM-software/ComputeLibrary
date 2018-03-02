@@ -33,8 +33,19 @@
 #include "arm_compute/runtime/Tensor.h"
 #include "support/ToolchainSupport.h"
 
+#include <sys/stat.h>
+
 using namespace arm_compute::graph;
 
+namespace
+{
+bool file_exists(const std::string &filename)
+{
+    std::ifstream file(filename);
+    return file.good();
+}
+
+} // namespace
 struct Stage
 {
     ITensorObject                          *_input;
@@ -69,9 +80,13 @@ private:
     GraphHints     _previous_hints{};
 };
 
+static const std::string tuner_data_filename = "acl_tuner.csv";
 Graph::~Graph() //NOLINT
 {
-    //Can't use =default because the destructor must be defined after Graph::Private's definition
+    if(_pimpl->_tuner.tune_new_kernels() && !_pimpl->_tuner.lws_table().empty())
+    {
+        _pimpl->_tuner.save_to_file(tuner_data_filename);
+    }
 }
 
 Graph::Graph()
@@ -85,17 +100,14 @@ void Graph::graph_init(const bool use_cl_tuner)
     // Check if OpenCL is available and initialize the scheduler
     if(opencl_is_available())
     {
-        if(use_cl_tuner)
+        if(_pimpl->_tuner.lws_table().empty() && file_exists(tuner_data_filename))
         {
-            arm_compute::CLScheduler::get().default_init(&_pimpl->_tuner);
+            _pimpl->_tuner.load_from_file(tuner_data_filename);
         }
-        else
-        {
-            arm_compute::CLScheduler::get().default_init();
-        }
+        _pimpl->_tuner.set_tune_new_kernels(use_cl_tuner);
+        arm_compute::CLScheduler::get().default_init(&_pimpl->_tuner);
     }
 }
-
 void Graph::run()
 {
     while(true)

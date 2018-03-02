@@ -574,13 +574,13 @@ typename std::enable_if<std::is_same<T, int8_t>::value, void>::type NEActivation
 template <ActivationLayerInfo::ActivationFunction F, typename T>
 typename std::enable_if<std::is_same<T, qasymm8_t>::value, void>::type NEActivationLayerKernel::activation(const Window &window)
 {
-    Iterator                  input(_input, window);
-    Iterator                  output(_output, window);
-    const QuantizationInfo    qi_in   = _input->info()->quantization_info();
-    const QuantizationInfo    qi_out  = _output->info()->quantization_info();
-    const qasymm8x16_t        a       = vdupq_n_u8(sqcvt_qasymm8_f32(_act_info.a(), qi_in.scale, qi_in.offset));
-    const qasymm8x16_t        b       = vdupq_n_u8(sqcvt_qasymm8_f32(_act_info.b(), qi_in.scale, qi_in.offset));
-    static const qasymm8x16_t CONST_0 = vdupq_n_u8(sqcvt_qasymm8_f32(0.f, qi_in.scale, qi_in.offset));
+    Iterator               input(_input, window);
+    Iterator               output(_output, window);
+    const QuantizationInfo qi_in   = _input->info()->quantization_info();
+    const QuantizationInfo qi_out  = _output->info()->quantization_info();
+    const qasymm8x16_t     a       = vdupq_n_u8(sqcvt_qasymm8_f32(_act_info.a(), qi_in.scale, qi_in.offset));
+    const qasymm8x16_t     b       = vdupq_n_u8(sqcvt_qasymm8_f32(_act_info.b(), qi_in.scale, qi_in.offset));
+    const qasymm8x16_t     CONST_0 = vdupq_n_u8(sqcvt_qasymm8_f32(0.f, qi_in.scale, qi_in.offset));
 
     // Initialise scale/offset for re-quantization
     float       s  = qi_in.scale / qi_out.scale;

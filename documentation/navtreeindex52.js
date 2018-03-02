@@ -1,5 +1,13 @@
 var NAVTREEINDEX52 =
 {
+"validation_2_c_l_2_normalization_layer_8cpp.xhtml#aa485ea6997e755f369f61ed9840fad92":[6,0,5,7,0,47,8],
+"validation_2_c_l_2_normalization_layer_8cpp.xhtml#ac2315c03cdbc4673700aa89571c66f7d":[6,0,5,7,0,47,0],
+"validation_2_c_l_2_normalization_layer_8cpp.xhtml#ad066b73b824713b5670cb84d7696cd8d":[6,0,5,7,0,47,10],
+"validation_2_c_l_2_normalization_layer_8cpp.xhtml#adb2d57eb02fe046765946de8bb7b6ba2":[6,0,5,7,0,47,3],
+"validation_2_c_l_2_normalization_layer_8cpp.xhtml#aee75983f5d158fab8500a99ad157e0ae":[6,0,5,7,0,47,5],
+"validation_2_c_l_2_normalization_layer_8cpp.xhtml#afd6e6adb78a1f84d8c841774ce9dcc10":[6,0,5,7,0,47,6],
+"validation_2_c_l_2_normalization_layer_8cpp_source.xhtml":[6,0,5,7,0,47],
+"validation_2_c_l_2_pooling_layer_8cpp.xhtml":[6,0,5,7,0,51],
 "validation_2_c_l_2_pooling_layer_8cpp.xhtml#a131007f56dc7d0a83672ce1dadf44713":[6,0,5,7,0,51,10],
 "validation_2_c_l_2_pooling_layer_8cpp.xhtml#a1f9e31f20d51bd86052dce3bbb32ff16":[6,0,5,7,0,51,4],
 "validation_2_c_l_2_pooling_layer_8cpp.xhtml#a31d18a7fc81cd5b9cd3b9d786af7086c":[6,0,5,7,0,51,9],
@@ -213,6 +221,7 @@ var NAVTREEINDEX52 =
 "validation_2_n_e_o_n_2_depth_concatenate_layer_8cpp.xhtml#a71807d5ba314debb62edc34b872557b0":[6,0,5,7,4,19,6],
 "validation_2_n_e_o_n_2_depth_concatenate_layer_8cpp.xhtml#a7ee4589e93ea3eb2d81572abcb6ea802":[6,0,5,7,4,19,1],
 "validation_2_n_e_o_n_2_depth_concatenate_layer_8cpp.xhtml#a89ffeb4d79b7cc03160661a5e0a77ca3":[6,0,5,7,4,19,3],
+"validation_2_n_e_o_n_2_depth_concatenate_layer_8cpp.xhtml#a963c5b8a3279186004d6a7e97a1b87e6":[6,0,5,7,4,19,7],
 "validation_2_n_e_o_n_2_depth_concatenate_layer_8cpp.xhtml#adcc2ea28e787202a1752ce6d1c438d87":[6,0,5,7,4,19,2],
 "validation_2_n_e_o_n_2_depth_concatenate_layer_8cpp.xhtml#ae9ad58f9b2b2c04093e2a27763c00bed":[6,0,5,7,4,19,4],
 "validation_2_n_e_o_n_2_depth_concatenate_layer_8cpp_source.xhtml":[6,0,5,7,4,19],
@@ -240,14 +249,5 @@ var NAVTREEINDEX52 =
 "validation_2_n_e_o_n_2_dequantization_layer_8cpp.xhtml#ae7e420b1b657e0a7b95690eb9b8cf64d":[6,0,5,7,4,23,3],
 "validation_2_n_e_o_n_2_dequantization_layer_8cpp.xhtml#afd3bff121f3d1b361014931aba336060":[6,0,5,7,4,23,1],
 "validation_2_n_e_o_n_2_dequantization_layer_8cpp_source.xhtml":[6,0,5,7,4,23],
-"validation_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml":[6,0,5,7,4,26],
-"validation_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#a254126d41d74b0728d68820637c24f13":[6,0,5,7,4,26,3],
-"validation_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#a72a64c233879d9e811495d201031ee61":[6,0,5,7,4,26,2],
-"validation_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#a8cceb019b663df01e4ffbe3b1d36deb4":[6,0,5,7,4,26,5],
-"validation_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#aa649a5972a5d0aecea568824038cd66d":[6,0,5,7,4,26,0],
-"validation_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#aa70901f5b53caf057b63eb479ce236f1":[6,0,5,7,4,26,4],
-"validation_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#aa9969002af02172f58bcbc59fcb319c1":[6,0,5,7,4,26,1],
-"validation_2_n_e_o_n_2_direct_convolution_layer_8cpp_source.xhtml":[6,0,5,7,4,26],
-"validation_2_n_e_o_n_2_floor_8cpp.xhtml":[6,0,5,7,4,33],
-"validation_2_n_e_o_n_2_floor_8cpp.xhtml#a238579da703bc6097512b25055470277":[6,0,5,7,4,33,1]
+"validation_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml":[6,0,5,7,4,26]
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,14 +50,16 @@
         }                                                                                \
     } while(false)
 
-#define ARM_COMPUTE_LOG_STREAM(logger_name, log_level, stream)                                                 \
-    do                                                                                                         \
-    {                                                                                                          \
-        auto __logger = arm_compute::logging::LoggerRegistry::get().logger(logger_name);                       \
-        if(__logger != nullptr)                                                                                \
-        {                                                                                                      \
-            __logger->log(log_level, static_cast<std::ostringstream &>(std::ostringstream() << stream).str()); \
-        }                                                                                                      \
+#define ARM_COMPUTE_LOG_STREAM(logger_name, log_level, stream)                           \
+    do                                                                                   \
+    {                                                                                    \
+        auto __logger = arm_compute::logging::LoggerRegistry::get().logger(logger_name); \
+        if(__logger != nullptr)                                                          \
+        {                                                                                \
+            std::ostringstream s;                                                        \
+            s << stream;                                                                 \
+            __logger->log(log_level, s.str());                                           \
+        }                                                                                \
     } while(false)
 
 #else /* ARM_COMPUTE_LOGGING_ENABLED */

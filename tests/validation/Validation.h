@@ -180,7 +180,7 @@ void validate(const arm_compute::PaddingSize &padding, const arm_compute::Paddin
  * other test cases.
  */
 template <typename T, typename U = AbsoluteTolerance<T>>
-void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, U tolerance_value = U(), float tolerance_number = 0.f);
+void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, U tolerance_value = U(), float tolerance_number = 0.f, float absolute_tolerance_value = 0.f);
 
 /** Validate tensors with valid region.
  *
@@ -193,7 +193,7 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, U toler
  * other test cases.
  */
 template <typename T, typename U = AbsoluteTolerance<T>>
-void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const ValidRegion &valid_region, U tolerance_value = U(), float tolerance_number = 0.f);
+void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const ValidRegion &valid_region, U tolerance_value = U(), float tolerance_number = 0.f, float absolute_tolerance_value = 0.f);
 
 /** Validate tensors with valid mask.
  *
@@ -206,7 +206,8 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const V
  * other test cases.
  */
 template <typename T, typename U = AbsoluteTolerance<T>>
-void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const SimpleTensor<T> &valid_mask, U tolerance_value = U(), float tolerance_number = 0.f);
+void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const SimpleTensor<T> &valid_mask, U tolerance_value = U(), float tolerance_number = 0.f,
+              float absolute_tolerance_value = 0.f);
 
 /** Validate tensors against constant value.
  *
@@ -317,10 +318,10 @@ struct compare<RelativeTolerance<U>> : public compare_base<RelativeTolerance<U>>
 };
 
 template <typename T, typename U>
-void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, U tolerance_value, float tolerance_number)
+void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, U tolerance_value, float tolerance_number, float absolute_tolerance_value)
 {
     // Validate with valid region covering the entire shape
-    validate(tensor, reference, shape_to_valid_region(tensor.shape()), tolerance_value, tolerance_number);
+    validate(tensor, reference, shape_to_valid_region(tensor.shape()), tolerance_value, tolerance_number, absolute_tolerance_value);
 }
 
 template <typename T, typename U, typename = typename std::enable_if<std::is_integral<T>::value>::type>
@@ -331,7 +332,7 @@ void validate_wrap(const IAccessor &tensor, const SimpleTensor<T> &reference, U 
 }
 
 template <typename T, typename U>
-void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const ValidRegion &valid_region, U tolerance_value, float tolerance_number)
+void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const ValidRegion &valid_region, U tolerance_value, float tolerance_number, float absolute_tolerance_value)
 {
     int64_t num_mismatches = 0;
     int64_t num_elements   = 0;
@@ -363,11 +364,16 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const V
                 const T &target_value    = reinterpret_cast<const T *>(tensor(id))[c];
                 const T &reference_value = reinterpret_cast<const T *>(reference(id))[c];
 
-                // Truncate numbers to the 4th decimal
-                const T target_truncated_value    = static_cast<T>(static_cast<int>(target_value * 10000) / 10000);
-                const T reference_truncated_value = static_cast<T>(static_cast<int>(target_value * 10000) / 10000);
-                if(!compare<U>(target_truncated_value, reference_truncated_value, tolerance_value))
+                if(!compare<U>(target_value, reference_value, tolerance_value))
                 {
+                    if(absolute_tolerance_value != 0.f)
+                    {
+                        const AbsoluteTolerance<float> abs_tolerance(absolute_tolerance_value);
+                        if(compare<AbsoluteTolerance<float>>(target_value, reference_value, abs_tolerance))
+                        {
+                            continue;
+                        }
+                    }
                     ARM_COMPUTE_TEST_INFO("id = " << id);
                     ARM_COMPUTE_TEST_INFO("channel = " << c);
                     ARM_COMPUTE_TEST_INFO("target = " << std::setprecision(5) << framework::make_printable(target_value));
@@ -477,7 +483,7 @@ void validate_wrap(const IAccessor &tensor, const SimpleTensor<T> &reference, co
 }
 
 template <typename T, typename U>
-void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const SimpleTensor<T> &valid_mask, U tolerance_value, float tolerance_number)
+void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const SimpleTensor<T> &valid_mask, U tolerance_value, float tolerance_number, float absolute_tolerance_value)
 {
     int64_t num_mismatches = 0;
     int64_t num_elements   = 0;
@@ -511,6 +517,14 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const S
 
                 if(!compare<U>(target_value, reference_value, tolerance_value))
                 {
+                    if(absolute_tolerance_value != 0.f)
+                    {
+                        const AbsoluteTolerance<float> abs_tolerance(absolute_tolerance_value);
+                        if(compare<AbsoluteTolerance<float>>(target_value, reference_value, abs_tolerance))
+                        {
+                            continue;
+                        }
+                    }
                     ARM_COMPUTE_TEST_INFO("id = " << id);
                     ARM_COMPUTE_TEST_INFO("channel = " << c);
                     ARM_COMPUTE_TEST_INFO("target = " << std::setprecision(5) << framework::make_printable(target_value));

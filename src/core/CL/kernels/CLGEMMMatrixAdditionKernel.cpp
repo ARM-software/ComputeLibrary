@@ -116,7 +116,9 @@ void CLGEMMMatrixAdditionKernel::configure(const ICLTensor *input, ICLTensor *ou
 
 Status CLGEMMMatrixAdditionKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const float beta)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(validate_arguments(input, output, beta));
+    ARM_COMPUTE_RETURN_ERROR_ON(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
     return Status{};
 }
 
