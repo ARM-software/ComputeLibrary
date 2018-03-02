@@ -3,7 +3,7 @@ var searchData=
   ['r_5fvalue',['r_value',['../_mali_counter_8cpp.xhtml#a736088bbd41fd7407ac9fc811864db68',1,'MaliCounter.cpp']]],
   ['raw_5f',['raw_',['../structarm__compute_1_1logging_1_1_log_msg.xhtml#ab564cdace3a0a660c5a04b5f2c637213',1,'arm_compute::logging::LogMsg']]],
   ['raw_5fprops',['raw_props',['../structmali__userspace_1_1mali__base__gpu__props.xhtml#a0f80a090da0ec7cd70cd3821f1470832',1,'mali_userspace::mali_base_gpu_props']]],
-  ['real_5ffunction',['real_function',['../classarm__compute_1_1_c_l_tuner.xhtml#af217b35b35e62e8e7ebc241ffd599803',1,'arm_compute::CLTuner']]],
+  ['real_5fclenqueuendrangekernel',['real_clEnqueueNDRangeKernel',['../classarm__compute_1_1_c_l_tuner.xhtml#a5baba955626e8da33ed5dd829a538974',1,'arm_compute::CLTuner']]],
   ['rect',['rect',['../structarm__compute_1_1_r_o_i.xhtml#aa23d9b69995e7138751a71caf1d46429',1,'arm_compute::ROI']]],
   ['required',['required',['../namespacecaffe__data__extractor.xhtml#ae81948490ddf54e80a22593640178350',1,'caffe_data_extractor.required()'],['../namespacetensorflow__data__extractor.xhtml#ae81948490ddf54e80a22593640178350',1,'tensorflow_data_extractor.required()']]],
   ['ret',['ret',['../unionmali__userspace_1_1uk__header.xhtml#a4fef07ab304fc672e0407e7598fb1870',1,'mali_userspace::uk_header::ret()'],['../hwc_8hpp.xhtml#a4fef07ab304fc672e0407e7598fb1870',1,'ret():&#160;hwc.hpp']]],

@@ -11,10 +11,10 @@
 <polygon fill="white" stroke="none" points="-4,4 -4,-35 115,-35 115,4 -4,4"/>
 <!-- Node1 -->
 <g id="node1" class="node"><title>Node1</title>
-<g id="a_node1"><a xlink:href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01int16__t_00_018_01_4.xhtml" target="_top" xlink:title="neon_vector\&lt; int16\l_t, 8 \&gt;">
+<g id="a_node1"><a xlink:href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01int32__t_00_012_01_4.xhtml" target="_top" xlink:title="neon_vector\&lt; int32\l_t, 2 \&gt;">
 <polygon fill="white" stroke="black" points="-7.10543e-15,-0.5 -7.10543e-15,-30.5 111,-30.5 111,-0.5 -7.10543e-15,-0.5"/>
-<text text-anchor="start" x="8" y="-18.5" font-family="Helvetica,sans-Serif" font-size="10.00">neon_vector&lt; int16</text>
-<text text-anchor="middle" x="55.5" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">_t, 8 &gt;</text>
+<text text-anchor="start" x="8" y="-18.5" font-family="Helvetica,sans-Serif" font-size="10.00">neon_vector&lt; int32</text>
+<text text-anchor="middle" x="55.5" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">_t, 2 &gt;</text>
 </a>
 </g>
 </g>

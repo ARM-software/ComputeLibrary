@@ -1,5 +1,9 @@
 var NAVTREEINDEX37 =
 {
+"classarm__compute_1_1test_1_1_tensor_cache.xhtml#a77d062d1fc4b239c215c4534deee8a2f":[5,0,0,8,48,3],
+"classarm__compute_1_1test_1_1_tensor_cache.xhtml#a8a342abc82aa86a51f668dd6a7f89934":[5,0,0,8,48,1],
+"classarm__compute_1_1test_1_1_tensor_cache.xhtml#ab9838ae8ffe3b1f98e1330d3ee260f98":[5,0,0,8,48,2],
+"classarm__compute_1_1test_1_1benchmark_1_1_depth_concatenate_layer_fixture.xhtml":[5,0,0,8,0,0],
 "classarm__compute_1_1test_1_1benchmark_1_1_depth_concatenate_layer_fixture.xhtml#a13a43e6d814de94978c515cb084873b1":[5,0,0,8,0,0,1],
 "classarm__compute_1_1test_1_1benchmark_1_1_depth_concatenate_layer_fixture.xhtml#a4adab6322a0276f34a7d656d49fc865c":[5,0,0,8,0,0,4],
 "classarm__compute_1_1test_1_1benchmark_1_1_depth_concatenate_layer_fixture.xhtml#a8e81f3e3a398b216ac76aaa32d884220":[5,0,0,8,0,0,2],
@@ -245,9 +249,5 @@ var NAVTREEINDEX37 =
 "classarm__compute_1_1test_1_1datasets_1_1_normalize_planar_y_u_v_layer_dataset.xhtml#a07945b88fcb23720042fb717e4c44766":[5,0,0,8,2,73,1],
 "classarm__compute_1_1test_1_1datasets_1_1_normalize_planar_y_u_v_layer_dataset.xhtml#a2fcbf5359798ec294d009f286fd802e6":[5,0,0,8,2,73,3],
 "classarm__compute_1_1test_1_1datasets_1_1_normalize_planar_y_u_v_layer_dataset.xhtml#ab847eb21a42ba6b11359c42b20c4c454":[5,0,0,8,2,73,2],
-"classarm__compute_1_1test_1_1datasets_1_1_normalize_planar_y_u_v_layer_dataset.xhtml#ab8e4e3e2a7bf18888b71bdf9dda0770b":[5,0,0,8,2,73,4],
-"classarm__compute_1_1test_1_1datasets_1_1_optimized_depthwise_convolution_layer_dataset3x3.xhtml":[5,0,0,8,2,74],
-"classarm__compute_1_1test_1_1datasets_1_1_optimized_depthwise_convolution_layer_dataset3x3.xhtml#a1a49769e224786240199be07b5003e61":[5,0,0,8,2,74,0],
-"classarm__compute_1_1test_1_1datasets_1_1_pooling_layer_dataset.xhtml":[5,0,0,8,2,75],
-"classarm__compute_1_1test_1_1datasets_1_1_pooling_layer_dataset.xhtml#a2fcbf5359798ec294d009f286fd802e6":[5,0,0,8,2,75,3]
+"classarm__compute_1_1test_1_1datasets_1_1_normalize_planar_y_u_v_layer_dataset.xhtml#ab8e4e3e2a7bf18888b71bdf9dda0770b":[5,0,0,8,2,73,4]
 };

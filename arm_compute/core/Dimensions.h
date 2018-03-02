@@ -50,7 +50,7 @@ public:
      */
     template <typename... Ts>
     explicit Dimensions(Ts... dims)
-        : _id{ { dims... } }, _num_dimensions{ sizeof...(dims) }
+        : _id{ { static_cast<T>(dims)... } }, _num_dimensions{ sizeof...(dims) }
     {
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,12 +51,12 @@ public:
     {
         // Create input shapes
         std::mt19937                    gen(library->seed());
-        std::uniform_int_distribution<> num_dis(2, 6);
+        std::uniform_int_distribution<> num_dis(2, 4);
         const int                       num_tensors = num_dis(gen);
 
         std::vector<TensorShape>         shapes(num_tensors, shape);
-        std::uniform_int_distribution<>  depth_dis(1, 7);
-        std::bernoulli_distribution      mutate_dis(0.25f);
+        std::uniform_int_distribution<>  depth_dis(1, 3);
+        std::bernoulli_distribution      mutate_dis(0.5f);
         std::uniform_real_distribution<> change_dis(-0.25f, 0.f);
 
         // Generate more shapes based on the input

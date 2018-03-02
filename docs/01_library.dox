@@ -366,5 +366,22 @@ mm->finalize();                // Finalize memory manager (Object lifetime check
 conv1.run();
 conv2.run();
 @endcode
+
+@section S4_8_opencl_tuner OpenCL Tuner
+
+OpenCL kernels when dispatched to the GPU take two arguments:
+- The Global Workgroup Size (GWS): That's the number of times to run an OpenCL kernel to process all the elements we want to process.
+- The Local Workgroup Size (LWS): That's the number of elements we want to run in parallel on a GPU core at a given point in time.
+
+The LWS can be required by an algorithm (For example if it contains memory barriers or uses local memory) but it can also be used for performance reasons to tweak the performance of a kernel: the execution time of the overall kernel might vary significantly depending on how the GWS is broken down.
+
+However, there is no universal rule regarding which LWS is best for a given kernel, so instead we created the @ref CLTuner.
+
+When the @ref CLTuner is enabled ( Target = 2 for the graph examples), the first time an OpenCL kernel is executed the Compute Library will try to run it with a variety of LWS values and will remember which one performed best for subsequent runs. At the end of the run the @ref graph::Graph will try to save these tuning parameters to a file.
+
+However this process takes quite a lot of time, which is why it cannot be enabled all the time.
+
+But, when the @ref CLTuner is disabled ( Target = 1 for the graph examples), the @ref graph::Graph will try to reload the file containing the tuning parameters, then for each executed kernel the Compute Library will use the fine tuned LWS if it was present in the file or use a default LWS value if it's not.
+
 */
 } // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,6 +62,9 @@ void NEDepthConcatenateLayer::configure(std::vector<ITensor *> inputs_vector, IT
 
         depth_offset += inputs_vector.at(i)->info()->dimension(2);
     }
+
+    // Set valid region from shape
+    output->info()->set_valid_region(ValidRegion(Coordinates(), output_shape));
 }
 
 void NEDepthConcatenateLayer::run()

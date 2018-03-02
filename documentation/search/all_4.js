@@ -819,7 +819,7 @@ var searchData=
   ['cltransposekernel',['CLTransposeKernel',['../classarm__compute_1_1_c_l_transpose_kernel.xhtml',1,'arm_compute']]],
   ['cltransposekernel_2eh',['CLTransposeKernel.h',['../_c_l_transpose_kernel_8h.xhtml',1,'']]],
   ['cltuner',['CLTuner',['../classarm__compute_1_1_c_l_tuner.xhtml',1,'arm_compute']]],
-  ['cltuner',['CLTuner',['../classarm__compute_1_1_c_l_tuner.xhtml#a7bb33096cd45bb983899ddf84f51c579',1,'arm_compute::CLTuner']]],
+  ['cltuner',['CLTuner',['../classarm__compute_1_1_c_l_tuner.xhtml#ad551ac5b533cac7908910085117f5ca8',1,'arm_compute::CLTuner']]],
   ['cltuner_2eh',['CLTuner.h',['../_c_l_tuner_8h.xhtml',1,'']]],
   ['cltypes_2eh',['CLTypes.h',['../_c_l_types_8h.xhtml',1,'']]],
   ['cluint16array',['CLUInt16Array',['../namespacearm__compute.xhtml#a7b4c4a79c73a3f85ba89aff03fddefa7',1,'arm_compute']]],

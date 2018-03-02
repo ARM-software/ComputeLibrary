@@ -367,7 +367,6 @@ var namespacearm__compute =
     [ "INEWinogradLayerTransformInputKernel", "classarm__compute_1_1_i_n_e_winograd_layer_transform_input_kernel.xhtml", "classarm__compute_1_1_i_n_e_winograd_layer_transform_input_kernel" ],
     [ "INEWinogradLayerTransformOutputKernel", "classarm__compute_1_1_i_n_e_winograd_layer_transform_output_kernel.xhtml", "classarm__compute_1_1_i_n_e_winograd_layer_transform_output_kernel" ],
     [ "INEWinogradLayerTransformWeightsKernel", "classarm__compute_1_1_i_n_e_winograd_layer_transform_weights_kernel.xhtml", "classarm__compute_1_1_i_n_e_winograd_layer_transform_weights_kernel" ],
-    [ "Interceptor", "classarm__compute_1_1_interceptor.xhtml", "classarm__compute_1_1_interceptor" ],
     [ "IOFormatInfo", "structarm__compute_1_1_i_o_format_info.xhtml", "structarm__compute_1_1_i_o_format_info" ],
     [ "IPoolManager", "classarm__compute_1_1_i_pool_manager.xhtml", "classarm__compute_1_1_i_pool_manager" ],
     [ "IPyramid", "classarm__compute_1_1_i_pyramid.xhtml", "classarm__compute_1_1_i_pyramid" ],

@@ -8,6 +8,7 @@ var dir_d28a4824dc47e487b107a5db32ef43c4 =
     [ "graph_alexnet.cpp", "graph__alexnet_8cpp.xhtml", "graph__alexnet_8cpp" ],
     [ "graph_googlenet.cpp", "graph__googlenet_8cpp.xhtml", "graph__googlenet_8cpp" ],
     [ "graph_inception_v3.cpp", "graph__inception__v3_8cpp.xhtml", "graph__inception__v3_8cpp" ],
+    [ "graph_inception_v4.cpp", "graph__inception__v4_8cpp.xhtml", "graph__inception__v4_8cpp" ],
     [ "graph_lenet.cpp", "graph__lenet_8cpp.xhtml", "graph__lenet_8cpp" ],
     [ "graph_mobilenet.cpp", "graph__mobilenet_8cpp.xhtml", "graph__mobilenet_8cpp" ],
     [ "graph_mobilenet_qasymm8.cpp", "graph__mobilenet__qasymm8_8cpp.xhtml", "graph__mobilenet__qasymm8_8cpp" ],

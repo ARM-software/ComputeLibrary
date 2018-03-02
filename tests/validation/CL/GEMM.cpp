@@ -49,7 +49,9 @@ namespace validation
 {
 namespace
 {
-RelativeTolerance<float>            tolerance_f32(0.001f);    /**< Tolerance value for comparing reference's output against implementation's output for floating point data types */
+RelativeTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for floating point data types */
+constexpr float          abs_tolerance_f32(
+    0.0001f);                                                 /**< Absolute tolerance value for comparing reference's output against implementation's output for floating point data types in case using relative tolerance fails because of small values */
 RelativeTolerance<half_float::half> tolerance_f16(half(0.2)); /**< Tolerance value for comparing reference's output against implementation's output for floating point data types */
 constexpr AbsoluteTolerance<float>  tolerance_q(1.0f);        /**< Tolerance value for comparing reference's output against implementation's output for fixed point data types */
 constexpr float                     tolerance_num   = 0.02f;  /**< Tolerance number */
@@ -198,7 +200,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMFixture<float>, framework::DatasetMode::P
 FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMDataset(), framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32);
+    validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, abs_tolerance_f32);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()

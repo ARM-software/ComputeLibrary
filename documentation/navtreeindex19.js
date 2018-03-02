@@ -1,5 +1,6 @@
 var NAVTREEINDEX19 =
 {
+"classarm__compute_1_1_activation_layer_info.xhtml#a63e05ce4946dd9807c005c1619fa337a":[5,0,0,19,4],
 "classarm__compute_1_1_activation_layer_info.xhtml#ac06d9557031b0febb70869efd793cb38":[5,0,0,19,1],
 "classarm__compute_1_1_activation_layer_info.xhtml#af28869d53fbe340640044d672b29ba7c":[5,0,0,19,5],
 "classarm__compute_1_1_activation_layer_info.xhtml#af56abff12f887fddfa02e0bc18a318a1":[5,0,0,19,2],
@@ -248,6 +249,5 @@ var NAVTREEINDEX19 =
 "classarm__compute_1_1_c_l_copy_to_array_kernel.xhtml":[5,0,0,70],
 "classarm__compute_1_1_c_l_copy_to_array_kernel.xhtml#a09ceae93051ead63b10d88903c5a62be":[5,0,0,70,6],
 "classarm__compute_1_1_c_l_copy_to_array_kernel.xhtml#a1d8f06853b678915058ff9e8259948b3":[5,0,0,70,4],
-"classarm__compute_1_1_c_l_copy_to_array_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e":[5,0,0,70,7],
-"classarm__compute_1_1_c_l_copy_to_array_kernel.xhtml#a4b3ff5e7b109a563e4c98e45eb66ad7a":[5,0,0,70,2]
+"classarm__compute_1_1_c_l_copy_to_array_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e":[5,0,0,70,7]
 };

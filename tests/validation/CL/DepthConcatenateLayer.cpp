@@ -42,6 +42,27 @@ namespace validation
 TEST_SUITE(CL)
 TEST_SUITE(DepthConcatenateLayer)
 
+TEST_CASE(Configuration, framework::DatasetMode::ALL)
+{
+    // Create tensors
+    CLTensor src1 = create_tensor<CLTensor>(TensorShape(32U, 32U, 128U), DataType::F32, 1);
+    CLTensor src2 = create_tensor<CLTensor>(TensorShape(32U, 32U, 32U), DataType::F32, 1);
+    CLTensor dst;
+
+    ARM_COMPUTE_EXPECT(src1.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(src2.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+    // Create and configure function
+    CLDepthConcatenateLayer concat_layer;
+
+    concat_layer.configure({ &src1, &src2 }, &dst);
+
+    // Validate valid region
+    const ValidRegion valid_region = shape_to_valid_region(TensorShape(32U, 32U, 160U));
+    validate(dst.info()->valid_region(), valid_region);
+}
+
 template <typename T>
 using CLDepthConcatenateLayerFixture = DepthConcatenateLayerValidationFixture<CLTensor, ICLTensor, CLAccessor, CLDepthConcatenateLayer, T>;
 
