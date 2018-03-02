@@ -467,16 +467,18 @@ inline bool is_in_valid_region(const ValidRegion &valid_region, Coordinates coor
  * @param[in] num_channels         (Optional) Number of channels.
  * @param[in] fixed_point_position (Optional) Number of fractional bits.
  * @param[in] quantization_info    (Optional) Quantization info for asymmetric quantized types.
+ * @param[in] data_layout          (Optional) Data layout. Default is NCHW.
  *
  * @return Initialized tensor of given type.
  */
 template <typename T>
 inline T create_tensor(const TensorShape &shape, DataType data_type, int num_channels = 1,
-                       int fixed_point_position = 0, QuantizationInfo quantization_info = QuantizationInfo())
+                       int fixed_point_position = 0, QuantizationInfo quantization_info = QuantizationInfo(), DataLayout data_layout = DataLayout::NCHW)
 {
     T          tensor;
     TensorInfo info(shape, num_channels, data_type, fixed_point_position);
     info.set_quantization_info(quantization_info);
+    info.set_data_layout(data_layout);
     tensor.allocator()->init(info);
 
     return tensor;
