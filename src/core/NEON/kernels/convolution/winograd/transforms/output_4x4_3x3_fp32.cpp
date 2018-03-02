@@ -41,9 +41,6 @@ int Transform::ops_performed(const Tensor4DShape &shape)
   return 170 * tile_M * tile_N * shape.n_channels;
 }
 
-// Instantiate cost methods
-template int Transform::ops_performed(const Tensor4DShape&);
-
 /* F(4x4, 3x3) constructs 4x4 output tiles from a 3x3 convolution. Since we use
  * enough tiles to cover the output space each output tile may contain up to 3
  * padded values to the right and bottom columns or rows of the tile, e.g.:

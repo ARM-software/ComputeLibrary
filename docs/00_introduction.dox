@@ -1,3 +1,5 @@
+namespace arm_compute
+{
 /** @mainpage Introduction
 
 @tableofcontents
@@ -26,8 +28,8 @@ For each release we provide some pre-built binaries of the library [here](https:
 These binaries have been built using the following toolchains:
             - Linux armv7a: gcc-linaro-arm-linux-gnueabihf-4.9-2014.07_linux
             - Linux arm64-v8a: gcc-linaro-4.9-2016.02-x86_64_aarch64-linux-gnu
-            - Android armv7a: clang++ / gnustl NDK r14
-            - Android am64-v8a: clang++ / gnustl NDK r14
+            - Android armv7a: clang++ / gnustl NDK r16b
+            - Android am64-v8a: clang++ / gnustl NDK r16b
 
 @warning Make sure to use a compatible toolchain to build your application or you will get some std::bad_alloc errors at runtime.
 
@@ -108,6 +110,8 @@ You should have the following file organisation:
 	│       │   └── OMPScheduler.h --> OpenMP scheduler (Alternative to the CPPScheduler)
 	│       ├── Memory manager files (LifetimeManager, PoolManager, etc.)
 	│       └── Basic implementations of the generic object interfaces (Array, Image, Tensor, etc.)
+	├── data -> Contains test images and reference data dumps used by validation tests
+	├── docs -> Contains Doxyfile and Doxygen sources used to generate the HTML pages in the documentation folder.
 	├── documentation
 	│   ├── index.xhtml
 	│   └── ...
@@ -155,6 +159,8 @@ You should have the following file organisation:
 	│   │   ├── Benchmark specific files
 	│   │   ├── CL --> OpenCL benchmarking tests
 	│   │   ├── GLES_COMPUTE --> GLES benchmarking tests
+	│   │   ├── fixtures
+	│   │   │   └── Fixtures to initialise and run the runtime Functions.
 	│   │   └── NEON --> NEON benchmarking tests
 	│   ├── datasets
 	│   │   └── Datasets for all the validation / benchmark tests, layer configurations for various networks, etc.
@@ -189,6 +195,14 @@ If there is more than one release in a month then an extra sequential number is 
 
 @subsection S2_2_changelog Changelog
 
+v18.03 Public maintenance release
+ - Various bug fixes.
+ - Fixed bug in @ref NEActivationLayer
+ - Fix in @ref CLTuner when using batches.
+ - Updated recommended NDK version to r16b (And fixed warnings).
+ - Fixed bug in validation code.
+ - Added Inception v4 graph example.
+
 v18.02 Public major release
  - Various NEON / OpenCL / GLES optimisations.
  - Various bug fixes.
@@ -197,57 +211,57 @@ v18.02 Public major release
     - graph_mobilenet_qassym8
     - graph_resnet
     - graph_squeezenet_v1_1
- - Renamed @ref arm_compute::CLConvolutionLayer into @ref arm_compute::CLGEMMConvolutionLayer and created a new @ref arm_compute::CLConvolutionLayer to select the fastest convolution method.
- - Renamed @ref arm_compute::NEConvolutionLayer into @ref arm_compute::NEGEMMConvolutionLayer and created a new @ref arm_compute::NEConvolutionLayer to select the fastest convolution method.
+ - Renamed @ref CLConvolutionLayer into @ref CLGEMMConvolutionLayer and created a new @ref CLConvolutionLayer to select the fastest convolution method.
+ - Renamed @ref NEConvolutionLayer into @ref NEGEMMConvolutionLayer and created a new @ref NEConvolutionLayer to select the fastest convolution method.
  - Added in place support to:
-    - @ref arm_compute::CLActivationLayer
-    - @ref arm_compute::CLBatchNormalizationLayer
+    - @ref CLActivationLayer
+    - @ref CLBatchNormalizationLayer
  - Added QASYMM8 support to:
-    - @ref arm_compute::CLActivationLayer
-    - @ref arm_compute::CLDepthwiseConvolutionLayer
-    - @ref arm_compute::NEDepthwiseConvolutionLayer
-    - @ref arm_compute::NESoftmaxLayer
+    - @ref CLActivationLayer
+    - @ref CLDepthwiseConvolutionLayer
+    - @ref NEDepthwiseConvolutionLayer
+    - @ref NESoftmaxLayer
  - Added FP16 support to:
-    - @ref arm_compute::CLDepthwiseConvolutionLayer3x3
-    - @ref arm_compute::CLDepthwiseConvolutionLayer
- - Added broadcasting support to @ref arm_compute::NEArithmeticAddition / @ref arm_compute::CLArithmeticAddition / @ref arm_compute::CLPixelWiseMultiplication
- - Added fused batched normalization and activation to @ref arm_compute::CLBatchNormalizationLayer and @ref arm_compute::NEBatchNormalizationLayer
- - Added support for non-square pooling to @ref arm_compute::NEPoolingLayer and @ref arm_compute::CLPoolingLayer
+    - @ref CLDepthwiseConvolutionLayer3x3
+    - @ref CLDepthwiseConvolutionLayer
+ - Added broadcasting support to @ref NEArithmeticAddition / @ref CLArithmeticAddition / @ref CLPixelWiseMultiplication
+ - Added fused batched normalization and activation to @ref CLBatchNormalizationLayer and @ref NEBatchNormalizationLayer
+ - Added support for non-square pooling to @ref NEPoolingLayer and @ref CLPoolingLayer
  - New OpenCL kernels / functions:
-    - @ref arm_compute::CLDirectConvolutionLayerOutputStageKernel
+    - @ref CLDirectConvolutionLayerOutputStageKernel
  - New NEON kernels / functions
     - Added name() method to all kernels.
     - Added support for Winograd 5x5.
-    - @ref arm_compute::NEPermuteKernel / @ref arm_compute::NEPermute
-    - @ref arm_compute::NEWinogradLayerTransformInputKernel / @ref arm_compute::NEWinogradLayer
-    - @ref arm_compute::NEWinogradLayerTransformOutputKernel / @ref arm_compute::NEWinogradLayer
-    - @ref arm_compute::NEWinogradLayerTransformWeightsKernel / @ref arm_compute::NEWinogradLayer
-    - Renamed arm_compute::NEWinogradLayerKernel into @ref arm_compute::NEWinogradLayerBatchedGEMMKernel
+    - @ref NEPermuteKernel / @ref NEPermute
+    - @ref NEWinogradLayerTransformInputKernel / @ref NEWinogradLayer
+    - @ref NEWinogradLayerTransformOutputKernel / @ref NEWinogradLayer
+    - @ref NEWinogradLayerTransformWeightsKernel / @ref NEWinogradLayer
+    - Renamed NEWinogradLayerKernel into @ref NEWinogradLayerBatchedGEMMKernel
  - New GLES kernels / functions:
-    - @ref arm_compute::GCTensorShiftKernel / @ref arm_compute::GCTensorShift
+    - @ref GCTensorShiftKernel / @ref GCTensorShift
 
 v18.01 Public maintenance release
  - Various bug fixes
  - Added some of the missing validate() methods
- - Added @ref arm_compute::CLDeconvolutionLayerUpsampleKernel / @ref arm_compute::CLDeconvolutionLayer @ref arm_compute::CLDeconvolutionLayerUpsample
- - Added @ref arm_compute::CLPermuteKernel / @ref arm_compute::CLPermute
+ - Added @ref CLDeconvolutionLayerUpsampleKernel / @ref CLDeconvolutionLayer @ref CLDeconvolutionLayerUpsample
+ - Added @ref CLPermuteKernel / @ref CLPermute
  - Added method to clean the programs cache in the CL Kernel library.
- - Added @ref arm_compute::GCArithmeticAdditionKernel / @ref arm_compute::GCArithmeticAddition
- - Added @ref arm_compute::GCDepthwiseConvolutionLayer3x3Kernel / @ref arm_compute::GCDepthwiseConvolutionLayer3x3
- - Added @ref arm_compute::GCNormalizePlanarYUVLayerKernel / @ref arm_compute::GCNormalizePlanarYUVLayer
- - Added @ref arm_compute::GCScaleKernel / @ref arm_compute::GCScale
- - Added @ref arm_compute::GCWeightsReshapeKernel / @ref arm_compute::GCConvolutionLayer
+ - Added @ref GCArithmeticAdditionKernel / @ref GCArithmeticAddition
+ - Added @ref GCDepthwiseConvolutionLayer3x3Kernel / @ref GCDepthwiseConvolutionLayer3x3
+ - Added @ref GCNormalizePlanarYUVLayerKernel / @ref GCNormalizePlanarYUVLayer
+ - Added @ref GCScaleKernel / @ref GCScale
+ - Added @ref GCWeightsReshapeKernel / @ref GCConvolutionLayer
  - Added FP16 support to the following GLES compute kernels:
-    - @ref arm_compute::GCCol2ImKernel
-    - @ref arm_compute::GCGEMMInterleave4x4Kernel
-    - @ref arm_compute::GCGEMMTranspose1xWKernel
-    - @ref arm_compute::GCIm2ColKernel
- - Refactored NEON Winograd (arm_compute::NEWinogradLayerKernel)
- - Added @ref arm_compute::NEDirectConvolutionLayerOutputStageKernel
+    - @ref GCCol2ImKernel
+    - @ref GCGEMMInterleave4x4Kernel
+    - @ref GCGEMMTranspose1xWKernel
+    - @ref GCIm2ColKernel
+ - Refactored NEON Winograd (NEWinogradLayerKernel)
+ - Added @ref NEDirectConvolutionLayerOutputStageKernel
  - Added QASYMM8 support to the following NEON kernels:
-    - @ref arm_compute::NEDepthwiseConvolutionLayer3x3Kernel
-    - @ref arm_compute::NEFillBorderKernel
-    - @ref arm_compute::NEPoolingLayerKernel
+    - @ref NEDepthwiseConvolutionLayer3x3Kernel
+    - @ref NEFillBorderKernel
+    - @ref NEPoolingLayerKernel
  - Added new examples:
     - graph_cl_mobilenet_qasymm8.cpp
     - graph_inception_v3.cpp
@@ -268,52 +282,52 @@ v17.12 Public major release
  - Added new kernels / functions for GLES compute
 
  - New OpenGL ES kernels / functions
-    - @ref arm_compute::GCAbsoluteDifferenceKernel / @ref arm_compute::GCAbsoluteDifference
-    - @ref arm_compute::GCActivationLayerKernel / @ref arm_compute::GCActivationLayer
-    - @ref arm_compute::GCBatchNormalizationLayerKernel / @ref arm_compute::GCBatchNormalizationLayer
-    - @ref arm_compute::GCCol2ImKernel
-    - @ref arm_compute::GCDepthConcatenateLayerKernel / @ref arm_compute::GCDepthConcatenateLayer
-    - @ref arm_compute::GCDirectConvolutionLayerKernel / @ref arm_compute::GCDirectConvolutionLayer
-    - @ref arm_compute::GCDropoutLayerKernel / @ref arm_compute::GCDropoutLayer
-    - @ref arm_compute::GCFillBorderKernel / @ref arm_compute::GCFillBorder
-    - @ref arm_compute::GCGEMMInterleave4x4Kernel / @ref arm_compute::GCGEMMInterleave4x4
-    - @ref arm_compute::GCGEMMMatrixAccumulateBiasesKernel / @ref arm_compute::GCGEMMMatrixAdditionKernel / @ref arm_compute::GCGEMMMatrixMultiplyKernel / @ref arm_compute::GCGEMM
-    - @ref arm_compute::GCGEMMTranspose1xWKernel / @ref arm_compute::GCGEMMTranspose1xW
-    - @ref arm_compute::GCIm2ColKernel
-    - @ref arm_compute::GCNormalizationLayerKernel / @ref arm_compute::GCNormalizationLayer
-    - @ref arm_compute::GCPixelWiseMultiplicationKernel / @ref arm_compute::GCPixelWiseMultiplication
-    - @ref arm_compute::GCPoolingLayerKernel / @ref arm_compute::GCPoolingLayer
-    - @ref arm_compute::GCLogits1DMaxKernel / @ref arm_compute::GCLogits1DShiftExpSumKernel / @ref arm_compute::GCLogits1DNormKernel / @ref arm_compute::GCSoftmaxLayer
-    - @ref arm_compute::GCTransposeKernel / @ref arm_compute::GCTranspose
+    - @ref GCAbsoluteDifferenceKernel / @ref GCAbsoluteDifference
+    - @ref GCActivationLayerKernel / @ref GCActivationLayer
+    - @ref GCBatchNormalizationLayerKernel / @ref GCBatchNormalizationLayer
+    - @ref GCCol2ImKernel
+    - @ref GCDepthConcatenateLayerKernel / @ref GCDepthConcatenateLayer
+    - @ref GCDirectConvolutionLayerKernel / @ref GCDirectConvolutionLayer
+    - @ref GCDropoutLayerKernel / @ref GCDropoutLayer
+    - @ref GCFillBorderKernel / @ref GCFillBorder
+    - @ref GCGEMMInterleave4x4Kernel / @ref GCGEMMInterleave4x4
+    - @ref GCGEMMMatrixAccumulateBiasesKernel / @ref GCGEMMMatrixAdditionKernel / @ref GCGEMMMatrixMultiplyKernel / @ref GCGEMM
+    - @ref GCGEMMTranspose1xWKernel / @ref GCGEMMTranspose1xW
+    - @ref GCIm2ColKernel
+    - @ref GCNormalizationLayerKernel / @ref GCNormalizationLayer
+    - @ref GCPixelWiseMultiplicationKernel / @ref GCPixelWiseMultiplication
+    - @ref GCPoolingLayerKernel / @ref GCPoolingLayer
+    - @ref GCLogits1DMaxKernel / @ref GCLogits1DShiftExpSumKernel / @ref GCLogits1DNormKernel / @ref GCSoftmaxLayer
+    - @ref GCTransposeKernel / @ref GCTranspose
 
  - New NEON kernels / functions
-    - @ref arm_compute::NEGEMMLowpAArch64A53Kernel / @ref arm_compute::NEGEMMLowpAArch64Kernel / @ref arm_compute::NEGEMMLowpAArch64V8P4Kernel / arm_compute::NEGEMMInterleavedBlockedKernel / @ref arm_compute::NEGEMMLowpAssemblyMatrixMultiplyCore
-    - @ref arm_compute::NEHGEMMAArch64FP16Kernel
-    - @ref arm_compute::NEDepthwiseConvolutionLayer3x3Kernel / @ref arm_compute::NEDepthwiseIm2ColKernel / @ref arm_compute::NEGEMMMatrixVectorMultiplyKernel / @ref arm_compute::NEDepthwiseVectorToTensorKernel / @ref arm_compute::NEDepthwiseConvolutionLayer
-    - @ref arm_compute::NEGEMMLowpOffsetContributionKernel / @ref arm_compute::NEGEMMLowpMatrixAReductionKernel / @ref arm_compute::NEGEMMLowpMatrixBReductionKernel / @ref arm_compute::NEGEMMLowpMatrixMultiplyCore
-    - @ref arm_compute::NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel / @ref arm_compute::NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
-    - @ref arm_compute::NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel / @ref arm_compute::NEGEMMLowpQuantizeDownInt32ToUint8Scale
-    - @ref arm_compute::NEWinogradLayer / arm_compute::NEWinogradLayerKernel
+    - @ref NEGEMMLowpAArch64A53Kernel / @ref NEGEMMLowpAArch64Kernel / @ref NEGEMMLowpAArch64V8P4Kernel / NEGEMMInterleavedBlockedKernel / @ref NEGEMMLowpAssemblyMatrixMultiplyCore
+    - @ref NEHGEMMAArch64FP16Kernel
+    - @ref NEDepthwiseConvolutionLayer3x3Kernel / @ref NEDepthwiseIm2ColKernel / @ref NEGEMMMatrixVectorMultiplyKernel / @ref NEDepthwiseVectorToTensorKernel / @ref NEDepthwiseConvolutionLayer
+    - @ref NEGEMMLowpOffsetContributionKernel / @ref NEGEMMLowpMatrixAReductionKernel / @ref NEGEMMLowpMatrixBReductionKernel / @ref NEGEMMLowpMatrixMultiplyCore
+    - @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel / @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
+    - @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel / @ref NEGEMMLowpQuantizeDownInt32ToUint8Scale
+    - @ref NEWinogradLayer / NEWinogradLayerKernel
 
  - New OpenCL kernels / functions
-    - @ref arm_compute::CLGEMMLowpOffsetContributionKernel / @ref arm_compute::CLGEMMLowpMatrixAReductionKernel / @ref arm_compute::CLGEMMLowpMatrixBReductionKernel / @ref arm_compute::CLGEMMLowpMatrixMultiplyCore
-    - @ref arm_compute::CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel / @ref arm_compute::CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
-    - @ref arm_compute::CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel / @ref arm_compute::CLGEMMLowpQuantizeDownInt32ToUint8Scale
+    - @ref CLGEMMLowpOffsetContributionKernel / @ref CLGEMMLowpMatrixAReductionKernel / @ref CLGEMMLowpMatrixBReductionKernel / @ref CLGEMMLowpMatrixMultiplyCore
+    - @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel / @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
+    - @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel / @ref CLGEMMLowpQuantizeDownInt32ToUint8Scale
 
  - New graph nodes for NEON and OpenCL
-    - @ref arm_compute::graph::BranchLayer
-    - @ref arm_compute::graph::DepthConvertLayer
-    - @ref arm_compute::graph::DepthwiseConvolutionLayer
-    - @ref arm_compute::graph::DequantizationLayer
-    - @ref arm_compute::graph::FlattenLayer
-    - @ref arm_compute::graph::QuantizationLayer
-    - @ref arm_compute::graph::ReshapeLayer
+    - @ref graph::BranchLayer
+    - @ref graph::DepthConvertLayer
+    - @ref graph::DepthwiseConvolutionLayer
+    - @ref graph::DequantizationLayer
+    - @ref graph::FlattenLayer
+    - @ref graph::QuantizationLayer
+    - @ref graph::ReshapeLayer
 
 v17.10 Public maintenance release
  - Bug fixes:
     - Check the maximum local workgroup size supported by OpenCL devices
     - Minor documentation updates (Fixed instructions to build the examples)
-    - Introduced a arm_compute::graph::GraphContext
+    - Introduced a graph::GraphContext
     - Added a few new Graph nodes, support for branches and grouping.
     - Automatically enable cl_printf in debug builds
     - Fixed bare metal builds for armv7a
@@ -322,32 +336,32 @@ v17.10 Public maintenance release
 
 v17.09 Public major release
  - Experimental Graph support: initial implementation of a simple stream API to easily chain machine learning layers.
- - Memory Manager (@ref arm_compute::BlobLifetimeManager, @ref arm_compute::BlobMemoryPool, @ref arm_compute::ILifetimeManager, @ref arm_compute::IMemoryGroup, @ref arm_compute::IMemoryManager, @ref arm_compute::IMemoryPool, @ref arm_compute::IPoolManager, @ref arm_compute::MemoryManagerOnDemand, @ref arm_compute::PoolManager)
+ - Memory Manager (@ref BlobLifetimeManager, @ref BlobMemoryPool, @ref ILifetimeManager, @ref IMemoryGroup, @ref IMemoryManager, @ref IMemoryPool, @ref IPoolManager, @ref MemoryManagerOnDemand, @ref PoolManager)
  - New validation and benchmark frameworks (Boost and Google frameworks replaced by homemade framework).
  - Most machine learning functions support both fixed point 8 and 16 bit (QS8, QS16) for both NEON and OpenCL.
  - New NEON kernels / functions:
-    - @ref arm_compute::NEGEMMAssemblyBaseKernel @ref arm_compute::NEGEMMAArch64Kernel
-    - @ref arm_compute::NEDequantizationLayerKernel / @ref arm_compute::NEDequantizationLayer
-    - @ref arm_compute::NEFloorKernel / @ref arm_compute::NEFloor
-    - @ref arm_compute::NEL2NormalizeLayerKernel / @ref arm_compute::NEL2NormalizeLayer
-    - @ref arm_compute::NEQuantizationLayerKernel @ref arm_compute::NEMinMaxLayerKernel / @ref arm_compute::NEQuantizationLayer
-    - @ref arm_compute::NEROIPoolingLayerKernel / @ref arm_compute::NEROIPoolingLayer
-    - @ref arm_compute::NEReductionOperationKernel / @ref arm_compute::NEReductionOperation
-    - @ref arm_compute::NEReshapeLayerKernel / @ref arm_compute::NEReshapeLayer
+    - @ref NEGEMMAssemblyBaseKernel @ref NEGEMMAArch64Kernel
+    - @ref NEDequantizationLayerKernel / @ref NEDequantizationLayer
+    - @ref NEFloorKernel / @ref NEFloor
+    - @ref NEL2NormalizeLayerKernel / @ref NEL2NormalizeLayer
+    - @ref NEQuantizationLayerKernel @ref NEMinMaxLayerKernel / @ref NEQuantizationLayer
+    - @ref NEROIPoolingLayerKernel / @ref NEROIPoolingLayer
+    - @ref NEReductionOperationKernel / @ref NEReductionOperation
+    - @ref NEReshapeLayerKernel / @ref NEReshapeLayer
 
  - New OpenCL kernels / functions:
-    - @ref arm_compute::CLDepthwiseConvolutionLayer3x3Kernel @ref arm_compute::CLDepthwiseIm2ColKernel @ref arm_compute::CLDepthwiseVectorToTensorKernel @ref arm_compute::CLDepthwiseWeightsReshapeKernel / @ref arm_compute::CLDepthwiseConvolutionLayer3x3 @ref arm_compute::CLDepthwiseConvolutionLayer @ref arm_compute::CLDepthwiseSeparableConvolutionLayer
-    - @ref arm_compute::CLDequantizationLayerKernel / @ref arm_compute::CLDequantizationLayer
-    - @ref arm_compute::CLDirectConvolutionLayerKernel / @ref arm_compute::CLDirectConvolutionLayer
-    - @ref arm_compute::CLFlattenLayer
-    - @ref arm_compute::CLFloorKernel / @ref arm_compute::CLFloor
-    - @ref arm_compute::CLGEMMTranspose1xW
-    - @ref arm_compute::CLGEMMMatrixVectorMultiplyKernel
-    - @ref arm_compute::CLL2NormalizeLayerKernel / @ref arm_compute::CLL2NormalizeLayer
-    - @ref arm_compute::CLQuantizationLayerKernel @ref arm_compute::CLMinMaxLayerKernel / @ref arm_compute::CLQuantizationLayer
-    - @ref arm_compute::CLROIPoolingLayerKernel / @ref arm_compute::CLROIPoolingLayer
-    - @ref arm_compute::CLReductionOperationKernel / @ref arm_compute::CLReductionOperation
-    - @ref arm_compute::CLReshapeLayerKernel / @ref arm_compute::CLReshapeLayer
+    - @ref CLDepthwiseConvolutionLayer3x3Kernel @ref CLDepthwiseIm2ColKernel @ref CLDepthwiseVectorToTensorKernel @ref CLDepthwiseWeightsReshapeKernel / @ref CLDepthwiseConvolutionLayer3x3 @ref CLDepthwiseConvolutionLayer @ref CLDepthwiseSeparableConvolutionLayer
+    - @ref CLDequantizationLayerKernel / @ref CLDequantizationLayer
+    - @ref CLDirectConvolutionLayerKernel / @ref CLDirectConvolutionLayer
+    - @ref CLFlattenLayer
+    - @ref CLFloorKernel / @ref CLFloor
+    - @ref CLGEMMTranspose1xW
+    - @ref CLGEMMMatrixVectorMultiplyKernel
+    - @ref CLL2NormalizeLayerKernel / @ref CLL2NormalizeLayer
+    - @ref CLQuantizationLayerKernel @ref CLMinMaxLayerKernel / @ref CLQuantizationLayer
+    - @ref CLROIPoolingLayerKernel / @ref CLROIPoolingLayer
+    - @ref CLReductionOperationKernel / @ref CLReductionOperation
+    - @ref CLReshapeLayerKernel / @ref CLReshapeLayer
 
 v17.06 Public major release
  - Various bug fixes
@@ -355,23 +369,23 @@ v17.06 Public major release
  - Added unit tests and benchmarks (AlexNet, LeNet)
  - Added support for sub tensors.
  - Added infrastructure to provide GPU specific optimisation for some OpenCL kernels.
- - Added @ref arm_compute::OMPScheduler (OpenMP) scheduler for NEON
- - Added @ref arm_compute::SingleThreadScheduler scheduler for NEON (For bare metal)
- - User can specify his own scheduler by implementing the @ref arm_compute::IScheduler interface.
+ - Added @ref OMPScheduler (OpenMP) scheduler for NEON
+ - Added @ref SingleThreadScheduler scheduler for NEON (For bare metal)
+ - User can specify his own scheduler by implementing the @ref IScheduler interface.
  - New OpenCL kernels / functions:
-    - @ref arm_compute::CLBatchNormalizationLayerKernel / @ref arm_compute::CLBatchNormalizationLayer
-    - @ref arm_compute::CLDepthConcatenateLayerKernel / @ref arm_compute::CLDepthConcatenateLayer
-    - @ref arm_compute::CLHOGOrientationBinningKernel @ref arm_compute::CLHOGBlockNormalizationKernel, @ref arm_compute::CLHOGDetectorKernel / @ref arm_compute::CLHOGDescriptor @ref arm_compute::CLHOGDetector @ref arm_compute::CLHOGGradient @ref arm_compute::CLHOGMultiDetection
-    - @ref arm_compute::CLLocallyConnectedMatrixMultiplyKernel / @ref arm_compute::CLLocallyConnectedLayer
-    - @ref arm_compute::CLWeightsReshapeKernel / @ref arm_compute::CLConvolutionLayerReshapeWeights
+    - @ref CLBatchNormalizationLayerKernel / @ref CLBatchNormalizationLayer
+    - @ref CLDepthConcatenateLayerKernel / @ref CLDepthConcatenateLayer
+    - @ref CLHOGOrientationBinningKernel @ref CLHOGBlockNormalizationKernel, @ref CLHOGDetectorKernel / @ref CLHOGDescriptor @ref CLHOGDetector @ref CLHOGGradient @ref CLHOGMultiDetection
+    - @ref CLLocallyConnectedMatrixMultiplyKernel / @ref CLLocallyConnectedLayer
+    - @ref CLWeightsReshapeKernel / @ref CLConvolutionLayerReshapeWeights
  - New C++ kernels:
-    - @ref arm_compute::CPPDetectionWindowNonMaximaSuppressionKernel
+    - @ref CPPDetectionWindowNonMaximaSuppressionKernel
  - New NEON kernels / functions:
-    - @ref arm_compute::NEBatchNormalizationLayerKernel / @ref arm_compute::NEBatchNormalizationLayer
-    - @ref arm_compute::NEDepthConcatenateLayerKernel / @ref arm_compute::NEDepthConcatenateLayer
-    - @ref arm_compute::NEDirectConvolutionLayerKernel / @ref arm_compute::NEDirectConvolutionLayer
-    - @ref arm_compute::NELocallyConnectedMatrixMultiplyKernel / @ref arm_compute::NELocallyConnectedLayer
-    - @ref arm_compute::NEWeightsReshapeKernel / @ref arm_compute::NEConvolutionLayerReshapeWeights
+    - @ref NEBatchNormalizationLayerKernel / @ref NEBatchNormalizationLayer
+    - @ref NEDepthConcatenateLayerKernel / @ref NEDepthConcatenateLayer
+    - @ref NEDirectConvolutionLayerKernel / @ref NEDirectConvolutionLayer
+    - @ref NELocallyConnectedMatrixMultiplyKernel / @ref NELocallyConnectedLayer
+    - @ref NEWeightsReshapeKernel / @ref NEConvolutionLayerReshapeWeights
 
 v17.05 Public bug fixes release
  - Various bug fixes
@@ -383,77 +397,77 @@ v17.05 Public bug fixes release
 v17.04 Public bug fixes release
 
  The following functions have been ported to use the new accurate padding:
- -  @ref arm_compute::CLColorConvertKernel
- -  @ref arm_compute::CLEdgeNonMaxSuppressionKernel
- -  @ref arm_compute::CLEdgeTraceKernel
- -  @ref arm_compute::CLGaussianPyramidHorKernel
- -  @ref arm_compute::CLGaussianPyramidVertKernel
- -  @ref arm_compute::CLGradientKernel
- -  @ref arm_compute::NEChannelCombineKernel
- -  @ref arm_compute::NEFillArrayKernel
- -  @ref arm_compute::NEGaussianPyramidHorKernel
- -  @ref arm_compute::NEGaussianPyramidVertKernel
- -  @ref arm_compute::NEHarrisScoreFP16Kernel
- -  @ref arm_compute::NEHarrisScoreKernel
- -  @ref arm_compute::NEHOGDetectorKernel
- -  @ref arm_compute::NELogits1DMaxKernel
- -  arm_compute::NELogits1DShiftExpSumKernel
- -  arm_compute::NELogits1DNormKernel
- -  @ref arm_compute::NENonMaximaSuppression3x3FP16Kernel
- -  @ref arm_compute::NENonMaximaSuppression3x3Kernel
+ -  @ref CLColorConvertKernel
+ -  @ref CLEdgeNonMaxSuppressionKernel
+ -  @ref CLEdgeTraceKernel
+ -  @ref CLGaussianPyramidHorKernel
+ -  @ref CLGaussianPyramidVertKernel
+ -  @ref CLGradientKernel
+ -  @ref NEChannelCombineKernel
+ -  @ref NEFillArrayKernel
+ -  @ref NEGaussianPyramidHorKernel
+ -  @ref NEGaussianPyramidVertKernel
+ -  @ref NEHarrisScoreFP16Kernel
+ -  @ref NEHarrisScoreKernel
+ -  @ref NEHOGDetectorKernel
+ -  @ref NELogits1DMaxKernel
+ -  NELogits1DShiftExpSumKernel
+ -  NELogits1DNormKernel
+ -  @ref NENonMaximaSuppression3x3FP16Kernel
+ -  @ref NENonMaximaSuppression3x3Kernel
 
 v17.03.1 First Major public release of the sources
  - Renamed the library to arm_compute
  - New CPP target introduced for C++ kernels shared between NEON and CL functions.
  - New padding calculation interface introduced and ported most kernels / functions to use it.
  - New OpenCL kernels / functions:
-   - @ref arm_compute::CLGEMMLowpMatrixMultiplyKernel / arm_compute::CLGEMMLowp
+   - @ref CLGEMMLowpMatrixMultiplyKernel / CLGEMMLowp
  - New NEON kernels / functions:
-   - @ref arm_compute::NENormalizationLayerKernel / @ref arm_compute::NENormalizationLayer
-   - @ref arm_compute::NETransposeKernel / @ref arm_compute::NETranspose
-   - @ref arm_compute::NELogits1DMaxKernel, arm_compute::NELogits1DShiftExpSumKernel, arm_compute::NELogits1DNormKernel / @ref arm_compute::NESoftmaxLayer
-   - @ref arm_compute::NEIm2ColKernel, @ref arm_compute::NECol2ImKernel, arm_compute::NEConvolutionLayerWeightsReshapeKernel / @ref arm_compute::NEConvolutionLayer
-   - @ref arm_compute::NEGEMMMatrixAccumulateBiasesKernel / @ref arm_compute::NEFullyConnectedLayer
-   - @ref arm_compute::NEGEMMLowpMatrixMultiplyKernel / arm_compute::NEGEMMLowp
+   - @ref NENormalizationLayerKernel / @ref NENormalizationLayer
+   - @ref NETransposeKernel / @ref NETranspose
+   - @ref NELogits1DMaxKernel, NELogits1DShiftExpSumKernel, NELogits1DNormKernel / @ref NESoftmaxLayer
+   - @ref NEIm2ColKernel, @ref NECol2ImKernel, NEConvolutionLayerWeightsReshapeKernel / @ref NEConvolutionLayer
+   - @ref NEGEMMMatrixAccumulateBiasesKernel / @ref NEFullyConnectedLayer
+   - @ref NEGEMMLowpMatrixMultiplyKernel / NEGEMMLowp
 
 v17.03 Sources preview
  - New OpenCL kernels / functions:
-   - @ref arm_compute::CLGradientKernel, @ref arm_compute::CLEdgeNonMaxSuppressionKernel, @ref arm_compute::CLEdgeTraceKernel / @ref arm_compute::CLCannyEdge
-   - GEMM refactoring + FP16 support: @ref arm_compute::CLGEMMInterleave4x4Kernel, @ref arm_compute::CLGEMMTranspose1xWKernel, @ref arm_compute::CLGEMMMatrixMultiplyKernel, @ref arm_compute::CLGEMMMatrixAdditionKernel / @ref arm_compute::CLGEMM
-   - @ref arm_compute::CLGEMMMatrixAccumulateBiasesKernel / @ref arm_compute::CLFullyConnectedLayer
-   - @ref arm_compute::CLTransposeKernel / @ref arm_compute::CLTranspose
-   - @ref arm_compute::CLLKTrackerInitKernel, @ref arm_compute::CLLKTrackerStage0Kernel, @ref arm_compute::CLLKTrackerStage1Kernel, @ref arm_compute::CLLKTrackerFinalizeKernel / @ref arm_compute::CLOpticalFlow
-   - @ref arm_compute::CLNormalizationLayerKernel / @ref arm_compute::CLNormalizationLayer
-   - @ref arm_compute::CLLaplacianPyramid, @ref arm_compute::CLLaplacianReconstruct
+   - @ref CLGradientKernel, @ref CLEdgeNonMaxSuppressionKernel, @ref CLEdgeTraceKernel / @ref CLCannyEdge
+   - GEMM refactoring + FP16 support: @ref CLGEMMInterleave4x4Kernel, @ref CLGEMMTranspose1xWKernel, @ref CLGEMMMatrixMultiplyKernel, @ref CLGEMMMatrixAdditionKernel / @ref CLGEMM
+   - @ref CLGEMMMatrixAccumulateBiasesKernel / @ref CLFullyConnectedLayer
+   - @ref CLTransposeKernel / @ref CLTranspose
+   - @ref CLLKTrackerInitKernel, @ref CLLKTrackerStage0Kernel, @ref CLLKTrackerStage1Kernel, @ref CLLKTrackerFinalizeKernel / @ref CLOpticalFlow
+   - @ref CLNormalizationLayerKernel / @ref CLNormalizationLayer
+   - @ref CLLaplacianPyramid, @ref CLLaplacianReconstruct
  - New NEON kernels / functions:
-   - @ref arm_compute::NEActivationLayerKernel / @ref arm_compute::NEActivationLayer
-   - GEMM refactoring + FP16 support (Requires armv8.2 CPU): @ref arm_compute::NEGEMMInterleave4x4Kernel, @ref arm_compute::NEGEMMTranspose1xWKernel, @ref arm_compute::NEGEMMMatrixMultiplyKernel, @ref arm_compute::NEGEMMMatrixAdditionKernel / @ref arm_compute::NEGEMM
-   - @ref arm_compute::NEPoolingLayerKernel / @ref arm_compute::NEPoolingLayer
+   - @ref NEActivationLayerKernel / @ref NEActivationLayer
+   - GEMM refactoring + FP16 support (Requires armv8.2 CPU): @ref NEGEMMInterleave4x4Kernel, @ref NEGEMMTranspose1xWKernel, @ref NEGEMMMatrixMultiplyKernel, @ref NEGEMMMatrixAdditionKernel / @ref NEGEMM
+   - @ref NEPoolingLayerKernel / @ref NEPoolingLayer
 
 v17.02.1 Sources preview
  - New OpenCL kernels / functions:
-   - @ref arm_compute::CLLogits1DMaxKernel, @ref arm_compute::CLLogits1DShiftExpSumKernel, @ref arm_compute::CLLogits1DNormKernel / @ref arm_compute::CLSoftmaxLayer
-   - @ref arm_compute::CLPoolingLayerKernel / @ref arm_compute::CLPoolingLayer
-   - @ref arm_compute::CLIm2ColKernel, @ref arm_compute::CLCol2ImKernel, arm_compute::CLConvolutionLayerWeightsReshapeKernel / @ref arm_compute::CLConvolutionLayer
-   - @ref arm_compute::CLRemapKernel / @ref arm_compute::CLRemap
-   - @ref arm_compute::CLGaussianPyramidHorKernel, @ref arm_compute::CLGaussianPyramidVertKernel / @ref arm_compute::CLGaussianPyramid, @ref arm_compute::CLGaussianPyramidHalf, @ref arm_compute::CLGaussianPyramidOrb
-   - @ref arm_compute::CLMinMaxKernel, @ref arm_compute::CLMinMaxLocationKernel / @ref arm_compute::CLMinMaxLocation
-   - @ref arm_compute::CLNonLinearFilterKernel / @ref arm_compute::CLNonLinearFilter
+   - @ref CLLogits1DMaxKernel, @ref CLLogits1DShiftExpSumKernel, @ref CLLogits1DNormKernel / @ref CLSoftmaxLayer
+   - @ref CLPoolingLayerKernel / @ref CLPoolingLayer
+   - @ref CLIm2ColKernel, @ref CLCol2ImKernel, CLConvolutionLayerWeightsReshapeKernel / @ref CLConvolutionLayer
+   - @ref CLRemapKernel / @ref CLRemap
+   - @ref CLGaussianPyramidHorKernel, @ref CLGaussianPyramidVertKernel / @ref CLGaussianPyramid, @ref CLGaussianPyramidHalf, @ref CLGaussianPyramidOrb
+   - @ref CLMinMaxKernel, @ref CLMinMaxLocationKernel / @ref CLMinMaxLocation
+   - @ref CLNonLinearFilterKernel / @ref CLNonLinearFilter
  - New NEON FP16 kernels (Requires armv8.2 CPU)
-   - @ref arm_compute::NEAccumulateWeightedFP16Kernel
-   - @ref arm_compute::NEBox3x3FP16Kernel
-   - @ref arm_compute::NENonMaximaSuppression3x3FP16Kernel
+   - @ref NEAccumulateWeightedFP16Kernel
+   - @ref NEBox3x3FP16Kernel
+   - @ref NENonMaximaSuppression3x3FP16Kernel
 
 v17.02 Sources preview
  - New OpenCL kernels / functions:
-   - @ref arm_compute::CLActivationLayerKernel / @ref arm_compute::CLActivationLayer
-   - @ref arm_compute::CLChannelCombineKernel / @ref arm_compute::CLChannelCombine
-   - @ref arm_compute::CLDerivativeKernel / @ref arm_compute::CLChannelExtract
-   - @ref arm_compute::CLFastCornersKernel / @ref arm_compute::CLFastCorners
-   - @ref arm_compute::CLMeanStdDevKernel / @ref arm_compute::CLMeanStdDev
+   - @ref CLActivationLayerKernel / @ref CLActivationLayer
+   - @ref CLChannelCombineKernel / @ref CLChannelCombine
+   - @ref CLDerivativeKernel / @ref CLChannelExtract
+   - @ref CLFastCornersKernel / @ref CLFastCorners
+   - @ref CLMeanStdDevKernel / @ref CLMeanStdDev
  - New NEON kernels / functions:
-   - HOG / SVM: @ref arm_compute::NEHOGOrientationBinningKernel, @ref arm_compute::NEHOGBlockNormalizationKernel, @ref arm_compute::NEHOGDetectorKernel, arm_compute::NEHOGNonMaximaSuppressionKernel / @ref arm_compute::NEHOGDescriptor, @ref arm_compute::NEHOGDetector, @ref arm_compute::NEHOGGradient, @ref arm_compute::NEHOGMultiDetection
-   - @ref arm_compute::NENonLinearFilterKernel / @ref arm_compute::NENonLinearFilter
+   - HOG / SVM: @ref NEHOGOrientationBinningKernel, @ref NEHOGBlockNormalizationKernel, @ref NEHOGDetectorKernel, NEHOGNonMaximaSuppressionKernel / @ref NEHOGDescriptor, @ref NEHOGDetector, @ref NEHOGGradient, @ref NEHOGMultiDetection
+   - @ref NENonLinearFilterKernel / @ref NENonLinearFilter
  - Introduced a CLScheduler to manage the default context and command queue used by the runtime library and create synchronisation events.
  - Switched all the kernels / functions to use tensors instead of images.
  - Updated documentation to include instructions to build the library from sources.
@@ -600,7 +614,7 @@ Example:
 
 @b cppthreads Build in the C++11 scheduler for NEON.
 
-@sa arm_compute::Scheduler::set
+@sa Scheduler::set
 
 @subsection S3_2_linux Building for Linux
 
@@ -741,21 +755,35 @@ or
 
 	LD_LIBRARY_PATH=build ./cl_convolution
 
+@note Examples accept different types of arguments, to find out what they are run the example without any argument and the help will be displayed at the beginning of the run.
+
+For example:
+	LD_LIBRARY_PATH=. ./graph_lenet
+
+	./graph_lenet
+
+	Usage: ./graph_lenet [target] [path_to_data] [batches]
+
+	No data folder provided: using random values
+
+	Test passed
+
+In this case the first argument of LeNet (like all the graph examples) is the target (i.e 0 to run on NEON, 1 to run on OpenCL if available, 2 to run on OpenCL using the CLTuner), the second argument is the path to the folder containing the npy files for the weights and finally the third argument is the number of batches to run.
+
 @subsection S3_3_android Building for Android
 
 For Android, the library was successfully built and tested using Google's standalone toolchains:
- - NDK r14 arm-linux-androideabi-4.9 for armv7a (clang++)
- - NDK r14 aarch64-linux-android-4.9 for arm64-v8a (clang++)
+ - clang++ from NDK r16b for armv7a
+ - clang++ from NDK r16b for arm64-v8a
 
 Here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_toolchain.html">create your Android standalone toolchains from the NDK</a>
 
-- Download the NDK r14 from here: https://developer.android.com/ndk/downloads/index.html
+- Download the NDK r16b from here: https://developer.android.com/ndk/downloads/index.html
 - Make sure you have Python 2 installed on your machine.
 - Generate the 32 and/or 64 toolchains by running the following commands:
 
-
-	$NDK/build/tools/make_standalone_toolchain.py --arch arm64 --install-dir $MY_TOOLCHAINS/aarch64-linux-android-4.9 --stl gnustl --api 21
-	$NDK/build/tools/make_standalone_toolchain.py --arch arm --install-dir $MY_TOOLCHAINS/arm-linux-androideabi-4.9 --stl gnustl --api 21
+	$NDK/build/tools/make_standalone_toolchain.py --arch arm64 --install-dir $MY_TOOLCHAINS/aarch64-linux-android-ndk-r16b --stl gnustl --api 21
+	$NDK/build/tools/make_standalone_toolchain.py --arch arm --install-dir $MY_TOOLCHAINS/arm-linux-android-ndk-r16b --stl gnustl --api 21
 
 @attention Due to some NDK issues make sure you use clang++ & gnustl
 
@@ -842,6 +870,21 @@ And finally to run the example:
 	adb shell /data/local/tmp/neon_convolution_aarch64
 	adb shell /data/local/tmp/cl_convolution_aarch64
 	adb shell /data/local/tmp/gc_absdiff_aarch64
+
+@note Examples accept different types of arguments, to find out what they are run the example without any argument and the help will be displayed at the beginning of the run.
+
+For example:
+	adb shell /data/local/tmp/graph_lenet
+
+	/data/local/tmp/graph_lenet
+
+	Usage: /data/local/tmp/graph_lenet [target] [path_to_data] [batches]
+
+	No data folder provided: using random values
+
+	Test passed
+
+In this case the first argument of LeNet (like all the graph examples) is the target (i.e 0 to run on NEON, 1 to run on OpenCL if available, 2 to run on OpenCL using the CLTuner), the second argument is the path to the folder containing the npy files for the weights and finally the third argument is the number of batches to run.
 
 @subsection S3_4_bare_metal Building for bare metal
 
@@ -933,3 +976,4 @@ To cross-compile the stub OpenGLES and EGL libraries simply run:
 	aarch64-linux-gnu-gcc -o libEGL.so -Iinclude/linux opengles-3.1-stubs/EGL.c -fPIC -shared
 	aarch64-linux-gnu-gcc -o libGLESv2.so -Iinclude/linux opengles-3.1-stubs/GLESv2.c -fPIC -shared
 */
+} // namespace arm_compute

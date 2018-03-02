@@ -56,6 +56,5 @@ var searchData=
   ['exp_5fsat_5fqs8x2',['exp_sat_qs8x2',['../fixed__point_8h.xhtml#ae360859290b2e6b78dd9d992bb456e2f',1,'fixed_point.h']]],
   ['exp_5fsat_5fqs8x4',['exp_sat_qs8x4',['../fixed__point_8h.xhtml#ac473935497b3ffcc5683b51a8bbae135',1,'fixed_point.h']]],
   ['exp_5fsat_5fqs8x8',['exp_sat_qs8x8',['../fixed__point_8h.xhtml#a6cb9c026b31ee1685cc1c76bab2474a7',1,'fixed_point.h']]],
-  ['export_5flws_5ftable',['export_lws_table',['../classarm__compute_1_1_c_l_tuner.xhtml#adc1bcaa09c238a061fee596d4631aaab',1,'arm_compute::CLTuner']]],
   ['extend_5fpadding',['extend_padding',['../classarm__compute_1_1_i_tensor_info.xhtml#a0cd5aea514f03afb48ebe22581ea4c66',1,'arm_compute::ITensorInfo::extend_padding()'],['../classarm__compute_1_1_sub_tensor_info.xhtml#af53d8203ecc37896ca4579d1ee3fdffc',1,'arm_compute::SubTensorInfo::extend_padding()'],['../classarm__compute_1_1_tensor_info.xhtml#af53d8203ecc37896ca4579d1ee3fdffc',1,'arm_compute::TensorInfo::extend_padding()']]]
 ];

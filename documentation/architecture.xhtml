@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.02</span>
+   &#160;<span id="projectnumber">18.03</span>
    </div>
   </td>
  </tr>
@@ -141,6 +141,7 @@ $(document).ready(function(){initNavTree('architecture.xhtml','');});
 <li class="level2"><a href="#S4_7_3_memory_manager_function_support">Function support</a></li>
 </ul>
 </li>
+<li class="level1"><a href="#S4_8_opencl_tuner">OpenCL Tuner</a></li>
 </ul>
 </div>
 <div class="textblock"><h1><a class="anchor" id="S4_1"></a>
@@ -294,12 +295,23 @@ Working with the Memory Manager</h2>
 <h2><a class="anchor" id="S4_7_3_memory_manager_function_support"></a>
 Function support</h2>
 <p>Most of the library's function have been ported to use <a class="el" href="classarm__compute_1_1_i_memory_manager.xhtml">IMemoryManager</a> for their internal temporary buffers.</p>
-<p>If that is the case, a memory manager can be passed to them during construction to reuse memory among these functions. </p><div class="fragment"><div class="line"><span class="comment">// Setup Memory Manager</span></div><div class="line">CLBufferAllocator  allocator{};                                                       <span class="comment">// Create an allocator to use for the backing memory allocation</span></div><div class="line"><span class="keyword">auto</span> lifetime_mgr  = std::make_shared&lt;BlobLifetimeManager&gt;();                         <span class="comment">// Create Lifetime Manager</span></div><div class="line"><span class="keyword">auto</span> pool_mgr      = std::make_shared&lt;PoolManager&gt;();                                 <span class="comment">// Create Pool Manager</span></div><div class="line"><span class="keyword">auto</span> mm            = std::make_shared&lt;MemoryManagerOnDemand&gt;(lifetime_mgr, pool_mgr); <span class="comment">// Create Memory Manager</span></div><div class="line"></div><div class="line"><span class="comment">// Create two convolution layers and use the memory manager to manager their internal temporary buffers</span></div><div class="line">CLConvolutionLayer conv1(mm), conv2(mm);</div><div class="line"></div><div class="line"><span class="comment">// Configure layers</span></div><div class="line">conv1.configure(...);</div><div class="line">conv2.configure(...);</div><div class="line"></div><div class="line"><span class="comment">// Finalize memory manager</span></div><div class="line">mm-&gt;set_allocator(&amp;allocator); <span class="comment">// Set allocator to use</span></div><div class="line">mm-&gt;set_set_num_pools(1);      <span class="comment">// Set number of pools to create in case parallel operations can be run</span></div><div class="line">mm-&gt;finalize();                <span class="comment">// Finalize memory manager (Object lifetime check, Memory pool creation etc)</span></div><div class="line"></div><div class="line"><span class="comment">// Run layers (Memory will be recycled for internal buffers for conv1 and conv2</span></div><div class="line">conv1.run();</div><div class="line">conv2.run();</div></div><!-- fragment --> </div></div><!-- contents -->
+<p>If that is the case, a memory manager can be passed to them during construction to reuse memory among these functions. </p><div class="fragment"><div class="line"><span class="comment">// Setup Memory Manager</span></div><div class="line">CLBufferAllocator  allocator{};                                                       <span class="comment">// Create an allocator to use for the backing memory allocation</span></div><div class="line"><span class="keyword">auto</span> lifetime_mgr  = std::make_shared&lt;BlobLifetimeManager&gt;();                         <span class="comment">// Create Lifetime Manager</span></div><div class="line"><span class="keyword">auto</span> pool_mgr      = std::make_shared&lt;PoolManager&gt;();                                 <span class="comment">// Create Pool Manager</span></div><div class="line"><span class="keyword">auto</span> mm            = std::make_shared&lt;MemoryManagerOnDemand&gt;(lifetime_mgr, pool_mgr); <span class="comment">// Create Memory Manager</span></div><div class="line"></div><div class="line"><span class="comment">// Create two convolution layers and use the memory manager to manager their internal temporary buffers</span></div><div class="line">CLConvolutionLayer conv1(mm), conv2(mm);</div><div class="line"></div><div class="line"><span class="comment">// Configure layers</span></div><div class="line">conv1.configure(...);</div><div class="line">conv2.configure(...);</div><div class="line"></div><div class="line"><span class="comment">// Finalize memory manager</span></div><div class="line">mm-&gt;set_allocator(&amp;allocator); <span class="comment">// Set allocator to use</span></div><div class="line">mm-&gt;set_set_num_pools(1);      <span class="comment">// Set number of pools to create in case parallel operations can be run</span></div><div class="line">mm-&gt;finalize();                <span class="comment">// Finalize memory manager (Object lifetime check, Memory pool creation etc)</span></div><div class="line"></div><div class="line"><span class="comment">// Run layers (Memory will be recycled for internal buffers for conv1 and conv2</span></div><div class="line">conv1.run();</div><div class="line">conv2.run();</div></div><!-- fragment --><h1><a class="anchor" id="S4_8_opencl_tuner"></a>
+OpenCL Tuner</h1>
+<p>OpenCL kernels when dispatched to the GPU take two arguments:</p><ul>
+<li>The Global Workgroup Size (GWS): That's the number of times to run an OpenCL kernel to process all the elements we want to process.</li>
+<li>The Local Workgroup Size (LWS): That's the number of elements we want to run in parallel on a GPU core at a given point in time.</li>
+</ul>
+<p>The LWS can be required by an algorithm (For example if it contains memory barriers or uses local memory) but it can also be used for performance reasons to tweak the performance of a kernel: the execution time of the overall kernel might vary significantly depending on how the GWS is broken down.</p>
+<p>However, there is no universal rule regarding which LWS is best for a given kernel, so instead we created the <a class="el" href="classarm__compute_1_1_c_l_tuner.xhtml">CLTuner</a>.</p>
+<p>When the <a class="el" href="classarm__compute_1_1_c_l_tuner.xhtml">CLTuner</a> is enabled ( Target = 2 for the graph examples), the first time an OpenCL kernel is executed the Compute Library will try to run it with a variety of LWS values and will remember which one performed best for subsequent runs. At the end of the run the <a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">graph::Graph</a> will try to save these tuning parameters to a file.</p>
+<p>However this process takes quite a lot of time, which is why it cannot be enabled all the time.</p>
+<p>But, when the <a class="el" href="classarm__compute_1_1_c_l_tuner.xhtml">CLTuner</a> is disabled ( Target = 1 for the graph examples), the <a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml">graph::Graph</a> will try to reload the file containing the tuning parameters, then for each executed kernel the Compute Library will use the fine tuned LWS if it was present in the file or use a default LWS value if it's not. </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu Feb 22 2018 15:45:22 for Compute Library by
+    <li class="footer">Generated on Fri Mar 2 2018 12:37:56 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

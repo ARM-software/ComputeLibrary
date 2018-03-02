@@ -40,8 +40,7 @@ var dir_b986aa98f9b6490bb4fc7918500346fb =
       [ "CLTensorAllocator", "classarm__compute_1_1_c_l_tensor_allocator.xhtml", "classarm__compute_1_1_c_l_tensor_allocator" ]
     ] ],
     [ "CLTuner.h", "_c_l_tuner_8h.xhtml", [
-      [ "CLTuner", "classarm__compute_1_1_c_l_tuner.xhtml", "classarm__compute_1_1_c_l_tuner" ],
-      [ "Interceptor", "classarm__compute_1_1_interceptor.xhtml", "classarm__compute_1_1_interceptor" ]
+      [ "CLTuner", "classarm__compute_1_1_c_l_tuner.xhtml", "classarm__compute_1_1_c_l_tuner" ]
     ] ],
     [ "ICLSimpleFunction.h", "_i_c_l_simple_function_8h.xhtml", [
       [ "ICLSimpleFunction", "classarm__compute_1_1_i_c_l_simple_function.xhtml", "classarm__compute_1_1_i_c_l_simple_function" ]

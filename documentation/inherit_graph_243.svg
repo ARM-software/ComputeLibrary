@@ -11,9 +11,9 @@
 <polygon fill="white" stroke="none" points="-4,4 -4,-24 65,-24 65,4 -4,4"/>
 <!-- Node1 -->
 <g id="node1" class="node"><title>Node1</title>
-<g id="a_node1"><a xlink:href="struct_tensor3_d.xhtml" target="_top" xlink:title="Structure to hold 3D tensor information. ">
+<g id="a_node1"><a xlink:href="struct_tensor4_d.xhtml" target="_top" xlink:title="Structure to hold 4D tensor information. ">
 <polygon fill="white" stroke="black" points="0,-0.5 0,-19.5 61,-19.5 61,-0.5 0,-0.5"/>
-<text text-anchor="middle" x="30.5" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">Tensor3D</text>
+<text text-anchor="middle" x="30.5" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">Tensor4D</text>
 </a>
 </g>
 </g>

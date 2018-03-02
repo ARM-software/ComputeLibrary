@@ -42,6 +42,27 @@ namespace validation
 TEST_SUITE(NEON)
 TEST_SUITE(DepthConcatenateLayer)
 
+TEST_CASE(Configuration, framework::DatasetMode::ALL)
+{
+    // Create tensors
+    Tensor src1 = create_tensor<Tensor>(TensorShape(32U, 32U, 128U), DataType::F32, 1);
+    Tensor src2 = create_tensor<Tensor>(TensorShape(32U, 32U, 32U), DataType::F32, 1);
+    Tensor dst;
+
+    ARM_COMPUTE_EXPECT(src1.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(src2.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+    // Create and configure function
+    NEDepthConcatenateLayer concat_layer;
+
+    concat_layer.configure({ &src1, &src2 }, &dst);
+
+    // Validate valid region
+    const ValidRegion valid_region = shape_to_valid_region(TensorShape(32U, 32U, 160U));
+    validate(dst.info()->valid_region(), valid_region);
+}
+
 template <typename T>
 using NEDepthConcatenateLayerFixture = DepthConcatenateLayerValidationFixture<Tensor, ITensor, Accessor, NEDepthConcatenateLayer, T>;
 

@@ -28,8 +28,8 @@ var searchData=
   ['printer',['Printer',['../classarm__compute_1_1logging_1_1_printer.xhtml',1,'arm_compute::logging']]],
   ['profiler',['Profiler',['../classarm__compute_1_1test_1_1framework_1_1_profiler.xhtml',1,'arm_compute::test::framework']]],
   ['program',['Program',['../classarm__compute_1_1_program.xhtml',1,'arm_compute']]],
-  ['promote',['promote',['../structarm__compute_1_1test_1_1traits_1_1promote.xhtml',1,'arm_compute::test::traits']]],
   ['promote',['promote',['../structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote.xhtml',1,'arm_compute::test::fixed_point_arithmetic::traits']]],
+  ['promote',['promote',['../structarm__compute_1_1test_1_1traits_1_1promote.xhtml',1,'arm_compute::test::traits']]],
   ['promote_3c_20float_20_3e',['promote&lt; float &gt;',['../structarm__compute_1_1test_1_1traits_1_1promote_3_01float_01_4.xhtml',1,'arm_compute::test::traits']]],
   ['promote_3c_20half_20_3e',['promote&lt; half &gt;',['../structarm__compute_1_1test_1_1traits_1_1promote_3_01half_01_4.xhtml',1,'arm_compute::test::traits']]],
   ['promote_3c_20int16_5ft_20_3e',['promote&lt; int16_t &gt;',['../structarm__compute_1_1test_1_1traits_1_1promote_3_01int16__t_01_4.xhtml',1,'arm_compute::test::traits']]],
@@ -44,8 +44,8 @@ var searchData=
   ['promote_3c_20uint32_5ft_20_3e',['promote&lt; uint32_t &gt;',['../structarm__compute_1_1test_1_1traits_1_1promote_3_01uint32__t_01_4.xhtml',1,'arm_compute::test::traits']]],
   ['promote_3c_20uint32_5ft_20_3e',['promote&lt; uint32_t &gt;',['../structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote_3_01uint32__t_01_4.xhtml',1,'arm_compute::test::fixed_point_arithmetic::traits']]],
   ['promote_3c_20uint64_5ft_20_3e',['promote&lt; uint64_t &gt;',['../structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote_3_01uint64__t_01_4.xhtml',1,'arm_compute::test::fixed_point_arithmetic::traits']]],
-  ['promote_3c_20uint8_5ft_20_3e',['promote&lt; uint8_t &gt;',['../structarm__compute_1_1test_1_1traits_1_1promote_3_01uint8__t_01_4.xhtml',1,'arm_compute::test::traits']]],
   ['promote_3c_20uint8_5ft_20_3e',['promote&lt; uint8_t &gt;',['../structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote_3_01uint8__t_01_4.xhtml',1,'arm_compute::test::fixed_point_arithmetic::traits']]],
+  ['promote_3c_20uint8_5ft_20_3e',['promote&lt; uint8_t &gt;',['../structarm__compute_1_1test_1_1traits_1_1promote_3_01uint8__t_01_4.xhtml',1,'arm_compute::test::traits']]],
   ['pyramid',['Pyramid',['../classarm__compute_1_1_pyramid.xhtml',1,'arm_compute']]],
   ['pyramidinfo',['PyramidInfo',['../classarm__compute_1_1_pyramid_info.xhtml',1,'arm_compute']]]
 ];

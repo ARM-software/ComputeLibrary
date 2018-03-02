@@ -60,6 +60,7 @@ var NAVTREEINDEX15 =
 "architecture.xhtml#S4_7_2_working_with_memory_manager":[1,4,1],
 "architecture.xhtml#S4_7_3_memory_manager_function_support":[1,4,2],
 "architecture.xhtml#S4_7_memory_manager":[1,4],
+"architecture.xhtml#S4_8_opencl_tuner":[1,5],
 "architecture.xhtml#padding":[1,3,0,0],
 "architecture.xhtml#valid_region":[1,3,0,1],
 "arithmetic__op_8cl.xhtml":[6,0,3,0,0,0,4],
@@ -248,6 +249,5 @@ var NAVTREEINDEX15 =
 "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6abd7ef6d4f35bc7d05c559b65032f15d1":[6,0,0,0,41,28,16],
 "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6ac8bd5bedff8ef192d39a962afc0e19ee":[6,0,0,0,41,28,8],
 "arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6ad5695915456312560039ee411667cdbf":[6,0,0,0,41,28,10],
-"arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6aef9ef3ebca4d2b64b6ec83808bafa5f2":[6,0,0,0,41,28,5],
-"arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6af14462d71aa842202c3e4b272c7ec924":[6,0,0,0,41,28,4]
+"arm__compute_2core_2_types_8h.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6aef9ef3ebca4d2b64b6ec83808bafa5f2":[6,0,0,0,41,28,5]
 };

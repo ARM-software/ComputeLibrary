@@ -37,26 +37,43 @@ class ICLKernel;
 class CLTuner : public ICLTuner
 {
 public:
-    /** Constructor */
-    CLTuner();
+    /** Constructor
+     *
+     * @param[in] tune_new_kernels Find the optimal local workgroup size for kernels which are not present in the table ?
+     *
+     */
+    CLTuner(bool tune_new_kernels = true);
 
     /** Destructor */
     ~CLTuner() = default;
 
+    /** Setter for tune_new_kernels option
+     *
+     * @param[in] tune_new_kernels Find the optimal local workgroup size for kernels which are not present in the table ?
+     */
+    void set_tune_new_kernels(bool tune_new_kernels);
+    /** Tune kernels that are not in the LWS table
+     *
+     * @return True if tuning of new kernels is enabled.
+     */
+    bool tune_new_kernels() const;
+    /** Manually add a LWS for a kernel
+     *
+     * @param[in] kernel_id   Unique identifiant of the kernel
+     * @param[in] optimal_lws Optimal local workgroup size to use for the given kernel
+     */
+    void add_lws_to_table(const std::string &kernel_id, cl::NDRange optimal_lws);
     /** Import LWS table
      *
      * @param[in] lws_table The unordered_map container to import
      */
     void import_lws_table(const std::unordered_map<std::string, cl::NDRange> &lws_table);
 
-    /** Export LWS table
+    /** Give read access to the LWS table
      *
      * return The lws table as unordered_map container
      */
-    const std::unordered_map<std::string, cl::NDRange> &export_lws_table();
-
-    // Inherited methods overridden:
-    void tune_kernel(ICLKernel &kernel) override;
+    const std::unordered_map<std::string, cl::NDRange> &lws_table() const;
 
     /** Set the OpenCL kernel event
      *
@@ -66,7 +83,28 @@ public:
      */
     void set_cl_kernel_event(cl_event kernel_event);
 
-    std::function<decltype(clEnqueueNDRangeKernel)> real_function;
+    std::function<decltype(clEnqueueNDRangeKernel)> real_clEnqueueNDRangeKernel;
+
+    /** Load the LWS table from file
+     *
+     * @param[in] filename Load the LWS table from this file.(Must exist)
+     */
+    void load_from_file(const std::string &filename);
+
+    /** Save the content of the LWS table to file
+     *
+     * @param[in] filename Save the LWS table to this file. (Content will be overwritten)
+     */
+    void save_to_file(const std::string &filename) const;
+
+    // Inherited methods overridden:
+    void tune_kernel(ICLKernel &kernel) override;
+
+    /** Is the kernel_event set ?
+     *
+     * @return true if the kernel_event is set.
+     */
+    bool kernel_event_is_set() const;
 
 private:
     /** Find optimal LWS using brute-force approach
@@ -81,33 +119,7 @@ private:
     cl::CommandQueue _queue;
     cl::CommandQueue _queue_profiler;
     cl::Event        _kernel_event;
-};
-
-/* Function to be used to intercept kernel enqueues and store their OpenCL Event */
-class Interceptor
-{
-public:
-    explicit Interceptor(CLTuner &tuner);
-
-    /** clEnqueueNDRangeKernel interface
-     *
-     * @param[in] command_queue           A valid command-queue. The kernel will be queued for execution on the device associated with command_queue.
-     * @param[in] kernel                  A valid kernel object. The OpenCL context associated with kernel and command_queue must be the same.
-     * @param[in] work_dim                The number of dimensions used to specify the global work-items and work-items in the work-group. work_dim must be greater than zero and less than or equal to CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS.
-     * @param[in] gwo                     Global-Workgroup-Offset. It can be used to specify an array of work_dim unsigned values that describe the offset used to calculate the global ID of a work-item. If global_work_offset is NULL, the global IDs start at offset (0, 0, ... 0).
-     * @param[in] gws                     Global-Workgroup-Size. Points to an array of work_dim unsigned values that describe the number of global work-items in work_dim dimensions that will execute the kernel function.
-     * @param[in] lws                     Local-Workgroup-Size. Points to an array of work_dim unsigned values that describe the number of work-items that make up a work-group
-     * @param[in] num_events_in_wait_list Number of events in the waiting list
-     * @param[in] event_wait_list         Event waiting list
-     * @param[in] event                   OpenCL kernel event
-     *
-     * @return the OpenCL status
-     */
-    cl_int operator()(cl_command_queue command_queue, cl_kernel kernel, cl_uint work_dim, const size_t *gwo, const size_t *gws, const size_t *lws, cl_uint num_events_in_wait_list,
-                      const cl_event *event_wait_list, cl_event *event);
-
-private:
-    CLTuner &_tuner;
+    bool             _tune_new_kernels;
 };
 }
 #endif /*__ARM_COMPUTE_CLTUNER_H__ */

@@ -41,6 +41,7 @@ var searchData=
   ['add_5fdecorator',['add_decorator',['../classarm__compute_1_1logging_1_1_logger.xhtml#aca0de1bc76119d77831c0b1d58a20f4d',1,'arm_compute::logging::Logger']]],
   ['add_5fimage_5ffile',['add_image_file',['../classarm__compute_1_1test_1_1datasets_1_1_image_file_dataset.xhtml#ac0eb4ae50d395d3c191d5078f7c99a06',1,'arm_compute::test::datasets::ImageFileDataset']]],
   ['add_5finput',['add_input',['../classarm__compute_1_1graph_1_1_node_context.xhtml#a092fa0a514eef844785e30916a2cf8bd',1,'arm_compute::graph::NodeContext']]],
+  ['add_5flws_5fto_5ftable',['add_lws_to_table',['../classarm__compute_1_1_c_l_tuner.xhtml#a7de8b49d3ae94affb80ba48945368a8a',1,'arm_compute::CLTuner']]],
   ['add_5fnode',['add_node',['../classarm__compute_1_1graph_1_1_graph.xhtml#a38ce1a1fc4dd3131a37225ae95c143ce',1,'arm_compute::graph::Graph::add_node()'],['../classarm__compute_1_1graph_1_1_sub_graph.xhtml#a38ce1a1fc4dd3131a37225ae95c143ce',1,'arm_compute::graph::SubGraph::add_node()']]],
   ['add_5foperation',['add_operation',['../classarm__compute_1_1graph_1_1_operation_registry.xhtml#aad5f9e2a10e4d9a6d13f78862df1d0d5',1,'arm_compute::graph::OperationRegistry']]],
   ['add_5foption',['add_option',['../classarm__compute_1_1_c_l_build_options.xhtml#a3e2b80ff5463b7d2017de847f5c32a30',1,'arm_compute::CLBuildOptions::add_option()'],['../classarm__compute_1_1test_1_1framework_1_1_command_line_parser.xhtml#a533951910a8df4f26eac7e534a226c5f',1,'arm_compute::test::framework::CommandLineParser::add_option()']]],

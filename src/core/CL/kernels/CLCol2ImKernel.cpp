@@ -144,7 +144,9 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
 
 Status CLCol2ImKernel::validate(const ITensorInfo *input, const ITensorInfo *output, std::pair<unsigned int, unsigned int> convolved_dims)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, convolved_dims));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), convolved_dims).first);
     return Status{};
 }
 

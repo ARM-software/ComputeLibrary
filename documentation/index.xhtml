@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.02</span>
+   &#160;<span id="projectnumber">18.03</span>
    </div>
   </td>
  </tr>
@@ -159,8 +159,8 @@ Pre-built binaries</h1>
 <p>These binaries have been built using the following toolchains:</p><ul>
 <li>Linux armv7a: gcc-linaro-arm-linux-gnueabihf-4.9-2014.07_linux</li>
 <li>Linux arm64-v8a: gcc-linaro-4.9-2016.02-x86_64_aarch64-linux-gnu</li>
-<li>Android armv7a: clang++ / gnustl NDK r14</li>
-<li>Android am64-v8a: clang++ / gnustl NDK r14</li>
+<li>Android armv7a: clang++ / gnustl NDK r16b</li>
+<li>Android am64-v8a: clang++ / gnustl NDK r16b</li>
 </ul>
 <dl class="section warning"><dt>Warning</dt><dd>Make sure to use a compatible toolchain to build your application or you will get some std::bad_alloc errors at runtime.</dd></dl>
 <h1><a class="anchor" id="S1_file_organisation"></a>
@@ -238,6 +238,8 @@ File organisation</h1>
 │       │   └── OMPScheduler.h --&gt; OpenMP scheduler (Alternative to the CPPScheduler)
 │       ├── Memory manager files (LifetimeManager, PoolManager, etc.)
 │       └── Basic implementations of the generic object interfaces (Array, Image, Tensor, etc.)
+├── data -&gt; Contains test images and reference data dumps used by validation tests
+├── docs -&gt; Contains Doxyfile and Doxygen sources used to generate the HTML pages in the documentation folder.
 ├── documentation
 │   ├── index.xhtml
 │   └── ...
@@ -285,6 +287,8 @@ File organisation</h1>
 │   │   ├── Benchmark specific files
 │   │   ├── CL --&gt; OpenCL benchmarking tests
 │   │   ├── GLES_COMPUTE --&gt; GLES benchmarking tests
+│   │   ├── fixtures
+│   │   │   └── Fixtures to initialise and run the runtime Functions.
 │   │   └── NEON --&gt; NEON benchmarking tests
 │   ├── datasets
 │   │   └── Datasets for all the validation / benchmark tests, layer configurations for various networks, etc.
@@ -313,6 +317,14 @@ v17.04 (First release of April 2017)
 </pre><dl class="section note"><dt>Note</dt><dd>We're aiming at releasing one major public release with new features per quarter. All releases in between will only contain bug fixes.</dd></dl>
 <h2><a class="anchor" id="S2_2_changelog"></a>
 Changelog</h2>
+<p>v18.03 Public maintenance release</p><ul>
+<li>Various bug fixes.</li>
+<li>Fixed bug in <a class="el" href="classarm__compute_1_1_n_e_activation_layer.xhtml">NEActivationLayer</a></li>
+<li>Fix in <a class="el" href="classarm__compute_1_1_c_l_tuner.xhtml">CLTuner</a> when using batches.</li>
+<li>Updated recommended NDK version to r16b (And fixed warnings).</li>
+<li>Fixed bug in validation code.</li>
+<li>Added Inception v4 graph example.</li>
+</ul>
 <p>v18.02 Public major release</p><ul>
 <li>Various NEON / OpenCL / GLES optimisations.</li>
 <li>Various bug fixes.</li>
@@ -323,71 +335,71 @@ Changelog</h2>
 <li>graph_squeezenet_v1_1</li>
 </ul>
 </li>
-<li>Renamed <a class="el" href="classarm__compute_1_1_c_l_convolution_layer.xhtml">arm_compute::CLConvolutionLayer</a> into <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_convolution_layer.xhtml">arm_compute::CLGEMMConvolutionLayer</a> and created a new <a class="el" href="classarm__compute_1_1_c_l_convolution_layer.xhtml">arm_compute::CLConvolutionLayer</a> to select the fastest convolution method.</li>
-<li>Renamed <a class="el" href="classarm__compute_1_1_n_e_convolution_layer.xhtml">arm_compute::NEConvolutionLayer</a> into <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_convolution_layer.xhtml">arm_compute::NEGEMMConvolutionLayer</a> and created a new <a class="el" href="classarm__compute_1_1_n_e_convolution_layer.xhtml">arm_compute::NEConvolutionLayer</a> to select the fastest convolution method.</li>
+<li>Renamed <a class="el" href="classarm__compute_1_1_c_l_convolution_layer.xhtml">CLConvolutionLayer</a> into <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_convolution_layer.xhtml">CLGEMMConvolutionLayer</a> and created a new <a class="el" href="classarm__compute_1_1_c_l_convolution_layer.xhtml">CLConvolutionLayer</a> to select the fastest convolution method.</li>
+<li>Renamed <a class="el" href="classarm__compute_1_1_n_e_convolution_layer.xhtml">NEConvolutionLayer</a> into <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_convolution_layer.xhtml">NEGEMMConvolutionLayer</a> and created a new <a class="el" href="classarm__compute_1_1_n_e_convolution_layer.xhtml">NEConvolutionLayer</a> to select the fastest convolution method.</li>
 <li>Added in place support to:<ul>
-<li><a class="el" href="classarm__compute_1_1_c_l_activation_layer.xhtml">arm_compute::CLActivationLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_batch_normalization_layer.xhtml">arm_compute::CLBatchNormalizationLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_activation_layer.xhtml">CLActivationLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_batch_normalization_layer.xhtml">CLBatchNormalizationLayer</a></li>
 </ul>
 </li>
 <li>Added QASYMM8 support to:<ul>
-<li><a class="el" href="classarm__compute_1_1_c_l_activation_layer.xhtml">arm_compute::CLActivationLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer.xhtml">arm_compute::CLDepthwiseConvolutionLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer.xhtml">arm_compute::NEDepthwiseConvolutionLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_softmax_layer.xhtml">arm_compute::NESoftmaxLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_activation_layer.xhtml">CLActivationLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer.xhtml">CLDepthwiseConvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer.xhtml">NEDepthwiseConvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_softmax_layer.xhtml">NESoftmaxLayer</a></li>
 </ul>
 </li>
 <li>Added FP16 support to:<ul>
-<li><a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer3x3.xhtml">arm_compute::CLDepthwiseConvolutionLayer3x3</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer.xhtml">arm_compute::CLDepthwiseConvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer3x3.xhtml">CLDepthwiseConvolutionLayer3x3</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer.xhtml">CLDepthwiseConvolutionLayer</a></li>
 </ul>
 </li>
-<li>Added broadcasting support to <a class="el" href="classarm__compute_1_1_n_e_arithmetic_addition.xhtml">arm_compute::NEArithmeticAddition</a> / <a class="el" href="classarm__compute_1_1_c_l_arithmetic_addition.xhtml">arm_compute::CLArithmeticAddition</a> / <a class="el" href="classarm__compute_1_1_c_l_pixel_wise_multiplication.xhtml">arm_compute::CLPixelWiseMultiplication</a></li>
-<li>Added fused batched normalization and activation to <a class="el" href="classarm__compute_1_1_c_l_batch_normalization_layer.xhtml">arm_compute::CLBatchNormalizationLayer</a> and <a class="el" href="classarm__compute_1_1_n_e_batch_normalization_layer.xhtml">arm_compute::NEBatchNormalizationLayer</a></li>
-<li>Added support for non-square pooling to <a class="el" href="classarm__compute_1_1_n_e_pooling_layer.xhtml">arm_compute::NEPoolingLayer</a> and <a class="el" href="classarm__compute_1_1_c_l_pooling_layer.xhtml">arm_compute::CLPoolingLayer</a></li>
+<li>Added broadcasting support to <a class="el" href="classarm__compute_1_1_n_e_arithmetic_addition.xhtml">NEArithmeticAddition</a> / <a class="el" href="classarm__compute_1_1_c_l_arithmetic_addition.xhtml">CLArithmeticAddition</a> / <a class="el" href="classarm__compute_1_1_c_l_pixel_wise_multiplication.xhtml">CLPixelWiseMultiplication</a></li>
+<li>Added fused batched normalization and activation to <a class="el" href="classarm__compute_1_1_c_l_batch_normalization_layer.xhtml">CLBatchNormalizationLayer</a> and <a class="el" href="classarm__compute_1_1_n_e_batch_normalization_layer.xhtml">NEBatchNormalizationLayer</a></li>
+<li>Added support for non-square pooling to <a class="el" href="classarm__compute_1_1_n_e_pooling_layer.xhtml">NEPoolingLayer</a> and <a class="el" href="classarm__compute_1_1_c_l_pooling_layer.xhtml">CLPoolingLayer</a></li>
 <li>New OpenCL kernels / functions:<ul>
-<li><a class="el" href="classarm__compute_1_1_c_l_direct_convolution_layer_output_stage_kernel.xhtml">arm_compute::CLDirectConvolutionLayerOutputStageKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_direct_convolution_layer_output_stage_kernel.xhtml">CLDirectConvolutionLayerOutputStageKernel</a></li>
 </ul>
 </li>
 <li>New NEON kernels / functions<ul>
 <li>Added name() method to all kernels.</li>
 <li>Added support for Winograd 5x5.</li>
-<li><a class="el" href="classarm__compute_1_1_n_e_permute_kernel.xhtml">arm_compute::NEPermuteKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_permute.xhtml">arm_compute::NEPermute</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_input_kernel.xhtml">arm_compute::NEWinogradLayerTransformInputKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_winograd_layer.xhtml">arm_compute::NEWinogradLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_output_kernel.xhtml">arm_compute::NEWinogradLayerTransformOutputKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_winograd_layer.xhtml">arm_compute::NEWinogradLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel.xhtml">arm_compute::NEWinogradLayerTransformWeightsKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_winograd_layer.xhtml">arm_compute::NEWinogradLayer</a></li>
-<li>Renamed arm_compute::NEWinogradLayerKernel into <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml">arm_compute::NEWinogradLayerBatchedGEMMKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_permute_kernel.xhtml">NEPermuteKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_permute.xhtml">NEPermute</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_input_kernel.xhtml">NEWinogradLayerTransformInputKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_winograd_layer.xhtml">NEWinogradLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_output_kernel.xhtml">NEWinogradLayerTransformOutputKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_winograd_layer.xhtml">NEWinogradLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel.xhtml">NEWinogradLayerTransformWeightsKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_winograd_layer.xhtml">NEWinogradLayer</a></li>
+<li>Renamed NEWinogradLayerKernel into <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml">NEWinogradLayerBatchedGEMMKernel</a></li>
 </ul>
 </li>
 <li>New GLES kernels / functions:<ul>
-<li><a class="el" href="classarm__compute_1_1_g_c_tensor_shift_kernel.xhtml">arm_compute::GCTensorShiftKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_tensor_shift.xhtml">arm_compute::GCTensorShift</a></li>
+<li><a class="el" href="classarm__compute_1_1_g_c_tensor_shift_kernel.xhtml">GCTensorShiftKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_tensor_shift.xhtml">GCTensorShift</a></li>
 </ul>
 </li>
 </ul>
 <p>v18.01 Public maintenance release</p><ul>
 <li>Various bug fixes</li>
 <li>Added some of the missing <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a6813132c943295888972727864ea5c2f">validate()</a> methods</li>
-<li>Added <a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel.xhtml">arm_compute::CLDeconvolutionLayerUpsampleKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer.xhtml">arm_compute::CLDeconvolutionLayer</a> <a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer_upsample.xhtml">arm_compute::CLDeconvolutionLayerUpsample</a></li>
-<li>Added <a class="el" href="classarm__compute_1_1_c_l_permute_kernel.xhtml">arm_compute::CLPermuteKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_permute.xhtml">arm_compute::CLPermute</a></li>
-<li>Added method to clean the programs cache in the CL Kernel library.</li>
-<li>Added <a class="el" href="classarm__compute_1_1_g_c_arithmetic_addition_kernel.xhtml">arm_compute::GCArithmeticAdditionKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_arithmetic_addition.xhtml">arm_compute::GCArithmeticAddition</a></li>
-<li>Added <a class="el" href="classarm__compute_1_1_g_c_depthwise_convolution_layer3x3_kernel.xhtml">arm_compute::GCDepthwiseConvolutionLayer3x3Kernel</a> / <a class="el" href="classarm__compute_1_1_g_c_depthwise_convolution_layer3x3.xhtml">arm_compute::GCDepthwiseConvolutionLayer3x3</a></li>
-<li>Added <a class="el" href="classarm__compute_1_1_g_c_normalize_planar_y_u_v_layer_kernel.xhtml">arm_compute::GCNormalizePlanarYUVLayerKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_normalize_planar_y_u_v_layer.xhtml">arm_compute::GCNormalizePlanarYUVLayer</a></li>
-<li>Added <a class="el" href="classarm__compute_1_1_g_c_scale_kernel.xhtml">arm_compute::GCScaleKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_scale.xhtml">arm_compute::GCScale</a></li>
-<li>Added <a class="el" href="classarm__compute_1_1_g_c_weights_reshape_kernel.xhtml">arm_compute::GCWeightsReshapeKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_convolution_layer.xhtml">arm_compute::GCConvolutionLayer</a></li>
+<li>Added <a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel.xhtml">CLDeconvolutionLayerUpsampleKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer.xhtml">CLDeconvolutionLayer</a> <a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer_upsample.xhtml">CLDeconvolutionLayerUpsample</a></li>
+<li>Added <a class="el" href="classarm__compute_1_1_c_l_permute_kernel.xhtml">CLPermuteKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_permute.xhtml">CLPermute</a></li>
+<li>Added method to clean the programs cache in the CL <a class="el" href="classarm__compute_1_1_kernel.xhtml" title="Kernel class. ">Kernel</a> library.</li>
+<li>Added <a class="el" href="classarm__compute_1_1_g_c_arithmetic_addition_kernel.xhtml">GCArithmeticAdditionKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_arithmetic_addition.xhtml">GCArithmeticAddition</a></li>
+<li>Added <a class="el" href="classarm__compute_1_1_g_c_depthwise_convolution_layer3x3_kernel.xhtml">GCDepthwiseConvolutionLayer3x3Kernel</a> / <a class="el" href="classarm__compute_1_1_g_c_depthwise_convolution_layer3x3.xhtml">GCDepthwiseConvolutionLayer3x3</a></li>
+<li>Added <a class="el" href="classarm__compute_1_1_g_c_normalize_planar_y_u_v_layer_kernel.xhtml">GCNormalizePlanarYUVLayerKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_normalize_planar_y_u_v_layer.xhtml">GCNormalizePlanarYUVLayer</a></li>
+<li>Added <a class="el" href="classarm__compute_1_1_g_c_scale_kernel.xhtml">GCScaleKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_scale.xhtml">GCScale</a></li>
+<li>Added <a class="el" href="classarm__compute_1_1_g_c_weights_reshape_kernel.xhtml">GCWeightsReshapeKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_convolution_layer.xhtml">GCConvolutionLayer</a></li>
 <li>Added FP16 support to the following GLES compute kernels:<ul>
-<li><a class="el" href="classarm__compute_1_1_g_c_col2_im_kernel.xhtml">arm_compute::GCCol2ImKernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_interleave4x4_kernel.xhtml">arm_compute::GCGEMMInterleave4x4Kernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_transpose1x_w_kernel.xhtml">arm_compute::GCGEMMTranspose1xWKernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_g_c_im2_col_kernel.xhtml">arm_compute::GCIm2ColKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_g_c_col2_im_kernel.xhtml">GCCol2ImKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_interleave4x4_kernel.xhtml">GCGEMMInterleave4x4Kernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_transpose1x_w_kernel.xhtml">GCGEMMTranspose1xWKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_g_c_im2_col_kernel.xhtml">GCIm2ColKernel</a></li>
 </ul>
 </li>
-<li>Refactored NEON Winograd (arm_compute::NEWinogradLayerKernel)</li>
-<li>Added <a class="el" href="classarm__compute_1_1_n_e_direct_convolution_layer_output_stage_kernel.xhtml">arm_compute::NEDirectConvolutionLayerOutputStageKernel</a></li>
+<li>Refactored NEON Winograd (NEWinogradLayerKernel)</li>
+<li>Added <a class="el" href="classarm__compute_1_1_n_e_direct_convolution_layer_output_stage_kernel.xhtml">NEDirectConvolutionLayerOutputStageKernel</a></li>
 <li>Added QASYMM8 support to the following NEON kernels:<ul>
-<li><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml">arm_compute::NEDepthwiseConvolutionLayer3x3Kernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_fill_border_kernel.xhtml">arm_compute::NEFillBorderKernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_pooling_layer_kernel.xhtml">arm_compute::NEPoolingLayerKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml">NEDepthwiseConvolutionLayer3x3Kernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_fill_border_kernel.xhtml">NEFillBorderKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_pooling_layer_kernel.xhtml">NEPoolingLayerKernel</a></li>
 </ul>
 </li>
 <li>Added new examples:<ul>
@@ -411,49 +423,49 @@ Changelog</h2>
 <li>Added new tests and benchmarks in validation and benchmark frameworks</li>
 <li>Added new kernels / functions for GLES compute</li>
 <li>New OpenGL ES kernels / functions<ul>
-<li><a class="el" href="classarm__compute_1_1_g_c_absolute_difference_kernel.xhtml">arm_compute::GCAbsoluteDifferenceKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_absolute_difference.xhtml">arm_compute::GCAbsoluteDifference</a></li>
-<li><a class="el" href="classarm__compute_1_1_g_c_activation_layer_kernel.xhtml">arm_compute::GCActivationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_activation_layer.xhtml">arm_compute::GCActivationLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_g_c_batch_normalization_layer_kernel.xhtml">arm_compute::GCBatchNormalizationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_batch_normalization_layer.xhtml">arm_compute::GCBatchNormalizationLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_g_c_col2_im_kernel.xhtml">arm_compute::GCCol2ImKernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_g_c_depth_concatenate_layer_kernel.xhtml">arm_compute::GCDepthConcatenateLayerKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_depth_concatenate_layer.xhtml">arm_compute::GCDepthConcatenateLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_g_c_direct_convolution_layer_kernel.xhtml">arm_compute::GCDirectConvolutionLayerKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_direct_convolution_layer.xhtml">arm_compute::GCDirectConvolutionLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_g_c_dropout_layer_kernel.xhtml">arm_compute::GCDropoutLayerKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_dropout_layer.xhtml">arm_compute::GCDropoutLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_g_c_fill_border_kernel.xhtml">arm_compute::GCFillBorderKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_fill_border.xhtml">arm_compute::GCFillBorder</a></li>
-<li><a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_interleave4x4_kernel.xhtml">arm_compute::GCGEMMInterleave4x4Kernel</a> / <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_interleave4x4.xhtml">arm_compute::GCGEMMInterleave4x4</a></li>
-<li><a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_accumulate_biases_kernel.xhtml">arm_compute::GCGEMMMatrixAccumulateBiasesKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_addition_kernel.xhtml">arm_compute::GCGEMMMatrixAdditionKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_multiply_kernel.xhtml">arm_compute::GCGEMMMatrixMultiplyKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m.xhtml">arm_compute::GCGEMM</a></li>
-<li><a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_transpose1x_w_kernel.xhtml">arm_compute::GCGEMMTranspose1xWKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_transpose1x_w.xhtml">arm_compute::GCGEMMTranspose1xW</a></li>
-<li><a class="el" href="classarm__compute_1_1_g_c_im2_col_kernel.xhtml">arm_compute::GCIm2ColKernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_g_c_normalization_layer_kernel.xhtml">arm_compute::GCNormalizationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_normalization_layer.xhtml">arm_compute::GCNormalizationLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_g_c_pixel_wise_multiplication_kernel.xhtml">arm_compute::GCPixelWiseMultiplicationKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_pixel_wise_multiplication.xhtml">arm_compute::GCPixelWiseMultiplication</a></li>
-<li><a class="el" href="classarm__compute_1_1_g_c_pooling_layer_kernel.xhtml">arm_compute::GCPoolingLayerKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_pooling_layer.xhtml">arm_compute::GCPoolingLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_g_c_logits1_d_max_kernel.xhtml">arm_compute::GCLogits1DMaxKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_logits1_d_shift_exp_sum_kernel.xhtml">arm_compute::GCLogits1DShiftExpSumKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_logits1_d_norm_kernel.xhtml">arm_compute::GCLogits1DNormKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_softmax_layer.xhtml">arm_compute::GCSoftmaxLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_g_c_transpose_kernel.xhtml">arm_compute::GCTransposeKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_transpose.xhtml">arm_compute::GCTranspose</a></li>
+<li><a class="el" href="classarm__compute_1_1_g_c_absolute_difference_kernel.xhtml">GCAbsoluteDifferenceKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_absolute_difference.xhtml">GCAbsoluteDifference</a></li>
+<li><a class="el" href="classarm__compute_1_1_g_c_activation_layer_kernel.xhtml">GCActivationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_activation_layer.xhtml">GCActivationLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_g_c_batch_normalization_layer_kernel.xhtml">GCBatchNormalizationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_batch_normalization_layer.xhtml">GCBatchNormalizationLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_g_c_col2_im_kernel.xhtml">GCCol2ImKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_g_c_depth_concatenate_layer_kernel.xhtml">GCDepthConcatenateLayerKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_depth_concatenate_layer.xhtml">GCDepthConcatenateLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_g_c_direct_convolution_layer_kernel.xhtml">GCDirectConvolutionLayerKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_direct_convolution_layer.xhtml">GCDirectConvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_g_c_dropout_layer_kernel.xhtml">GCDropoutLayerKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_dropout_layer.xhtml">GCDropoutLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_g_c_fill_border_kernel.xhtml">GCFillBorderKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_fill_border.xhtml">GCFillBorder</a></li>
+<li><a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_interleave4x4_kernel.xhtml">GCGEMMInterleave4x4Kernel</a> / <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_interleave4x4.xhtml">GCGEMMInterleave4x4</a></li>
+<li><a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_accumulate_biases_kernel.xhtml">GCGEMMMatrixAccumulateBiasesKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_addition_kernel.xhtml">GCGEMMMatrixAdditionKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_multiply_kernel.xhtml">GCGEMMMatrixMultiplyKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m.xhtml">GCGEMM</a></li>
+<li><a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_transpose1x_w_kernel.xhtml">GCGEMMTranspose1xWKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_transpose1x_w.xhtml">GCGEMMTranspose1xW</a></li>
+<li><a class="el" href="classarm__compute_1_1_g_c_im2_col_kernel.xhtml">GCIm2ColKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_g_c_normalization_layer_kernel.xhtml">GCNormalizationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_normalization_layer.xhtml">GCNormalizationLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_g_c_pixel_wise_multiplication_kernel.xhtml">GCPixelWiseMultiplicationKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_pixel_wise_multiplication.xhtml">GCPixelWiseMultiplication</a></li>
+<li><a class="el" href="classarm__compute_1_1_g_c_pooling_layer_kernel.xhtml">GCPoolingLayerKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_pooling_layer.xhtml">GCPoolingLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_g_c_logits1_d_max_kernel.xhtml">GCLogits1DMaxKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_logits1_d_shift_exp_sum_kernel.xhtml">GCLogits1DShiftExpSumKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_logits1_d_norm_kernel.xhtml">GCLogits1DNormKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_softmax_layer.xhtml">GCSoftmaxLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_g_c_transpose_kernel.xhtml">GCTransposeKernel</a> / <a class="el" href="classarm__compute_1_1_g_c_transpose.xhtml">GCTranspose</a></li>
 </ul>
 </li>
 <li>New NEON kernels / functions<ul>
-<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_a_arch64_a53_kernel.xhtml">arm_compute::NEGEMMLowpAArch64A53Kernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_a_arch64_kernel.xhtml">arm_compute::NEGEMMLowpAArch64Kernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_a_arch64_v8_p4_kernel.xhtml">arm_compute::NEGEMMLowpAArch64V8P4Kernel</a> / arm_compute::NEGEMMInterleavedBlockedKernel / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_assembly_matrix_multiply_core.xhtml">arm_compute::NEGEMMLowpAssemblyMatrixMultiplyCore</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_h_g_e_m_m_a_arch64_f_p16_kernel.xhtml">arm_compute::NEHGEMMAArch64FP16Kernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml">arm_compute::NEDepthwiseConvolutionLayer3x3Kernel</a> / <a class="el" href="classarm__compute_1_1_n_e_depthwise_im2_col_kernel.xhtml">arm_compute::NEDepthwiseIm2ColKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_vector_multiply_kernel.xhtml">arm_compute::NEGEMMMatrixVectorMultiplyKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_depthwise_vector_to_tensor_kernel.xhtml">arm_compute::NEDepthwiseVectorToTensorKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer.xhtml">arm_compute::NEDepthwiseConvolutionLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_offset_contribution_kernel.xhtml">arm_compute::NEGEMMLowpOffsetContributionKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_a_reduction_kernel.xhtml">arm_compute::NEGEMMLowpMatrixAReductionKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_b_reduction_kernel.xhtml">arm_compute::NEGEMMLowpMatrixBReductionKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_multiply_core.xhtml">arm_compute::NEGEMMLowpMatrixMultiplyCore</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_kernel.xhtml">arm_compute::NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point.xhtml">arm_compute::NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_kernel.xhtml">arm_compute::NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale.xhtml">arm_compute::NEGEMMLowpQuantizeDownInt32ToUint8Scale</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_winograd_layer.xhtml">arm_compute::NEWinogradLayer</a> / arm_compute::NEWinogradLayerKernel</li>
+<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_a_arch64_a53_kernel.xhtml">NEGEMMLowpAArch64A53Kernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_a_arch64_kernel.xhtml">NEGEMMLowpAArch64Kernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_a_arch64_v8_p4_kernel.xhtml">NEGEMMLowpAArch64V8P4Kernel</a> / NEGEMMInterleavedBlockedKernel / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_assembly_matrix_multiply_core.xhtml">NEGEMMLowpAssemblyMatrixMultiplyCore</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_h_g_e_m_m_a_arch64_f_p16_kernel.xhtml">NEHGEMMAArch64FP16Kernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml">NEDepthwiseConvolutionLayer3x3Kernel</a> / <a class="el" href="classarm__compute_1_1_n_e_depthwise_im2_col_kernel.xhtml">NEDepthwiseIm2ColKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_vector_multiply_kernel.xhtml">NEGEMMMatrixVectorMultiplyKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_depthwise_vector_to_tensor_kernel.xhtml">NEDepthwiseVectorToTensorKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer.xhtml">NEDepthwiseConvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_offset_contribution_kernel.xhtml">NEGEMMLowpOffsetContributionKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_a_reduction_kernel.xhtml">NEGEMMLowpMatrixAReductionKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_b_reduction_kernel.xhtml">NEGEMMLowpMatrixBReductionKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_multiply_core.xhtml">NEGEMMLowpMatrixMultiplyCore</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_kernel.xhtml">NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point.xhtml">NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_kernel.xhtml">NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale.xhtml">NEGEMMLowpQuantizeDownInt32ToUint8Scale</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_winograd_layer.xhtml">NEWinogradLayer</a> / NEWinogradLayerKernel</li>
 </ul>
 </li>
 <li>New OpenCL kernels / functions<ul>
-<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_offset_contribution_kernel.xhtml">arm_compute::CLGEMMLowpOffsetContributionKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_a_reduction_kernel.xhtml">arm_compute::CLGEMMLowpMatrixAReductionKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_b_reduction_kernel.xhtml">arm_compute::CLGEMMLowpMatrixBReductionKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_core.xhtml">arm_compute::CLGEMMLowpMatrixMultiplyCore</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_kernel.xhtml">arm_compute::CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point.xhtml">arm_compute::CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_kernel.xhtml">arm_compute::CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale.xhtml">arm_compute::CLGEMMLowpQuantizeDownInt32ToUint8Scale</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_offset_contribution_kernel.xhtml">CLGEMMLowpOffsetContributionKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_a_reduction_kernel.xhtml">CLGEMMLowpMatrixAReductionKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_b_reduction_kernel.xhtml">CLGEMMLowpMatrixBReductionKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_core.xhtml">CLGEMMLowpMatrixMultiplyCore</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_kernel.xhtml">CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point.xhtml">CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_kernel.xhtml">CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale.xhtml">CLGEMMLowpQuantizeDownInt32ToUint8Scale</a></li>
 </ul>
 </li>
 <li>New graph nodes for NEON and OpenCL<ul>
-<li><a class="el" href="classarm__compute_1_1graph_1_1_branch_layer.xhtml">arm_compute::graph::BranchLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1graph_1_1_depth_convert_layer.xhtml">arm_compute::graph::DepthConvertLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1graph_1_1_depthwise_convolution_layer.xhtml">arm_compute::graph::DepthwiseConvolutionLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1graph_1_1_dequantization_layer.xhtml">arm_compute::graph::DequantizationLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1graph_1_1_flatten_layer.xhtml">arm_compute::graph::FlattenLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1graph_1_1_quantization_layer.xhtml">arm_compute::graph::QuantizationLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1graph_1_1_reshape_layer.xhtml">arm_compute::graph::ReshapeLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1graph_1_1_branch_layer.xhtml">graph::BranchLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1graph_1_1_depth_convert_layer.xhtml">graph::DepthConvertLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1graph_1_1_depthwise_convolution_layer.xhtml">graph::DepthwiseConvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1graph_1_1_dequantization_layer.xhtml">graph::DequantizationLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1graph_1_1_flatten_layer.xhtml">graph::FlattenLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1graph_1_1_quantization_layer.xhtml">graph::QuantizationLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1graph_1_1_reshape_layer.xhtml">graph::ReshapeLayer</a></li>
 </ul>
 </li>
 </ul>
@@ -461,7 +473,7 @@ Changelog</h2>
 <li>Bug fixes:<ul>
 <li>Check the maximum local workgroup size supported by OpenCL devices</li>
 <li>Minor documentation updates (Fixed instructions to build the examples)</li>
-<li>Introduced a <a class="el" href="classarm__compute_1_1graph_1_1_graph_context.xhtml" title="Graph context. ">arm_compute::graph::GraphContext</a></li>
+<li>Introduced a <a class="el" href="classarm__compute_1_1graph_1_1_graph_context.xhtml" title="Graph context. ">graph::GraphContext</a></li>
 <li>Added a few new Graph nodes, support for branches and grouping.</li>
 <li>Automatically enable cl_printf in debug builds</li>
 <li>Fixed bare metal builds for armv7a</li>
@@ -472,33 +484,33 @@ Changelog</h2>
 </ul>
 <p>v17.09 Public major release</p><ul>
 <li>Experimental Graph support: initial implementation of a simple stream API to easily chain machine learning layers.</li>
-<li>Memory Manager (<a class="el" href="classarm__compute_1_1_blob_lifetime_manager.xhtml">arm_compute::BlobLifetimeManager</a>, <a class="el" href="classarm__compute_1_1_blob_memory_pool.xhtml">arm_compute::BlobMemoryPool</a>, <a class="el" href="classarm__compute_1_1_i_lifetime_manager.xhtml">arm_compute::ILifetimeManager</a>, <a class="el" href="classarm__compute_1_1_i_memory_group.xhtml">arm_compute::IMemoryGroup</a>, <a class="el" href="classarm__compute_1_1_i_memory_manager.xhtml">arm_compute::IMemoryManager</a>, <a class="el" href="classarm__compute_1_1_i_memory_pool.xhtml">arm_compute::IMemoryPool</a>, <a class="el" href="classarm__compute_1_1_i_pool_manager.xhtml">arm_compute::IPoolManager</a>, <a class="el" href="classarm__compute_1_1_memory_manager_on_demand.xhtml">arm_compute::MemoryManagerOnDemand</a>, <a class="el" href="classarm__compute_1_1_pool_manager.xhtml">arm_compute::PoolManager</a>)</li>
+<li><a class="el" href="classarm__compute_1_1_memory.xhtml" title="CPU implementation of memory object. ">Memory</a> Manager (<a class="el" href="classarm__compute_1_1_blob_lifetime_manager.xhtml">BlobLifetimeManager</a>, <a class="el" href="classarm__compute_1_1_blob_memory_pool.xhtml">BlobMemoryPool</a>, <a class="el" href="classarm__compute_1_1_i_lifetime_manager.xhtml">ILifetimeManager</a>, <a class="el" href="classarm__compute_1_1_i_memory_group.xhtml">IMemoryGroup</a>, <a class="el" href="classarm__compute_1_1_i_memory_manager.xhtml">IMemoryManager</a>, <a class="el" href="classarm__compute_1_1_i_memory_pool.xhtml">IMemoryPool</a>, <a class="el" href="classarm__compute_1_1_i_pool_manager.xhtml">IPoolManager</a>, <a class="el" href="classarm__compute_1_1_memory_manager_on_demand.xhtml">MemoryManagerOnDemand</a>, <a class="el" href="classarm__compute_1_1_pool_manager.xhtml">PoolManager</a>)</li>
 <li>New validation and benchmark frameworks (Boost and Google frameworks replaced by homemade framework).</li>
 <li>Most machine learning functions support both fixed point 8 and 16 bit (QS8, QS16) for both NEON and OpenCL.</li>
 <li>New NEON kernels / functions:<ul>
-<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_assembly_base_kernel.xhtml">arm_compute::NEGEMMAssemblyBaseKernel</a> <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_a_arch64_kernel.xhtml">arm_compute::NEGEMMAArch64Kernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_dequantization_layer_kernel.xhtml">arm_compute::NEDequantizationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_dequantization_layer.xhtml">arm_compute::NEDequantizationLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_floor_kernel.xhtml">arm_compute::NEFloorKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_floor.xhtml">arm_compute::NEFloor</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_l2_normalize_layer_kernel.xhtml">arm_compute::NEL2NormalizeLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_l2_normalize_layer.xhtml">arm_compute::NEL2NormalizeLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_quantization_layer_kernel.xhtml">arm_compute::NEQuantizationLayerKernel</a> <a class="el" href="classarm__compute_1_1_n_e_min_max_layer_kernel.xhtml">arm_compute::NEMinMaxLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_quantization_layer.xhtml">arm_compute::NEQuantizationLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_r_o_i_pooling_layer_kernel.xhtml">arm_compute::NEROIPoolingLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_r_o_i_pooling_layer.xhtml">arm_compute::NEROIPoolingLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_reduction_operation_kernel.xhtml">arm_compute::NEReductionOperationKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_reduction_operation.xhtml">arm_compute::NEReductionOperation</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_reshape_layer_kernel.xhtml">arm_compute::NEReshapeLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_reshape_layer.xhtml">arm_compute::NEReshapeLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_assembly_base_kernel.xhtml">NEGEMMAssemblyBaseKernel</a> <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_a_arch64_kernel.xhtml">NEGEMMAArch64Kernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_dequantization_layer_kernel.xhtml">NEDequantizationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_dequantization_layer.xhtml">NEDequantizationLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_floor_kernel.xhtml">NEFloorKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_floor.xhtml">NEFloor</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_l2_normalize_layer_kernel.xhtml">NEL2NormalizeLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_l2_normalize_layer.xhtml">NEL2NormalizeLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_quantization_layer_kernel.xhtml">NEQuantizationLayerKernel</a> <a class="el" href="classarm__compute_1_1_n_e_min_max_layer_kernel.xhtml">NEMinMaxLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_quantization_layer.xhtml">NEQuantizationLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_r_o_i_pooling_layer_kernel.xhtml">NEROIPoolingLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_r_o_i_pooling_layer.xhtml">NEROIPoolingLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_reduction_operation_kernel.xhtml">NEReductionOperationKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_reduction_operation.xhtml">NEReductionOperation</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_reshape_layer_kernel.xhtml">NEReshapeLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_reshape_layer.xhtml">NEReshapeLayer</a></li>
 </ul>
 </li>
 <li>New OpenCL kernels / functions:<ul>
-<li><a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer3x3_kernel.xhtml">arm_compute::CLDepthwiseConvolutionLayer3x3Kernel</a> <a class="el" href="classarm__compute_1_1_c_l_depthwise_im2_col_kernel.xhtml">arm_compute::CLDepthwiseIm2ColKernel</a> <a class="el" href="classarm__compute_1_1_c_l_depthwise_vector_to_tensor_kernel.xhtml">arm_compute::CLDepthwiseVectorToTensorKernel</a> <a class="el" href="classarm__compute_1_1_c_l_depthwise_weights_reshape_kernel.xhtml">arm_compute::CLDepthwiseWeightsReshapeKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer3x3.xhtml">arm_compute::CLDepthwiseConvolutionLayer3x3</a> <a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer.xhtml">arm_compute::CLDepthwiseConvolutionLayer</a> <a class="el" href="classarm__compute_1_1_c_l_depthwise_separable_convolution_layer.xhtml">arm_compute::CLDepthwiseSeparableConvolutionLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_dequantization_layer_kernel.xhtml">arm_compute::CLDequantizationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_dequantization_layer.xhtml">arm_compute::CLDequantizationLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml">arm_compute::CLDirectConvolutionLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_direct_convolution_layer.xhtml">arm_compute::CLDirectConvolutionLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_flatten_layer.xhtml">arm_compute::CLFlattenLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_floor_kernel.xhtml">arm_compute::CLFloorKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_floor.xhtml">arm_compute::CLFloor</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_transpose1x_w.xhtml">arm_compute::CLGEMMTranspose1xW</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_vector_multiply_kernel.xhtml">arm_compute::CLGEMMMatrixVectorMultiplyKernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_l2_normalize_layer_kernel.xhtml">arm_compute::CLL2NormalizeLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_l2_normalize_layer.xhtml">arm_compute::CLL2NormalizeLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_quantization_layer_kernel.xhtml">arm_compute::CLQuantizationLayerKernel</a> <a class="el" href="classarm__compute_1_1_c_l_min_max_layer_kernel.xhtml">arm_compute::CLMinMaxLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_quantization_layer.xhtml">arm_compute::CLQuantizationLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_r_o_i_pooling_layer_kernel.xhtml">arm_compute::CLROIPoolingLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_r_o_i_pooling_layer.xhtml">arm_compute::CLROIPoolingLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_reduction_operation_kernel.xhtml">arm_compute::CLReductionOperationKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_reduction_operation.xhtml">arm_compute::CLReductionOperation</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_reshape_layer_kernel.xhtml">arm_compute::CLReshapeLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_reshape_layer.xhtml">arm_compute::CLReshapeLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer3x3_kernel.xhtml">CLDepthwiseConvolutionLayer3x3Kernel</a> <a class="el" href="classarm__compute_1_1_c_l_depthwise_im2_col_kernel.xhtml">CLDepthwiseIm2ColKernel</a> <a class="el" href="classarm__compute_1_1_c_l_depthwise_vector_to_tensor_kernel.xhtml">CLDepthwiseVectorToTensorKernel</a> <a class="el" href="classarm__compute_1_1_c_l_depthwise_weights_reshape_kernel.xhtml">CLDepthwiseWeightsReshapeKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer3x3.xhtml">CLDepthwiseConvolutionLayer3x3</a> <a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer.xhtml">CLDepthwiseConvolutionLayer</a> <a class="el" href="classarm__compute_1_1_c_l_depthwise_separable_convolution_layer.xhtml">CLDepthwiseSeparableConvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_dequantization_layer_kernel.xhtml">CLDequantizationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_dequantization_layer.xhtml">CLDequantizationLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_direct_convolution_layer_kernel.xhtml">CLDirectConvolutionLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_direct_convolution_layer.xhtml">CLDirectConvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_flatten_layer.xhtml">CLFlattenLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_floor_kernel.xhtml">CLFloorKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_floor.xhtml">CLFloor</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_transpose1x_w.xhtml">CLGEMMTranspose1xW</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_vector_multiply_kernel.xhtml">CLGEMMMatrixVectorMultiplyKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_l2_normalize_layer_kernel.xhtml">CLL2NormalizeLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_l2_normalize_layer.xhtml">CLL2NormalizeLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_quantization_layer_kernel.xhtml">CLQuantizationLayerKernel</a> <a class="el" href="classarm__compute_1_1_c_l_min_max_layer_kernel.xhtml">CLMinMaxLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_quantization_layer.xhtml">CLQuantizationLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_r_o_i_pooling_layer_kernel.xhtml">CLROIPoolingLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_r_o_i_pooling_layer.xhtml">CLROIPoolingLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_reduction_operation_kernel.xhtml">CLReductionOperationKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_reduction_operation.xhtml">CLReductionOperation</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_reshape_layer_kernel.xhtml">CLReshapeLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_reshape_layer.xhtml">CLReshapeLayer</a></li>
 </ul>
 </li>
 </ul>
@@ -508,27 +520,27 @@ Changelog</h2>
 <li>Added unit tests and benchmarks (AlexNet, LeNet)</li>
 <li>Added support for sub tensors.</li>
 <li>Added infrastructure to provide GPU specific optimisation for some OpenCL kernels.</li>
-<li>Added <a class="el" href="classarm__compute_1_1_o_m_p_scheduler.xhtml">arm_compute::OMPScheduler</a> (OpenMP) scheduler for NEON</li>
-<li>Added <a class="el" href="classarm__compute_1_1_single_thread_scheduler.xhtml">arm_compute::SingleThreadScheduler</a> scheduler for NEON (For bare metal)</li>
-<li>User can specify his own scheduler by implementing the <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml">arm_compute::IScheduler</a> interface.</li>
+<li>Added <a class="el" href="classarm__compute_1_1_o_m_p_scheduler.xhtml">OMPScheduler</a> (OpenMP) scheduler for NEON</li>
+<li>Added <a class="el" href="classarm__compute_1_1_single_thread_scheduler.xhtml">SingleThreadScheduler</a> scheduler for NEON (For bare metal)</li>
+<li>User can specify his own scheduler by implementing the <a class="el" href="classarm__compute_1_1_i_scheduler.xhtml">IScheduler</a> interface.</li>
 <li>New OpenCL kernels / functions:<ul>
-<li><a class="el" href="classarm__compute_1_1_c_l_batch_normalization_layer_kernel.xhtml">arm_compute::CLBatchNormalizationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_batch_normalization_layer.xhtml">arm_compute::CLBatchNormalizationLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_depth_concatenate_layer_kernel.xhtml">arm_compute::CLDepthConcatenateLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_depth_concatenate_layer.xhtml">arm_compute::CLDepthConcatenateLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_h_o_g_orientation_binning_kernel.xhtml">arm_compute::CLHOGOrientationBinningKernel</a> <a class="el" href="classarm__compute_1_1_c_l_h_o_g_block_normalization_kernel.xhtml">arm_compute::CLHOGBlockNormalizationKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_h_o_g_detector_kernel.xhtml">arm_compute::CLHOGDetectorKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_h_o_g_descriptor.xhtml">arm_compute::CLHOGDescriptor</a> <a class="el" href="classarm__compute_1_1_c_l_h_o_g_detector.xhtml">arm_compute::CLHOGDetector</a> <a class="el" href="classarm__compute_1_1_c_l_h_o_g_gradient.xhtml">arm_compute::CLHOGGradient</a> <a class="el" href="classarm__compute_1_1_c_l_h_o_g_multi_detection.xhtml">arm_compute::CLHOGMultiDetection</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_locally_connected_matrix_multiply_kernel.xhtml">arm_compute::CLLocallyConnectedMatrixMultiplyKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_locally_connected_layer.xhtml">arm_compute::CLLocallyConnectedLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_weights_reshape_kernel.xhtml">arm_compute::CLWeightsReshapeKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_convolution_layer_reshape_weights.xhtml">arm_compute::CLConvolutionLayerReshapeWeights</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_batch_normalization_layer_kernel.xhtml">CLBatchNormalizationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_batch_normalization_layer.xhtml">CLBatchNormalizationLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_depth_concatenate_layer_kernel.xhtml">CLDepthConcatenateLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_depth_concatenate_layer.xhtml">CLDepthConcatenateLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_h_o_g_orientation_binning_kernel.xhtml">CLHOGOrientationBinningKernel</a> <a class="el" href="classarm__compute_1_1_c_l_h_o_g_block_normalization_kernel.xhtml">CLHOGBlockNormalizationKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_h_o_g_detector_kernel.xhtml">CLHOGDetectorKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_h_o_g_descriptor.xhtml">CLHOGDescriptor</a> <a class="el" href="classarm__compute_1_1_c_l_h_o_g_detector.xhtml">CLHOGDetector</a> <a class="el" href="classarm__compute_1_1_c_l_h_o_g_gradient.xhtml">CLHOGGradient</a> <a class="el" href="classarm__compute_1_1_c_l_h_o_g_multi_detection.xhtml">CLHOGMultiDetection</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_locally_connected_matrix_multiply_kernel.xhtml">CLLocallyConnectedMatrixMultiplyKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_locally_connected_layer.xhtml">CLLocallyConnectedLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_weights_reshape_kernel.xhtml">CLWeightsReshapeKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_convolution_layer_reshape_weights.xhtml">CLConvolutionLayerReshapeWeights</a></li>
 </ul>
 </li>
 <li>New C++ kernels:<ul>
-<li><a class="el" href="classarm__compute_1_1_c_p_p_detection_window_non_maxima_suppression_kernel.xhtml">arm_compute::CPPDetectionWindowNonMaximaSuppressionKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_p_p_detection_window_non_maxima_suppression_kernel.xhtml">CPPDetectionWindowNonMaximaSuppressionKernel</a></li>
 </ul>
 </li>
 <li>New NEON kernels / functions:<ul>
-<li><a class="el" href="classarm__compute_1_1_n_e_batch_normalization_layer_kernel.xhtml">arm_compute::NEBatchNormalizationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_batch_normalization_layer.xhtml">arm_compute::NEBatchNormalizationLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_depth_concatenate_layer_kernel.xhtml">arm_compute::NEDepthConcatenateLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_depth_concatenate_layer.xhtml">arm_compute::NEDepthConcatenateLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_direct_convolution_layer_kernel.xhtml">arm_compute::NEDirectConvolutionLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_direct_convolution_layer.xhtml">arm_compute::NEDirectConvolutionLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_locally_connected_matrix_multiply_kernel.xhtml">arm_compute::NELocallyConnectedMatrixMultiplyKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_locally_connected_layer.xhtml">arm_compute::NELocallyConnectedLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_weights_reshape_kernel.xhtml">arm_compute::NEWeightsReshapeKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_convolution_layer_reshape_weights.xhtml">arm_compute::NEConvolutionLayerReshapeWeights</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_batch_normalization_layer_kernel.xhtml">NEBatchNormalizationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_batch_normalization_layer.xhtml">NEBatchNormalizationLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_depth_concatenate_layer_kernel.xhtml">NEDepthConcatenateLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_depth_concatenate_layer.xhtml">NEDepthConcatenateLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_direct_convolution_layer_kernel.xhtml">NEDirectConvolutionLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_direct_convolution_layer.xhtml">NEDirectConvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_locally_connected_matrix_multiply_kernel.xhtml">NELocallyConnectedMatrixMultiplyKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_locally_connected_layer.xhtml">NELocallyConnectedLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_weights_reshape_kernel.xhtml">NEWeightsReshapeKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_convolution_layer_reshape_weights.xhtml">NEConvolutionLayerReshapeWeights</a></li>
 </ul>
 </li>
 </ul>
@@ -541,94 +553,94 @@ Changelog</h2>
 </ul>
 <p>v17.04 Public bug fixes release</p>
 <p>The following functions have been ported to use the new accurate padding:</p><ul>
-<li><a class="el" href="classarm__compute_1_1_c_l_color_convert_kernel.xhtml">arm_compute::CLColorConvertKernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_edge_non_max_suppression_kernel.xhtml">arm_compute::CLEdgeNonMaxSuppressionKernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_edge_trace_kernel.xhtml">arm_compute::CLEdgeTraceKernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_gaussian_pyramid_hor_kernel.xhtml">arm_compute::CLGaussianPyramidHorKernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_gaussian_pyramid_vert_kernel.xhtml">arm_compute::CLGaussianPyramidVertKernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_gradient_kernel.xhtml">arm_compute::CLGradientKernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_channel_combine_kernel.xhtml">arm_compute::NEChannelCombineKernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_fill_array_kernel.xhtml">arm_compute::NEFillArrayKernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_gaussian_pyramid_hor_kernel.xhtml">arm_compute::NEGaussianPyramidHorKernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_gaussian_pyramid_vert_kernel.xhtml">arm_compute::NEGaussianPyramidVertKernel</a></li>
-<li><a class="el" href="namespacearm__compute.xhtml#a0b6679b5d5c7f7dc527258181b04cf35">arm_compute::NEHarrisScoreFP16Kernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_harris_score_kernel.xhtml">arm_compute::NEHarrisScoreKernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_h_o_g_detector_kernel.xhtml">arm_compute::NEHOGDetectorKernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_logits1_d_max_kernel.xhtml">arm_compute::NELogits1DMaxKernel</a></li>
-<li>arm_compute::NELogits1DShiftExpSumKernel</li>
-<li>arm_compute::NELogits1DNormKernel</li>
-<li><a class="el" href="namespacearm__compute.xhtml#a38cad49e6beaef76bc1ec5064c9e9dba">arm_compute::NENonMaximaSuppression3x3FP16Kernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_non_maxima_suppression3x3_kernel.xhtml">arm_compute::NENonMaximaSuppression3x3Kernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_color_convert_kernel.xhtml">CLColorConvertKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_edge_non_max_suppression_kernel.xhtml">CLEdgeNonMaxSuppressionKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_edge_trace_kernel.xhtml">CLEdgeTraceKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_gaussian_pyramid_hor_kernel.xhtml">CLGaussianPyramidHorKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_gaussian_pyramid_vert_kernel.xhtml">CLGaussianPyramidVertKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_gradient_kernel.xhtml">CLGradientKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_channel_combine_kernel.xhtml">NEChannelCombineKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_fill_array_kernel.xhtml">NEFillArrayKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_gaussian_pyramid_hor_kernel.xhtml">NEGaussianPyramidHorKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_gaussian_pyramid_vert_kernel.xhtml">NEGaussianPyramidVertKernel</a></li>
+<li><a class="el" href="namespacearm__compute.xhtml#a0b6679b5d5c7f7dc527258181b04cf35">NEHarrisScoreFP16Kernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_harris_score_kernel.xhtml">NEHarrisScoreKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_h_o_g_detector_kernel.xhtml">NEHOGDetectorKernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_logits1_d_max_kernel.xhtml">NELogits1DMaxKernel</a></li>
+<li>NELogits1DShiftExpSumKernel</li>
+<li>NELogits1DNormKernel</li>
+<li><a class="el" href="namespacearm__compute.xhtml#a38cad49e6beaef76bc1ec5064c9e9dba">NENonMaximaSuppression3x3FP16Kernel</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_non_maxima_suppression3x3_kernel.xhtml">NENonMaximaSuppression3x3Kernel</a></li>
 </ul>
 <p>v17.03.1 First Major public release of the sources</p><ul>
 <li>Renamed the library to <a class="el" href="namespacearm__compute.xhtml" title="This file contains all available output stages for GEMMLowp on OpenCL. ">arm_compute</a></li>
 <li>New CPP target introduced for C++ kernels shared between NEON and CL functions.</li>
 <li>New padding calculation interface introduced and ported most kernels / functions to use it.</li>
 <li>New OpenCL kernels / functions:<ul>
-<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_kernel.xhtml">arm_compute::CLGEMMLowpMatrixMultiplyKernel</a> / arm_compute::CLGEMMLowp</li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_kernel.xhtml">CLGEMMLowpMatrixMultiplyKernel</a> / CLGEMMLowp</li>
 </ul>
 </li>
 <li>New NEON kernels / functions:<ul>
-<li><a class="el" href="classarm__compute_1_1_n_e_normalization_layer_kernel.xhtml">arm_compute::NENormalizationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_normalization_layer.xhtml">arm_compute::NENormalizationLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_transpose_kernel.xhtml">arm_compute::NETransposeKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_transpose.xhtml">arm_compute::NETranspose</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_logits1_d_max_kernel.xhtml">arm_compute::NELogits1DMaxKernel</a>, arm_compute::NELogits1DShiftExpSumKernel, arm_compute::NELogits1DNormKernel / <a class="el" href="classarm__compute_1_1_n_e_softmax_layer.xhtml">arm_compute::NESoftmaxLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml">arm_compute::NEIm2ColKernel</a>, <a class="el" href="classarm__compute_1_1_n_e_col2_im_kernel.xhtml">arm_compute::NECol2ImKernel</a>, arm_compute::NEConvolutionLayerWeightsReshapeKernel / <a class="el" href="classarm__compute_1_1_n_e_convolution_layer.xhtml">arm_compute::NEConvolutionLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_accumulate_biases_kernel.xhtml">arm_compute::NEGEMMMatrixAccumulateBiasesKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_fully_connected_layer.xhtml">arm_compute::NEFullyConnectedLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_multiply_kernel.xhtml">arm_compute::NEGEMMLowpMatrixMultiplyKernel</a> / arm_compute::NEGEMMLowp</li>
+<li><a class="el" href="classarm__compute_1_1_n_e_normalization_layer_kernel.xhtml">NENormalizationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_normalization_layer.xhtml">NENormalizationLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_transpose_kernel.xhtml">NETransposeKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_transpose.xhtml">NETranspose</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_logits1_d_max_kernel.xhtml">NELogits1DMaxKernel</a>, NELogits1DShiftExpSumKernel, NELogits1DNormKernel / <a class="el" href="classarm__compute_1_1_n_e_softmax_layer.xhtml">NESoftmaxLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml">NEIm2ColKernel</a>, <a class="el" href="classarm__compute_1_1_n_e_col2_im_kernel.xhtml">NECol2ImKernel</a>, NEConvolutionLayerWeightsReshapeKernel / <a class="el" href="classarm__compute_1_1_n_e_convolution_layer.xhtml">NEConvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_accumulate_biases_kernel.xhtml">NEGEMMMatrixAccumulateBiasesKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_fully_connected_layer.xhtml">NEFullyConnectedLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_multiply_kernel.xhtml">NEGEMMLowpMatrixMultiplyKernel</a> / NEGEMMLowp</li>
 </ul>
 </li>
 </ul>
 <p>v17.03 Sources preview</p><ul>
 <li>New OpenCL kernels / functions:<ul>
-<li><a class="el" href="classarm__compute_1_1_c_l_gradient_kernel.xhtml">arm_compute::CLGradientKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_edge_non_max_suppression_kernel.xhtml">arm_compute::CLEdgeNonMaxSuppressionKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_edge_trace_kernel.xhtml">arm_compute::CLEdgeTraceKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_canny_edge.xhtml">arm_compute::CLCannyEdge</a></li>
-<li>GEMM refactoring + FP16 support: <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel.xhtml">arm_compute::CLGEMMInterleave4x4Kernel</a>, <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_transpose1x_w_kernel.xhtml">arm_compute::CLGEMMTranspose1xWKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml">arm_compute::CLGEMMMatrixMultiplyKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_addition_kernel.xhtml">arm_compute::CLGEMMMatrixAdditionKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m.xhtml">arm_compute::CLGEMM</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_accumulate_biases_kernel.xhtml">arm_compute::CLGEMMMatrixAccumulateBiasesKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_fully_connected_layer.xhtml">arm_compute::CLFullyConnectedLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_transpose_kernel.xhtml">arm_compute::CLTransposeKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_transpose.xhtml">arm_compute::CLTranspose</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_l_k_tracker_init_kernel.xhtml">arm_compute::CLLKTrackerInitKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_l_k_tracker_stage0_kernel.xhtml">arm_compute::CLLKTrackerStage0Kernel</a>, <a class="el" href="classarm__compute_1_1_c_l_l_k_tracker_stage1_kernel.xhtml">arm_compute::CLLKTrackerStage1Kernel</a>, <a class="el" href="classarm__compute_1_1_c_l_l_k_tracker_finalize_kernel.xhtml">arm_compute::CLLKTrackerFinalizeKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_optical_flow.xhtml">arm_compute::CLOpticalFlow</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_normalization_layer_kernel.xhtml">arm_compute::CLNormalizationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_normalization_layer.xhtml">arm_compute::CLNormalizationLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_laplacian_pyramid.xhtml">arm_compute::CLLaplacianPyramid</a>, <a class="el" href="classarm__compute_1_1_c_l_laplacian_reconstruct.xhtml">arm_compute::CLLaplacianReconstruct</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_gradient_kernel.xhtml">CLGradientKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_edge_non_max_suppression_kernel.xhtml">CLEdgeNonMaxSuppressionKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_edge_trace_kernel.xhtml">CLEdgeTraceKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_canny_edge.xhtml">CLCannyEdge</a></li>
+<li>GEMM refactoring + FP16 support: <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel.xhtml">CLGEMMInterleave4x4Kernel</a>, <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_transpose1x_w_kernel.xhtml">CLGEMMTranspose1xWKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_multiply_kernel.xhtml">CLGEMMMatrixMultiplyKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_addition_kernel.xhtml">CLGEMMMatrixAdditionKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m.xhtml">CLGEMM</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_matrix_accumulate_biases_kernel.xhtml">CLGEMMMatrixAccumulateBiasesKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_fully_connected_layer.xhtml">CLFullyConnectedLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_transpose_kernel.xhtml">CLTransposeKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_transpose.xhtml">CLTranspose</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_l_k_tracker_init_kernel.xhtml">CLLKTrackerInitKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_l_k_tracker_stage0_kernel.xhtml">CLLKTrackerStage0Kernel</a>, <a class="el" href="classarm__compute_1_1_c_l_l_k_tracker_stage1_kernel.xhtml">CLLKTrackerStage1Kernel</a>, <a class="el" href="classarm__compute_1_1_c_l_l_k_tracker_finalize_kernel.xhtml">CLLKTrackerFinalizeKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_optical_flow.xhtml">CLOpticalFlow</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_normalization_layer_kernel.xhtml">CLNormalizationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_normalization_layer.xhtml">CLNormalizationLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_laplacian_pyramid.xhtml">CLLaplacianPyramid</a>, <a class="el" href="classarm__compute_1_1_c_l_laplacian_reconstruct.xhtml">CLLaplacianReconstruct</a></li>
 </ul>
 </li>
 <li>New NEON kernels / functions:<ul>
-<li><a class="el" href="classarm__compute_1_1_n_e_activation_layer_kernel.xhtml">arm_compute::NEActivationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_activation_layer.xhtml">arm_compute::NEActivationLayer</a></li>
-<li>GEMM refactoring + FP16 support (Requires armv8.2 CPU): <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_interleave4x4_kernel.xhtml">arm_compute::NEGEMMInterleave4x4Kernel</a>, <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w_kernel.xhtml">arm_compute::NEGEMMTranspose1xWKernel</a>, <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_multiply_kernel.xhtml">arm_compute::NEGEMMMatrixMultiplyKernel</a>, <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml">arm_compute::NEGEMMMatrixAdditionKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m.xhtml">arm_compute::NEGEMM</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_pooling_layer_kernel.xhtml">arm_compute::NEPoolingLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_pooling_layer.xhtml">arm_compute::NEPoolingLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_activation_layer_kernel.xhtml">NEActivationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_activation_layer.xhtml">NEActivationLayer</a></li>
+<li>GEMM refactoring + FP16 support (Requires armv8.2 CPU): <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_interleave4x4_kernel.xhtml">NEGEMMInterleave4x4Kernel</a>, <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w_kernel.xhtml">NEGEMMTranspose1xWKernel</a>, <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_multiply_kernel.xhtml">NEGEMMMatrixMultiplyKernel</a>, <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml">NEGEMMMatrixAdditionKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m.xhtml">NEGEMM</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_pooling_layer_kernel.xhtml">NEPoolingLayerKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_pooling_layer.xhtml">NEPoolingLayer</a></li>
 </ul>
 </li>
 </ul>
 <p>v17.02.1 Sources preview</p><ul>
 <li>New OpenCL kernels / functions:<ul>
-<li><a class="el" href="classarm__compute_1_1_c_l_logits1_d_max_kernel.xhtml">arm_compute::CLLogits1DMaxKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_logits1_d_shift_exp_sum_kernel.xhtml">arm_compute::CLLogits1DShiftExpSumKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_logits1_d_norm_kernel.xhtml">arm_compute::CLLogits1DNormKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_softmax_layer.xhtml">arm_compute::CLSoftmaxLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml">arm_compute::CLPoolingLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_pooling_layer.xhtml">arm_compute::CLPoolingLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_im2_col_kernel.xhtml">arm_compute::CLIm2ColKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_col2_im_kernel.xhtml">arm_compute::CLCol2ImKernel</a>, arm_compute::CLConvolutionLayerWeightsReshapeKernel / <a class="el" href="classarm__compute_1_1_c_l_convolution_layer.xhtml">arm_compute::CLConvolutionLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_remap_kernel.xhtml">arm_compute::CLRemapKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_remap.xhtml">arm_compute::CLRemap</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_gaussian_pyramid_hor_kernel.xhtml">arm_compute::CLGaussianPyramidHorKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_gaussian_pyramid_vert_kernel.xhtml">arm_compute::CLGaussianPyramidVertKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_gaussian_pyramid.xhtml">arm_compute::CLGaussianPyramid</a>, <a class="el" href="classarm__compute_1_1_c_l_gaussian_pyramid_half.xhtml">arm_compute::CLGaussianPyramidHalf</a>, <a class="el" href="classarm__compute_1_1_c_l_gaussian_pyramid_orb.xhtml">arm_compute::CLGaussianPyramidOrb</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_min_max_kernel.xhtml">arm_compute::CLMinMaxKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_min_max_location_kernel.xhtml">arm_compute::CLMinMaxLocationKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_min_max_location.xhtml">arm_compute::CLMinMaxLocation</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_non_linear_filter_kernel.xhtml">arm_compute::CLNonLinearFilterKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_non_linear_filter.xhtml">arm_compute::CLNonLinearFilter</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_logits1_d_max_kernel.xhtml">CLLogits1DMaxKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_logits1_d_shift_exp_sum_kernel.xhtml">CLLogits1DShiftExpSumKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_logits1_d_norm_kernel.xhtml">CLLogits1DNormKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_softmax_layer.xhtml">CLSoftmaxLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml">CLPoolingLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_pooling_layer.xhtml">CLPoolingLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_im2_col_kernel.xhtml">CLIm2ColKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_col2_im_kernel.xhtml">CLCol2ImKernel</a>, CLConvolutionLayerWeightsReshapeKernel / <a class="el" href="classarm__compute_1_1_c_l_convolution_layer.xhtml">CLConvolutionLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_remap_kernel.xhtml">CLRemapKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_remap.xhtml">CLRemap</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_gaussian_pyramid_hor_kernel.xhtml">CLGaussianPyramidHorKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_gaussian_pyramid_vert_kernel.xhtml">CLGaussianPyramidVertKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_gaussian_pyramid.xhtml">CLGaussianPyramid</a>, <a class="el" href="classarm__compute_1_1_c_l_gaussian_pyramid_half.xhtml">CLGaussianPyramidHalf</a>, <a class="el" href="classarm__compute_1_1_c_l_gaussian_pyramid_orb.xhtml">CLGaussianPyramidOrb</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_min_max_kernel.xhtml">CLMinMaxKernel</a>, <a class="el" href="classarm__compute_1_1_c_l_min_max_location_kernel.xhtml">CLMinMaxLocationKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_min_max_location.xhtml">CLMinMaxLocation</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_non_linear_filter_kernel.xhtml">CLNonLinearFilterKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_non_linear_filter.xhtml">CLNonLinearFilter</a></li>
 </ul>
 </li>
 <li>New NEON FP16 kernels (Requires armv8.2 CPU)<ul>
-<li><a class="el" href="namespacearm__compute.xhtml#aff99c045b07329b332b1cb97a2dd1518">arm_compute::NEAccumulateWeightedFP16Kernel</a></li>
-<li><a class="el" href="namespacearm__compute.xhtml#a96f7f6f98dc47e0dc3b928bf87397ebf">arm_compute::NEBox3x3FP16Kernel</a></li>
-<li><a class="el" href="namespacearm__compute.xhtml#a38cad49e6beaef76bc1ec5064c9e9dba">arm_compute::NENonMaximaSuppression3x3FP16Kernel</a></li>
+<li><a class="el" href="namespacearm__compute.xhtml#aff99c045b07329b332b1cb97a2dd1518">NEAccumulateWeightedFP16Kernel</a></li>
+<li><a class="el" href="namespacearm__compute.xhtml#a96f7f6f98dc47e0dc3b928bf87397ebf">NEBox3x3FP16Kernel</a></li>
+<li><a class="el" href="namespacearm__compute.xhtml#a38cad49e6beaef76bc1ec5064c9e9dba">NENonMaximaSuppression3x3FP16Kernel</a></li>
 </ul>
 </li>
 </ul>
 <p>v17.02 Sources preview</p><ul>
 <li>New OpenCL kernels / functions:<ul>
-<li><a class="el" href="classarm__compute_1_1_c_l_activation_layer_kernel.xhtml">arm_compute::CLActivationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_activation_layer.xhtml">arm_compute::CLActivationLayer</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_channel_combine_kernel.xhtml">arm_compute::CLChannelCombineKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_channel_combine.xhtml">arm_compute::CLChannelCombine</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_derivative_kernel.xhtml">arm_compute::CLDerivativeKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_channel_extract.xhtml">arm_compute::CLChannelExtract</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_fast_corners_kernel.xhtml">arm_compute::CLFastCornersKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_fast_corners.xhtml">arm_compute::CLFastCorners</a></li>
-<li><a class="el" href="classarm__compute_1_1_c_l_mean_std_dev_kernel.xhtml">arm_compute::CLMeanStdDevKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_mean_std_dev.xhtml">arm_compute::CLMeanStdDev</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_activation_layer_kernel.xhtml">CLActivationLayerKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_activation_layer.xhtml">CLActivationLayer</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_channel_combine_kernel.xhtml">CLChannelCombineKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_channel_combine.xhtml">CLChannelCombine</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_derivative_kernel.xhtml">CLDerivativeKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_channel_extract.xhtml">CLChannelExtract</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_fast_corners_kernel.xhtml">CLFastCornersKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_fast_corners.xhtml">CLFastCorners</a></li>
+<li><a class="el" href="classarm__compute_1_1_c_l_mean_std_dev_kernel.xhtml">CLMeanStdDevKernel</a> / <a class="el" href="classarm__compute_1_1_c_l_mean_std_dev.xhtml">CLMeanStdDev</a></li>
 </ul>
 </li>
 <li>New NEON kernels / functions:<ul>
-<li>HOG / SVM: <a class="el" href="classarm__compute_1_1_n_e_h_o_g_orientation_binning_kernel.xhtml">arm_compute::NEHOGOrientationBinningKernel</a>, <a class="el" href="classarm__compute_1_1_n_e_h_o_g_block_normalization_kernel.xhtml">arm_compute::NEHOGBlockNormalizationKernel</a>, <a class="el" href="classarm__compute_1_1_n_e_h_o_g_detector_kernel.xhtml">arm_compute::NEHOGDetectorKernel</a>, arm_compute::NEHOGNonMaximaSuppressionKernel / <a class="el" href="classarm__compute_1_1_n_e_h_o_g_descriptor.xhtml">arm_compute::NEHOGDescriptor</a>, <a class="el" href="classarm__compute_1_1_n_e_h_o_g_detector.xhtml">arm_compute::NEHOGDetector</a>, <a class="el" href="classarm__compute_1_1_n_e_h_o_g_gradient.xhtml">arm_compute::NEHOGGradient</a>, <a class="el" href="classarm__compute_1_1_n_e_h_o_g_multi_detection.xhtml">arm_compute::NEHOGMultiDetection</a></li>
-<li><a class="el" href="classarm__compute_1_1_n_e_non_linear_filter_kernel.xhtml">arm_compute::NENonLinearFilterKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_non_linear_filter.xhtml">arm_compute::NENonLinearFilter</a></li>
+<li><a class="el" href="classarm__compute_1_1_h_o_g.xhtml" title="CPU implementation of HOG data-object. ">HOG</a> / SVM: <a class="el" href="classarm__compute_1_1_n_e_h_o_g_orientation_binning_kernel.xhtml">NEHOGOrientationBinningKernel</a>, <a class="el" href="classarm__compute_1_1_n_e_h_o_g_block_normalization_kernel.xhtml">NEHOGBlockNormalizationKernel</a>, <a class="el" href="classarm__compute_1_1_n_e_h_o_g_detector_kernel.xhtml">NEHOGDetectorKernel</a>, NEHOGNonMaximaSuppressionKernel / <a class="el" href="classarm__compute_1_1_n_e_h_o_g_descriptor.xhtml">NEHOGDescriptor</a>, <a class="el" href="classarm__compute_1_1_n_e_h_o_g_detector.xhtml">NEHOGDetector</a>, <a class="el" href="classarm__compute_1_1_n_e_h_o_g_gradient.xhtml">NEHOGGradient</a>, <a class="el" href="classarm__compute_1_1_n_e_h_o_g_multi_detection.xhtml">NEHOGMultiDetection</a></li>
+<li><a class="el" href="classarm__compute_1_1_n_e_non_linear_filter_kernel.xhtml">NENonLinearFilterKernel</a> / <a class="el" href="classarm__compute_1_1_n_e_non_linear_filter.xhtml">NENonLinearFilter</a></li>
 </ul>
 </li>
-<li>Introduced a CLScheduler to manage the default context and command queue used by the runtime library and create synchronisation events.</li>
+<li>Introduced a <a class="el" href="classarm__compute_1_1_c_l_scheduler.xhtml" title="Provides global access to a CL context and command queue. ">CLScheduler</a> to manage the default context and command queue used by the runtime library and create synchronisation events.</li>
 <li>Switched all the kernels / functions to use tensors instead of images.</li>
 <li>Updated documentation to include instructions to build the library from sources.</li>
 </ul>
@@ -729,8 +741,8 @@ benchmark_tests: Build benchmark test programs (yes|no)
 <dl class="section note"><dt>Note</dt><dd>If you want to natively compile for 32bit on a 64bit ARM device running a 64bit OS then you will have to use cross-compile too.</dd></dl>
 <p>There is also an 'embed_only' option which will generate all the .embed files for the OpenCL kernels and / or OpenGLES compute shaders. This might be useful if using a different build system to compile the library.</p>
 <p><b>Werror:</b> If you are compiling using the same toolchains as the ones used in this guide then there shouldn't be any warning and therefore you should be able to keep Werror=1. If with a different compiler version the library fails to build because of warnings interpreted as errors then, if you are sure the warnings are not important, you might want to try to build with Werror=0 (But please do report the issue either on Github or by an email to <a href="#" onclick="location.href='mai'+'lto:'+'dev'+'el'+'ope'+'r@'+'arm'+'.c'+'om'; return false;">devel<span style="display: none;">.nosp@m.</span>oper<span style="display: none;">.nosp@m.</span>@arm.<span style="display: none;">.nosp@m.</span>com</a> so that the issue can be addressed).</p>
-<p><b>opencl</b> / <b>neon</b> / <b>gles_compute:</b> Choose which SIMD technology you want to target. (NEON for ARM Cortex-A CPUs or OpenCL / GLES_COMPUTE for ARM Mali GPUs)</p>
-<p><b>embed_kernels:</b> For OpenCL / GLES_COMPUTE only: set embed_kernels=1 if you want the OpenCL / GLES_COMPUTE kernels to be built in the library's binaries instead of being read from separate ".cl" / ".cs" files. If embed_kernels is set to 0 then the application can set the path to the folder containing the OpenCL / GLES_COMPUTE kernel files by calling CLKernelLibrary::init() / GCKernelLibrary::init(). By default the path is set to "./cl_kernels" / "./cs_shaders".</p>
+<p><b>opencl</b> / <b>neon</b> / <b><a class="el" href="namespacearm__compute_1_1gles__compute.xhtml">gles_compute</a>:</b> Choose which SIMD technology you want to target. (NEON for ARM Cortex-A CPUs or OpenCL / GLES_COMPUTE for ARM Mali GPUs)</p>
+<p><b>embed_kernels:</b> For OpenCL / GLES_COMPUTE only: set embed_kernels=1 if you want the OpenCL / GLES_COMPUTE kernels to be built in the library's binaries instead of being read from separate ".cl" / ".cs" files. If embed_kernels is set to 0 then the application can set the path to the folder containing the OpenCL / GLES_COMPUTE kernel files by calling <a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#af353532ea782387df6bcb6d01894f4ae" title="Initialises the kernel library. ">CLKernelLibrary::init()</a> / <a class="el" href="classarm__compute_1_1_g_c_kernel_library.xhtml#abe24625d55f2fb35da7e293e5e28d483" title="Initialises the kernel library. ">GCKernelLibrary::init()</a>. By default the path is set to "./cl_kernels" / "./cs_shaders".</p>
 <p><b>set_soname:</b> Do you want to build the versioned version of the library ?</p>
 <p>If enabled the library will contain a SONAME and SHLIBVERSION and some symlinks will automatically be created between the objects. Example: libarm_compute_core.so -&gt; libarm_compute_core.so.1.0.0 libarm_compute_core.so.1 -&gt; libarm_compute_core.so.1.0.0 libarm_compute_core.so.1.0.0</p>
 <dl class="section note"><dt>Note</dt><dd>This options is disabled by default as it requires SCons version 2.4 or above.</dd></dl>
@@ -744,7 +756,7 @@ benchmark_tests: Build benchmark test programs (yes|no)
 <p><b>openmp</b> Build in the OpenMP scheduler for NEON.</p>
 <dl class="section note"><dt>Note</dt><dd>Only works when building with g++ not clang++</dd></dl>
 <p><b>cppthreads</b> Build in the C++11 scheduler for NEON.</p>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="classarm__compute_1_1_scheduler.xhtml#a12775a7fbfa126fa4f9f06f8e02d9a8e" title="Sets the user defined scheduler and makes it the active scheduler. ">arm_compute::Scheduler::set</a></dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="classarm__compute_1_1_scheduler.xhtml#a12775a7fbfa126fa4f9f06f8e02d9a8e" title="Sets the user defined scheduler and makes it the active scheduler. ">Scheduler::set</a></dd></dl>
 <h2><a class="anchor" id="S3_2_linux"></a>
 Building for Linux</h2>
 <h3><a class="anchor" id="S3_2_1_library"></a>
@@ -757,7 +769,7 @@ How to build the library ?</h3>
 </ul>
 <dl class="section note"><dt>Note</dt><dd>If you are building with opencl=1 then scons will expect to find libOpenCL.so either in the current directory or in "build" (See the section below if you need a stub OpenCL library to link against) </dd>
 <dd>
-If you are building with gles_compute=1 then scons will expect to find libEGL.so / libGLESv1_CM.so / libGLESv2.so either in the current directory or in "build" (See the section below if you need a stub OpenCL library to link against)</dd></dl>
+If you are building with <a class="el" href="namespacearm__compute_1_1gles__compute.xhtml">gles_compute</a>=1 then scons will expect to find libEGL.so / libGLESv1_CM.so / libGLESv2.so either in the current directory or in "build" (See the section below if you need a stub OpenCL library to link against)</dd></dl>
 <p>To cross-compile the library in debug mode, with NEON only support, for Linux 32bit: </p><pre class="fragment">scons Werror=1 -j8 debug=1 neon=1 opencl=0 os=linux arch=armv7a
 </pre><p>To cross-compile the library in asserts mode, with OpenCL only support, for Linux 64bit: </p><pre class="fragment">scons Werror=1 -j8 debug=0 asserts=1 neon=0 opencl=1 embed_kernels=1 os=linux arch=arm64-v8a
 </pre><p>To cross-compile the library in asserts mode, with GLES_COMPUTE only support, for Linux 64bit: </p><pre class="fragment">scons Werror=1 -j8 debug=0 asserts=1 neon=0 opencl=0 gles_compute=1 embed_kernels=1 os=linux arch=arm64-v8a
@@ -800,21 +812,28 @@ How to manually build the examples ?</h3>
 These two commands assume libarm_compute.so is available in your library path, if not add the path to it using -L</dd></dl>
 <p>To run the built executable simply run: </p><pre class="fragment">LD_LIBRARY_PATH=build ./neon_convolution
 </pre><p>or </p><pre class="fragment">LD_LIBRARY_PATH=build ./cl_convolution
-</pre><h2><a class="anchor" id="S3_3_android"></a>
+</pre><dl class="section note"><dt>Note</dt><dd>Examples accept different types of arguments, to find out what they are run the example without any argument and the help will be displayed at the beginning of the run.</dd></dl>
+<p>For example: LD_LIBRARY_PATH=. ./graph_lenet</p>
+<p>./graph_lenet</p>
+<p>Usage: ./graph_lenet [target] [path_to_data] [batches]</p>
+<p>No data folder provided: using random values</p>
+<p>Test passed</p>
+<p>In this case the first argument of LeNet (like all the graph examples) is the target (i.e 0 to run on NEON, 1 to run on OpenCL if available, 2 to run on OpenCL using the <a class="el" href="classarm__compute_1_1_c_l_tuner.xhtml" title="Basic implementation of the OpenCL tuner interface. ">CLTuner</a>), the second argument is the path to the folder containing the npy files for the weights and finally the third argument is the number of batches to run.</p>
+<h2><a class="anchor" id="S3_3_android"></a>
 Building for Android</h2>
 <p>For Android, the library was successfully built and tested using Google's standalone toolchains:</p><ul>
-<li>NDK r14 arm-linux-androideabi-4.9 for armv7a (clang++)</li>
-<li>NDK r14 aarch64-linux-android-4.9 for arm64-v8a (clang++)</li>
+<li>clang++ from NDK r16b for armv7a</li>
+<li>clang++ from NDK r16b for arm64-v8a</li>
 </ul>
 <p>Here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_toolchain.html">create your Android standalone toolchains from the NDK</a></p>
 <ul>
-<li>Download the NDK r14 from here: <a href="https://developer.android.com/ndk/downloads/index.html">https://developer.android.com/ndk/downloads/index.html</a></li>
+<li>Download the NDK r16b from here: <a href="https://developer.android.com/ndk/downloads/index.html">https://developer.android.com/ndk/downloads/index.html</a></li>
 <li>Make sure you have Python 2 installed on your machine.</li>
-<li>Generate the 32 and/or 64 toolchains by running the following commands:</li>
+<li><p class="startli">Generate the 32 and/or 64 toolchains by running the following commands:</p>
+<p class="startli">$NDK/build/tools/make_standalone_toolchain.py &ndash;arch arm64 &ndash;install-dir $MY_TOOLCHAINS/aarch64-linux-android-ndk-r16b &ndash;stl gnustl &ndash;api 21 $NDK/build/tools/make_standalone_toolchain.py &ndash;arch arm &ndash;install-dir $MY_TOOLCHAINS/arm-linux-android-ndk-r16b &ndash;stl gnustl &ndash;api 21</p>
+</li>
 </ul>
-<pre class="fragment">$NDK/build/tools/make_standalone_toolchain.py --arch arm64 --install-dir $MY_TOOLCHAINS/aarch64-linux-android-4.9 --stl gnustl --api 21
-$NDK/build/tools/make_standalone_toolchain.py --arch arm --install-dir $MY_TOOLCHAINS/arm-linux-androideabi-4.9 --stl gnustl --api 21
-</pre><dl class="section attention"><dt>Attention</dt><dd>Due to some NDK issues make sure you use clang++ &amp; gnustl</dd></dl>
+<dl class="section attention"><dt>Attention</dt><dd>Due to some NDK issues make sure you use clang++ &amp; gnustl</dd></dl>
 <dl class="section note"><dt>Note</dt><dd>Make sure to add the toolchains to your PATH: export PATH=$PATH:$MY_TOOLCHAINS/aarch64-linux-android-4.9/bin:$MY_TOOLCHAINS/arm-linux-androideabi-4.9/bin</dd></dl>
 <h3><a class="anchor" id="S3_3_1_library"></a>
 How to build the library ?</h3>
@@ -860,7 +879,14 @@ adb shell chmod 777 -R /data/local/tmp/
 </pre><p>And finally to run the example: </p><pre class="fragment">adb shell /data/local/tmp/neon_convolution_aarch64
 adb shell /data/local/tmp/cl_convolution_aarch64
 adb shell /data/local/tmp/gc_absdiff_aarch64
-</pre><h2><a class="anchor" id="S3_4_bare_metal"></a>
+</pre><dl class="section note"><dt>Note</dt><dd>Examples accept different types of arguments, to find out what they are run the example without any argument and the help will be displayed at the beginning of the run.</dd></dl>
+<p>For example: adb shell /data/local/tmp/graph_lenet</p>
+<p>/data/local/tmp/graph_lenet</p>
+<p>Usage: /data/local/tmp/graph_lenet [target] [path_to_data] [batches]</p>
+<p>No data folder provided: using random values</p>
+<p>Test passed</p>
+<p>In this case the first argument of LeNet (like all the graph examples) is the target (i.e 0 to run on NEON, 1 to run on OpenCL if available, 2 to run on OpenCL using the <a class="el" href="classarm__compute_1_1_c_l_tuner.xhtml" title="Basic implementation of the OpenCL tuner interface. ">CLTuner</a>), the second argument is the path to the folder containing the npy files for the weights and finally the third argument is the number of batches to run.</p>
+<h2><a class="anchor" id="S3_4_bare_metal"></a>
 Building for bare metal</h2>
 <p>For bare metal, the library was successfully built using linaros's latest (gcc-linaro-6.3.1-2017.05) bare metal toolchains:</p><ul>
 <li>arm-eabi for armv7a</li>
@@ -915,7 +941,7 @@ aarch64-linux-gnu-gcc -o libGLESv2.so -Iinclude/linux opengles-3.1-stubs/GLESv2.
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Thu Feb 22 2018 15:45:27 for Compute Library by
+    <li class="footer">Generated on Fri Mar 2 2018 12:38:01 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>
