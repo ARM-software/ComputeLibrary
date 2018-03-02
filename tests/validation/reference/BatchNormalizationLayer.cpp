@@ -106,7 +106,6 @@ SimpleTensor<T> batch_normalization_layer(const SimpleTensor<T> &src, const Simp
                     const float numerator   = src[pos] - mean[i];
                     const float x_bar       = numerator / denominator;
                     result[pos]             = beta[i] + x_bar * gamma[i];
-                    ;
                 }
             }
         }

@@ -61,13 +61,12 @@ public:
      * @param[out]     output   Destination tensor. Output will have the same number of dimensions as input. Data type supported: same as @p input
      * @param[in]      mean     Mean values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
      * @param[in]      var      Variance values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]      beta     Beta values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]      gamma    Gamma values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]      epsilon  Small value to avoid division with zero.
+     * @param[in]      beta     (Optional) Beta values tensor info. 1 dimension with size equal to the feature maps [FM]. If not provided, default value for beta is 0. Data types supported: Same as @p input
+     * @param[in]      gamma    (Optional) Gamma values tensor info. 1 dimension with size equal to the feature maps [FM]. If not provided, default value for gamma is 1. Data types supported: Same as @p input
+     * @param[in]      epsilon  (Optional) Small value to avoid division with zero. Default value is 0.001f.
      * @param[in]      act_info (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
-     *                          Data types supported: F32
      */
-    void configure(ITensor *input, ITensor *output, const ITensor *mean, const ITensor *var, const ITensor *beta, const ITensor *gamma, float epsilon,
+    void configure(ITensor *input, ITensor *output, const ITensor *mean, const ITensor *var, const ITensor *beta = nullptr, const ITensor *gamma = nullptr, float epsilon = 0.001f,
                    ActivationLayerInfo act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref NEBatchNormalizationLayerKernel
      *
@@ -77,18 +76,17 @@ public:
      * @param[in] output   Destination tensor info. Output will have the same number of dimensions as input. Data type supported: same as @p input
      * @param[in] mean     Mean values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
      * @param[in] var      Variance values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in] beta     Beta values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in] gamma    Gamma values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in] epsilon  Small value to avoid division with zero.
+     * @param[in] beta     (Optional) Beta values tensor info. 1 dimension with size equal to the feature maps [FM]. If not provided, default value for beta is 0. Data types supported: Same as @p input
+     * @param[in] gamma    (Optional) Gamma values tensor info. 1 dimension with size equal to the feature maps [FM]. If not provided, default value for gamma is 1. Data types supported: Same as @p input
+     * @param[in] epsilon  (Optional) Small value to avoid division with zero. Default value is 0.001f.
      * @param[in] act_info (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
-     *                     Data types supported: F32
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output,
                            const ITensorInfo *mean, const ITensorInfo *var,
-                           const ITensorInfo *beta, const ITensorInfo *gamma,
-                           float epsilon, ActivationLayerInfo act_info);
+                           const ITensorInfo *beta = nullptr, const ITensorInfo *gamma = nullptr,
+                           float epsilon = 0.001f, ActivationLayerInfo act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

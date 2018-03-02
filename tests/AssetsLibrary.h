@@ -352,6 +352,16 @@ public:
     template <typename T>
     void fill_layer_data(T &&tensor, std::string name) const;
 
+    /** Fill a tensor with a constant value
+     *
+     * @param[in, out] tensor To be filled tensor.
+     * @param[in]      value  Value to be assigned to all elements of the input tensor.
+     *
+     * @note    @p value must be of the same type as the data type of @p tensor
+     */
+    template <typename T, typename D>
+    void fill_tensor_value(T &&tensor, D value) const;
+
 private:
     // Function prototype to convert between image formats.
     using Converter = void (*)(const RawTensor &src, RawTensor &dst);
@@ -773,6 +783,12 @@ void AssetsLibrary::fill_layer_data(T &&tensor, std::string name) const
             stream.read(reinterpret_cast<char *>(tensor(id)), tensor.element_size());
         });
     }
+}
+
+template <typename T, typename D>
+void AssetsLibrary::fill_tensor_value(T &&tensor, D value) const
+{
+    fill_tensor_uniform(tensor, 0, value, value);
 }
 } // namespace test
 } // namespace arm_compute

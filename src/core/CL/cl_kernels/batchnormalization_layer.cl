@@ -93,8 +93,12 @@ __kernel void batchnormalization_layer(TENSOR3D_DECLARATION(input),
 #endif /* not IN_PLACE */
                                        VECTOR_DECLARATION(mean),
                                        VECTOR_DECLARATION(var),
+#ifndef USE_DEFAULT_BETA
                                        VECTOR_DECLARATION(beta),
+#endif /* USE_DEFAULT_BETA */
+#ifndef USE_DEFAULT_GAMMA
                                        VECTOR_DECLARATION(gamma),
+#endif /* USE_DEFAULT_GAMMA */
                                        float epsilon)
 {
     Tensor3D in = CONVERT_TO_TENSOR3D_STRUCT(input);
@@ -103,10 +107,14 @@ __kernel void batchnormalization_layer(TENSOR3D_DECLARATION(input),
 #else  /* IN_PLACE */
     Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(output);
 #endif /* IN_PLACE */
-    Vector mean  = CONVERT_TO_VECTOR_STRUCT(mean);
-    Vector var   = CONVERT_TO_VECTOR_STRUCT(var);
-    Vector beta  = CONVERT_TO_VECTOR_STRUCT(beta);
+    Vector mean = CONVERT_TO_VECTOR_STRUCT(mean);
+    Vector var  = CONVERT_TO_VECTOR_STRUCT(var);
+#ifndef USE_DEFAULT_BETA
+    Vector beta = CONVERT_TO_VECTOR_STRUCT(beta);
+#endif /* USE_DEFAULT_BETA */
+#ifndef USE_DEFAULT_GAMMA
     Vector gamma = CONVERT_TO_VECTOR_STRUCT(gamma);
+#endif /* USE_DEFAULT_GAMMA */
 
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
     data = 0;
@@ -117,9 +125,7 @@ __kernel void batchnormalization_layer(TENSOR3D_DECLARATION(input),
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
     x_bar = 0;
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    gamma_vec = 0;
-    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    beta_vec = 0;
+    res = 0;
 
     const int current_slice = get_global_id(2);
 
@@ -132,11 +138,22 @@ __kernel void batchnormalization_layer(TENSOR3D_DECLARATION(input),
     numerator = SUB_OP(data, numerator);
     x_bar     = MUL_OP(numerator, denominator);
 
-    gamma_vec = *((__global DATA_TYPE *)(gamma.ptr + current_slice * gamma.stride_x));
-    beta_vec  = *((__global DATA_TYPE *)(beta.ptr + current_slice * beta.stride_x));
-
+#ifndef USE_DEFAULT_GAMMA
     VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
-    res = ADD_OP(MUL_OP(gamma_vec, x_bar), beta_vec);
+    gamma_vec = *((__global DATA_TYPE *)(gamma.ptr + current_slice * gamma.stride_x));
+
+    res = MUL_OP(gamma_vec, x_bar);
+#else  /* USE_DEFAULT_GAMMA */
+    // gamma is equal to 1, no need to perform multiplications
+    res = x_bar;
+#endif /* USE_DEFAULT_GAMMA */
+
+#ifndef USE_DEFAULT_BETA
+    VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+    beta_vec = *((__global DATA_TYPE *)(beta.ptr + current_slice * beta.stride_x));
+    // beta is not zero, hence we need to perform the addition
+    res = ADD_OP(res, beta_vec);
+#endif /* USE_DEFAULT_BETA */
 
     res = ACTIVATION_FUNC(res);
 
