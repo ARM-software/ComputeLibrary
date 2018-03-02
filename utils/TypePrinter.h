@@ -338,6 +338,34 @@ inline std::string to_string(const RoundingPolicy &rounding_policy)
     return str.str();
 }
 
+/** Formatted output of the DataLayout type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const DataLayout &data_layout)
+{
+    switch(data_layout)
+    {
+        case DataLayout::UNKNOWN:
+            os << "UNKNOWN";
+            break;
+        case DataLayout::NHWC:
+            os << "NHWC";
+            break;
+        case DataLayout::NCHW:
+            os << "NCHW";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+inline std::string to_string(const arm_compute::DataLayout &data_layout)
+{
+    std::stringstream str;
+    str << data_layout;
+    return str.str();
+}
+
 /** Formatted output of the DataType type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const DataType &data_type)
 {

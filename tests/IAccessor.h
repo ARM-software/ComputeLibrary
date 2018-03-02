@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,6 +51,9 @@ public:
 
     /** Image format of the tensor. */
     virtual Format format() const = 0;
+
+    /** Data layout of the tensor. */
+    virtual DataLayout data_layout() const = 0;
 
     /** Data type of the tensor. */
     virtual DataType data_type() const = 0;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -71,6 +71,7 @@ public:
         _data_type            = tensor._data_type;
         _num_channels         = tensor._num_channels;
         _fixed_point_position = tensor._fixed_point_position;
+        _data_layout          = tensor._data_layout;
     }
 
     /** Conversion operator to SimpleTensor.
@@ -89,6 +90,7 @@ public:
         cast._data_type            = _data_type;
         cast._num_channels         = _num_channels;
         cast._fixed_point_position = _fixed_point_position;
+        cast._data_layout          = _data_layout;
 
         return cast;
     }

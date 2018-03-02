@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,6 +56,7 @@ public:
     size_t           element_size() const override;
     size_t           size() const override;
     Format           format() const override;
+    DataLayout       data_layout() const override;
     DataType         data_type() const override;
     int              num_channels() const override;
     int              num_elements() const override;
@@ -98,6 +99,11 @@ inline size_t GCAccessor::size() const
 inline Format GCAccessor::format() const
 {
     return _tensor.info()->format();
+}
+
+inline DataLayout GCAccessor::data_layout() const
+{
+    return _tensor.info()->data_layout();
 }
 
 inline DataType GCAccessor::data_type() const
