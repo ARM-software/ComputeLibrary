@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 
 #include "arm_compute/runtime/CL/functions/CLDequantizationLayer.h"
 
+#include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
 using namespace arm_compute;
@@ -33,8 +34,18 @@ CLDequantizationLayer::CLDequantizationLayer()
 {
 }
 
+Status CLDequantizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *min_max)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output, min_max);
+    ARM_COMPUTE_RETURN_ON_ERROR(CLDequantizationLayerKernel::validate(input, output, min_max));
+
+    return Status{};
+}
+
 void CLDequantizationLayer::configure(const ICLTensor *input, ICLTensor *output, const ICLTensor *min_max)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, min_max);
+
     _dequantize_kernel.configure(input, output, min_max);
 }
 

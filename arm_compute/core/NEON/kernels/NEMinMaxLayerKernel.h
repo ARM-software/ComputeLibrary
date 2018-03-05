@@ -65,6 +65,15 @@ public:
      *                    The dimensions over the second must match the batched dimensions of the input tensor. Data types supported: F32
      */
     void configure(const ITensor *input, ITensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLMinMaxLayerKernel
+     *
+     * @param[in] input  Input tensor info.  Data types supported: F32.
+     * @param[in] output Output tensor info with shape [2, batches, ...] which stores the minimum and maximum values for each 3D input tensor.
+     *                   The dimensions over the second must match the batched dimensions of the input tensor. Data types supported: F32.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
     /** Resets global minimum and maximum. */
     void reset();
 

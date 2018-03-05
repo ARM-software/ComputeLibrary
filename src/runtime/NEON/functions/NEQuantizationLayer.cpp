@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #include "arm_compute/runtime/NEON/functions/NEQuantizationLayer.h"
 
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 using namespace arm_compute;
@@ -34,8 +35,21 @@ NEQuantizationLayer::NEQuantizationLayer()
 {
 }
 
+Status NEQuantizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+
+    TensorInfo min_max{ input->num_channels(), input->data_type() };
+    ARM_COMPUTE_RETURN_ON_ERROR(NEMinMaxLayerKernel::validate(input, &min_max));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEQuantizationLayerKernel::validate(input, output, &min_max));
+
+    return Status{};
+}
+
 void NEQuantizationLayer::configure(const ITensor *input, ITensor *output)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+
     // Configure min-max kernel. _min_max tensor will be auto-configured within the kernel
     _min_max_kernel.configure(input, &_min_max);
 

@@ -32,14 +32,60 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 #include <algorithm>
 #include <arm_neon.h>
 #include <climits>
 #include <cstddef>
 
+using namespace arm_compute::misc::shape_calculator;
+
 namespace arm_compute
 {
+namespace
+{
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() < 3);
+
+    if(output->tensor_shape().total_size() > 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+
+        TensorShape output_shape = compute_min_max_shape(input);
+
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
+    }
+
+    return Status{};
+}
+
+std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
+{
+    TensorShape output_shape = compute_min_max_shape(input);
+
+    // Output auto initialization if not yet initialized
+    auto_init_if_empty(*output, output_shape, 1, input->data_type(), input->fixed_point_position());
+
+    constexpr unsigned int num_elems_processed_per_iteration = 1;
+
+    // Configure kernel window
+    Window                 win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal output_access(output, 0, 2);
+
+    bool window_changed = update_window_and_padding(win, input_access, output_access);
+
+    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_tuple(err, win);
+}
+} // namespace
+
 NEMinMaxLayerKernel::NEMinMaxLayerKernel()
     : _input(nullptr), _output(nullptr), _mtx()
 {
@@ -47,36 +93,25 @@ NEMinMaxLayerKernel::NEMinMaxLayerKernel()
 
 void NEMinMaxLayerKernel::configure(const ITensor *input, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON(input->info()->num_dimensions() < 3);
-    ARM_COMPUTE_ERROR_ON(output == nullptr);
-
-    TensorShape output_shape{ input->info()->tensor_shape() };
-    output_shape.set(Window::DimX, 2);
-    output_shape.remove_dimension(1);
-    output_shape.remove_dimension(1);
-
-    // Output auto initialization if not yet initialized
-    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
-
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
 
     _input  = input;
     _output = output;
 
-    // Configure kernel window
-    constexpr unsigned int num_elems_processed_per_iteration = 1;
+    auto win_config = validate_and_configure_window(input->info(), output->info());
 
-    Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
-    AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(output->info(), 0, 2);
+    ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
-    update_window_and_padding(win, input_access, output_access);
+    INEKernel::configure(std::get<1>(win_config));
+}
 
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
+Status NEMinMaxLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(std::get<0>(validate_and_configure_window(input->clone().get(), output->clone().get())));
 
-    INEKernel::configure(win);
+    return Status{};
 }
 
 void NEMinMaxLayerKernel::run(const Window &window, const ThreadInfo &info)

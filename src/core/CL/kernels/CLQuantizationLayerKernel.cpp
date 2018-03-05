@@ -34,6 +34,46 @@
 
 using namespace arm_compute;
 
+namespace
+{
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *min_max)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output, min_max);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() < 3);
+
+    if(output->tensor_shape().total_size() > 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+    }
+
+    return Status{};
+}
+
+std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, ITensorInfo *min_max)
+{
+    // Output tensor auto initialization if not yet initialized
+    auto_init_if_empty(*output, input->tensor_shape(), 1, DataType::U8, 0);
+
+    constexpr unsigned int num_elems_processed_per_iteration = 4;
+
+    // Configure window
+    Window                 win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+    AccessWindowStatic     min_max_access(min_max, 0, 0, 2, min_max->dimension(1));
+
+    // Update window and padding
+    bool window_changed = update_window_and_padding(win, input_access, output_access, min_max_access);
+
+    output_access.set_valid_region(win, input->valid_region());
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_tuple(err, win);
+}
+} // namespace
+
 CLQuantizationLayerKernel::CLQuantizationLayerKernel()
     : _input(nullptr), _output(nullptr), _min_max(nullptr)
 {
@@ -41,37 +81,30 @@ CLQuantizationLayerKernel::CLQuantizationLayerKernel()
 
 void CLQuantizationLayerKernel::configure(const ICLTensor *input, ICLTensor *output, ICLTensor *min_max)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(output, min_max);
-    ARM_COMPUTE_ERROR_ON(input->info()->num_dimensions() < 3);
-
-    // Output tensor auto initialization if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, DataType::U8, 0);
-
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, min_max);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), min_max->info()));
 
     _input   = input;
     _output  = output;
     _min_max = min_max;
 
-    constexpr unsigned int num_elems_processed_per_iteration = 4;
-
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("quantization_layer"));
 
-    // Configure window
-    Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
-    AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowStatic     min_max_access(min_max->info(), 0, 0, 2, min_max->info()->dimension(1));
+    // Configure kernel window
+    auto win_config = validate_and_configure_window(input->info(), output->info(), min_max->info());
 
-    // Update window and padding
-    update_window_and_padding(win, input_access, output_access, min_max_access);
+    ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
-    output_access.set_valid_region(win, input->info()->valid_region());
+    ICLKernel::configure(std::get<1>(win_config));
+}
 
-    ICLKernel::configure(win);
+Status CLQuantizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *min_max)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, min_max));
+    ARM_COMPUTE_RETURN_ON_ERROR(std::get<0>(validate_and_configure_window(input->clone().get(), output->clone().get(), min_max->clone().get())));
+
+    return Status{};
 }
 
 void CLQuantizationLayerKernel::run(const Window &window, cl::CommandQueue &queue)
