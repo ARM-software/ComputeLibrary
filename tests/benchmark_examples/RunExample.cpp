@@ -130,6 +130,16 @@ int run_example(int argc, char **argv, Example &example)
     {
         for(auto &p : printers)
         {
+#ifdef ARM_COMPUTE_CL
+            if(opencl_is_available())
+            {
+                p->print_entry("CL_DEVICE_VERSION", CLKernelLibrary::get().get_device_version());
+            }
+            else
+            {
+                p->print_entry("CL_DEVICE_VERSION", "Unavailable");
+            }
+#endif /* ARM_COMPUTE_CL */
             p->print_entry("Iterations", support::cpp11::to_string(options.iterations->value()));
             p->print_entry("Threads", support::cpp11::to_string(options.threads->value()));
         }

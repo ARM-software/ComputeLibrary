@@ -840,3 +840,8 @@ cl::NDRange CLKernelLibrary::default_ndrange() const
 {
     return cl::NDRange(128u, 1);
 }
+
+std::string CLKernelLibrary::get_device_version()
+{
+    return _device.getInfo<CL_DEVICE_VERSION>();
+}

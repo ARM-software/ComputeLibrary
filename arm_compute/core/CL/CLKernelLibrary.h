@@ -261,6 +261,12 @@ public:
     {
         _device = std::move(device);
     }
+
+    /** Return the device version
+     *
+     * @return The content of CL_DEVICE_VERSION
+     */
+    std::string get_device_version();
     /** Creates a kernel from the kernel library.
      *
      * @param[in] kernel_name       Kernel name.
