@@ -27,7 +27,10 @@
 #define BENCHMARK_EXAMPLES
 #include "utils/Utils.cpp"
 
+#include "ValidateExample.h"
 #include "arm_compute/runtime/Scheduler.h"
+#include "tests/AssetsLibrary.h"
+#include "tests/Globals.h"
 #include "tests/framework/Framework.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/command_line/CommandLineParser.h"
@@ -48,9 +51,14 @@ using namespace arm_compute::test;
 
 namespace arm_compute
 {
+namespace test
+{
+std::unique_ptr<AssetsLibrary> library;
+} // namespace test
 namespace utils
 {
-static Example *g_example = nullptr;
+static ValidateExample *g_example = nullptr;
+template <bool          validate>
 class ExampleTest : public arm_compute::test::framework::TestCase
 {
 public:
@@ -61,16 +69,25 @@ public:
     }
     void do_teardown() override
     {
+        if(validate)
+        {
+            g_example->do_validate();
+        }
         g_example->do_teardown();
     }
 };
 
-int run_example(int argc, char **argv, Example &example)
+int run_example(int argc, char **argv, ValidateExample &example)
 {
     framework::CommandLineParser parser;
     framework::CommonOptions     options(parser);
     auto                         example_args = parser.add_option<framework::ListOption<std::string>>("example_args");
     example_args->set_help("Arguments to pass to the example separated by commas (e.g: arg0,arg1,arg2)");
+    auto seed = parser.add_option<framework::SimpleOption<std::random_device::result_type>>("seed", std::random_device()());
+    seed->set_help("Global seed for random number generation");
+    auto validate = parser.add_option<framework::SimpleOption<int>>("validate", 1);
+    validate->set_help("Enable / disable output validation (0/1)");
+
     framework::Framework &framework = framework::Framework::get();
 
     parser.parse(argc, argv);
@@ -93,6 +110,7 @@ int run_example(int argc, char **argv, Example &example)
 
     // Set number of threads in Scheduler
     Scheduler::get().set_num_threads(options.threads->value());
+    library = support::cpp14::make_unique<AssetsLibrary>("." /* Only using random values */, seed->value());
 
     // We need to do the setup here because framework.init() will need CL / GLES to be initialised
     try
@@ -130,6 +148,8 @@ int run_example(int argc, char **argv, Example &example)
     {
         for(auto &p : printers)
         {
+            p->print_entry("Version", build_information());
+            p->print_entry("Seed", support::cpp11::to_string(seed->value()));
 #ifdef ARM_COMPUTE_CL
             if(opencl_is_available())
             {
@@ -142,6 +162,7 @@ int run_example(int argc, char **argv, Example &example)
 #endif /* ARM_COMPUTE_CL */
             p->print_entry("Iterations", support::cpp11::to_string(options.iterations->value()));
             p->print_entry("Threads", support::cpp11::to_string(options.threads->value()));
+            example.print_parameters(*p);
         }
     }
 
@@ -150,9 +171,17 @@ int run_example(int argc, char **argv, Example &example)
     {
         framework.add_printer(p.get());
     }
+
     framework.set_throw_errors(options.throw_errors->value());
     arm_compute::test::framework::detail::TestSuiteRegistrar suite{ "Examples" };
-    framework.add_test_case<ExampleTest>(basename(argv[0]), framework::DatasetMode::ALL, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE);
+    if(validate->value() != 0)
+    {
+        framework.add_test_case<ExampleTest<true>>(basename(argv[0]), framework::DatasetMode::ALL, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE);
+    }
+    else
+    {
+        framework.add_test_case<ExampleTest<false>>(basename(argv[0]), framework::DatasetMode::ALL, arm_compute::test::framework::TestCaseFactory::Status::ACTIVE);
+    }
 
     //func(argc, argv);
     bool success = framework.run();
