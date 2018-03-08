@@ -101,7 +101,14 @@ class NEGEMMConvolutionLayer : public IFunction
 public:
     /** Constructor */
     NEGEMMConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager = nullptr);
-
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEGEMMConvolutionLayer(const NEGEMMConvolutionLayer &) = delete;
+    /** Default move constructor */
+    NEGEMMConvolutionLayer(NEGEMMConvolutionLayer &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEGEMMConvolutionLayer &operator=(const NEGEMMConvolutionLayer &) = delete;
+    /** Default move assignment operator */
+    NEGEMMConvolutionLayer &operator=(NEGEMMConvolutionLayer &&) = default;
     /** Set the input and output tensors.
      *
      * @param[in]  input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -164,6 +171,8 @@ private:
     NEGEMMLowpMatrixMultiplyCore                        _mm_gemmlowp;
     NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint _gemmlowp_output_stage;
     NECol2ImKernel                                      _output_col2im_kernel;
+
+    const ITensor *_original_weights;
 
     Tensor _input_im2col_reshaped;
     Tensor _input_interleaved_reshaped;

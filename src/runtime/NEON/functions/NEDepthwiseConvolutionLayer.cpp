@@ -153,7 +153,7 @@ void NEDepthwiseConvolutionLayer3x3::run()
 
 NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayer()
     : _im2col_kernel(), _weights_reshape_kernel(), _v2mm_kernel(), _vector_to_tensor_kernel(), _output_stage_kernel(), _v2mm_input_fill_border(), _v2mm_weights_fill_border(), _input_reshaped(),
-      _weights_reshaped(), _v2mm_output(), _output_reshaped(), _is_quantized(false)
+      _weights_reshaped(), _v2mm_output(), _output_reshaped(), _is_first_run(true), _is_quantized(false), _original_weights(nullptr)
 {
 }
 
@@ -167,7 +167,9 @@ void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weigh
     const size_t weights_h = weights->info()->dimension(1);
     const size_t weights_z = weights->info()->dimension(2);
 
-    _is_quantized = is_data_type_quantized_asymmetric(input->info()->data_type());
+    _is_quantized     = is_data_type_quantized_asymmetric(input->info()->data_type());
+    _is_first_run     = true;
+    _original_weights = weights;
 
     // Should bias be appended ?
     bool append_bias = (biases != nullptr) && !_is_quantized;
@@ -241,10 +243,21 @@ void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weigh
 
 void NEDepthwiseConvolutionLayer::run()
 {
+    // Run weights reshaping (Runs once for every configure)
+    if(_is_first_run)
+    {
+        ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
+
+        NEScheduler::get().schedule(&_weights_reshape_kernel, Window::DimX);
+        NEScheduler::get().schedule(&_v2mm_weights_fill_border, Window::DimX);
+        _is_first_run = false;
+
+        // Mark original weights tensor as unused
+        _original_weights->mark_as_unused();
+    }
+
     NEScheduler::get().schedule(&_im2col_kernel, Window::DimX);
-    NEScheduler::get().schedule(&_weights_reshape_kernel, Window::DimX);
     NEScheduler::get().schedule(&_v2mm_input_fill_border, Window::DimX);
-    NEScheduler::get().schedule(&_v2mm_weights_fill_border, Window::DimX);
     NEScheduler::get().schedule(&_v2mm_kernel, Window::DimX);
     NEScheduler::get().schedule(&_vector_to_tensor_kernel, Window::DimX);
     if(_is_quantized)

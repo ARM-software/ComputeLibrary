@@ -53,6 +53,14 @@ class CLLocallyConnectedLayer : public IFunction
 public:
     /** Default constructor */
     CLLocallyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLLocallyConnectedLayer(const CLLocallyConnectedLayer &) = delete;
+    /** Default move constructor */
+    CLLocallyConnectedLayer(CLLocallyConnectedLayer &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLLocallyConnectedLayer &operator=(const CLLocallyConnectedLayer &) = delete;
+    /** Default move assignment operator */
+    CLLocallyConnectedLayer &operator=(CLLocallyConnectedLayer &&) = default;
     /** Set the input and output tensors.
      *
      * @param[in]  input     Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -93,6 +101,7 @@ private:
     CLTensor                               _weights_reshaped;
     CLTensor                               _gemm_output;
     bool                                   _is_first_run;
+    const ICLTensor                       *_original_weights;
 };
 }
 #endif /* __ARM_COMPUTE_CLLOCALLYCONNECTEDLAYER_H__ */

@@ -97,6 +97,14 @@ class NEDepthwiseConvolutionLayer : public IFunction
 public:
     /** Default constructor */
     NEDepthwiseConvolutionLayer();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEDepthwiseConvolutionLayer(const NEDepthwiseConvolutionLayer &) = delete;
+    /** Default move constructor */
+    NEDepthwiseConvolutionLayer(NEDepthwiseConvolutionLayer &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEDepthwiseConvolutionLayer &operator=(const NEDepthwiseConvolutionLayer &) = delete;
+    /** Default move assignment operator */
+    NEDepthwiseConvolutionLayer &operator=(NEDepthwiseConvolutionLayer &&) = default;
     /** Initialize the function's source, destination, weights and convolution information.
      *
      * @param[in, out] input     Source tensor. Data type supported: QASYMM8/F32. (Written to only for border filling).
@@ -123,7 +131,9 @@ private:
     Tensor                                    _weights_reshaped;
     Tensor                                    _v2mm_output;
     Tensor                                    _output_reshaped;
+    bool                                      _is_first_run;
     bool                                      _is_quantized;
+    const ITensor                            *_original_weights;
 };
 }
 #endif /* __ARM_COMPUTE_NEDEPTHWISECONVOLUTION_H__ */

@@ -56,6 +56,7 @@ public:
     const arm_compute::ITensor &tensor() const override;
     void map(bool blocking) override;
     void unmap() override;
+    void release_if_unused() override;
     bool is_subtensor() const override;
 
 private:

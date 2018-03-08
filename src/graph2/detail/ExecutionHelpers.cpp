@@ -135,6 +135,17 @@ ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx)
     return workload;
 }
 
+void release_unused_tensors(Graph &g)
+{
+    for(auto &tensor : g.tensors())
+    {
+        if(tensor != nullptr && tensor->handle() != nullptr)
+        {
+            tensor->handle()->release_if_unused();
+        }
+    }
+}
+
 void call_tensor_accessor(Tensor *tensor)
 {
     ARM_COMPUTE_ERROR_ON(!tensor);

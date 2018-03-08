@@ -83,6 +83,14 @@ class CLDepthwiseConvolutionLayer : public IFunction
 public:
     /** Default constructor */
     CLDepthwiseConvolutionLayer();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLDepthwiseConvolutionLayer(const CLDepthwiseConvolutionLayer &) = delete;
+    /** Default move constructor */
+    CLDepthwiseConvolutionLayer(CLDepthwiseConvolutionLayer &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLDepthwiseConvolutionLayer &operator=(const CLDepthwiseConvolutionLayer &) = delete;
+    /** Default move assignment operator */
+    CLDepthwiseConvolutionLayer &operator=(CLDepthwiseConvolutionLayer &&) = default;
     /** Initialize the function's source, destination, weights and convolution information.
      *
      * @param[in, out] input     Source tensor. Data type supported: QASYMM8/F32. (Written to only for border filling).
@@ -109,7 +117,9 @@ private:
     CLTensor                                  _weights_reshaped;
     CLTensor                                  _v2mm_output;
     CLTensor                                  _output_reshaped;
+    bool                                      _is_first_run;
     bool                                      _is_quantized;
+    const ICLTensor                          *_original_weights;
 };
 }
 #endif /*__ARM_COMPUTE_CLDEPTHWISECONVOLUTION_H__ */

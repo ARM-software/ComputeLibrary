@@ -90,8 +90,8 @@ void CLConvolutionLayerReshapeWeights::run()
 }
 
 CLGEMMConvolutionLayer::CLGEMMConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(memory_manager), _reshape_weights(), _im2col_kernel(), _mm_gemm(memory_manager), _mm_gemmlowp(memory_manager), _gemmlowp_output_stage(), _col2im_kernel(), _im2col_output(),
-      _weights_reshaped(), _gemm_output(), _tmp_output(), _is_quantized(false), _is_first_run(true)
+    : _memory_group(memory_manager), _reshape_weights(), _im2col_kernel(), _mm_gemm(memory_manager), _mm_gemmlowp(memory_manager), _gemmlowp_output_stage(), _col2im_kernel(), _original_weights(nullptr),
+      _im2col_output(), _weights_reshaped(), _gemm_output(), _tmp_output(), _is_quantized(false), _is_first_run(true)
 {
 }
 
@@ -164,7 +164,9 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
                                                                 weights_info,
                                                                 dilation));
 
-    _is_quantized = is_data_type_quantized_asymmetric(input->info()->data_type());
+    _is_first_run     = true;
+    _original_weights = weights;
+    _is_quantized     = is_data_type_quantized_asymmetric(input->info()->data_type());
 
     const DataType dt = input->info()->data_type();
 
@@ -349,9 +351,13 @@ void CLGEMMConvolutionLayer::run()
     // Run weights reshaping (Runs once for every configure)
     if(_is_first_run)
     {
-        _reshape_weights.run();
+        ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
 
+        _reshape_weights.run();
         _is_first_run = false;
+
+        // Mark original weights tensor as unused
+        _original_weights->mark_as_unused();
     }
 
     _memory_group.acquire();

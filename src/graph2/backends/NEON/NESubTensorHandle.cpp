@@ -61,6 +61,11 @@ void NESubTensorHandle::unmap()
     // noop
 }
 
+void NESubTensorHandle::release_if_unused()
+{
+    // noop
+}
+
 bool NESubTensorHandle::is_subtensor() const
 {
     return true;

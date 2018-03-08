@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,6 +76,14 @@ class CLFullyConnectedLayer : public IFunction
 public:
     /** Constructor */
     CLFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLFullyConnectedLayer(const CLFullyConnectedLayer &) = delete;
+    /** Default move constructor */
+    CLFullyConnectedLayer(CLFullyConnectedLayer &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLFullyConnectedLayer &operator=(const CLFullyConnectedLayer &) = delete;
+    /** Default move assignment operator */
+    CLFullyConnectedLayer &operator=(CLFullyConnectedLayer &&) = default;
     /** Set the input and output tensors.
      *
      * @param[in]  input                Source tensor. Data type supported: QS8/QASYMM8/QS16/F16/F32.
@@ -121,6 +129,7 @@ private:
     bool                                                _is_fc_after_conv;
     bool                                                _accumulate_biases;
     bool                                                _is_quantized;
+    const ICLTensor                                    *_original_weights;
 };
 }
 #endif /* __ARM_COMPUTE_CLFULLYCONNECTEDLAYER_H__ */

@@ -82,6 +82,12 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
 
     // Finalize Graph context
     ctx.finalize();
+
+    // Make first run
+    execute_graph(graph);
+
+    // Release all unused const nodes
+    detail::release_unused_tensors(graph);
 }
 
 void GraphManager::execute_graph(Graph &graph)

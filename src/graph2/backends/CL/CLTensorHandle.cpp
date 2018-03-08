@@ -60,6 +60,15 @@ void CLTensorHandle::unmap()
     _tensor.unmap();
 }
 
+void CLTensorHandle::release_if_unused()
+{
+    // TODO (geopin01): Release tensor only if all sub-tensors are marked as not used
+    if(!_tensor.is_used())
+    {
+        _tensor.allocator()->free();
+    }
+}
+
 bool CLTensorHandle::is_subtensor() const
 {
     return false;

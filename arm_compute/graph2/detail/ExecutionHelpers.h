@@ -63,6 +63,11 @@ void validate_all_nodes(Graph &g);
  * @return The execution workload
  */
 ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx);
+/** Release the memory of all unused const nodes
+ *
+ * @param[in] g Graph to release the memory from
+ */
+void release_unused_tensors(Graph &g);
 /** Calls accessor of a given tensor
  *
  * @param[in] tensor The tensor of which the accessor should be called

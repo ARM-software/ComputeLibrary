@@ -64,6 +64,11 @@ void CLSubTensorHandle::unmap()
     _sub_tensor.unmap();
 }
 
+void CLSubTensorHandle::release_if_unused()
+{
+    // noop
+}
+
 bool CLSubTensorHandle::is_subtensor() const
 {
     return true;

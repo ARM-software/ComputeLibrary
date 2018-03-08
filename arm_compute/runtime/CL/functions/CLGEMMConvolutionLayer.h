@@ -103,6 +103,14 @@ public:
      * @param[in] memory_manager (Optional) Memory manager.
      */
     CLGEMMConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLGEMMConvolutionLayer(const CLGEMMConvolutionLayer &) = delete;
+    /** Default move constructor */
+    CLGEMMConvolutionLayer(CLGEMMConvolutionLayer &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLGEMMConvolutionLayer &operator=(const CLGEMMConvolutionLayer &) = delete;
+    /** Default move assignment operator */
+    CLGEMMConvolutionLayer &operator=(CLGEMMConvolutionLayer &&) = default;
     /** Set the input and output tensors.
      *
      * @param[in]  input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -171,6 +179,8 @@ private:
     CLGEMMLowpMatrixMultiplyCore                        _mm_gemmlowp;
     CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint _gemmlowp_output_stage;
     CLCol2ImKernel                                      _col2im_kernel;
+
+    const ICLTensor *_original_weights;
 
     CLTensor _im2col_output;
     CLTensor _weights_reshaped;

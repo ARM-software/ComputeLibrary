@@ -53,6 +53,14 @@ class NELocallyConnectedLayer : public IFunction
 public:
     /** Default constructor */
     NELocallyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NELocallyConnectedLayer(const NELocallyConnectedLayer &) = delete;
+    /** Default move constructor */
+    NELocallyConnectedLayer(NELocallyConnectedLayer &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NELocallyConnectedLayer &operator=(const NELocallyConnectedLayer &) = delete;
+    /** Default move assignment operator */
+    NELocallyConnectedLayer &operator=(NELocallyConnectedLayer &&) = default;
     /** Set the input and output tensors.
      *
      * @param[in]  input     Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -93,6 +101,7 @@ private:
     Tensor                                 _weights_reshaped;
     Tensor                                 _gemm_output;
     bool                                   _is_first_run;
+    const ITensor                         *_original_weights;
 };
 }
 #endif /* __ARM_COMPUTE_NELOCALLYCONNECTEDLAYER_H__ */

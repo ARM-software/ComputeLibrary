@@ -94,6 +94,14 @@ class NEFullyConnectedLayer : public IFunction
 public:
     /** Constructor */
     NEFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEFullyConnectedLayer(const NEFullyConnectedLayer &) = delete;
+    /** Default move constructor */
+    NEFullyConnectedLayer(NEFullyConnectedLayer &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEFullyConnectedLayer &operator=(const NEFullyConnectedLayer &) = delete;
+    /** Default move assignment operator */
+    NEFullyConnectedLayer &operator=(NEFullyConnectedLayer &&) = default;
     /** Set the input and output tensors.
      *
      * @param[in]  input                Source tensor. Data type supported: QS8/QS16/F32.
@@ -134,6 +142,7 @@ private:
     bool                                _is_batched_fc_layer;
     bool                                _linearize_input;
     bool                                _accumulate_biases;
+    const ITensor                      *_original_weights;
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEFULLYCONNECTEDLAYER_H__ */

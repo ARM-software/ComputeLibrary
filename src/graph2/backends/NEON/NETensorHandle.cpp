@@ -59,6 +59,15 @@ void NETensorHandle::unmap()
 {
 }
 
+void NETensorHandle::release_if_unused()
+{
+    // TODO (geopin01): Release tensor only if all sub-tensors are marked as not used
+    if(!_tensor.is_used())
+    {
+        _tensor.allocator()->free();
+    }
+}
+
 bool NETensorHandle::is_subtensor() const
 {
     return false;

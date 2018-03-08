@@ -73,7 +73,7 @@ void calculate_shapes(const ITensorInfo *input, const ITensorInfo *weights, cons
 
 NELocallyConnectedLayer::NELocallyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _input_im2col_kernel(), _weights_reshape_kernel(), _mm_kernel(), _output_col2im_kernel(), _input_im2col_reshaped(), _weights_reshaped(), _gemm_output(),
-      _is_first_run(false)
+      _is_first_run(false), _original_weights(nullptr)
 {
 }
 
@@ -126,8 +126,9 @@ void NELocallyConnectedLayer::configure(const ITensor *input, const ITensor *wei
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_ERROR_THROW_ON(NELocallyConnectedLayer::validate(input->info(), weights->info(), biases == nullptr ? nullptr : biases->info(), output->info(), conv_info));
 
-    bool _has_bias = (biases != nullptr);
-    _is_first_run  = true;
+    bool _has_bias    = (biases != nullptr);
+    _is_first_run     = true;
+    _original_weights = weights;
 
     const unsigned int kernel_width  = weights->info()->dimension(0);
     const unsigned int kernel_height = weights->info()->dimension(1);
@@ -169,8 +170,13 @@ void NELocallyConnectedLayer::run()
     // Run weights reshaping (Runs once for every configure)
     if(_is_first_run)
     {
+        ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
+
         _is_first_run = false;
         NEScheduler::get().schedule(&_weights_reshape_kernel, 3);
+
+        // Mark original weights tensor as unused
+        _original_weights->mark_as_unused();
     }
 
     _memory_group.acquire();

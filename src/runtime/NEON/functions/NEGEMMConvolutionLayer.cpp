@@ -217,7 +217,7 @@ Status validate_and_initialize_values(const ITensorInfo *input, const ITensorInf
 
 NEGEMMConvolutionLayer::NEGEMMConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager)
     : _asm_glue(), _memory_group(memory_manager), _input_im2col_kernel(), _input_interleave_kernel(), _reshape_weights(), _mm_kernel(), _mm_gemmlowp(memory_manager), _gemmlowp_output_stage(),
-      _output_col2im_kernel(), _input_im2col_reshaped(), _input_interleaved_reshaped(), _weights_reshaped(), _gemm_output(), _tmp_output(), _workspace(), _append_bias(false),
+      _output_col2im_kernel(), _original_weights(nullptr), _input_im2col_reshaped(), _input_interleaved_reshaped(), _weights_reshaped(), _gemm_output(), _tmp_output(), _workspace(), _append_bias(false),
       _is_fully_connected_convolution(false), _are_weights_reshaped(false), _is_quantized(false), _is_interleaved(false)
 {
 }
@@ -267,6 +267,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
 
     ARM_COMPUTE_ERROR_THROW_ON(status);
 
+    _original_weights                       = weights;
     const unsigned int fixed_point_position = input->info()->fixed_point_position();
     const ITensor     *biases_to_use        = (_append_bias) ? biases : nullptr;
 
@@ -549,8 +550,13 @@ void NEGEMMConvolutionLayer::run()
     // Run weights reshaping (Runs once for every configure)
     if(!_are_weights_reshaped)
     {
+        ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
+
         _are_weights_reshaped = true;
         _reshape_weights.run();
+
+        // Mark original weights tensor as unused
+        _original_weights->mark_as_unused();
     }
 
     _memory_group.acquire();
