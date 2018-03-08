@@ -66,7 +66,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
                                                                                    combine(framework::dataset::make("UseBeta", { false, true }),
                                                                                            framework::dataset::make("UseGamma", { false, true }))),
                                                                            framework::dataset::make("DataType", { DataType::QS8, DataType::QS16, DataType::F16, DataType::F32 })),
-                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                shape0, shape1, epsilon, use_gamma, use_beta, dt, data_layout)
 {
     // Set fixed point position data type allowed
@@ -168,7 +168,7 @@ FIXTURE_DATA_TEST_CASE(Random, CLBatchNormalizationLayerFixture<float>, framewor
                                                                                                                            framework::dataset::make("UseGamma", { false, true }))),
                                                                                                                    act_infos),
                                                                                                                    framework::dataset::make("DataType", DataType::F32)),
-                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, 0);
@@ -181,7 +181,7 @@ FIXTURE_DATA_TEST_CASE(Random, CLBatchNormalizationLayerFixture<half>, framework
                                                                                                                           framework::dataset::make("UseGamma", { false, true }))),
                                                                                                                   framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))),
                                                                                                                   framework::dataset::make("DataType", DataType::F16)),
-                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, 0);

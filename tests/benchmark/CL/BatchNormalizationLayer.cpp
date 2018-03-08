@@ -56,7 +56,7 @@ REGISTER_FIXTURE_DATA_TEST_CASE(MobileNetBatchNormalizationLayer, CLBatchNormali
                                                                                 framework::dataset::make("UseBeta", { false, true }))),
                                                                 framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))),
                                                         data_types),
-                                                framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                         framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2BatchNormalizationLayer, CLBatchNormalizationLayerFixture, framework::DatasetMode::ALL,
@@ -65,7 +65,7 @@ REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2BatchNormalizationLayer, CLBatchNormalizat
                                                                                 framework::dataset::make("UseBeta", { false, true }))),
                                                                 framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
                                                         data_types),
-                                                framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                         framework::dataset::make("Batches", 1)));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4BatchNormalizationLayer, CLBatchNormalizationLayerFixture, framework::DatasetMode::ALL,
@@ -74,7 +74,7 @@ REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4BatchNormalizationLayer, CLB
                                                                                 framework::dataset::make("UseBeta", { false, true }))),
                                                                 framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
                                                         data_types),
-                                                framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                         framework::dataset::make("Batches", 1)));
 
 TEST_SUITE(NIGHTLY)
@@ -85,7 +85,7 @@ REGISTER_FIXTURE_DATA_TEST_CASE(MobileNetBatchNormalizationLayer, CLBatchNormali
                                                                                 framework::dataset::make("UseBeta", { false, true }))),
                                                                 framework::dataset::make("ActivationInfo", ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))),
                                                         data_types),
-                                                framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                         framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2BatchNormalizationLayer, CLBatchNormalizationLayerFixture, framework::DatasetMode::NIGHTLY,
@@ -94,7 +94,7 @@ REGISTER_FIXTURE_DATA_TEST_CASE(YOLOV2BatchNormalizationLayer, CLBatchNormalizat
                                                                                 framework::dataset::make("UseBeta", { false, true }))),
                                                                 framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
                                                         data_types),
-                                                framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                         framework::dataset::make("Batches", { 4, 8 })));
 
 REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4BatchNormalizationLayer, CLBatchNormalizationLayerFixture, framework::DatasetMode::NIGHTLY,
@@ -103,7 +103,7 @@ REGISTER_FIXTURE_DATA_TEST_CASE(GoogLeNetInceptionV4BatchNormalizationLayer, CLB
                                                                                 framework::dataset::make("UseBeta", { false, true }))),
                                                                 framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
                                                         data_types),
-                                                framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                                framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                         framework::dataset::make("Batches", { 4, 8 })));
 TEST_SUITE_END()
 TEST_SUITE_END()

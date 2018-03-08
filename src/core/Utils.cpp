@@ -126,6 +126,18 @@ const std::string &arm_compute::string_from_channel(Channel channel)
     return channels_map[channel];
 }
 
+const std::string &arm_compute::string_from_data_layout(DataLayout dl)
+{
+    static std::map<DataLayout, const std::string> dl_map =
+    {
+        { DataLayout::UNKNOWN, "UNKNOWN" },
+        { DataLayout::NCHW, "NCHW" },
+        { DataLayout::NHWC, "NHWC" },
+    };
+
+    return dl_map[dl];
+}
+
 const std::string &arm_compute::string_from_data_type(DataType dt)
 {
     static std::map<DataType, const std::string> dt_map =

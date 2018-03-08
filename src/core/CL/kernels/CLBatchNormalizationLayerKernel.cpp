@@ -49,6 +49,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output,
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mean, var);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, mean, var);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, mean, var);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL)) != mean->dimension(0));
     if(beta != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mean, beta);
@@ -62,7 +63,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output,
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, gamma);
     }
 
-    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(2) != mean->dimension(0));
     if(act_info.enabled())
     {
         ActivationLayerInfo::ActivationFunction act = act_info.activation();
@@ -75,6 +75,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output,
     if(output != nullptr && output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
@@ -152,7 +153,7 @@ void CLBatchNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *out
     build_opts.add_option_if(gamma == nullptr, "-DUSE_DEFAULT_GAMMA");
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("batchnormalization_layer", build_opts.options()));
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("batchnormalization_layer_" + lower_string(string_from_data_layout(input->info()->data_layout())), build_opts.options()));
 
     // Set kernel static arguments
     unsigned int include_output = (!_run_in_place) ? 1 : 0;
@@ -173,6 +174,8 @@ void CLBatchNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *out
     ICLKernel::configure(win_config.second);
 
     _config_id = "batch_normalization_layer_";
+    _config_id += string_from_data_layout(input->info()->data_layout());
+    _config_id += "_";
     _config_id += string_from_data_type(input->info()->data_type());
     _config_id += "_";
     _config_id += support::cpp11::to_string(input->info()->dimension(0));

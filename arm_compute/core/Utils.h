@@ -917,7 +917,13 @@ const std::string &string_from_format(Format format);
  * @return The string describing the channel.
  */
 const std::string &string_from_channel(Channel channel);
-
+/** Convert a data layout identity into a string.
+ *
+ * @param[in] dl @ref DataLayout to be translated to string.
+ *
+ * @return The string describing the data layout.
+ */
+const std::string &string_from_data_layout(DataLayout dl);
 /** Convert a data type identity into a string.
  *
  * @param[in] dt @ref DataType to be translated to string.
