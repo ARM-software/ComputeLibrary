@@ -43,8 +43,9 @@ public:
      * @param[in] parent_handle Parent tensor handle
      * @param[in] shape         Sub-Tensor shape
      * @param[in] coords        Starting coordinates
+     * @param[in] extend_parent Extends parent shape if true
      */
-    NESubTensorHandle(ITensorHandle *parent_handle, const TensorShape &shape, const Coordinates &coords);
+    NESubTensorHandle(ITensorHandle *parent_handle, const TensorShape &shape, const Coordinates &coords, bool extend_parent = false);
     /** Destructor: free the tensor's memory */
     ~NESubTensorHandle() = default;
     /** Allow instances of this class to be move constructed */

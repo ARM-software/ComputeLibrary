@@ -27,5 +27,6 @@
 #include "arm_compute/graph2/mutators/DepthConcatSubTensorMutator.h"
 #include "arm_compute/graph2/mutators/InPlaceOperationMutator.h"
 #include "arm_compute/graph2/mutators/NodeFusionMutator.h"
+#include "arm_compute/graph2/mutators/SplitLayerSubTensorMutator.h"
 
 #endif /* __ARM_COMPUTE_GRAPH2_GRAPH_MUTATORS_H__ */

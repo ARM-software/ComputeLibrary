@@ -39,5 +39,6 @@
 #include "arm_compute/graph2/nodes/PoolingLayerNode.h"
 #include "arm_compute/graph2/nodes/ReshapeLayerNode.h"
 #include "arm_compute/graph2/nodes/SoftmaxLayerNode.h"
+#include "arm_compute/graph2/nodes/SplitLayerNode.h"
 
 #endif /* __ARM_COMPUTE_GRAPH2_NODES_H__ */

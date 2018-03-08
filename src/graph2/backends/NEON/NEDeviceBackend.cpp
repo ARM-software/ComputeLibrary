@@ -86,14 +86,14 @@ std::unique_ptr<ITensorHandle> NEDeviceBackend::create_tensor(const Tensor &tens
     return std::move(backend_tensor_handle);
 }
 
-std::unique_ptr<ITensorHandle> NEDeviceBackend::create_subtensor(ITensorHandle *parent, TensorShape shape, Coordinates coords)
+std::unique_ptr<ITensorHandle> NEDeviceBackend::create_subtensor(ITensorHandle *parent, TensorShape shape, Coordinates coords, bool extend_parent)
 {
     if(parent == nullptr)
     {
         return nullptr;
     }
 
-    return support::cpp14::make_unique<NESubTensorHandle>(parent, shape, coords);
+    return support::cpp14::make_unique<NESubTensorHandle>(parent, shape, coords, extend_parent);
 }
 
 std::unique_ptr<arm_compute::IFunction> NEDeviceBackend::configure_node(INode &node, GraphContext &ctx)

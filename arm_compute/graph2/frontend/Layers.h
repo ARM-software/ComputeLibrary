@@ -187,11 +187,10 @@ public:
 
     NodeID create_layer(IStream &s) override
     {
-        ARM_COMPUTE_UNUSED(_num_groups);
         NodeIdxPair input         = { s.tail_node(), 0 };
         NodeParams  common_params = { "", s.hints().target_hint };
         return GraphBuilder::add_convolution_node(s.graph(), common_params, input,
-                                                  Size2D(_conv_width, _conv_height), _ofm, _conv_info,
+                                                  Size2D(_conv_width, _conv_height), _ofm, _conv_info, _num_groups,
                                                   s.hints().convolution_method_hint,
                                                   std::move(_weights), std::move(_bias));
     }

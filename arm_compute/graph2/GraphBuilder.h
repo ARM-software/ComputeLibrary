@@ -101,10 +101,11 @@ public:
      *
      * @param[in] g                     Graph to add the node to
      * @param[in] params                Common node parameters
-     * @param[in] input                 Input to the batch normalization layer node as a NodeID-Index pair
+     * @param[in] input                 Input to the convolution layer node as a NodeID-Index pair
      * @param[in] kernel_spatial_extend Spatial extend of convolution kernels
      * @param[in] depth                 Number of convolution kernels
      * @param[in] conv_info             Convolution layer information
+     * @param[in] num_groups            (Optional) Number of groups for a grouped convolution. Defaults to 1
      * @param[in] method                (Optional) Convolution method to use
      * @param[in] weights_accessor      (Optional) Accessor of the weights node data
      * @param[in] bias_accessor         (Optional) Accessor of the bias node data
@@ -113,13 +114,13 @@ public:
      */
     static NodeID add_convolution_node(Graph &g, NodeParams params, NodeIdxPair input,
                                        Size2D kernel_spatial_extend, unsigned int depth, PadStrideInfo conv_info,
-                                       ConvolutionMethod   method           = ConvolutionMethod::DEFAULT,
+                                       unsigned int num_groups = 1, ConvolutionMethod method = ConvolutionMethod::DEFAULT,
                                        ITensorAccessorUPtr weights_accessor = nullptr, ITensorAccessorUPtr bias_accessor = nullptr);
     /** Adds a depth concatenate node to the graph
      *
      * @param[in] g      Graph to add the node to
      * @param[in] params Common node parameters
-     * @param[in] inputs Input to the batch normalization layer node as a NodeID-Index pair
+     * @param[in] inputs Inputs to the depth concatenate layer node as a NodeID-Index pair
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
@@ -128,7 +129,7 @@ public:
      *
      * @param[in] g                     Graph to add the node to
      * @param[in] params                Common node parameters
-     * @param[in] input                 Input to the batch normalization layer node as a NodeID-Index pair
+     * @param[in] input                 Input to the depthwise convolution layer node as a NodeID-Index pair
      * @param[in] kernel_spatial_extend Spatial extend of convolution kernels
      * @param[in] conv_info             Convolution layer information
      * @param[in] method                (Optional) Convolution method to use
@@ -156,7 +157,7 @@ public:
      *
      * @param[in] g      Graph to add the node to
      * @param[in] params Common node parameters
-     * @param[in] input  Input to the batch normalization layer node as a NodeID-Index pair
+     * @param[in] input  Input to the flatten layer node as a NodeID-Index pair
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
@@ -165,7 +166,7 @@ public:
      *
      * @param[in] g                Graph to add the layer to
      * @param[in] params           Common node parameters
-     * @param[in] input            Input to the batch normalization layer node as a NodeID-Index pair
+     * @param[in] input            Input to the fully connected layer node as a NodeID-Index pair
      * @param[in] num_outputs      Number of output neurons
      * @param[in] weights_accessor (Optional) Accessor of the weights node data
      * @param[in] bias_accessor    (Optional) Accessor of the bias node data
@@ -178,7 +179,7 @@ public:
      *
      * @param[in] g         Graph to add the node to
      * @param[in] params    Common node parameters
-     * @param[in] input     Input to the batch normalization layer node as a NodeID-Index pair
+     * @param[in] input     Input to the normalization layer node as a NodeID-Index pair
      * @param[in] norm_info Normalization layer information
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
@@ -188,7 +189,7 @@ public:
      *
      * @param[in] g         Graph to add the node to
      * @param[in] params    Common node parameters
-     * @param[in] input     Input to the batch normalization layer node as a NodeID-Index pair
+     * @param[in] input     Input to the pooling layer node as a NodeID-Index pair
      * @param[in] pool_info Pooling layer information
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
@@ -198,7 +199,7 @@ public:
      *
      * @param[in] g      Graph to add the node to
      * @param[in] params Common node parameters
-     * @param[in] input  Input to the batch normalization layer node as a NodeID-Index pair
+     * @param[in] input  Input to the reshape layer node as a NodeID-Index pair
      * @param[in] shape  Output reshaped shape
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
@@ -208,12 +209,23 @@ public:
      *
      * @param[in] g      Graph to add the node to
      * @param[in] params Common node parameters
-     * @param[in] input  Input to the batch normalization layer node as a NodeID-Index pair
+     * @param[in] input  Input to the softmax layer node as a NodeID-Index pair
      * @param[in] beta   Beta parameter
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_softmax_node(Graph &g, NodeParams params, NodeIdxPair input, float beta = 1.f);
+    /** Adds a split node to the graph
+     *
+     * @param[in] g          Graph to add the node to
+     * @param[in] params     Common node parameters
+     * @param[in] input      Input to the split layer node as a NodeID-Index pair
+     * @param[in] num_splits Number of different splits
+     * @param[in] axis       (Optional) Split axis. Defaults to 0
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_split_node(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_splits, unsigned int axis = 0);
 };
 } // namespace graph2
 } // namespace arm_compute

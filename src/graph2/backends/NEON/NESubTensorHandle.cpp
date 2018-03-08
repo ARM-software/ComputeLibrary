@@ -29,11 +29,11 @@ namespace graph2
 {
 namespace backends
 {
-NESubTensorHandle::NESubTensorHandle(ITensorHandle *parent_handle, const TensorShape &shape, const Coordinates &coords)
+NESubTensorHandle::NESubTensorHandle(ITensorHandle *parent_handle, const TensorShape &shape, const Coordinates &coords, bool extend_parent)
     : _sub_tensor()
 {
     ARM_COMPUTE_ERROR_ON(!parent_handle);
-    _sub_tensor = arm_compute::SubTensor(&parent_handle->tensor(), shape, coords);
+    _sub_tensor = arm_compute::SubTensor(&parent_handle->tensor(), shape, coords, extend_parent);
 }
 
 void NESubTensorHandle::allocate()

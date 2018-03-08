@@ -31,12 +31,12 @@ namespace graph2
 {
 namespace backends
 {
-CLSubTensorHandle::CLSubTensorHandle(ITensorHandle *parent_handle, const TensorShape &shape, const Coordinates &coords)
+CLSubTensorHandle::CLSubTensorHandle(ITensorHandle *parent_handle, const TensorShape &shape, const Coordinates &coords, bool extend_parent)
     : _sub_tensor()
 {
     ARM_COMPUTE_ERROR_ON(!parent_handle);
     auto parent_tensor = arm_compute::utils::cast::polymorphic_downcast<ICLTensor *>(&parent_handle->tensor());
-    _sub_tensor        = arm_compute::CLSubTensor(parent_tensor, shape, coords);
+    _sub_tensor        = arm_compute::CLSubTensor(parent_tensor, shape, coords, extend_parent);
 }
 
 void CLSubTensorHandle::allocate()

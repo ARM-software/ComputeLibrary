@@ -21,8 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/graph/Graph.h"
-#include "arm_compute/graph/Nodes.h"
+#include "arm_compute/graph2.h"
 #include "support/ToolchainSupport.h"
 #include "utils/GraphUtils.h"
 #include "utils/Utils.h"
@@ -32,7 +31,7 @@
 #include <memory>
 
 using namespace arm_compute::utils;
-using namespace arm_compute::graph;
+using namespace arm_compute::graph2::frontend;
 using namespace arm_compute::graph_utils;
 
 /** Example demonstrating how to implement AlexNet's network using the Compute Library's graph API
@@ -54,13 +53,16 @@ public:
         std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<CaffePreproccessor>(mean_rgb);
 
         // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
-        const int  int_target_hint = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
-        TargetHint target_hint     = set_target_hint(int_target_hint);
+        const int target                   = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
+        Target    target_hint              = set_target_hint2(target);
+        bool      enable_tuning            = (target == 2);
+        bool      enable_memory_management = true;
 
-        const bool            is_gemm_convolution5x5     = Graph::gpu_target() == arm_compute::GPUTarget::MIDGARD || target_hint == TargetHint::NEON;
-        const bool            is_winograd_convolution3x3 = target_hint == TargetHint::OPENCL;
-        ConvolutionMethodHint convolution_5x5_hint       = is_gemm_convolution5x5 ? ConvolutionMethodHint::GEMM : ConvolutionMethodHint::DIRECT;
-        ConvolutionMethodHint convolution_3x3_hint       = is_winograd_convolution3x3 ? ConvolutionMethodHint::WINOGRAD : ConvolutionMethodHint::GEMM;
+        // TODO (geopin01) : Get GPU target somehow and set gemm also for midgard ?
+        const bool        is_gemm_convolution5x5     = (target_hint == Target::NEON);
+        const bool        is_winograd_convolution3x3 = target_hint == Target::CL;
+        ConvolutionMethod convolution_5x5_hint       = is_gemm_convolution5x5 ? ConvolutionMethod::GEMM : ConvolutionMethod::DIRECT;
+        ConvolutionMethod convolution_3x3_hint       = is_winograd_convolution3x3 ? ConvolutionMethod::WINOGRAD : ConvolutionMethod::GEMM;
 
         // Parse arguments
         if(argc < 2)
@@ -95,8 +97,8 @@ public:
         }
 
         graph << target_hint
-              << Tensor(TensorInfo(TensorShape(227U, 227U, 3U, 1U), 1, DataType::F32),
-                        get_input_accessor(image, std::move(preprocessor)))
+              << InputLayer(TensorDescriptor(TensorShape(227U, 227U, 3U, 1U), DataType::F32),
+                            get_input_accessor(image, std::move(preprocessor)))
               // Layer 1
               << ConvolutionLayer(
                   11U, 11U, 96U,
@@ -158,10 +160,10 @@ public:
                   get_weights_accessor(data_path, "/cnn_data/alexnet_model/fc8_b.npy"))
               // Softmax
               << SoftmaxLayer()
-              << Tensor(get_output_accessor(label, 5));
+              << OutputLayer(get_output_accessor(label, 5));
 
-        // In order to enable the OpenCL tuner, graph_init() has to be called only when all nodes have been instantiated
-        graph.graph_init(int_target_hint == 2);
+        // Finalize graph
+        graph.finalize(target_hint, enable_tuning, enable_memory_management);
     }
     void do_run() override
     {
@@ -170,7 +172,7 @@ public:
     }
 
 private:
-    Graph graph{};
+    Stream graph{ 0, "AlexNet" };
 };
 
 /** Main program for AlexNet

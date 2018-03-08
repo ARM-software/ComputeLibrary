@@ -127,14 +127,14 @@ std::unique_ptr<ITensorHandle> CLDeviceBackend::create_tensor(const Tensor &tens
     return std::move(backend_tensor_handle);
 }
 
-std::unique_ptr<ITensorHandle> CLDeviceBackend::create_subtensor(ITensorHandle *parent, TensorShape shape, Coordinates coords)
+std::unique_ptr<ITensorHandle> CLDeviceBackend::create_subtensor(ITensorHandle *parent, TensorShape shape, Coordinates coords, bool extend_parent)
 {
     if(parent == nullptr)
     {
         return nullptr;
     }
 
-    return support::cpp14::make_unique<CLSubTensorHandle>(parent, shape, coords);
+    return support::cpp14::make_unique<CLSubTensorHandle>(parent, shape, coords, extend_parent);
 }
 
 std::unique_ptr<arm_compute::IFunction> CLDeviceBackend::configure_node(INode &node, GraphContext &ctx)

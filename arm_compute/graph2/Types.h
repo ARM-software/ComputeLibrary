@@ -38,6 +38,7 @@ namespace graph2
 {
 using arm_compute::Status;
 
+using arm_compute::Coordinates;
 using arm_compute::DataType;
 using arm_compute::TensorShape;
 using arm_compute::Size2D;
@@ -125,6 +126,7 @@ enum class NodeType
     PoolingLayer,
     ReshapeLayer,
     SoftmaxLayer,
+    SplitLayer,
 
     Input,
     Output,

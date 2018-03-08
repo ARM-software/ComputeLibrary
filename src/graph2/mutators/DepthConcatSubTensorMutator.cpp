@@ -70,7 +70,7 @@ void DepthConcatSubTensorMutator::mutate(Graph &g)
                     const auto input_shape  = input_tensor->desc().shape;
 
                     auto backend = backends::BackendRegistry::get().find_backend(input_tensor->desc().target);
-                    auto handle  = backend->create_subtensor(output_tensor->handle(), input_shape, Coordinates(0, 0, depth));
+                    auto handle  = backend->create_subtensor(output_tensor->handle(), input_shape, Coordinates(0, 0, depth), false);
                     input_tensor->set_handle(std::move(handle));
 
                     depth += input_shape.z();

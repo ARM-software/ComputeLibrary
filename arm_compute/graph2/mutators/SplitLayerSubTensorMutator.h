@@ -21,31 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH2_NODES_FWD_H__
-#define __ARM_COMPUTE_GRAPH2_NODES_FWD_H__
+#ifndef __ARM_COMPUTE_GRAPH2_SPLIT_LAYER_SUBTENSOR_MUTATOR_H__
+#define __ARM_COMPUTE_GRAPH2_SPLIT_LAYER_SUBTENSOR_MUTATOR_H__
+
+#include "arm_compute/graph2/IGraphMutator.h"
 
 namespace arm_compute
 {
 namespace graph2
 {
-// Forward declarations
-class INode;
-class ActivationLayerNode;
-class BatchNormalizationLayerNode;
-class ConstNode;
-class ConvolutionLayerNode;
-class DepthConcatenateLayerNode;
-class DepthwiseConvolutionLayerNode;
-class EltwiseLayerNode;
-class FlattenLayerNode;
-class FullyConnectedLayerNode;
-class InputNode;
-class NormalizationLayerNode;
-class OutputNode;
-class PoolingLayerNode;
-class ReshapeLayerNode;
-class SoftmaxLayerNode;
-class SplitLayerNode;
+/** Mutation pass to optimize split operations by using sub-tensors
+ *
+ * @warning This is compulsory to run in case Split layers are present in the model
+ **/
+class SplitLayerSubTensorMutator final : public IGraphMutator
+{
+public:
+    // Inherited methods overridden
+    virtual void mutate(Graph &g) override;
+    const char *name() override;
+};
 } // namespace graph2
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH2_NODES_FWD_H__ */
+#endif /* __ARM_COMPUTE_GRAPH2_SPLIT_LAYER_SUBTENSOR_MUTATOR_H__ */

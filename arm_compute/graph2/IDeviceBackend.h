@@ -65,13 +65,14 @@ public:
     virtual std::unique_ptr<ITensorHandle> create_tensor(const Tensor &tensor) = 0;
     /** Create a backend Sub-Tensor
      *
-     * @param[in] parent Parent sub-tensor handle
-     * @param[in] shape  Shape of the sub-tensor
-     * @param[in] coords Starting coordinates of the sub-tensor
+     * @param[in] parent        Parent sub-tensor handle
+     * @param[in] shape         Shape of the sub-tensor
+     * @param[in] coords        Starting coordinates of the sub-tensor
+     * @param[in] extend_parent Extends parent shape if true
      *
      * @return Backend sub-tensor handle
      */
-    virtual std::unique_ptr<ITensorHandle> create_subtensor(ITensorHandle *parent, TensorShape shape, Coordinates coords) = 0;
+    virtual std::unique_ptr<ITensorHandle> create_subtensor(ITensorHandle *parent, TensorShape shape, Coordinates coords, bool extend_parent) = 0;
     /** Configure a backend Node
      *
      * @note This creates an appropriate configured backend function for the given node

@@ -116,6 +116,11 @@ public:
      * @param[in] n Node to visit.
      */
     virtual void visit(SoftmaxLayerNode &n) = 0;
+    /** Visit SplitLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(SplitLayerNode &n) = 0;
 };
 
 /** Default visitor implementation
@@ -192,6 +197,10 @@ public:
         default_visit();
     }
     virtual void visit(SoftmaxLayerNode &n) override
+    {
+        default_visit();
+    }
+    virtual void visit(SplitLayerNode &n) override
     {
         default_visit();
     }
