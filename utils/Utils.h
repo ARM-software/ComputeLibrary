@@ -857,11 +857,8 @@ void fill_random_tensor(T &tensor, float lower_bound, float upper_bound)
     std::random_device rd;
     std::mt19937       gen(rd());
 
-    TensorShape shape(tensor.info()->dimension(0), tensor.info()->dimension(1));
-
     Window window;
-    window.set(Window::DimX, Window::Dimension(0, shape.x(), 1));
-    window.set(Window::DimY, Window::Dimension(0, shape.y(), 1));
+    window.use_tensor_dimensions(tensor.info()->tensor_shape());
 
     map(tensor, true);
 
