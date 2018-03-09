@@ -111,7 +111,7 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    /** Template function to run the im2col optimised for the fully connected layer case
+    /** Template function to run the im2col optimised for the fully connected and flatten layers case
      *
      * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
      */

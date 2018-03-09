@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_FLATTEN_LAYER_FIXTURE
-#define ARM_COMPUTE_TEST_FLATTEN_LAYER_FIXTURE
+#ifndef ARM_COMPUTE_TEST_IM2COL_FIXTURE
+#define ARM_COMPUTE_TEST_IM2COL_FIXTURE
 
+#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "tests/AssetsLibrary.h"
@@ -34,9 +34,7 @@
 #include "tests/IAccessor.h"
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Fixture.h"
-#include "tests/validation/reference/FlattenLayer.h"
-
-#include <random>
+#include "tests/validation/reference/Im2Col.h"
 
 namespace arm_compute
 {
@@ -47,49 +45,48 @@ namespace validation
 using namespace arm_compute::misc::shape_calculator;
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class FlattenLayerValidationFixture : public framework::Fixture
+class Im2ColValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, DataType data_type)
+    void setup(TensorShape shape, DataType data_type, const Size2D &kernel_dims, const PadStrideInfo &conv_info, const QuantizationInfo &quant_info, const DataLayout &data_layout)
     {
-        _fractional_bits = is_data_type_fixed_point(data_type) ? 4 : 0;
+        _kernel_dims = kernel_dims;
+        _conv_info   = conv_info;
+        _quant_info  = quant_info;
+        _data_layout = data_layout;
+        _has_bias    = data_type != DataType::QASYMM8;
 
-        TensorShape shape_flatten;
-        TensorInfo  input_info(shape, 1, data_type, _fractional_bits);
-        shape_flatten = compute_im2col_flatten_shape(&input_info);
+        if(_data_layout == DataLayout::NHWC)
+        {
+            permute(shape, PermutationVector(2U, 0U, 1U));
+        }
 
-        _target    = compute_target(shape, shape_flatten, data_type);
-        _reference = compute_reference(shape, shape_flatten, data_type);
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(_target.info()->tensor_shape(), _reference.shape());
+        TensorShape output_shape;
+        TensorInfo  input_info(shape, 1, data_type);
+        input_info.set_data_layout(_data_layout);
+        output_shape = compute_im2col_conv_shape(&input_info, _kernel_dims, _conv_info, _has_bias, Size2D(1U, 1U));
+
+        _target    = compute_target(shape, output_shape, data_type);
+        _reference = compute_reference(shape, output_shape, data_type);
     }
 
 protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        if(_fractional_bits == 0)
-        {
-            std::uniform_real_distribution<> distribution(-1.f, 1.f);
-            library->fill(tensor, distribution, 0);
-        }
-        else
-        {
-            const int                       one_fixed = 1 << _fractional_bits;
-            std::uniform_int_distribution<> distribution(-one_fixed, one_fixed);
-            library->fill(tensor, distribution, 0);
-        }
+        library->fill_tensor_uniform(tensor, 0);
     }
 
-    TensorType compute_target(const TensorShape &shape, const TensorShape &shape_flatten, DataType data_type)
+    TensorType compute_target(const TensorShape &shape, const TensorShape &output_shape, DataType data_type)
     {
         // Create tensors
-        TensorType src = create_tensor<TensorType>(shape, data_type, 1, _fractional_bits);
-        TensorType dst = create_tensor<TensorType>(shape_flatten, data_type, 1, _fractional_bits);
+        TensorType src = create_tensor<TensorType>(shape, data_type, 1, 0, _quant_info, _data_layout);
+        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1, 0, _quant_info, _data_layout);
 
         // Create and configure function
-        FunctionType flatten_layer;
-        flatten_layer.configure(&src, &dst);
+        FunctionType im2col_func;
+        im2col_func.configure(&src, &dst, _kernel_dims, _conv_info, _has_bias);
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -105,27 +102,31 @@ protected:
         fill(AccessorType(src));
 
         // Compute function
-        flatten_layer.run();
+        im2col_func.run();
 
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape, const TensorShape &shape_flatten, DataType data_type)
+    SimpleTensor<T> compute_reference(const TensorShape &shape, const TensorShape &output_shape, DataType data_type)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, data_type, 1, _fractional_bits };
+        SimpleTensor<T> src{ shape, data_type, 1, 0, _quant_info, _data_layout };
 
         // Fill reference
         fill(src);
 
-        return reference::flatten_layer<T>(src, shape_flatten);
+        return reference::im2col<T>(src, output_shape, _kernel_dims, _conv_info, _has_bias);
     }
 
-    TensorType      _target{};
-    SimpleTensor<T> _reference{};
-    int             _fractional_bits{};
+    TensorType       _target{};
+    SimpleTensor<T>  _reference{};
+    Size2D           _kernel_dims{};
+    PadStrideInfo    _conv_info{};
+    DataLayout       _data_layout{};
+    QuantizationInfo _quant_info{};
+    bool             _has_bias{};
 };
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_FLATTEN_LAYER_FIXTURE */
+#endif /* ARM_COMPUTE_TEST_IM2COL_FIXTURE */

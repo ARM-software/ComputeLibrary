@@ -188,7 +188,7 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
 
     if(_linearize_input)
     {
-        _im2col_output.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_im2col_shape(input->info(), num_input_dimensions)));
+        _im2col_output.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_im2col_fc_shape(input->info(), num_input_dimensions)));
 
         // Configure im2col kernel
         _memory_group.manage(&_im2col_output);
@@ -288,7 +288,7 @@ Status NEFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
 
     if(linearize_input)
     {
-        im2col_output->set_tensor_shape(compute_im2col_shape(input, num_input_dimensions));
+        im2col_output->set_tensor_shape(compute_im2col_fc_shape(input, num_input_dimensions));
 
         ARM_COMPUTE_RETURN_ON_ERROR(NEIm2ColKernel::validate(input, im2col_output.get(), Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false, true));
 

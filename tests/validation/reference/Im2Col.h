@@ -21,9 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "FlattenLayer.h"
+#ifndef __ARM_COMPUTE_TEST_IM2COL_H__
+#define __ARM_COMPUTE_TEST_IM2COL_H__
 
-#include "tests/validation/FixedPoint.h"
+#include "tests/SimpleTensor.h"
 
 namespace arm_compute
 {
@@ -34,21 +35,9 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> flatten_layer(const SimpleTensor<T> &src, const TensorShape &shape_flatten)
-{
-    SimpleTensor<T> dst(shape_flatten, src.data_type(), 1, src.fixed_point_position());
-
-    // Note: Since the reference implementation does not use padding bytes, we can copy directly the content of the source tensor
-    std::copy(src.data(), src.data() + src.num_elements(), dst.data());
-
-    return dst;
-}
-
-template SimpleTensor<float> flatten_layer(const SimpleTensor<float> &src, const TensorShape &shape_flatten);
-template SimpleTensor<half> flatten_layer(const SimpleTensor<half> &src, const TensorShape &shape_flatten);
-template SimpleTensor<qint8_t> flatten_layer(const SimpleTensor<qint8_t> &src, const TensorShape &shape_flatten);
-template SimpleTensor<qint16_t> flatten_layer(const SimpleTensor<qint16_t> &src, const TensorShape &shape_flatten);
+SimpleTensor<T> im2col(const SimpleTensor<T> &src, const TensorShape &dst_shape, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias);
 } // namespace reference
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
+#endif /* __ARM_COMPUTE_TEST_IM2COL_H__ */
