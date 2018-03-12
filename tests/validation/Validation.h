@@ -310,7 +310,7 @@ struct compare<RelativeTolerance<U>> : public compare_base<RelativeTolerance<U>>
                 return false;
             }
 
-            const double relative_change = std::abs(static_cast<double>(this->_target) - static_cast<double>(this->_reference)) / this->_reference;
+            const double relative_change = std::abs((static_cast<double>(this->_target) - static_cast<double>(this->_reference)) / this->_reference);
 
             return relative_change <= static_cast<U>(this->_tolerance);
         }
