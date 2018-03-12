@@ -160,7 +160,7 @@ void NEMinMaxLayerKernel::reset()
 
     float32x2_t reset_values = vdup_n_f32(0.0f);
     reset_values             = vset_lane_f32(std::numeric_limits<float>::max(), reset_values, 0);
-    reset_values             = vset_lane_f32(std::numeric_limits<float>::min(), reset_values, 1);
+    reset_values             = vset_lane_f32(std::numeric_limits<float>::lowest(), reset_values, 1);
 
     Window window_output;
     window_output.use_tensor_dimensions(_output->info()->tensor_shape());
