@@ -56,7 +56,8 @@ vars.AddVariables(
     PathVariable("build_dir", "Specify sub-folder for the build", ".", PathVariable.PathAccept),
     #FIXME Remove before release (And remove all references to INTERNAL_ONLY)
     BoolVariable("internal_only", "Enable ARM internal only tests", True),
-    ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", "")
+    ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", ""),
+    ("compiler_cache", "Command to prefix to the C and C++ compiler (e.g ccache)", "")
 )
 
 env = Environment(platform="posix", variables=vars, ENV = os.environ)
@@ -163,8 +164,8 @@ elif env['arch'] == 'x86_64':
 if env['build'] == 'native':
     prefix = ""
 
-env['CC'] = prefix + c_compiler
-env['CXX'] = prefix + cpp_compiler
+env['CC'] = env['compiler_cache']+" "+prefix + c_compiler
+env['CXX'] = env['compiler_cache']+" "+prefix + cpp_compiler
 env['LD'] = prefix + "ld"
 env['AS'] = prefix + "as"
 env['AR'] = prefix + "ar"
