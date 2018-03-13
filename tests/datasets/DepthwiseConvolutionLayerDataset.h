@@ -193,6 +193,7 @@ public:
         add_config(TensorShape(7U, 7U, 32U), TensorShape(3U, 3U, 32U), TensorShape(4U, 4U, 32U), PadStrideInfo(2, 2, 1, 1, 1, 1, DimensionRoundingType::CEIL));
         add_config(TensorShape(8U, 8U, 32U), TensorShape(3U, 3U, 32U), TensorShape(3U, 3U, 32U), PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL));
         add_config(TensorShape(8U, 8U, 32U), TensorShape(3U, 3U, 32U), TensorShape(4U, 4U, 32U), PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::CEIL));
+        add_config(TensorShape(64U, 64U, 128U), TensorShape(3U, 3U, 128U), TensorShape(32U, 32U, 128U), PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::CEIL));
     }
 };
 } // namespace datasets

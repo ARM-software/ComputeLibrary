@@ -39,6 +39,8 @@
 namespace depthwise
 {
 
+const unsigned int CHANNEL_BLOCK = 16;
+
 template <int OTR, int OTC, int KR, int KC, int SR, int SC, typename TIn, typename TOut>
 int DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::get_output_size(
   const int dim_size, const bool same_padding
@@ -54,7 +56,15 @@ DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::DepthwiseConvolution(
   const int n_channels, const bool padding_same,
   const TIn* const weights,
   const TIn* const input,
-  TOut* const output
+  TOut* const output,
+  const int weight_col_stride,
+  const int weight_row_stride,
+  const int input_col_stride,
+  const int input_row_stride,
+  const int input_batch_stride,
+  const int output_col_stride,
+  const int output_row_stride,
+  const int output_batch_stride
 ) : _weights(weights), _input(input), _output(output),
     _n_batches(n_batches),
     _n_input_rows(n_input_rows),
@@ -64,7 +74,15 @@ DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::DepthwiseConvolution(
     _n_output_cols(get_output_size(n_input_cols, padding_same)),
     _n_tile_rows(iceildiv(_n_output_rows, output_tile_rows)),
     _n_tile_cols(iceildiv(_n_output_cols, output_tile_cols)),
-    _padding_same(padding_same)
+    _padding_same(padding_same),
+    _weight_col_stride(weight_col_stride ? weight_col_stride : _n_channels),
+    _weight_row_stride(weight_row_stride ? weight_row_stride : KC * _weight_col_stride),
+    _input_col_stride(input_col_stride ? input_col_stride : _n_channels),
+    _input_row_stride(input_row_stride ? input_row_stride : _n_input_cols * _input_col_stride),
+    _input_batch_stride(input_batch_stride ? input_batch_stride : _n_input_rows * _input_row_stride),
+    _output_col_stride(output_col_stride ? output_col_stride : _n_channels),
+    _output_row_stride(output_row_stride ? output_row_stride : _n_output_cols * _output_col_stride),
+    _output_batch_stride(output_batch_stride ? output_batch_stride : _n_output_rows * _output_row_stride)
 {
 }
 
@@ -72,8 +90,8 @@ DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::DepthwiseConvolution(
 template <int OTR, int OTC, int KR, int KC, int SR, int SC, typename TIn, typename TOut>
 unsigned int DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::get_window() const
 {
-  // TODO Later support parallelisation over tile rows.
-  return 1;  // _n_tile_rows;
+  // Parallelise over blocks of channels.
+  return iceildiv(_n_channels, CHANNEL_BLOCK);
 }
 
 
@@ -83,41 +101,31 @@ void DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::run(
   const unsigned int stop
 )
 {
-  // TODO Later support parallelisation over tile rows.
-  (void) start;
-  (void) stop;
-
-  // Compute input striding
-  const int input_col_stride = _n_channels;
-  const int input_row_stride = _n_input_cols * input_col_stride;
-  const int input_batch_stride = _n_input_rows * input_row_stride;
-
-  // Compute output striding
-  const int output_col_stride = _n_channels;
-  const int output_row_stride = _n_output_cols * output_col_stride;
-  const int output_batch_stride = _n_output_rows * output_row_stride;
+  // Parallelise over blocks of channels
+  const auto start_channel = CHANNEL_BLOCK * start;
+  const auto stop_channel = std::min<unsigned int>(_n_channels, CHANNEL_BLOCK * stop);
 
   // Compute top and bottom padding for input and output
   const int input_pad_top = _padding_same ?
-                            ((_n_output_rows - 1)*stride_rows + kernel_rows - _n_input_rows) / 2 : 0;
+    ((_n_output_rows - 1)*stride_rows + kernel_rows - _n_input_rows) / 2 : 0;
   const int input_pad_left = _padding_same ?
-                             ((_n_output_cols - 1)*stride_cols + kernel_cols - _n_input_cols) / 2 : 0;
-  constexpr int tile_overlap = kernel_rows - 1;
+    ((_n_output_cols - 1)*stride_cols + kernel_cols - _n_input_cols) / 2 : 0;
+  constexpr int tile_overlap = kernel_rows - stride_rows;
 
   // Perform the convolution by calling `process_tile_row` for each tile row in
   // each batch.
   for (int batch = 0; batch < _n_batches; batch++)
   {
-    const TIn* const inptr_batch = _input + batch*input_batch_stride;
-    TOut* const outptr_batch = _output + batch*output_batch_stride;
+    const TIn* const inptr_batch = _input + batch*_input_batch_stride;
+    TOut* const outptr_batch = _output + batch*_output_batch_stride;
 
     // Loop over rows of tiles
     for (int tile_i = 0; tile_i < _n_tile_rows; tile_i++)
     {
       // Pointer to the row
       const int input_row_offset = (tile_i == 0) ? 0 : input_pad_top;
-      const TIn* const inptr_row = (inptr_batch + ((inner_tile_rows - tile_overlap)*tile_i - input_row_offset)*input_row_stride);
-      TOut* const outptr_row = outptr_batch + output_tile_rows * tile_i * output_row_stride;
+      const TIn* const inptr_row = (inptr_batch + ((inner_tile_rows - tile_overlap)*tile_i - input_row_offset)*_input_row_stride);
+      TOut* const outptr_row = outptr_batch + output_tile_rows * tile_i * _output_row_stride;
 
       // Input padding (top + bottom) for the row
       const int input_row_top = tile_i*(inner_tile_rows - tile_overlap) - input_pad_top;
@@ -131,9 +139,10 @@ void DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::run(
 
       // Process the row
       process_tile_row(
-        _n_channels, _weights,
-        inptr_row, input_row_stride, input_col_stride,
-        outptr_row, output_row_stride, output_col_stride,
+        stop_channel - start_channel,
+        _weights + start_channel, _weight_row_stride, _weight_col_stride,
+        inptr_row + start_channel, _input_row_stride, _input_col_stride,
+        outptr_row + start_channel, _output_row_stride, _output_col_stride,
         input_row_pad_top, input_pad_left, input_row_pad_bottom,
         output_row_pad_bottom,
         _n_tile_cols, _n_input_cols, _n_output_cols
@@ -147,6 +156,8 @@ template <int OTR, int OTC, int KR, int KC, int SR, int SC, typename TIn, typena
 void DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::process_tile_row(
   const int n_channels,
   const TIn* const weights,
+  const int weight_row_stride,
+  const int weight_col_stride,
   const TIn* const inptr,
   const int in_row_stride,
   const int in_col_stride,
@@ -162,7 +173,7 @@ void DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::process_tile_row
   const int n_output_cols
 )
 {
-  constexpr int tile_overlap = kernel_cols - 1;
+  constexpr int tile_overlap = kernel_cols - stride_cols;
 
   // Loop over columns of tiles
   for (int tile_j = 0; tile_j < n_tiles; tile_j++)
@@ -183,44 +194,182 @@ void DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::process_tile_row
     TOut* const outptr_col = outptr + tile_j * output_tile_cols * out_col_stride;
 
     // Apply the specific tile processing function
-    tile_fns[row_pad_in_top][t_pad_in_left][row_pad_in_bottom][t_pad_in_right][row_pad_out_bottom][t_pad_out_right](
-      n_channels, weights,
+    const bool pad_top = row_pad_in_top > 0;
+    const bool pad_left = t_pad_in_left > 0;
+    const bool pad_bottom = row_pad_in_bottom || row_pad_out_bottom;
+    const bool pad_right = t_pad_in_right || t_pad_out_right;
+
+    const TileFn tilefn = [&] () {
+      if (!pad_top && !pad_left && !pad_bottom && !pad_right)
+      {
+        // No padding
+        return tilefn_unpadded;
+      }
+      else if (pad_top && !pad_left && !pad_bottom && !pad_right)
+      {
+        // Padding on the top only, subtract off the minimum expected padding in
+        // order to index into the array of specialised methods.
+        const int index = row_pad_in_top - min_in_pad_top;
+        return tilefn_top[index];
+      }
+      else if (!pad_top && pad_left && !pad_bottom && !pad_right)
+      {
+        // Padding on the left only, subtract off the minimum expected padding in
+        // order to index into the array of specialised methods.
+        const int index = t_pad_in_left - min_in_pad_left;
+        return tilefn_left[index];
+      }
+      else if (!pad_top && !pad_left && pad_bottom && !pad_right)
+      {
+        // Padding on the bottom only
+        return tilefn_bottom[row_pad_in_bottom][row_pad_out_bottom];
+      }
+      else if (!pad_top && !pad_left && !pad_bottom && pad_right)
+      {
+        // Padding on the right only
+        return tilefn_right[t_pad_in_right][t_pad_out_right];
+      }
+      else
+      {
+        // Otherwise use generic tile processing method.
+        return tilefn_generic;
+      }
+    }();
+
+    tilefn(
+      n_channels,
+      weights, weight_row_stride, weight_col_stride,
       inptr_col, in_row_stride, in_col_stride,
-      outptr_col, out_row_stride, out_col_stride
+      outptr_col, out_row_stride, out_col_stride,
+      row_pad_in_top, t_pad_in_left, row_pad_in_bottom, t_pad_in_right,
+      row_pad_out_bottom, t_pad_out_right
     );
   }
 }
 
 
+// New templated struct used solely as a way to provide tile processing
+// specialisations.
+template <int OutputTileRows, int OutputTileCols,
+          int KernelRows, int KernelCols,
+          int StrideRows, int StrideCols,
+          typename TIn, typename TOut>
+struct DepthwiseConvolutionImpl : public DepthwiseConvolution<
+    OutputTileRows, OutputTileCols,
+    KernelRows, KernelCols,
+    StrideRows, StrideCols, TIn, TOut
+>
+{
+  typedef DepthwiseConvolution<
+    OutputTileRows, OutputTileCols,
+    KernelRows, KernelCols,
+    StrideRows, StrideCols,
+    TIn, TOut
+  > DWC;
+
+  /** Perform the depthwise convolution of a tile.
+   *
+   * @param[in] n_channels Number of channels.
+   * @param[in] weights Pointer to Height x Width x Channels ordered weights.
+   * @param[in] inptr Pointer to the top-left unpadded value of the tile.
+   * @param[in] in_row_stride Stride between rows of the input tensor.
+   * @param[in] in_col_stride Stride between columns of the input tensor.
+   * @param[out] outptr Pointer to the top-left output value for the tile.
+   * @param[in] out_row_stride Stride between rows of the output tensor.
+   * @param[in] out_col_stride Stride between columns of the output tensor.
+   *
+   * The following parameters may be ignored if the function has been
+   * specialised for specific padding constraints.
+   *
+   * @param[in] _in_pad_top Padding to apply to top of input tile.
+   * @param[in] _in_pad_left Padding to apply to left of input tile.
+   * @param[in] _in_pad_bottom Padding to apply to bottom of input tile.
+   * @param[in] _in_pad_right Padding to apply to right of input tile.
+   * @param[in] _out_pad_bottom Null cells at bottom of output tile.
+   * @param[in] _out_pad_right Null cells at right of output tile.
+   */
+  template <
+    bool Specialize=false,  // Specialize (or not) the method
+    int InPadTop=0,         // If specialized, top padding
+    int InPadLeft=0,        // If specialized, left padding
+    int InPadBottom=0,      // If specialized, bottom padding
+    int InPadRight=0,       // If specialized, right padding
+    int OutPadBottom=0,     // If specialized, bottom output padding
+    int OutPadRight=0       // If specialized, bottom right padding
+  >
+  static void process_tile(
+    const int n_channels,
+    const TIn* const weights,
+    const int weight_row_stride,
+    const int weight_col_stride,
+    const TIn* const inptr,
+    const int in_row_stride,
+    const int in_col_stride,
+    TOut* const outptr,
+    const int out_row_stride,
+    const int out_col_stride,
+    const int in_pad_top=0,
+    const int in_pad_left=0,
+    const int in_pad_bottom=0,
+    const int in_pad_right=0,
+    const int out_pad_bottom=0,
+    const int out_pad_right=0
+  );
+};
+
+
 template <int OTR, int OTC, int KR, int KC, int SR, int SC, typename TIn, typename TOut>
 template <
-  int in_pad_top, int in_pad_left, int in_pad_bottom, int in_pad_right,
-  int out_pad_bottom, int out_pad_right
+  bool Specialize,
+  int InPadTop, int InPadLeft, int InPadBottom, int InPadRight,
+  int OutPadBottom, int OutPadRight
 >
-void DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::process_tile(
+void DepthwiseConvolutionImpl<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::process_tile(
   const int n_channels,
-  const TIn* const weights,
-  const TIn* const inptr,
+  const TIn *__restrict__ const weights,
+  const int weight_row_stride,
+  const int weight_col_stride,
+  const TIn *__restrict__ const inptr,
   const int in_row_stride,
   const int in_col_stride,
-  TOut* const outptr,
+  TOut *__restrict__ const outptr,
   const int out_row_stride,
-  const int out_col_stride
+  const int out_col_stride,
+  const int _in_pad_top,
+  const int _in_pad_left,
+  const int _in_pad_bottom,
+  const int _in_pad_right,
+  const int _out_pad_bottom,
+  const int _out_pad_right
 )
 {
+  constexpr auto inner_tile_rows = DWC::inner_tile_rows;
+  constexpr auto inner_tile_cols = DWC::inner_tile_cols;
+  constexpr auto kernel_rows = DWC::kernel_rows;
+  constexpr auto kernel_cols = DWC::kernel_cols;
+  constexpr auto output_tile_rows = DWC::output_tile_rows;
+  constexpr auto output_tile_cols = DWC::output_tile_cols;
+  constexpr auto stride_rows = DWC::stride_rows;
+  constexpr auto stride_cols = DWC::stride_cols;
+
+  // Extract parameters
+  const int in_pad_top = Specialize ? InPadTop : _in_pad_top;
+  const int in_pad_left = Specialize ? InPadLeft : _in_pad_left;
+  const int in_pad_bottom = Specialize ? InPadBottom : _in_pad_bottom;
+  const int in_pad_right = Specialize ? InPadRight : _in_pad_right;
+  const int out_pad_bottom = Specialize ? OutPadBottom : _out_pad_bottom;
+  const int out_pad_right = Specialize ? OutPadRight : _out_pad_right;
+
   // Compute valid ranges of the tile
-  constexpr int in_cells_i = inner_tile_rows - in_pad_bottom;
-  constexpr int in_cells_j = inner_tile_cols - in_pad_right;
-  constexpr int out_cells_i = output_tile_rows - out_pad_bottom;
-  constexpr int out_cells_j = output_tile_cols - out_pad_right;
+  const int in_cells_i = inner_tile_rows - in_pad_bottom;
+  const int in_cells_j = inner_tile_cols - in_pad_right;
+  const int out_cells_i = output_tile_rows - out_pad_bottom;
+  const int out_cells_j = output_tile_cols - out_pad_right;
 
   // Instantiate pointers
-  const TIn* inptr_base = inptr;
-  const TIn* wptr_base = weights;
-  TOut* outptr_base = outptr;
-
-  const int weight_col_stride = n_channels;
-  const int weight_row_stride = kernel_cols * n_channels;
+  const TIn* __restrict__ inptr_base = inptr;
+  const TIn* __restrict__ wptr_base = weights;
+  TOut* __restrict__ outptr_base = outptr;
 
   // Perform the depthwise convolution
   int channels_remaining = n_channels;
@@ -259,7 +408,7 @@ void DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::process_tile(
     wptr_base++;
 
     // Perform the convolution
-    TOut v[out_cells_i][out_cells_j];
+    TOut v[output_tile_rows][output_tile_cols];
     for (int out_i = 0; out_i < out_cells_i; out_i++)
     {
       for (int out_j = 0; out_j < out_cells_j; out_j++)
@@ -287,7 +436,7 @@ void DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::process_tile(
     // Store the output tile
     for (int i = 0; i < out_cells_i; i++)
     {
-      TOut* const outptr_row = outptr_base + i*out_row_stride;
+      TOut* __restrict__ const outptr_row = outptr_base + i*out_row_stride;
       for (int j = 0; j < out_cells_j; j++)
       {
         *(outptr_row + j*out_col_stride) = v[i][j];
@@ -296,53 +445,5 @@ void DepthwiseConvolution<OTR, OTC, KR, KC, SR, SC, TIn, TOut>::process_tile(
     outptr_base++;
   }
 }
-
-
-// New templated struct used solely as a way to provide tile processing
-// specialisations.
-template <int OutputTileRows, int OutputTileCols,
-          int KernelRows, int KernelCols,
-          int StrideRows, int StrideCols,
-          typename TIn, typename TOut>
-struct DepthwiseConvolutionImpl : public DepthwiseConvolution<
-    OutputTileRows, OutputTileCols,
-    KernelRows, KernelCols,
-    StrideRows, StrideCols, TIn, TOut
->
-{
-  template <
-    int in_pad_top, int in_pad_left, int in_pad_bottom, int in_pad_right,
-    int out_pad_bottom, int out_pad_right
-  >
-  static void process_tile(
-    const int n_channels,
-    const TIn* const weights,
-    const TIn* const inptr,
-    const int in_row_stride,
-    const int in_col_stride,
-    TOut* const outptr,
-    const int out_row_stride,
-    const int out_col_stride
-  )
-  {
-    // By default, redirect to parent. Specialised implementations can be added
-    // by overriding this method.
-    DepthwiseConvolution<OutputTileRows, OutputTileCols,
-                         KernelRows, KernelCols,
-                         StrideRows, StrideCols,
-                         TIn, TOut>::
-      template process_tile<in_pad_top, in_pad_left, in_pad_bottom, in_pad_right,
-                            out_pad_bottom, out_pad_right>(
-        n_channels,
-        weights,
-        inptr,
-        in_row_stride,
-        in_col_stride,
-        outptr,
-        out_row_stride,
-        out_col_stride
-    );
-  }
-};
 
 }  // namespace depthwise

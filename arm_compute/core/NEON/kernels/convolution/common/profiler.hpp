@@ -24,17 +24,21 @@
 
 #pragma once
 
+#include <cstdio>
+#include <cstring>
+#include <chrono>
+#include <unistd.h>
+
+#ifdef CYCLE_PROFILING
 #include <algorithm>
 #include <cmath>
-#include <cstring>
-#include <cstdio>
 #include <map>
 #include <mutex>
 #include <thread>
 #include <vector>
 
 #include "perf.h"
-#include <unistd.h>
+#endif  // CYCLE_PROFILING
 
 #ifdef CYCLE_PROFILING
 class EventIDContainer
@@ -295,32 +299,43 @@ public:
 #endif  // CYCLE_PROFILING
 
     template <typename T>
-    void operator() (const char * event,
-                     T func,
-                     long int bytes_read = 0,
-                     long int ops = 0,
-                     long int bytes_written = 0) {
+    double operator() (const char * event,
+                       T func,
+                       long int bytes_read = 0,
+                       long int ops = 0,
+                       long int bytes_written = 0) {
 #ifdef CYCLE_PROFILING
         if (currentevent==maxevents) {
+            const std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
             func();
+            const std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+            return std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
         } else {
             const auto countfd = thread_counter_fds.get_counter_fd();
+            const std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
             start_counter(countfd);
             func();
             long long cycs = stop_counter(countfd);
+            const std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+            return std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
             // Store the profiling data
             std::lock_guard<std::mutex> lock_events(event_lock);
             events[currentevent++] = {
               get_event_id(event), bytes_read, ops, bytes_written, cycs
             };
+
+            return duration_us;
         }
 #else
       (void) event;
       (void) bytes_read;
       (void) ops;
       (void) bytes_written;
+      const std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
       func();
+      const std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+      return std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 #endif  // CYCLE_PROFILING
     }
 };

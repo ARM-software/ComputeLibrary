@@ -30,9 +30,12 @@ void PrintTensor(const Tensor4D<Tensor4DShape, float>& tensor);
 void PrintWeights(const Tensor4D<KernelShape, float>& weights);
 
 // Test the equivalence of two tensors
-bool CmpTensors(const Tensor4D<Tensor4DShape, float>& a,
-                const Tensor4D<Tensor4DShape, float>& b,
-                const float max_delta=0.0f);
+// Counts the instances that |a - b|/|a| > max_err
+bool CmpTensors(
+  const Tensor4D<Tensor4DShape, float>& a,
+  const Tensor4D<Tensor4DShape, float>& b,
+  const float max_err=0.0f
+);
 
 // Fill the tensor with a test pattern
 void TestPattern(Tensor4D<Tensor4DShape, float>& tensor);

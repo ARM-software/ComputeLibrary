@@ -23,18 +23,6 @@
  */
 
 #include <cstdio>
-#include <ctime>
-
-double TimeInUs(void)
-{
-#ifdef CYCLE_PROFILING
-  timespec t;
-  clock_gettime(CLOCK_REALTIME, &t);
-  return 1e6*t.tv_sec + 1e-3*t.tv_nsec;
-#else
-  return 0;
-#endif
-}
 
 void PrintMatrix(const float* const m, const int M, const int N, const int row_stride)
 {

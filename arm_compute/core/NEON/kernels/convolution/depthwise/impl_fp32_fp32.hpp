@@ -51,36 +51,58 @@ struct DepthwiseConvolutionImpl<OutputTileRows, OutputTileCols, KernelRows, Kern
   > DWC;
 
   template <
-    int in_pad_top, int in_pad_left, int in_pad_bottom, int in_pad_right,
-    int out_pad_bottom, int out_pad_right
+    bool Specialize=false,  // Specialize (or not) the method
+    int InPadTop=0,         // If specialized, top padding
+    int InPadLeft=0,        // If specialized, left padding
+    int InPadBottom=0,      // If specialized, bottom padding
+    int InPadRight=0,       // If specialized, right padding
+    int OutPadBottom=0,     // If specialized, bottom output padding
+    int OutPadRight=0       // If specialized, bottom right padding
   >
   static void process_tile(
     const int n_channels,
     const float* const weights,
+    const int weight_row_stride,
+    const int weight_col_stride,
     const float* const inptr,
     const int in_row_stride,
     const int in_col_stride,
     float* const outptr,
     const int out_row_stride,
-    const int out_col_stride
+    const int out_col_stride,
+    const int in_pad_top=0,
+    const int in_pad_left=0,
+    const int in_pad_bottom=0,
+    const int in_pad_right=0,
+    const int out_pad_bottom=0,
+    const int out_pad_right=0
   );
 };
 
 
 template <int OTR, int OTC, int KR, int KC, int SR, int SC>
 template <
-  int in_pad_top, int in_pad_left, int in_pad_bottom, int in_pad_right,
-  int out_pad_bottom, int out_pad_right
+  bool Specialize,
+  int InPadTop, int InPadLeft, int InPadBottom, int InPadRight,
+  int OutPadBottom, int OutPadRight
 >
 void DepthwiseConvolutionImpl<OTR, OTC, KR, KC, SR, SC, float, float>::process_tile(
   const int n_channels,
-  const float* const weights,
-  const float* const inptr,
+  const float *__restrict__ const weights,
+  const int weight_row_stride,
+  const int weight_col_stride,
+  const float *__restrict__ const inptr,
   const int in_row_stride,
   const int in_col_stride,
-  float* const outptr,
+  float *__restrict__ const outptr,
   const int out_row_stride,
-  const int out_col_stride
+  const int out_col_stride,
+  const int _in_pad_top,
+  const int _in_pad_left,
+  const int _in_pad_bottom,
+  const int _in_pad_right,
+  const int _out_pad_bottom,
+  const int _out_pad_right
 )
 {
   constexpr auto inner_tile_rows = DWC::inner_tile_rows;
@@ -92,19 +114,24 @@ void DepthwiseConvolutionImpl<OTR, OTC, KR, KC, SR, SC, float, float>::process_t
   constexpr auto stride_rows = DWC::stride_rows;
   constexpr auto stride_cols = DWC::stride_cols;
 
+  // Extract parameters
+  const int in_pad_top = Specialize ? InPadTop : _in_pad_top;
+  const int in_pad_left = Specialize ? InPadLeft : _in_pad_left;
+  const int in_pad_bottom = Specialize ? InPadBottom : _in_pad_bottom;
+  const int in_pad_right = Specialize ? InPadRight : _in_pad_right;
+  const int out_pad_bottom = Specialize ? OutPadBottom : _out_pad_bottom;
+  const int out_pad_right = Specialize ? OutPadRight : _out_pad_right;
+
   // Compute valid ranges of the tile
-  constexpr int in_cells_i = inner_tile_rows - in_pad_bottom;
-  constexpr int in_cells_j = inner_tile_cols - in_pad_right;
-  constexpr int out_cells_i = output_tile_rows - out_pad_bottom;
-  constexpr int out_cells_j = output_tile_cols - out_pad_right;
+  const int in_cells_i = inner_tile_rows - in_pad_bottom;
+  const int in_cells_j = inner_tile_cols - in_pad_right;
+  const int out_cells_i = output_tile_rows - out_pad_bottom;
+  const int out_cells_j = output_tile_cols - out_pad_right;
 
   // Instantiate pointers
-  const float* inptr_base = inptr;
-  const float* wptr_base = weights;
-  float* outptr_base = outptr;
-
-  const int weight_col_stride = n_channels;
-  const int weight_row_stride = kernel_cols * n_channels;
+  const float* __restrict__ inptr_base = inptr;
+  const float* __restrict__ wptr_base = weights;
+  float* __restrict__ outptr_base = outptr;
 
   // Perform the depthwise convolution
   int channels_remaining = n_channels;
@@ -144,7 +171,7 @@ void DepthwiseConvolutionImpl<OTR, OTC, KR, KC, SR, SC, float, float>::process_t
     wptr_base += 4;
 
     // Perform the convolution
-    float32x4_t v[out_cells_i][out_cells_j];
+    float32x4_t v[output_tile_rows][output_tile_cols];
     for (int out_i = 0; out_i < out_cells_i; out_i++)
     {
       for (int out_j = 0; out_j < out_cells_j; out_j++)
@@ -222,7 +249,7 @@ void DepthwiseConvolutionImpl<OTR, OTC, KR, KC, SR, SC, float, float>::process_t
     wptr_base++;
 
     // Perform the convolution
-    float v[out_cells_i][out_cells_j];
+    float v[output_tile_rows][output_tile_cols];
     for (int out_i = 0; out_i < out_cells_i; out_i++)
     {
       for (int out_j = 0; out_j < out_cells_j; out_j++)

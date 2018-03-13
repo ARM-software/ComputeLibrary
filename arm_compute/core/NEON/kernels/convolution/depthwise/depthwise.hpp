@@ -29,7 +29,7 @@ namespace depthwise
 
 class IDepthwiseConvolution
 {
-public:
+  public:
     virtual ~IDepthwiseConvolution() = default;
     virtual int output_size(const int dim_size, const bool padding_same) const = 0;
     virtual unsigned int get_window(void) const = 0;
@@ -59,8 +59,8 @@ class DepthwiseConvolution : public IDepthwiseConvolution
     static constexpr int kernel_cols = KernelCols;
     static constexpr int stride_rows = StrideRows;
     static constexpr int stride_cols = StrideCols;
-    static constexpr int inner_tile_rows = stride_rows * output_tile_rows + kernel_rows - 1;
-    static constexpr int inner_tile_cols = stride_cols * output_tile_cols + kernel_cols - 1;
+    static constexpr int inner_tile_rows = stride_rows * (output_tile_rows - 1) + kernel_rows;
+    static constexpr int inner_tile_cols = stride_cols * (output_tile_cols - 1) + kernel_cols;
 
     /** Create a new depthwise convolution engine.
      *
@@ -79,6 +79,75 @@ class DepthwiseConvolution : public IDepthwiseConvolution
       const TIn* const weights,
       const TIn* const input,
       TOut* const output
+    ) : DepthwiseConvolution(
+      n_batches, n_input_rows, n_input_cols, n_channels, padding_same,
+      weights, input, output, 0 /* column stride = default */
+    )
+    {
+    }
+
+    /** Create a new depthwise convolution engine with a specified column stride.
+     *
+     * @param[in] n_batches Number of batches tensors.
+     * @param[in] n_input_rows Number of rows in input tensor.
+     * @param[in] n_input_cols Number of columns in input tensor.
+     * @param[in] n_channels Number of channels in input and output tensors.
+     * @param[in] padding_same True if padding is SAME, else VALID.
+     * @param[in] weights Pointer to Height x Width x Channel ordered weights.
+     * @param[in] input Pointer to NHWC ordered input tensor.
+     * @param[output] output Pointer to NHWC ordered output tensor.
+     * @param[in] col_stride Stride between columns of the weights, inputs and output tensors.
+     */
+    DepthwiseConvolution(
+      const int n_batches, const int n_input_rows, const int n_input_cols,
+      const int n_channels, const bool padding_same,
+      const TIn* const weights,
+      const TIn* const input,
+      TOut* const output,
+      const int col_stride
+    ) : DepthwiseConvolution(
+      n_batches, n_input_rows, n_input_cols, n_channels, padding_same,
+      weights, input, output,
+      col_stride, 0,    /* Weight row stride = default */
+      col_stride, 0, 0, /* Input row stride, batch stride = default */
+      col_stride, 0, 0  /* Output row stride, batch stride = default */
+    )
+    {
+    }
+
+    /** Create a new depthwise convolution engine.
+     *
+     * @param[in] n_batches Number of batches tensors.
+     * @param[in] n_input_rows Number of rows in input tensor.
+     * @param[in] n_input_cols Number of columns in input tensor.
+     * @param[in] n_channels Number of channels in input and output tensors.
+     * @param[in] padding_same True if padding is SAME, else VALID.
+     * @param[in] weights Pointer to Height x Width x Channel ordered weights.
+     * @param[in] input Pointer to NHWC ordered input tensor.
+     * @param[output] output Pointer to NHWC ordered output tensor.
+     * @param[in] weight_col_stride Stride between columns of the weights (if 0, defaults appropriately).
+     * @param[in] weight_row_stride Stride between rows of the weights (if 0, defaults appropriately).
+     * @param[in] input_col_stride Stride between columns of the input tensor (if 0, defaults appropriately).
+     * @param[in] input_row_stride Stride between rows of the input tensor (if 0, defaults appropriately).
+     * @param[in] input_batch_stride Stride between batches of the input tensor (if 0, defaults appropriately).
+     * @param[in] output_col_stride Stride between columns of the output tensor (if 0, defaults appropriately).
+     * @param[in] output_row_stride Stride between rows of the output tensor (if 0, defaults appropriately).
+     * @param[in] output_batch_stride Stride between batches of the output tensor (if 0, defaults appropriately).
+     */
+    DepthwiseConvolution(
+      const int n_batches, const int n_input_rows, const int n_input_cols,
+      const int n_channels, const bool padding_same,
+      const TIn* const weights,
+      const TIn* const input,
+      TOut* const output,
+      const int weight_col_stride,
+      const int weight_row_stride,
+      const int input_col_stride,
+      const int input_row_stride,
+      const int input_batch_stride,
+      const int output_col_stride,
+      const int output_row_stride,
+      const int output_batch_stride
     );
 
     // Cannot copy or move a DepthwiseConvolution.
@@ -99,14 +168,15 @@ class DepthwiseConvolution : public IDepthwiseConvolution
      */
     int output_size(const int dim_size, const bool padding_same) const override
     {
-        return DepthwiseConvolution<OutputTileRows,
-                                    OutputTileCols,
-                                    KernelRows,
-                                    KernelCols,
-                                    StrideRows,
-                                    StrideCols,
-                                    TIn,
-                                    TOut>::get_output_size(dim_size, padding_same);
+      return DepthwiseConvolution<
+        OutputTileRows,
+        OutputTileCols,
+        KernelRows,
+        KernelCols,
+        StrideRows,
+        StrideCols,
+        TIn, TOut
+      >::get_output_size(dim_size, padding_same);
     }
 
     /** Get the window of work to be performed by an instance of the operator.
@@ -128,6 +198,8 @@ class DepthwiseConvolution : public IDepthwiseConvolution
     static void process_tile_row(
       const int n_channels,
       const TIn* const weights,
+      const int weight_row_stride,
+      const int weight_col_stride,
       const TIn* const inptr,
       const int in_row_stride,
       const int in_col_stride,
@@ -143,7 +215,27 @@ class DepthwiseConvolution : public IDepthwiseConvolution
       const int n_output_cols
     );
 
-    /** Process a single tile of the tensors.
+    // Determine the maximum (and minimum) padding values which can be applied
+    // to tiles of the tensors involved in this class of convolution.
+    static constexpr int max_in_pad_top = (kernel_rows - 1) / 2;
+    static constexpr int min_in_pad_top = (kernel_rows - stride_rows) / 2;
+
+    static constexpr int max_in_pad_left = (kernel_cols - 1) / 2;
+    static constexpr int min_in_pad_left = (kernel_cols - stride_cols) / 2;
+
+    static constexpr int max_in_pad_bottom = inner_tile_rows;
+    static constexpr int max_in_pad_right = inner_tile_cols;
+    static constexpr int max_out_pad_bottom = output_tile_rows;
+    static constexpr int max_out_pad_right = output_tile_cols;
+
+    static constexpr int n_in_pad_top_fns = (max_in_pad_top - min_in_pad_top) + 1;
+    static constexpr int n_in_pad_left_fns = (max_in_pad_left - min_in_pad_left) + 1;
+    static constexpr int n_in_pad_bottom_fns = max_in_pad_bottom + 1;
+    static constexpr int n_in_pad_right_fns = max_in_pad_right + 1;
+    static constexpr int n_out_pad_bottom_fns = max_out_pad_bottom + 1;
+    static constexpr int n_out_pad_right_fns = max_out_pad_right + 1;
+
+    /** Pointer to a function which will process a tile.
      *
      * @param[in] n_channels Number of channels.
      * @param[in] weights Pointer to Height x Width x Channels ordered weights.
@@ -153,48 +245,47 @@ class DepthwiseConvolution : public IDepthwiseConvolution
      * @param[out] outptr Pointer to the top-left output value for the tile.
      * @param[in] out_row_stride Stride between rows of the output tensor.
      * @param[in] out_col_stride Stride between columns of the output tensor.
+     *
+     * The following parameters may be ignored if the function has been
+     * specialised for specific padding constraints.
+     *
+     * @param[in] _in_pad_top Padding to apply to top of input tile.
+     * @param[in] _in_pad_left Padding to apply to left of input tile.
+     * @param[in] _in_pad_bottom Padding to apply to bottom of input tile.
+     * @param[in] _in_pad_right Padding to apply to right of input tile.
+     * @param[in] _out_pad_bottom Null cells at bottom of output tile.
+     * @param[in] _out_pad_right Null cells at right of output tile.
      */
-    template <
-      int in_pad_top, int in_pad_left, int in_pad_bottom, int in_pad_right,
-      int out_pad_bottom, int out_pad_right
-    >
-    static void process_tile(
+    typedef void (*TileFn)(
       const int n_channels,
       const TIn* const weights,
+      const int weight_row_stride,
+      const int weight_col_stride,
       const TIn* const inptr,
       const int in_row_stride,
       const int in_col_stride,
       TOut* const outptr,
       const int out_row_stride,
-      const int out_col_stride
+      const int out_col_stride,
+      const int _in_pad_top,
+      const int _in_pad_left,
+      const int _in_pad_bottom,
+      const int _in_pad_right,
+      const int _out_pad_bottom,
+      const int _out_pad_right
     );
 
-    // Type of a pointer to a `process_tile` instance
-    typedef void (*TileFn)(
-      const int,
-      const TIn* const,
-      const TIn* const, const int, const int,
-      TOut* const, const int, const int
-    );
-
-    // Determine the maximum padding values which can be applied to tiles of
-    // the tensors involved in this class of convolution.
-    static constexpr int max_in_pad_top = 2;
-    static constexpr int max_in_pad_left = 2;
-    static constexpr int max_in_pad_bottom = inner_tile_rows - 1;
-    static constexpr int max_in_pad_right = inner_tile_cols - 1;
-    static constexpr int max_out_pad_bottom = output_tile_rows;
-    static constexpr int max_out_pad_right = output_tile_cols;
-
-    /** Array of methods to process tensor tiles.
+    /* Arrays of methods to process tensor tiles.
      *
      * Allows dynamic dispatch to specialized implementations based on
      * different padding configurations.
      */
-    static const TileFn tile_fns[
-      max_in_pad_top][max_in_pad_left][max_in_pad_bottom][max_in_pad_right][
-      max_out_pad_bottom][max_out_pad_right
-    ];
+    static const TileFn tilefn_unpadded;
+    static const TileFn tilefn_top[n_in_pad_top_fns];
+    static const TileFn tilefn_left[n_in_pad_left_fns];
+    static const TileFn tilefn_bottom[n_in_pad_bottom_fns][n_out_pad_bottom_fns];
+    static const TileFn tilefn_right[n_in_pad_right_fns][n_out_pad_right_fns];
+    static const TileFn tilefn_generic;
 
   private:
     // Member variables of instances of a convolution engine.
@@ -204,6 +295,11 @@ class DepthwiseConvolution : public IDepthwiseConvolution
     const int _n_batches, _n_input_rows, _n_input_cols, _n_channels,
               _n_output_rows, _n_output_cols, _n_tile_rows, _n_tile_cols;
     const bool _padding_same;
+
+    // Stride information for a convolution instance
+    const int _weight_col_stride, _weight_row_stride;
+    const int _input_col_stride, _input_row_stride, _input_batch_stride;
+    const int _output_col_stride, _output_row_stride, _output_batch_stride;
 };
 
 }  // namespace depthwise

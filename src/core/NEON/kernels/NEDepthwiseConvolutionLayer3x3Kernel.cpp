@@ -219,8 +219,7 @@ void NEDepthwiseConvolutionLayer3x3Kernel::generate_convolver()
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(_input, _weights);
     ARM_COMPUTE_ERROR_ON(_weights->info()->dimension(1) != 3 || _weights->info()->dimension(2) != 3);
 
-    _convolver = create_convolver_object(_input->info()->tensor_shape(), _conv_info,
-                                         _weights->buffer(), _input->buffer(), _output->buffer());
+    _convolver = create_convolver_object(_conv_info, _weights, _input, _output, true);
 }
 
 void NEDepthwiseConvolutionLayer3x3Kernel::configure_generic()
@@ -282,8 +281,7 @@ void NEDepthwiseConvolutionLayer3x3Kernel::configure_optimized()
     ARM_COMPUTE_ERROR_ON(_weights->info()->dimension(1) != 3 || _weights->info()->dimension(2) != 3);
 
     _border_size = BorderSize(0, 0);
-    _convolver   = create_convolver_object(_input->info()->tensor_shape(), _conv_info,
-                                           _weights->buffer(), _input->buffer(), _output->buffer());
+    _convolver   = create_convolver_object(_conv_info, _weights, _input, _output);
 
     // Auto-configure output
     bool        same_padding = _conv_info.has_padding();
@@ -295,6 +293,15 @@ void NEDepthwiseConvolutionLayer3x3Kernel::configure_optimized()
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*_output->info(),
                        _input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape));
+
+    // Set padding in channels
+    const int num_channels = _weights->info()->dimension(0);
+    if((num_channels >= 128) && (num_channels % 16 == 0))
+    {
+        _input->info()->extend_padding(PaddingSize(0, 4, 0, 0));
+        _weights->info()->extend_padding(PaddingSize(0, 4, 0, 0));
+        _output->info()->extend_padding(PaddingSize(0, 4, 0, 0));
+    }
 
     // Configure window
     Window win;
@@ -330,41 +337,56 @@ void NEDepthwiseConvolutionLayer3x3Kernel::run_optimized(const Window &window, c
     _convolver->run(start, end);
 }
 
-std::unique_ptr<depthwise::IDepthwiseConvolution> NEDepthwiseConvolutionLayer3x3Kernel::create_convolver_object(TensorShape    shape,
-                                                                                                                PadStrideInfo  conv_info,
-                                                                                                                const uint8_t *w_ptr,
-                                                                                                                uint8_t       *in_ptr,
-                                                                                                                uint8_t       *out_ptr)
+std::unique_ptr<depthwise::IDepthwiseConvolution> NEDepthwiseConvolutionLayer3x3Kernel::create_convolver_object(PadStrideInfo  conv_info,
+                                                                                                                const ITensor *w,
+                                                                                                                const ITensor *in,
+                                                                                                                ITensor       *out,
+                                                                                                                bool           setup_strides)
 {
-    const int  in_rows      = shape.z();
-    const int  in_cols      = shape.y();
-    const int  n_batches    = shape[3];
-    const int  n_channels   = shape.x();
-    const bool padding_same = conv_info.has_padding();
+    const TensorShape shape               = in->info()->tensor_shape();
+    const int         in_rows             = shape.z();
+    const int         in_cols             = shape.y();
+    const int         n_batches           = shape[3];
+    const int         n_channels          = shape.x();
+    const bool        padding_same        = conv_info.has_padding();
+    const int         weight_col_stride   = (setup_strides) ? w->info()->strides_in_bytes().y() / w->info()->element_size() : 0;
+    const int         weight_row_stride   = (setup_strides) ? w->info()->strides_in_bytes().z() / w->info()->element_size() : 0;
+    const int         input_col_stride    = (setup_strides) ? in->info()->strides_in_bytes().y() / in->info()->element_size() : 0;
+    const int         input_row_stride    = (setup_strides) ? in->info()->strides_in_bytes().z() / in->info()->element_size() : 0;
+    const int         input_batch_stride  = (setup_strides) ? in->info()->strides_in_bytes()[3] / in->info()->element_size() : 0;
+    const int         output_col_stride   = (setup_strides) ? out->info()->strides_in_bytes().y() / out->info()->element_size() : 0;
+    const int         output_row_stride   = (setup_strides) ? out->info()->strides_in_bytes().z() / out->info()->element_size() : 0;
+    const int         output_batch_stride = (setup_strides) ? out->info()->strides_in_bytes()[3] / out->info()->element_size() : 0;
 
     const auto stride_x = conv_info.stride().first;
     switch(stride_x)
     {
         case 1:
-            return arm_compute::support::cpp14::make_unique<DepthwiseConvolution<2, 2, 3, 3, 1, 1, float, float>>(
+            return arm_compute::support::cpp14::make_unique<DepthwiseConvolution<4, 4, 3, 3, 1, 1, float, float>>(
                        n_batches,
                        in_rows,
                        in_cols,
                        n_channels,
                        padding_same,
-                       reinterpret_cast<const float *>(w_ptr),
-                       reinterpret_cast<float *>(in_ptr),
-                       reinterpret_cast<float *>(out_ptr));
+                       reinterpret_cast<const float *>(w->ptr_to_element(Coordinates())),
+                       reinterpret_cast<float *>(in->ptr_to_element(Coordinates())),
+                       reinterpret_cast<float *>(out->ptr_to_element(Coordinates())),
+                       weight_col_stride, weight_row_stride,
+                       input_col_stride, input_row_stride, input_batch_stride,
+                       output_col_stride, output_row_stride, output_batch_stride);
         case 2:
-            return arm_compute::support::cpp14::make_unique<DepthwiseConvolution<2, 2, 3, 3, 2, 2, float, float>>(
+            return arm_compute::support::cpp14::make_unique<DepthwiseConvolution<3, 3, 3, 3, 2, 2, float, float>>(
                        n_batches,
                        in_rows,
                        in_cols,
                        n_channels,
                        padding_same,
-                       reinterpret_cast<const float *>(w_ptr),
-                       reinterpret_cast<float *>(in_ptr),
-                       reinterpret_cast<float *>(out_ptr));
+                       reinterpret_cast<const float *>(w->ptr_to_element(Coordinates())),
+                       reinterpret_cast<float *>(in->ptr_to_element(Coordinates())),
+                       reinterpret_cast<float *>(out->ptr_to_element(Coordinates())),
+                       weight_col_stride, weight_row_stride,
+                       input_col_stride, input_row_stride, input_batch_stride,
+                       output_col_stride, output_row_stride, output_batch_stride);
         default:
             return nullptr;
     }
