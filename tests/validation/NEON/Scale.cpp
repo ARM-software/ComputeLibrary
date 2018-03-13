@@ -99,7 +99,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
     nescale.configure(&src, &dst, policy, border_mode, constant_border_value, sampling_policy);
 
     // Validate valid region
-    const ValidRegion dst_valid_region = calculate_valid_region_scale(*(src.info()), shape_scaled, policy, sampling_policy, (border_mode == BorderMode::UNDEFINED));
+    const ValidRegion dst_valid_region = calculate_valid_region_scale(*(src.info()), shape_scaled, policy, BorderSize(1), (border_mode == BorderMode::UNDEFINED));
 
     validate(dst.info()->valid_region(), dst_valid_region);
 
@@ -126,7 +126,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<float>, framework::DatasetMode::
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
-    ValidRegion valid_region = shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(1));
+    ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, BorderSize(1), (_border_mode == BorderMode::UNDEFINED));
 
     // Validate output
     validate(Accessor(_target), _reference, valid_region, tolerance_f32, tolerance_num_f32);
@@ -139,7 +139,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<float>, framework::DatasetMode::
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
-    ValidRegion valid_region = shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(1));
+    ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, BorderSize(1), (_border_mode == BorderMode::UNDEFINED));
 
     // Validate output
     validate(Accessor(_target), _reference, valid_region, tolerance_f32, tolerance_num_f32);
@@ -157,7 +157,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<uint8_t>, framework::DatasetMode
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
-    ValidRegion valid_region = shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(1));
+    ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, BorderSize(1), (_border_mode == BorderMode::UNDEFINED));
 
     // Validate output
     validate(Accessor(_target), _reference, valid_region, tolerance_u8);
@@ -170,7 +170,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<uint8_t>, framework::DatasetMode
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
-    ValidRegion valid_region = shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(1));
+    ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, BorderSize(1), (_border_mode == BorderMode::UNDEFINED));
 
     // Validate output
     validate(Accessor(_target), _reference, valid_region, tolerance_u8);
@@ -185,7 +185,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<int16_t>, framework::DatasetMode
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
-    ValidRegion valid_region = shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(1));
+    ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, BorderSize(1), (_border_mode == BorderMode::UNDEFINED));
 
     // Validate output
     validate(Accessor(_target), _reference, valid_region, tolerance_s16, tolerance_num_s16);
@@ -198,7 +198,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<int16_t>, framework::DatasetMode
 {
     //Create valid region
     TensorInfo  src_info(_shape, 1, _data_type);
-    ValidRegion valid_region = shape_to_valid_region(_reference.shape(), (_border_mode == BorderMode::UNDEFINED), BorderSize(1));
+    ValidRegion valid_region = calculate_valid_region_scale(src_info, _reference.shape(), _policy, BorderSize(1), (_border_mode == BorderMode::UNDEFINED));
 
     // Validate output
     validate(Accessor(_target), _reference, valid_region, tolerance_s16, tolerance_num_s16);

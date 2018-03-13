@@ -165,14 +165,6 @@ std::vector<size_t> sort_indices(const std::vector<T> &v)
     return idx;
 }
 
-/** Ignores the given arguments
- *
- * @tparam T Arguments types
- */
-template <typename... T>
-inline void ignore_unused(T &&...)
-{
-}
 } // namespace utility
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_MISC_UTILITY_H__ */

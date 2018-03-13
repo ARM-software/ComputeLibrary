@@ -300,6 +300,39 @@ inline bool set_quantization_info_if_empty(ITensorInfo &info, QuantizationInfo q
     return false;
 }
 
+inline ValidRegion calculate_valid_region_scale(const ITensorInfo &src_info, const TensorShape &dst_shape, InterpolationPolicy policy, BorderSize border_size, bool border_undefined)
+{
+    const auto wr = static_cast<float>(dst_shape[0]) / static_cast<float>(src_info.tensor_shape()[0]);
+    const auto hr = static_cast<float>(dst_shape[1]) / static_cast<float>(src_info.tensor_shape()[1]);
+
+    ValidRegion valid_region{ Coordinates(), dst_shape, src_info.tensor_shape().num_dimensions() };
+
+    Coordinates &anchor = valid_region.anchor;
+    TensorShape &shape  = valid_region.shape;
+
+    anchor.set(0, (policy == InterpolationPolicy::BILINEAR
+                   && border_undefined) ?
+               ((static_cast<int>(src_info.valid_region().anchor[0]) + border_size.left + 0.5f) * wr - 0.5f) :
+               ((static_cast<int>(src_info.valid_region().anchor[0]) + 0.5f) * wr - 0.5f));
+    anchor.set(1, (policy == InterpolationPolicy::BILINEAR
+                   && border_undefined) ?
+               ((static_cast<int>(src_info.valid_region().anchor[1]) + border_size.top + 0.5f) * hr - 0.5f) :
+               ((static_cast<int>(src_info.valid_region().anchor[1]) + 0.5f) * hr - 0.5f));
+    float shape_out_x = (policy == InterpolationPolicy::BILINEAR
+                         && border_undefined) ?
+                        ((static_cast<int>(src_info.valid_region().anchor[0]) + static_cast<int>(src_info.valid_region().shape[0]) - 1) - 1 + 0.5f) * wr - 0.5f :
+                        ((static_cast<int>(src_info.valid_region().anchor[0]) + static_cast<int>(src_info.valid_region().shape[0])) + 0.5f) * wr - 0.5f;
+    float shape_out_y = (policy == InterpolationPolicy::BILINEAR
+                         && border_undefined) ?
+                        ((static_cast<int>(src_info.valid_region().anchor[1]) + static_cast<int>(src_info.valid_region().shape[1]) - 1) - 1 + 0.5f) * hr - 0.5f :
+                        ((static_cast<int>(src_info.valid_region().anchor[1]) + static_cast<int>(src_info.valid_region().shape[1])) + 0.5f) * hr - 0.5f;
+
+    shape.set(0, shape_out_x - anchor[0]);
+    shape.set(1, shape_out_y - anchor[1]);
+
+    return valid_region;
+}
+
 inline Coordinates index2coords(const TensorShape &shape, int index)
 {
     int num_elements = shape.total_size();

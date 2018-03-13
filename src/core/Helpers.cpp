@@ -173,15 +173,3 @@ Window arm_compute::calculate_max_window_horizontal(const ValidRegion &valid_reg
 
     return window;
 }
-
-ValidRegion arm_compute::calculate_valid_region_scale(const ITensorInfo &src_info, const TensorShape &dst_shape,
-                                                      InterpolationPolicy interpolate_policy, SamplingPolicy sampling_policy, bool border_undefined)
-{
-    /* TODO (COMPMID-959) : Fix scale valid region */
-    arm_compute::utility::ignore_unused(src_info, interpolate_policy, sampling_policy, border_undefined);
-
-    // Setup output valid region
-    ValidRegion valid_region{ Coordinates(), dst_shape };
-
-    return valid_region;
-}
