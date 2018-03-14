@@ -56,6 +56,7 @@ def filter_clang_tidy_lines( lines ):
                 ("NEMath.inl" in line and "statement expression not allowed at file scope" in line) or
                 ("Utils.h" in line and "no member named 'unmap' in 'arm_compute::Tensor'" in line) or
                 ("Utils.h" in line and "no member named 'map' in 'arm_compute::Tensor'" in line) or
+                ("CPUUtils.cpp" in line and "'asm/hwcap.h' file not found" in line) or
                 "3rdparty" in line):
                 print_context=False
                 continue
@@ -95,6 +96,8 @@ def filter_clang_tidy_lines( lines ):
                ("NEWinogradLayerKernel.cpp" in line and "use '= default' to define a trivial destructor" in line) or
                ("NEGEMMLowpMatrixMultiplyCore.cpp" in line and "constructor does not initialize these fields" in line) or
                ("NEGEMMLowpAssemblyMatrixMultiplyCore" in line and "constructor does not initialize these fields" in line) or
+               ("CPUUtils.cpp" in line and "consider replacing 'unsigned long' with 'uint64'" in line) or
+               ("CPUUtils.cpp" in line and "parameter 'cpusv' is unused" in line) or
                "3rdparty" in line):
                 print_context=False
                 continue

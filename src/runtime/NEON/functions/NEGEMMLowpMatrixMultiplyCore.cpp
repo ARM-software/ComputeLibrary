@@ -62,13 +62,13 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
     {
         case DataType::S8:
         {
-            _dot_product_path = setup_assembly_kernel(a, b, nullptr, output, 1.f, 1.f, _workspace, _memory_group, _asm_glue_signed);
+            _dot_product_path = setup_assembly_kernel(a, b, output, 1.f, 1.f, _workspace, _memory_group, _asm_glue_signed);
             break;
         }
         case DataType::QASYMM8:
         case DataType::U8:
         {
-            _dot_product_path = setup_assembly_kernel(a, b, nullptr, output, 1.f, 1.f, _workspace, _memory_group, _asm_glue_unsigned);
+            _dot_product_path = setup_assembly_kernel(a, b, output, 1.f, 1.f, _workspace, _memory_group, _asm_glue_unsigned);
             break;
         }
         default:
@@ -155,10 +155,6 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
     {
         _tmp_a.allocator()->allocate();
         _tmp_b.allocator()->allocate();
-    }
-    else
-    {
-        _workspace.allocator()->allocate();
     }
 
     if(_a_offset != 0)

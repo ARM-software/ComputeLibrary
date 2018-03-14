@@ -27,6 +27,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Utils.h"
+#include "arm_compute/runtime/CPUUtils.h"
 
 #include <omp.h>
 
@@ -41,6 +42,7 @@ OMPScheduler &OMPScheduler::get()
 OMPScheduler::OMPScheduler() // NOLINT
     : _num_threads(omp_get_max_threads())
 {
+    get_cpu_configuration(_cpu_info);
 }
 
 unsigned int OMPScheduler::num_threads() const
@@ -59,7 +61,7 @@ void OMPScheduler::schedule(ICPPKernel *kernel, unsigned int split_dimension)
     ARM_COMPUTE_ERROR_ON_MSG(!kernel, "The child class didn't set the kernel");
 
     ThreadInfo info;
-    info.cpu_info = _info;
+    info.cpu_info = &_cpu_info;
 
     const Window      &max_window     = kernel->window();
     const unsigned int num_iterations = max_window.num_iterations(split_dimension);
@@ -71,7 +73,7 @@ void OMPScheduler::schedule(ICPPKernel *kernel, unsigned int split_dimension)
     }
     else
     {
-        #pragma omp parallel private(info) num_threads(info.num_threads)
+        #pragma omp parallel firstprivate(info) num_threads(info.num_threads)
         {
             const int tid  = omp_get_thread_num();
             Window    win  = max_window.split_window(split_dimension, tid, info.num_threads);

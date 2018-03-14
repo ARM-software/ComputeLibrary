@@ -107,7 +107,7 @@ public:
         {
             auto reshape = [&](unsigned int width, unsigned int height, bool convolution_layer) -> TensorShape
             {
-                const bool is_optimised = std::is_same<ITensorType, ITensor>::value && NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV7 && data_type == DataType::F32;
+                const bool is_optimised = std::is_same<ITensorType, ITensor>::value && data_type == DataType::F32;
 
                 if(convolution_layer && is_optimised)
                 {

@@ -23,7 +23,15 @@
  */
 #pragma once
 
-/* This file is used to configure integration-specific aspects of arm_gemm, this is the gemm-linux version */
+/* This file is used to configure integration-specific aspects of arm_gemm into ACL */
 
-/* Our CPUInfo is defined in newgemm_lib.hpp */
-#include "newgemm_lib.hpp"
+#include "arm_compute/core/CPP/CPPTypes.h"
+
+namespace arm_gemm
+{
+using CPUModel = arm_compute::CPUModel;
+using CPUInfo  = arm_compute::CPUInfo;
+} // namespace arm_compute
+
+
+

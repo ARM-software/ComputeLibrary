@@ -69,12 +69,17 @@ inline std::string to_string(T && value)
  *
  * @return Integer representation of @p str.
  */
-inline int stoi(const std::string &str)
+inline int stoi(const std::string &str, std::size_t *pos = 0, int base = 10)
 {
-    std::stringstream stream(str);
-    int               value = 0;
-    stream >> value;
-    return value;
+    unsigned int      x;
+    std::stringstream ss;
+    if(base == 16)
+    {
+        ss << std::hex;
+    }
+    ss << str;
+    ss >> x;
+    return x;
 }
 
 /** Convert string values to unsigned long.
@@ -86,10 +91,15 @@ inline int stoi(const std::string &str)
  *
  * @return Unsigned long representation of @p str.
  */
-inline unsigned long stoul(const std::string &str)
+inline unsigned long stoul(const std::string &str, std::size_t *pos = 0, int base = 10)
 {
-    std::stringstream stream(str);
+    std::stringstream stream;
     unsigned long     value = 0;
+    if(base == 16)
+    {
+        stream << std::hex;
+    }
+    stream << str;
     stream >> value;
     return value;
 }

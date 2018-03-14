@@ -127,70 +127,32 @@ inline void allocate_workspace(size_t workspace_size, Tensor &workspace, MemoryG
 
 /** Create a wrapper kernel.
  *
- * @param[in]  a     Input tensor A.
- * @param[in]  b     Input tensor B.
- * @param[in]  c     (Optional) Input tensor C.
- * @param[out] d     Output tensor.
- * @param[in]  alpha Alpha value.
- * @param[in]  beta  Beta value.
- *
- * @return the wrapper kernel.
- */
-template <typename T>
-std::unique_ptr<NEGEMMAssemblyWrapper<T>> create_wrapper_kernel(const ITensor *a, const ITensor *b, const ITensor *c, ITensor *d, float alpha, float beta)
-{
-    // rework this function, why are we checking data type and other things here ? should we create another function can_run_optimised_kernel() ?
-#if defined(__arm__)
-    if(NEScheduler::get().cpu_info().CPU == CPUTarget::ARMV7 && a->info()->data_type() == DataType::F32 && (c == nullptr || beta == 0.f))
-    {
-        return support::cpp14::make_unique<NEGEMMAssemblyWrapper<T>>();
-    }
-#elif defined(__aarch64__)
-    if(NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV8 && a->info()->data_type() == DataType::F32 && (c == nullptr || beta == 0.f))
-    {
-        return support::cpp14::make_unique<NEGEMMAssemblyWrapper<T>>();
-    }
-    else if(a->info()->data_type() == DataType::F16 && (c == nullptr || beta == 0.f))
-    {
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        return support::cpp14::make_unique<NEGEMMAssemblyWrapper<T>>();
-#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-        ARM_COMPUTE_ERROR("Recompile the library with arch=arm64-v8.2-a to enable support for FP16.");
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-    }
-#endif /* defined(__arm__) || defined(__aarch64__) */
-    return nullptr;
-}
-
-/** Setup assembly kernel.
- *
  * @param[in]  a            Input tensor A.
  * @param[in]  b            Input tensor B.
- * @param[in]  c            (Optional) Input tensor C.
- * @param[in]  d            Output tensor.
+ * @param[out] d            Output tensor.
  * @param[in]  alpha        Alpha value.
  * @param[in]  beta         Beta value.
  * @param[out] workspace    Workspace tensor
  * @param[in]  memory_group Tensor memory group.
  * @param[out] asm_glue     Assembly glue kernel.
  *
- * @return True if the assembly kernel is setup correctly.
+ * @return the wrapper kernel.
  */
 template <typename T>
-inline bool setup_assembly_kernel(const ITensor *a, const ITensor *b, const ITensor *c, ITensor *d, float alpha, float beta,
+inline bool setup_assembly_kernel(const ITensor *a, const ITensor *b, ITensor *d, float alpha, float beta,
                                   Tensor &workspace, MemoryGroup &memory_group, T &asm_glue)
 {
-    const ::CPUInfo *ci          = get_CPUInfo();
-    const int        M           = d->info()->tensor_shape().y();
-    const int        N           = d->info()->tensor_shape().x();
-    const int        K           = a->info()->tensor_shape().x();
-    unsigned int     num_threads = NEScheduler::get().num_threads();
+    const CPUInfo &ci          = NEScheduler::get().cpu_info();
+    const int      M           = d->info()->tensor_shape().y();
+    const int      N           = d->info()->tensor_shape().x();
+    const int      K           = a->info()->tensor_shape().x();
+    unsigned int   num_threads = NEScheduler::get().num_threads();
     // unique_ptr to a Gemm object
-    std::unique_ptr<typename T::AssemblyGemm> asm_gemm(arm_gemm::gemm<typename T::TypeOperator, typename T::TypeResult>(*ci, M, N, K, false, false, alpha, beta, num_threads,
-                                                                                                                        false));
-
+    std::unique_ptr<typename T::AssemblyGemm>
+    asm_gemm(arm_gemm::gemm<typename T::TypeOperator, typename T::TypeResult>(ci, M, N, K, false, false, alpha, beta, num_threads, false));
     // arm_compute wrapper for the Gemm object (see above)
-    std::unique_ptr<NEGEMMAssemblyWrapper<typename T::AssemblyGemm>> acl_gemm_wrapper = create_wrapper_kernel<typename T::AssemblyGemm>(a, b, c, d, alpha, beta);
+    std::unique_ptr<NEGEMMAssemblyWrapper<typename T::AssemblyGemm>>
+                                                                  acl_gemm_wrapper = support::cpp14::make_unique<NEGEMMAssemblyWrapper<typename T::AssemblyGemm>>();
     if(acl_gemm_wrapper != nullptr && asm_gemm != nullptr)
     {
         acl_gemm_wrapper->configure(asm_gemm.get());
@@ -198,15 +160,23 @@ inline bool setup_assembly_kernel(const ITensor *a, const ITensor *b, const ITen
         if(workspace_size)
         {
             // Allocate workspace
-            allocate_workspace(workspace_size, workspace, memory_group, 4096, num_threads);
+            const unsigned int alignment = 4096;
+            allocate_workspace(workspace_size, workspace, memory_group, alignment, num_threads);
+            ARM_COMPUTE_ERROR_ON_NULLPTR(workspace.buffer());
             asm_gemm->set_working_space(reinterpret_cast<typename T::TypeResult *>(workspace.buffer()));
         }
-        const unsigned int window_size = asm_gemm->get_window_size();
-        if(window_size < num_threads)
+
+        //if we disable this code below in brackets then ConvLayer deadlocks when threads > 1 and
+        //the shapes are In=1x1x1024 Weights=1x1x1024x1001 Biases=1001 Out=1x1x1001
         {
-            num_threads = window_size;
-            asm_gemm->set_nthreads(num_threads);
+            const unsigned int window_size = asm_gemm->get_window_size();
+            if(window_size < num_threads)
+            {
+                num_threads = window_size;
+                asm_gemm->set_nthreads(num_threads);
+            }
         }
+
         asm_glue._gemm_kernel_asm  = std::move(asm_gemm);
         asm_glue._optimised_kernel = std::move(acl_gemm_wrapper);
         // We need to setup the ptrs in the run() method

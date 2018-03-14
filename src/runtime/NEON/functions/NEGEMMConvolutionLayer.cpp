@@ -271,8 +271,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     const unsigned int fixed_point_position = input->info()->fixed_point_position();
     const ITensor     *biases_to_use        = (_append_bias) ? biases : nullptr;
 
-    bool run_optimised =
-        (NEScheduler::get().cpu_info().CPU == CPUTarget::ARMV7 && dt == DataType::F32) || (NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV8 && dt == DataType::F32);
+    bool run_optimised = dt == DataType::F32;
 
     // Reshape weights if needed
     if(run_optimised)
@@ -369,8 +368,10 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     // Configure matrix multiply
     if(run_optimised)
     {
-        run_optimised = setup_assembly_kernel(&_input_im2col_reshaped, weights, nullptr, &_gemm_output, 1.f, 0.f, _workspace, _memory_group, _asm_glue);
-        ARM_COMPUTE_ERROR_ON_MSG(run_optimised == false, "setup_assembly_kernel failed.");
+        if(!setup_assembly_kernel(&_input_im2col_reshaped, weights, &_gemm_output, 1.f, 0.f, _workspace, _memory_group, _asm_glue))
+        {
+            ARM_COMPUTE_ERROR("setup_assembly_kernel failed.");
+        }
     }
     else
     {
@@ -450,17 +451,10 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     std::unique_ptr<ITensorInfo> reshaped_weights = weights->clone();
     bool                         optimised_kernel = false;
 
-#if defined(__arm__)
-    if(NEScheduler::get().cpu_info().CPU == CPUTarget::ARMV7 && dt == DataType::F32)
+    if(dt == DataType::F32)
     {
         optimised_kernel = true;
     }
-#elif defined(__aarch64__)
-    if(NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV8 && dt == DataType::F32)
-    {
-        optimised_kernel = true;
-    }
-#endif /* defined(__arm__) || defined(__aarch64__) */
 
     // Reshape weights if needed
     if(optimised_kernel)

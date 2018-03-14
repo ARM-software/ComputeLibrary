@@ -59,17 +59,11 @@ public:
      */
     virtual void schedule(ICPPKernel *kernel, unsigned int split_dimension) = 0;
 
-    /** Sets the target CPU architecture.
-     *
-     * @param[in] target Target CPU.
-     */
-    void set_target(CPUTarget target);
-
     /** Get CPU info.
      *
      * @return CPU info.
      */
-    CPUInfo cpu_info() const;
+    CPUInfo &cpu_info();
     /** Get a hint for the best possible number of execution threads
      *
      * @warning In case we can't work out the best number of threads,
@@ -80,7 +74,7 @@ public:
     unsigned int num_threads_hint() const;
 
 protected:
-    CPUInfo _info{};
+    CPUInfo _cpu_info;
 
 private:
     unsigned int _num_threads_hint = {};

@@ -100,6 +100,8 @@ protected:
     TensorType compute_target(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, const PadStrideInfo &info,
                               bool reshape_weights, const Size2D &dilation)
     {
+        const bool is_optimised = std::is_same<FunctionType, NEConvolutionLayer>::value && _data_type == DataType::F32;
+
         WeightsInfo weights_info(!reshape_weights, weights_shape.x(), weights_shape.y(), weights_shape[3]);
         TensorShape reshaped_weights_shape(weights_shape);
 
@@ -107,12 +109,6 @@ protected:
         {
             // Check if its a "fully connected" convolution
             const bool is_fully_connected_convolution = (output_shape.x() == 1 && output_shape.y() == 1);
-            bool       is_optimised                   = false;
-#if defined(__arm__)
-            is_optimised = std::is_same<FunctionType, NEConvolutionLayer>::value && NEScheduler::get().cpu_info().CPU == CPUTarget::ARMV7 && _data_type == DataType::F32;
-#elif defined(__aarch64__)
-            is_optimised = std::is_same<FunctionType, NEConvolutionLayer>::value && NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV8 && _data_type == DataType::F32;
-#endif /* defined(__arm__) || defined(__aarch64__) */
 
             reshaped_weights_shape.collapse(3);
 
@@ -167,14 +163,7 @@ protected:
 
         if(!reshape_weights)
         {
-            const bool is_fully_connected_convolution = (output_shape.x() == 1 && output_shape.y() == 1);
-            bool       is_optimised                   = false;
-#if defined(__arm__)
-            is_optimised = std::is_same<FunctionType, NEConvolutionLayer>::value && NEScheduler::get().cpu_info().CPU == CPUTarget::ARMV7 && _data_type == DataType::F32;
-#elif defined(__aarch64__)
-            is_optimised = std::is_same<FunctionType, NEConvolutionLayer>::value && NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV8 && _data_type == DataType::F32;
-#endif /* defined(__arm__) || defined(__aarch64__) */
-
+            const bool      is_fully_connected_convolution = (output_shape.x() == 1 && output_shape.y() == 1);
             TensorShape     tmp_weights_shape(weights_shape);
             SimpleTensor<T> tmp_weights(tmp_weights_shape, _data_type, 1, _fractional_bits, _quantization_info);
 

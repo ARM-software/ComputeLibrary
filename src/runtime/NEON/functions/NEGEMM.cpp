@@ -65,7 +65,8 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
     // Check if we need to reshape the matrix B only on the first run
     _reshape_b_only_on_first_run      = gemm_info.reshape_b_only_on_first_run();
     _run_vector_matrix_multiplication = a->info()->dimension(1) < 2;
-    const bool run_optimised          = setup_assembly_kernel(a, b, c, d, alpha, beta, _workspace, _memory_group, _asm_glue);
+
+    const bool run_optimised = a->info()->data_type() == DataType::F32 && (c == nullptr || beta == 0.f) && setup_assembly_kernel(a, b, d, alpha, beta, _workspace, _memory_group, _asm_glue);
 
     // Check if the first input tensor is a vector.
     // If so, all the kernels for reshaping the tensors can be skipped
