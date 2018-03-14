@@ -130,6 +130,7 @@ int run_example(int argc, char **argv, Example &example)
     {
         for(auto &p : printers)
         {
+            p->print_entry("Version", build_information());
 #ifdef ARM_COMPUTE_CL
             if(opencl_is_available())
             {
