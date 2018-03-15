@@ -40,8 +40,8 @@
 using namespace arm_compute;
 using namespace arm_compute::gles_compute;
 
-GCGEMM::GCGEMM()
-    : _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _ma_kernel(), _tmp_a(), _tmp_b(), _is_interleaved_transposed(false), _run_addition(false)
+GCGEMM::GCGEMM(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _ma_kernel(), _tmp_a(), _tmp_b(), _is_interleaved_transposed(false), _run_addition(false)
 {
 }
 
@@ -88,6 +88,7 @@ void GCGEMM::configure(const IGCTensor *a, const IGCTensor *b, const IGCTensor *
 
         TensorInfo info_a(shape_tmp_a, 1, a->info()->data_type(), a->info()->fixed_point_position());
         _tmp_a.allocator()->init(info_a);
+        _memory_group.manage(&_tmp_a);
 
         TensorInfo info_b(shape_tmp_b, 1, b->info()->data_type(), b->info()->fixed_point_position());
         _tmp_b.allocator()->init(info_b);
@@ -118,6 +119,7 @@ void GCGEMM::configure(const IGCTensor *a, const IGCTensor *b, const IGCTensor *
 
 void GCGEMM::run()
 {
+    _memory_group.acquire();
     if(_is_interleaved_transposed)
     {
         // Run interleave kernel
@@ -137,4 +139,5 @@ void GCGEMM::run()
         GCScheduler::get().memory_barrier();
         GCScheduler::get().dispatch(_ma_kernel);
     }
+    _memory_group.release();
 }

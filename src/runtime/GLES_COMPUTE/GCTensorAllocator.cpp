@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,9 +31,14 @@
 
 using namespace arm_compute;
 
-GCTensorAllocator::GCTensorAllocator()
-    : _gl_buffer(), _mapping(nullptr)
+GCTensorAllocator::GCTensorAllocator(GCTensor *owner)
+    : _associated_memory_group(nullptr), _gl_buffer(), _mapping(nullptr), _owner(owner)
 {
+}
+
+GCTensorAllocator::~GCTensorAllocator()
+{
+    _gl_buffer = support::cpp14::make_unique<GLBufferWrapper>();
 }
 
 uint8_t *GCTensorAllocator::data()
@@ -43,17 +48,35 @@ uint8_t *GCTensorAllocator::data()
 
 void GCTensorAllocator::allocate()
 {
-    _gl_buffer = support::cpp14::make_unique<GLBufferWrapper>();
-    ARM_COMPUTE_GL_CHECK(glBindBuffer(GL_SHADER_STORAGE_BUFFER, _gl_buffer->_ssbo_name));
-    ARM_COMPUTE_GL_CHECK(glBufferData(GL_SHADER_STORAGE_BUFFER, static_cast<GLsizeiptr>(info().total_size()), nullptr, GL_STATIC_DRAW));
-    ARM_COMPUTE_GL_CHECK(glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0));
+    if(_associated_memory_group == nullptr)
+    {
+        _gl_buffer = support::cpp14::make_unique<GLBufferWrapper>();
+        ARM_COMPUTE_GL_CHECK(glBindBuffer(GL_SHADER_STORAGE_BUFFER, _gl_buffer->_ssbo_name));
+        ARM_COMPUTE_GL_CHECK(glBufferData(GL_SHADER_STORAGE_BUFFER, static_cast<GLsizeiptr>(info().total_size()), nullptr, GL_STATIC_DRAW));
+        ARM_COMPUTE_GL_CHECK(glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0));
+    }
+    else
+    {
+        _associated_memory_group->finalize_memory(_owner, reinterpret_cast<void **>(&_gl_buffer), info().total_size());
+    }
     info().set_is_resizable(false);
 }
 
 void GCTensorAllocator::free()
 {
-    _gl_buffer.reset();
-    info().set_is_resizable(true);
+    if(_associated_memory_group == nullptr)
+    {
+        _gl_buffer.reset();
+        info().set_is_resizable(true);
+    }
+}
+
+void GCTensorAllocator::set_associated_memory_group(GCMemoryGroup *associated_memory_group)
+{
+    ARM_COMPUTE_ERROR_ON(associated_memory_group == nullptr);
+    ARM_COMPUTE_ERROR_ON(_associated_memory_group != nullptr);
+    ARM_COMPUTE_ERROR_ON(_gl_buffer.get() != nullptr);
+    _associated_memory_group = associated_memory_group;
 }
 
 uint8_t *GCTensorAllocator::lock()

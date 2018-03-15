@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,57 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "arm_compute/runtime/GLES_COMPUTE/GCBufferAllocator.h"
+#include "arm_compute/runtime/GLES_COMPUTE/GCTensorAllocator.h"
 
-#include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
+#include "arm_compute/core/Error.h"
+#include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
+
+#include <cstddef>
 
 using namespace arm_compute;
 
-GCTensor::GCTensor()
-    : _allocator(this)
+void *GCBufferAllocator::allocate(size_t size, size_t alignment)
 {
+    ARM_COMPUTE_UNUSED(alignment);
+    auto *gl_buffer = new GLBufferWrapper();
+    ARM_COMPUTE_GL_CHECK(glBindBuffer(GL_SHADER_STORAGE_BUFFER, gl_buffer->_ssbo_name));
+    ARM_COMPUTE_GL_CHECK(glBufferData(GL_SHADER_STORAGE_BUFFER, static_cast<GLsizeiptr>(size), nullptr, GL_STATIC_DRAW));
+    ARM_COMPUTE_GL_CHECK(glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0));
+
+    return reinterpret_cast<void *>(gl_buffer);
 }
 
-ITensorAllocator *GCTensor::allocator()
+void GCBufferAllocator::free(void *ptr)
 {
-    return &_allocator;
-}
-
-TensorInfo *GCTensor::info() const
-{
-    return &_allocator.info();
-}
-
-TensorInfo *GCTensor::info()
-{
-    return &_allocator.info();
-}
-
-uint8_t *GCTensor::buffer() const
-{
-    return _allocator.data();
-}
-
-GLuint GCTensor::gc_buffer() const
-{
-    return _allocator.get_gl_ssbo_name();
-}
-
-void GCTensor::map(bool blocking)
-{
-    IGCTensor::map(blocking);
-}
-
-void GCTensor::unmap()
-{
-    IGCTensor::unmap();
-}
-
-uint8_t *GCTensor::do_map(bool blocking)
-{
-    return _allocator.map(blocking);
-}
-
-void GCTensor::do_unmap()
-{
-    _allocator.unmap();
+    ARM_COMPUTE_ERROR_ON(ptr == nullptr);
+    auto *gl_buffer = reinterpret_cast<GLBufferWrapper *>(ptr);
+    delete gl_buffer;
 }

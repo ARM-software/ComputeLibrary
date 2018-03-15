@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -12,7 +12,7 @@
  *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ *gc
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,57 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#ifndef __ARM_COMPUTE_GCBUFFERALLOCATOR_H__
+#define __ARM_COMPUTE_GCBUFFERALLOCATOR_H__
 
-#include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
+#include "arm_compute/runtime/IAllocator.h"
 
-using namespace arm_compute;
+#include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
+#include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
 
-GCTensor::GCTensor()
-    : _allocator(this)
+#include <cstddef>
+
+namespace arm_compute
 {
-}
-
-ITensorAllocator *GCTensor::allocator()
+/** Default gles buffer allocator implementation */
+class GCBufferAllocator : public IAllocator
 {
-    return &_allocator;
-}
+public:
+    /** Default constructor */
+    GCBufferAllocator() = default;
 
-TensorInfo *GCTensor::info() const
-{
-    return &_allocator.info();
-}
-
-TensorInfo *GCTensor::info()
-{
-    return &_allocator.info();
-}
-
-uint8_t *GCTensor::buffer() const
-{
-    return _allocator.data();
-}
-
-GLuint GCTensor::gc_buffer() const
-{
-    return _allocator.get_gl_ssbo_name();
-}
-
-void GCTensor::map(bool blocking)
-{
-    IGCTensor::map(blocking);
-}
-
-void GCTensor::unmap()
-{
-    IGCTensor::unmap();
-}
-
-uint8_t *GCTensor::do_map(bool blocking)
-{
-    return _allocator.map(blocking);
-}
-
-void GCTensor::do_unmap()
-{
-    _allocator.unmap();
-}
+    // Inherited methods overridden:
+    void *allocate(size_t size, size_t alignment) override;
+    void free(void *ptr) override;
+};
+} // arm_compute
+#endif /*__ARM_COMPUTE_GCBUFFERALLOCATOR_H__ */

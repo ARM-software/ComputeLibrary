@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_GCSOFTMAXLAYER_H__
 
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCSoftmaxLayerKernel.h"
+#include "arm_compute/runtime/GLES_COMPUTE/GCMemoryGroup.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
 #include "arm_compute/runtime/IFunction.h"
 
@@ -46,7 +47,7 @@ class GCSoftmaxLayer : public IFunction
 {
 public:
     /** Constructor */
-    GCSoftmaxLayer();
+    GCSoftmaxLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
      * @param[in]  input  Source tensor. Data types supported: F16/F32
@@ -59,6 +60,7 @@ public:
     void run() override;
 
 private:
+    GCMemoryGroup               _memory_group;
     GCLogits1DMaxKernel         _max_kernel;
     GCLogits1DShiftExpSumKernel _shift_exp_sum_kernel;
     GCLogits1DNormKernel        _norm_kernel;

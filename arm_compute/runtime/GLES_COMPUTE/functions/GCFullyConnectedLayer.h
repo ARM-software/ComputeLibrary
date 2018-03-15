@@ -28,6 +28,7 @@
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCIm2ColKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCTransposeKernel.h"
+#include "arm_compute/runtime/GLES_COMPUTE/GCMemoryGroup.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
 #include "arm_compute/runtime/GLES_COMPUTE/IGCSimpleFunction.h"
 
@@ -63,7 +64,7 @@ class GCFullyConnectedLayer : public IFunction
 {
 public:
     /** Constructor */
-    GCFullyConnectedLayer();
+    GCFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
      * @param[in]  input                Source tensor. Data type supported: F16/F32.
@@ -82,6 +83,7 @@ private:
     void configure_fc_fc(const IGCTensor *input, const IGCTensor *weights, IGCTensor *output);
     void configure_conv_fc(const IGCTensor *input, const IGCTensor *weights, IGCTensor *output);
 
+    GCMemoryGroup                       _memory_group;
     GCIm2ColKernel                      _im2col_kernel;
     GCFullyConnectedLayerReshapeWeights _reshape_weights_kernel;
     GCGEMMMatrixMultiplyKernel          _mm_kernel;

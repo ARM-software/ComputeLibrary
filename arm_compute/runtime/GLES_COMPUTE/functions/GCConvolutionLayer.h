@@ -33,6 +33,7 @@
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCIm2ColKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCWeightsReshapeKernel.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/runtime/GLES_COMPUTE/GCMemoryGroup.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
 #include "arm_compute/runtime/IFunction.h"
 
@@ -83,7 +84,7 @@ class GCConvolutionLayer : public IFunction
 {
 public:
     /** Default constructor */
-    GCConvolutionLayer();
+    GCConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
 
     /** Set the input and output tensors.
      *
@@ -115,6 +116,7 @@ private:
     void configure_mm(const IGCTensor *input, const IGCTensor *weights, IGCTensor *output, bool is_interleaved_transposed = true);
 
 private:
+    GCMemoryGroup                    _memory_group;
     GCConvolutionLayerReshapeWeights _reshape_weights;
     GCIm2ColKernel                   _input_im2col_kernel;
     GCGEMMInterleave4x4Kernel        _input_interleave_kernel;

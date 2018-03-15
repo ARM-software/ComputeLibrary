@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -91,7 +91,7 @@ protected:
     void do_unmap() override;
 
 private:
-    mutable GCTensorAllocator _allocator;
+    mutable GCTensorAllocator _allocator; /**< Instance of the OpenGL ES tensor allocator */
 };
 
 using GCImage = GCTensor;

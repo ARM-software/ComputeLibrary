@@ -91,9 +91,9 @@ void GCConvolutionLayerReshapeWeights::run()
     }
 }
 
-GCConvolutionLayer::GCConvolutionLayer()
-    : _reshape_weights(), _input_im2col_kernel(), _input_interleave_kernel(), _mm_kernel(), _output_col2im_kernel(), _fill_border(), _input_im2col_reshaped(), _input_interleaved_reshaped(),
-      _weights_reshaped(), _weights_transposed(), _gemm_output(), _tmp_output(), _append_bias(false), _is_fully_connected_convolution(false), _are_weights_reshaped(false)
+GCConvolutionLayer::GCConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _reshape_weights(), _input_im2col_kernel(), _input_interleave_kernel(), _mm_kernel(), _output_col2im_kernel(), _fill_border(), _input_im2col_reshaped(),
+      _input_interleaved_reshaped(), _weights_reshaped(), _weights_transposed(), _gemm_output(), _tmp_output(), _append_bias(false), _is_fully_connected_convolution(false), _are_weights_reshaped(false)
 {
 }
 
@@ -196,6 +196,7 @@ void GCConvolutionLayer::configure(const IGCTensor *input, const IGCTensor *weig
     // FIXME: input->clone() doesn't work with subtensors for grouped convolutions.
     TensorInfo im2col_reshaped_info(shape_im2col, 1, dt, input->info()->fixed_point_position());
     _input_im2col_reshaped.allocator()->init(im2col_reshaped_info);
+    _memory_group.manage(&_input_im2col_reshaped);
 
     // Create tensor (interleave) to prepare input tensor for GEMM
     if(run_interleaved)
@@ -207,6 +208,7 @@ void GCConvolutionLayer::configure(const IGCTensor *input, const IGCTensor *weig
         // FIXME: input->clone() doesn't work with subtensors for grouped convolutions.
         TensorInfo interleaved_info(shape_interleaved, 1, dt, input->info()->fixed_point_position());
         _input_interleaved_reshaped.allocator()->init(interleaved_info);
+        _memory_group.manage(&_input_interleaved_reshaped);
     }
 
     // Create GEMM output tensor
@@ -218,6 +220,7 @@ void GCConvolutionLayer::configure(const IGCTensor *input, const IGCTensor *weig
     // FIXME: input->clone() doesn't work with subtensors for grouped convolutions.
     TensorInfo info_gemm(shape_gemm, 1, gemm_data_type, input->info()->fixed_point_position());
     _gemm_output.allocator()->init(info_gemm);
+    _memory_group.manage(&_gemm_output);
 
     // Configure kernels
     if(dt == DataType::F16)
@@ -263,6 +266,8 @@ void GCConvolutionLayer::run()
         _reshape_weights.run();
     }
 
+    _memory_group.acquire();
+
     // Run im2col
     GCScheduler::get().dispatch(_fill_border);
     GCScheduler::get().memory_barrier();
@@ -282,4 +287,6 @@ void GCConvolutionLayer::run()
     GCScheduler::get().memory_barrier();
     // Reshape output matrix
     GCScheduler::get().dispatch(_output_col2im_kernel, false);
+
+    _memory_group.release();
 }

@@ -29,6 +29,7 @@
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCGEMMMatrixAdditionKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCGEMMTranspose1xWKernel.h"
+#include "arm_compute/runtime/GLES_COMPUTE/GCMemoryGroup.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
 #include "arm_compute/runtime/IFunction.h"
 
@@ -48,7 +49,7 @@ class GCGEMM : public IFunction
 {
 public:
     /** Default constructor. */
-    GCGEMM();
+    GCGEMM(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
 
     /** Initialise the kernel's inputs and output
      *
@@ -73,6 +74,7 @@ public:
     void run() override;
 
 private:
+    GCMemoryGroup              _memory_group;
     GCGEMMInterleave4x4Kernel  _interleave_kernel;
     GCGEMMTranspose1xWKernel   _transpose_kernel;
     GCGEMMMatrixMultiplyKernel _mm_kernel;

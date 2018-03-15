@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,57 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#ifndef __ARM_COMPUTE_GCMEMORYGROUP_H__
+#define __ARM_COMPUTE_GCMEMORYGROUP_H__
 
+#include "arm_compute/runtime/MemoryGroupBase.h"
+
+#include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
+#include "arm_compute/core/utils/misc/Cast.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
 
-using namespace arm_compute;
-
-GCTensor::GCTensor()
-    : _allocator(this)
+namespace arm_compute
 {
-}
+using GCMemoryGroup = MemoryGroupBase<GCTensor>;
 
-ITensorAllocator *GCTensor::allocator()
+template <>
+inline void MemoryGroupBase<GCTensor>::associate_memory_group(GCTensor *obj)
 {
-    return &_allocator;
-}
+    ARM_COMPUTE_ERROR_ON(obj == nullptr);
+    ARM_COMPUTE_ERROR_ON(dynamic_cast<GCTensorAllocator *>(obj->allocator()) == nullptr);
 
-TensorInfo *GCTensor::info() const
-{
-    return &_allocator.info();
+    auto allocator = arm_compute::utils::cast::polymorphic_downcast<GCTensorAllocator *>(obj->allocator());
+    ARM_COMPUTE_ERROR_ON(allocator == nullptr);
+    allocator->set_associated_memory_group(this);
 }
-
-TensorInfo *GCTensor::info()
-{
-    return &_allocator.info();
-}
-
-uint8_t *GCTensor::buffer() const
-{
-    return _allocator.data();
-}
-
-GLuint GCTensor::gc_buffer() const
-{
-    return _allocator.get_gl_ssbo_name();
-}
-
-void GCTensor::map(bool blocking)
-{
-    IGCTensor::map(blocking);
-}
-
-void GCTensor::unmap()
-{
-    IGCTensor::unmap();
-}
-
-uint8_t *GCTensor::do_map(bool blocking)
-{
-    return _allocator.map(blocking);
-}
-
-void GCTensor::do_unmap()
-{
-    _allocator.unmap();
-}
+} // arm_compute
+#endif /*__ARM_COMPUTE_GCMEMORYGROUP_H__ */
