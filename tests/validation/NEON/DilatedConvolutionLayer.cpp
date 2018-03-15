@@ -66,22 +66,17 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
 TEST_SUITE(NEON)
 
 TEST_SUITE(DilatedConvolutionLayer)
-DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
-                                                                                               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(8U, 8U, 2U), 1, DataType::F32, 0),
-                                                                                                                        TensorInfo(TensorShape(23U, 27U, 5U, 4U), 1, DataType::F32, 0),
-                                                                                                                        TensorInfo(TensorShape(3U, 3U, 2U, 1U), 1, DataType::F32, 0),
-                                                                                                                        TensorInfo(TensorShape(33U, 27U, 7U, 4U), 1, DataType::F32, 0)
-                                                                                                                                     }),
-                                                                                               framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
-                                                                                                                        TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
-                                                                                                                        TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
-                                                                                                                        TensorInfo(TensorShape(5U, 5U, 7U, 16U), 1, DataType::F16, 0)
-                                                                                                                                       })),
-                                                                                           framework::dataset::make("BiasesInfo", { TensorInfo(TensorShape(1U), 1, DataType::F32, 0),
-                                                                                                                    TensorInfo(TensorShape(21U), 1, DataType::F32, 0),
-                                                                                                                    TensorInfo(TensorShape(21U), 1, DataType::F32, 0),
-                                                                                                                    TensorInfo(TensorShape(16U), 1, DataType::F32, 0)
-                                                                                                                                  })),
+DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
+                                                                                           framework::dataset::make("InputInfo", { TensorInfo(TensorShape(8U, 8U, 2U), 1, DataType::F32, 0),
+                                                                                                                    TensorInfo(TensorShape(23U, 27U, 5U, 4U), 1, DataType::F32, 0),
+                                                                                                                    TensorInfo(TensorShape(3U, 3U, 2U, 1U), 1, DataType::F32, 0),
+                                                                                                                    TensorInfo(TensorShape(33U, 27U, 7U, 4U), 1, DataType::F32, 0)
+                                                                                                                                 }),
+                                                                                           framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
+                                                                                                                    TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
+                                                                                                                    TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
+                                                                                                                    TensorInfo(TensorShape(5U, 5U, 7U, 16U), 1, DataType::F16, 0)
+                                                                                                                                   })),
                                                                                        framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(6U, 6U, 1U), 1, DataType::F32, 0),
                                                                                                                 TensorInfo(TensorShape(21U, 25U, 21U, 4U), 1, DataType::F32, 0),
                                                                                                                 TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32, 0),
@@ -98,11 +93,10 @@ DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(z
                                                                                                                       Size2D(3U, 3U)
                                                                                                                     })),
                                                                            framework::dataset::make("Expected", { ConvolutionMethod::GEMM, ConvolutionMethod::GEMM, ConvolutionMethod::GEMM, ConvolutionMethod::GEMM })),
-               input_info, weights_info, biases_info, output_info, conv_info, dilation, expected)
+               input_info, weights_info, output_info, conv_info, dilation, expected)
 {
     ConvolutionMethod is_valid = NEConvolutionLayer::get_convolution_method(&input_info.clone()->set_is_resizable(false),
                                                                             &weights_info.clone()->set_is_resizable(false),
-                                                                            &biases_info.clone()->set_is_resizable(false),
                                                                             &output_info.clone()->set_is_resizable(false),
                                                                             conv_info, WeightsInfo(), dilation);
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);

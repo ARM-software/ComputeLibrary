@@ -47,8 +47,7 @@ void NEConvolutionLayer::configure(ITensor *input, const ITensor *weights, const
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_ERROR_THROW_ON(NEConvolutionLayer::validate(input->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), output->info(), conv_info, weights_info, dilation, act_info));
 
-    switch(NEConvolutionLayer::get_convolution_method(input->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), output->info(), conv_info,
-                                                      weights_info, dilation, act_info))
+    switch(NEConvolutionLayer::get_convolution_method(input->info(), weights->info(), output->info(), conv_info, weights_info, dilation, act_info))
     {
         case ConvolutionMethod::WINOGRAD:
         {
@@ -80,7 +79,7 @@ void NEConvolutionLayer::configure(ITensor *input, const ITensor *weights, const
 Status NEConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
                                     const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info)
 {
-    switch(NEConvolutionLayer::get_convolution_method(input, weights, biases, output, conv_info, weights_info, dilation, act_info))
+    switch(NEConvolutionLayer::get_convolution_method(input, weights, output, conv_info, weights_info, dilation, act_info))
     {
         case ConvolutionMethod::WINOGRAD:
             //Validate Winograd
@@ -101,15 +100,19 @@ Status NEConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo 
     return Status{};
 }
 
-ConvolutionMethod NEConvolutionLayer::get_convolution_method(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
+ConvolutionMethod NEConvolutionLayer::get_convolution_method(const ITensorInfo *input, const ITensorInfo *weights,
+                                                             const ITensorInfo *output, const PadStrideInfo &conv_info,
                                                              const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(weights);
     ARM_COMPUTE_UNUSED(output);
     ARM_COMPUTE_UNUSED(weights_info);
     ARM_COMPUTE_UNUSED(act_info);
 
     if((input->data_type() == DataType::F32) && (weights->dimension(0) == 3) && (weights->dimension(1) == 3) && (weights->num_dimensions() <= 4) && (conv_info.stride().first == 1)
-       && (conv_info.stride().second == 1) && (biases != nullptr) && (dilation == Size2D(1U, 1U)))
+       && (conv_info.stride().second == 1) && (dilation == Size2D(1U, 1U)))
     {
         return ConvolutionMethod::WINOGRAD;
     }

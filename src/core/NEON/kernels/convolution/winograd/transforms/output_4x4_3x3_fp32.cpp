@@ -100,170 +100,338 @@ void Transform::process_tile(
   const float *inptr = matrix_base;
   const float *bptr = biases;
 
-  // For each channel of the output
-  int channels_remaining = n_channels;
-#ifdef __aarch64__
-  for (; channels_remaining >= 4; channels_remaining -= 4)
+  if (bptr)
   {
-    // Matrices used and computed during this transform
-    float32x4_t F[6][6], FZ[6][4], f[4][4], b;
-
-    // Read a 6x6 tile in the Winograd domain
-    for (int i = 0, m = 0; i < 6; i++)
+    // For each channel of the output
+    int channels_remaining = n_channels;
+#ifdef __aarch64__
+    for (; channels_remaining >= 4; channels_remaining -= 4)
     {
-      for (int j = 0; j < 6; j++, m++)
+      // Matrices used and computed during this transform
+      float32x4_t F[6][6], FZ[6][4], f[4][4], b;
+
+      // Read a 6x6 tile in the Winograd domain
+      for (int i = 0, m = 0; i < 6; i++)
       {
-        F[i][j] = vld1q_f32(inptr + m*matrix_stride);
+        for (int j = 0; j < 6; j++, m++)
+        {
+          F[i][j] = vld1q_f32(inptr + m*matrix_stride);
+        }
+      }
+      inptr += 4;
+
+      // Compute the matrix F Z
+      for (int i = 0; i < 6; i++)
+      {
+        // FZ[i][0] =  1*F[i][0] +  1*F[i][1] +  1*F[i][2] +  1*F[i][3] +  1*F[i][4];
+        FZ[i][0] = vaddq_f32(vaddq_f32(vaddq_f32(F[i][0], F[i][1]), vaddq_f32(F[i][2], F[i][3])), F[i][4]);
+
+        // FZ[i][1] =  1*F[i][1] + -1*F[i][2] +  2*F[i][3] + -2*F[i][4];
+        FZ[i][1] = vmlaq_n_f32(vsubq_f32(F[i][1], F[i][2]), vsubq_f32(F[i][3], F[i][4]), 2.0f);
+
+        // FZ[i][2] =  1*F[i][1] +  1*F[i][2] +  4*F[i][3] +  4*F[i][4];
+        FZ[i][2] = vmlaq_n_f32(vaddq_f32(F[i][1], F[i][2]), vaddq_f32(F[i][3], F[i][4]), 4.0f);
+
+        // FZ[i][3] =  1*F[i][1] + -1*F[i][2] +  8*F[i][3] + -8*F[i][4] +  1*F[i][5];
+        FZ[i][3] = vaddq_f32(vmlaq_n_f32(vsubq_f32(F[i][1], F[i][2]), vsubq_f32(F[i][3], F[i][4]), 8.0f), F[i][5]);
+      }
+
+      // Compute the output tile f = ZT F Z
+      for (int j = 0; j < 4; j++)
+      {
+        // f[0][j] =  1*FZ[0][j] +  1*FZ[1][j] +  1*FZ[2][j] +  1*FZ[3][j] +  1*FZ[4][j];
+        f[0][j] = vaddq_f32(vaddq_f32(vaddq_f32(FZ[0][j], FZ[1][j]), vaddq_f32(FZ[2][j], FZ[3][j])), FZ[4][j]);
+
+        // f[1][j] =  1*FZ[1][j] + -1*FZ[2][j] +  2*FZ[3][j] + -2*FZ[4][j];
+        f[1][j] = vmlaq_n_f32(vsubq_f32(FZ[1][j], FZ[2][j]), vsubq_f32(FZ[3][j], FZ[4][j]), 2.0f);
+
+        // f[2][j] =  1*FZ[1][j] +  1*FZ[2][j] +  4*FZ[3][j] +  4*FZ[4][j];
+        f[2][j] = vmlaq_n_f32(vaddq_f32(FZ[1][j], FZ[2][j]), vaddq_f32(FZ[3][j], FZ[4][j]), 4.0f);
+
+        // f[3][j] =  1*FZ[1][j] + -1*FZ[2][j] +  8*FZ[3][j] + -8*FZ[4][j] +  1*FZ[5][j];
+        f[3][j] = vaddq_f32(vmlaq_n_f32(vsubq_f32(FZ[1][j], FZ[2][j]), vsubq_f32(FZ[3][j], FZ[4][j]), 8.0f), FZ[5][j]);
+      }
+
+      // Write out the output tile
+      b = vld1q_f32(bptr);
+      bptr += 4;
+      for (int i = 0; i < cells_i; i++)
+      {
+        for (int j = 0; j < cells_j; j++)
+        {
+          vst1q_f32(outptrs[i][j], vaddq_f32(f[i][j], b));
+          outptrs[i][j] += 4;
+        }
       }
     }
-    inptr += 4;
-
-    // Compute the matrix F Z
-    for (int i = 0; i < 6; i++)
-    {
-      // FZ[i][0] =  1*F[i][0] +  1*F[i][1] +  1*F[i][2] +  1*F[i][3] +  1*F[i][4];
-      FZ[i][0] = vaddq_f32(vaddq_f32(vaddq_f32(F[i][0], F[i][1]), vaddq_f32(F[i][2], F[i][3])), F[i][4]);
-
-      // FZ[i][1] =  1*F[i][1] + -1*F[i][2] +  2*F[i][3] + -2*F[i][4];
-      FZ[i][1] = vmlaq_n_f32(vsubq_f32(F[i][1], F[i][2]), vsubq_f32(F[i][3], F[i][4]), 2.0f);
-
-      // FZ[i][2] =  1*F[i][1] +  1*F[i][2] +  4*F[i][3] +  4*F[i][4];
-      FZ[i][2] = vmlaq_n_f32(vaddq_f32(F[i][1], F[i][2]), vaddq_f32(F[i][3], F[i][4]), 4.0f);
-
-      // FZ[i][3] =  1*F[i][1] + -1*F[i][2] +  8*F[i][3] + -8*F[i][4] +  1*F[i][5];
-      FZ[i][3] = vaddq_f32(vmlaq_n_f32(vsubq_f32(F[i][1], F[i][2]), vsubq_f32(F[i][3], F[i][4]), 8.0f), F[i][5]);
-    }
-
-    // Compute the output tile f = ZT F Z
-    for (int j = 0; j < 4; j++)
-    {
-      // f[0][j] =  1*FZ[0][j] +  1*FZ[1][j] +  1*FZ[2][j] +  1*FZ[3][j] +  1*FZ[4][j];
-      f[0][j] = vaddq_f32(vaddq_f32(vaddq_f32(FZ[0][j], FZ[1][j]), vaddq_f32(FZ[2][j], FZ[3][j])), FZ[4][j]);
-
-      // f[1][j] =  1*FZ[1][j] + -1*FZ[2][j] +  2*FZ[3][j] + -2*FZ[4][j];
-      f[1][j] = vmlaq_n_f32(vsubq_f32(FZ[1][j], FZ[2][j]), vsubq_f32(FZ[3][j], FZ[4][j]), 2.0f);
-
-      // f[2][j] =  1*FZ[1][j] +  1*FZ[2][j] +  4*FZ[3][j] +  4*FZ[4][j];
-      f[2][j] = vmlaq_n_f32(vaddq_f32(FZ[1][j], FZ[2][j]), vaddq_f32(FZ[3][j], FZ[4][j]), 4.0f);
-
-      // f[3][j] =  1*FZ[1][j] + -1*FZ[2][j] +  8*FZ[3][j] + -8*FZ[4][j] +  1*FZ[5][j];
-      f[3][j] = vaddq_f32(vmlaq_n_f32(vsubq_f32(FZ[1][j], FZ[2][j]), vsubq_f32(FZ[3][j], FZ[4][j]), 8.0f), FZ[5][j]);
-    }
-
-    // Write out the output tile
-    b = vld1q_f32(bptr);
-    bptr += 4;
-    for (int i = 0; i < cells_i; i++)
-    {
-      for (int j = 0; j < cells_j; j++)
-      {
-        vst1q_f32(outptrs[i][j], vaddq_f32(f[i][j], b));
-        outptrs[i][j] += 4;
-      }
-    }
-  }
 #endif  // __aarch64__
 #ifdef __arm_any__
-  for (; channels_remaining >= 2; channels_remaining -= 2)
-  {
-    // Matrices used and computed during this transform
-    float32x2_t F[6][6], FZ[6][4], f[4][4], b;
-
-    // Read a 6x6 tile in the Winograd domain
-    for (int i = 0, m = 0; i < 6; i++)
+    for (; channels_remaining >= 2; channels_remaining -= 2)
     {
-      for (int j = 0; j < 6; j++, m++)
+      // Matrices used and computed during this transform
+      float32x2_t F[6][6], FZ[6][4], f[4][4], b;
+
+      // Read a 6x6 tile in the Winograd domain
+      for (int i = 0, m = 0; i < 6; i++)
       {
-        F[i][j] = vld1_f32(inptr + m*matrix_stride);
+        for (int j = 0; j < 6; j++, m++)
+        {
+          F[i][j] = vld1_f32(inptr + m*matrix_stride);
+        }
+      }
+      inptr += 2;
+
+      // Compute the matrix F Z
+      for (int i = 0; i < 6; i++)
+      {
+        // FZ[i][0] =  1*F[i][0] +  1*F[i][1] +  1*F[i][2] +  1*F[i][3] +  1*F[i][4];
+        FZ[i][0] = vadd_f32(vadd_f32(vadd_f32(F[i][0], F[i][1]), vadd_f32(F[i][2], F[i][3])), F[i][4]);
+
+        // FZ[i][1] =  1*F[i][1] + -1*F[i][2] +  2*F[i][3] + -2*F[i][4];
+        FZ[i][1] = vmla_n_f32(vsub_f32(F[i][1], F[i][2]), vsub_f32(F[i][3], F[i][4]), 2.0f);
+
+        // FZ[i][2] =  1*F[i][1] +  1*F[i][2] +  4*F[i][3] +  4*F[i][4];
+        FZ[i][2] = vmla_n_f32(vadd_f32(F[i][1], F[i][2]), vadd_f32(F[i][3], F[i][4]), 4.0f);
+
+        // FZ[i][3] =  1*F[i][1] + -1*F[i][2] +  8*F[i][3] + -8*F[i][4] +  1*F[i][5];
+        FZ[i][3] = vadd_f32(vmla_n_f32(vsub_f32(F[i][1], F[i][2]), vsub_f32(F[i][3], F[i][4]), 8.0f), F[i][5]);
+      }
+
+      // Compute the output tile f = ZT F Z
+      for (int j = 0; j < 4; j++)
+      {
+        // f[0][j] =  1*FZ[0][j] +  1*FZ[1][j] +  1*FZ[2][j] +  1*FZ[3][j] +  1*FZ[4][j];
+        f[0][j] = vadd_f32(vadd_f32(vadd_f32(FZ[0][j], FZ[1][j]), vadd_f32(FZ[2][j], FZ[3][j])), FZ[4][j]);
+
+        // f[1][j] =  1*FZ[1][j] + -1*FZ[2][j] +  2*FZ[3][j] + -2*FZ[4][j];
+        f[1][j] = vmla_n_f32(vsub_f32(FZ[1][j], FZ[2][j]), vsub_f32(FZ[3][j], FZ[4][j]), 2.0f);
+
+        // f[2][j] =  1*FZ[1][j] +  1*FZ[2][j] +  4*FZ[3][j] +  4*FZ[4][j];
+        f[2][j] = vmla_n_f32(vadd_f32(FZ[1][j], FZ[2][j]), vadd_f32(FZ[3][j], FZ[4][j]), 4.0f);
+
+        // f[3][j] =  1*FZ[1][j] + -1*FZ[2][j] +  8*FZ[3][j] + -8*FZ[4][j] +  1*FZ[5][j];
+        f[3][j] = vadd_f32(vmla_n_f32(vsub_f32(FZ[1][j], FZ[2][j]), vsub_f32(FZ[3][j], FZ[4][j]), 8.0f), FZ[5][j]);
+      }
+
+      // Write out the output tile
+      b = vld1_f32(bptr);
+      bptr += 2;
+      for (int i = 0; i < cells_i; i++)
+      {
+        for (int j = 0; j < cells_j; j++)
+        {
+          vst1_f32(outptrs[i][j], vadd_f32(f[i][j], b));
+          outptrs[i][j] += 2;
+        }
       }
     }
-    inptr += 2;
-
-    // Compute the matrix F Z
-    for (int i = 0; i < 6; i++)
+#endif
+    for (; channels_remaining; channels_remaining--)
     {
-      // FZ[i][0] =  1*F[i][0] +  1*F[i][1] +  1*F[i][2] +  1*F[i][3] +  1*F[i][4];
-      FZ[i][0] = vadd_f32(vadd_f32(vadd_f32(F[i][0], F[i][1]), vadd_f32(F[i][2], F[i][3])), F[i][4]);
+      // Matrices used and computed during this transform
+      float F[6][6], FZ[6][4], f[4][4], b;
 
-      // FZ[i][1] =  1*F[i][1] + -1*F[i][2] +  2*F[i][3] + -2*F[i][4];
-      FZ[i][1] = vmla_n_f32(vsub_f32(F[i][1], F[i][2]), vsub_f32(F[i][3], F[i][4]), 2.0f);
-
-      // FZ[i][2] =  1*F[i][1] +  1*F[i][2] +  4*F[i][3] +  4*F[i][4];
-      FZ[i][2] = vmla_n_f32(vadd_f32(F[i][1], F[i][2]), vadd_f32(F[i][3], F[i][4]), 4.0f);
-
-      // FZ[i][3] =  1*F[i][1] + -1*F[i][2] +  8*F[i][3] + -8*F[i][4] +  1*F[i][5];
-      FZ[i][3] = vadd_f32(vmla_n_f32(vsub_f32(F[i][1], F[i][2]), vsub_f32(F[i][3], F[i][4]), 8.0f), F[i][5]);
-    }
-
-    // Compute the output tile f = ZT F Z
-    for (int j = 0; j < 4; j++)
-    {
-      // f[0][j] =  1*FZ[0][j] +  1*FZ[1][j] +  1*FZ[2][j] +  1*FZ[3][j] +  1*FZ[4][j];
-      f[0][j] = vadd_f32(vadd_f32(vadd_f32(FZ[0][j], FZ[1][j]), vadd_f32(FZ[2][j], FZ[3][j])), FZ[4][j]);
-
-      // f[1][j] =  1*FZ[1][j] + -1*FZ[2][j] +  2*FZ[3][j] + -2*FZ[4][j];
-      f[1][j] = vmla_n_f32(vsub_f32(FZ[1][j], FZ[2][j]), vsub_f32(FZ[3][j], FZ[4][j]), 2.0f);
-
-      // f[2][j] =  1*FZ[1][j] +  1*FZ[2][j] +  4*FZ[3][j] +  4*FZ[4][j];
-      f[2][j] = vmla_n_f32(vadd_f32(FZ[1][j], FZ[2][j]), vadd_f32(FZ[3][j], FZ[4][j]), 4.0f);
-
-      // f[3][j] =  1*FZ[1][j] + -1*FZ[2][j] +  8*FZ[3][j] + -8*FZ[4][j] +  1*FZ[5][j];
-      f[3][j] = vadd_f32(vmla_n_f32(vsub_f32(FZ[1][j], FZ[2][j]), vsub_f32(FZ[3][j], FZ[4][j]), 8.0f), FZ[5][j]);
-    }
-
-    // Write out the output tile
-    b = vld1_f32(bptr);
-    bptr += 2;
-    for (int i = 0; i < cells_i; i++)
-    {
-      for (int j = 0; j < cells_j; j++)
+      // Read a 6x6 tile in the Winograd domain
+      for (int i = 0, m = 0; i < 6; i++)
       {
-        vst1_f32(outptrs[i][j], vadd_f32(f[i][j], b));
-        outptrs[i][j] += 2;
+        for (int j = 0; j < 6; j++, m++)
+        {
+          F[i][j] = *(inptr + m*matrix_stride);
+        }
+      }
+      inptr++;
+
+      // Compute the matrix F Z
+      for (int i = 0; i < 6; i++)
+      {
+        FZ[i][0] =  1*F[i][0] +  1*F[i][1] +  1*F[i][2] +  1*F[i][3] +  1*F[i][4];
+        FZ[i][1] =  1*F[i][1] + -1*F[i][2] +  2*F[i][3] + -2*F[i][4];
+        FZ[i][2] =  1*F[i][1] +  1*F[i][2] +  4*F[i][3] +  4*F[i][4];
+        FZ[i][3] =  1*F[i][1] + -1*F[i][2] +  8*F[i][3] + -8*F[i][4] +  1*F[i][5];
+      }
+
+      // Compute the output tile f = ZT F Z
+      for (int j = 0; j < 4; j++)
+      {
+        f[0][j] =  1*FZ[0][j] +  1*FZ[1][j] +  1*FZ[2][j] +  1*FZ[3][j] +  1*FZ[4][j];
+        f[1][j] =  1*FZ[1][j] + -1*FZ[2][j] +  2*FZ[3][j] + -2*FZ[4][j];
+        f[2][j] =  1*FZ[1][j] +  1*FZ[2][j] +  4*FZ[3][j] +  4*FZ[4][j];
+        f[3][j] =  1*FZ[1][j] + -1*FZ[2][j] +  8*FZ[3][j] + -8*FZ[4][j] +  1*FZ[5][j];
+      }
+
+      // Write out the output tile
+      b = *(bptr++);
+      for (int i = 0; i < cells_i; i++)
+      {
+        for (int j = 0; j < cells_j; j++)
+        {
+          *(outptrs[i][j]++) = f[i][j] + b;
+        }
       }
     }
   }
-#endif
-  for (; channels_remaining; channels_remaining--)
+  else
   {
-    // Matrices used and computed during this transform
-    float F[6][6], FZ[6][4], f[4][4], b;
-
-    // Read a 6x6 tile in the Winograd domain
-    for (int i = 0, m = 0; i < 6; i++)
+    // For each channel of the output
+    int channels_remaining = n_channels;
+#ifdef __aarch64__
+    for (; channels_remaining >= 4; channels_remaining -= 4)
     {
-      for (int j = 0; j < 6; j++, m++)
+      // Matrices used and computed during this transform
+      float32x4_t F[6][6], FZ[6][4], f[4][4];
+
+      // Read a 6x6 tile in the Winograd domain
+      for (int i = 0, m = 0; i < 6; i++)
       {
-        F[i][j] = *(inptr + m*matrix_stride);
+        for (int j = 0; j < 6; j++, m++)
+        {
+          F[i][j] = vld1q_f32(inptr + m*matrix_stride);
+        }
+      }
+      inptr += 4;
+
+      // Compute the matrix F Z
+      for (int i = 0; i < 6; i++)
+      {
+        // FZ[i][0] =  1*F[i][0] +  1*F[i][1] +  1*F[i][2] +  1*F[i][3] +  1*F[i][4];
+        FZ[i][0] = vaddq_f32(vaddq_f32(vaddq_f32(F[i][0], F[i][1]), vaddq_f32(F[i][2], F[i][3])), F[i][4]);
+
+        // FZ[i][1] =  1*F[i][1] + -1*F[i][2] +  2*F[i][3] + -2*F[i][4];
+        FZ[i][1] = vmlaq_n_f32(vsubq_f32(F[i][1], F[i][2]), vsubq_f32(F[i][3], F[i][4]), 2.0f);
+
+        // FZ[i][2] =  1*F[i][1] +  1*F[i][2] +  4*F[i][3] +  4*F[i][4];
+        FZ[i][2] = vmlaq_n_f32(vaddq_f32(F[i][1], F[i][2]), vaddq_f32(F[i][3], F[i][4]), 4.0f);
+
+        // FZ[i][3] =  1*F[i][1] + -1*F[i][2] +  8*F[i][3] + -8*F[i][4] +  1*F[i][5];
+        FZ[i][3] = vaddq_f32(vmlaq_n_f32(vsubq_f32(F[i][1], F[i][2]), vsubq_f32(F[i][3], F[i][4]), 8.0f), F[i][5]);
+      }
+
+      // Compute the output tile f = ZT F Z
+      for (int j = 0; j < 4; j++)
+      {
+        // f[0][j] =  1*FZ[0][j] +  1*FZ[1][j] +  1*FZ[2][j] +  1*FZ[3][j] +  1*FZ[4][j];
+        f[0][j] = vaddq_f32(vaddq_f32(vaddq_f32(FZ[0][j], FZ[1][j]), vaddq_f32(FZ[2][j], FZ[3][j])), FZ[4][j]);
+
+        // f[1][j] =  1*FZ[1][j] + -1*FZ[2][j] +  2*FZ[3][j] + -2*FZ[4][j];
+        f[1][j] = vmlaq_n_f32(vsubq_f32(FZ[1][j], FZ[2][j]), vsubq_f32(FZ[3][j], FZ[4][j]), 2.0f);
+
+        // f[2][j] =  1*FZ[1][j] +  1*FZ[2][j] +  4*FZ[3][j] +  4*FZ[4][j];
+        f[2][j] = vmlaq_n_f32(vaddq_f32(FZ[1][j], FZ[2][j]), vaddq_f32(FZ[3][j], FZ[4][j]), 4.0f);
+
+        // f[3][j] =  1*FZ[1][j] + -1*FZ[2][j] +  8*FZ[3][j] + -8*FZ[4][j] +  1*FZ[5][j];
+        f[3][j] = vaddq_f32(vmlaq_n_f32(vsubq_f32(FZ[1][j], FZ[2][j]), vsubq_f32(FZ[3][j], FZ[4][j]), 8.0f), FZ[5][j]);
+      }
+
+      // Write out the output tile
+      for (int i = 0; i < cells_i; i++)
+      {
+        for (int j = 0; j < cells_j; j++)
+        {
+          vst1q_f32(outptrs[i][j], f[i][j]);
+          outptrs[i][j] += 4;
+        }
       }
     }
-    inptr++;
-
-    // Compute the matrix F Z
-    for (int i = 0; i < 6; i++)
+#endif  // __aarch64__
+#ifdef __arm_any__
+    for (; channels_remaining >= 2; channels_remaining -= 2)
     {
-      FZ[i][0] =  1*F[i][0] +  1*F[i][1] +  1*F[i][2] +  1*F[i][3] +  1*F[i][4];
-      FZ[i][1] =  1*F[i][1] + -1*F[i][2] +  2*F[i][3] + -2*F[i][4];
-      FZ[i][2] =  1*F[i][1] +  1*F[i][2] +  4*F[i][3] +  4*F[i][4];
-      FZ[i][3] =  1*F[i][1] + -1*F[i][2] +  8*F[i][3] + -8*F[i][4] +  1*F[i][5];
-    }
+      // Matrices used and computed during this transform
+      float32x2_t F[6][6], FZ[6][4], f[4][4];
 
-    // Compute the output tile f = ZT F Z
-    for (int j = 0; j < 4; j++)
-    {
-      f[0][j] =  1*FZ[0][j] +  1*FZ[1][j] +  1*FZ[2][j] +  1*FZ[3][j] +  1*FZ[4][j];
-      f[1][j] =  1*FZ[1][j] + -1*FZ[2][j] +  2*FZ[3][j] + -2*FZ[4][j];
-      f[2][j] =  1*FZ[1][j] +  1*FZ[2][j] +  4*FZ[3][j] +  4*FZ[4][j];
-      f[3][j] =  1*FZ[1][j] + -1*FZ[2][j] +  8*FZ[3][j] + -8*FZ[4][j] +  1*FZ[5][j];
-    }
-
-    // Write out the output tile
-    b = *(bptr++);
-    for (int i = 0; i < cells_i; i++)
-    {
-      for (int j = 0; j < cells_j; j++)
+      // Read a 6x6 tile in the Winograd domain
+      for (int i = 0, m = 0; i < 6; i++)
       {
-        *(outptrs[i][j]++) = f[i][j] + b;
+        for (int j = 0; j < 6; j++, m++)
+        {
+          F[i][j] = vld1_f32(inptr + m*matrix_stride);
+        }
+      }
+      inptr += 2;
+
+      // Compute the matrix F Z
+      for (int i = 0; i < 6; i++)
+      {
+        // FZ[i][0] =  1*F[i][0] +  1*F[i][1] +  1*F[i][2] +  1*F[i][3] +  1*F[i][4];
+        FZ[i][0] = vadd_f32(vadd_f32(vadd_f32(F[i][0], F[i][1]), vadd_f32(F[i][2], F[i][3])), F[i][4]);
+
+        // FZ[i][1] =  1*F[i][1] + -1*F[i][2] +  2*F[i][3] + -2*F[i][4];
+        FZ[i][1] = vmla_n_f32(vsub_f32(F[i][1], F[i][2]), vsub_f32(F[i][3], F[i][4]), 2.0f);
+
+        // FZ[i][2] =  1*F[i][1] +  1*F[i][2] +  4*F[i][3] +  4*F[i][4];
+        FZ[i][2] = vmla_n_f32(vadd_f32(F[i][1], F[i][2]), vadd_f32(F[i][3], F[i][4]), 4.0f);
+
+        // FZ[i][3] =  1*F[i][1] + -1*F[i][2] +  8*F[i][3] + -8*F[i][4] +  1*F[i][5];
+        FZ[i][3] = vadd_f32(vmla_n_f32(vsub_f32(F[i][1], F[i][2]), vsub_f32(F[i][3], F[i][4]), 8.0f), F[i][5]);
+      }
+
+      // Compute the output tile f = ZT F Z
+      for (int j = 0; j < 4; j++)
+      {
+        // f[0][j] =  1*FZ[0][j] +  1*FZ[1][j] +  1*FZ[2][j] +  1*FZ[3][j] +  1*FZ[4][j];
+        f[0][j] = vadd_f32(vadd_f32(vadd_f32(FZ[0][j], FZ[1][j]), vadd_f32(FZ[2][j], FZ[3][j])), FZ[4][j]);
+
+        // f[1][j] =  1*FZ[1][j] + -1*FZ[2][j] +  2*FZ[3][j] + -2*FZ[4][j];
+        f[1][j] = vmla_n_f32(vsub_f32(FZ[1][j], FZ[2][j]), vsub_f32(FZ[3][j], FZ[4][j]), 2.0f);
+
+        // f[2][j] =  1*FZ[1][j] +  1*FZ[2][j] +  4*FZ[3][j] +  4*FZ[4][j];
+        f[2][j] = vmla_n_f32(vadd_f32(FZ[1][j], FZ[2][j]), vadd_f32(FZ[3][j], FZ[4][j]), 4.0f);
+
+        // f[3][j] =  1*FZ[1][j] + -1*FZ[2][j] +  8*FZ[3][j] + -8*FZ[4][j] +  1*FZ[5][j];
+        f[3][j] = vadd_f32(vmla_n_f32(vsub_f32(FZ[1][j], FZ[2][j]), vsub_f32(FZ[3][j], FZ[4][j]), 8.0f), FZ[5][j]);
+      }
+
+      // Write out the output tile
+      for (int i = 0; i < cells_i; i++)
+      {
+        for (int j = 0; j < cells_j; j++)
+        {
+          vst1_f32(outptrs[i][j], f[i][j]);
+          outptrs[i][j] += 2;
+        }
+      }
+    }
+#endif
+    for (; channels_remaining; channels_remaining--)
+    {
+      // Matrices used and computed during this transform
+      float F[6][6], FZ[6][4], f[4][4];
+
+      // Read a 6x6 tile in the Winograd domain
+      for (int i = 0, m = 0; i < 6; i++)
+      {
+        for (int j = 0; j < 6; j++, m++)
+        {
+          F[i][j] = *(inptr + m*matrix_stride);
+        }
+      }
+      inptr++;
+
+      // Compute the matrix F Z
+      for (int i = 0; i < 6; i++)
+      {
+        FZ[i][0] =  1*F[i][0] +  1*F[i][1] +  1*F[i][2] +  1*F[i][3] +  1*F[i][4];
+        FZ[i][1] =  1*F[i][1] + -1*F[i][2] +  2*F[i][3] + -2*F[i][4];
+        FZ[i][2] =  1*F[i][1] +  1*F[i][2] +  4*F[i][3] +  4*F[i][4];
+        FZ[i][3] =  1*F[i][1] + -1*F[i][2] +  8*F[i][3] + -8*F[i][4] +  1*F[i][5];
+      }
+
+      // Compute the output tile f = ZT F Z
+      for (int j = 0; j < 4; j++)
+      {
+        f[0][j] =  1*FZ[0][j] +  1*FZ[1][j] +  1*FZ[2][j] +  1*FZ[3][j] +  1*FZ[4][j];
+        f[1][j] =  1*FZ[1][j] + -1*FZ[2][j] +  2*FZ[3][j] + -2*FZ[4][j];
+        f[2][j] =  1*FZ[1][j] +  1*FZ[2][j] +  4*FZ[3][j] +  4*FZ[4][j];
+        f[3][j] =  1*FZ[1][j] + -1*FZ[2][j] +  8*FZ[3][j] + -8*FZ[4][j] +  1*FZ[5][j];
+      }
+
+      // Write out the output tile
+      for (int i = 0; i < cells_i; i++)
+      {
+        for (int j = 0; j < cells_j; j++)
+        {
+          *(outptrs[i][j]++) = f[i][j];
+        }
       }
     }
   }

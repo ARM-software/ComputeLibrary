@@ -299,12 +299,11 @@ void NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, Ker
 {
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(_biases->buffer());
     ARM_COMPUTE_ERROR_ON_NULLPTR(_output_workspace);
     ARM_COMPUTE_ERROR_ON_NULLPTR(_output);
 
     OutputTransform output_transform(_output_workspace, _matrix_stride, _matrix_row_stride,
-                                     reinterpret_cast<T *>(_biases->buffer()), _output,
+                                     (_biases ? reinterpret_cast<T *>(_biases->buffer()) : nullptr), _output,
                                      _n_batches, _n_rows, _n_cols, _n_channels);
 
     // The code below cannot be moved to configure because biases hasn't been allocated at that point

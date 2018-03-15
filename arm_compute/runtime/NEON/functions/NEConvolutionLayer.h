@@ -92,8 +92,6 @@ public:
      *                         while every optional dimension from 4 and above represent a batch of inputs.
      *                         Data types supported: QS8/QASYMM8/QS16/F16/F32.
      * @param[in] weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported:Same as @p input.
-     * @param[in] biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
-     *                         Data type supported: Should match @p input data type, except for input of QASYMM8 type where biases should be of S32 type.
      * @param[in] output       Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
      *                         Data types supported: Same as @p input.
      * @param[in] conv_info    Contains padding and stride information described in @ref PadStrideInfo.
@@ -104,9 +102,8 @@ public:
      *
      * @return the Convolution Method Hint
      */
-    static ConvolutionMethod get_convolution_method(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
+    static ConvolutionMethod get_convolution_method(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *output, const PadStrideInfo &conv_info,
                                                     const WeightsInfo &weights_info = WeightsInfo(), const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo());
-
     // Inherited methods overridden:
     void run() override;
 

@@ -48,7 +48,7 @@ namespace validation
 {
 using namespace arm_compute::misc::shape_calculator;
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool use_bias = true>
 class WinogradConvolutionLayerValidationFixture : public framework::Fixture
 {
 public:
@@ -93,7 +93,7 @@ protected:
 
         // Create and configure function
         FunctionType conv;
-        conv.configure(&src, &weights, &bias, &dst, info, act_info);
+        conv.configure(&src, &weights, (use_bias) ? &bias : nullptr, &dst, info, act_info);
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -133,7 +133,14 @@ protected:
         // Fill reference
         fill(src, 0, -1.f, 1.f);
         fill(weights, 1, -1.f, 1.f);
-        fill(bias, 2, -1.f, 1.f);
+        if(use_bias)
+        {
+            fill(bias, 2, -1.f, 1.f);
+        }
+        else
+        {
+            fill(bias, 2, 0.f, 0.f);
+        }
 
         return (act_info.enabled()) ? reference::activation_layer<T>(reference::convolution_layer<T>(src, weights, bias, output_shape, info), act_info) : reference::convolution_layer<T>(src, weights, bias,
                 output_shape, info);
