@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,10 +22,10 @@
  * SOFTWARE.
 */
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/functions/NEGaussianPyramid.h"
-#include "arm_compute/runtime/Tensor.h"
-#include "arm_compute/runtime/TensorAllocator.h"
-#include "tests/NEON/Accessor.h"
+#include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/CLTensorAllocator.h"
+#include "arm_compute/runtime/CL/functions/CLGaussianPyramid.h"
+#include "tests/CL/CLAccessor.h"
 #include "tests/PaddingCalculator.h"
 #include "tests/datasets/BorderModeDataset.h"
 #include "tests/datasets/ShapeDatasets.h"
@@ -48,7 +48,7 @@ const auto small_gaussian_pyramid_levels = combine(datasets::Medium2DShapes(), d
 const auto large_gaussian_pyramid_levels = combine(datasets::Large2DShapes(), datasets::BorderModes()) * framework::dataset::make("numlevels", 2, 5);
 
 template <typename T>
-inline void validate_gaussian_pyramid(const Pyramid &target, const std::vector<SimpleTensor<T>> &reference, BorderMode border_mode)
+inline void validate_gaussian_pyramid(const CLPyramid &target, const std::vector<SimpleTensor<T>> &reference, BorderMode border_mode)
 {
     ValidRegion prev_valid_region = shape_to_valid_region(reference[0].shape());
 
@@ -57,29 +57,30 @@ inline void validate_gaussian_pyramid(const Pyramid &target, const std::vector<S
         const ValidRegion valid_region = shape_to_valid_region_gaussian_pyramid_half(reference[i - 1].shape(), prev_valid_region, (border_mode == BorderMode::UNDEFINED));
 
         // Validate outputs
-        validate(Accessor(*(target.get_pyramid_level(i))), reference[i], valid_region);
+        validate(CLAccessor(*(target.get_pyramid_level(i))), reference[i], valid_region);
 
         // Keep the valid region for the next level
         prev_valid_region = valid_region;
     }
 }
+
 } // namespace
 
-TEST_SUITE(NEON)
+TEST_SUITE(CL)
 TEST_SUITE(GaussianPyramid)
 TEST_SUITE(Half)
 
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, large_gaussian_pyramid_levels,
                shape, border_mode, num_levels)
 {
-    Tensor src = create_tensor<Tensor>(shape, DataType::U8);
+    CLTensor src = create_tensor<CLTensor>(shape, DataType::U8);
 
     // Create pyramid
     PyramidInfo pyramid_info(num_levels, SCALE_PYRAMID_HALF, shape, Format::U8);
-    Pyramid     dst;
+    CLPyramid   dst;
     dst.init(pyramid_info);
 
-    NEGaussianPyramidHalf gaussian_pyramid_half;
+    CLGaussianPyramidHalf gaussian_pyramid_half;
     gaussian_pyramid_half.configure(&src, &dst, border_mode, 0);
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -91,14 +92,14 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, large_gaussian_pyrami
 }
 
 template <typename T>
-using NEGaussianPyramidHalfFixture = GaussianPyramidHalfValidationFixture<Tensor, Accessor, NEGaussianPyramidHalf, T, Pyramid>;
+using CLGaussianPyramidHalfFixture = GaussianPyramidHalfValidationFixture<CLTensor, CLAccessor, CLGaussianPyramidHalf, T, CLPyramid>;
 
-FIXTURE_DATA_TEST_CASE(RunSmallGaussianPyramidHalf, NEGaussianPyramidHalfFixture<uint8_t>, framework::DatasetMode::ALL, small_gaussian_pyramid_levels)
+FIXTURE_DATA_TEST_CASE(RunSmallGaussianPyramidHalf, CLGaussianPyramidHalfFixture<uint8_t>, framework::DatasetMode::ALL, small_gaussian_pyramid_levels)
 {
     validate_gaussian_pyramid(_target, _reference, _border_mode);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLargeGaussianPyramidHalf, NEGaussianPyramidHalfFixture<uint8_t>, framework::DatasetMode::NIGHTLY, large_gaussian_pyramid_levels)
+FIXTURE_DATA_TEST_CASE(RunLargeGaussianPyramidHalf, CLGaussianPyramidHalfFixture<uint8_t>, framework::DatasetMode::NIGHTLY, large_gaussian_pyramid_levels)
 {
     validate_gaussian_pyramid(_target, _reference, _border_mode);
 }

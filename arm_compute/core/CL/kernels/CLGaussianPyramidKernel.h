@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,19 +49,17 @@ public:
 
     /** Initialise the kernel's source, destination and border mode.
      *
-     * @param[in]  input            Source tensor. Data types supported: U8.
-     * @param[out] output           Destination tensor. Output should have half the input width. Data types supported: U16.
-     * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
+     * @param[in]  input  Source tensor. Data types supported: U8.
+     * @param[out] output Destination tensor. Output should have half the input width. Data types supported: U16.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, bool border_undefined);
+    void configure(const ICLTensor *input, ICLTensor *output);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
     BorderSize border_size() const override;
 
 private:
-    BorderSize _border_size;
-    int        _l2_load_offset;
+    int _l2_load_offset;
 };
 
 /** OpenCL kernel to perform a Gaussian filter and half scaling across height (vertical pass) */
@@ -83,11 +81,10 @@ public:
 
     /** Initialise the kernel's source, destination and border mode.
      *
-     * @param[in]  input            Source tensor. Data types supported: U16.
-     * @param[out] output           Destination tensor. Output should have half the input height. Data types supported: U8.
-     * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
+     * @param[in]  input  Source tensor. Data types supported: U16.
+     * @param[out] output Destination tensor. Output should have half the input height. Data types supported: U8.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, bool border_undefined);
+    void configure(const ICLTensor *input, ICLTensor *output);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
