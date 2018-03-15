@@ -100,6 +100,7 @@ ITensorInfo &SubTensorInfo::set_tensor_shape(const TensorShape &shape)
     if(_parent->tensor_shape().total_size() != 0 && !_extend_parent)
     {
         ARM_COMPUTE_ERROR_ON_INVALID_SUBTENSOR(_parent->tensor_shape(), _coords, shape);
+        _valid_region = ValidRegion{ _coords, shape };
     }
     else if(_extend_parent) // Extend parent shape, configure if specified
     {
