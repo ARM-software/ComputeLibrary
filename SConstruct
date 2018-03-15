@@ -171,9 +171,6 @@ env['AS'] = prefix + "as"
 env['AR'] = prefix + "ar"
 env['RANLIB'] = prefix + "ranlib"
 
-if 'ccache' in env['compiler_cache'] and 'clang++' in cpp_compiler:
-    env['ENV']['CCACHE_CPP2'] = 'yes'
-
 if not GetOption("help"):
     try:
         compiler_ver = subprocess.check_output(env['CXX'].split() + ["-dumpversion"]).strip()
