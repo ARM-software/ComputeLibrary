@@ -116,6 +116,144 @@ __kernel void winograd_filter_transform_2x2_3x3_nchw(
     *(__global float *)(dst_addr + 14 * dst_stride_z) = out3.s2;
     *(__global float *)(dst_addr + 15 * dst_stride_z) = out3.s3;
 }
+
+/** This OpenCL kernel performs Winograd filter transform 3x3 when the data format is NCHW and the output tile is 4x4
+ *
+ * @note The number of channels must be passed at compile time using -DNUM_CHANNELS: e.g. -DNUM_CHANNELS=64
+ *
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F32
+ * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
+ * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
+ * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes)
+ * @param[in]  src_step_w                        src_stride_w * number of elements along W processed per workitem(in bytes)
+ * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
+ * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
+ * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
+ * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ */
+__kernel void winograd_filter_transform_4x4_3x3_nchw(
+    TENSOR4D_DECLARATION(src),
+    TENSOR3D_DECLARATION(dst))
+{
+    Tensor4D src = CONVERT_TO_TENSOR4D_STRUCT(src, NUM_CHANNELS);
+
+    const __global uchar *src_addr = tensor4D_offset(&src, 0, 0, 0, 0);
+
+    // Load the values from the input tensor
+    float3 w0 = vload3(0, (__global float *)(src_addr + 0 * src_stride_y));
+    float3 w1 = vload3(0, (__global float *)(src_addr + 1 * src_stride_y));
+    float3 w2 = vload3(0, (__global float *)(src_addr + 2 * src_stride_y));
+
+    // Transform the 3x3 tile in a 6x6 tile
+    float8 out0 = 0.0f;
+    float8 out1 = 0.0f;
+    float8 out2 = 0.0f;
+    float8 out3 = 0.0f;
+    float8 out4 = 0.0f;
+    float8 out5 = 0.0f;
+
+    // Row 0
+    out0.s0 = (w0.s0) / 16.f;
+    out0.s1 = (-w0.s0 - w0.s1 - w0.s2) / 24.f;
+    out0.s2 = (-w0.s0 + w0.s1 - w0.s2) / 24.f;
+    out0.s3 = (w0.s0 + 2 * w0.s1 + 4 * w0.s2) / 96.f;
+    out0.s4 = (w0.s0 - 2 * w0.s1 + 4 * w0.s2) / 96.f;
+    out0.s5 = (w0.s2) / 4.f;
+
+    // Row 1
+    out1.s0 = (-w0.s0 - w1.s0 - w2.s0) / 24.f;
+    out1.s1 = (w0.s0 + w1.s0 + w2.s0 + w0.s1 + w1.s1 + w2.s1 + w0.s2 + w1.s2 + w2.s2) / 36.f;
+    out1.s2 = (w0.s0 + w1.s0 + w2.s0 - w0.s1 - w1.s1 - w2.s1 + w0.s2 + w1.s2 + w2.s2) / 36.f;
+    out1.s3 = (-w0.s0 - w1.s0 - w2.s0 + 2 * (-w0.s1 - w1.s1 - w2.s1) + 4 * (-w0.s2 - w1.s2 - w2.s2)) / 144.f;
+    out1.s4 = (-w0.s0 - w1.s0 - w2.s0 + 2 * (w0.s1 + w1.s1 + w2.s1) + 4 * (-w0.s2 - w1.s2 - w2.s2)) / 144.f;
+    out1.s5 = (-w0.s2 - w1.s2 - w2.s2) / 6.f;
+
+    // Row 2
+    out2.s0 = (-w0.s0 + w1.s0 - w2.s0) / 24.f;
+    out2.s1 = (w0.s0 - w1.s0 + w2.s0 + w0.s1 - w1.s1 + w2.s1 + w0.s2 - w1.s2 + w2.s2) / 36.f;
+    out2.s2 = (w0.s0 - w1.s0 + w2.s0 - w0.s1 + w1.s1 - w2.s1 + w0.s2 - w1.s2 + w2.s2) / 36.f;
+    out2.s3 = (-w0.s0 + w1.s0 - w2.s0 + 2 * (-w0.s1 + w1.s1 - w2.s1) + 4 * (-w0.s2 + w1.s2 - w2.s2)) / 144.f;
+    out2.s4 = (-w0.s0 + w1.s0 - w2.s0 + 2 * (w0.s1 - w1.s1 + w2.s1) + 4 * (-w0.s2 + w1.s2 - w2.s2)) / 144.f;
+    out2.s5 = (-w0.s2 + w1.s2 - w2.s2) / 6.f;
+
+    // Row 3
+    out3.s0 = (w0.s0 + 2 * w1.s0 + 4 * w2.s0) / 96.f;
+    out3.s1 = (-w0.s0 - 2 * w1.s0 - 4 * w2.s0 - w0.s1 - 2 * w1.s1 - 4 * w2.s1 - w0.s2 - 2 * w1.s2 - 4 * w2.s2) / 144.f;
+    out3.s2 = (-w0.s0 - 2 * w1.s0 - 4 * w2.s0 + w0.s1 + 2 * w1.s1 + 4 * w2.s1 - w0.s2 - 2 * w1.s2 - 4 * w2.s2) / 144.f;
+    out3.s3 = ((w0.s0 + 2 * w1.s0 + 4 * w2.s0) + 2 * (w0.s1 + 2 * w1.s1 + 4 * w2.s1) + 4 * (w0.s2 + 2 * w1.s2 + 4 * w2.s2)) / 576.f;
+    out3.s4 = ((w0.s0 + 2 * w1.s0 + 4 * w2.s0) + 2 * (-w0.s1 - 2 * w1.s1 - 4 * w2.s1) + 4 * (w0.s2 + 2 * w1.s2 + 4 * w2.s2)) / 576.f;
+    out3.s5 = (w0.s2 + 2 * w1.s2 + 4 * w2.s2) / 24.f;
+
+    // Row 4
+    out4.s0 = (w0.s0 - 2 * w1.s0 + 4 * w2.s0) / 96.f;
+    out4.s1 = (-w0.s0 + 2 * w1.s0 - 4 * w2.s0 - w0.s1 + 2 * w1.s1 - 4 * w2.s1 - w0.s2 + 2 * w1.s2 - 4 * w2.s2) / 144.f;
+    out4.s2 = (-w0.s0 + 2 * w1.s0 - 4 * w2.s0 + w0.s1 - 2 * w1.s1 + 4 * w2.s1 - w0.s2 + 2 * w1.s2 - 4 * w2.s2) / 144.f;
+    out4.s3 = ((w0.s0 - 2 * w1.s0 + 4 * w2.s0) + 2 * (w0.s1 - 2 * w1.s1 + 4 * w2.s1) + 4 * (w0.s2 - 2 * w1.s2 + 4 * w2.s2)) / 576.f;
+    out4.s4 = ((w0.s0 - 2 * w1.s0 + 4 * w2.s0) + 2 * (-w0.s1 + 2 * w1.s1 - 4 * w2.s1) + 4 * (w0.s2 - 2 * w1.s2 + 4 * w2.s2)) / 576.f;
+    out4.s5 = (w0.s2 - 2 * w1.s2 + 4 * w2.s2) / 24.f;
+
+    // Row 5
+    out5.s0 = (w2.s0) / 4.f;
+    out5.s1 = (-w2.s0 - w2.s1 - w2.s2) / 6.f;
+    out5.s2 = (-w2.s0 + w2.s1 - w2.s2) / 6.f;
+    out5.s3 = (w2.s0 + 2 * w2.s1 + 4 * w2.s2) / 24.f;
+    out5.s4 = (w2.s0 - 2 * w2.s1 + 4 * w2.s2) / 24.f;
+    out5.s5 = (w2.s2);
+
+    int z  = get_global_id(2);
+    int x0 = z / NUM_CHANNELS; // idx filter
+    int y0 = z % NUM_CHANNELS; // idx channel
+
+    // Get output address
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x0 * dst_stride_x + y0 * dst_stride_y;
+
+    // Store the 36 values across the 36 channels
+    *(__global float *)(dst_addr + 0 * dst_stride_z)  = out0.s0;
+    *(__global float *)(dst_addr + 1 * dst_stride_z)  = out0.s1;
+    *(__global float *)(dst_addr + 2 * dst_stride_z)  = out0.s2;
+    *(__global float *)(dst_addr + 3 * dst_stride_z)  = out0.s3;
+    *(__global float *)(dst_addr + 4 * dst_stride_z)  = out0.s4;
+    *(__global float *)(dst_addr + 5 * dst_stride_z)  = out0.s5;
+    *(__global float *)(dst_addr + 6 * dst_stride_z)  = out1.s0;
+    *(__global float *)(dst_addr + 7 * dst_stride_z)  = out1.s1;
+    *(__global float *)(dst_addr + 8 * dst_stride_z)  = out1.s2;
+    *(__global float *)(dst_addr + 9 * dst_stride_z)  = out1.s3;
+    *(__global float *)(dst_addr + 10 * dst_stride_z) = out1.s4;
+    *(__global float *)(dst_addr + 11 * dst_stride_z) = out1.s5;
+    *(__global float *)(dst_addr + 12 * dst_stride_z) = out2.s0;
+    *(__global float *)(dst_addr + 13 * dst_stride_z) = out2.s1;
+    *(__global float *)(dst_addr + 14 * dst_stride_z) = out2.s2;
+    *(__global float *)(dst_addr + 15 * dst_stride_z) = out2.s3;
+    *(__global float *)(dst_addr + 16 * dst_stride_z) = out2.s4;
+    *(__global float *)(dst_addr + 17 * dst_stride_z) = out2.s5;
+    *(__global float *)(dst_addr + 18 * dst_stride_z) = out3.s0;
+    *(__global float *)(dst_addr + 19 * dst_stride_z) = out3.s1;
+    *(__global float *)(dst_addr + 20 * dst_stride_z) = out3.s2;
+    *(__global float *)(dst_addr + 21 * dst_stride_z) = out3.s3;
+    *(__global float *)(dst_addr + 22 * dst_stride_z) = out3.s4;
+    *(__global float *)(dst_addr + 23 * dst_stride_z) = out3.s5;
+    *(__global float *)(dst_addr + 24 * dst_stride_z) = out4.s0;
+    *(__global float *)(dst_addr + 25 * dst_stride_z) = out4.s1;
+    *(__global float *)(dst_addr + 26 * dst_stride_z) = out4.s2;
+    *(__global float *)(dst_addr + 27 * dst_stride_z) = out4.s3;
+    *(__global float *)(dst_addr + 28 * dst_stride_z) = out4.s4;
+    *(__global float *)(dst_addr + 29 * dst_stride_z) = out4.s5;
+    *(__global float *)(dst_addr + 30 * dst_stride_z) = out5.s0;
+    *(__global float *)(dst_addr + 31 * dst_stride_z) = out5.s1;
+    *(__global float *)(dst_addr + 32 * dst_stride_z) = out5.s2;
+    *(__global float *)(dst_addr + 33 * dst_stride_z) = out5.s3;
+    *(__global float *)(dst_addr + 34 * dst_stride_z) = out5.s4;
+    *(__global float *)(dst_addr + 35 * dst_stride_z) = out5.s5;
+}
 #endif // defined(NUM_CHANNELS)
 
 #if defined(NUM_TILES_X) && defined(PAD_LEFT) && defined(PAD_TOP)

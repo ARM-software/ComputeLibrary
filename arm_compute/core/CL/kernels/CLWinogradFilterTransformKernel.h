@@ -48,20 +48,22 @@ public:
     ~CLWinogradFilterTransformKernel() = default;
     /** Set the input and output tensor.
      *
-     * @param[in]  input  Source tensor. The input is a 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] (NCHW data layout).
-     *                    kernel_x must be 3 and equal to kernel_y. Data types supported: F32.
-     * @param[out] output Destination tensor. The output is a 3D tensor with dimensions [OFM, IFM, 16]. Data type supported: same as @p input
+     * @param[in]  input       Source tensor. The input is a 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] (NCHW data layout).
+     *                         kernel_x must be 3 and equal to kernel_y. Data types supported: F32.
+     * @param[out] output      Destination tensor. The output is a 3D tensor with dimensions [OFM, IFM, 16]. Data type supported: same as @p input
+     * @param[in]  output_tile Output tile. Currently only 2x2 and 4x4 tiles are supported.
      */
-    void configure(const ICLTensor *input, ICLTensor *output);
+    void configure(const ICLTensor *input, ICLTensor *output, const Size2D &output_tile);
     /** Static function to check if given info will lead to a valid configuration of @ref CLWinogradFilterTransformKernel
      *
-     * @param[in] input  Source tensor info. The input is a 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] (NCHW data layout).
-     *                   kernel_x must be 3 and equal to kernel_y. Data types supported: F32.
-     * @param[in] output Destination tensor info. The output is a 3D tensor with dimensions [OFM, IFM, 16]. Data type supported: same as @p input
+     * @param[in] input       Source tensor info. The input is a 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] (NCHW data layout).
+     *                        kernel_x must be 3 and equal to kernel_y. Data types supported: F32.
+     * @param[in] output      Destination tensor info. The output is a 3D tensor with dimensions [OFM, IFM, 16]. Data type supported: same as @p input
+     * @param[in] output_tile Output tile. Currently only 2x2 and 4x4 tiles are supported.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &output_tile);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

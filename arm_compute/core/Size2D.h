@@ -24,6 +24,7 @@
 #ifndef __ARM_COMPUTE_SIZE2D_H__
 #define __ARM_COMPUTE_SIZE2D_H__
 
+#include "support/ToolchainSupport.h"
 #include <cstddef>
 #include <utility>
 
@@ -52,6 +53,21 @@ public:
     size_t area() const
     {
         return (width * height);
+    }
+
+    bool operator==(const Size2D &other) const
+    {
+        return (width == other.width) && (height == other.height);
+    }
+
+    bool operator!=(const Size2D &other) const
+    {
+        return !(*this == other);
+    }
+
+    std::string to_string() const
+    {
+        return support::cpp11::to_string(width) + std::string("x") + support::cpp11::to_string(height);
     }
 
 public:

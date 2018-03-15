@@ -64,7 +64,7 @@ void CLWinogradConvolutionLayer::configure(ICLTensor *input, const ICLTensor *we
     _input_transform.configure(input, &_input0, conv_info, Size2D(kernel_w, kernel_h));
 
     // Configure filter transform
-    _filter_transform.configure(weights, &_input1);
+    _filter_transform.configure(weights, &_input1, Size2D(2U, 2U));
 
     // Configure batched matrix multiply
     _batched_mm.configure(&_input0, &_input1, nullptr, &_batched_mm_output, 1.0f, 0.0f, GEMMInfo(false, false, true /* Reshape weights only for the first run*/));
@@ -103,9 +103,9 @@ Status CLWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITen
     ARM_COMPUTE_RETURN_ON_ERROR(CLWinogradInputTransform::validate(input, &input0, conv_info, Size2D(kernel_w, kernel_h)));
 
     // Validate filter transform
-    const TensorShape input1_shape = misc::shape_calculator::compute_winograd_filter_transform_shape(*weights);
+    const TensorShape input1_shape = misc::shape_calculator::compute_winograd_filter_transform_shape(*weights, Size2D(2U, 2U));
     const TensorInfo  input1       = weights->clone()->set_tensor_shape(input1_shape);
-    ARM_COMPUTE_RETURN_ON_ERROR(CLWinogradFilterTransformKernel::validate(weights, &input1));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLWinogradFilterTransformKernel::validate(weights, &input1, Size2D(2U, 2U)));
 
     // Configure batched matrix multiply
     TensorShape batched_mm_output_shape = input0.tensor_shape();

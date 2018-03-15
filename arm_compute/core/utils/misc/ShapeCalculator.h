@@ -196,23 +196,17 @@ inline TensorShape compute_fully_connected_reshaped_weights_shape(const ITensorI
     return output_shape;
 }
 
-inline TensorShape compute_winograd_filter_transform_shape(const ITensorInfo &input)
+inline TensorShape compute_winograd_filter_transform_shape(const ITensorInfo &input, const Size2D &output_tile)
 {
-    // COMPMID-984 (giaiod01)
     TensorShape tensor_shape{ input.tensor_shape() };
+
+    tensor_shape.remove_dimension(get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::WIDTH));
+    tensor_shape.set(Window::DimY, input.dimension(2));
+    tensor_shape.set(Window::DimZ, (output_tile.width == 2) ? 16 : 36);
 
     if(input.data_layout() == DataLayout::NCHW)
     {
-        tensor_shape.remove_dimension(0);
         tensor_shape.set(Window::DimX, input.dimension(3));
-        tensor_shape.set(Window::DimY, input.dimension(2));
-        tensor_shape.set(Window::DimZ, 16);
-    }
-    else
-    {
-        tensor_shape.remove_dimension(1);
-        tensor_shape.set(Window::DimY, input.dimension(2));
-        tensor_shape.set(Window::DimZ, 16);
     }
 
     return tensor_shape;

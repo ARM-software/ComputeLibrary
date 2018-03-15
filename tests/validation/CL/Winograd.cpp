@@ -147,12 +147,12 @@ TEST_SUITE_END() // InputTransform
 TEST_SUITE(FilterTransform)
 // *INDENT-OFF*
 // clang-format off
-DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                 framework::dataset::make("InputInfo",{
                                                                                         TensorInfo(TensorShape(3U, 3U, 5U, 3U), 1, DataType::F16),     // F16 not supported
                                                                                         TensorInfo(TensorShape(3U, 3U, 5U, 3U), 1, DataType::QASYMM8), // QASYMM8 not supported
                                                                                         TensorInfo(TensorShape(5U, 5U, 5U, 3U), 1, DataType::F32),     // Kernel size not supported
-                                                                                        TensorInfo(TensorShape(3U, 3U), 1, DataType::F32),             // valid
+                                                                                        TensorInfo(TensorShape(3U, 3U), 1, DataType::F32),             // Output tile not supported
                                                                                         TensorInfo(TensorShape(3U, 3U, 5U, 3U), 1, DataType::F32),     // valid
                                                                                         TensorInfo(TensorShape(3U, 3U, 37U, 2U), 1, DataType::F32),    // valid
                                                                                         TensorInfo(TensorShape(3U, 3U, 37U, 22U), 1, DataType::F32)    // valid
@@ -164,12 +164,21 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
                                                                                         TensorInfo(TensorShape(1U, 1U, 16U), 1, DataType::F32),
                                                                                         TensorInfo(TensorShape(3U, 5U, 16U), 1, DataType::F32),
                                                                                         TensorInfo(TensorShape(2U, 37U, 16U), 1, DataType::F32),
-                                                                                        TensorInfo(TensorShape(22U, 37U, 16U), 1, DataType::F32)
+                                                                                        TensorInfo(TensorShape(22U, 37U, 36U), 1, DataType::F32)
                                                                                     })),
-                                                framework::dataset::make("Expected", { false, false, false, true, true, true, true })),
-                                            input_info, output_info, expected)
+                                                framework::dataset::make("OutputTile", {
+                                                                                        Size2D(2U, 2U),
+                                                                                        Size2D(2U, 2U),
+                                                                                        Size2D(2U, 2U),
+                                                                                        Size2D(3U, 3U),
+                                                                                        Size2D(2U, 2U),
+                                                                                        Size2D(2U, 2U),
+                                                                                        Size2D(4U, 4U)
+                                                                                    })),
+                                                framework::dataset::make("Expected", { false, false, false, false, true, true, true })),
+                                            input_info, output_info, output_tile, expected)
 {
-    ARM_COMPUTE_EXPECT(bool(CLWinogradFilterTransformKernel::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false))) == expected, framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(bool(CLWinogradFilterTransformKernel::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), output_tile)) == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
 // *INDENT-ON*
@@ -177,13 +186,14 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
 using CLWinogradFilterTransform        = CLSynthetizeFunctionWithZeroConstantBorder<CLWinogradFilterTransformKernel, 0>;
 using CLWinogradFilterTransformFixture = WinogradFilterTransformValidationFixture<CLTensor, CLAccessor, CLWinogradFilterTransform, float>;
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallWinogradFilterTransformDataset(), datasets::LargeWinogradFilterTransformDataset()),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallWinogradFilterTransformDataset(), datasets::LargeWinogradFilterTransformDataset()),
+                                                                           framework::dataset::make("OutputTile", { Size2D(2U, 2U), Size2D(4U, 4U) })),
                                                                    framework::dataset::make("DataType", { DataType::F32 })),
-               shape_a, is_nchw_format, data_type)
+               shape_a, is_nchw_format, output_tile, data_type)
 {
     ARM_COMPUTE_UNUSED(is_nchw_format);
 
-    TensorShape shape_b = compute_winograd_filter_transform_shape(TensorInfo(shape_a, 1, data_type));
+    TensorShape shape_b = compute_winograd_filter_transform_shape(TensorInfo(shape_a, 1, data_type), output_tile);
 
     // Create tensors
     CLTensor a = create_tensor<CLTensor>(shape_a, data_type);
@@ -194,16 +204,19 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
 
     // Create and configure function
     CLWinogradFilterTransform winograd_filter_transform;
-    winograd_filter_transform.configure(&a, &b);
+    winograd_filter_transform.configure(&a, &b, output_tile);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradFilterTransformFixture, framework::DatasetMode::ALL, combine(datasets::SmallWinogradFilterTransformDataset(), framework::dataset::make("DataType", { DataType::F32 })))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradFilterTransformFixture, framework::DatasetMode::ALL, combine(combine(datasets::SmallWinogradFilterTransformDataset(), framework::dataset::make("OutputTile", { Size2D(2U, 2U), Size2D(4U, 4U) })),
+                                                                                                        framework::dataset::make("DataType", { DataType::F32 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradFilterTransformFixture, framework::DatasetMode::NIGHTLY, combine(datasets::LargeWinogradFilterTransformDataset(), framework::dataset::make("DataType", { DataType::F32 })))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradFilterTransformFixture, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeWinogradFilterTransformDataset(),
+                                                                                                                    framework::dataset::make("OutputTile", { Size2D(2U, 2U), Size2D(4U, 4U) })),
+                                                                                                            framework::dataset::make("DataType", { DataType::F32 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);

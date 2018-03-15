@@ -225,12 +225,12 @@ class WinogradFilterTransformValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape input_shape, bool is_nchw_format, DataType data_type)
+    void setup(TensorShape input_shape, bool is_nchw_format, Size2D output_tile, DataType data_type)
     {
-        TensorShape output_shape = compute_winograd_filter_transform_shape(TensorInfo(input_shape, 1, data_type));
+        TensorShape output_shape = compute_winograd_filter_transform_shape(TensorInfo(input_shape, 1, data_type), output_tile);
 
-        _target    = compute_target(input_shape, output_shape, is_nchw_format, data_type);
-        _reference = compute_reference(input_shape, output_shape, is_nchw_format, data_type);
+        _target    = compute_target(input_shape, output_shape, is_nchw_format, output_tile, data_type);
+        _reference = compute_reference(input_shape, output_shape, is_nchw_format, output_tile, data_type);
     }
 
 protected:
@@ -254,7 +254,7 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape &input_shape, const TensorShape &output_shape, bool is_nchw_format, DataType data_type)
+    TensorType compute_target(const TensorShape &input_shape, const TensorShape &output_shape, bool is_nchw_format, const Size2D &output_tile, DataType data_type)
     {
         ARM_COMPUTE_UNUSED(is_nchw_format);
 
@@ -264,7 +264,7 @@ protected:
 
         // Create and configure function
         FunctionType filter_transform;
-        filter_transform.configure(&src, &dst);
+        filter_transform.configure(&src, &dst, output_tile);
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -284,7 +284,7 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, bool is_nchw_format, DataType data_type)
+    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, bool is_nchw_format, const Size2D &output_tile, DataType data_type)
     {
         ARM_COMPUTE_UNUSED(is_nchw_format);
 
@@ -294,7 +294,7 @@ protected:
         // Fill reference
         fill(src, 0, -1.f, 1.f);
 
-        return reference::winograd_filter_transform<T>(src, output_shape);
+        return reference::winograd_filter_transform<T>(src, output_shape, output_tile);
     }
 
     TensorType      _target{};

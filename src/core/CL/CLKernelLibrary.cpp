@@ -352,6 +352,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "warp_perspective_nearest_neighbour", "warp_perspective.cl" },
     { "warp_perspective_bilinear", "warp_perspective.cl" },
     { "winograd_filter_transform_2x2_3x3_nchw", "winograd.cl" },
+    { "winograd_filter_transform_4x4_3x3_nchw", "winograd.cl" },
     { "winograd_input_transform_2x2_3x3_stepz1_nchw", "winograd.cl" },
     { "winograd_input_transform_2x2_3x3_stepz2_nchw", "winograd.cl" },
     { "winograd_output_transform_2x2_3x3_nchw", "winograd.cl" },
