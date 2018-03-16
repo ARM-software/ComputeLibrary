@@ -58,7 +58,7 @@ inline int       stoi( const std::string& str, std::size_t* pos = 0, int base = 
 #endif
 
 
-#ifndef BARE_METAL
+#if ! defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__))
 #include <sys/auxv.h>
 
 /* Get HWCAP bits from asm/hwcap.h */
@@ -203,8 +203,6 @@ private:
                         _percpu[curcpu].midr      = midr;
                         _percpu[curcpu].model     = midr_to_model(midr);
                         _percpu[curcpu].model_set = true;
-
-                        printf("CPU %d: %x\n",curcpu,midr);
                     }
 
                     midr=0;
@@ -244,7 +242,6 @@ private:
                 _percpu[curcpu].model     = midr_to_model(midr);
                 _percpu[curcpu].model_set = true;
 
-                printf("CPU %d: %x\n",curcpu,midr);
             }
         }
     }
@@ -254,7 +251,7 @@ private:
     int get_max_cpus() {
         int max_cpus = 1;
 
-#ifndef BARE_METAL
+#if ! defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__))
         std::ifstream CPUspresent;
         CPUspresent.open("/sys/devices/system/cpu/present", std::ios::in);
         bool success = false;
@@ -294,7 +291,7 @@ private:
 
 public:
     CPUInfo() {
-#ifndef BARE_METAL
+#if ! defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__))
         unsigned long hwcaps = getauxval(AT_HWCAP);
 
         if (hwcaps & HWCAP_CPUID) {
@@ -383,7 +380,7 @@ public:
     }
 
     CPUModel get_cpu_model() const {
-#ifdef BARE_METAL
+#if defined(BARE_METAL) || (!defined(__arm__) && !defined( __aarch64__) )
         return get_cpu_model(0);
 #else
         return get_cpu_model(sched_getcpu());
