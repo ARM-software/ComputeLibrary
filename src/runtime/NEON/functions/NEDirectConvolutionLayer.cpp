@@ -35,17 +35,21 @@ using namespace arm_compute;
 
 NEDirectConvolutionLayer::NEDirectConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _output_stage_kernel(), _conv_kernel(), _input_border_handler(), _activationlayer_function(), _accumulator(), _has_bias(false), _is_fixed_point(false),
-      _is_activationlayer_enabled(false)
+      _is_activationlayer_enabled(false), _dim_split(Window::DimZ)
 {
 }
 
 void NEDirectConvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *bias, ITensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_ERROR_ON(input->info()->data_layout() == DataLayout::UNKNOWN);
+
     // Free accumulator
     if(_accumulator.buffer() != nullptr)
     {
         _accumulator.allocator()->free();
     }
+
+    _dim_split = input->info()->data_layout() == DataLayout::NCHW ? Window::DimZ : Window::DimY;
 
     // Check if bias should be added in the convolution result
     _has_bias = (bias != nullptr);
@@ -124,7 +128,7 @@ void NEDirectConvolutionLayer::run()
 
     _memory_group.acquire();
 
-    NEScheduler::get().schedule(&_conv_kernel, Window::DimZ);
+    NEScheduler::get().schedule(&_conv_kernel, _dim_split);
     if(_has_bias || _is_fixed_point)
     {
         NEScheduler::get().schedule(&_output_stage_kernel, Window::DimY);

@@ -171,7 +171,9 @@ using CLDirectConvolutionValidationWithTensorShapesFixture = DirectConvolutionVa
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(data, framework::dataset::make("DataType", DataType::F16)), ActivationFunctionsDataset))
+FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(data, framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                ActivationFunctionsDataset),
+                                                                                                        framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp16, tolerance_num);
@@ -179,8 +181,9 @@ FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixture<half>, framework::Da
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(data, framework::dataset::make("DataType", DataType::F32)),
-                                                                                                         ActivationFunctionsDataset))
+FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(data, framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                 ActivationFunctionsDataset),
+                                                                                                         framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);

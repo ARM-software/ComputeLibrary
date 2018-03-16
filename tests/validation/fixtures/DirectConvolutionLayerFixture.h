@@ -21,8 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/Globals.h"
 #include "tests/IAccessor.h"
@@ -31,6 +33,7 @@
 #include "tests/validation/Helpers.h"
 #include "tests/validation/fixtures/ConvolutionLayerFixture.h"
 #include "tests/validation/reference/ConvolutionLayer.h"
+#include "tests/validation/reference/Permute.h"
 
 #include <random>
 
@@ -40,6 +43,8 @@ namespace test
 {
 namespace validation
 {
+using namespace arm_compute::misc::shape_calculator;
+
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
 class DirectConvolutionValidationGenericFixture : public framework::Fixture
 {
@@ -49,26 +54,42 @@ public:
 public:
     template <typename...>
     void setup(TensorShape input_shape, int stride_x, int stride_y, int pad_x, int pad_y, unsigned int kernel_size, unsigned int num_kernels,
-               DataType data_type, int fractional_bits, QuantizationInfo quantization_info, ActivationLayerInfo act_info)
+               DataType data_type, int fractional_bits, QuantizationInfo quantization_info, ActivationLayerInfo act_info, DataLayout data_layout)
     {
+        ARM_COMPUTE_ERROR_ON(data_layout == DataLayout::UNKNOWN);
+
         _fractional_bits   = fractional_bits;
         _quantization_info = quantization_info;
         _data_type         = data_type;
 
-        const TensorShape   weights_shape(kernel_size, kernel_size, input_shape.z(), num_kernels);
+        TensorShape         weights_shape(kernel_size, kernel_size, input_shape.z(), num_kernels);
         const TensorShape   bias_shape(num_kernels);
         const PadStrideInfo info(stride_x, stride_y, pad_x, pad_y, DimensionRoundingType::FLOOR);
-        const TensorShape   output_shape   = get_output_shape(input_shape, weights_shape, info);
         const DataType      bias_data_type = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
 
-        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, data_type, bias_data_type, fractional_bits, quantization_info, act_info);
-        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, data_type, bias_data_type, fractional_bits, quantization_info, act_info);
+        if(data_layout == DataLayout::NHWC)
+        {
+            permute(input_shape, PermutationVector(2U, 0U, 1U));
+            permute(weights_shape, PermutationVector(2U, 0U, 1U));
+        }
+
+        TensorInfo input_info   = TensorInfo(input_shape, 1, data_type, _fractional_bits);
+        TensorInfo weights_info = TensorInfo(weights_shape, 1, data_type, _fractional_bits);
+
+        input_info.set_data_layout(data_layout);
+        weights_info.set_data_layout(data_layout);
+
+        const TensorShape output_shape = compute_deep_convolution_shape(input_info, weights_info, info);
+
+        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, data_type, bias_data_type, fractional_bits, quantization_info, act_info, data_layout);
+        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, data_type, bias_data_type, fractional_bits, quantization_info, act_info, data_layout);
     }
 
     template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation,
-               DataType data_type, int fractional_bits, QuantizationInfo quantization_info, ActivationLayerInfo act_info)
+               DataType data_type, int fractional_bits, QuantizationInfo quantization_info, ActivationLayerInfo act_info, DataLayout data_layout)
     {
+        ARM_COMPUTE_ERROR_ON(data_layout == DataLayout::UNKNOWN);
         ARM_COMPUTE_UNUSED(dilation);
 
         _fractional_bits   = fractional_bits;
@@ -77,8 +98,15 @@ public:
 
         const DataType bias_data_type = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
 
-        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, data_type, bias_data_type, fractional_bits, quantization_info, act_info);
-        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, data_type, bias_data_type, fractional_bits, quantization_info, act_info);
+        if(data_layout == DataLayout::NHWC)
+        {
+            permute(input_shape, PermutationVector(2U, 0U, 1U));
+            permute(weights_shape, PermutationVector(2U, 0U, 1U));
+            permute(output_shape, PermutationVector(2U, 0U, 1U));
+        }
+
+        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, data_type, bias_data_type, fractional_bits, quantization_info, act_info, data_layout);
+        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, data_type, bias_data_type, fractional_bits, quantization_info, act_info, data_layout);
     }
 
 protected:
@@ -112,13 +140,13 @@ protected:
     }
 
     TensorType compute_target(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, const PadStrideInfo &info,
-                              DataType data_type, DataType bias_data_type, int fixed_point_position, QuantizationInfo quantization_info, ActivationLayerInfo act_info)
+                              DataType data_type, DataType bias_data_type, int fixed_point_position, QuantizationInfo quantization_info, ActivationLayerInfo act_info, const DataLayout &data_layout)
     {
         // Create tensors
-        TensorType src     = create_tensor<TensorType>(input_shape, data_type, 1, fixed_point_position, quantization_info);
-        TensorType weights = create_tensor<TensorType>(weights_shape, data_type, 1, fixed_point_position, quantization_info);
+        TensorType src     = create_tensor<TensorType>(input_shape, data_type, 1, fixed_point_position, quantization_info, data_layout);
+        TensorType weights = create_tensor<TensorType>(weights_shape, data_type, 1, fixed_point_position, quantization_info, data_layout);
         TensorType bias    = create_tensor<TensorType>(bias_shape, bias_data_type, 1, fixed_point_position, quantization_info);
-        TensorType dst     = create_tensor<TensorType>(output_shape, data_type, 1, fixed_point_position, quantization_info);
+        TensorType dst     = create_tensor<TensorType>(output_shape, data_type, 1, fixed_point_position, quantization_info, data_layout);
 
         // Create and configure function
         FunctionType conv;
@@ -152,11 +180,13 @@ protected:
     }
 
     SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, const PadStrideInfo &info,
-                                      DataType data_type, DataType bias_data_type, int fixed_point_position, QuantizationInfo quantization_info, ActivationLayerInfo act_info)
+                                      DataType data_type, DataType bias_data_type, int fixed_point_position, QuantizationInfo quantization_info, ActivationLayerInfo act_info, const DataLayout &data_layout)
     {
+        ARM_COMPUTE_ERROR_ON(data_layout == DataLayout::UNKNOWN);
+
         // Create reference
-        SimpleTensor<T>     src{ input_shape, data_type, 1, fixed_point_position, quantization_info };
-        SimpleTensor<T>     weights{ weights_shape, data_type, 1, fixed_point_position, quantization_info };
+        SimpleTensor<T>     src{ input_shape, data_type, 1, fixed_point_position, quantization_info, data_layout };
+        SimpleTensor<T>     weights{ weights_shape, data_type, 1, fixed_point_position, quantization_info, data_layout };
         SimpleTensor<TBias> bias{ bias_shape, bias_data_type, 1, fixed_point_position, quantization_info };
 
         // Fill reference
@@ -164,9 +194,25 @@ protected:
         fill(weights, 1);
         fill(bias, 2);
 
-        return (act_info.enabled()) ? reference::activation_layer<T>(reference::convolution_layer<T>(src, weights, bias, output_shape, info),
-                                                                     act_info) :
-               reference::convolution_layer<T>(src, weights, bias, output_shape, info);
+        SimpleTensor<T> dst;
+
+        // FIXME: move to reference once all functions that call reference::convolution_layer<>() support NHWC
+        if(src.data_layout() == DataLayout::NHWC)
+        {
+            SimpleTensor<T> src_nchw     = reference::permute<T>(src, PermutationVector(1U, 2U, 0U));
+            SimpleTensor<T> weights_nchw = reference::permute<T>(weights, PermutationVector(1U, 2U, 0U));
+
+            TensorShape output_shape_nchw{ output_shape };
+            permute(output_shape_nchw, PermutationVector(1U, 2U, 0U));
+
+            dst = reference::permute<T>(reference::convolution_layer<T>(src_nchw, weights_nchw, bias, output_shape_nchw, info), PermutationVector(2U, 0U, 1U));
+        }
+        else
+        {
+            dst = reference::convolution_layer<T>(src, weights, bias, output_shape, info);
+        }
+
+        return (act_info.enabled()) ? reference::activation_layer<T>(dst, act_info) : dst;
     }
 
     TensorType       _target{};
@@ -174,21 +220,6 @@ protected:
     int              _fractional_bits{};
     QuantizationInfo _quantization_info{};
     DataType         _data_type{};
-
-private:
-    TensorShape get_output_shape(TensorShape in_shape, TensorShape kernel_shape, const PadStrideInfo &info)
-    {
-        TensorShape out_shape(in_shape);
-        const std::pair<unsigned int, unsigned int> scaled_dims = scaled_dimensions(in_shape.x(),
-                                                                                    in_shape.y(),
-                                                                                    kernel_shape.x(),
-                                                                                    kernel_shape.y(),
-                                                                                    info);
-        out_shape.set(0, scaled_dims.first);
-        out_shape.set(1, scaled_dims.second);
-        out_shape.set(2, kernel_shape[3]);
-        return out_shape;
-    }
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
@@ -196,10 +227,11 @@ class DirectConvolutionValidationFixture : public DirectConvolutionValidationGen
 {
 public:
     template <typename...>
-    void setup(TensorShape input_shape, int stride_x, int stride_y, int pad_x, int pad_y, unsigned int kernel_size, unsigned int num_kernels, DataType data_type, ActivationLayerInfo act_info)
+    void setup(TensorShape input_shape, int stride_x, int stride_y, int pad_x, int pad_y, unsigned int kernel_size, unsigned int num_kernels, DataType data_type, ActivationLayerInfo act_info,
+               DataLayout data_layout)
     {
         DirectConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, stride_x, stride_y, pad_x, pad_y, kernel_size, num_kernels, data_type, 0, QuantizationInfo(),
-                                                                                                    act_info);
+                                                                                                    act_info, data_layout);
     }
 };
 
@@ -212,7 +244,7 @@ public:
                ActivationLayerInfo act_info)
     {
         DirectConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, stride_x, stride_y, pad_x, pad_y, kernel_size, num_kernels, data_type, fractional_bits,
-                                                                                                    QuantizationInfo(), act_info);
+                                                                                                    QuantizationInfo(), act_info, DataLayout::NCHW);
     }
 };
 
@@ -225,7 +257,7 @@ public:
                ActivationLayerInfo act_info)
     {
         DirectConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, stride_x, stride_y, pad_x, pad_y, kernel_size, num_kernels, data_type, 0, quantization_info,
-                                                                                                    act_info);
+                                                                                                    act_info, DataLayout::NCHW);
     }
 };
 
@@ -238,7 +270,7 @@ public:
                DataType data_type, QuantizationInfo quantization_info, ActivationLayerInfo act_info)
     {
         DirectConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, data_type, 0, quantization_info,
-                                                                                                    act_info);
+                                                                                                    act_info, DataLayout::NCHW);
     }
 };
 
@@ -251,7 +283,7 @@ public:
                DataType data_type, ActivationLayerInfo act_info)
     {
         DirectConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, data_type, 0, QuantizationInfo(),
-                                                                                                    act_info);
+                                                                                                    act_info, DataLayout::NCHW);
     }
 };
 

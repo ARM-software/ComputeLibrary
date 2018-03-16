@@ -34,6 +34,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "support/ToolchainSupport.h"
 
@@ -41,26 +42,6 @@ using namespace arm_compute;
 
 namespace
 {
-/** Calculates expected output shape dimension
- *
- * @param[in] Input shape
- *
- * @return Expected output shape
- */
-TensorShape get_output_shape(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info)
-{
-    unsigned int output_width  = 0;
-    unsigned int output_height = 0;
-    std::tie(output_width, output_height) = scaled_dimensions(input_shape.x(), input_shape.y(), weights_shape.x(), weights_shape.y(), conv_info);
-
-    TensorShape output_shape = input_shape;
-    output_shape.set(0, output_width);
-    output_shape.set(1, output_height);
-    output_shape.set(2, weights_shape[3]);
-
-    return output_shape;
-}
-
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
@@ -100,7 +81,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     if(output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(),
-                                                           get_output_shape(input->tensor_shape(), weights->tensor_shape(), conv_info));
+                                                           misc::shape_calculator::compute_deep_convolution_shape(*input, *weights, conv_info));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
@@ -114,7 +95,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     const DataType     data_type   = input->data_type();
 
     // Get convolved dimensions
-    TensorShape output_shape = get_output_shape(input->tensor_shape(), weights->tensor_shape(), conv_info);
+    TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*input, *weights, conv_info);
 
     // Output auto inizialitation if not yet initialized
     // FIXME: input->clone()->set_tensor_shape(output_shape) doesn't work with subtensors for grouped direct convolutions (AlexNet).
@@ -134,7 +115,8 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     unsigned int num_elems_written_per_iteration_x = 0;
     unsigned int num_elems_written_per_iteration_y = 0;
 
-    if(gpu_target_is_in(target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX) && (kernel_size <= 5) && (conv_stride_x == 1) && (conv_stride_y == 1) && (data_type == DataType::F32))
+    if(gpu_target_is_in(target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX) && (kernel_size <= 5) && (conv_stride_x == 1)
+       && (conv_stride_y == 1) && (data_type == DataType::F32))
     {
         // Configure kernel window
 
@@ -274,7 +256,7 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     const DataType     data_type   = input->info()->data_type();
 
     // Get convolved dimensions
-    TensorShape output_shape = get_output_shape(input->info()->tensor_shape(), weights->info()->tensor_shape(), conv_info);
+    TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*input->info(), *weights->info(), conv_info);
 
     // Output auto inizialitation if not yet initialized
     // FIXME: input->clone()->set_tensor_shape(output_shape) doesn't work with subtensors for grouped direct convolutions (AlexNet).
@@ -309,7 +291,8 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     CLBuildOptions build_options;
     build_options.add_option_if(_biases != nullptr, std::string("-DHAS_BIAS"));
 
-    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX) && (kernel_size <= 5) && (_conv_stride_x == 1) && (_conv_stride_y == 1) && (data_type == DataType::F32))
+    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX) && (kernel_size <= 5) && (_conv_stride_x == 1)
+       && (_conv_stride_y == 1) && (data_type == DataType::F32))
     {
         build_options.add_option(std::string("-DWEIGHTS_DEPTH=" + support::cpp11::to_string(_weights->info()->dimension(2))));
 

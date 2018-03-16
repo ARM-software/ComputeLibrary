@@ -426,6 +426,8 @@ void swap(SimpleTensor<U> &tensor1, SimpleTensor<U> &tensor2)
     swap(tensor1._format, tensor2._format);
     swap(tensor1._data_type, tensor2._data_type);
     swap(tensor1._num_channels, tensor2._num_channels);
+    swap(tensor1._fixed_point_position, tensor2._fixed_point_position);
+    swap(tensor1._quantization_info, tensor2._quantization_info);
     swap(tensor1._buffer, tensor2._buffer);
 }
 } // namespace test

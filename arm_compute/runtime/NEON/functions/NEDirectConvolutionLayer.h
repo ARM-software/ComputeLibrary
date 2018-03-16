@@ -106,6 +106,7 @@ private:
     bool                                      _has_bias;
     bool                                      _is_fixed_point;
     bool                                      _is_activationlayer_enabled;
+    unsigned int                              _dim_split;
 };
 }
 #endif /* __ARM_COMPUTE_NEDIRECTCONVOLUTIONLAYER_H__ */

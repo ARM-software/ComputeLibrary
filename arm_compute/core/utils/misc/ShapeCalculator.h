@@ -300,19 +300,19 @@ inline TensorShape compute_deep_convolution_shape(const ITensorInfo &input, cons
     const size_t idx_height  = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::HEIGHT);
     const size_t idx_channel = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::CHANNEL);
 
-    const unsigned int input_width     = input_shape[idx_width];
-    const unsigned int input_height    = input_shape[idx_height];
-    const unsigned int weights_width   = weights_shape[idx_width];
-    const unsigned int weights_height  = weights_shape[idx_height];
-    const unsigned int weights_channel = weights_shape[idx_channel];
-    unsigned int       output_width    = 0;
-    unsigned int       output_height   = 0;
+    const unsigned int input_width         = input_shape[idx_width];
+    const unsigned int input_height        = input_shape[idx_height];
+    const unsigned int weights_width       = weights_shape[idx_width];
+    const unsigned int weights_height      = weights_shape[idx_height];
+    const unsigned int weights_out_channel = weights_shape[3];
+    unsigned int       output_width        = 0;
+    unsigned int       output_height       = 0;
     std::tie(output_width, output_height) = scaled_dimensions(input_width, input_height, weights_width, weights_height, conv_info);
 
     TensorShape output_shape{ input_shape };
     output_shape.set(idx_width, output_width);
     output_shape.set(idx_height, output_height);
-    output_shape.set(idx_channel, weights_channel);
+    output_shape.set(idx_channel, weights_out_channel);
 
     return output_shape;
 }
