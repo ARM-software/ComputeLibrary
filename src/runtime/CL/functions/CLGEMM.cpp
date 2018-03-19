@@ -138,7 +138,7 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
 
         // Manage intermediate buffers
         _memory_group.manage(&_tmp_a);
-        if(_reshape_b_only_on_first_run)
+        if(!_reshape_b_only_on_first_run)
         {
             _memory_group.manage(&_tmp_b);
         }
