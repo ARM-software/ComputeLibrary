@@ -33,7 +33,7 @@
 
 namespace arm_compute
 {
-/** Default gles buffer allocator implementation */
+/** Default GLES buffer allocator implementation */
 class GCBufferAllocator : public IAllocator
 {
 public:
@@ -44,5 +44,5 @@ public:
     void *allocate(size_t size, size_t alignment) override;
     void free(void *ptr) override;
 };
-} // arm_compute
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_GCBUFFERALLOCATOR_H__ */

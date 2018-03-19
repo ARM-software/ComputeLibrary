@@ -67,14 +67,17 @@ public:
     GCFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
-     * @param[in]  input                Source tensor. Data type supported: F16/F32.
-     * @param[in]  weights              Weights tensor. The weights must be 2 dimensional. Data type supported: Same as @p input
-     * @param[in]  biases               Bias tensor. It can be nullptr. Data type supported:Same as @p input.
-     * @param[out] output               Destination tensor. Data type supported: Same as @p input.
-     * @param[in]  transpose_weights    (Optional) Transpose weights if true. Defaults to true.
-     * @param[in]  are_weights_reshaped (Optional) Reshape the weights tensor if false. Defaults to false.
+     * @param[in]  input                   Source tensor. Data type supported: F16/F32.
+     * @param[in]  weights                 Weights tensor. The weights must be 2 dimensional. Data type supported: Same as @p input
+     * @param[in]  biases                  Bias tensor. It can be nullptr. Data type supported:Same as @p input.
+     * @param[out] output                  Destination tensor. Data type supported: Same as @p input.
+     * @param[in]  transpose_weights       (Optional) Transpose weights if true. Defaults to true.
+     * @param[in]  are_weights_reshaped    (Optional) Reshape the weights tensor if false. Defaults to false.
+     * @param[in]  retain_internal_weights (Optional) Retain internal reshaped weights. Defaults to false.
+     *                                     Used for reconfiguration purposes.
      */
-    void configure(const IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, bool transpose_weights = true, bool are_weights_reshaped = false);
+    void configure(const IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output,
+                   bool transpose_weights = true, bool are_weights_reshaped = false, bool retain_internal_weights = false);
 
     //Inherited methods override
     void run() override;

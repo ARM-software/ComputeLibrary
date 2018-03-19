@@ -92,6 +92,10 @@ void GCGEMM::configure(const IGCTensor *a, const IGCTensor *b, const IGCTensor *
 
         TensorInfo info_b(shape_tmp_b, 1, b->info()->data_type(), b->info()->fixed_point_position());
         _tmp_b.allocator()->init(info_b);
+        if(!gemm_info.reshape_b_only_on_first_run())
+        {
+            _memory_group.manage(&_tmp_b);
+        }
 
         // Configure interleave kernel
         _interleave_kernel.configure(a, &_tmp_a);

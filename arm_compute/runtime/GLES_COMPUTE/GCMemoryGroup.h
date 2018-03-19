@@ -44,5 +44,5 @@ inline void MemoryGroupBase<GCTensor>::associate_memory_group(GCTensor *obj)
     ARM_COMPUTE_ERROR_ON(allocator == nullptr);
     allocator->set_associated_memory_group(this);
 }
-} // arm_compute
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_GCMEMORYGROUP_H__ */

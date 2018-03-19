@@ -57,10 +57,12 @@ void GCNormalizationLayer::configure(const IGCTensor *input, IGCTensor *output, 
 void GCNormalizationLayer::run()
 {
     _memory_group.acquire();
+
     GCScheduler::get().dispatch(_multiply_kernel, false);
     GCScheduler::get().memory_barrier();
     GCScheduler::get().dispatch(_border_handler, false);
     GCScheduler::get().memory_barrier();
     GCScheduler::get().dispatch(_norm_kernel, true);
+
     _memory_group.release();
 }

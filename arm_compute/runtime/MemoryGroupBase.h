@@ -96,7 +96,7 @@ inline MemoryGroupBase<TensorType>::MemoryGroupBase(std::shared_ptr<IMemoryManag
 template <typename TensorType>
 inline void MemoryGroupBase<TensorType>::manage(TensorType *obj)
 {
-    if(_memory_manager)
+    if(_memory_manager && _mappings.empty())
     {
         ARM_COMPUTE_ERROR_ON(!_memory_manager->lifetime_manager());
 
@@ -114,7 +114,11 @@ inline void MemoryGroupBase<TensorType>::manage(TensorType *obj)
 template <typename TensorType>
 inline void MemoryGroupBase<TensorType>::finalize_memory(TensorType *obj, void **handle, size_t size)
 {
-    if(_memory_manager)
+    // TODO (geopin01) : Check size (track size in MemoryMappings)
+    // Check if existing mapping is valid
+    ARM_COMPUTE_ERROR_ON(!_mappings.empty() && (_mappings.find(handle) == std::end(_mappings)));
+
+    if(_memory_manager && _mappings.empty())
     {
         ARM_COMPUTE_ERROR_ON(!_memory_manager->lifetime_manager());
         _memory_manager->lifetime_manager()->end_lifetime(obj, handle, size);

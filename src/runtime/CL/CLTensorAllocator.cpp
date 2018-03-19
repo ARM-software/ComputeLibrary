@@ -24,7 +24,6 @@
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/Log.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -58,11 +57,7 @@ void *SVMMemory::allocate(cl_context context, size_t size, cl_svm_mem_flags flag
     ARM_COMPUTE_ERROR_ON(_ptr != nullptr);
     ARM_COMPUTE_ERROR_ON(size > CL_DEVICE_MAX_MEM_ALLOC_SIZE);
     _ptr = clSVMAlloc(context, flags, size, alignment);
-    if(_ptr == nullptr)
-    {
-        ARM_COMPUTE_LOG_INFO_MSG_CORE("Call to clSVMAlloc() failed.");
-    }
-    else
+    if(_ptr != nullptr)
     {
         _size       = size;
         _fine_grain = static_cast<bool>(flags & CL_MEM_SVM_FINE_GRAIN_BUFFER);
@@ -76,9 +71,9 @@ void *CLTensorAllocator::svm_ptr()
 
 void CLTensorAllocator::allocate()
 {
-    ARM_COMPUTE_ERROR_ON(_buffer.get() != nullptr);
     if(_associated_memory_group == nullptr)
     {
+        ARM_COMPUTE_ERROR_ON(_buffer.get() != nullptr);
         if(_svm_memory.allocate(CLScheduler::get().context()(), CL_MEM_READ_WRITE | CL_MEM_SVM_FINE_GRAIN_BUFFER, info().total_size(), 0) == nullptr)
         {
             // try at coarse grain svm memory

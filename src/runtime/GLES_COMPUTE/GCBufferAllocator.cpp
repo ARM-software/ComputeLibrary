@@ -29,8 +29,8 @@
 
 #include <cstddef>
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 void *GCBufferAllocator::allocate(size_t size, size_t alignment)
 {
     ARM_COMPUTE_UNUSED(alignment);
@@ -48,3 +48,4 @@ void GCBufferAllocator::free(void *ptr)
     auto *gl_buffer = reinterpret_cast<GLBufferWrapper *>(ptr);
     delete gl_buffer;
 }
+} // namespace arm_compute
