@@ -282,6 +282,14 @@ inline TensorShape compute_min_max_shape(const ITensorInfo *input)
     return output_shape;
 }
 
+inline TensorShape compute_rnn_shape(const ITensorInfo *input, const unsigned int batch_size)
+{
+    TensorShape output_shape{ input->tensor_shape() };
+    output_shape.set(1, batch_size);
+
+    return output_shape;
+}
+
 } // namespace shape_calculator
 } // namespace misc
 } // namespace arm_compute

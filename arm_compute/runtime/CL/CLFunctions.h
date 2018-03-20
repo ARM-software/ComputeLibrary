@@ -93,6 +93,7 @@
 #include "arm_compute/runtime/CL/functions/CLPixelWiseMultiplication.h"
 #include "arm_compute/runtime/CL/functions/CLPoolingLayer.h"
 #include "arm_compute/runtime/CL/functions/CLQuantizationLayer.h"
+#include "arm_compute/runtime/CL/functions/CLRNNLayer.h"
 #include "arm_compute/runtime/CL/functions/CLROIPoolingLayer.h"
 #include "arm_compute/runtime/CL/functions/CLReductionOperation.h"
 #include "arm_compute/runtime/CL/functions/CLRemap.h"
