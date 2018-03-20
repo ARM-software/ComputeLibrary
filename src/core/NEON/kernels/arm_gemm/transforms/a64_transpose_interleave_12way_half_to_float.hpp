@@ -23,7 +23,7 @@
  */
 #pragma once
 
-#if defined(__aarch64__) && defined(__ARM_FEATURE_FP16_SCALAR_ARITHMETIC)
+#if defined(__aarch64__) && defined(__ARM_FP16_ARGS)
 
 #include "transpose_interleave_common.hpp"
 
@@ -110,4 +110,4 @@ inline void TransformImpl<12, 1, true, 4, 2>::Transform(
     TransposeInterleaveCommon<12, __fp16, float>::Transform(out, in, stride, x0, xmax, k0, kmax);
 }
 
-#endif // __aarch64__
+#endif // __aarch64__ && __ARM_FP16_ARGS

@@ -23,7 +23,8 @@
  */
 #pragma once
 
-#if defined(__aarch64__) && defined(__ARM_FEATURE_FP16_SCALAR_ARITHMETIC)
+// This should be possible on any AArch64 target, but some old compilers don't support __fp16 arguments.
+#if defined(__aarch64__) && defined(__ARM_FP16_ARGS)
 
 #include <arm_neon.h>
 
@@ -270,4 +271,4 @@ inline void MergeResults<12, 8>(__fp16 *out, const float *in, int ldout, int y0,
     }
 }
 
-#endif // __aarch64__ && __ARM_FEATURE_FP16_SCALAR_ARITHMETIC
+#endif // __aarch64__ && __ARM_FP16_ARGS

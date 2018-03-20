@@ -23,7 +23,7 @@
  */
 #pragma once
 
-#if defined(__aarch64__) && defined(__ARM_FEATURE_FP16_SCALAR_ARITHMETIC)
+#if defined(__aarch64__) && (defined(FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC))
 
 #include "arm_gemm.hpp"
 
@@ -71,4 +71,4 @@ public:
 
 } // namespace arm_gemm
 
-#endif // __aarch64__
+#endif // __aarch64__ && (FP16_KERNELS || __ARM_FEATURE_FP16_VECTOR_ARITHMETIC)

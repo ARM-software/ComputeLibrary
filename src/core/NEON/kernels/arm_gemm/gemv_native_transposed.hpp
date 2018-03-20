@@ -49,7 +49,7 @@ class GemvNativeTransposed : public GemmCommon<To, Tr>
     const unsigned int _Nsize;
     const unsigned int _Ksize;
 
-    const Tr _alpha;
+    const Tr _beta;
 
     const CPUInfo *const _ci;
 
@@ -60,8 +60,8 @@ public:
     GemvNativeTransposed(GemvNativeTransposed &) = delete;
     GemvNativeTransposed &operator=(GemvNativeTransposed &) = delete;
 
-    GemvNativeTransposed(const CPUInfo *ci, const unsigned int N, const unsigned int K, const Tr alpha)
-        : _Nsize(N), _Ksize(K), _alpha(alpha), _ci(ci)
+    GemvNativeTransposed(const CPUInfo *ci, const unsigned int N, const unsigned int K, const Tr beta)
+        : _Nsize(N), _Ksize(K), _beta(beta), _ci(ci)
     {
         /* For now don't do any blocking. TODO: figure out if we should. */
         m_block = K;
@@ -97,7 +97,7 @@ public:
                 prof(PROFILE_KERNEL, ((mmax - m0) * (nmax - n0)), [&](void)
                 {
                     strat.kernel(this->_Bptr + (m0 * this->_ldb) + n0, this->_Aptr + m0, this->_Cptr + n0,
-                                 _alpha, this->_ldb, (mmax - m0), (nmax - n0));
+                                 _beta, this->_ldb, (mmax - m0), (nmax - n0));
                 });
             }
         }

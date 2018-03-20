@@ -21,7 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#if defined(__aarch64__) && defined(__ARM_FEATURE_FP16_SCALAR_ARITHMETIC)
+
+// Build on AArch64 where either FP16_KERNELS is set or FP16 is explicitly supported.
+#if defined(__aarch64__) && (defined(FP16_KERNELS) || defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC))
 
 #include <arm_neon.h>
 
@@ -357,4 +359,4 @@ void a64_hgemm_asimd_24x8_a55r1(const __fp16 *Apanel, const __fp16 *Bpanel, __fp
 
 } // namespace arm_gemm
 
-#endif // __aarch64__ && __ARM_FEATURE_FP16_SCALAR_ARITHMETIC
+#endif // __aarch64__ && (FP16_KERNELS || __ARM_FEATURE_FP16_VECTOR_ARITHMETIC)

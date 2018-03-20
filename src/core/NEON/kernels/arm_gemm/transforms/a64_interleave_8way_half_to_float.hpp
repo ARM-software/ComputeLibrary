@@ -23,7 +23,7 @@
  */
 #pragma once
 
-#if defined(__aarch64__) && defined(__ARM_FEATURE_FP16_SCALAR_ARITHMETIC)
+#if defined(__aarch64__) && defined(__ARM_FP16_ARGS)
 
 #include <arm_neon.h>
 
@@ -189,4 +189,4 @@ inline void TransformImpl<8, 1, false, 4, 2>::Transform(float *out, const __fp16
     }
 }
 
-#endif // __aarch64__
+#endif // __aarch64__ && __ARM_FP16_ARGS
