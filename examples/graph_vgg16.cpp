@@ -71,8 +71,10 @@ public:
         bool      enable_memory_management = true;
 
         // Check if we can use GEMM-based convolutions evaluating if the platform has at least 1.8 GB of available memory
-        const size_t      memory_required  = 1932735283L;
-        ConvolutionMethod convolution_hint = convolution_hint_vgg16(memory_required);
+        const size_t      memory_required           = 1932735283L;
+        const bool        is_opencl                 = target_hint == Target::CL;
+        ConvolutionMethod first_convolution3x3_hint = is_opencl ? ConvolutionMethod::DIRECT : ConvolutionMethod::GEMM;
+        ConvolutionMethod convolution3x3_hint       = is_opencl ? ConvolutionMethod::WINOGRAD : convolution_hint_vgg16(memory_required);
 
         // Parse arguments
         if(argc < 2)
@@ -107,7 +109,7 @@ public:
         }
 
         graph << target_hint
-              << convolution_hint
+              << first_convolution3x3_hint
               << InputLayer(TensorDescriptor(TensorShape(224U, 224U, 3U, 1U), DataType::F32),
                             get_input_accessor(image, std::move(preprocessor)))
               // Layer 1
@@ -117,6 +119,7 @@ public:
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv1_1_b.npy"),
                   PadStrideInfo(1, 1, 1, 1))
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+              << convolution3x3_hint
               // Layer 2
               << ConvolutionLayer(
                   3U, 3U, 64U,

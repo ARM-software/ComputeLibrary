@@ -57,8 +57,10 @@ public:
         const int  int_target_hint = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
         TargetHint target_hint     = set_target_hint(int_target_hint);
 
-        const bool            is_gemm_convolution5x5 = Graph::gpu_target() == arm_compute::GPUTarget::MIDGARD || target_hint == TargetHint::NEON;
-        ConvolutionMethodHint convolution_5x5_hint   = is_gemm_convolution5x5 ? ConvolutionMethodHint::GEMM : ConvolutionMethodHint::DIRECT;
+        const bool            is_gemm_convolution5x5     = Graph::gpu_target() == arm_compute::GPUTarget::MIDGARD || target_hint == TargetHint::NEON;
+        const bool            is_winograd_convolution3x3 = target_hint == TargetHint::OPENCL;
+        ConvolutionMethodHint convolution_5x5_hint       = is_gemm_convolution5x5 ? ConvolutionMethodHint::GEMM : ConvolutionMethodHint::DIRECT;
+        ConvolutionMethodHint convolution_3x3_hint       = is_winograd_convolution3x3 ? ConvolutionMethodHint::WINOGRAD : ConvolutionMethodHint::GEMM;
 
         // Parse arguments
         if(argc < 2)
@@ -114,7 +116,7 @@ public:
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
               << NormalizationLayer(NormalizationLayerInfo(NormType::CROSS_MAP, 5, 0.0001f, 0.75f))
               << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0)))
-              << ConvolutionMethodHint::GEMM
+              << convolution_3x3_hint
               // Layer 3
               << ConvolutionLayer(
                   3U, 3U, 384U,
