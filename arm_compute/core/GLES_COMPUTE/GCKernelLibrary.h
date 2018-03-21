@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,9 +51,9 @@ public:
     GCProgram(const GCProgram &) = default;
     /** Default Move Constructor. */
     GCProgram(GCProgram &&) = default;
-    /** Default copy assignment operator. */
+    /** Default copy assignment operator */
     GCProgram &operator=(const GCProgram &) = default;
-    /** Default move assignment operator. */
+    /** Default move assignment operator */
     GCProgram &operator=(GCProgram &&) = default;
     /** Returns program name.
      *
@@ -93,9 +93,9 @@ public:
     GCKernel(const GCKernel &) = default;
     /** Default Move Constructor. */
     GCKernel(GCKernel &&) = default;
-    /** Default copy assignment operator. */
+    /** Default copy assignment operator */
     GCKernel &operator=(const GCKernel &) = default;
-    /** Default move assignment operator. */
+    /** Default move assignment operator */
     GCKernel &operator=(GCKernel &&) = default;
     /** Constructor.
      *
@@ -194,11 +194,14 @@ private:
     ~GCKernelLibrary();
 
 public:
-    /** Prevent instances of this class from being copied. */
+    /** Prevent instances of this class from being copied */
     GCKernelLibrary(const GCKernelLibrary &) = delete;
-    /** Prevent instances of this class from being copied. */
+    /** Prevent instances of this class from being copied */
     const GCKernelLibrary &operator=(const GCKernelLibrary &) = delete;
-
+    /** Get the static instance of @ref GCKernelLibrary.
+     *
+     * @return The static instance of GCKernelLibrary.
+     */
     static GCKernelLibrary &get();
     /** Initialises the kernel library.
      *

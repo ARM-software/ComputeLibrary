@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,7 +61,11 @@ public:
      *
      * @return Tensor
      */
-    virtual ITensor       *tensor()       = 0;
+    virtual ITensor *tensor() = 0;
+    /** Returns a pointer to the internal tensor
+     *
+     * @return const Tensor
+     */
     virtual const ITensor *tensor() const = 0;
     /** Return the target that this tensor is pinned on
      *

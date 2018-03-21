@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -63,7 +63,10 @@ public:
     /** Stop all added instruments. */
     void stop();
 
-    /** Return measurements for all instruments. */
+    /** Return measurements for all instruments.
+     *
+     * @return measurements for all instruments.
+     */
     const MeasurementsMap &measurements() const;
 
 private:

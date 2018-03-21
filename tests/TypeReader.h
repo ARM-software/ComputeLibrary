@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -32,7 +32,13 @@
 
 namespace arm_compute
 {
-/** Formatted input of the BorderMode type. */
+/** Formatted input of the BorderMode type.
+ *
+ * @param[out] is   Input stream.
+ * @param[in]  mode Border mode.
+ *
+ * @return the modified input stream.
+ */
 inline ::std::istream &operator>>(::std::istream &is, BorderMode &mode)
 {
     std::string value;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,7 +40,7 @@ namespace test
 class TensorCache
 {
 public:
-    /* Search the cache for a tensor of created from the specified image and
+    /** Search the cache for a tensor of created from the specified image and
      * format.
      *
      * @param[in] key Key to look up the tensor. Consists of image name and format.
@@ -50,7 +50,7 @@ public:
      */
     RawTensor *find(std::tuple<const std::string &, Format> key);
 
-    /* Search the cache for a tensor of created from the specified image,
+    /** Search the cache for a tensor of created from the specified image,
      * format and channel.
      *
      * @param[in] key Key to look up the tensor. Consists of image name, format and channel.

@@ -46,7 +46,12 @@ namespace graph_utils
 class IPreprocessor
 {
 public:
-    virtual ~IPreprocessor()                 = default;
+    /** Default destructor. */
+    virtual ~IPreprocessor() = default;
+    /** Preprocess the given tensor.
+     *
+     * @param[in] tensor Tensor to preprocess.
+     */
     virtual void preprocess(ITensor &tensor) = 0;
 };
 

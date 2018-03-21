@@ -44,9 +44,13 @@ public:
      */
     GCAccessor(GCTensor &tensor);
 
+    /** Prevent instances of this class from being copy constructed */
     GCAccessor(const GCAccessor &) = delete;
+    /** Prevent instances of this class from being copied */
     GCAccessor &operator=(const GCAccessor &) = delete;
-    GCAccessor(GCAccessor &&)                 = default;
+    /** Allow instances of this class to be move constructed */
+    GCAccessor(GCAccessor &&) = default;
+    /** Allow instances of this class to be moved */
     GCAccessor &operator=(GCAccessor &&) = default;
 
     /** Destructor that unmaps the GLES memory. */

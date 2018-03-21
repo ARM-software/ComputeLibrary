@@ -38,13 +38,23 @@ namespace framework
 class SchedulerTimer : public Instrument
 {
 public:
-    SchedulerTimer(const SchedulerTimer &) = delete;
-    SchedulerTimer &operator=(const SchedulerTimer &) = delete;
+    /** Construct a Scheduler timer.
+     *
+     * @param[in] scale_factor Measurement scale factor.
+     */
     SchedulerTimer(ScaleFactor scale_factor);
+
+    /** Prevent instances of this class from being copy constructed */
+    SchedulerTimer(const SchedulerTimer &) = delete;
+    /** Prevent instances of this class from being copied */
+    SchedulerTimer &operator=(const SchedulerTimer &) = delete;
+
     std::string                 id() const override;
     void                        start() override;
     void                        stop() override;
     Instrument::MeasurementsMap measurements() const override;
+
+    /** Kernel information */
     struct kernel_info
     {
         Instrument::MeasurementsMap measurements{}; /**< Time it took the kernel to run */

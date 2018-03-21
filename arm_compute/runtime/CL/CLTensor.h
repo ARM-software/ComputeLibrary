@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -76,6 +76,7 @@ private:
     mutable CLTensorAllocator _allocator; /**< Instance of the OpenCL tensor allocator */
 };
 
+/** OpenCL Image */
 using CLImage = CLTensor;
 }
 #endif /*__ARM_COMPUTE_CLTENSOR_H__ */

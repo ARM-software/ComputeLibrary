@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,10 @@ namespace framework
 class OpenCLTimer : public Instrument
 {
 public:
+    /** Construct an OpenCL timer.
+     *
+     * @param[in] scale_factor Measurement scale factor.
+     */
     OpenCLTimer(ScaleFactor scale_factor);
     std::string     id() const override;
     void            start() override;

@@ -30,6 +30,7 @@ namespace arm_compute
 {
 namespace graph2
 {
+/** Batch Normalization Layer node */
 class BatchNormalizationLayerNode final : public INode
 {
 public:

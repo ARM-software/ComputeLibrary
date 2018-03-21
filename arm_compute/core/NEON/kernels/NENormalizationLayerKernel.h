@@ -47,7 +47,7 @@ public:
     NENormalizationLayerKernel &operator=(const NENormalizationLayerKernel &) = delete;
     /** Default Move Constructor. */
     NENormalizationLayerKernel(NENormalizationLayerKernel &&) = default;
-    /** Default move assignment operator. */
+    /** Default move assignment operator */
     NENormalizationLayerKernel &operator=(NENormalizationLayerKernel &&) = default;
     /** Default destructor */
     ~NENormalizationLayerKernel() = default;

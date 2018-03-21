@@ -30,6 +30,7 @@ namespace arm_compute
 {
 namespace graph2
 {
+/** Const node */
 class ConstNode final : public INode
 {
 public:

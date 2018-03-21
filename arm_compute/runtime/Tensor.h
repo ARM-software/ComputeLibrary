@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,6 +60,7 @@ private:
     mutable TensorAllocator _allocator; /**< Instance of the basic CPU allocator.*/
 };
 
+/** Image */
 using Image = Tensor;
 }
 #endif /*__ARM_COMPUTE_TENSOR_H__ */

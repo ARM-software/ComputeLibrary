@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,7 @@ public:
     GCNormalizationLayerKernel &operator=(const GCNormalizationLayerKernel &) = delete;
     /** Default Move Constructor. */
     GCNormalizationLayerKernel(GCNormalizationLayerKernel &&) = default;
-    /** Default move assignment operator. */
+    /** Default move assignment operator */
     GCNormalizationLayerKernel &operator=(GCNormalizationLayerKernel &&) = default;
     /** Default destrutor */
     ~GCNormalizationLayerKernel() = default;

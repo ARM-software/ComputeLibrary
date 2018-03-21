@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,6 +64,7 @@ public:
     {
     }
 
+    /** Allow instances of this class to be move constructed */
     CartesianProductDataset(CartesianProductDataset &&) = default;
 
     /** Type of the dataset. */
@@ -72,6 +73,11 @@ public:
     /** Iterator for the dataset. */
     struct iterator
     {
+        /** Construct an iterator.
+         *
+         * @param[in] dataset1 Dataset 1.
+         * @param[in] dataset2 Dataset 2.
+         */
         iterator(const T_noref *dataset1, const U_noref *dataset2)
             : _iter1{ dataset1->begin() },
               _dataset2{ dataset2 },
@@ -79,23 +85,40 @@ public:
         {
         }
 
+        /** Allow instances of this class to be copy constructed */
         iterator(const iterator &) = default;
+        /** Allow instances of this class to be copied */
         iterator &operator=(const iterator &) = default;
-        iterator(iterator &&)                 = default;
+        /** Allow instances of this class to be move constructed */
+        iterator(iterator &&) = default;
+        /** Allow instances of this class to be moved */
         iterator &operator=(iterator &&) = default;
 
+        /** Default destructor */
         ~iterator() = default;
 
+        /** Get the description of the current value.
+         *
+         * @return description of the current value.
+         */
         std::string description() const
         {
             return _iter1.description() + ":" + _iter2.description();
         }
 
+        /** Get the value of the iterator.
+         *
+         * @return the value of the iterator.
+         */
         CartesianProductDataset::type operator*() const
         {
             return std::tuple_cat(*_iter1, *_iter2);
         }
 
+        /** Inrement the iterator.
+         *
+         * @return *this;
+         */
         iterator &operator++()
         {
             ++_second_pos;
@@ -159,6 +182,13 @@ CartesianProductDataset<T, U> combine(T &&dataset1, U &&dataset2)
     return CartesianProductDataset<T, U>(std::forward<T>(dataset1), std::forward<U>(dataset2));
 }
 
+/** Helper function to create a @ref CartesianProductDataset.
+ *
+ * @param[in] dataset1 First dataset.
+ * @param[in] dataset2 Second dataset.
+ *
+ * @return A grid dataset.
+ */
 template <typename T, typename U>
 CartesianProductDataset<T, U>
 operator*(T &&dataset1, U &&dataset2)

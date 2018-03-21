@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,9 +40,9 @@ class CLBitwiseOrKernel : public ICLKernel
 public:
     /** Default constructor. */
     CLBitwiseOrKernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLBitwiseOrKernel(const CLBitwiseOrKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLBitwiseOrKernel &operator=(const CLBitwiseOrKernel &) = delete;
     /** Allow instances of this class to be moved */
     CLBitwiseOrKernel(CLBitwiseOrKernel &&) = default;

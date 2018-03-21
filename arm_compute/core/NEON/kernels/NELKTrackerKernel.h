@@ -45,6 +45,7 @@ struct NELKInternalKeypoint
     bool  tracking_status{ false }; /**< the tracking status of the keypoint */
 };
 
+/** Interface for NEON Array of Internal Key Points. */
 using INELKInternalKeypointArray = IArray<NELKInternalKeypoint>;
 
 /** Interface for the Lucas-Kanade tracker kernel */

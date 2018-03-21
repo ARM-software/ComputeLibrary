@@ -40,37 +40,70 @@ public:
     /** Virtual destructor. */
     virtual ~IAccessor() = default;
 
-    /** Shape of the tensor. */
+    /** Shape of the tensor.
+     *
+     * @return the shape of the tensor.
+     */
     virtual TensorShape shape() const = 0;
 
-    /** Size of each element in the tensor in bytes. */
+    /** Size of each element in the tensor in bytes.
+     *
+     * @return the size of each element in the tensor in bytes.
+     */
     virtual size_t element_size() const = 0;
 
-    /** Total size of the tensor in bytes. */
+    /** Total size of the tensor in bytes.
+     *
+     * @return the total size of the tensor in bytes.
+     */
     virtual size_t size() const = 0;
 
-    /** Image format of the tensor. */
+    /** Image format of the tensor.
+     *
+     * @return the format of the tensor.
+     */
     virtual Format format() const = 0;
 
-    /** Data layout of the tensor. */
+    /** Data layout of the tensor.
+     *
+     * @return the data layout of the tensor.
+     */
     virtual DataLayout data_layout() const = 0;
 
-    /** Data type of the tensor. */
+    /** Data type of the tensor.
+     *
+     * @return the data type of the tensor.
+     */
     virtual DataType data_type() const = 0;
 
-    /** Number of channels of the tensor. */
+    /** Number of channels of the tensor.
+     *
+     * @return the number of channels of the tensor.
+     */
     virtual int num_channels() const = 0;
 
-    /** Number of elements of the tensor. */
+    /** Number of elements of the tensor.
+     *
+     * @return the number of elements of the tensor.
+     */
     virtual int num_elements() const = 0;
 
-    /** Available padding around the tensor. */
+    /** Available padding around the tensor.
+     *
+     * @return the available padding around the tensor.
+     */
     virtual PaddingSize padding() const = 0;
 
-    /** Number of bits for the fractional part. */
+    /** Number of bits for the fractional part.
+     *
+     * @return the number of bits for the fractional part.
+     */
     virtual int fixed_point_position() const = 0;
 
-    /** Quantization info in case of asymmetric quantized type */
+    /** Quantization info in case of asymmetric quantized type
+     *
+     * @return
+     */
     virtual QuantizationInfo quantization_info() const = 0;
 
     /** Read only access to the specified element.

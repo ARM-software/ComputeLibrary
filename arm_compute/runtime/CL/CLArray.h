@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,7 +46,9 @@ public:
     CLArray(const CLArray &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLArray &operator=(const CLArray &) = delete;
-    CLArray(CLArray &&)                 = default;
+    /** Allow instances of this class to be move constructed */
+    CLArray(CLArray &&) = default;
+    /** Allow instances of this class to be moved */
     CLArray &operator=(CLArray &&) = default;
     /** Constructor: initializes an array which can contain up to max_num_points values
      *
@@ -101,16 +103,27 @@ private:
     cl::Buffer _buffer;
 };
 
-using CLKeyPointArray        = CLArray<KeyPoint>;
-using CLCoordinates2DArray   = CLArray<Coordinates2D>;
+/** OpenCL Array of Key Points. */
+using CLKeyPointArray = CLArray<KeyPoint>;
+/** OpenCL Array of 2D Coordinates. */
+using CLCoordinates2DArray = CLArray<Coordinates2D>;
+/** OpenCL Array of Detection Windows. */
 using CLDetectionWindowArray = CLArray<DetectionWindow>;
-using CLROIArray             = CLArray<ROI>;
-using CLSize2DArray          = CLArray<Size2D>;
-using CLUInt8Array           = CLArray<cl_uchar>;
-using CLUInt16Array          = CLArray<cl_ushort>;
-using CLUInt32Array          = CLArray<cl_uint>;
-using CLInt16Array           = CLArray<cl_short>;
-using CLInt32Array           = CLArray<cl_int>;
-using CLFloatArray           = CLArray<cl_float>;
+/** OpenCL Array of ROIs. */
+using CLROIArray = CLArray<ROI>;
+/** OpenCL Array of 2D Sizes. */
+using CLSize2DArray = CLArray<Size2D>;
+/** OpenCL Array of uint8s. */
+using CLUInt8Array = CLArray<cl_uchar>;
+/** OpenCL Array of uint16s. */
+using CLUInt16Array = CLArray<cl_ushort>;
+/** OpenCL Array of uint32s. */
+using CLUInt32Array = CLArray<cl_uint>;
+/** OpenCL Array of int16s. */
+using CLInt16Array = CLArray<cl_short>;
+/** OpenCL Array of int32s. */
+using CLInt32Array = CLArray<cl_int>;
+/** OpenCL Array of floats. */
+using CLFloatArray = CLArray<cl_float>;
 }
 #endif /* __ARM_COMPUTE_CLARRAY_H__ */

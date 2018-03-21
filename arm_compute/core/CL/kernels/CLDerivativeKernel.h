@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,9 +36,9 @@ class CLDerivativeKernel : public ICLKernel
 public:
     /** Default constructor */
     CLDerivativeKernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLDerivativeKernel(const CLDerivativeKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLDerivativeKernel &operator=(const CLDerivativeKernel &) = delete;
     /** Allow instances of this class to be moved */
     CLDerivativeKernel(CLDerivativeKernel &&) = default;

@@ -55,7 +55,7 @@ public:
     CPPDetectionWindowNonMaximaSuppressionKernel &operator=(CPPDetectionWindowNonMaximaSuppressionKernel &&) = default;
     /** Initialise the kernel's input, output and the euclidean minimum distance
      *
-     * @attention: If @ref CLDetectionWindowArray is passed to the kernel, the map() and unmap() methods @ref CLDetectionWindowArray must be called respectively before and after
+     * @attention: If @ref IDetectionWindowArray is passed to the kernel, the map() and unmap() methods @ref IDetectionWindowArray must be called respectively before and after
      *             the run() method of @ref CPPDetectionWindowNonMaximaSuppressionKernel
      *
      * @param[in, out] input_output Input/Output array of @ref DetectionWindow

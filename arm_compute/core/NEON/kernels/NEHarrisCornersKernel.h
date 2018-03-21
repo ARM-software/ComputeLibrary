@@ -127,6 +127,7 @@ private:
     HarrisScoreFunction *_func;
 };
 #else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+/** Interface for the accumulate Weighted kernel using FP16 */
 template <int32_t block_size>
 using NEHarrisScoreFP16Kernel = NEHarrisScoreKernel<block_size>;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */

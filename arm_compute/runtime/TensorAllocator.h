@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,13 +44,16 @@ using MemoryGroup = MemoryGroupBase<Tensor>;
 class TensorAllocator : public ITensorAllocator
 {
 public:
-    /** Default constructor. */
+    /** Default constructor.
+     *
+     * @param[in] owner Owner of the tensor allocator.
+     */
     TensorAllocator(Tensor *owner = nullptr);
     /** Default destructor */
     ~TensorAllocator();
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     TensorAllocator(const TensorAllocator &) = delete;
-    /** Prevent instances of this class from being copy assigned (As this class contains pointers). */
+    /** Prevent instances of this class from being copy assigned (As this class contains pointers) */
     TensorAllocator &operator=(const TensorAllocator &) = delete;
     /** Allow instances of this class to be moved */
     TensorAllocator(TensorAllocator &&) noexcept;
@@ -71,7 +74,10 @@ public:
      */
     void init(const TensorAllocator &allocator, const Coordinates &coords, TensorInfo sub_info);
 
-    /** Returns the pointer to the allocated data. */
+    /** Returns the pointer to the allocated data.
+     *
+     * @return a pointer to the allocated data.
+     */
     uint8_t *data() const;
 
     /** Allocate size specified by TensorInfo of CPU memory.

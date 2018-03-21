@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,10 @@ class ICLTensor;
 class CLReductionOperation : public IFunction
 {
 public:
-    /* Constructor */
+    /** Default Constructor.
+     *
+     * @param[in] memory_manager (Optional) Memory manager.
+     */
     CLReductionOperation(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
 
     /** Set the input and output tensors.

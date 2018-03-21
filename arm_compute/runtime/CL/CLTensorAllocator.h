@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,28 +35,38 @@ namespace arm_compute
 class CLTensor;
 template <typename>
 class MemoryGroupBase;
+/** Memory Group in OpenCL */
 using CLMemoryGroup = MemoryGroupBase<CLTensor>;
 
 /** Basic implementation of a CL memory tensor allocator. */
 class CLTensorAllocator : public ITensorAllocator
 {
 public:
-    /** Default constructor. */
+    /** Default constructor.
+     *
+     * @param[in] owner (Optional) Owner of the allocator.
+     */
     CLTensorAllocator(CLTensor *owner = nullptr);
     /** Default destructor */
     ~CLTensorAllocator();
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLTensorAllocator(const CLTensorAllocator &) = delete;
-    /** Prevent instances of this class from being copy assigned (As this class contains pointers). */
+    /** Prevent instances of this class from being copy assigned (As this class contains pointers) */
     CLTensorAllocator &operator=(const CLTensorAllocator &) = delete;
     /** Allow instances of this class to be moved */
     CLTensorAllocator(CLTensorAllocator &&) = default;
     /** Allow instances of this class to be moved */
     CLTensorAllocator &operator=(CLTensorAllocator &&) = default;
 
-    /** Interface to be implemented by the child class to return the pointer to the mapped data. */
+    /** Interface to be implemented by the child class to return the pointer to the mapped data.
+     *
+     * @return pointer to the mapped data.
+     */
     uint8_t *data();
-    /** Interface to be implemented by the child class to return the pointer to the CL data. */
+    /** Interface to be implemented by the child class to return the pointer to the CL data.
+     *
+     * @return pointer to the CL data.
+     */
     const cl::Buffer &cl_data() const;
     /** Enqueue a map operation of the allocated buffer on the given queue.
      *

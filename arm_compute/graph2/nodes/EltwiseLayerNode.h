@@ -30,6 +30,7 @@ namespace arm_compute
 {
 namespace graph2
 {
+/** Eltwise Layer node */
 class EltwiseLayerNode final : public INode
 {
 public:

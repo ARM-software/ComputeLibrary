@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,6 +26,7 @@
 
 namespace arm_compute
 {
+#ifndef DOXYGEN_SKIP_THIS
 inline qasymm8_t sqcvt_qasymm8_f32(float value, float scale, int offset, RoundingPolicy rounding_policy = RoundingPolicy::TO_NEAREST_UP)
 {
     int quantized = arm_compute::round(value / scale, rounding_policy) + offset;
@@ -38,4 +39,5 @@ inline float scvt_f32_qasymm8(qasymm8_t value, float scale, int offset)
     float dequantized = (static_cast<int>(value) - offset) * scale;
     return dequantized;
 }
+#endif /* DOXYGEN_SKIP_THIS */
 }

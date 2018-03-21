@@ -71,23 +71,23 @@ enum class Format
 /** Available data types */
 enum class DataType
 {
-    UNKNOWN,
-    U8,
-    S8,
-    QS8,
-    QASYMM8,
-    U16,
-    S16,
-    QS16,
-    U32,
-    S32,
-    QS32,
-    U64,
-    S64,
-    F16,
-    F32,
-    F64,
-    SIZET
+    UNKNOWN, /**< Unknown data type */
+    U8,      /**< unsigned 8-bit number */
+    S8,      /**< signed 8-bit number */
+    QS8,     /**< quantized, symmetric fixed-point 8-bit number */
+    QASYMM8, /**< quantized, asymmetric fixed-point 8-bit number */
+    U16,     /**< unsigned 16-bit number */
+    S16,     /**< signed 16-bit number */
+    QS16,    /**< quantized, symmetric fixed-point 16-bit number */
+    U32,     /**< unsigned 32-bit number */
+    S32,     /**< signed 32-bit number */
+    QS32,    /**< quantized, symmetric fixed-point 32-bit number */
+    U64,     /**< unsigned 64-bit number */
+    S64,     /**< signed 64-bit number */
+    F16,     /**< 16-bit floating-point number */
+    F32,     /**< 32-bit floating-point number */
+    F64,     /**< 64-bit floating-point number */
+    SIZET    /**< size_t */
 };
 
 /** Available Sampling Policies */
@@ -100,47 +100,65 @@ enum class SamplingPolicy
 /** Constant value of the border pixels when using BorderMode::CONSTANT */
 constexpr uint8_t CONSTANT_BORDER_VALUE = 199;
 
-/* Constant value used to indicate a half-scale pyramid */
+/** Constant value used to indicate a half-scale pyramid */
 constexpr float SCALE_PYRAMID_HALF = 0.5f;
 
-/* Constant value used to indicate a ORB scaled pyramid */
+/** Constant value used to indicate a ORB scaled pyramid */
 constexpr float SCALE_PYRAMID_ORB = 8.408964152537146130583778358414e-01;
 
 /** Supported tensor data layouts */
 enum class DataLayout
 {
-    UNKNOWN,
-    NCHW,
-    NHWC
+    UNKNOWN, /**< Unknown data layout */
+    NCHW,    /**< Num samples, channels, height, width */
+    NHWC     /**< Num samples, height, width, channels */
 };
 
 /** Supported tensor data layout dimensions */
 enum class DataLayoutDimension
 {
-    CHANNEL,
-    HEIGHT,
-    WIDTH,
-    BATCHES
+    CHANNEL, /**< channel */
+    HEIGHT,  /**< height */
+    WIDTH,   /**< width */
+    BATCHES  /**< batches */
 };
 
 /** Quantization settings (used for QASYMM8 data type) */
 struct QuantizationInfo
 {
+    /** Default constructor */
     QuantizationInfo()
         : scale(0.0f), offset(0)
     {
     }
 
+    /** Construct quantization info.
+     *
+     * @param[in] scale  Scale.
+     * @param[in] offset Offset.
+     */
     QuantizationInfo(float scale, int offset)
         : scale(scale), offset(offset)
     {
     }
 
+    /** Check whether equal to a given quantization info.
+     *
+     * @param[in] other Other quantization info.
+     *
+     * @return True if the given quantization info is the same.
+     */
     bool operator==(const QuantizationInfo &other)
     {
         return scale == other.scale && offset == other.offset;
     }
 
+    /** Check whether not equal to a given quantization info.
+     *
+     * @param[in] other Other quantization info.
+     *
+     * @return True if the given quantization info is not the same.
+     */
     bool operator!=(const QuantizationInfo &other)
     {
         return !(*this == other);
@@ -149,46 +167,80 @@ struct QuantizationInfo
     float scale;  /**< scale */
     int   offset; /**< offset */
 
-    /** Quantizes a value using the scale/offset in this QuantizationInfo */
+    /** Quantizes a value using the scale/offset in this QuantizationInfo
+     *
+     * @param[in] value           Value to quantize.
+     * @param[in] rounding_policy Policy to use when rounding.
+     *
+     * @return the quantized value.
+     */
     qasymm8_t quantize(float value, RoundingPolicy rounding_policy) const
     {
         ARM_COMPUTE_ERROR_ON_MSG(scale == 0, "QuantizationInfo::quantize: scale == 0");
         return sqcvt_qasymm8_f32(value, scale, offset, rounding_policy);
     }
 
-    /** Dequantizes a value using the scale/offset in this QuantizationInfo */
+    /** Dequantizes a value using the scale/offset in this QuantizationInfo
+     *
+     * @param[in] value Value to dequantize.
+     *
+     * @return the original value before quantization.
+     */
     float dequantize(qasymm8_t value) const
     {
         ARM_COMPUTE_ERROR_ON_MSG(scale == 0, "QuantizationInfo::dequantize: scale == 0");
         return scvt_f32_qasymm8(value, scale, offset);
     }
 
-    /** Indicates whether this QuantizationInfo has valid settings or not */
+    /** Indicates whether this QuantizationInfo has valid settings or not
+     *
+     * @return True if the this has invalid settings.
+     */
     bool empty() const
     {
         return scale == 0;
     }
 };
 
+/** Container for valid region of a window */
 struct ValidRegion
 {
+    /** Default constructor */
     ValidRegion()
         : anchor{}, shape{}
     {
     }
 
+    /** Allow instances of this class to be copy constructed */
     ValidRegion(const ValidRegion &) = default;
-    ValidRegion(ValidRegion &&)      = default;
+    /** Allow instances of this class to be move constructed */
+    ValidRegion(ValidRegion &&) = default;
+    /** Allow instances of this class to be copied */
     ValidRegion &operator=(const ValidRegion &) = default;
+    /** Allow instances of this class to be moved */
     ValidRegion &operator=(ValidRegion &&) = default;
-    ~ValidRegion()                         = default;
+    /** Default destructor */
+    ~ValidRegion() = default;
 
+    /** Constructor for a valid region with default number of dimensions
+     *
+     * @param[in] an_anchor Anchor for the start of the valid region.
+     * @param[in] a_shape   Shape of the valid region.
+     *
+     */
     ValidRegion(const Coordinates &an_anchor, const TensorShape &a_shape)
         : anchor{ an_anchor }, shape{ a_shape }
     {
         anchor.set_num_dimensions(std::max(anchor.num_dimensions(), shape.num_dimensions()));
     }
 
+    /** Constructor for a valid region with specified number of dimensions
+     *
+     * @param[in] an_anchor      Anchor for the start of the valid region.
+     * @param[in] a_shape        Shape of the valid region.
+     * @param[in] num_dimensions Number of dimensions (must be >= number of dimensions of anchor and shape).
+     *
+     */
     ValidRegion(const Coordinates &an_anchor, const TensorShape &a_shape, size_t num_dimensions)
         : anchor{ an_anchor }, shape{ a_shape }
     {
@@ -223,8 +275,8 @@ struct ValidRegion
         return *this;
     }
 
-    Coordinates anchor;
-    TensorShape shape;
+    Coordinates anchor; /**< Anchor for the start of the valid region. */
+    TensorShape shape;  /**< Shape of the valid region. */
 };
 
 /** Methods available to handle borders */
@@ -274,6 +326,12 @@ struct BorderSize
         return top == right && top == bottom && top == left;
     }
 
+    /** Scale this border size.
+     *
+     * @param[in] scale Scale to multiply border size by.
+     *
+     * @return *this.
+     */
     BorderSize &operator*=(float scale)
     {
         top *= scale;
@@ -284,6 +342,12 @@ struct BorderSize
         return *this;
     }
 
+    /** Scale a copy of this border size.
+     *
+     * @param[in] scale Scale to multiply border size by.
+     *
+     * @return a scaled copy of this.
+     */
     BorderSize operator*(float scale)
     {
         BorderSize size = *this;
@@ -292,6 +356,10 @@ struct BorderSize
         return size;
     }
 
+    /** Limit this border size.
+     *
+     * @param[in] limit Border size to limit this border size to.
+     */
     void limit(const BorderSize &limit)
     {
         top    = std::min(top, limit.top);
@@ -300,12 +368,13 @@ struct BorderSize
         left   = std::min(left, limit.left);
     }
 
-    unsigned int top;
-    unsigned int right;
-    unsigned int bottom;
-    unsigned int left;
+    unsigned int top;    /**< top of the border */
+    unsigned int right;  /**< right of the border */
+    unsigned int bottom; /**< bottom of the border */
+    unsigned int left;   /**< left of the border */
 };
 
+/** Container for 2D padding size */
 using PaddingSize = BorderSize;
 
 /** Policy to handle overflow */
@@ -326,8 +395,8 @@ enum class InterpolationPolicy
 /** Bilinear Interpolation method used by LKTracker */
 enum class BilinearInterpolation
 {
-    BILINEAR_OLD_NEW,
-    BILINEAR_SCHARR
+    BILINEAR_OLD_NEW, /**< Old-new method */
+    BILINEAR_SCHARR   /**< Scharr method */
 };
 
 /** Threshold mode */
@@ -340,9 +409,9 @@ enum class ThresholdType
 /** Termination criteria */
 enum class Termination
 {
-    TERM_CRITERIA_EPSILON,
-    TERM_CRITERIA_ITERATIONS,
-    TERM_CRITERIA_BOTH
+    TERM_CRITERIA_EPSILON,    /**< Terminate when within epsilon of a threshold */
+    TERM_CRITERIA_ITERATIONS, /**< Terminate after a maximum number of iterations */
+    TERM_CRITERIA_BOTH        /**< Terminate on whichever of the other conditions occurs first */
 };
 
 /** Magnitude calculation type. */
@@ -374,6 +443,7 @@ struct KeyPoint
     float   error{ 0.f };         /**< Tracking error initialized to 0 by the corner detector */
 };
 
+/** Internal key point */
 using InternalKeypoint = std::tuple<float, float, float>; /* x,y,strength */
 
 /** Rectangle type */
@@ -542,14 +612,28 @@ public:
           _round_type(round)
     {
     }
+    /** Get the stride.
+     *
+     * @return a pair: stride x, stride y.
+     */
     std::pair<unsigned int, unsigned int> stride() const
     {
         return _stride;
     }
+    /** Check whether the padding is symmetric.
+     *
+     * @return True if the padding is symmetric.
+     */
     bool padding_is_symmetric() const
     {
         return (_pad_left == _pad_right) && (_pad_top == _pad_bottom);
     }
+    /** Get the padding.
+     *
+     * @note This should only be used when the padding is symmetric.
+     *
+     * @return a pair: padding left/right, padding top/bottom
+     */
     std::pair<unsigned int, unsigned int> pad() const
     {
         //this accessor should be used only when padding is symmetric
@@ -557,28 +641,34 @@ public:
         return std::make_pair(_pad_left, _pad_top);
     }
 
+    /** Get the left padding */
     unsigned int pad_left() const
     {
         return _pad_left;
     }
+    /** Get the right padding */
     unsigned int pad_right() const
     {
         return _pad_right;
     }
+    /** Get the top padding */
     unsigned int pad_top() const
     {
         return _pad_top;
     }
+    /** Get the bottom padding */
     unsigned int pad_bottom() const
     {
         return _pad_bottom;
     }
 
+    /** Get the rounding type */
     DimensionRoundingType round() const
     {
         return _round_type;
     }
 
+    /** Check whether this has any padding */
     bool has_padding() const
     {
         return (_pad_left != 0 || _pad_top != 0 || _pad_right != 0 || _pad_bottom != 0);
@@ -645,22 +735,27 @@ public:
         : _pool_type(pool_type), _pool_size(Size2D()), _pad_stride_info(PadStrideInfo(1, 1, 0, 0)), _exclude_padding(false), _is_global_pooling(true)
     {
     }
+    /** Get the pooling type */
     PoolingType pool_type() const
     {
         return _pool_type;
     }
+    /** Get the pooling size */
     const Size2D &pool_size() const
     {
         return _pool_size;
     }
+    /** Get the padding and stride */
     PadStrideInfo pad_stride_info() const
     {
         return _pad_stride_info;
     }
+    /** Check if padding is excluded in calculations */
     bool exclude_padding() const
     {
         return _exclude_padding;
     }
+    /** Check if is global pooling */
     bool is_global_pooling() const
     {
         return _is_global_pooling;
@@ -688,14 +783,17 @@ public:
         : _pooled_width(pooled_width), _pooled_height(pooled_height), _spatial_scale(spatial_scale)
     {
     }
+    /** Get the pooled width of the layer */
     unsigned int pooled_width() const
     {
         return _pooled_width;
     }
+    /** Get the pooled height of the layer */
     unsigned int pooled_height() const
     {
         return _pooled_height;
     }
+    /** Get the spatial scale */
     float spatial_scale() const
     {
         return _spatial_scale;
@@ -739,18 +837,22 @@ public:
         : _act(f), _a(a), _b(b), _enabled(true)
     {
     }
+    /** Get the type of activation function */
     ActivationFunction activation() const
     {
         return _act;
     }
+    /** Get the alpha value */
     float a() const
     {
         return _a;
     }
+    /** Get the beta value */
     float b() const
     {
         return _b;
     }
+    /** Check if initialised */
     bool enabled() const
     {
         return _enabled;
@@ -781,30 +883,37 @@ public:
         : _type(type), _norm_size(norm_size), _alpha(alpha), _beta(beta), _kappa(kappa), _is_scaled(is_scaled)
     {
     }
+    /** Get the normalization type */
     NormType type() const
     {
         return _type;
     }
+    /** Get the normalization size */
     uint32_t norm_size() const
     {
         return _norm_size;
     }
+    /** Get the alpha value */
     float alpha() const
     {
         return _alpha;
     }
+    /** Get the beta value */
     float beta() const
     {
         return _beta;
     }
+    /** Get the kappa value */
     float kappa() const
     {
         return _kappa;
     }
+    /** Check if normalization is cross map */
     bool is_cross_map() const
     {
         return _type == NormType::CROSS_MAP;
     }
+    /** Check if normalization is not cross map */
     bool is_in_map() const
     {
         return !is_cross_map();
@@ -1046,6 +1155,15 @@ struct IOFormatInfo
         Full         /**< Print the tensor object including padding */
     };
 
+    /** Construct a set of IO formatting information.
+     *
+     * @param[in] print_region   Area to be printed. Used by Tensor objects. Default: ValidRegion.
+     * @param[in] precision_type Precision type for floating point numbers. Default: stream default.
+     * @param[in] precision      Precision value for float point numbers. Default: 10.
+     * @param[in] align_columns  Whether to align columns when printed. Default: true.
+     * @param[in] element_delim  Delimeter between elements. Default: " ".
+     * @param[in] row_delim      Delimenter between rows. Default: "\n".
+     */
     IOFormatInfo(PrintRegion   print_region   = PrintRegion::ValidRegion,
                  PrecisionType precision_type = PrecisionType::Default,
                  unsigned int  precision      = 10,
@@ -1061,12 +1179,18 @@ struct IOFormatInfo
     {
     }
 
-    PrintRegion   print_region;
+    /** Area to be printed by Tensor objects */
+    PrintRegion print_region;
+    /** Floating point precision type */
     PrecisionType precision_type;
-    unsigned int  precision;
-    std::string   element_delim;
-    std::string   row_delim;
-    bool          align_columns;
+    /** Floating point precision */
+    unsigned int precision;
+    /** Element delimeter */
+    std::string element_delim;
+    /** Row delimeter */
+    std::string row_delim;
+    /** Align columns */
+    bool align_columns;
 };
 
 /** Available ConvolutionMethod*/

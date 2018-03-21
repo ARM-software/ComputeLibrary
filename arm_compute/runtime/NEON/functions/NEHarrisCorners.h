@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,6 +64,8 @@ public:
     /** Constructor
      *
      * Initialize _sobel, _harris_score and _corner_list to nullptr.
+     *
+     * @param[in] memory_manager (Optional) Memory manager.
      */
     NEHarrisCorners(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Initialize the function's source, destination, conv and border_mode.

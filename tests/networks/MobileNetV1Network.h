@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,6 +55,11 @@ template <typename TensorType,
 class MobileNetV1Network
 {
 public:
+    /** Initialize the network.
+     *
+     * @param[in] input_spatial_size Size of the spatial input.
+     * @param[in] batches            Number of batches.
+     */
     void init(unsigned int input_spatial_size, int batches)
     {
         _batches            = batches;
@@ -117,6 +122,7 @@ public:
         smx.configure(&reshape_out, &output);
     }
 
+    /** Allocate the network. */
     void allocate()
     {
         input.allocator()->allocate();

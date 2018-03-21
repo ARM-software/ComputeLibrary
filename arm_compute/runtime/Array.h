@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,15 +61,27 @@ private:
     std::unique_ptr<T[]> _values;
 };
 
-using KeyPointArray        = Array<KeyPoint>;
-using Coordinates2DArray   = Array<Coordinates2D>;
+/** Array of Key Points. */
+using KeyPointArray = Array<KeyPoint>;
+/** Array of 2D Coordinates. */
+using Coordinates2DArray = Array<Coordinates2D>;
+/** Array of Detection Windows. */
 using DetectionWindowArray = Array<DetectionWindow>;
-using Size2DArray          = Array<Size2D>;
-using UInt8Array           = Array<uint8_t>;
-using UInt16Array          = Array<uint16_t>;
-using UInt32Array          = Array<uint32_t>;
-using Int16Array           = Array<int16_t>;
-using Int32Array           = Array<int32_t>;
-using FloatArray           = Array<float>;
+/** Array of ROIs. */
+using ROIArray = Array<ROI>;
+/** Array of 2D Sizes. */
+using Size2DArray = Array<Size2D>;
+/** Array of uint8s. */
+using UInt8Array = Array<uint8_t>;
+/** Array of uint16s. */
+using UInt16Array = Array<uint16_t>;
+/** Array of uint32s. */
+using UInt32Array = Array<uint32_t>;
+/** Array of int16s. */
+using Int16Array = Array<int16_t>;
+/** Array of int32s. */
+using Int32Array = Array<int32_t>;
+/** Array of floats. */
+using FloatArray = Array<float>;
 }
 #endif /* __ARM_COMPUTE_ARRAY_H__ */

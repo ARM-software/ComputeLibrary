@@ -34,23 +34,88 @@ namespace graph2
 class INodeVisitor
 {
 public:
-    virtual ~INodeVisitor()                              = default;
-    virtual void visit(INode &n)                         = 0;
-    virtual void visit(ActivationLayerNode &n)           = 0;
-    virtual void visit(BatchNormalizationLayerNode &n)   = 0;
-    virtual void visit(ConstNode &n)                     = 0;
-    virtual void visit(ConvolutionLayerNode &n)          = 0;
-    virtual void visit(DepthConcatenateLayerNode &n)     = 0;
+    /** Default destructor. */
+    virtual ~INodeVisitor() = default;
+    /** Visit INode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(INode &n) = 0;
+    /** Visit ActivationLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(ActivationLayerNode &n) = 0;
+    /** Visit BatchNormalizationLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(BatchNormalizationLayerNode &n) = 0;
+    /** Visit ConstNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(ConstNode &n) = 0;
+    /** Visit ConvolutionLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(ConvolutionLayerNode &n) = 0;
+    /** Visit DepthConcatenateLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(DepthConcatenateLayerNode &n) = 0;
+    /** Visit DepthwiseConvolutionLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
     virtual void visit(DepthwiseConvolutionLayerNode &n) = 0;
-    virtual void visit(EltwiseLayerNode &n)              = 0;
-    virtual void visit(FlattenLayerNode &n)              = 0;
-    virtual void visit(FullyConnectedLayerNode &n)       = 0;
-    virtual void visit(InputNode &n)                     = 0;
-    virtual void visit(NormalizationLayerNode &n)        = 0;
-    virtual void visit(OutputNode &n)                    = 0;
-    virtual void visit(PoolingLayerNode &n)              = 0;
-    virtual void visit(ReshapeLayerNode &n)              = 0;
-    virtual void visit(SoftmaxLayerNode &n)              = 0;
+    /** Visit EltwiseLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(EltwiseLayerNode &n) = 0;
+    /** Visit FlattenLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(FlattenLayerNode &n) = 0;
+    /** Visit FullyConnectedLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(FullyConnectedLayerNode &n) = 0;
+    /** Visit InputNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(InputNode &n) = 0;
+    /** Visit NormalizationLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(NormalizationLayerNode &n) = 0;
+    /** Visit OutputNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(OutputNode &n) = 0;
+    /** Visit PoolingLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(PoolingLayerNode &n) = 0;
+    /** Visit ReshapeLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(ReshapeLayerNode &n) = 0;
+    /** Visit SoftmaxLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(SoftmaxLayerNode &n) = 0;
 };
 
 /** Default visitor implementation
@@ -61,8 +126,10 @@ public:
 class DefaultNodeVisitor : public INodeVisitor
 {
 public:
+    /** Default destructor */
     virtual ~DefaultNodeVisitor() = default;
 
+#ifndef DOXYGEN_SKIP_THIS
     // Inherited methods overridden
     virtual void visit(INode &n) override
     {
@@ -128,6 +195,7 @@ public:
     {
         default_visit();
     }
+#endif /* DOXYGEN_SKIP_THIS */
 
     /** Function to be overloaded by the client and implement default behavior for the
      *  non-overloaded visitors

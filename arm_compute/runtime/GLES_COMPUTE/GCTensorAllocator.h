@@ -59,10 +59,10 @@ public:
     /** Default constructor. */
     GCTensorAllocator(GCTensor *owner = nullptr);
 
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     GCTensorAllocator(const GCTensorAllocator &) = delete;
 
-    /** Prevent instances of this class from being copy assigned (As this class contains pointers). */
+    /** Prevent instances of this class from being copy assigned (As this class contains pointers) */
     GCTensorAllocator &operator=(const GCTensorAllocator &) = delete;
 
     /** Allow instances of this class to be moved */
@@ -74,7 +74,10 @@ public:
     /** Default destructor */
     ~GCTensorAllocator();
 
-    /** Interface to be implemented by the child class to return the pointer to the mapped data. */
+    /** Interface to be implemented by the child class to return the pointer to the mapped data.
+     *
+     * @return a pointer to the data.
+     */
     uint8_t *data();
 
     /** Get the OpenGL ES buffer object name

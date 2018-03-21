@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -80,8 +80,11 @@ private:
     gles::NDRange    _lws;
 };
 
+/** Interface for the 1x1 direct convolution kernel */
 using GCDirectConvolutionLayer1x1Kernel = GCDirectConvolutionLayerKernel<1>;
+/** Interface for the 3x3 direct convolution kernel */
 using GCDirectConvolutionLayer3x3Kernel = GCDirectConvolutionLayerKernel<3>;
+/** Interface for the 5x5 direct convolution kernel */
 using GCDirectConvolutionLayer5x5Kernel = GCDirectConvolutionLayerKernel<5>;
 }
 #endif /*__ARM_COMPUTE_GCDIRECTCONVOLUTIONLAYERKERNEL_H__ */

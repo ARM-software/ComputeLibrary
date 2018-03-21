@@ -86,7 +86,7 @@ protected:
 };
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-/** NEON kernel to perform Gradient computation
+/** NEON kernel to perform Gradient computation for FP16 datatype
  */
 class NEGradientFP16Kernel : public NEGradientKernel
 {
@@ -99,6 +99,7 @@ public:
     void configure(const ITensor *gx, const ITensor *gy, ITensor *magnitude, ITensor *phase, int32_t norm_type) override;
 };
 #else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+/** NEON kernel to perform Gradient computation for FP16 datatype */
 using NEGradientFP16Kernel = NEGradientKernel;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 

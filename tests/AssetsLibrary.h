@@ -66,27 +66,39 @@ public:
      */
     AssetsLibrary(std::string path, std::random_device::result_type seed);
 
-    /** Path to assets directory used to initialise library. */
+    /** Path to assets directory used to initialise library.
+     *
+     * @return the path to the assets directory.
+     */
     std::string path() const;
 
-    /** Seed that is used to fill tensors with random values. */
+    /** Seed that is used to fill tensors with random values.
+     *
+     * @return the initial random seed.
+     */
     std::random_device::result_type seed() const;
 
     /** Provides a tensor shape for the specified image.
      *
      * @param[in] name Image file used to look up the raw tensor.
+     *
+     * @return the tensor shape for the specified image.
      */
     TensorShape get_image_shape(const std::string &name);
 
-    /** Provides a contant raw tensor for the specified image.
+    /** Provides a constant raw tensor for the specified image.
      *
      * @param[in] name Image file used to look up the raw tensor.
+     *
+     * @return a raw tensor for the specified image.
      */
     const RawTensor &get(const std::string &name) const;
 
     /** Provides a raw tensor for the specified image.
      *
      * @param[in] name Image file used to look up the raw tensor.
+     *
+     * @return a raw tensor for the specified image.
      */
     RawTensor get(const std::string &name);
 
@@ -96,6 +108,8 @@ public:
      * @param[in] name         Image file used to initialise the tensor.
      * @param[in] data_type    Data type used to initialise the tensor.
      * @param[in] num_channels Number of channels used to initialise the tensor.
+     *
+     * @return a raw tensor for the specified image.
      */
     RawTensor get(const std::string &name, DataType data_type, int num_channels = 1) const;
 
@@ -104,6 +118,8 @@ public:
      *
      * @param[in] name   Image file used to look up the raw tensor.
      * @param[in] format Format used to look up the raw tensor.
+     *
+     * @return a raw tensor for the specified image.
      */
     const RawTensor &get(const std::string &name, Format format) const;
 
@@ -112,6 +128,8 @@ public:
      *
      * @param[in] name   Image file used to look up the raw tensor.
      * @param[in] format Format used to look up the raw tensor.
+     *
+     * @return a raw tensor for the specified image.
      */
     RawTensor get(const std::string &name, Format format);
 
@@ -123,6 +141,8 @@ public:
      *
      * @note The channel has to be unambiguous so that the format can be
      *       inferred automatically.
+     *
+     * @return a raw tensor for the specified image channel.
      */
     const RawTensor &get(const std::string &name, Channel channel) const;
 
@@ -134,6 +154,8 @@ public:
      *
      * @note The channel has to be unambiguous so that the format can be
      *       inferred automatically.
+     *
+     * @return a raw tensor for the specified image channel.
      */
     RawTensor get(const std::string &name, Channel channel);
 
@@ -143,6 +165,8 @@ public:
      * @param[in] name    Image file used to look up the raw tensor.
      * @param[in] format  Format used to look up the raw tensor.
      * @param[in] channel Channel used to look up the raw tensor.
+     *
+     * @return a raw tensor for the specified image channel.
      */
     const RawTensor &get(const std::string &name, Format format, Channel channel) const;
 
@@ -152,6 +176,8 @@ public:
      * @param[in] name    Image file used to look up the raw tensor.
      * @param[in] format  Format used to look up the raw tensor.
      * @param[in] channel Channel used to look up the raw tensor.
+     *
+     * @return a raw tensor for the specified image channel.
      */
     RawTensor get(const std::string &name, Format format, Channel channel);
 

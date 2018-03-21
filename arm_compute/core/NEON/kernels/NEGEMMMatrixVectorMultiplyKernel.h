@@ -30,6 +30,7 @@ namespace arm_compute
 {
 class ITensor;
 
+/** Interface for the GEMM matrix vector multiply kernel. **/
 class NEGEMMMatrixVectorMultiplyKernel : public INESimpleKernel
 {
 public:

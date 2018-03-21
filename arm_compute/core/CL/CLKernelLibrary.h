@@ -104,11 +104,11 @@ public:
     Program(const Program &) = default;
     /** Default Move Constructor. */
     Program(Program &&) = default;
-    /** Default copy assignment operator. */
+    /** Default copy assignment operator */
     Program &operator=(const Program &) = default;
-    /** Default move assignment operator. */
+    /** Default move assignment operator */
     Program &operator=(Program &&) = default;
-    /**Returns program name.
+    /** Returns program name.
      *
      * @return Program's name.
      */
@@ -121,7 +121,13 @@ public:
      * @return The CL program object.
      */
     explicit operator cl::Program() const;
-
+    /** Build the given CL program.
+     *
+     * @param[in] program       The CL program to build.
+     * @param[in] build_options Options to build the CL program.
+     *
+     * @return True if the CL program builds successfully.
+     */
     static bool build(const cl::Program &program, const std::string &build_options = "");
     /** Build the underlying CL program.
      *
@@ -150,9 +156,9 @@ public:
     Kernel(const Kernel &) = default;
     /** Default Move Constructor. */
     Kernel(Kernel &&) = default;
-    /** Default copy assignment operator. */
+    /** Default copy assignment operator */
     Kernel &operator=(const Kernel &) = default;
-    /** Default move assignment operator. */
+    /** Default move assignment operator */
     Kernel &operator=(Kernel &&) = default;
     /** Constructor.
      *
@@ -192,9 +198,9 @@ private:
     CLKernelLibrary();
 
 public:
-    /** Prevent instances of this class from being copied. */
+    /** Prevent instances of this class from being copied */
     CLKernelLibrary(const CLKernelLibrary &) = delete;
-    /** Prevent instances of this class from being copied. */
+    /** Prevent instances of this class from being copied */
     const CLKernelLibrary &operator=(const CLKernelLibrary &) = delete;
     /** Access the KernelLibrary singleton.
      * @return The KernelLibrary instance.
@@ -226,9 +232,11 @@ public:
     {
         return _kernel_path;
     };
-    /** Gets the source of the selected program
+    /** Gets the source of the selected program.
      *
      * @param[in] program_name Program name.
+     *
+     * @return Source of the selected program.
      */
     std::string get_program_source(const std::string &program_name);
     /** Sets the CL context used to create programs.

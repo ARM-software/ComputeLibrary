@@ -30,6 +30,7 @@ namespace arm_compute
 {
 namespace graph2
 {
+/** Depthwise Convolution Layer node */
 class DepthwiseConvolutionLayerNode final : public INode
 {
 public:

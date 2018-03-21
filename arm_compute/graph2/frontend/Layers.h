@@ -45,6 +45,11 @@ namespace frontend
 class InputLayer final : public ILayer
 {
 public:
+    /** Construct an input layer.
+     *
+     * @param[in] desc     Description of input tensor.
+     * @param[in] accessor Accessor to get input tensor data from.
+     */
     InputLayer(TensorDescriptor desc, ITensorAccessorUPtr accessor)
         : _desc(desc), _accessor(std::move(accessor))
     {
@@ -65,6 +70,10 @@ private:
 class OutputLayer final : public ILayer
 {
 public:
+    /** Construct an output layer.
+     *
+     * @param[in] accessor Accessor to give output tensor data to.
+     */
     OutputLayer(ITensorAccessorUPtr accessor)
         : _accessor(std::move(accessor))
     {
@@ -85,6 +94,10 @@ private:
 class ActivationLayer final : public ILayer
 {
 public:
+    /** Construct an activation layer.
+     *
+     * @param[in] act_info Activation information
+     */
     ActivationLayer(ActivationLayerInfo act_info)
         : _act_info(act_info)
     {
@@ -105,6 +118,14 @@ private:
 class BatchNormalizationLayer final : public ILayer
 {
 public:
+    /** Construct a batch normalization layer.
+     *
+     * @param[in] mean    Accessor to get mean tensor data from.
+     * @param[in] var     Accessor to get var tensor data from.
+     * @param[in] gamma   (Optional) Accessor to get gamma tensor data from. Default: nullptr.
+     * @param[in] beta    (Optional) Accessor to get beta tensor data from. Default: nullptr.
+     * @param[in] epsilon (Optional) Epsilon value. Default: 0.001.
+     */
     BatchNormalizationLayer(ITensorAccessorUPtr mean,
                             ITensorAccessorUPtr var,
                             ITensorAccessorUPtr gamma   = nullptr,
@@ -137,6 +158,16 @@ private:
 class ConvolutionLayer final : public ILayer
 {
 public:
+    /** Construct a convolution layer.
+     *
+     * @param[in] conv_width  Convolution width.
+     * @param[in] conv_height Convolution height.
+     * @param[in] ofm         Output feature map.
+     * @param[in] weights     Accessor to get kernel weights from.
+     * @param[in] bias        Accessor to get kernel bias from.
+     * @param[in] conv_info   Padding and stride information.
+     * @param[in] num_groups  (Optional) Number of groups. Default: 1.
+     */
     ConvolutionLayer(unsigned int        conv_width,
                      unsigned int        conv_height,
                      unsigned int        ofm,
@@ -179,6 +210,14 @@ private:
 class DepthwiseConvolutionLayer final : public ILayer
 {
 public:
+    /** Construct a depthwise convolution layer.
+     *
+     * @param[in] conv_width  Convolution width.
+     * @param[in] conv_height Convolution height.
+     * @param[in] weights     Accessor to get kernel weights from.
+     * @param[in] bias        Accessor to get kernel bias from.
+     * @param[in] conv_info   Padding and stride information.
+     */
     DepthwiseConvolutionLayer(unsigned int        conv_width,
                               unsigned int        conv_height,
                               ITensorAccessorUPtr weights,
@@ -214,6 +253,7 @@ private:
 class FlattenLayer final : public ILayer
 {
 public:
+    /** Construct a flatten layer. */
     FlattenLayer()
     {
     }
@@ -230,6 +270,12 @@ public:
 class FullyConnectedLayer final : public ILayer
 {
 public:
+    /** Construct a fully connected layer.
+     *
+     * @param[in] num_outputs Number of outputs.
+     * @param[in] weights     Accessor to get weights from.
+     * @param[in] bias        Accessor to get bias from.
+     */
     FullyConnectedLayer(unsigned int        num_outputs,
                         ITensorAccessorUPtr weights,
                         ITensorAccessorUPtr bias)
@@ -255,6 +301,10 @@ private:
 class NormalizationLayer final : public ILayer
 {
 public:
+    /** Construct a normalization layer.
+     *
+     * @param[in] norm_info Normalization information.
+     */
     NormalizationLayer(NormalizationLayerInfo norm_info)
         : _norm_info(norm_info)
     {
@@ -275,6 +325,10 @@ private:
 class PoolingLayer final : public ILayer
 {
 public:
+    /** Construct a pooling layer.
+     *
+     * @param[in] pool_info Pooling information.
+     */
     PoolingLayer(PoolingLayerInfo pool_info)
         : _pool_info(pool_info)
     {
@@ -295,6 +349,10 @@ private:
 class ReshapeLayer final : public ILayer
 {
 public:
+    /** Construct a reshape layer.
+     *
+     * @param[in] shape Target shape.
+     */
     ReshapeLayer(TensorShape shape)
         : _shape(shape)
     {
@@ -315,6 +373,10 @@ private:
 class SoftmaxLayer final : public ILayer
 {
 public:
+    /** Construct a softmax layer.
+     *
+     * @param[in] beta (Optional) Beta value. Default 1.0.
+     */
     SoftmaxLayer(float beta = 1.0f)
         : _beta(beta)
     {
@@ -335,7 +397,7 @@ private:
 class BranchLayer final : public ILayer
 {
 public:
-    /** Default Constructor
+    /** Construct a branch layer
      *
      * @param[in] merge_method     Branch merging method
      * @param[in] sub_stream1      First graph branch
@@ -355,7 +417,7 @@ public:
         },
         std::move(rest_sub_streams)...);
     }
-    /** Default Constructor
+    /** Construct a branch layer
      *
      * @param[in] sub_stream Sub-stream
      */

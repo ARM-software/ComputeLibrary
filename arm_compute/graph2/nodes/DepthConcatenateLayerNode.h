@@ -30,6 +30,7 @@ namespace arm_compute
 {
 namespace graph2
 {
+/** Depth Concatenation Layer node */
 class DepthConcatenateLayerNode final : public INode
 {
 public:

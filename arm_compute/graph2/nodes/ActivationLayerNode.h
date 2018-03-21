@@ -30,6 +30,7 @@ namespace arm_compute
 {
 namespace graph2
 {
+/** Activation Layer node */
 class ActivationLayerNode final : public INode
 {
 public:

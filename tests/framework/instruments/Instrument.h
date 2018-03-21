@@ -57,13 +57,19 @@ public:
     template <typename T, ScaleFactor scale>
     static std::unique_ptr<Instrument> make_instrument();
 
+    /** Default constructor. */
     Instrument() = default;
 
+    /** Allow instances of this class to be copy constructed */
     Instrument(const Instrument &) = default;
-    Instrument(Instrument &&)      = default;
+    /** Allow instances of this class to be move constructed */
+    Instrument(Instrument &&) = default;
+    /** Allow instances of this class to be copied */
     Instrument &operator=(const Instrument &) = default;
+    /** Allow instances of this class to be moved */
     Instrument &operator=(Instrument &&) = default;
-    virtual ~Instrument()                = default;
+    /** Default destructor. */
+    virtual ~Instrument() = default;
 
     /** Identifier for the instrument */
     virtual std::string id() const = 0;
@@ -74,9 +80,13 @@ public:
     /** Stop measuring. */
     virtual void stop() = 0;
 
+    /** Map of measurements */
     using MeasurementsMap = std::map<std::string, Measurement>;
 
-    /** Return the latest measurement. */
+    /** Return the latest measurement.
+     *
+     * @return the latest measurement.
+     */
     virtual MeasurementsMap measurements() const = 0;
 
 protected:

@@ -144,15 +144,15 @@ enum class MemoryManagerAffinity
  */
 struct NodeIdxPair
 {
-    NodeID node_id;
-    size_t index;
+    NodeID node_id; /**< Node ID */
+    size_t index;   /**< Index */
 };
 
 /** Common node parameters */
 struct NodeParams
 {
-    std::string name;
-    Target      target;
+    std::string name;   /**< Node name */
+    Target      target; /**< Node target */
 };
 } // namespace graph2
 } // namespace arm_compute

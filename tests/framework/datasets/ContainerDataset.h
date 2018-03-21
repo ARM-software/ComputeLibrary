@@ -72,8 +72,10 @@ public:
     {
     }
 
+    /** Allow instances of this class to be copy constructed */
     ContainerDataset(const ContainerDataset &) = default;
-    ContainerDataset(ContainerDataset &&)      = default;
+    /** Allow instances of this class to be move constructed */
+    ContainerDataset(ContainerDataset &&) = default;
 
     /** Type of the dataset. */
     using type = std::tuple<container_value_type>;
@@ -81,22 +83,39 @@ public:
     /** Iterator for the dataset. */
     struct iterator
     {
+        /** Construct iterator
+         *
+         * @param[in] name     Description of the values.
+         * @param[in] iterator Iterator for the values.
+         */
         iterator(std::string name, container_const_iterator iterator)
             : _name{ name }, _iterator{ iterator }
         {
         }
 
+        /** Get a description of the current value.
+         *
+         * @return a description.
+         */
         std::string description() const
         {
             using support::cpp11::to_string;
             return _name + "=" + to_string(*_iterator);
         }
 
+        /** Get the current value.
+         *
+         * @return the current value.
+         */
         ContainerDataset::type operator*() const
         {
             return std::make_tuple(*_iterator);
         }
 
+        /** Increment the iterator.
+         *
+         * @return this.
+         */
         iterator &operator++()
         {
             ++_iterator;

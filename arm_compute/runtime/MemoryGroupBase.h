@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,9 +44,9 @@ public:
     MemoryGroupBase(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Default destructor */
     ~MemoryGroupBase() = default;
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     MemoryGroupBase(const MemoryGroupBase &) = delete;
-    /** Prevent instances of this class from being copy assigned (As this class contains pointers). */
+    /** Prevent instances of this class from being copy assigned (As this class contains pointers) */
     MemoryGroupBase &operator=(const MemoryGroupBase &) = delete;
     /** Allow instances of this class to be moved */
     MemoryGroupBase(MemoryGroupBase &&) = default;

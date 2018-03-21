@@ -51,7 +51,7 @@ enum class GPUTarget
     TBOX          = 0x260
 };
 
-/* Available OpenCL Version */
+/** Available OpenCL Version */
 enum class CLVersion
 {
     CL10,   /* the OpenCL 1.0 */

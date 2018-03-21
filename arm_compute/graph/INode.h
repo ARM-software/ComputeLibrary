@@ -46,6 +46,8 @@ public:
      * @param[in] ctx    Graph context to be used
      * @param[in] input  Input tensor of the node
      * @param[in] output Output tensor of the node
+     *
+     * @return a pointer to the function which implements the node.
      */
     virtual std::unique_ptr<arm_compute::IFunction> instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output) = 0;
     /** Override the existing target hint

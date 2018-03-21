@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,18 +48,20 @@ enum class CPUTarget
     A75_DOT = (A75 | DOT),
 };
 
+/** Information about a CPU. */
 struct CPUInfo
 {
-    CPUTarget CPU{ CPUTarget::INTRINSICS };
-    int       L1_size{ 0 };
-    int       L2_size{ 0 };
+    CPUTarget CPU{ CPUTarget::INTRINSICS }; /**< CPU target. */
+    int       L1_size{ 0 };                 /**< Size of L1 cache. */
+    int       L2_size{ 0 };                 /**< Size of L2 cache. */
 };
 
+/** Information about executing thread and CPU. */
 struct ThreadInfo
 {
-    int     thread_id{ 0 };
-    int     num_threads{ 1 };
-    CPUInfo cpu_info{};
+    int     thread_id{ 0 };   /**< Executing thread. */
+    int     num_threads{ 1 }; /**< Number of CPU threads. */
+    CPUInfo cpu_info{};       /**< CPU information. */
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CPP_TYPES_H__ */

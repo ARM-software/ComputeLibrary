@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,13 +50,14 @@ enum class GradientDimension
     GRAD_XY, /**< x and y gradient dimension */
 };
 
+/** Min and max values and locations */
 template <typename MinMaxType>
 struct MinMaxLocationValues
 {
-    MinMaxType                 min{};
-    MinMaxType                 max{};
-    std::vector<Coordinates2D> min_loc{};
-    std::vector<Coordinates2D> max_loc{};
+    MinMaxType                 min{};     /**< Min value */
+    MinMaxType                 max{};     /**< Max value */
+    std::vector<Coordinates2D> min_loc{}; /**< Min value location */
+    std::vector<Coordinates2D> max_loc{}; /**< Max value location */
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_TEST_TYPES_H__ */

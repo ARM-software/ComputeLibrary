@@ -48,18 +48,21 @@ class IKernel;
 class ITensor;
 class ITensorInfo;
 
+/** Disable bitwise operations by default */
 template <typename T>
 struct enable_bitwise_ops
 {
-    static constexpr bool value = false;
+    static constexpr bool value = false; /**< Disabled */
 };
 
+#ifndef DOXYGEN_SKIP_THIS
 template <typename T>
 typename std::enable_if<enable_bitwise_ops<T>::value, T>::type operator&(T lhs, T rhs)
 {
     using underlying_type = typename std::underlying_type<T>::type;
     return static_cast<T>(static_cast<underlying_type>(lhs) & static_cast<underlying_type>(rhs));
 }
+#endif /* DOXYGEN_SKIP_THIS */
 
 namespace traits
 {
@@ -532,7 +535,7 @@ inline void permute(TensorShape &shape, const PermutationVector &perm)
     }
 }
 
-/* Auto initialize the tensor info (shape, number of channels, data type and fixed point position) if the current assignment is empty.
+/** Auto initialize the tensor info (shape, number of channels, data type and fixed point position) if the current assignment is empty.
  *
  * @param[in,out] info                 Tensor info used to check and assign.
  * @param[in]     shape                New shape.
@@ -558,7 +561,7 @@ bool auto_init_if_empty(ITensorInfo       &info,
  */
 bool auto_init_if_empty(ITensorInfo &info_sink, const ITensorInfo &info_source);
 
-/* Set the shape to the specified value if the current assignment is empty.
+/** Set the shape to the specified value if the current assignment is empty.
  *
  * @param[in,out] info  Tensor info used to check and assign.
  * @param[in]     shape New shape.
@@ -567,7 +570,7 @@ bool auto_init_if_empty(ITensorInfo &info_sink, const ITensorInfo &info_source);
  */
 bool set_shape_if_empty(ITensorInfo &info, const TensorShape &shape);
 
-/* Set the format, data type and number of channels to the specified value if
+/** Set the format, data type and number of channels to the specified value if
  * the current data type is unknown.
  *
  * @param[in,out] info   Tensor info used to check and assign.
@@ -577,7 +580,7 @@ bool set_shape_if_empty(ITensorInfo &info, const TensorShape &shape);
  */
 bool set_format_if_unknown(ITensorInfo &info, Format format);
 
-/* Set the data type and number of channels to the specified value if
+/** Set the data type and number of channels to the specified value if
  * the current data type is unknown.
  *
  * @param[in,out] info      Tensor info used to check and assign.
@@ -587,7 +590,7 @@ bool set_format_if_unknown(ITensorInfo &info, Format format);
  */
 bool set_data_type_if_unknown(ITensorInfo &info, DataType data_type);
 
-/* Set the data layout to the specified value if
+/** Set the data layout to the specified value if
  * the current data layout is unknown.
  *
  * @param[in,out] info        Tensor info used to check and assign.
@@ -597,7 +600,7 @@ bool set_data_type_if_unknown(ITensorInfo &info, DataType data_type);
  */
 bool set_data_layout_if_unknown(ITensorInfo &info, DataLayout data_layout);
 
-/* Set the fixed point position to the specified value if
+/** Set the fixed point position to the specified value if
  * the current fixed point position is 0 and the data type is QS8 or QS16
  *
  * @param[in,out] info                 Tensor info used to check and assign.
@@ -607,7 +610,7 @@ bool set_data_layout_if_unknown(ITensorInfo &info, DataLayout data_layout);
  */
 bool set_fixed_point_position_if_zero(ITensorInfo &info, int fixed_point_position);
 
-/* Set the quantization info to the specified value if
+/** Set the quantization info to the specified value if
  * the current quantization info is empty and the data type of asymmetric quantized type
  *
  * @param[in,out] info              Tensor info used to check and assign.
@@ -647,10 +650,10 @@ inline Coordinates index2coords(const TensorShape &shape, int index);
  */
 inline int coords2index(const TensorShape &shape, const Coordinates &coord);
 
-/* Get the index of the given dimension.
+/** Get the index of the given dimension.
  *
- * @param[in] info        Tensor info used to check and assign.
- * @param[in] data_layout New data layout.
+ * @param[in] data_layout           The data layout.
+ * @param[in] data_layout_dimension The dimension which this index is requested for.
  *
  * @return The int conversion of the requested data layout index.
  */

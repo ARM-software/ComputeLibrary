@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,13 +40,19 @@ public:
     CLLutAllocator();
     /** Default destructor. */
     ~CLLutAllocator() = default;
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLLutAllocator(const CLLutAllocator &) = delete;
-    /** Prevent instances of this class from being copy assigned (As this class contains pointers). */
+    /** Prevent instances of this class from being copy assigned (As this class contains pointers) */
     const CLLutAllocator &operator=(const CLLutAllocator &) = delete;
-    /** Interface to be implemented by the child class to return the pointer to the mapped data. */
+    /** Interface to be implemented by the child class to return the pointer to the mapped data.
+     *
+     * @return pointer to the mapped data.
+     */
     uint8_t *data();
-    /** Interface to be implemented by the child class to return the pointer to the CL data. */
+    /** Interface to be implemented by the child class to return the pointer to the CL data.
+     *
+     * @return pointer to the CL data.
+     */
     const cl::Buffer &cl_data() const;
     /** Enqueue a map operation of the allocated buffer on the given queue.
      *

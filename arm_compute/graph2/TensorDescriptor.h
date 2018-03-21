@@ -46,9 +46,9 @@ struct TensorDescriptor final
     {
     }
 
-    TensorShape shape{};
-    DataType    data_type{ DataType::UNKNOWN };
-    Target      target{ Target::UNSPECIFIED };
+    TensorShape shape{};                        /**< Tensor shape */
+    DataType    data_type{ DataType::UNKNOWN }; /**< Data type */
+    Target      target{ Target::UNSPECIFIED };  /**< Target */
 };
 } // namespace graph2
 } // namespace arm_compute

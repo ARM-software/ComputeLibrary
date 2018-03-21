@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,9 +44,9 @@ public:
      * @param[in] range    The total number of the consecutive values of the distribution interval.
      */
     CLDistribution1D(size_t num_bins, int32_t offset, uint32_t range);
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLDistribution1D(const CLDistribution1D &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLDistribution1D &operator=(const CLDistribution1D &) = delete;
     /** Enqueue a map operation of the allocated buffer.
      *

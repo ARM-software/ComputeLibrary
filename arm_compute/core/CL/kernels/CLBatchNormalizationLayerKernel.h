@@ -43,7 +43,7 @@ public:
     CLBatchNormalizationLayerKernel &operator=(const CLBatchNormalizationLayerKernel &) = delete;
     /** Default Move Constructor. */
     CLBatchNormalizationLayerKernel(CLBatchNormalizationLayerKernel &&) = default;
-    /** Default move assignment operator. */
+    /** Default move assignment operator */
     CLBatchNormalizationLayerKernel &operator=(CLBatchNormalizationLayerKernel &&) = default;
     /** Default destructor */
     ~CLBatchNormalizationLayerKernel() = default;

@@ -101,9 +101,17 @@ public:
      */
     RawTensor(const RawTensor &tensor);
 
-    RawTensor &operator     =(RawTensor tensor);
+    /** Copy the given @p tensor.
+     *
+     * @param[in] tensor To be copied tensor.
+     *
+     * @return a copy of the given tensor.
+     */
+    RawTensor &operator=(RawTensor tensor);
+    /** Allow instances of this class to be move constructed */
     RawTensor(RawTensor &&) = default;
-    ~RawTensor()            = default;
+    /** Default destructor. */
+    ~RawTensor() = default;
 
     /** Read only access to the specified element.
      *

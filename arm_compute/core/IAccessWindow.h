@@ -71,12 +71,14 @@ inline int adjust_up(int required, int available, int step)
 class IAccessWindow
 {
 public:
+    /** Default virtual destructor */
     virtual ~IAccessWindow() = default;
     /** Shrink the window if padding is not large enough.
      *
      * @param[in] window Window used by the kernel.
      *
      * @return True if the window has been changed.
+     *
      */
     virtual bool update_window_if_needed(Window &window) const = 0;
     /** Increase the padding to be large enough for the window.
@@ -94,6 +96,9 @@ public:
      * @param[in] input_valid_region Combined valid region of all inputs.
      * @param[in] border_undefined   Undefined borders are excluded from the valid region.
      * @param[in] border_size        Size of the border around the XY-plane of the tensor.
+     *
+     * @return a valid region.
+     *
      */
     virtual ValidRegion compute_valid_region(const Window &window, ValidRegion input_valid_region, bool border_undefined, BorderSize border_size) const = 0;
 };
@@ -138,11 +143,16 @@ public:
         ARM_COMPUTE_ERROR_ON(scale_y < 0);
     }
 
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     AccessWindowRectangle(const AccessWindowRectangle &) = delete;
-    AccessWindowRectangle(AccessWindowRectangle &&)      = delete;
+    /** Allow instances of this class to be move constructed */
+    AccessWindowRectangle(AccessWindowRectangle &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     AccessWindowRectangle &operator=(const AccessWindowRectangle &) = delete;
+    /** Allow instances of this class to be moved */
     AccessWindowRectangle &operator=(AccessWindowRectangle &&) = default;
-    ~AccessWindowRectangle()                                   = default;
+    /** Default destructor */
+    ~AccessWindowRectangle() = default;
 
     /** Set the valid region based on access pattern, valid region of the inputs and border mode.
      *
@@ -159,12 +169,26 @@ public:
      *
      * @param[in] window             Execution window of the kernel.
      * @param[in] input_valid_region Combined valid region of all inputs.
+     *
+     * @return a valid region.
+     *
      */
     ValidRegion compute_valid_region(const Window &window, const ValidRegion &input_valid_region) const;
 
     // Inherited methods overridden:
 
-    /** @note This method assumes that all elements written by the kernel are valid. */
+    /** Compute the valid region based on access pattern and valid region of the inputs.
+     *
+     * @note This method assumes that all elements written by the kernel are valid.
+     *
+     * @param[in] window             Execution window of the kernel.
+     * @param[in] input_valid_region Combined valid region of all inputs.
+     * @param[in] border_undefined   Undefined borders are excluded from the valid region.
+     * @param[in] border_size        Size of the border around the XY-plane of the tensor.
+     *
+     * @return a valid region.
+     *
+     */
     ValidRegion compute_valid_region(const Window &window, ValidRegion input_valid_region, bool border_undefined, BorderSize border_size) const override;
 
     bool update_window_if_needed(Window &window) const override;

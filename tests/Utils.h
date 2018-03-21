@@ -105,17 +105,26 @@ namespace traits
 {
 // *INDENT-OFF*
 // clang-format off
+/** Promote a type */
 template <typename T> struct promote { };
-template <> struct promote<uint8_t> { using type = uint16_t; };
-template <> struct promote<int8_t> { using type = int16_t; };
-template <> struct promote<uint16_t> { using type = uint32_t; };
-template <> struct promote<int16_t> { using type = int32_t; };
-template <> struct promote<uint32_t> { using type = uint64_t; };
-template <> struct promote<int32_t> { using type = int64_t; };
-template <> struct promote<float> { using type = float; };
-template <> struct promote<half> { using type = half; };
+/** Promote uint8_t to uint16_t */
+template <> struct promote<uint8_t> { using type = uint16_t; /**< Promoted type */ };
+/** Promote int8_t to int16_t */
+template <> struct promote<int8_t> { using type = int16_t; /**< Promoted type */ };
+/** Promote uint16_t to uint32_t */
+template <> struct promote<uint16_t> { using type = uint32_t; /**< Promoted type */ };
+/** Promote int16_t to int32_t */
+template <> struct promote<int16_t> { using type = int32_t; /**< Promoted type */ };
+/** Promote uint32_t to uint64_t */
+template <> struct promote<uint32_t> { using type = uint64_t; /**< Promoted type */ };
+/** Promote int32_t to int64_t */
+template <> struct promote<int32_t> { using type = int64_t; /**< Promoted type */ };
+/** Promote float to float */
+template <> struct promote<float> { using type = float; /**< Promoted type */ };
+/** Promote half to half */
+template <> struct promote<half> { using type = half; /**< Promoted type */ };
 
-
+/** Get promoted type */
 template <typename T>
 using promote_t = typename promote<T>::type;
 
@@ -378,8 +387,11 @@ T saturate_cast(T val)
 template <typename... T>
 struct common_promoted_signed_type
 {
-    using common_type       = typename std::common_type<T...>::type;
-    using promoted_type     = traits::promote_t<common_type>;
+    /** Common type */
+    using common_type = typename std::common_type<T...>::type;
+    /** Promoted type */
+    using promoted_type = traits::promote_t<common_type>;
+    /** Intermediate type */
     using intermediate_type = typename traits::make_signed_conditional_t<promoted_type>::type;
 };
 
@@ -388,8 +400,11 @@ struct common_promoted_signed_type
 template <typename... T>
 struct common_promoted_unsigned_type
 {
-    using common_type       = typename std::common_type<T...>::type;
-    using promoted_type     = traits::promote_t<common_type>;
+    /** Common type */
+    using common_type = typename std::common_type<T...>::type;
+    /** Promoted type */
+    using promoted_type = traits::promote_t<common_type>;
+    /** Intermediate type */
     using intermediate_type = typename traits::make_unsigned_conditional_t<promoted_type>::type;
 };
 

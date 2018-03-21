@@ -30,6 +30,7 @@ namespace arm_compute
 {
 namespace graph2
 {
+/** Output Layer node */
 class OutputNode final : public INode
 {
 public:

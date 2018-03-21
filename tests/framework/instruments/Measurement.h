@@ -40,6 +40,7 @@ namespace framework
 /** Generic measurement that stores values as either double or long long int. */
 struct Measurement
 {
+    /** Measurement value */
     struct Value
     {
         /** Constructor
@@ -187,6 +188,13 @@ struct Measurement
             }
         }
 
+        /** Get the relative standard deviation to a given distribution as a percentage.
+         *
+         * @param[in] variance The variance of the distribution.
+         * @param[in] mean     The mean of the distribution.
+         *
+         * @return the relative standard deviation.
+         */
         static double relative_standard_deviation(const Value &variance, const Value &mean)
         {
             if(variance.is_floating_point)
@@ -222,6 +230,11 @@ struct Measurement
     /** Stream output operator to print the measurement.
      *
      * Prints value and unit.
+     *
+     * @param[out] os          Output stream.
+     * @param[in]  measurement Measurement.
+     *
+     * @return the modified output stream.
      */
     friend inline std::ostream &operator<<(std::ostream &os, const Measurement &measurement)
     {

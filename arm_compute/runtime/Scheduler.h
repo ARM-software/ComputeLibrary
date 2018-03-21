@@ -33,12 +33,13 @@ namespace arm_compute
 class Scheduler
 {
 public:
+    /** Scheduler type */
     enum class Type
     {
-        ST,    // Single thread.
-        CPP,   // C++11 threads.
-        OMP,   // OpenMP.
-        CUSTOM // Provided by the user.
+        ST,    /**< Single thread. */
+        CPP,   /**< C++11 threads. */
+        OMP,   /**< OpenMP. */
+        CUSTOM /**< Provided by the user. */
     };
     /** Sets the user defined scheduler and makes it the active scheduler.
      *
@@ -63,6 +64,8 @@ public:
      */
     static Type get_type();
     /** Returns true if the given scheduler type is supported. False otherwise.
+     *
+     * @param[in] t the type of the scheduler to check.
      *
      * @return true if the given scheduler type is supported. False otherwise.
      */

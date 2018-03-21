@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,7 +51,7 @@ public:
      * @note Some names are reserved e.g. [CORE, RUNTIME, GRAPH]
      *
      * @param[in] name      Logger's name
-     * @param[in] log_level Logger's log level. Defaults to @ref LogLevel::INFO
+     * @param[in] log_level Logger's log level. Defaults to INFO
      * @param[in] printers  Printers to attach to the system loggers. Defaults with a @ref StdPrinter.
      */
     void create_logger(const std::string &name, LogLevel log_level = LogLevel::INFO,
@@ -70,7 +70,7 @@ public:
     std::shared_ptr<Logger> logger(const std::string &name);
     /** Creates reserved library loggers
      *
-     * @param[in] log_level (Optional) Logger's log level. Defaults to @ref LogLevel::INFO
+     * @param[in] log_level (Optional) Logger's log level. Defaults to INFO
      * @param[in] printers  (Optional) Printers to attach to the system loggers. Defaults with a @ref StdPrinter.
      */
     void create_reserved_loggers(LogLevel                              log_level = LogLevel::INFO,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,9 +43,12 @@ namespace arm_compute
 {
 class CLPyramid;
 
+/** OpenCL Array of Internal Keypoints */
 using CLLKInternalKeypointArray = CLArray<CLLKInternalKeypoint>;
-using CLCoefficientTableArray   = CLArray<CLCoefficientTable>;
-using CLOldValueArray           = CLArray<CLOldValue>;
+/** OpenCL Array of Coefficient Tables */
+using CLCoefficientTableArray = CLArray<CLCoefficientTable>;
+/** OpenCL Array of Old Values */
+using CLOldValueArray = CLArray<CLOldValue>;
 
 /** Basic function to execute optical flow. This function calls the following OpenCL kernels and functions:
  *

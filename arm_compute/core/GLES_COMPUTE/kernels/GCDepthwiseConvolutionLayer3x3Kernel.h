@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,7 @@ public:
     GCDepthwiseConvolutionLayer3x3Kernel &operator=(const GCDepthwiseConvolutionLayer3x3Kernel &) = delete;
     /** Default Move Constructor. */
     GCDepthwiseConvolutionLayer3x3Kernel(GCDepthwiseConvolutionLayer3x3Kernel &&) = default;
-    /** Default move assignment operator. */
+    /** Default move assignment operator */
     GCDepthwiseConvolutionLayer3x3Kernel &operator=(GCDepthwiseConvolutionLayer3x3Kernel &&) = default;
     /** Initialize the function's source, destination, conv and border_size.
      *

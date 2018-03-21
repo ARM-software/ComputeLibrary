@@ -34,6 +34,7 @@ namespace strong_type
 template <typename T>
 struct Comparable : misc::CRTP<T, Comparable>
 {
+#ifndef DOXYGEN_SKIP_THIS
     bool operator==(T const &other) const
     {
         return this->impl().get() == other.get();
@@ -58,6 +59,7 @@ struct Comparable : misc::CRTP<T, Comparable>
     {
         return !(*this > other);
     }
+#endif /* DOXYGEN_SKIP_THIS */
 };
 } // namespace strong_type
 } // namespace arm_compute

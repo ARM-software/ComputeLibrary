@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,7 +44,7 @@ typedef struct InternalKeypoint
     float x;               /**< The x coordinate. */
     float y;               /**< The y coordinate. */
     float tracking_status; /**< A zero indicates a lost point. Initialized to 1 by corner detectors. */
-    float dummy;
+    float dummy;           /**< Dummy member for alignment. */
 } InternalKeypoint;
 
 /** Threshold for the determinant. Used for lost tracking criteria */

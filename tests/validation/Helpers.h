@@ -151,10 +151,10 @@ TensorShape calculate_depth_concatenate_shape(const std::vector<TensorShape> &in
 /** Parameters of Harris Corners algorithm. */
 struct HarrisCornersParameters
 {
-    float   threshold{ 0.f };
-    float   sensitivity{ 0.f };
-    float   min_dist{ 0.f };
-    uint8_t constant_border_value{ 0 };
+    float   threshold{ 0.f };           /**< Threshold */
+    float   sensitivity{ 0.f };         /**< Sensitivity */
+    float   min_dist{ 0.f };            /**< Minimum distance */
+    uint8_t constant_border_value{ 0 }; /**< Border value */
 };
 
 /** Generate parameters for Harris Corners algorithm. */

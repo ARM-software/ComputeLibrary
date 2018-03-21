@@ -49,21 +49,37 @@ public:
     {
     }
 
+    /** Get beginning of iterator.
+     *
+     * @return beginning of iterator.
+     */
     typename T::reverse_iterator begin()
     {
         return _it.rbegin();
     }
 
+    /** Get end of iterator.
+     *
+     * @return end of iterator.
+     */
     typename T::reverse_iterator end()
     {
         return _it.rend();
     }
 
+    /** Get beginning of const iterator.
+     *
+     * @return beginning of const iterator.
+     */
     typename T::const_reverse_iterator cbegin()
     {
         return _it.rbegin();
     }
 
+    /** Get end of const iterator.
+     *
+     * @return end of const iterator.
+     */
     typename T::const_reverse_iterator cend()
     {
         return _it.rend();

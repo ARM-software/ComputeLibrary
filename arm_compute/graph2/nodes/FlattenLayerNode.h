@@ -30,6 +30,7 @@ namespace arm_compute
 {
 namespace graph2
 {
+/** Flatten Layer node */
 class FlattenLayerNode final : public INode
 {
 public:

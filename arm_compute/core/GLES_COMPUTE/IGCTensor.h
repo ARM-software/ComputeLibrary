@@ -38,10 +38,10 @@ public:
     /** Default constructor. */
     IGCTensor();
 
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     IGCTensor(const IGCTensor &) = delete;
 
-    /** Prevent instances of this class from being copy assigned (As this class contains pointers). */
+    /** Prevent instances of this class from being copy assigned (As this class contains pointers) */
     IGCTensor &operator=(const IGCTensor &) = delete;
 
     /** Allow instances of this class to be moved */
@@ -107,6 +107,7 @@ private:
     bool     _needs_shifting;
 };
 
+/** Interface for GLES Compute image */
 using IGCImage = IGCTensor;
 }
 #endif /*__ARM_COMPUTE_IGCTENSOR_H__ */

@@ -210,6 +210,8 @@ public:
      * @param[in] hog_info HOG's metadata used to allocate normalized HOG space
      * @param[in] width    Width of the 2D tensor where the HOG descriptor will be computed on
      * @param[in] height   Height of the 2D tensor where the HOG descriptor will be computed on
+     *
+     * @return Total allocation size including padding in bytes.
      */
     size_t init_auto_padding(const HOGInfo &hog_info, unsigned int width, unsigned int height);
 

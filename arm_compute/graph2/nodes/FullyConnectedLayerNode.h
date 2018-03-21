@@ -30,6 +30,7 @@ namespace arm_compute
 {
 namespace graph2
 {
+/** Fully Connected Layer node */
 class FullyConnectedLayerNode final : public INode
 {
 public:

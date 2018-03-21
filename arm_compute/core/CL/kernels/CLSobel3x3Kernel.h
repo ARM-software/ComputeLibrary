@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,9 +36,9 @@ class CLSobel3x3Kernel : public ICLKernel
 public:
     /** Default constructor: initialize all the pointers to nullptr and parameters to zero. */
     CLSobel3x3Kernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLSobel3x3Kernel(const CLSobel3x3Kernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLSobel3x3Kernel &operator=(const CLSobel3x3Kernel &) = delete;
     /** Allow instances of this class to be moved */
     CLSobel3x3Kernel(CLSobel3x3Kernel &&) = default;

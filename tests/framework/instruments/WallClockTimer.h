@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,6 +38,10 @@ namespace framework
 class WallClockTimer : public Instrument
 {
 public:
+    /** Construct a Wall clock timer.
+     *
+     * @param[in] scale_factor Measurement scale factor.
+     */
     WallClockTimer(ScaleFactor scale_factor)
     {
         switch(scale_factor)

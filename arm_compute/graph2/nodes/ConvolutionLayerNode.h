@@ -30,6 +30,7 @@ namespace arm_compute
 {
 namespace graph2
 {
+/** Convolution Layer node */
 class ConvolutionLayerNode final : public INode
 {
 public:

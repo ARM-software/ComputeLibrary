@@ -61,7 +61,7 @@ inline bool have_different_dimensions(const Dimensions<T> &dim1, const Dimension
     return false;
 }
 
-/** Functor to compare two @ref Dimensions objects and throw an error on mismatch.
+/** Function to compare two @ref Dimensions objects and throw an error on mismatch.
  *
  * @param[in] dim      Object to compare against.
  * @param[in] function Function in which the error occurred.
@@ -72,6 +72,13 @@ template <typename T>
 class compare_dimension
 {
 public:
+    /** Construct a comparison function.
+     *
+     * @param[in] dim      Dimensions to compare.
+     * @param[in] function Source function. Used for error reporting.
+     * @param[in] file     Source code file. Used for error reporting.
+     * @param[in] line     Source code line. Used for error reporting.
+     */
     compare_dimension(const Dimensions<T> &dim, const char *function, const char *file, int line)
         : _dim{ dim }, _function{ function }, _file{ file }, _line{ line }
     {
@@ -80,6 +87,8 @@ public:
     /** Compare the given object against the stored one.
      *
      * @param[in] dim To be compared object.
+     *
+     * @return a status.
      */
     arm_compute::Status operator()(const Dimensions<T> &dim)
     {
@@ -109,11 +118,19 @@ inline arm_compute::Status for_each_error(F &&func, T &&arg, Ts &&... args)
     return arm_compute::Status{};
 }
 
+/** Get the info for a tensor, dummy struct */
 template <typename T>
 struct get_tensor_info_t;
+/** Get the info for a tensor */
 template <>
 struct get_tensor_info_t<ITensorInfo *>
 {
+    /** Get the info for a tensor.
+     *
+     * @param[in] tensor Tensor.
+     *
+     * @return tensor info.
+     */
     ITensorInfo *operator()(const ITensor *tensor)
     {
         return tensor->info();
@@ -845,6 +862,8 @@ arm_compute::Status error_on_invalid_multi_hog(const char *function, const char 
  * @param[in] file     Name of the file where the error occurred.
  * @param[in] line     Line on which the error occurred.
  * @param[in] kernel   Kernel to validate.
+ *
+ * @return Status
  */
 arm_compute::Status error_on_unconfigured_kernel(const char *function, const char *file, const int line,
                                                  const IKernel *kernel);

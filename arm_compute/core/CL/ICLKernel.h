@@ -293,6 +293,14 @@ protected:
  */
 void enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Window &window, const cl::NDRange &lws_hint = CLKernelLibrary::get().default_ndrange());
 
+/** Add the passed array's parameters to the object's kernel's arguments starting from the index idx.
+ *
+ * @param[in,out] idx            Index at which to start adding the array's arguments. Will be incremented by the number of kernel arguments set.
+ * @param[in]     array          Array to set as an argument of the object's kernel.
+ * @param[in]     strides        @ref Strides object containing stride of each dimension in bytes.
+ * @param[in]     num_dimensions Number of dimensions of the @p array.
+ * @param[in]     window         Window the kernel will be executed on.
+ */
 template <typename T, unsigned int dimension_size>
 void ICLKernel::add_array_argument(unsigned &idx, const ICLArray<T> *array, const Strides &strides, unsigned int num_dimensions, const Window &window)
 {

@@ -98,7 +98,10 @@ private:
 class CLGEMMConvolutionLayer : public IFunction
 {
 public:
-    /** Default constructor */
+    /** Default constructor
+     *
+     * @param[in] memory_manager (Optional) Memory manager.
+     */
     CLGEMMConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
@@ -128,6 +131,8 @@ public:
      * @param[in]  conv_info    Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  weights_info Specifies if the weights tensor has been reshaped with CLWeightsReshapeKernel. If this is not part of the fully connected layer the weights
      *                          tensor has also been transposed with CLGEMMTranspose1xWKernel. Data type supported: Same as @p input.
+     *
+     * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
                            const WeightsInfo &weights_info = WeightsInfo());

@@ -46,7 +46,7 @@ public:
     CLDequantizationLayerKernel &operator=(const CLDequantizationLayerKernel &) = delete;
     /** Default Move Constructor. */
     CLDequantizationLayerKernel(CLDequantizationLayerKernel &&) = default;
-    /** Default move assignment operator. */
+    /** Default move assignment operator */
     CLDequantizationLayerKernel &operator=(CLDequantizationLayerKernel &&) = default;
     /** Default destructor */
     ~CLDequantizationLayerKernel() = default;

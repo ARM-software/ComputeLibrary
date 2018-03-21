@@ -34,6 +34,7 @@ namespace arm_compute
 {
 namespace graph2
 {
+/** Graph printer visitor. */
 class DotGraphVisitor final : public DefaultNodeVisitor
 {
 public:

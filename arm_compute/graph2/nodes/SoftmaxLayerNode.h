@@ -30,6 +30,7 @@ namespace arm_compute
 {
 namespace graph2
 {
+/** Softmax Layer node */
 class SoftmaxLayerNode final : public INode
 {
 public:

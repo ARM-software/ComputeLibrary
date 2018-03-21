@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,6 +43,8 @@ public:
     /** Interface to be implemented that configures an operation
      *
      * @param[in] ctx Node parameters to be used by the operation
+     *
+     * @return a pointer to the function which implements the operation.
      */
     virtual std::unique_ptr<arm_compute::IFunction> configure(NodeContext &ctx) = 0;
     /** Interface to be implemented that returns the target of the operation

@@ -30,6 +30,7 @@ namespace arm_compute
 {
 namespace graph2
 {
+/** Reshape Layer node */
 class ReshapeLayerNode final : public INode
 {
 public:

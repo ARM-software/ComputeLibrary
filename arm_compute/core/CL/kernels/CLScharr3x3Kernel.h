@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,9 +52,9 @@ class CLScharr3x3Kernel : public ICLKernel
 public:
     /** Default constructor: initialize all the pointers to nullptr and parameters to zero. */
     CLScharr3x3Kernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLScharr3x3Kernel(const CLScharr3x3Kernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLScharr3x3Kernel &operator=(const CLScharr3x3Kernel &) = delete;
     /** Allow instances of this class to be moved */
     CLScharr3x3Kernel(CLScharr3x3Kernel &&) = default;

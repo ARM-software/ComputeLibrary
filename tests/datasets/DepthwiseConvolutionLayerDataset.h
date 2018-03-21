@@ -113,6 +113,8 @@ private:
     std::vector<TensorShape>   _dst_shapes{};
     std::vector<PadStrideInfo> _infos{};
 };
+
+/** Dataset containing small, generic depthwise convolution shapes. */
 class SmallDepthwiseConvolutionLayerDataset final : public DepthwiseConvolutionLayerDataset
 {
 public:
@@ -135,6 +137,7 @@ public:
     }
 };
 
+/** Dataset containing large, generic depthwise convolution shapes. */
 class LargeDepthwiseConvolutionLayerDataset final : public DepthwiseConvolutionLayerDataset
 {
 public:
@@ -149,6 +152,7 @@ public:
     }
 };
 
+/** Dataset containing small, 3x3 depthwise convolution shapes. */
 class SmallDepthwiseConvolutionLayerDataset3x3 final : public DepthwiseConvolutionLayerDataset
 {
 public:
@@ -165,6 +169,7 @@ public:
     }
 };
 
+/** Dataset containing large, 3x3 depthwise convolution shapes. */
 class LargeDepthwiseConvolutionLayerDataset3x3 final : public DepthwiseConvolutionLayerDataset
 {
 public:
@@ -178,6 +183,8 @@ public:
         add_config(TensorShape(177U, 311U, 22U), TensorShape(3U, 3U, 22U), TensorShape(89U, 311U, 22U), PadStrideInfo(2, 1, 1, 1));
     }
 };
+
+/** Dataset containing optimized, 3x3 depthwise convolution shapes. */
 class OptimizedDepthwiseConvolutionLayerDataset3x3 final : public DepthwiseConvolutionLayerDataset
 {
 public:

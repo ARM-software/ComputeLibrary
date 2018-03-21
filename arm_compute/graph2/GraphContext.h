@@ -38,8 +38,8 @@ namespace graph2
 /** Contains structs required for memory management */
 struct MemoryManagerContext
 {
-    Target                                       target = { Target::UNSPECIFIED };
-    std::shared_ptr<arm_compute::IMemoryManager> mm     = { nullptr };
+    Target                                       target = { Target::UNSPECIFIED }; /**< Target */
+    std::shared_ptr<arm_compute::IMemoryManager> mm     = { nullptr };             /**< Memory manager */
 };
 
 /** Graph context **/

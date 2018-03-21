@@ -43,7 +43,7 @@ public:
     GCBatchNormalizationLayerKernel &operator=(const GCBatchNormalizationLayerKernel &) = delete;
     /** Default Move Constructor. */
     GCBatchNormalizationLayerKernel(GCBatchNormalizationLayerKernel &&) = default;
-    /** Default move assignment operator. */
+    /** Default move assignment operator */
     GCBatchNormalizationLayerKernel &operator=(GCBatchNormalizationLayerKernel &&) = default;
     /** Default destructor */
     ~GCBatchNormalizationLayerKernel() = default;

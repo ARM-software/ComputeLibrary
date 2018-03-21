@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,12 +40,18 @@ namespace arm_compute
 class ICLTensor : public ITensor
 {
 public:
+    /** Default constructor. */
     ICLTensor();
+    /** Prevent instances of this class from being copy constructed */
     ICLTensor(const ICLTensor &) = delete;
+    /** Prevent instances of this class from being copied */
     ICLTensor &operator=(const ICLTensor &) = delete;
-    ICLTensor(ICLTensor &&)                 = default;
+    /** Allow instances of this class to be move constructed */
+    ICLTensor(ICLTensor &&) = default;
+    /** Allow instances of this class to be copied */
     ICLTensor &operator=(ICLTensor &&) = default;
-    virtual ~ICLTensor()               = default;
+    /** Default virtual destructor. */
+    virtual ~ICLTensor() = default;
 
     /** Interface to be implemented by the child class to return a reference to the OpenCL buffer containing the image's data.
      *

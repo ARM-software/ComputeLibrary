@@ -62,8 +62,15 @@ namespace utils
 class Example
 {
 public:
+    /** Setup the example.
+     *
+     * @param[in] argc Argument count.
+     * @param[in] argv Argument values.
+     */
     virtual void do_setup(int argc, char **argv) {};
+    /** Run the example. */
     virtual void do_run() {};
+    /** Teardown the example. */
     virtual void do_teardown() {};
 
     /** Default destructor. */
@@ -489,9 +496,11 @@ private:
     unsigned int  _width, _height;
 };
 
+/** Numpy data loader */
 class NPYLoader
 {
 public:
+    /** Default constructor */
     NPYLoader()
         : _fs(), _shape(), _fortran_order(false), _typestring()
     {

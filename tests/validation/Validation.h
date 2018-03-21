@@ -69,7 +69,10 @@ public:
     {
     }
 
-    /** Implicit conversion to the underlying type. */
+    /** Implicit conversion to the underlying type.
+     *
+     * @return the underlying type.
+     */
     constexpr operator T() const
     {
         return _value;
@@ -102,7 +105,10 @@ public:
     {
     }
 
-    /** Implicit conversion to the underlying type. */
+    /** Implicit conversion to the underlying type.
+     *
+     * @return the underlying type.
+     */
     constexpr operator value_type() const
     {
         return _value;
@@ -241,27 +247,36 @@ template <typename T, typename U, typename V = AbsoluteTolerance<float>>
 void validate_keypoints(T target_first, T target_last, U reference_first, U reference_last, V tolerance = AbsoluteTolerance<float>(),
                         float allowed_missing_percentage = 5.f, float allowed_mismatch_percentage = 5.f);
 
+/** Compare values with a tolerance. */
 template <typename T>
 struct compare_base
 {
+    /** Construct a comparison object.
+     *
+     * @param[in] target    Target value.
+     * @param[in] reference Reference value.
+     * @param[in] tolerance Allowed tolerance.
+     */
     compare_base(typename T::value_type target, typename T::value_type reference, T tolerance = T(0))
         : _target{ target }, _reference{ reference }, _tolerance{ tolerance }
     {
     }
 
-    typename T::value_type _target{};
-    typename T::value_type _reference{};
-    T                      _tolerance{};
+    typename T::value_type _target{};    /**< Target value */
+    typename T::value_type _reference{}; /**< Reference value */
+    T                      _tolerance{}; /**< Tolerance value */
 };
 
 template <typename T>
 struct compare;
 
+/** Compare values with an absolute tolerance */
 template <typename U>
 struct compare<AbsoluteTolerance<U>> : public compare_base<AbsoluteTolerance<U>>
 {
     using compare_base<AbsoluteTolerance<U>>::compare_base;
 
+    /** Perform comparison */
     operator bool() const
     {
         if(!support::cpp11::isfinite(this->_target) || !support::cpp11::isfinite(this->_reference))
@@ -281,11 +296,13 @@ struct compare<AbsoluteTolerance<U>> : public compare_base<AbsoluteTolerance<U>>
     }
 };
 
+/** Compare values with a relative tolerance */
 template <typename U>
 struct compare<RelativeTolerance<U>> : public compare_base<RelativeTolerance<U>>
 {
     using compare_base<RelativeTolerance<U>>::compare_base;
 
+    /** Perform comparison */
     operator bool() const
     {
         if(!support::cpp11::isfinite(this->_target) || !support::cpp11::isfinite(this->_reference))

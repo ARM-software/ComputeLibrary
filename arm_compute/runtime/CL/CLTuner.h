@@ -71,7 +71,7 @@ public:
 
     /** Give read access to the LWS table
      *
-     * return The lws table as unordered_map container
+     * @return The lws table as unordered_map container
      */
     const std::unordered_map<std::string, cl::NDRange> &lws_table() const;
 
@@ -83,6 +83,7 @@ public:
      */
     void set_cl_kernel_event(cl_event kernel_event);
 
+    /** clEnqueueNDRangeKernel symbol */
     std::function<decltype(clEnqueueNDRangeKernel)> real_clEnqueueNDRangeKernel;
 
     /** Load the LWS table from file

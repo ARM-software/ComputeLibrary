@@ -35,11 +35,11 @@ namespace arm_compute
 enum class DataType;
 enum class GPUTarget;
 
-/** Enable operation operations on GPUTarget enumerations */
+/** Enable bitwise operations on GPUTarget enumerations */
 template <>
 struct enable_bitwise_ops<arm_compute::GPUTarget>
 {
-    static constexpr bool value = true;
+    static constexpr bool value = true; /**< Enabled. */
 };
 
 /** Max vector width of an OpenCL vector */

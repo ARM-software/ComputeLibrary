@@ -38,6 +38,7 @@ class GraphContext;
 
 namespace backends
 {
+/** Factory for generating NEON backend functions **/
 class NEFunctionFactory final
 {
 public:

@@ -49,7 +49,7 @@ public:
     NEDepthwiseConvolutionLayer3x3Kernel &operator=(const NEDepthwiseConvolutionLayer3x3Kernel &) = delete;
     /** Default Move Constructor. */
     NEDepthwiseConvolutionLayer3x3Kernel(NEDepthwiseConvolutionLayer3x3Kernel &&) = default;
-    /** Default move assignment operator. */
+    /** Default move assignment operator */
     NEDepthwiseConvolutionLayer3x3Kernel &operator=(NEDepthwiseConvolutionLayer3x3Kernel &&) = default;
     /** Initialize the function's source, destination, conv and border_size.
      *

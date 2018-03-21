@@ -51,7 +51,10 @@ class ICLTensor;
 class CLGEMM : public IFunction
 {
 public:
-    /** Default constructor. */
+    /** Default constructor.
+     *
+     * @param[in] memory_manager (Optional) Memory manager.
+     */
     CLGEMM(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Initialise the kernel's inputs and output
      *

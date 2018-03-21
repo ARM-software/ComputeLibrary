@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,13 +40,13 @@ class GCAbsoluteDifferenceKernel : public IGCKernel
 public:
     /** Default constructor. */
     GCAbsoluteDifferenceKernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     GCAbsoluteDifferenceKernel(const GCAbsoluteDifferenceKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     GCAbsoluteDifferenceKernel &operator=(const GCAbsoluteDifferenceKernel &) = delete;
-    /** Allow instances of this class to be moved. */
+    /** Allow instances of this class to be moved */
     GCAbsoluteDifferenceKernel(GCAbsoluteDifferenceKernel &&) = default;
-    /** Allow instances of this class to be moved. */
+    /** Allow instances of this class to be moved */
     GCAbsoluteDifferenceKernel &operator=(GCAbsoluteDifferenceKernel &&) = default;
     /** Default destructor */
     ~GCAbsoluteDifferenceKernel() = default;

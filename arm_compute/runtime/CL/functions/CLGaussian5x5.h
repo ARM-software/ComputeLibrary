@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,7 +49,10 @@ class ICLTensor;
 class CLGaussian5x5 : public IFunction
 {
 public:
-    /** Default Constructor. */
+    /** Default Constructor.
+     *
+     * @param[in] memory_manager (Optional) Memory manager.
+     */
     CLGaussian5x5(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Initialise the function's source, destinations and border mode.
      *

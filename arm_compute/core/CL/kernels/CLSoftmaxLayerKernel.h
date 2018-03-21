@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -100,6 +100,7 @@ private:
 class CLLogits1DMaxShiftExpSumKernel : public ICLKernel
 {
 public:
+    /** Info for whether a parallel reduction will be run and the vector size of the execution. */
     using ParallelReductionInfo = std::tuple<bool, unsigned int>;
 
 public:
@@ -139,8 +140,8 @@ public:
      *
      * @param[in] size Size to check
      *
-     * @return A two-element tuple where the first element is a boolean specifying is a parallel reduction will be run,
-     *         while the second elements is the vector size of the execution.
+     * @return A two-element tuple where the first element is a boolean specifying if a parallel reduction will be run,
+     *         while the second element is the vector size of the execution.
      */
     static ParallelReductionInfo is_parallel_reduction(size_t size);
 

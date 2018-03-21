@@ -32,6 +32,8 @@ namespace arm_compute
 /** Ignores unused arguments
  *
  * @tparam T Argument types
+ *
+ * @param[in] ... Ignored arguments
  */
 template <typename... T>
 inline void ignore_unused(T &&...)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,14 +44,19 @@ public:
     {
         _lut.map(true);
     }
+    /** Default destructor */
     ~CLLutAccessor()
     {
         _lut.unmap();
     }
 
+    /** Prevent instances of this class from being copy constructed */
     CLLutAccessor(const CLLutAccessor &) = delete;
+    /** Prevent instances of this class from being copied */
     CLLutAccessor &operator=(const CLLutAccessor &) = delete;
-    CLLutAccessor(CLLutAccessor &&)                 = default;
+    /** Allow instances of this class to be move constructed */
+    CLLutAccessor(CLLutAccessor &&) = default;
+    /** Allow instance of this class to be moved */
     CLLutAccessor &operator=(CLLutAccessor &&) = default;
 
     int num_elements() const override

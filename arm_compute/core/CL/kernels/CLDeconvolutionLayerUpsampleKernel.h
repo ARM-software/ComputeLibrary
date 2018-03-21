@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,7 @@ public:
     CLDeconvolutionLayerUpsampleKernel &operator=(const CLDeconvolutionLayerUpsampleKernel &) = delete;
     /** Default Move Constructor. */
     CLDeconvolutionLayerUpsampleKernel(CLDeconvolutionLayerUpsampleKernel &&) = default;
-    /** Default move assignment operator. */
+    /** Default move assignment operator */
     CLDeconvolutionLayerUpsampleKernel &operator=(CLDeconvolutionLayerUpsampleKernel &&) = default;
     /** Default destructor */
     ~CLDeconvolutionLayerUpsampleKernel() = default;

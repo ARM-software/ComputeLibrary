@@ -94,65 +94,104 @@ public:
     /** Create a deep copy of the given @p tensor.
      *
      * @param[in] tensor To be copied tensor.
+     *
+     * @return a copy of the given tensor.
      */
-    SimpleTensor &operator        =(SimpleTensor tensor);
+    SimpleTensor &operator=(SimpleTensor tensor);
+    /** Allow instances of this class to be move constructed */
     SimpleTensor(SimpleTensor &&) = default;
-    ~SimpleTensor()               = default;
+    /** Default destructor. */
+    ~SimpleTensor() = default;
 
+    /** Tensor value type */
     using value_type = T;
-    using Buffer     = std::unique_ptr<value_type[]>;
+    /** Tensor buffer pointer type */
+    using Buffer = std::unique_ptr<value_type[]>;
 
     friend class RawTensor;
 
     /** Return value at @p offset in the buffer.
      *
      * @param[in] offset Offset within the buffer.
+     *
+     * @return value in the buffer.
      */
     T &operator[](size_t offset);
 
     /** Return constant value at @p offset in the buffer.
      *
      * @param[in] offset Offset within the buffer.
+     *
+     * @return constant value in the buffer.
      */
     const T &operator[](size_t offset) const;
 
-    /** Shape of the tensor. */
+    /** Shape of the tensor.
+     *
+     * @return the shape of the tensor.
+     */
     TensorShape shape() const override;
-
-    /** Size of each element in the tensor in bytes. */
+    /** Size of each element in the tensor in bytes.
+     *
+     * @return the size of each element in the tensor in bytes.
+     */
     size_t element_size() const override;
-
-    /** Total size of the tensor in bytes. */
+    /** Total size of the tensor in bytes.
+     *
+     * @return the total size of the tensor in bytes.
+     */
     size_t size() const override;
-
-    /** Data layout of the tensor. */
-    DataLayout data_layout() const override;
-
-    /** Image format of the tensor. */
+    /** Image format of the tensor.
+     *
+     * @return the format of the tensor.
+     */
     Format format() const override;
-
-    /** Data type of the tensor. */
+    /** Data layout of the tensor.
+     *
+     * @return the data layout of the tensor.
+     */
+    DataLayout data_layout() const override;
+    /** Data type of the tensor.
+     *
+     * @return the data type of the tensor.
+     */
     DataType data_type() const override;
-
-    /** Number of channels of the tensor. */
+    /** Number of channels of the tensor.
+     *
+     * @return the number of channels of the tensor.
+     */
     int num_channels() const override;
-
-    /** Number of elements of the tensor. */
+    /** Number of elements of the tensor.
+     *
+     * @return the number of elements of the tensor.
+     */
     int num_elements() const override;
-
-    /** Available padding around the tensor. */
+    /** Available padding around the tensor.
+     *
+     * @return the available padding around the tensor.
+     */
     PaddingSize padding() const override;
-
-    /** The number of bits for the fractional part of the fixed point numbers. */
+    /** Number of bits for the fractional part.
+     *
+     * @return the number of bits for the fractional part.
+     */
     int fixed_point_position() const override;
-
-    /** Quantization info in case of asymmetric quantized type */
+    /** Quantization info in case of asymmetric quantized type
+     *
+     * @return
+     */
     QuantizationInfo quantization_info() const override;
 
-    /** Constant pointer to the underlying buffer. */
+    /** Constant pointer to the underlying buffer.
+     *
+     * @return a constant pointer to the data.
+     */
     const T *data() const;
 
-    /** Pointer to the underlying buffer. */
+    /** Pointer to the underlying buffer.
+     *
+     * @return a pointer to the data.
+     */
     T *data();
 
     /** Read only access to the specified element.

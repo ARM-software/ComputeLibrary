@@ -33,11 +33,18 @@ namespace frontend
 // Forward declarations
 class IStream;
 
-/** ILayer interface **/
+/** ILayer interface */
 class ILayer
 {
 public:
-    virtual ~ILayer()                       = default;
+    /** Default destructor */
+    virtual ~ILayer() = default;
+    /** Create layer and add to the given stream.
+     *
+     * @param[in] s Stream to add layer to.
+     *
+     * @return ID of the created node.
+     */
     virtual NodeID create_layer(IStream &s) = 0;
 };
 } // namespace frontend

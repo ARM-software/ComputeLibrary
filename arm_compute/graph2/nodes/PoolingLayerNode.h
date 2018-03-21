@@ -30,6 +30,7 @@ namespace arm_compute
 {
 namespace graph2
 {
+/** Pooling Layer node */
 class PoolingLayerNode final : public INode
 {
 public:

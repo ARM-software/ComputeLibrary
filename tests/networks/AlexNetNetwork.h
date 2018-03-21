@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,6 +54,13 @@ template <typename ITensorType,
 class AlexNetNetwork
 {
 public:
+    /** Initialize the network.
+     *
+     * @param[in] data_type            Data type.
+     * @param[in] fixed_point_position Fixed point position (for quantized data types).
+     * @param[in] batches              Number of batches.
+     * @param[in] reshaped_weights     Whether the weights need reshaping or not. Default: false.
+     */
     void init(DataType data_type, int fixed_point_position, int batches, bool reshaped_weights = false)
     {
         _data_type            = data_type;
@@ -185,6 +192,7 @@ public:
         }
     }
 
+    /** Build the network */
     void build()
     {
         input.allocator()->init(TensorInfo(TensorShape(227U, 227U, 3U, _batches), 1, _data_type, _fixed_point_position));
@@ -270,6 +278,7 @@ public:
         smx.configure(&fc8_out, &output);
     }
 
+    /** Allocate the network */
     void allocate()
     {
         input.allocator()->allocate();

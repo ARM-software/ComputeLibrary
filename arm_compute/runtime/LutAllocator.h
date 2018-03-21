@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,10 @@ class LutAllocator : public ILutAllocator
 public:
     /** Default constructor. */
     LutAllocator();
-    /** Interface to be implemented by the child class to return the pointer to the allocate data. */
+    /** Interface to be implemented by the child class to return the pointer to the allocate data.
+     *
+     * @return a pointer to the data.
+     */
     uint8_t *data() const;
 
 protected:

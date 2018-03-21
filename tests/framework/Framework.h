@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -65,10 +65,10 @@ namespace framework
  */
 struct TestInfo
 {
-    int                     id;
-    std::string             name;
-    DatasetMode             mode;
-    TestCaseFactory::Status status;
+    int                     id;     /**< Test ID */
+    std::string             name;   /**< Test name */
+    DatasetMode             mode;   /**< Test data set mode */
+    TestCaseFactory::Status status; /**< Test status */
 };
 
 inline bool operator<(const TestInfo &lhs, const TestInfo &rhs)

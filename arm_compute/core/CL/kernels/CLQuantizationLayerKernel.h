@@ -45,7 +45,7 @@ public:
     CLQuantizationLayerKernel &operator=(const CLQuantizationLayerKernel &) = delete;
     /** Default Move Constructor. */
     CLQuantizationLayerKernel(CLQuantizationLayerKernel &&) = default;
-    /** Default move assignment operator. */
+    /** Default move assignment operator */
     CLQuantizationLayerKernel &operator=(CLQuantizationLayerKernel &&) = default;
     /** Default destructor */
     ~CLQuantizationLayerKernel() = default;

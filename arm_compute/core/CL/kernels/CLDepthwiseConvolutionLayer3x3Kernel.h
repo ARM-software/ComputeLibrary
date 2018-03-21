@@ -43,7 +43,7 @@ public:
     CLDepthwiseConvolutionLayer3x3Kernel &operator=(const CLDepthwiseConvolutionLayer3x3Kernel &) = delete;
     /** Default Move Constructor. */
     CLDepthwiseConvolutionLayer3x3Kernel(CLDepthwiseConvolutionLayer3x3Kernel &&) = default;
-    /** Default move assignment operator. */
+    /** Default move assignment operator */
     CLDepthwiseConvolutionLayer3x3Kernel &operator=(CLDepthwiseConvolutionLayer3x3Kernel &&) = default;
     /** Initialize the function's source, destination, conv and border_size.
      *

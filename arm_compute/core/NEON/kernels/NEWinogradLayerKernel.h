@@ -34,6 +34,7 @@ namespace arm_compute
 {
 class ITensor;
 
+/** Interface for the NEON kernel to perform Winograd input transform. */
 template <typename T>
 class INEWinogradLayerTransformInputKernel : public INEKernel
 {
@@ -46,6 +47,8 @@ public:
      * @param[in] n_rows       Number of rows in each feature map.
      * @param[in] n_cols       Number of columns in each feature map.
      * @param[in] same_padding Use "SAME" padding, otherwise use "VALID".
+     *
+     * @return Storage size (in units of TIn) required.
      */
     virtual unsigned int get_input_storage_size(int n_batches, int n_channels, int n_rows, int n_cols, bool same_padding) const = 0;
 
@@ -72,11 +75,13 @@ public:
      */
     virtual void configure(const T *const input, const int n_batches, const int n_rows, const int n_cols, const int n_channels, const PaddingType padding, T *const output, const int matrix_stride) = 0;
 
+    /** Destructor */
     virtual ~INEWinogradLayerTransformInputKernel()
     {
     }
 };
 
+/** NEON kernel to perform Winograd input transform. */
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
 class NEWinogradLayerTransformInputKernel : public INEWinogradLayerTransformInputKernel<T>
 {
@@ -89,6 +94,8 @@ public:
      * @param[in] n_rows       Number of rows in each feature map.
      * @param[in] n_cols       Number of columns in each feature map.
      * @param[in] same_padding Use "SAME" padding, otherwise use "VALID".
+     *
+     * @return Storage size (in units of TIn) required.
      */
     unsigned int get_input_storage_size(
         int  n_batches,
@@ -107,6 +114,7 @@ public:
      */
     int get_matrix_stride(const KernelShape &kernel_shape, const Tensor4DShape &input_shape, const PaddingType padding_type) const override;
 
+    /** Default constructor */
     NEWinogradLayerTransformInputKernel();
 
     const char *name() const override
@@ -139,7 +147,9 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
     bool is_parallelisable() const override;
 
+    /** Winograd base kernel */
     using WinogradBase = winograd::WinogradGEMM<OutputTileRows, OutputTileCols, KernelCols, KernelCols>;
+    /** Winograd convolution kernel */
     using WinogradConv = typename WinogradBase::template Convolution<T, T>;
 
 private:
@@ -147,6 +157,7 @@ private:
     std::unique_ptr<InputTransform> _transform;
 };
 
+/** Interface for the NEON kernel to perform Winograd output transform. */
 template <typename T>
 class INEWinogradLayerTransformOutputKernel : public INEKernel
 {
@@ -159,6 +170,8 @@ public:
      * @param[in] n_cols            Number of columns in each feature map of the input tensor.
      * @param[in] n_output_channels Number of feature maps in the output tensor.
      * @param[in] same_padding      Use "SAME" padding, otherwise use "VALID".
+     *
+     * @return Storage size (in units of TOut) required.
      */
     virtual unsigned int get_output_storage_size(int n_batches, int n_rows, int n_cols, int n_output_channels, bool same_padding) const = 0;
 
@@ -208,6 +221,7 @@ public:
     }
 };
 
+/** NEON kernel to perform Winograd output transform. */
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
 class NEWinogradLayerTransformOutputKernel : public INEWinogradLayerTransformOutputKernel<T>
 {
@@ -227,7 +241,7 @@ public:
     NEWinogradLayerTransformOutputKernel(NEWinogradLayerTransformOutputKernel &&) = default;
     /** Allow instances of this class to be moved */
     NEWinogradLayerTransformOutputKernel &operator=(NEWinogradLayerTransformOutputKernel &&) = default;
-
+    /** Default destructor */
     ~NEWinogradLayerTransformOutputKernel() = default;
 
     // Inherited methods overridden:
@@ -239,6 +253,8 @@ public:
      * @param[in] n_cols            Number of columns in each feature map of the input tensor.
      * @param[in] n_output_channels Number of feature maps in the output tensor.
      * @param[in] same_padding      Use "SAME" padding, otherwise use "VALID".
+     *
+     * @return Storage size (in units of TOut) required.
      */
     unsigned int get_output_storage_size(int n_batches, int n_rows, int n_cols, int n_output_channels, bool same_padding) const override;
 
@@ -301,6 +317,7 @@ private:
     int            _n_channels;
 };
 
+/** Interface for the NEON kernel to perform Winograd weights transform. */
 template <typename T>
 class INEWinogradLayerTransformWeightsKernel : public INEKernel
 {
@@ -310,6 +327,8 @@ public:
      *
      * @param[in] n_output_channels Number of output feature maps.
      * @param[in] n_input_channels  Number of input feature maps.
+     *
+     * @return Storage size (in units of T) required.
      */
     virtual unsigned int get_weight_storage_size(int n_output_channels, int n_input_channels) const = 0;
     /** Gets the stride between matrices in the kernel worspace
@@ -335,10 +354,12 @@ public:
     }
 };
 
+/** NEON kernel to perform Winograd weights transform. */
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
 class NEWinogradLayerTransformWeightsKernel final : public INEWinogradLayerTransformWeightsKernel<T>
 {
 public:
+    /** Default constructor. */
     NEWinogradLayerTransformWeightsKernel();
     const char *name() const override
     {
@@ -359,6 +380,7 @@ private:
     std::unique_ptr<WeightsTransform> _transform;
 };
 
+/** Interface for the NEON kernel to perform Winograd. */
 template <typename TIn, typename TOut>
 class INEWinogradLayerBatchedGEMMKernel : public INEKernel
 {
@@ -406,16 +428,17 @@ public:
     virtual int get_number_blocks() const = 0;
 };
 
+/** NEON kernel to perform Winograd. */
 template <typename TIn, typename TOut, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
 class NEWinogradLayerBatchedGEMMKernel : public INEWinogradLayerBatchedGEMMKernel<TIn, TOut>
 {
 public:
+    /** Winograd base kernel */
     using WinogradBase = winograd::WinogradGEMM<OutputTileRows, OutputTileCols, KernelRows, KernelCols>;
+    /** Winograd convolution kernel */
     using WinogradConv = typename WinogradBase::template Convolution<TIn, TOut>;
-    using MultiGEMM    = winograd::BatchedBlockedGemm<WinogradConv::M_BLOCK, WinogradConv::N_BLOCK, TIn, TOut>;
-
-    static const int _output_tile_rows = OutputTileRows;
-    static const int _output_tile_cols = OutputTileCols;
+    /** Winograd batched blocked GEMM operator */
+    using MultiGEMM = winograd::BatchedBlockedGemm<WinogradConv::M_BLOCK, WinogradConv::N_BLOCK, TIn, TOut>;
 
     const char *name() const override
     {
@@ -432,7 +455,7 @@ public:
     NEWinogradLayerBatchedGEMMKernel(NEWinogradLayerBatchedGEMMKernel &&) = default;
     /** Allow instances of this class to be moved */
     NEWinogradLayerBatchedGEMMKernel &operator=(NEWinogradLayerBatchedGEMMKernel &&) = default;
-
+    /** Default destructor. */
     ~NEWinogradLayerBatchedGEMMKernel() = default;
 
     // Inherited methods overridden:
@@ -474,6 +497,8 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
+    static const int           _output_tile_rows = OutputTileRows;
+    static const int           _output_tile_cols = OutputTileCols;
     std::unique_ptr<MultiGEMM> _gemms;
 };
 

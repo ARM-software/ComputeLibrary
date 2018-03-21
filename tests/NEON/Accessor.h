@@ -41,10 +41,25 @@ public:
      */
     Accessor(Tensor &tensor);
 
+    /** Prevent instances of this class from being copy constructed */
     Accessor(const Accessor &) = delete;
+    /** Prevent instances of this class from being copied */
     Accessor &operator=(const Accessor &) = delete;
-    Accessor(Accessor &&)                 = default;
+    /** Allow instances of this class to be move constructed */
+    Accessor(Accessor &&) = default;
+    /** Allow instances of this class to be moved */
     Accessor &operator=(Accessor &&) = default;
+
+    /** Get the tensor data.
+     *
+     * @return a constant pointer to the tensor data.
+     */
+    const void *data() const;
+    /** Get the tensor data.
+     *
+     * @return a pointer to the tensor data.
+     */
+    void *data();
 
     TensorShape      shape() const override;
     size_t           element_size() const override;
@@ -59,8 +74,6 @@ public:
     QuantizationInfo quantization_info() const override;
     const void *operator()(const Coordinates &coord) const override;
     void *operator()(const Coordinates &coord) override;
-    const void *data() const;
-    void       *data();
 
 private:
     Tensor &_tensor;

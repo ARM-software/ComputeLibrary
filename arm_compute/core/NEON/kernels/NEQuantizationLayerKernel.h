@@ -50,7 +50,7 @@ public:
     NEQuantizationLayerKernel &operator=(const NEQuantizationLayerKernel &) = delete;
     /** Default Move Constructor. */
     NEQuantizationLayerKernel(NEQuantizationLayerKernel &&) = default;
-    /** Default move assignment operator. */
+    /** Default move assignment operator */
     NEQuantizationLayerKernel &operator=(NEQuantizationLayerKernel &&) = default;
     /** Default destructor */
     ~NEQuantizationLayerKernel() = default;

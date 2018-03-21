@@ -40,10 +40,10 @@ public:
     /** Default constructor */
     GCTensor();
 
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     GCTensor(const GCTensor &) = delete;
 
-    /** Prevent instances of this class from being copy assigned (As this class contains pointers). */
+    /** Prevent instances of this class from being copy assigned (As this class contains pointers) */
     GCTensor &operator=(const GCTensor &) = delete;
 
     /** Allow instances of this class to be moved */
@@ -94,6 +94,7 @@ private:
     mutable GCTensorAllocator _allocator; /**< Instance of the OpenGL ES tensor allocator */
 };
 
+/** OpenGL ES Image */
 using GCImage = GCTensor;
 }
 

@@ -33,6 +33,7 @@ template <typename T, template <typename> class Type>
 struct CRTP
 {
 public:
+    /** Exact type */
     using ExactType = T;
 
 protected:

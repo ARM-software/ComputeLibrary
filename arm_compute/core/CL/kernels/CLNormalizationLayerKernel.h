@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,7 @@ public:
     CLNormalizationLayerKernel &operator=(const CLNormalizationLayerKernel &) = delete;
     /** Default Move Constructor. */
     CLNormalizationLayerKernel(CLNormalizationLayerKernel &&) = default;
-    /** Default move assignment operator. */
+    /** Default move assignment operator */
     CLNormalizationLayerKernel &operator=(CLNormalizationLayerKernel &&) = default;
     /** Set the input and output tensors.
      *
