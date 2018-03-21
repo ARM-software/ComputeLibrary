@@ -57,6 +57,8 @@ public:
         bool      enable_tuning            = (target == 2);
         bool      enable_memory_management = true;
 
+        ConvolutionMethod convolution_hint = (target_hint == Target::CL) ? ConvolutionMethod::WINOGRAD : ConvolutionMethod::GEMM;
+
         // Parse arguments
         if(argc < 2)
         {
@@ -97,6 +99,7 @@ public:
                   get_weights_accessor(data_path, "/cnn_data/resnet50_model/conv1_weights.npy"),
                   std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                   PadStrideInfo(2, 2, 3, 3))
+              << convolution_hint
               << BatchNormalizationLayer(
                   get_weights_accessor(data_path, "/cnn_data/resnet50_model/conv1_BatchNorm_moving_mean.npy"),
                   get_weights_accessor(data_path, "/cnn_data/resnet50_model/conv1_BatchNorm_moving_variance.npy"),

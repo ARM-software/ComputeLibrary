@@ -21,38 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH2_NEDEVICEBACKEND_H__
-#define __ARM_COMPUTE_GRAPH2_NEDEVICEBACKEND_H__
+#ifndef __ARM_COMPUTE_GRAPH2_CLNODEVALIDATOR_H__
+#define __ARM_COMPUTE_GRAPH2_CLNODEVALIDATOR_H__
 
-#include "arm_compute/graph2/IDeviceBackend.h"
-
-#include "arm_compute/runtime/Allocator.h"
+#include "arm_compute/core/Error.h"
 
 namespace arm_compute
 {
 namespace graph2
 {
+// Forward declarations
+class INode;
+
 namespace backends
 {
-/** NEON device backend */
-class NEDeviceBackend final : public IDeviceBackend
+class CLNodeValidator final
 {
 public:
-    NEDeviceBackend();
-
-    // Inherited overridden methods
-    void initialize_backend() override;
-    void setup_backend_context(GraphContext &ctx) override;
-    std::unique_ptr<ITensorHandle> create_tensor(const Tensor &tensor) override;
-    std::unique_ptr<ITensorHandle> create_subtensor(ITensorHandle *parent, TensorShape shape, Coordinates coords) override;
-    std::unique_ptr<arm_compute::IFunction> configure_node(INode &node, GraphContext &ctx) override;
-    Status validate_node(INode &node) override;
-    std::shared_ptr<arm_compute::IMemoryManager> create_memory_manager(MemoryManagerAffinity affinity) override;
-
-private:
-    Allocator _allocator; /**< NEON backend allocator */
+    /** Validate a node
+     *
+     * @param[in] node Node to validate
+     *
+     * @return An error status
+     */
+    static Status validate(INode *node);
 };
 } // namespace backends
 } // namespace graph2
 } // namespace arm_compute
-#endif //__ARM_COMPUTE_GRAPH2_NEDEVICEBACKEND_H__
+#endif //__ARM_COMPUTE_GRAPH2_CLNODEVALIDATOR_H__

@@ -24,15 +24,28 @@
 #ifndef __ARM_COMPUTE_GRAPH2_NENODEVALIDATOR_H__
 #define __ARM_COMPUTE_GRAPH2_NENODEVALIDATOR_H__
 
-#include "arm_compute/graph2/INodeVisitor.h"
+#include "arm_compute/core/Error.h"
 
 namespace arm_compute
 {
 namespace graph2
 {
+// Forward declarations
+class INode;
+
 namespace backends
 {
-// TODO (geopin01) : Add node validator
+class NENodeValidator final
+{
+public:
+    /** Validate a node
+     *
+     * @param[in] node Node to validate
+     *
+     * @return An error status
+     */
+    static Status validate(INode *node);
+};
 } // namespace backends
 } // namespace graph2
 } // namespace arm_compute

@@ -30,6 +30,7 @@
 #include "arm_compute/graph2/Tensor.h"
 #include "arm_compute/graph2/backends/BackendRegistrar.h"
 #include "arm_compute/graph2/backends/CL/CLFunctionFactory.h"
+#include "arm_compute/graph2/backends/CL/CLNodeValidator.h"
 #include "arm_compute/graph2/backends/CL/CLSubTensorHandle.h"
 #include "arm_compute/graph2/backends/CL/CLTensorHandle.h"
 
@@ -145,13 +146,12 @@ std::unique_ptr<arm_compute::IFunction> CLDeviceBackend::configure_node(INode &n
     return CLFunctionFactory::create(&node, ctx);
 }
 
-arm_compute::Status CLDeviceBackend::validate_node(const INode &node)
+arm_compute::Status CLDeviceBackend::validate_node(INode &node)
 {
     ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating CL node with ID : " << node.id() << std::endl);
+    ARM_COMPUTE_ERROR_ON(node.assigned_target() != Target::CL);
 
-    ARM_COMPUTE_UNUSED(node);
-
-    return Status{};
+    return CLNodeValidator::validate(&node);
 }
 
 std::shared_ptr<arm_compute::IMemoryManager> CLDeviceBackend::create_memory_manager(MemoryManagerAffinity affinity)

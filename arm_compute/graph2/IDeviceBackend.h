@@ -88,7 +88,7 @@ public:
      *
      * @return An error status
      */
-    virtual Status validate_node(const INode &node) = 0;
+    virtual Status validate_node(INode &node) = 0;
     /** Create a backend memory manager given its affinity
      *
      * @param[in] affinity Memory Manager affinity

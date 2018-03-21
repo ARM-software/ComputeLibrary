@@ -58,6 +58,8 @@ public:
         bool      enable_tuning            = (target == 2);
         bool      enable_memory_management = true;
 
+        ConvolutionMethod convolution_hint = (target_hint == Target::CL) ? ConvolutionMethod::WINOGRAD : ConvolutionMethod::GEMM;
+
         // Parse arguments
         if(argc < 2)
         {
@@ -100,6 +102,7 @@ public:
                   PadStrideInfo(2, 2, 0, 0))
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
               << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)))
+              << convolution_hint
               << ConvolutionLayer(
                   1U, 1U, 16U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1.0_model/fire2_squeeze1x1_w.npy"),

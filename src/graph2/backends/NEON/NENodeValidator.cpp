@@ -21,12 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH2_NEDEVICEBACKEND_H__
-#define __ARM_COMPUTE_GRAPH2_NEDEVICEBACKEND_H__
+#include "arm_compute/graph2/backends/NEON/NENodeValidator.h"
 
-#include "arm_compute/graph2/IDeviceBackend.h"
+#include "arm_compute/graph2/backends/ValidateHelpers.h"
+#include "arm_compute/graph2/nodes/Nodes.h"
 
-#include "arm_compute/runtime/Allocator.h"
+#include "arm_compute/core/utils/misc/Cast.h"
+#include "arm_compute/runtime/NEON/NEFunctions.h"
+
+using namespace arm_compute::utils::cast;
 
 namespace arm_compute
 {
@@ -34,25 +37,29 @@ namespace graph2
 {
 namespace backends
 {
-/** NEON device backend */
-class NEDeviceBackend final : public IDeviceBackend
+Status NENodeValidator::validate(INode *node)
 {
-public:
-    NEDeviceBackend();
+    if(node == nullptr)
+    {
+        return Status{};
+    }
 
-    // Inherited overridden methods
-    void initialize_backend() override;
-    void setup_backend_context(GraphContext &ctx) override;
-    std::unique_ptr<ITensorHandle> create_tensor(const Tensor &tensor) override;
-    std::unique_ptr<ITensorHandle> create_subtensor(ITensorHandle *parent, TensorShape shape, Coordinates coords) override;
-    std::unique_ptr<arm_compute::IFunction> configure_node(INode &node, GraphContext &ctx) override;
-    Status validate_node(INode &node) override;
-    std::shared_ptr<arm_compute::IMemoryManager> create_memory_manager(MemoryManagerAffinity affinity) override;
+    NodeType type = node->type();
+    switch(type)
+    {
+        case NodeType::ConvolutionLayer:
+            return detail::validate_convolution_layer<NEConvolutionLayer,
+                   NEDirectConvolutionLayer,
+                   NEGEMMConvolutionLayer,
+                   NEWinogradLayer>(*polymorphic_downcast<ConvolutionLayerNode *>(node));
+        case NodeType::DepthwiseConvolutionLayer:
+            return detail::validate_depthwise_convolution_layer<NEDepthwiseConvolutionLayer,
+                   NEDepthwiseConvolutionLayer3x3>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
 
-private:
-    Allocator _allocator; /**< NEON backend allocator */
-};
+        default:
+            return Status{};
+    }
+}
 } // namespace backends
 } // namespace graph2
 } // namespace arm_compute
-#endif //__ARM_COMPUTE_GRAPH2_NEDEVICEBACKEND_H__

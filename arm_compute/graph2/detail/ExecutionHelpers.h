@@ -50,6 +50,11 @@ void configure_all_tensors(Graph &g);
  * @param[in] g Graph to allocate the tensors
  */
 void allocate_all_tensors(Graph &g);
+/** Validates all nodes
+ *
+ * @param[in] g Graph to validate
+ */
+void validate_all_nodes(Graph &g);
 /** Configures all nodes of graph
  *
  * @param[in] g   Graph to configure the nodes

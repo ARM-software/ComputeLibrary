@@ -54,7 +54,7 @@ public:
         // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
         const int         target                   = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
         Target            target_hint              = set_target_hint2(target);
-        ConvolutionMethod convolution_hint         = ConvolutionMethod::GEMM;
+        ConvolutionMethod convolution_hint         = (target_hint == Target::CL) ? ConvolutionMethod::WINOGRAD : ConvolutionMethod::GEMM;
         bool              enable_tuning            = (target == 2);
         bool              enable_memory_management = true;
 

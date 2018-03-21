@@ -75,6 +75,23 @@ void allocate_all_tensors(Graph &g)
     }
 }
 
+void validate_all_nodes(Graph &g)
+{
+    auto &nodes = g.nodes();
+
+    // Create tasks
+    for(auto &node : nodes)
+    {
+        if(node != nullptr)
+        {
+            Target assigned_target = node->assigned_target();
+            auto   backend         = backends::BackendRegistry::get().find_backend(assigned_target);
+            ARM_COMPUTE_ERROR_ON_MSG(!backend, "Requested backend doesn't exist!");
+            backend->validate_node(*node);
+        }
+    }
+}
+
 ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx)
 {
     ExecutionWorkload workload;

@@ -30,6 +30,7 @@
 #include "arm_compute/graph2/Tensor.h"
 #include "arm_compute/graph2/backends/BackendRegistrar.h"
 #include "arm_compute/graph2/backends/NEON/NEFunctionFactory.h"
+#include "arm_compute/graph2/backends/NEON/NENodeValidator.h"
 #include "arm_compute/graph2/backends/NEON/NESubTensorHandle.h"
 #include "arm_compute/graph2/backends/NEON/NETensorHandle.h"
 
@@ -104,12 +105,12 @@ std::unique_ptr<arm_compute::IFunction> NEDeviceBackend::configure_node(INode &n
     return NEFunctionFactory::create(&node, ctx);
 }
 
-arm_compute::Status NEDeviceBackend::validate_node(const INode &node)
+arm_compute::Status NEDeviceBackend::validate_node(INode &node)
 {
     ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating NEON node with ID : " << node.id() << std::endl);
-    ARM_COMPUTE_UNUSED(node);
+    ARM_COMPUTE_ERROR_ON(node.assigned_target() != Target::NEON);
 
-    return Status{};
+    return NENodeValidator::validate(&node);
 }
 
 std::shared_ptr<arm_compute::IMemoryManager> NEDeviceBackend::create_memory_manager(MemoryManagerAffinity affinity)

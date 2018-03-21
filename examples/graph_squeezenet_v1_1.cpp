@@ -61,6 +61,8 @@ public:
         bool      enable_tuning            = (target == 2);
         bool      enable_memory_management = true;
 
+        ConvolutionMethod convolution_hint = (target_hint == Target::CL) ? ConvolutionMethod::WINOGRAD : ConvolutionMethod::GEMM;
+
         // Parse arguments
         if(argc < 2)
         {
@@ -96,6 +98,7 @@ public:
         graph << target_hint
               << InputLayer(TensorDescriptor(TensorShape(227U, 227U, 3U, 1U), DataType::F32),
                             get_input_accessor(image, std::move(preprocessor)))
+              << ConvolutionMethod::DIRECT
               << ConvolutionLayer(
                   3U, 3U, 64U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/conv1_w.npy"),
@@ -103,6 +106,7 @@ public:
                   PadStrideInfo(2, 2, 0, 0))
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
               << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)))
+              << convolution_hint
               << ConvolutionLayer(
                   1U, 1U, 16U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire2_squeeze1x1_w.npy"),

@@ -60,6 +60,8 @@ public:
         bool      enable_tuning            = (target == 2);
         bool      enable_memory_management = true;
 
+        ConvolutionMethod convolution_hint = (target_hint == Target::CL) ? ConvolutionMethod::WINOGRAD : ConvolutionMethod::GEMM;
+
         // Parse arguments
         if(argc < 2)
         {
@@ -104,6 +106,7 @@ public:
                                          get_weights_accessor(data_path, "/cnn_data/inceptionv4_model/Conv2d_1a_3x3_BatchNorm_beta.npy"),
                                          0.001f)
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+              << convolution_hint
               // Conv2d_2a_3x3
               << ConvolutionLayer(3U, 3U, 32U,
                                   get_weights_accessor(data_path, "/cnn_data/inceptionv4_model/Conv2d_2a_3x3_weights.npy"),

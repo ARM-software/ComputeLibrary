@@ -57,7 +57,7 @@ public:
     std::unique_ptr<ITensorHandle> create_tensor(const Tensor &tensor) override;
     std::unique_ptr<ITensorHandle> create_subtensor(ITensorHandle *parent, TensorShape shape, Coordinates coords) override;
     std::unique_ptr<arm_compute::IFunction> configure_node(INode &node, GraphContext &ctx) override;
-    Status validate_node(const INode &node) override;
+    Status validate_node(INode &node) override;
     std::shared_ptr<arm_compute::IMemoryManager> create_memory_manager(MemoryManagerAffinity affinity) override;
 
 private:
