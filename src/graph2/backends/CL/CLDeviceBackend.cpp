@@ -101,7 +101,7 @@ void CLDeviceBackend::initialize_backend()
 void CLDeviceBackend::setup_backend_context(GraphContext &ctx)
 {
     // Setup tuner
-    set_kernel_tuning(ctx.is_tuning_enabled());
+    set_kernel_tuning(ctx.config().use_tuner);
 
     // Setup a management backend
     if(ctx.memory_management_ctx(Target::CL) == nullptr)

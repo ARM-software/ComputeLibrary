@@ -47,6 +47,7 @@ using graph2::ConvolutionMethod;
 using graph2::DepthwiseConvolutionMethod;
 using graph2::TensorDescriptor;
 using graph2::DimensionRoundingType;
+using graph2::GraphConfig;
 
 /** Branch layer merging method */
 enum class BranchMergeMethod

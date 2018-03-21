@@ -40,6 +40,7 @@
 #include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/OffsetLifetimeManager.h"
 #include "arm_compute/runtime/PoolManager.h"
+#include "arm_compute/runtime/Scheduler.h"
 
 #include "support/ToolchainSupport.h"
 
@@ -63,6 +64,10 @@ void NEDeviceBackend::initialize_backend()
 
 void NEDeviceBackend::setup_backend_context(GraphContext &ctx)
 {
+    // Set number of threads
+    Scheduler::get().set_num_threads(ctx.config().num_threads);
+
+    // Create function level memory manager
     if(ctx.memory_management_ctx(Target::NEON) == nullptr)
     {
         MemoryManagerContext mm_ctx;

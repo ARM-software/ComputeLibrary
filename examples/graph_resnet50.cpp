@@ -52,10 +52,8 @@ public:
                                                                                                                    false /* Do not convert to BGR */);
 
         // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
-        const int target                   = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
-        Target    target_hint              = set_target_hint2(target);
-        bool      enable_tuning            = (target == 2);
-        bool      enable_memory_management = true;
+        const int target      = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
+        Target    target_hint = set_target_hint2(target);
 
         ConvolutionMethod convolution_hint = (target_hint == Target::CL) ? ConvolutionMethod::WINOGRAD : ConvolutionMethod::GEMM;
 
@@ -125,7 +123,10 @@ public:
               << OutputLayer(get_output_accessor(label, 5));
 
         // Finalize graph
-        graph.finalize(target_hint, enable_tuning, enable_memory_management);
+        GraphConfig config;
+        config.use_function_memory_manager = true;
+        config.use_tuner                   = (target == 2);
+        graph.finalize(target_hint, config);
     }
 
     void do_run() override

@@ -54,8 +54,6 @@ public:
         Target                     target_hint                = set_target_hint2(target);
         ConvolutionMethod          convolution_hint           = ConvolutionMethod::GEMM;
         DepthwiseConvolutionMethod depthwise_convolution_hint = DepthwiseConvolutionMethod::OPTIMIZED_3x3;
-        bool                       enable_tuning              = (target == 2);
-        bool                       enable_memory_management   = true;
 
         // Set model to execute. 0 (MobileNetV1_1.0_224), 1 (MobileNetV1_0.75_160)
         int model_id = (argc > 2) ? std::strtol(argv[2], nullptr, 10) : 0;
@@ -150,7 +148,10 @@ public:
               << OutputLayer(get_output_accessor(label, 5));
 
         // Finalize graph
-        graph.finalize(target_hint, enable_tuning, enable_memory_management);
+        GraphConfig config;
+        config.use_function_memory_manager = true;
+        config.use_tuner                   = (target == 2);
+        graph.finalize(target_hint, config);
     }
     void do_run() override
     {

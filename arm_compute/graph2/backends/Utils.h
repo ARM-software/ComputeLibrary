@@ -87,7 +87,7 @@ inline bool is_in_place_operation(void *input, void *output)
  */
 inline std::shared_ptr<IMemoryManager> get_memory_manager(GraphContext &ctx, Target target)
 {
-    bool enabled = ctx.is_memory_management_enabled() && (ctx.memory_management_ctx(target) != nullptr);
+    bool enabled = ctx.config().use_function_memory_manager && (ctx.memory_management_ctx(target) != nullptr);
     return enabled ? ctx.memory_management_ctx(target)->mm : nullptr;
 }
 } // namespace backends

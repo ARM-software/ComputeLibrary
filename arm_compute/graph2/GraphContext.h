@@ -56,26 +56,18 @@ public:
     GraphContext &operator=(const GraphContext &) = delete;
     /** Default move assignment operator */
     GraphContext &operator=(GraphContext &&) = default;
-    /** Enables tuning
+    /** Graph configuration accessor
      *
-     * @param[in] enable_tuning Enables tuning if true
-     */
-    void enable_tuning(bool enable_tuning);
-    /** Checks if tuning is enabled
+     * @note Every alteration has to be done before graph finalization
      *
-     * @return True if tuning is enabled else false
+     * @return The graph configuration
      */
-    bool is_tuning_enabled() const;
-    /** Enables memory management
+    const GraphConfig &config() const;
+    /** Sets graph configuration
      *
-     * @param[in] enable_mm Enables mm if true
+     * @param[in] config Configuration to use
      */
-    void enable_memory_managenent(bool enable_mm);
-    /** Checks if memory management is enabled
-     *
-     * @return True if memory management is enabled else false
-     */
-    bool is_memory_management_enabled();
+    void set_config(const GraphConfig &config);
     /** Inserts a memory manager context
      *
      * @param[in] memory_ctx Memory manage context
@@ -94,8 +86,7 @@ public:
     void finalize();
 
 private:
-    bool _tunable;                                           /**< Specifies if the Graph should use a tunable object */
-    bool _memory_managed;                                    /**< Specifies if the Graph should use a memory managed */
+    GraphConfig _config;                                     /**< Graph configuration */
     std::map<Target, MemoryManagerContext> _memory_managers; /**< Memory managers for each target */
 };
 } // namespace graph2

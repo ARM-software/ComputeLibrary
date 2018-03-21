@@ -37,11 +37,10 @@ Stream::Stream(size_t id, std::string name)
 {
 }
 
-void Stream::finalize(Target target, bool enable_tuning, bool enable_memory_management)
+void Stream::finalize(Target target, const GraphConfig &config)
 {
     PassManager pm = create_default_pass_manager();
-    _ctx.enable_tuning(enable_tuning);
-    _ctx.enable_memory_managenent(enable_memory_management);
+    _ctx.set_config(config);
     _manager.finalize_graph(_g, _ctx, pm, target);
 }
 

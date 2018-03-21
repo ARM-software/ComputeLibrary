@@ -61,14 +61,10 @@ public:
     Stream &operator=(Stream &&) = default;
     /** Finalizes the stream for an execution target
      *
-     * @note enable_tuning only works if the target is OpenCL.
-     * @note tuning increases the execution time of first run of the graph
-     *
-     * @param[in] target                   Execution target
-     * @param[in] enable_tuning            (Optional) Enables the tuning interface. Defaults to false
-     * @param[in] enable_memory_management (Optional) Enables the memory management interface. Defaults to false
+     * @param[in] target Execution target
+     * @param[in] config (Optional) Graph configuration to use
      */
-    void finalize(Target target, bool enable_tuning = false, bool enable_memory_management = false);
+    void finalize(Target target, const GraphConfig &config);
     /** Executes the stream **/
     void run();
 

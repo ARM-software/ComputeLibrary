@@ -71,6 +71,15 @@ constexpr EdgeID EmptyEdgeID = std::numeric_limits<EdgeID>::max();
 // Forward declarations
 class TensorDescriptor;
 
+/** Graph configuration structure */
+struct GraphConfig
+{
+    bool         use_function_memory_manager{ false };   /**< Use a memory manager to manage per-funcion auxilary memory */
+    bool         use_transition_memory_manager{ false }; /**< Use a memory manager to manager transition buffer memory */
+    bool         use_tuner{ false };                     /**< Use a tuner in tunable backends */
+    unsigned int num_threads{ 0 };                       /**< Number of threads to use (thread capable backends), if 0 the backend will auto-initialize */
+};
+
 /**< Data layout format */
 enum class DataLayout
 {

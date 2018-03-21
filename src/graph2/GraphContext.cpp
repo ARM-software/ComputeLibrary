@@ -29,28 +29,18 @@ namespace arm_compute
 namespace graph2
 {
 GraphContext::GraphContext()
-    : _tunable(false), _memory_managed(false), _memory_managers()
+    : _config(), _memory_managers()
 {
 }
 
-void GraphContext::enable_tuning(bool enable_tuning)
+const GraphConfig &GraphContext::config() const
 {
-    _tunable = enable_tuning;
+    return _config;
 }
 
-bool GraphContext::is_tuning_enabled() const
+void GraphContext::set_config(const GraphConfig &config)
 {
-    return _tunable;
-}
-
-void GraphContext::enable_memory_managenent(bool enable_mm)
-{
-    _memory_managed = enable_mm;
-}
-
-bool GraphContext::is_memory_management_enabled()
-{
-    return _memory_managed;
+    _config = config;
 }
 
 bool GraphContext::insert_memory_management_ctx(MemoryManagerContext &&memory_ctx)
