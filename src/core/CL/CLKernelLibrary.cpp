@@ -184,6 +184,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "convolution_separable9x1_static", "convolution9x9.cl" },
     { "convert_depth_down", "depth_convert.cl" },
     { "convert_depth_up", "depth_convert.cl" },
+    { "copy_tensor", "copy_tensor.cl" },
     { "copy_plane", "channel_extract.cl" },
     { "copy_planes_3p", "channel_combine.cl" },
     { "copy_to_keypoint", "fast_corners.cl" },
@@ -436,6 +437,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "convolution_rectangle.cl",
 #include "./cl_kernels/convolution_rectangle.clembed"
+    },
+    {
+        "copy_tensor.cl",
+#include "./cl_kernels/copy_tensor.clembed"
     },
     {
         "deconvolution_layer.cl",
