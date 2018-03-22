@@ -306,6 +306,38 @@ inline ValidRegion shape_to_valid_region_gaussian_pyramid_half(const TensorShape
     return valid_region;
 }
 
+/** Create a valid region for Laplacian Pyramid based on tensor shape and valid region at level "i - 1" and border mode
+ *
+ * @note The border size is 2 in case of Laplacian Pyramid
+ *
+ * @param[in] a_shape          Shape used at level "i - 1" of Laplacian Pyramid
+ * @param[in] a_valid_region   Valid region used at level "i - 1" of Laplacian Pyramid
+ * @param[in] border_undefined (Optional) Boolean indicating if the border mode is undefined.
+ *
+ *  return The valid region for the level "i" of Laplacian Pyramid
+ */
+inline ValidRegion shape_to_valid_region_laplacian_pyramid(const TensorShape &a_shape, const ValidRegion &a_valid_region, bool border_undefined = false)
+{
+    ValidRegion valid_region = shape_to_valid_region_gaussian_pyramid_half(a_shape, a_valid_region, border_undefined);
+
+    if(border_undefined)
+    {
+        const BorderSize gaussian5x5_border(2);
+
+        auto border_left   = static_cast<int>(gaussian5x5_border.left);
+        auto border_right  = static_cast<int>(gaussian5x5_border.right);
+        auto border_top    = static_cast<int>(gaussian5x5_border.top);
+        auto border_bottom = static_cast<int>(gaussian5x5_border.bottom);
+
+        valid_region.anchor.set(0, valid_region.anchor[0] + border_left);
+        valid_region.anchor.set(1, valid_region.anchor[1] + border_top);
+        valid_region.shape.set(0, std::max(0, static_cast<int>(valid_region.shape[0]) - border_right - border_left));
+        valid_region.shape.set(1, std::max(0, static_cast<int>(valid_region.shape[1]) - border_top - border_bottom));
+    }
+
+    return valid_region;
+}
+
 /** Write the value after casting the pointer according to @p data_type.
  *
  * @warning The type of the value must match the specified data type.
