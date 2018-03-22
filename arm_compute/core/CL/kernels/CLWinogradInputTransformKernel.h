@@ -46,28 +46,38 @@ public:
     CLWinogradInputTransformKernel &operator=(CLWinogradInputTransformKernel &&) = default;
     /** Set the input and output of the kernel.
      *
-     * @param[in] input       The input tensor to permute. Data types supported: F32
-     * @param[in] output      The output tensor. Data types supported: Same as @p input
-     * @param[in] conv_info   Contains padding and stride information described in @ref PadStrideInfo. Currently only unit strides are supported.
-     * @param[in] kernel_dims Kernel dimensions. Currently only 3x3 kernels are supported
+     * @note Winograd input transform supports the following configurations:
+     *       Output tile size: 2x2
+     *       Kernel size: 3x3
+     *       Strides: only unit strides
+     *
+     * @param[in] input         The input tensor to transform. Data types supported: F32
+     * @param[in] output        The output tensor. The shape for this tensor can be calculated using the utility function @p compute_winograd_input_transform_shape. Data types supported: Same as @p input
+     * @param[in] winograd_info Contains Winograd's information described in @ref WinogradInfo.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, const PadStrideInfo &conv_info, const Size2D &kernel_dims);
+    void configure(const ICLTensor *input, ICLTensor *output, const WinogradInfo &winograd_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLWinogradInputTransformKernel
      *
-     * @param[in] input       First tensor input info. Data types supported: F32.
-     * @param[in] output      Output tensor info. Data types supported: same as @p input.
-     * @param[in] conv_info   Contains padding and stride information described in @ref PadStrideInfo. Currently only unit strides are supported.
-     * @param[in] kernel_dims Kernel dimensions. Currently only 3x3 kernels are supported
+     * @note Winograd input transform supports the following configurations:
+     *       Output tile size: 2x2
+     *       Kernel size: 3x3
+     *       Strides: only unit strides
+     *
+     * @param[in] input         The input tensor to transform. Data types supported: F32
+     * @param[in] output        The output tensor. The shape for this tensor can be calculated using the utility function @p compute_winograd_input_transform_shape. Data types supported: Same as @p input
+     * @param[in] winograd_info Contains Winograd's information described in @ref WinogradInfo.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PadStrideInfo &conv_info, const Size2D &kernel_dims);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const WinogradInfo &winograd_info);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
     BorderSize border_size() const override;
 
 private:
+    using WinogradKey = std::pair<std::pair<int, int>, std::pair<int, int>>;
+
     BorderSize       _border_size;
     const ICLTensor *_input;
     ICLTensor       *_output;

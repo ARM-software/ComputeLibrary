@@ -28,6 +28,8 @@
 
 #include "arm_compute/core/Types.h"
 
+#include <algorithm>
+
 namespace arm_compute
 {
 namespace test
@@ -39,153 +41,155 @@ namespace reference
 namespace
 {
 template <typename T>
-void winograd_filter_transform3x3(const SimpleTensor<T> &in, SimpleTensor<T> &out, const Size2D &output_tile)
+void initialize_matrix_transform(SimpleTensor<T> &src, const Size2D &output_tile_size, const Size2D &kernel_size, WinogradTransformType winograd_transform_type)
 {
-    const bool         is_2x2      = (output_tile.width == 2);
-    const unsigned int transf_side = is_2x2 ? 4u : 6u;
+    ARM_COMPUTE_ERROR_ON((output_tile_size != Size2D(2U, 2U)) && (output_tile_size != Size2D(4U, 4U)));
+    ARM_COMPUTE_ERROR_ON(kernel_size != Size2D(3U, 3U));
 
-    // Simple tensor for the 3x3 input tile
-    SimpleTensor<T> input_tile{ TensorShape(3u, 3u), in.data_type(), 1 };
-
-    // Simple tensor for the transformation matrix
-    SimpleTensor<T> trans_matrix{ TensorShape(3u, transf_side), in.data_type(), 1 };
-
-    // Simple tensor for the transformation matrix transpose
-    SimpleTensor<T> trans_matrix_transposed{ TensorShape(transf_side, 3u), in.data_type(), 1 };
-
-    // Simple tensor for the 3xSide temporary tile
-    SimpleTensor<T> tmp_tile{ TensorShape(3u, transf_side), in.data_type(), 1 };
-
-    // Simple tensor for the SidexSide output tile
-    SimpleTensor<T> transf_tile{ TensorShape(transf_side, transf_side), in.data_type(), 1 };
-
-    if(is_2x2)
+    // Winograd input transform matrices
+    static const float imatrix2x2_3x3[] =
     {
-        // Initialize 3x4 transformation matrix
-        // 1   | 0   | 0
-        // 0.5 | 0.5 | 0.5
-        // 0.5 |-0.5 | 0.5
-        // 0   | 0   | 1
-        trans_matrix[0 + 0 * 3] = 1.0f;
-        trans_matrix[1 + 0 * 3] = 0.0f;
-        trans_matrix[2 + 0 * 3] = 0.0f;
-        trans_matrix[0 + 1 * 3] = 0.5f;
-        trans_matrix[1 + 1 * 3] = 0.5f;
-        trans_matrix[2 + 1 * 3] = 0.5f;
-        trans_matrix[0 + 2 * 3] = 0.5f;
-        trans_matrix[1 + 2 * 3] = -0.5f;
-        trans_matrix[2 + 2 * 3] = 0.5f;
-        trans_matrix[0 + 3 * 3] = 0.0f;
-        trans_matrix[1 + 3 * 3] = 0.0f;
-        trans_matrix[2 + 3 * 3] = 1.0f;
+        1.0f, 0.0f, -1.0f, 0.0f,
+        0.0f, 1.0f, 1.0f, 0.0f,
+        0.0f, -1.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f, -1.0f
+    };
+
+    static const float imatrix4x4_3x3[] =
+    {
+        4.0f, 0.0f, -5.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, -4.0f, -4.0f, 1.0f, 1.0f, 0.0f,
+        0.0f, 4.0f, -4.0f, -1.0f, 1.0f, 0.0f,
+        0.0f, -2.0f, -1.0f, 2.0f, 1.0f, 0.0f,
+        0.0f, 2.0f, -1.0f, -2.0f, 1.0f, 0.0f,
+        0.0f, 4.0f, 0.0f, -5.0f, 0.0f, 1.0f,
+    };
+
+    // ------------------------------------------
+
+    // Winograd filter transform matrices
+    static const float fmatrix2x2_3x3[] =
+    {
+        1.0f, 0.0f, 0.0f,
+        0.5f, 0.5f, 0.5f,
+        0.5f, -0.5f, 0.5f,
+        0.0f, 0.0f, 1.0f
+    };
+
+    static const float fmatrix4x4_3x3[] =
+    {
+        0.25f, 0.0f, 0.0f,
+        -1.0f / 6.0f, -1.0f / 6.0f, -1.0f / 6.0f,
+        -1.0f / 6.0f, 1.0f / 6.0f, -1.0f / 6.0f,
+        1.0f / 24.0f, 1.0f / 12.0f, 1.0f / 6.0f,
+        1.0f / 24.0f, -1.0f / 12.0f, 1.0f / 6.0f,
+        0.0f, 0.0f, 1.0f
+    };
+
+    // ------------------------------------------
+
+    // Winograd output transform matrices
+    static const float omatrix2x2_3x3[] =
+    {
+        1.0f, 1.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, -1.0f, -1.0f
+    };
+
+    static const float omatrix4x4_3x3[] =
+    {
+        1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, -1.0f, 2.0f, -2.0f, 0.0f,
+        0.0f, 1.0f, 1.0f, 4.0f, 4.0f, 0.0f,
+        0.0f, 1.0f, -1.0f, 8.0f, -8.0f, 1.0f
+    };
+
+    // ------------------------------------------
+
+    using WinogradKey = std::tuple<std::pair<int, int>, std::pair<int, int>, WinogradTransformType>;
+
+    // Key = (Output tile size, Kernel size, Winograd transform type)
+    static std::map<WinogradKey, const float *> matrix_map =
+    {
+        { WinogradKey(std::pair<int, int>(2, 2), std::pair<int, int>(3, 3), WinogradTransformType::INPUT), imatrix2x2_3x3 },
+        { WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(3, 3), WinogradTransformType::INPUT), imatrix4x4_3x3 },
+        { WinogradKey(std::pair<int, int>(2, 2), std::pair<int, int>(3, 3), WinogradTransformType::FILTER), fmatrix2x2_3x3 },
+        { WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(3, 3), WinogradTransformType::FILTER), fmatrix4x4_3x3 },
+        { WinogradKey(std::pair<int, int>(2, 2), std::pair<int, int>(3, 3), WinogradTransformType::OUTPUT), omatrix2x2_3x3 },
+        { WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(3, 3), WinogradTransformType::OUTPUT), omatrix4x4_3x3 },
+    };
+
+    // Find input matrix transform
+    std::map<WinogradKey, const float *>::iterator it;
+
+    it = matrix_map.find(WinogradKey(std::pair<int, int>(output_tile_size.width, output_tile_size.height),
+                                     std::pair<int, int>(kernel_size.width, kernel_size.height),
+                                     winograd_transform_type));
+
+    float const *matrix_values = nullptr;
+    if(it != matrix_map.end())
+    {
+        // Get matrix pointer
+        matrix_values = it->second;
     }
     else
     {
-        // Initialize 3x6 transformation matrix
-        //   1/4  |    0   |   0
-        //  -1/6  |  -1/6  | -1/6
-        //  -1/6  |   1/6  | -1/6
-        //  1/24  |  1/12  |  1/6
-        //  1/24  | -1/12  |  1/6
-        //    0   |    0   |   1
-        trans_matrix[0 + 0 * 3] = 1.0f / 4.0f;
-        trans_matrix[1 + 0 * 3] = 0.0f;
-        trans_matrix[2 + 0 * 3] = 0.0f;
-        trans_matrix[0 + 1 * 3] = -1.0f / 6.0f;
-        trans_matrix[1 + 1 * 3] = -1.0f / 6.0f;
-        trans_matrix[2 + 1 * 3] = -1.0f / 6.0f;
-        trans_matrix[0 + 2 * 3] = -1.0f / 6.0f;
-        trans_matrix[1 + 2 * 3] = 1.0f / 6.0f;
-        trans_matrix[2 + 2 * 3] = -1.0f / 6.0f;
-        trans_matrix[0 + 3 * 3] = 1.0f / 24.0f;
-        trans_matrix[1 + 3 * 3] = 1.0f / 12.0f;
-        trans_matrix[2 + 3 * 3] = 1.0f / 6.0f;
-        trans_matrix[0 + 4 * 3] = 1.0f / 24.0f;
-        trans_matrix[1 + 4 * 3] = -1.0f / 12.0f;
-        trans_matrix[2 + 4 * 3] = 1.0f / 6.0f;
-        trans_matrix[0 + 5 * 3] = 0.0f;
-        trans_matrix[1 + 5 * 3] = 0.0f;
-        trans_matrix[2 + 5 * 3] = 1.0f;
+        ARM_COMPUTE_ERROR("Winograd configuration not supported");
     }
 
-    // Transpose the transformation matrix
-    transpose_matrix(trans_matrix, trans_matrix_transposed);
-
-    const int num_channels = in.shape()[2];
-    const int num_filters  = in.shape()[3];
-    const int num_batches  = in.shape().total_size() / (9 * num_channels * num_filters);
-
-    for(int n = 0; n < num_batches; ++n)
-    {
-        for(int w = 0; w < num_filters; ++w)
-        {
-            for(int z = 0; z < num_channels; ++z)
-            {
-                // Load the 3x3 tile from the input tensor
-                get_tile(in, input_tile, Coordinates(0, 0, z, w, n));
-
-                // First transformation
-                matrix_multiply(trans_matrix, input_tile, tmp_tile);
-
-                // Second transformation
-                matrix_multiply(tmp_tile, trans_matrix_transposed, transf_tile);
-
-                // Store the 4x4 output tile across the 16 channels
-                const int output_offset = w + z * num_filters;
-
-                for(unsigned int out_h = 0, out_pos = 0; out_h < transf_side; ++out_h)
-                {
-                    for(unsigned int out_w = 0; out_w < transf_side; ++out_w, ++out_pos)
-                    {
-                        out[output_offset + out_pos * num_filters * num_channels] = transf_tile[out_w + out_h * transf_side];
-                    }
-                }
-            }
-        }
-    }
+    // Copy values
+    std::copy(&matrix_values[0], &matrix_values[0] + src.num_elements(), &src[0]);
 }
+} // namespace
 
 template <typename T>
-void winograd_input_transform3x3(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const PadStrideInfo &conv_info)
+SimpleTensor<T> winograd_input_transform(const SimpleTensor<T> &in, const TensorShape &output_shape, const WinogradInfo &winograd_info)
 {
-    TensorShape shape4x4(4u, 4u);
+    ARM_COMPUTE_ERROR_ON(in.data_layout() != DataLayout::NCHW);
 
-    // Simple tensor for the 4x4 input tile
-    SimpleTensor<T> src_tile{ shape4x4, src.data_type() };
+    const PadStrideInfo conv_info        = winograd_info.convolution_info;
+    const Size2D        output_tile_size = winograd_info.output_tile_size;
+    const Size2D        kernel_size      = winograd_info.kernel_size;
 
-    // Simple tensor for the 4x4 temporary tile
-    SimpleTensor<T> tmp_tile{ shape4x4, src.data_type() };
+    SimpleTensor<T> out{ output_shape, in.data_type() };
 
-    // Simple tensor for the 4x4 output tile
-    SimpleTensor<T> dst_tile{ shape4x4, src.data_type() };
+    // Calculate dimensions for the tile
+    const unsigned int tile_w = output_tile_size.width + kernel_size.width - 1;
+    const unsigned int tile_h = output_tile_size.height + kernel_size.height - 1;
+
+    TensorShape tile_dims(tile_w, tile_h);
+
+    // Simple tensor for the input tile
+    SimpleTensor<T> src_tile{ tile_dims, in.data_type() };
+
+    // Simple tensor for the temporary tile
+    SimpleTensor<T> tmp_tile{ tile_dims, in.data_type() };
+
+    // Simple tensor for the output tile
+    SimpleTensor<T> dst_tile{ tile_dims, in.data_type() };
 
     // Simple tensor for the transformation matrix
-    SimpleTensor<T> matrix{ shape4x4, src.data_type() };
+    SimpleTensor<T> matrix{ tile_dims, in.data_type() };
 
     // Simple tensor for the transformation matrix transposed
-    SimpleTensor<T> matrix_transposed{ shape4x4, src.data_type() };
+    SimpleTensor<T> matrix_transposed{ tile_dims, in.data_type() };
 
-    const float matrix_values[] = { 1.f, 0.f, -1.f, 0.f,
-                                    0.f, 1.f, 1.f, 0.f,
-                                    0.f, -1.f, 1.f, 0.f,
-                                    0.f, 1.f, 0.f, -1.f
-                                  };
+    // Initialize matrix for the input transform
+    initialize_matrix_transform(matrix, output_tile_size, kernel_size, WinogradTransformType::INPUT);
 
-    for(int i = 0; i < matrix.num_elements(); ++i)
-    {
-        matrix[i] = matrix_values[i];
-    }
-
+    // Transpose matrix
     transpose_matrix(matrix, matrix_transposed);
 
-    const int in_w        = src.shape().x();
-    const int in_h        = src.shape().y();
-    const int in_d        = src.shape().z();
-    const int num_batches = src.shape().total_size() / (in_w * in_h * in_d);
-    const int num_tiles_x = std::ceil((in_w - 2 + conv_info.pad_left() + conv_info.pad_right()) / 2.0f);
-    const int num_tiles_y = std::ceil((in_h - 2 + conv_info.pad_top() + conv_info.pad_bottom()) / 2.0f);
+    const int in_w        = in.shape().x();
+    const int in_h        = in.shape().y();
+    const int in_d        = in.shape().z();
+    const int out_d       = out.shape().z();
+    const int num_batches = in.shape().total_size() / (in_w * in_h * in_d);
+    const int num_tiles_x = std::ceil((in_w - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right()) / static_cast<float>(output_tile_size.width));
+    const int num_tiles_y = std::ceil((in_h - (kernel_size.height - 1) + conv_info.pad_top() + conv_info.pad_bottom()) / static_cast<float>(output_tile_size.height));
+    const int step_x      = output_tile_size.width;
+    const int step_y      = output_tile_size.height;
 
-    ARM_COMPUTE_ERROR_ON((num_tiles_x * num_tiles_y) != static_cast<int>(dst.shape().y()));
+    ARM_COMPUTE_ERROR_ON((num_tiles_x * num_tiles_y) != static_cast<int>(out.shape().y()));
 
     for(int b = 0; b < num_batches; ++b)
     {
@@ -195,61 +199,154 @@ void winograd_input_transform3x3(const SimpleTensor<T> &src, SimpleTensor<T> &ds
             {
                 for(int x = 0; x < num_tiles_x; ++x)
                 {
-                    int xi = x * 2 - conv_info.pad_left();
-                    int yi = y * 2 - conv_info.pad_top();
+                    int xi = x * step_x - conv_info.pad_left();
+                    int yi = y * step_y - conv_info.pad_top();
 
-                    // Get the 4x4 tile from the input tensor
-                    get_tile(src, src_tile, Coordinates(xi, yi, z, b));
+                    // Get the tile from the input tensor
+                    get_tile(in, src_tile, Coordinates(xi, yi, z, b));
 
                     // Compute the transformation
                     matrix_multiply(matrix, src_tile, tmp_tile);
                     matrix_multiply(tmp_tile, matrix_transposed, dst_tile);
 
-                    // Store the 4x4 output tile across the 16 channels
-                    for(int i = 0; i < 16; ++i)
+                    // Store the output tile across the channels
+                    for(int i = 0; i < out_d; ++i)
                     {
                         int xo = z;
                         int yo = x + y * num_tiles_x;
-                        dst[coords2index(dst.shape(), Coordinates(xo, yo, i, b))] = dst_tile[i];
+                        out[coords2index(out.shape(), Coordinates(xo, yo, i, b))] = dst_tile[i];
                     }
                 }
             }
         }
     }
+
+    return out;
 }
 
 template <typename T>
-void winograd_output_transform3x3(const SimpleTensor<T> &in, SimpleTensor<T> &out, int num_tiles_x)
+SimpleTensor<T> winograd_filter_transform(const SimpleTensor<T> &in, const TensorShape &output_shape, const WinogradInfo &winograd_info)
 {
-    ARM_COMPUTE_ERROR_ON(in.shape()[2] != 16);
-    ARM_COMPUTE_ERROR_ON(in.shape()[0] != out.shape()[2]);
+    ARM_COMPUTE_ERROR_ON_MSG(in.data_layout() != DataLayout::NCHW, "Only supported NCHW data format");
 
-    // Simple tensor for the 3x3 input tile
-    SimpleTensor<T> input_tile{ TensorShape(4u, 4u), in.data_type(), 1 };
+    // Create reference
+    SimpleTensor<T> out{ output_shape, in.data_type(), 1 };
+
+    const Size2D output_tile_size = winograd_info.output_tile_size;
+    const Size2D kernel_size      = winograd_info.kernel_size;
+
+    TensorShape kernel_tile_dims(kernel_size.width, kernel_size.height);
+
+    // Calculate dimensions for the tile
+    const unsigned int input_tile_w    = output_tile_size.width + kernel_size.width - 1;
+    const unsigned int input_tile_h    = output_tile_size.height + kernel_size.height - 1;
+    const unsigned int input_tile_area = input_tile_w * input_tile_h;
+
+    // Simple tensor for the input tile
+    SimpleTensor<T> input_tile{ kernel_tile_dims, in.data_type(), 1 };
 
     // Simple tensor for the transformation matrix
-    SimpleTensor<T> trans_matrix{ TensorShape(4u, 2u), in.data_type(), 1 };
+    SimpleTensor<T> trans_matrix{ TensorShape(kernel_tile_dims[0], input_tile_w), in.data_type(), 1 };
 
     // Simple tensor for the transformation matrix transpose
-    SimpleTensor<T> trans_matrix_transposed{ TensorShape(2u, 4u), in.data_type(), 1 };
+    SimpleTensor<T> trans_matrix_transposed{ TensorShape(input_tile_w, kernel_tile_dims[0]), in.data_type(), 1 };
 
-    // Simple tensor for the 4x3 temporary tile
-    SimpleTensor<T> tmp_tile{ TensorShape(4u, 2u), in.data_type(), 1 };
+    // Simple tensor for the temporary tile
+    SimpleTensor<T> tmp_tile{ TensorShape(kernel_tile_dims[0], input_tile_w), in.data_type(), 1 };
 
-    // Simple tensor for the 4x4 output tile
-    SimpleTensor<T> output_tile{ TensorShape(2u, 2u), in.data_type(), 1 };
+    // Simple tensor for the output tile
+    SimpleTensor<T> transf_tile{ TensorShape(input_tile_w, input_tile_w), in.data_type(), 1 };
 
-    // Initialize transformation matrix
-    // 1   | 1   | 1   | 1
-    // 0   | 1   | -1  | -1
-    trans_matrix[0 + 0 * 4] = 1.0f;
-    trans_matrix[1 + 0 * 4] = 1.0f;
-    trans_matrix[2 + 0 * 4] = 1.0f;
-    trans_matrix[3 + 0 * 4] = 0.0f;
-    trans_matrix[0 + 1 * 4] = 0.0f;
-    trans_matrix[1 + 1 * 4] = 1.0f;
-    trans_matrix[2 + 1 * 4] = -1.0f;
-    trans_matrix[3 + 1 * 4] = -1.0f;
+    // Initialize matrix for the filter transform
+    initialize_matrix_transform(trans_matrix, output_tile_size, kernel_size, WinogradTransformType::FILTER);
+
+    // Transpose the transformation matrix
+    transpose_matrix(trans_matrix, trans_matrix_transposed);
+
+    const int num_channels = in.shape()[2];
+    const int num_filters  = in.shape()[3];
+    const int num_batches  = in.shape().total_size() / (kernel_size.area() * num_channels * num_filters);
+
+    for(int n = 0; n < num_batches; ++n)
+    {
+        for(int w = 0; w < num_filters; ++w)
+        {
+            for(int z = 0; z < num_channels; ++z)
+            {
+                // Load the tile from the input tensor
+                get_tile(in, input_tile, Coordinates(0, 0, z, w, n));
+
+                // First transformation
+                matrix_multiply(trans_matrix, input_tile, tmp_tile);
+
+                // Second transformation
+                matrix_multiply(tmp_tile, trans_matrix_transposed, transf_tile);
+
+                // Store the output tile across the channels
+                const int output_offset = w + z * num_filters;
+
+                // Store the values across the channels
+                for(unsigned int i = 0; i < input_tile_area; ++i)
+                {
+                    out[output_offset + i * num_filters * num_channels] = transf_tile[i];
+                }
+            }
+        }
+    }
+
+    return out;
+}
+
+template <typename T>
+SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const TensorShape &output_shape, const WinogradInfo &winograd_info)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(winograd_info.output_data_layout != DataLayout::NCHW, "Only supported NCHW data format");
+
+    const PadStrideInfo conv_info        = winograd_info.convolution_info;
+    const Size2D        input_dimensions = winograd_info.input_dimensions;
+    const Size2D        output_tile_size = winograd_info.output_tile_size;
+    const Size2D        kernel_size      = winograd_info.kernel_size;
+
+    // Create reference
+    SimpleTensor<T> out{ output_shape, in.data_type(), 1 };
+
+    // Calculate dimensions for the tiles
+    const unsigned int in_tile_w  = output_tile_size.width + kernel_size.width - 1;
+    const unsigned int in_tile_h  = output_tile_size.height + kernel_size.height - 1;
+    const unsigned int out_tile_w = output_tile_size.width;
+    const unsigned int out_tile_h = output_tile_size.height;
+
+    ARM_COMPUTE_ERROR_ON(in.shape()[2] != (in_tile_w * in_tile_h));
+    ARM_COMPUTE_ERROR_ON(in.shape()[0] != out.shape()[2]);
+
+    // Compute tile dimensions
+    // Input tile dimensions
+    TensorShape in_tile_dims(in_tile_w, in_tile_h);
+
+    // Output tile dimensions
+    TensorShape out_tile_dims(output_tile_size.width, output_tile_size.height);
+
+    // Transformation matrix dimensions
+    TensorShape tr_tile_dims(in_tile_w, output_tile_size.width);
+
+    // Create tensors
+    // Simple tensor for the input tile
+    SimpleTensor<T> input_tile{ in_tile_dims, in.data_type(), 1 };
+
+    // Simple tensor for the transformation matrix
+    SimpleTensor<T> trans_matrix{ tr_tile_dims, in.data_type(), 1 };
+
+    // Simple tensor for the transformation matrix transpose
+    SimpleTensor<T> trans_matrix_transposed{ TensorShape(tr_tile_dims[1], tr_tile_dims[0]), in.data_type(), 1 };
+
+    // Simple tensor for the temporary tile
+    SimpleTensor<T> tmp_tile{ tr_tile_dims, in.data_type(), 1 };
+
+    // Simple tensor for the output tile
+    SimpleTensor<T> output_tile{ out_tile_dims, in.data_type(), 1 };
+
+    // Initialize matrix for the output transform
+    initialize_matrix_transform(trans_matrix, output_tile_size, kernel_size, WinogradTransformType::OUTPUT);
 
     // Transpose the transformation matrix
     transpose_matrix(trans_matrix, trans_matrix_transposed);
@@ -272,13 +369,22 @@ void winograd_output_transform3x3(const SimpleTensor<T> &in, SimpleTensor<T> &ou
     const int stridez_out = stridey_out * h_out;
     const int stridew_out = stridez_out * c_out;
 
+    // Compute number of elements to process in the X and Y direction
+    const int num_elements_x = input_dimensions.width - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right();
+    const int num_elements_y = input_dimensions.height - (kernel_size.height - 1) + conv_info.pad_top() + conv_info.pad_bottom();
+    const int num_tiles_x    = std::ceil(num_elements_x / static_cast<float>(output_tile_size.width));
+    const int num_tiles_y    = std::ceil(num_elements_y / static_cast<float>(output_tile_size.height));
+
+    ARM_COMPUTE_UNUSED(num_tiles_y);
+    ARM_COMPUTE_ERROR_ON(in.shape()[1] != static_cast<unsigned int>(num_tiles_x * num_tiles_y));
+
     for(int n = 0; n < num_batches; ++n)
     {
         for(int y = 0; y < h_in; ++y)
         {
             for(int x = 0; x < w_in; ++x)
             {
-                // Load the 4x4 tile across the 16 channels of the input tensor
+                // Load the input tile tile across the channels of the input tensor
                 for(int z = 0; z < c_in; ++z)
                 {
                     input_tile[z] = in[x + (y * stridey_in) + (z * stridez_in) + (n * stridew_in)];
@@ -290,102 +396,34 @@ void winograd_output_transform3x3(const SimpleTensor<T> &in, SimpleTensor<T> &ou
                 // Second transformation
                 matrix_multiply(tmp_tile, trans_matrix_transposed, output_tile);
 
-                // Store the 2x2 output tile
-                const int xo = (y % num_tiles_x) * 2;
-                const int yo = (y / num_tiles_x) * 2;
+                // Store the output tile
+                const int xo = (y % num_tiles_x) * out_tile_w;
+                const int yo = (y / num_tiles_x) * out_tile_h;
                 const int zo = x;
 
-                const int output_offset                  = xo + (yo * stridey_out) + (zo * stridez_out) + (n * stridew_out);
-                out[output_offset + 0 * stridey_out + 0] = output_tile[0 + 0 * 2];
+                const int output_offset = xo + (yo * stridey_out) + (zo * stridez_out) + (n * stridew_out);
 
-                // Check out-of-bound writes
-                if(xo + 1 < w_out)
+                for(int yi = 0; yi < static_cast<int>(out_tile_h); ++yi)
                 {
-                    out[output_offset + 0 * stridey_out + 1] = output_tile[1 + 0 * 2];
-                }
-
-                if(yo + 1 < h_out)
-                {
-                    out[output_offset + 1 * stridey_out + 0] = output_tile[0 + 1 * 2];
-                }
-
-                if((yo + 1 < h_out) && (xo + 1 < w_out))
-                {
-                    out[output_offset + 1 * stridey_out + 1] = output_tile[1 + 1 * 2];
+                    for(int xi = 0; xi < static_cast<int>(out_tile_w); ++xi)
+                    {
+                        // Check out-of-bound writes
+                        if((xo + xi < w_out) && (yo + yi < h_out))
+                        {
+                            out[output_offset + yi * stridey_out + xi] = output_tile[xi + yi * out_tile_w];
+                        }
+                    }
                 }
             }
         }
     }
-}
-} // namespace
-
-template <typename T>
-SimpleTensor<T> winograd_input_transform(const SimpleTensor<T> &src, const TensorShape &dst_shape, const PadStrideInfo &conv_info, const Size2D &kernel_dims)
-{
-    ARM_COMPUTE_ERROR_ON(kernel_dims.width != kernel_dims.height);
-    ARM_COMPUTE_ERROR_ON(src.data_layout() != DataLayout::NCHW);
-
-    SimpleTensor<T> dst{ dst_shape, src.data_type() };
-
-    switch(kernel_dims.width)
-    {
-        case 3:
-            winograd_input_transform3x3(src, dst, conv_info);
-            break;
-        default:
-            ARM_COMPUTE_ERROR("Only 3x3 kernels are supported");
-    }
-
-    return dst;
-}
-
-template <typename T>
-SimpleTensor<T> winograd_filter_transform(const SimpleTensor<T> &in, const TensorShape &output_shape, const Size2D &output_tile)
-{
-    ARM_COMPUTE_ERROR_ON_MSG(in.data_layout() != DataLayout::NCHW, "Only supported NCHW data format");
-
-    // Create reference
-    SimpleTensor<T> out{ output_shape, in.data_type(), 1 };
-
-    switch(in.shape()[0])
-    {
-        case 3:
-            winograd_filter_transform3x3(in, out, output_tile);
-            break;
-        default:
-            ARM_COMPUTE_ERROR("Only supported 3x3 kernel");
-            break;
-    }
 
     return out;
 }
 
-template <typename T>
-SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const TensorShape &output_shape, const Size2D &kernel_dims, const Size2D &num_tiles)
-{
-    ARM_COMPUTE_ERROR_ON_MSG(in.data_layout() != DataLayout::NCHW, "Only supported NCHW data format");
-    ARM_COMPUTE_ERROR_ON(kernel_dims.width != kernel_dims.height);
-    ARM_COMPUTE_ERROR_ON(in.shape()[1] != num_tiles.area());
-
-    // Create reference
-    SimpleTensor<T> out{ output_shape, in.data_type(), 1 };
-
-    switch(kernel_dims.width)
-    {
-        case 3:
-            winograd_output_transform3x3(in, out, num_tiles.width);
-            break;
-        default:
-            ARM_COMPUTE_ERROR("Only supported 3x3 kernel");
-            break;
-    }
-
-    return out;
-}
-
-template SimpleTensor<float> winograd_input_transform(const SimpleTensor<float> &src, const TensorShape &dst_shape, const PadStrideInfo &conv_info, const Size2D &kernel_dims);
-template SimpleTensor<float> winograd_filter_transform(const SimpleTensor<float> &in, const TensorShape &output_shape, const Size2D &output_tile);
-template SimpleTensor<float> winograd_output_transform(const SimpleTensor<float> &in, const TensorShape &output_shape, const Size2D &kernel_dims, const Size2D &num_tiles);
+template SimpleTensor<float> winograd_filter_transform(const SimpleTensor<float> &in, const TensorShape &output_shape, const WinogradInfo &winograd_info);
+template SimpleTensor<float> winograd_input_transform(const SimpleTensor<float> &in, const TensorShape &output_shape, const WinogradInfo &winograd_info);
+template SimpleTensor<float> winograd_output_transform(const SimpleTensor<float> &in, const TensorShape &output_shape, const WinogradInfo &winograd_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

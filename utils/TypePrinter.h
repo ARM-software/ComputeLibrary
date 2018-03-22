@@ -1457,6 +1457,7 @@ inline std::string to_string(const GPUTarget &gpu_target)
     str << gpu_target;
     return str.str();
 }
+
 /** Formatted output of the DetectionWindow type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const DetectionWindow &detection_window)
 {
@@ -1470,7 +1471,25 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DetectionWindow &det
     return os;
 }
 
+/** Formatted output of the WinogradInfo type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const WinogradInfo &info)
+{
+    os << "{OutputTileSize=" << info.output_tile_size << ","
+       << "KernelSize=" << info.kernel_size << ","
+       << "PadStride=" << info.convolution_info << ","
+       << "OutputDataLayout=" << info.output_data_layout << "}";
+
+    return os;
+}
+
 inline std::string to_string(const DetectionWindow &type)
+{
+    std::stringstream str;
+    str << type;
+    return str.str();
+}
+
+inline std::string to_string(const WinogradInfo &type)
 {
     std::stringstream str;
     str << type;

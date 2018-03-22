@@ -1136,6 +1136,29 @@ private:
     GEMMReshapeInfo _reshape_info;
 };
 
+/** Winograd information */
+struct WinogradInfo
+{
+    /** Default constructor
+     *
+     * @param[in] output_tile_sz Width and height of the output tile
+     * @param[in] kernel_sz      Width and height of the kernel
+     * @param[in] input_dims     Width and height of the input tensor before the convolution is applied
+     * @param[in] conv_info      Convolution info (Pads, strides)
+     * @param[in] data_layout    Data layout to use for the output tensor once the convolution has been applied
+     */
+    WinogradInfo(Size2D output_tile_sz, Size2D kernel_sz, Size2D input_dims, PadStrideInfo conv_info, DataLayout data_layout)
+        : output_tile_size(output_tile_sz), kernel_size(kernel_sz), input_dimensions(input_dims), convolution_info(conv_info), output_data_layout(data_layout)
+    {
+    }
+
+    Size2D        output_tile_size{};                     /**< Width and height of the output tile */
+    Size2D        kernel_size{};                          /**< Width and height of the kernel*/
+    Size2D        input_dimensions{};                     /**< Width and height of the input tensor before the convolution is applied */
+    PadStrideInfo convolution_info{};                     /**< Convolution info (Pads, strides,...) */
+    DataLayout    output_data_layout{ DataLayout::NCHW }; /**< Data layout to use for the output tensor once the convolution has been applied (NCHW or NHWC) */
+};
+
 /** IO formatting information class*/
 struct IOFormatInfo
 {

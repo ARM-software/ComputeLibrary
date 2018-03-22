@@ -44,18 +44,26 @@ using namespace arm_compute::misc::shape_calculator;
 
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const Size2D &output_tile)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const WinogradInfo &winograd_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(0) != 3);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(0) != input->dimension(1));
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() != DataLayout::NCHW);
+
+    const Size2D kernel_size      = winograd_info.kernel_size;
+    const Size2D output_tile_size = winograd_info.output_tile_size;
+
+    const size_t idx_w = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
+    const size_t idx_h = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
+
+    ARM_COMPUTE_RETURN_ERROR_ON(kernel_size != Size2D(3U, 3U));
+    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(idx_w) != kernel_size.width || input->dimension(idx_h) != kernel_size.height);
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4);
-    ARM_COMPUTE_RETURN_ERROR_ON(output_tile != Size2D(2U, 2U) && output_tile != Size2D(4U, 4U));
+    ARM_COMPUTE_RETURN_ERROR_ON(output_tile_size != Size2D(2U, 2U) && output_tile_size != Size2D(4U, 4U));
 
     // Checks performed when output is configured
     if(output->total_size() != 0)
     {
-        const TensorInfo tensor_info_output = input->clone()->set_tensor_shape(compute_winograd_filter_transform_shape(*input, output_tile));
+        const TensorInfo tensor_info_output = input->clone()->set_tensor_shape(compute_winograd_filter_transform_shape(*input, winograd_info));
 
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &tensor_info_output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
@@ -64,9 +72,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, const Size2D &output_tile)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
 {
-    ARM_COMPUTE_UNUSED(output_tile);
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     constexpr unsigned int num_elems_processed_per_iteration_x = 3;
@@ -92,36 +99,41 @@ CLWinogradFilterTransformKernel::CLWinogradFilterTransformKernel()
 {
 }
 
-void CLWinogradFilterTransformKernel::configure(const ICLTensor *input, ICLTensor *output, const Size2D &output_tile)
+void CLWinogradFilterTransformKernel::configure(const ICLTensor *input, ICLTensor *output, const WinogradInfo &winograd_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    // Output tensor auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(compute_winograd_filter_transform_shape(*input->info(), output_tile)));
+    // Output auto initialization if not yet initialized
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(compute_winograd_filter_transform_shape(*input->info(), winograd_info)));
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), output_tile));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), winograd_info));
+
+    const size_t idx_c = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::CHANNEL);
 
     // Set build options
     CLBuildOptions build_opts;
-    build_opts.add_option("-DNUM_CHANNELS=" + support::cpp11::to_string(input->info()->dimension(2)));
+    build_opts.add_option("-DNUM_CHANNELS=" + support::cpp11::to_string(input->info()->dimension(idx_c)));
+
+    const Size2D kernel_size      = winograd_info.kernel_size;
+    const Size2D output_tile_size = winograd_info.output_tile_size;
 
     // Create kernel
-    std::string kernel_name = std::string("winograd_filter_transform_") + output_tile.to_string() + std::string("_3x3_nchw");
+    std::string kernel_name = "winograd_filter_transform_" + output_tile_size.to_string() + "_" + kernel_size.to_string() + "_nchw";
     _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     _input  = input;
     _output = output;
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output->info(), output_tile);
+    auto win_config = validate_and_configure_window(input->info(), output->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure(win_config.second);
 }
 
-Status CLWinogradFilterTransformKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &output_tile)
+Status CLWinogradFilterTransformKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const WinogradInfo &winograd_info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, output_tile));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), output_tile).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, winograd_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
 
     return Status{};
 }

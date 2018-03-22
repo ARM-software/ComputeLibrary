@@ -30,16 +30,16 @@
 
 using namespace arm_compute;
 
-void CLWinogradInputTransform::configure(ICLTensor *input, ICLTensor *output, const PadStrideInfo &conv_info, const Size2D &kernel_dims)
+void CLWinogradInputTransform::configure(ICLTensor *input, ICLTensor *output, const WinogradInfo &winograd_info)
 {
     auto k = arm_compute::support::cpp14::make_unique<CLWinogradInputTransformKernel>();
-    k->configure(input, output, conv_info, kernel_dims);
+    k->configure(input, output, winograd_info);
     _kernel = std::move(k);
     _border_handler.configure(input, _kernel->border_size(), BorderMode::CONSTANT, PixelValue(0));
 }
 
-Status CLWinogradInputTransform::validate(const ITensorInfo *input, const ITensorInfo *output, const PadStrideInfo &conv_info, const Size2D &kernel_dims)
+Status CLWinogradInputTransform::validate(const ITensorInfo *input, const ITensorInfo *output, const WinogradInfo &winograd_info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(CLWinogradInputTransformKernel::validate(input, output, conv_info, kernel_dims));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLWinogradInputTransformKernel::validate(input, output, winograd_info));
     return Status{};
 }

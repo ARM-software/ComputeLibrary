@@ -372,6 +372,38 @@ public:
     }
 };
 
+/** Data set containing small 3x3 tensor shapes. */
+class Small3x3Shapes final : public ShapeDataset
+{
+public:
+    Small3x3Shapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 3U, 3U, 7U, 4U },
+                     TensorShape{ 3U, 3U, 4U, 13U },
+                     TensorShape{ 3U, 3U, 9U, 2U },
+                     TensorShape{ 3U, 3U, 3U, 5U },
+    })
+    {
+    }
+};
+
+/** Data set containing large 3x3 tensor shapes. */
+class Large3x3Shapes final : public ShapeDataset
+{
+public:
+    Large3x3Shapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 3U, 3U, 32U, 64U },
+                     TensorShape{ 3U, 3U, 51U, 13U },
+                     TensorShape{ 3U, 3U, 53U, 47U },
+                     TensorShape{ 3U, 3U, 128U, 384U },
+    })
+    {
+    }
+};
+
 /** Data set containing small tensor shapes for deconvolution. */
 class SmallDeconvolutionShapes final : public ShapeDataset
 {

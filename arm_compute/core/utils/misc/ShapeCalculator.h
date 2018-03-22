@@ -196,31 +196,35 @@ inline TensorShape compute_fully_connected_reshaped_weights_shape(const ITensorI
     return output_shape;
 }
 
-inline TensorShape compute_winograd_filter_transform_shape(const ITensorInfo &input, const Size2D &output_tile)
+inline TensorShape compute_winograd_filter_transform_shape(const ITensorInfo &input, const WinogradInfo &winograd_info)
 {
     TensorShape tensor_shape{ input.tensor_shape() };
 
-    tensor_shape.remove_dimension(get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::WIDTH));
-    tensor_shape.set(Window::DimY, input.dimension(2));
-    tensor_shape.set(Window::DimZ, (output_tile.width == 2) ? 16 : 36);
+    const Size2D kernel_size      = winograd_info.kernel_size;
+    const Size2D output_tile_size = winograd_info.output_tile_size;
+    const Size2D input_tile_size  = Size2D(output_tile_size.width + kernel_size.width - 1, output_tile_size.height + kernel_size.height - 1);
 
-    if(input.data_layout() == DataLayout::NCHW)
-    {
-        tensor_shape.set(Window::DimX, input.dimension(3));
-    }
+    tensor_shape.remove_dimension(get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::WIDTH));
+    tensor_shape.set(Window::DimX, input.dimension(3));
+    tensor_shape.set(Window::DimY, input.dimension(get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::CHANNEL)));
+    tensor_shape.set(Window::DimZ, input_tile_size.area());
 
     return tensor_shape;
 }
-
-inline TensorShape compute_winograd_input_transform_shape(const ITensorInfo &input, const PadStrideInfo &conv_info, const Size2D &kernel_size)
+inline TensorShape compute_winograd_input_transform_shape(const ITensorInfo &input, const WinogradInfo &winograd_info)
 {
+    const PadStrideInfo conv_info        = winograd_info.convolution_info;
+    const Size2D        kernel_size      = winograd_info.kernel_size;
+    const Size2D        output_tile_size = winograd_info.output_tile_size;
+    const Size2D        input_tile_size  = Size2D(output_tile_size.width + kernel_size.width - 1, output_tile_size.height + kernel_size.height - 1);
+
     // Compute height
-    const unsigned int num_tiles_x = std::ceil((input.tensor_shape().x() - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right()) / 2.f);
-    const unsigned int num_tiles_y = std::ceil((input.tensor_shape().y() - (kernel_size.height - 1) + conv_info.pad_top() + conv_info.pad_bottom()) / 2.f);
+    const unsigned int num_tiles_x = std::ceil((input.tensor_shape().x() - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right()) / static_cast<float>(output_tile_size.width));
+    const unsigned int num_tiles_y = std::ceil((input.tensor_shape().y() - (kernel_size.height - 1) + conv_info.pad_top() + conv_info.pad_bottom()) / static_cast<float>(output_tile_size.height));
 
     const unsigned int width  = input.tensor_shape()[get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::CHANNEL)];
     const unsigned int height = num_tiles_x * num_tiles_y;
-    const unsigned int depth  = 16; // COMPMID-990
+    const unsigned int depth  = input_tile_size.area();
 
     TensorShape output_shape{ input.tensor_shape() };
     output_shape.set(0, width);
@@ -229,14 +233,24 @@ inline TensorShape compute_winograd_input_transform_shape(const ITensorInfo &inp
 
     return output_shape;
 }
-
-inline TensorShape compute_winograd_output_transform_shape(const ITensorInfo &input, const Size2D &output_convolved_dims, DataLayout data_layout)
+inline TensorShape compute_winograd_output_transform_shape(const ITensorInfo &input, const WinogradInfo &winograd_info)
 {
+    const PadStrideInfo conv_info        = winograd_info.convolution_info;
+    const Size2D        kernel_size      = winograd_info.kernel_size;
+    const Size2D        input_dimensions = winograd_info.input_dimensions;
+    const DataLayout    data_layout      = winograd_info.output_data_layout;
+
+    // Compute output shape
+    unsigned int output_width  = 0;
+    unsigned int output_height = 0;
+    std::tie(output_width, output_height) = scaled_dimensions(input_dimensions.width, input_dimensions.height,
+                                                              kernel_size.width, kernel_size.height, conv_info);
+
     TensorShape tensor_shape{ input.tensor_shape() };
 
     // Output dimension
-    const unsigned int out_w = output_convolved_dims.width;
-    const unsigned int out_h = output_convolved_dims.height;
+    const unsigned int out_w = output_width;
+    const unsigned int out_h = output_height;
     const unsigned int out_c = input.dimension(0);
 
     tensor_shape.set(get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH), out_w);
@@ -245,7 +259,6 @@ inline TensorShape compute_winograd_output_transform_shape(const ITensorInfo &in
 
     return tensor_shape;
 }
-
 inline TensorShape compute_deep_convolution_shape(const ITensorInfo &input, const ITensorInfo &weights, PadStrideInfo conv_info)
 {
     const TensorShape input_shape{ input.tensor_shape() };
@@ -271,7 +284,6 @@ inline TensorShape compute_deep_convolution_shape(const ITensorInfo &input, cons
 
     return output_shape;
 }
-
 inline TensorShape compute_min_max_shape(const ITensorInfo *input)
 {
     TensorShape output_shape{ input->tensor_shape() };

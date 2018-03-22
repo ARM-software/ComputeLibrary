@@ -48,22 +48,30 @@ public:
     ~CLWinogradFilterTransformKernel() = default;
     /** Set the input and output tensor.
      *
-     * @param[in]  input       Source tensor. The input is a 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] (NCHW data layout).
-     *                         kernel_x must be 3 and equal to kernel_y. Data types supported: F32.
-     * @param[out] output      Destination tensor. The output is a 3D tensor with dimensions [OFM, IFM, 16]. Data type supported: same as @p input
-     * @param[in]  output_tile Output tile. Currently only 2x2 and 4x4 tiles are supported.
+     * @note Winograd filter transform supports the following configurations:
+     *       Output tile size: 2x2, 4x4
+     *       Kernel size: 3x3
+     *       Strides: only unit strides
+     *
+     * @param[in]  input         Source tensor. The input is a 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] (NCHW data layout). Data types supported: F32.
+     * @param[out] output        The output tensor. The shape for this tensor can be calculated using the utility function @p compute_winograd_filter_transform_shape. Data types supported: Same as @p input
+     * @param[in]  winograd_info Contains Winograd's information described in @ref WinogradInfo
      */
-    void configure(const ICLTensor *input, ICLTensor *output, const Size2D &output_tile);
+    void configure(const ICLTensor *input, ICLTensor *output, const WinogradInfo &winograd_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLWinogradFilterTransformKernel
      *
-     * @param[in] input       Source tensor info. The input is a 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] (NCHW data layout).
-     *                        kernel_x must be 3 and equal to kernel_y. Data types supported: F32.
-     * @param[in] output      Destination tensor info. The output is a 3D tensor with dimensions [OFM, IFM, 16]. Data type supported: same as @p input
-     * @param[in] output_tile Output tile. Currently only 2x2 and 4x4 tiles are supported.
+     * @note Winograd filter transform supports the following configurations:
+     *       Output tile size: 2x2, 4x4
+     *       Kernel size: 3x3
+     *       Strides: only unit strides
+     *
+     * @param[in]  input         Source tensor. The input is a 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] (NCHW data layout). Data types supported: F32.
+     * @param[out] output        The output tensor. The shape for this tensor can be calculated using the utility function @p compute_winograd_filter_transform_shape. Data types supported: Same as @p input
+     * @param[in]  winograd_info Contains Winograd's information described in @ref WinogradInfo
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &output_tile);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const WinogradInfo &winograd_info);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

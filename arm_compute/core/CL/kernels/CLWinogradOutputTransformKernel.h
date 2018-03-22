@@ -48,31 +48,39 @@ public:
     ~CLWinogradOutputTransformKernel() = default;
     /** Set the input and output tensor.
      *
-     * @param[in]  input                 Source tensor with shape [C, N, 16, batches]. Data types supported: F32.
-     * @param[in]  bias                  Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. It can be a nullptr. Data type supported: as @p input
-     * @param[out] output                Destination tensor with shape [output_convolved_dims.width, output_convolved_dims.height, C, batches]. Data type supported: same as @p input
-     * @param[in]  kernel_dims           Kernel dimensions (Width and height). Currently only supported 3x3 kernels
-     * @param[in]  output_convolved_dims Output dimensions after the convolution (Width and height)
-     * @param[in]  num_tiles             Number of tiles of size 2x2 in the output tensor along the X and Y direction
+     * @note Winograd output transform supports the following configurations:
+     *       Output tile size: 2x2
+     *       Kernel size: 3x3
+     *       Strides: only unit strides
+     *
+     * @param[in]  input         Source tensor with shape [C, N, 16, batches]. Data types supported: F32.
+     * @param[in]  bias          Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. It can be a nullptr. Data type supported: as @p input
+     * @param[out] output        The output tensor. The shape for this tensor can be calculated using the utility function @p compute_winograd_output_transform_shape. Data types supported: Same as @p input
+     * @param[in]  winograd_info Contains Winograd's information described in @ref WinogradInfo
      */
-    void configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const Size2D &kernel_dims, const Size2D &output_convolved_dims, const Size2D &num_tiles);
+    void configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const WinogradInfo &winograd_info);
     /** Static function to check if given info will lead to a valid configuration of @ref CLWinogradOutputTransformKernel
      *
-     * @param[in]  input                 Source tensor with shape [C, N, 16, batches]. Data types supported: F32.
-     * @param[in]  bias                  Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. It can be a nullptr. Data type supported: as @p input
-     * @param[out] output                Destination tensor with shape [output_convolved_dims.width, output_convolved_dims.height, C, batches]. Data type supported: same as @p input
-     * @param[in]  kernel_dims           Kernel dimensions (Width and height). Currently only supported 3x3 kernels
-     * @param[in]  output_convolved_dims Output dimensions after the convolution (Width and height)
-     * @param[in]  num_tiles             Number of tiles of size 2x2 in the output tensor along the X and Y direction
+     * @note Winograd output transform supports the following configurations:
+     *       Output tile size: 2x2
+     *       Kernel size: 3x3
+     *       Strides: only unit strides
+     *
+     * @param[in]  input         Source tensor with shape [C, N, 16, batches]. Data types supported: F32.
+     * @param[in]  bias          Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. It can be a nullptr. Data type supported: as @p input
+     * @param[out] output        The output tensor. The shape for this tensor can be calculated using the utility function @p compute_winograd_output_transform_shape. Data types supported: Same as @p input
+     * @param[in]  winograd_info Contains Winograd's information described in @ref WinogradInfo
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const Size2D &kernel_dims, const Size2D &output_convolved_dims, const Size2D &num_tiles);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const WinogradInfo &winograd_info);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
 
 private:
+    using WinogradKey = std::pair<std::pair<int, int>, std::pair<int, int>>;
+
     const ICLTensor *_input;
     const ICLTensor *_bias;
     ICLTensor       *_output;

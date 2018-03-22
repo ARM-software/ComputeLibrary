@@ -37,20 +37,14 @@ namespace datasets
 class WinogradOutputTransformDataset
 {
 public:
-    using type = std::tuple<TensorShape, Size2D, Size2D, Size2D, DataLayout>;
+    using type = std::tuple<TensorShape, WinogradInfo>;
 
     struct iterator
     {
-        iterator(std::vector<TensorShape>::const_iterator a_it,
-                 std::vector<Size2D>::const_iterator      b_it,
-                 std::vector<Size2D>::const_iterator      c_it,
-                 std::vector<Size2D>::const_iterator      d_it,
-                 std::vector<DataLayout>::const_iterator  data_layout_it)
+        iterator(std::vector<TensorShape>::const_iterator  a_it,
+                 std::vector<WinogradInfo>::const_iterator info_it)
             : _a_it{ std::move(a_it) },
-              _b_it{ std::move(b_it) },
-              _c_it{ std::move(c_it) },
-              _d_it{ std::move(d_it) },
-              _data_layout_it{ std::move(data_layout_it) }
+              _info_it{ std::move(info_it) }
         {
         }
 
@@ -58,54 +52,42 @@ public:
         {
             std::stringstream description;
             description << "Input=" << *_a_it << ":";
-            description << "KernelDims=" << *_b_it << ":";
-            description << "OutputDims=" << *_c_it << ":";
-            description << "NumTiles=" << *_d_it << ":";
-            description << "DataLayout=" << *_data_layout_it;
+            description << "WinogradInfo=" << *_info_it << ":";
             return description.str();
         }
 
         WinogradOutputTransformDataset::type operator*() const
         {
-            return std::make_tuple(*_a_it, *_b_it, *_c_it, *_d_it, *_data_layout_it);
+            return std::make_tuple(*_a_it, *_info_it);
         }
 
         iterator &operator++()
         {
             ++_a_it;
-            ++_b_it;
-            ++_c_it;
-            ++_d_it;
-            ++_data_layout_it;
+            ++_info_it;
 
             return *this;
         }
 
     private:
-        std::vector<TensorShape>::const_iterator _a_it;
-        std::vector<Size2D>::const_iterator      _b_it;
-        std::vector<Size2D>::const_iterator      _c_it;
-        std::vector<Size2D>::const_iterator      _d_it;
-        std::vector<DataLayout>::const_iterator  _data_layout_it;
+        std::vector<TensorShape>::const_iterator  _a_it;
+        std::vector<WinogradInfo>::const_iterator _info_it;
     };
 
     iterator begin() const
     {
-        return iterator(_a_shapes.begin(), _b_dims.begin(), _c_dims.begin(), _d_dims.begin(), _data_layout.begin());
+        return iterator(_a_shapes.begin(), _info.begin());
     }
 
     int size() const
     {
-        return std::min(_a_shapes.size(), std::min(_b_dims.size(), std::min(_c_dims.size(), std::min(_d_dims.size(), _data_layout.size()))));
+        return std::min(_a_shapes.size(), _info.size());
     }
 
-    void add_config(TensorShape a, Size2D b, Size2D c, Size2D d, DataLayout data_layout)
+    void add_config(TensorShape a, WinogradInfo b)
     {
         _a_shapes.emplace_back(std::move(a));
-        _b_dims.emplace_back(std::move(b));
-        _c_dims.emplace_back(std::move(c));
-        _d_dims.emplace_back(std::move(d));
-        _data_layout.emplace_back(std::move(data_layout));
+        _info.emplace_back(std::move(b));
     }
 
 protected:
@@ -113,11 +95,8 @@ protected:
     WinogradOutputTransformDataset(WinogradOutputTransformDataset &&) = default;
 
 private:
-    std::vector<TensorShape> _a_shapes{};
-    std::vector<Size2D>      _b_dims{};
-    std::vector<Size2D>      _c_dims{};
-    std::vector<Size2D>      _d_dims{};
-    std::vector<DataLayout>  _data_layout{};
+    std::vector<TensorShape>  _a_shapes{};
+    std::vector<WinogradInfo> _info{};
 };
 
 class SmallWinogradOutputTransformDataset final : public WinogradOutputTransformDataset
@@ -125,12 +104,12 @@ class SmallWinogradOutputTransformDataset final : public WinogradOutputTransform
 public:
     SmallWinogradOutputTransformDataset()
     {
-        add_config(TensorShape(24U, 49U, 16U), Size2D(3, 3), Size2D(14U, 14U), Size2D(7U, 7U), DataLayout::NCHW);
-        add_config(TensorShape(13U, 6U, 16U), Size2D(3, 3), Size2D(5U, 4U), Size2D(3U, 2U), DataLayout::NCHW);
-        add_config(TensorShape(7U, 20U, 16U), Size2D(3, 3), Size2D(8U, 9U), Size2D(4U, 5U), DataLayout::NCHW);
-        add_config(TensorShape(24U, 49U, 16U, 3U), Size2D(3, 3), Size2D(14U, 14U), Size2D(7U, 7U), DataLayout::NCHW);
-        add_config(TensorShape(13U, 6U, 16U, 2U), Size2D(3, 3), Size2D(5U, 4U), Size2D(3U, 2U), DataLayout::NCHW);
-        add_config(TensorShape(7U, 20U, 16U, 5U), Size2D(3, 3), Size2D(8U, 9U), Size2D(4U, 5U), DataLayout::NCHW);
+        add_config(TensorShape(13U, 6U, 16U), WinogradInfo(Size2D(2U, 2U), Size2D(3U, 3U), Size2D(7U, 6U), PadStrideInfo(1, 1, 0, 0), DataLayout::NCHW));
+        add_config(TensorShape(7U, 20U, 16U), WinogradInfo(Size2D(2U, 2U), Size2D(3U, 3U), Size2D(10U, 11U), PadStrideInfo(1, 1, 0, 0), DataLayout::NCHW));
+        add_config(TensorShape(1U, 442U, 16U), WinogradInfo(Size2D(2U, 2U), Size2D(3U, 3U), Size2D(53U, 33U), PadStrideInfo(1, 1, 0, 1), DataLayout::NCHW));
+        add_config(TensorShape(7U, 12U, 16U, 3U), WinogradInfo(Size2D(2U, 2U), Size2D(3U, 3U), Size2D(8U, 10U), PadStrideInfo(1, 1, 0, 0), DataLayout::NCHW));
+        add_config(TensorShape(24U, 49U, 16U, 2U), WinogradInfo(Size2D(2U, 2U), Size2D(3U, 3U), Size2D(14U, 14U), PadStrideInfo(1, 1, 1, 1), DataLayout::NCHW));
+        add_config(TensorShape(7U, 12U, 16U, 5U), WinogradInfo(Size2D(2U, 2U), Size2D(3U, 3U), Size2D(8U, 10U), PadStrideInfo(1, 1, 0, 0), DataLayout::NCHW));
     }
 };
 
@@ -139,12 +118,12 @@ class LargeWinogradOutputTransformDataset final : public WinogradOutputTransform
 public:
     LargeWinogradOutputTransformDataset()
     {
-        add_config(TensorShape(128U, 3136U, 16U), Size2D(3, 3), Size2D(112U, 112U), Size2D(56U, 56U), DataLayout::NCHW);
-        add_config(TensorShape(256U, 784U, 16U), Size2D(3, 3), Size2D(55U, 55U), Size2D(28U, 28U), DataLayout::NCHW);
-        add_config(TensorShape(512U, 169U, 16U), Size2D(3, 3), Size2D(26U, 26U), Size2D(13U, 13U), DataLayout::NCHW);
-        add_config(TensorShape(128U, 3136U, 16U, 3U), Size2D(3, 3), Size2D(112U, 112U), Size2D(56U, 56U), DataLayout::NCHW);
-        add_config(TensorShape(256U, 784U, 16U, 2U), Size2D(3, 3), Size2D(55U, 55U), Size2D(28U, 28U), DataLayout::NCHW);
-        add_config(TensorShape(512U, 169U, 16U, 5U), Size2D(3, 3), Size2D(26U, 26U), Size2D(13U, 13U), DataLayout::NCHW);
+        add_config(TensorShape(64U, 12544U, 16U), WinogradInfo(Size2D(2U, 2U), Size2D(3U, 3U), Size2D(224U, 224U), PadStrideInfo(1, 1, 1, 1), DataLayout::NCHW));
+        add_config(TensorShape(32U, 3080U, 16U), WinogradInfo(Size2D(2U, 2U), Size2D(3U, 3U), Size2D(112U, 112U), PadStrideInfo(1, 1, 1, 0), DataLayout::NCHW));
+        add_config(TensorShape(13U, 756U, 16U), WinogradInfo(Size2D(2U, 2U), Size2D(3U, 3U), Size2D(56U, 56U), PadStrideInfo(1, 1, 0, 1), DataLayout::NCHW));
+        add_config(TensorShape(64U, 12544U, 16U, 3U), WinogradInfo(Size2D(2U, 2U), Size2D(3U, 3U), Size2D(224U, 224U), PadStrideInfo(1, 1, 1, 1), DataLayout::NCHW));
+        add_config(TensorShape(32U, 3080U, 16U, 2U), WinogradInfo(Size2D(2U, 2U), Size2D(3U, 3U), Size2D(112U, 112U), PadStrideInfo(1, 1, 1, 0), DataLayout::NCHW));
+        add_config(TensorShape(13U, 756U, 16U, 5U), WinogradInfo(Size2D(2U, 2U), Size2D(3U, 3U), Size2D(56U, 56U), PadStrideInfo(1, 1, 0, 1), DataLayout::NCHW));
     }
 };
 } // namespace datasets

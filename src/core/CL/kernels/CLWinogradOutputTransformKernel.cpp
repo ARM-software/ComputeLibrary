@@ -46,13 +46,27 @@ using namespace arm_compute::misc::shape_calculator;
 
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const Size2D &kernel_dims, const Size2D &output_convolved_dims, const Size2D &num_tiles)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const WinogradInfo &winograd_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(1) != num_tiles.area());
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_dims.width != 3 || kernel_dims.height != 3, "Only 3x3 kernels are supported");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(static_cast<unsigned int>(std::sqrt(input->dimension(2))) != 4, "Only 2x2 output tile is supported");
-    ARM_COMPUTE_UNUSED(kernel_dims);
+    ARM_COMPUTE_RETURN_ERROR_ON(winograd_info.output_data_layout != DataLayout::NCHW);
+
+    const PadStrideInfo conv_info        = winograd_info.convolution_info;
+    const Size2D        output_tile_size = winograd_info.output_tile_size;
+    const Size2D        kernel_size      = winograd_info.kernel_size;
+    const Size2D        input_dimensions = winograd_info.input_dimensions;
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size != Size2D(3U, 3U), "Only 3x3 kernels are supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->dimension(2) != 16, "Only 2x2 output tile is supported");
+
+    // Compute number of elements to process in the X and Y direction
+    const int num_elements_x = input_dimensions.width - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right();
+    const int num_elements_y = input_dimensions.height - (kernel_size.height - 1) + conv_info.pad_top() + conv_info.pad_bottom();
+    const int num_tiles_x    = std::ceil(num_elements_x / static_cast<float>(output_tile_size.width));
+    const int num_tiles_y    = std::ceil(num_elements_y / static_cast<float>(output_tile_size.height));
+
+    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(1) != static_cast<unsigned int>((num_tiles_x * num_tiles_y)));
+    ARM_COMPUTE_UNUSED(output_tile_size);
 
     if(bias != nullptr)
     {
@@ -63,7 +77,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
     // Checks performed when output is configured
     if(output->total_size() != 0)
     {
-        const TensorInfo tensor_info_output = input->clone()->set_tensor_shape(compute_winograd_output_transform_shape(*input, output_convolved_dims, DataLayout::NCHW));
+        const TensorInfo tensor_info_output = input->clone()->set_tensor_shape(compute_winograd_output_transform_shape(*input, winograd_info));
 
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &tensor_info_output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
@@ -72,7 +86,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *bias, ITensorInfo *output)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *bias, ITensorInfo *output, const Size2D &output_tile_size)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
@@ -82,7 +96,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     bool   window_changed = false;
 
     AccessWindowRectangle input_access(input, 0, 0, num_elems_processed_per_iteration, num_elems_processed_per_iteration);
-    AccessWindowStatic    output_access(output, 0, 0, ceil_to_multiple(output->dimension(0), 2), ceil_to_multiple(output->dimension(1), 2));
+    AccessWindowStatic    output_access(output, 0, 0, ceil_to_multiple(output->dimension(0), output_tile_size.width), ceil_to_multiple(output->dimension(1), output_tile_size.height));
 
     if(bias != nullptr)
     {
@@ -105,36 +119,44 @@ CLWinogradOutputTransformKernel::CLWinogradOutputTransformKernel()
 {
 }
 
-void CLWinogradOutputTransformKernel::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const Size2D &kernel_dims, const Size2D &output_convolved_dims,
-                                                const Size2D &num_tiles)
+void CLWinogradOutputTransformKernel::configure(const ICLTensor *input, const ICLTensor *bias, ICLTensor *output, const WinogradInfo &winograd_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_UNUSED(kernel_dims);
 
     // Output tensor auto initialization if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(compute_winograd_output_transform_shape(*input->info(), output_convolved_dims, DataLayout::NCHW)));
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(compute_winograd_output_transform_shape(*input->info(), winograd_info)));
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr ? bias->info() : nullptr), output->info(), kernel_dims, output_convolved_dims, num_tiles));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (bias != nullptr ? bias->info() : nullptr), output->info(), winograd_info));
 
     _input  = input;
     _bias   = bias;
     _output = output;
 
+    // Compute num_tiles_x
+    const Size2D        input_dimensions = winograd_info.input_dimensions;
+    const Size2D        kernel_size      = winograd_info.kernel_size;
+    const Size2D        output_tile_size = winograd_info.output_tile_size;
+    const PadStrideInfo conv_info        = winograd_info.convolution_info;
+    const int           num_elements_x   = input_dimensions.width - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right();
+    const int           num_tiles_x      = std::ceil(num_elements_x / static_cast<float>(output_tile_size.width));
+
     // Set build options
     CLBuildOptions build_opts;
     build_opts.add_option_if(_bias != nullptr, std::string("-DHAS_BIAS"));
-    build_opts.add_option("-DNUM_TILES_X=" + support::cpp11::to_string(num_tiles.width));
+    build_opts.add_option("-DNUM_TILES_X=" + support::cpp11::to_string(num_tiles_x));
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("winograd_output_transform_2x2_3x3_nchw", build_opts.options()));
+    std::string kernel_name = "winograd_output_transform_" + output_tile_size.to_string() + "_" + kernel_size.to_string() + "_nchw";
+    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), (bias != nullptr ? bias->info() : nullptr), output->info());
+    auto win_config = validate_and_configure_window(input->info(), (bias != nullptr ? bias->info() : nullptr), output->info(), winograd_info.output_tile_size);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure(win_config.second);
 
     // Set config_id for enabling LWS tuning
-    _config_id = "winograd_output_transform_2x2_3x3";
+    _config_id = kernel_name;
+    _config_id += "_";
     _config_id += lower_string(string_from_data_type(input->info()->data_type()));
     _config_id += "_";
     _config_id += support::cpp11::to_string(input->info()->dimension(0));
@@ -146,11 +168,10 @@ void CLWinogradOutputTransformKernel::configure(const ICLTensor *input, const IC
     _config_id += support::cpp11::to_string(output->info()->dimension(1));
 }
 
-Status CLWinogradOutputTransformKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const Size2D &kernel_dims, const Size2D &output_convolved_dims,
-                                                 const Size2D &num_tiles)
+Status CLWinogradOutputTransformKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const WinogradInfo &winograd_info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, (bias != nullptr ? bias->clone().get() : nullptr), output, kernel_dims, output_convolved_dims, num_tiles));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), (bias != nullptr ? bias->clone().get() : nullptr), output->clone().get()).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, (bias != nullptr ? bias->clone().get() : nullptr), output, winograd_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), (bias != nullptr ? bias->clone().get() : nullptr), output->clone().get(), winograd_info.output_tile_size).first);
 
     return Status{};
 }

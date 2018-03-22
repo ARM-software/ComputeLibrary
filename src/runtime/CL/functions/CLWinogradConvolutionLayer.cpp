@@ -39,21 +39,22 @@ CLWinogradConvolutionLayer::CLWinogradConvolutionLayer(std::shared_ptr<IMemoryMa
 
 void CLWinogradConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
-    // TODO(COMPMID-1013): This part will be removed
-    // Get indeces for the width and height
+    // Get indices for the width and height
     const size_t idx_width  = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::WIDTH);
     const size_t idx_height = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
+
+    // Input shape
+    const TensorShape input_shape = input->info()->tensor_shape();
 
     // Kernel size
     const unsigned int kernel_w = weights->info()->tensor_shape()[idx_width];
     const unsigned int kernel_h = weights->info()->tensor_shape()[idx_height];
 
-    // Number of tiles along the X and Y direction
-    const unsigned int num_tiles_x = std::ceil((input->info()->tensor_shape().x() - (kernel_w - 1) + conv_info.pad_left() + conv_info.pad_right()) / 2.f);
-    const unsigned int num_tiles_y = std::ceil((input->info()->tensor_shape().y() - (kernel_h - 1) + conv_info.pad_top() + conv_info.pad_bottom()) / 2.f);
-
-    // Compute output shape
-    const TensorShape output_convolved_shape = misc::shape_calculator::compute_deep_convolution_shape(*input->info(), *weights->info(), conv_info);
+    const WinogradInfo winograd_info = WinogradInfo(Size2D(2, 2),
+                                                    Size2D(kernel_w, kernel_h),
+                                                    Size2D(input_shape[idx_width], input_shape[idx_height]),
+                                                    conv_info,
+                                                    input->info()->data_layout());
 
     // Manage intermediate tensors
     _memory_group.manage(&_input0);
@@ -62,17 +63,16 @@ void CLWinogradConvolutionLayer::configure(ICLTensor *input, const ICLTensor *we
     // Do not manage _input1 as it contains the weights
 
     // Configure input transform
-    _input_transform.configure(input, &_input0, conv_info, Size2D(kernel_w, kernel_h));
+    _input_transform.configure(input, &_input0, winograd_info);
 
     // Configure filter transform
-    _filter_transform.configure(weights, &_input1, Size2D(2U, 2U));
+    _filter_transform.configure(weights, &_input1, winograd_info);
 
     // Configure batched matrix multiply
     _batched_mm.configure(&_input0, &_input1, nullptr, &_batched_mm_output, 1.0f, 0.0f, GEMMInfo(false, false, true /* Reshape weights only for the first run*/));
 
     // Configure output transform
-    _output_transform.configure(&_batched_mm_output, biases, output, Size2D(kernel_w, kernel_h), Size2D(output_convolved_shape[idx_width], output_convolved_shape[idx_height]), Size2D(num_tiles_x,
-                                num_tiles_y));
+    _output_transform.configure(&_batched_mm_output, biases, output, winograd_info);
 
     // Configure activation layer
     _is_activationlayer_enabled = act_info.enabled();
@@ -90,31 +90,32 @@ void CLWinogradConvolutionLayer::configure(ICLTensor *input, const ICLTensor *we
 Status CLWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
                                             const ActivationLayerInfo &act_info)
 {
-    // TODO(COMPMID-1013): This part will be removed
     // Get indeces for the width and height
     const size_t idx_width  = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
     const size_t idx_height = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
+
+    // Input shape
+    const TensorShape input_shape = input->tensor_shape();
 
     // Kernel size
     const unsigned int kernel_w = weights->tensor_shape()[idx_width];
     const unsigned int kernel_h = weights->tensor_shape()[idx_height];
 
-    // Number of tiles along the X and Y direction
-    const unsigned int num_tiles_x = std::ceil((input->tensor_shape().x() - (kernel_w - 1) + conv_info.pad_left() + conv_info.pad_right()) / 2.f);
-    const unsigned int num_tiles_y = std::ceil((input->tensor_shape().y() - (kernel_h - 1) + conv_info.pad_top() + conv_info.pad_bottom()) / 2.f);
-
-    // Compute output shape
-    const TensorShape output_convolved_shape = misc::shape_calculator::compute_deep_convolution_shape(*input, *weights, conv_info);
+    const WinogradInfo winograd_info = WinogradInfo(Size2D(2, 2),
+                                                    Size2D(kernel_w, kernel_h),
+                                                    Size2D(input_shape[idx_width], input_shape[idx_height]),
+                                                    conv_info,
+                                                    input->data_layout());
 
     // Validate input transform
-    const TensorShape input0_shape = misc::shape_calculator::compute_winograd_input_transform_shape(*input, conv_info, Size2D(kernel_w, kernel_h));
+    const TensorShape input0_shape = misc::shape_calculator::compute_winograd_input_transform_shape(*input, winograd_info);
     const TensorInfo  input0       = input->clone()->set_tensor_shape(input0_shape);
-    ARM_COMPUTE_RETURN_ON_ERROR(CLWinogradInputTransform::validate(input, &input0, conv_info, Size2D(kernel_w, kernel_h)));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLWinogradInputTransform::validate(input, &input0, winograd_info));
 
     // Validate filter transform
-    const TensorShape input1_shape = misc::shape_calculator::compute_winograd_filter_transform_shape(*weights, Size2D(2U, 2U));
+    const TensorShape input1_shape = misc::shape_calculator::compute_winograd_filter_transform_shape(*weights, winograd_info);
     const TensorInfo  input1       = weights->clone()->set_tensor_shape(input1_shape);
-    ARM_COMPUTE_RETURN_ON_ERROR(CLWinogradFilterTransformKernel::validate(weights, &input1, Size2D(2U, 2U)));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLWinogradFilterTransformKernel::validate(weights, &input1, winograd_info));
 
     // Validate batched matrix multiply
     TensorShape batched_mm_output_shape = input0.tensor_shape();
@@ -122,10 +123,8 @@ Status CLWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITen
     const TensorInfo batched_mm_output  = input0.clone()->set_tensor_shape(batched_mm_output_shape);
     ARM_COMPUTE_RETURN_ON_ERROR(CLGEMM::validate(&input0, &input1, nullptr, &batched_mm_output, 1.0f, 0.0f, GEMMInfo(false, false, true /* Reshape weights only for the first run*/)));
 
-    // Validate output transform
-    ARM_COMPUTE_RETURN_ON_ERROR(CLWinogradOutputTransformKernel::validate(&batched_mm_output, biases, output, Size2D(kernel_w, kernel_h), Size2D(output_convolved_shape[idx_width],
-                                                                          output_convolved_shape[idx_height]),
-                                                                          Size2D(num_tiles_x, num_tiles_y)));
+    // Configure output transform
+    ARM_COMPUTE_RETURN_ON_ERROR(CLWinogradOutputTransformKernel::validate(&batched_mm_output, biases, output, winograd_info));
 
     // Validate Activation Layer
     if(act_info.enabled())
