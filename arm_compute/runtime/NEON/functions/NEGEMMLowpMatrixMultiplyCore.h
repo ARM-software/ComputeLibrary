@@ -48,7 +48,6 @@ class ITensor;
  *
  * otherwise if the DOT product instruction is available:
  *
- *  -# @ref NEGEMMInterleaveBlockedKernel
  *  -# @ref NEGEMMLowpOffsetContributionKernel
  *
 */
@@ -85,7 +84,7 @@ public:
      */
     static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *output, const GEMMInfo &gemm_info = GEMMInfo());
 
-    // Inherited methods overridden:
+    // Inherited methods overridden
     void run() override;
 
 private:
