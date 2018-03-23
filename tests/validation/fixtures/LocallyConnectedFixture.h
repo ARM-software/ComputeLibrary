@@ -24,6 +24,7 @@
 #ifndef ARM_COMPUTE_TEST_LOCALLY_CONNECTED_FIXTURE
 #define ARM_COMPUTE_TEST_LOCALLY_CONNECTED_FIXTURE
 
+#include "arm_compute/core/Error.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
@@ -54,8 +55,10 @@ public:
 
 public:
     template <typename...>
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, DataType data_type)
+    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, DataType data_type)
     {
+        ARM_COMPUTE_UNUSED(dilation);
+
         _data_type      = data_type;
         _bias_data_type = data_type;
 

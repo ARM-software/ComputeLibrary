@@ -102,7 +102,8 @@ void GCConvolutionLayer::configure_mm(const IGCTensor *input, const IGCTensor *w
     _mm_kernel.configure(input, weights, output, 1.f, is_interleaved_transposed);
 }
 
-void GCConvolutionLayer::configure(const IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info)
+void GCConvolutionLayer::configure(const IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
+                                   const Size2D &dilation)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
@@ -136,7 +137,7 @@ void GCConvolutionLayer::configure(const IGCTensor *input, const IGCTensor *weig
     const unsigned int kernel_width  = (_are_weights_reshaped) ? weights_info.kernel_size().first : weights->info()->dimension(0);
     const unsigned int kernel_height = (_are_weights_reshaped) ? weights_info.kernel_size().second : weights->info()->dimension(1);
     std::tie(conv_w, conv_h) = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1), kernel_width, kernel_height,
-                                                 conv_info);
+                                                 conv_info, dilation);
 
     // Check if its a "fully connected" convolution
     _is_fully_connected_convolution = ((conv_w == 1) && (conv_h == 1));
@@ -229,7 +230,7 @@ void GCConvolutionLayer::configure(const IGCTensor *input, const IGCTensor *weig
         input->info()->extend_padding(border_size);
         _fill_border.configure(input, border_size, BorderMode::CONSTANT, PixelValue(0)); // for PAD of im2col fp16: consider it as border
     }
-    _input_im2col_kernel.configure(input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, _append_bias);
+    _input_im2col_kernel.configure(input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, _append_bias, dilation);
 
     // Configure matrix multiply
     if(run_interleaved)

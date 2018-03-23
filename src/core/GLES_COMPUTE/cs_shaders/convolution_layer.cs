@@ -164,6 +164,7 @@ void main()
  * @note STRIDE_X/STRIDE_Y must be passed for stride info, e.g. "#define STRIDE_X xxx"
  * @note CONVOLVED_WIDTH/CONVOLVED_HEIGHT must be passed for convolved dimension, e.g. "#define CONVOLVED_WIDTH xxx"
  * @note SRC_WIDTH/SRC_HEIGHT must be passed for input dimension, e.g. "#define SRC_WIDTH xxx"
+ * @note DILATION_X/DILATION_Y must be passed for dilation sizes, e.g. "#define DILATION_X xxx"
  * @note In case biases will be added to the convolution "#define HAS_BIAS" has to be passed to append the final matrix with 1 in each row.
  *
  * @param[in]  src_ptr      Pointer to the source tensor. Supported data types: F16/F32
@@ -210,9 +211,9 @@ void main(void)
     uint src_pos = 0u;
 
     // Linearize convolution elements
-    for(uint y = yi, y_e = yi + uint(KERNEL_HEIGHT); y < y_e; ++y)
+    for(uint y = yi, y_e = yi + uint(KERNEL_HEIGHT) * uint(DILATION_Y); y < y_e; y += uint(DILATION_Y))
     {
-        for(uint x = xi, x_e = xi + uint(KERNEL_WIDTH); x < x_e; ++x, TENSOR_OFFSET_ADVANCE(dst_iter, 1u))
+        for(uint x = xi, x_e = xi + uint(KERNEL_WIDTH) * uint(DILATION_X); x < x_e; x += uint(DILATION_X), TENSOR_OFFSET_ADVANCE(dst_iter, 1u))
         {
 #if PAD_LEFT == 0 && PAD_TOP == 0 && PAD_RIGHT == 0 && PAD_BOTTOM == 0
             src_pos = TENSOR_OFFSET_ADVANCE_IN_BYTES(src_iter, x * src_attrs.stride_x + y * src_attrs.stride_y);

@@ -42,13 +42,14 @@ CLConvolutionLayer::CLConvolutionLayer(std::shared_ptr<IMemoryManager> memory_ma
 {
 }
 
-void CLConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info)
+void CLConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
+                                   const Size2D &dilation)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_ERROR_THROW_ON(CLConvolutionLayer::validate(input->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), output->info(), conv_info, weights_info));
+    ARM_COMPUTE_ERROR_THROW_ON(CLConvolutionLayer::validate(input->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), output->info(), conv_info, weights_info, dilation));
 
     switch(CLConvolutionLayer::get_convolution_method(input->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), output->info(), conv_info,
-                                                      weights_info, CLScheduler::get().target()))
+                                                      weights_info, CLScheduler::get().target(), dilation))
     {
         case ConvolutionMethod::DIRECT:
         {
@@ -60,7 +61,7 @@ void CLConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, c
         case ConvolutionMethod::GEMM:
         {
             auto f = arm_compute::support::cpp14::make_unique<CLGEMMConvolutionLayer>(_memory_manager);
-            f->configure(input, weights, biases, output, conv_info, weights_info);
+            f->configure(input, weights, biases, output, conv_info, weights_info, dilation);
             _function = std::move(f);
             break;
         }
@@ -71,14 +72,14 @@ void CLConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, c
 }
 
 Status CLConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                    const WeightsInfo &weights_info)
+                                    const WeightsInfo &weights_info, const Size2D &dilation)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
 
     //Configure if the parameters match the direct convolution or the gemm-based
     const GPUTarget gpu_target = CLScheduler::get().target();
 
-    switch(CLConvolutionLayer::get_convolution_method(input, weights, biases, output, conv_info, weights_info, gpu_target))
+    switch(CLConvolutionLayer::get_convolution_method(input, weights, biases, output, conv_info, weights_info, gpu_target, dilation))
     {
         case ConvolutionMethod::DIRECT:
         {
@@ -89,7 +90,7 @@ Status CLConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo 
         case ConvolutionMethod::GEMM:
         {
             // Validate gemm-based convolution layer
-            CLGEMMConvolutionLayer::validate(input, weights, biases, output, conv_info, weights_info);
+            CLGEMMConvolutionLayer::validate(input, weights, biases, output, conv_info, weights_info, dilation);
             break;
         }
         default:
@@ -101,7 +102,7 @@ Status CLConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo 
 }
 
 ConvolutionMethod CLConvolutionLayer::get_convolution_method(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                                             const WeightsInfo &weights_info, const GPUTarget gpu_target)
+                                                             const WeightsInfo &weights_info, const GPUTarget gpu_target, const Size2D &dilation)
 {
     ARM_COMPUTE_UNUSED(input);
     ARM_COMPUTE_UNUSED(weights);
@@ -110,6 +111,7 @@ ConvolutionMethod CLConvolutionLayer::get_convolution_method(const ITensorInfo *
     ARM_COMPUTE_UNUSED(conv_info);
     ARM_COMPUTE_UNUSED(weights_info);
     ARM_COMPUTE_UNUSED(gpu_target);
+    ARM_COMPUTE_UNUSED(dilation);
 
     return ConvolutionMethod::GEMM;
 }

@@ -41,11 +41,12 @@ using namespace arm_compute;
 
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, bool has_bias)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, bool has_bias, const Size2D &dilation)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::QASYMM8 && has_bias);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_RETURN_ERROR_ON((dilation.x() < 1) || (dilation.y() < 1));
 
     // Checks performed when output is configured
     if(output->total_size() != 0)
@@ -63,12 +64,12 @@ CLIm2ColKernel::CLIm2ColKernel()
 {
 }
 
-void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias)
+void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), has_bias));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), has_bias, dilation));
 
     _input       = input;
     _output      = output;
@@ -107,7 +108,7 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
 
         _convolved_dims = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1),
                                             kernel_dims.width, kernel_dims.height,
-                                            conv_info);
+                                            conv_info, dilation);
 
         build_opts.add_option("-DKERNEL_WIDTH=" + support::cpp11::to_string(kernel_dims.width));
         build_opts.add_option("-DKERNEL_HEIGHT=" + support::cpp11::to_string(kernel_dims.height));
@@ -122,77 +123,82 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
         build_opts.add_option("-DPAD_BOTTOM=" + support::cpp11::to_string(conv_info.pad_bottom()));
         build_opts.add_option("-DSRC_WIDTH=" + support::cpp11::to_string(input->info()->dimension(0)));
         build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(1)));
+        build_opts.add_option("-DDILATION_X=" + support::cpp11::to_string(dilation.x()));
+        build_opts.add_option("-DDILATION_Y=" + support::cpp11::to_string(dilation.y()));
         build_opts.add_option_if_else(is_data_type_quantized(data_type), "-DPAD_VALUE=" + support::cpp11::to_string(input->info()->quantization_info().offset), "-DPAD_VALUE=0");
 
         const bool squared_im2col = kernel_dims.width == kernel_dims.height;
 
-        if(squared_im2col && !is_data_type_fixed_point(data_type))
+        if(dilation == Size2D(1U, 1U))
         {
-            // Check if we can run an optimized im2col
-            switch(kernel_dims.width)
+            if(squared_im2col && !is_data_type_fixed_point(data_type))
             {
-                case 1:
-                    // Optimized im2col1x1 if stride_x = 1 and conv_info.has_padding() = false
-                    if(conv_info.stride().first == 1 && !conv_info.has_padding())
-                    {
-                        // Set hint for LWS
+                // Check if we can run an optimized im2col
+                switch(kernel_dims.width)
+                {
+                    case 1:
+                        // Optimized im2col1x1 if stride_x = 1 and conv_info.has_padding() = false
+                        if(conv_info.stride().first == 1 && !conv_info.has_padding())
+                        {
+                            // Set hint for LWS
+                            _lws_hint                          = cl::NDRange(1, 1, 8);
+                            _num_elems_processed_per_iteration = 4;
+                            is_optimized_path                  = true;
+                            kernel_name                        = "im2col1x1_stridex1_dchw";
+                        }
+                        break;
+                    case 3:
                         _lws_hint                          = cl::NDRange(1, 1, 8);
-                        _num_elems_processed_per_iteration = 4;
-                        is_optimized_path                  = true;
-                        kernel_name                        = "im2col1x1_stridex1_dchw";
-                    }
-                    break;
-                case 3:
-                    _lws_hint                          = cl::NDRange(1, 1, 8);
-                    _num_elems_processed_per_iteration = 1;
-                    is_optimized_path                  = true;
-                    kernel_name                        = "im2col3x3_dchw";
-                    break;
-                case 5:
-                    _num_elems_processed_per_iteration = 1;
-                    is_optimized_path                  = true;
-                    kernel_name                        = "im2col5x5_dchw";
-                    break;
-                case 11:
-                    // Optimized im2col11x11 if pad_x = pad_y = 0
-                    if(!conv_info.has_padding())
-                    {
                         _num_elems_processed_per_iteration = 1;
                         is_optimized_path                  = true;
-                        kernel_name                        = "im2col11x11_padx0_pady0_dchw";
-                    }
-                    break;
-                default:
-                    is_optimized_path = false;
-                    break;
+                        kernel_name                        = "im2col3x3_dchw";
+                        break;
+                    case 5:
+                        _num_elems_processed_per_iteration = 1;
+                        is_optimized_path                  = true;
+                        kernel_name                        = "im2col5x5_dchw";
+                        break;
+                    case 11:
+                        // Optimized im2col11x11 if pad_x = pad_y = 0
+                        if(!conv_info.has_padding())
+                        {
+                            _num_elems_processed_per_iteration = 1;
+                            is_optimized_path                  = true;
+                            kernel_name                        = "im2col11x11_padx0_pady0_dchw";
+                        }
+                        break;
+                    default:
+                        is_optimized_path = false;
+                        break;
+                }
             }
-        }
-        else if(kernel_dims.width > 1 && !conv_info.has_padding())
-        {
-            _num_elems_processed_per_iteration = 1;
-            kernel_name                        = "im2col_generic_padx0_pady0_dchw";
+            else if(kernel_dims.width > 1 && !conv_info.has_padding())
+            {
+                _num_elems_processed_per_iteration = 1;
+                kernel_name                        = "im2col_generic_padx0_pady0_dchw";
 
-            // Optimized im2col is performed using one or more vector operations with the specified vector size
-            // and a remainder. For example, for 5x5 convolutions, im2col is performed using vectors of size 4
-            // and scalars; for 7x7 convolutions, using vectors of size 4 and vectors of size 3.
-            // Using the vector size of 4 is always safe since OpenCL supports vectors of size 2 and 3.
-            // Using the vector size of 8, however, may be faster.
-            size_t vector_size = 4;
-            // For 2x2 convolutions, use vectors of size 2. (For 3x3 convolutions, im2col_kernel3x3_padx0_pady0
-            // is used instead.)
-            if(kernel_dims.width < vector_size)
-            {
-                vector_size = kernel_dims.width;
+                // Optimized im2col is performed using one or more vector operations with the specified vector size
+                // and a remainder. For example, for 5x5 convolutions, im2col is performed using vectors of size 4
+                // and scalars; for 7x7 convolutions, using vectors of size 4 and vectors of size 3.
+                // Using the vector size of 4 is always safe since OpenCL supports vectors of size 2 and 3.
+                // Using the vector size of 8, however, may be faster.
+                size_t vector_size = 4;
+                // For 2x2 convolutions, use vectors of size 2. (For 3x3 convolutions, im2col_kernel3x3_padx0_pady0
+                // is used instead.)
+                if(kernel_dims.width < vector_size)
+                {
+                    vector_size = kernel_dims.width;
+                }
+                // Local work size and vector size optimized for the 11x11 AlexNet convolution on Bifrost.
+                if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72) && kernel_dims.width == 11)
+                {
+                    _lws_hint   = cl::NDRange(1, 1, 1);
+                    vector_size = 8;
+                }
+                const size_t width_mod_vector_size = kernel_dims.width % vector_size;
+                build_opts.add_option("-DVECTOR_SIZE=" + support::cpp11::to_string(vector_size));
+                build_opts.add_option("-DWIDTH_MOD_VECTOR_SIZE=" + support::cpp11::to_string(width_mod_vector_size));
             }
-            // Local work size and vector size optimized for the 11x11 AlexNet convolution on Bifrost.
-            if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72) && kernel_dims.width == 11)
-            {
-                _lws_hint   = cl::NDRange(1, 1, 1);
-                vector_size = 8;
-            }
-            const size_t width_mod_vector_size = kernel_dims.width % vector_size;
-            build_opts.add_option("-DVECTOR_SIZE=" + support::cpp11::to_string(vector_size));
-            build_opts.add_option("-DWIDTH_MOD_VECTOR_SIZE=" + support::cpp11::to_string(width_mod_vector_size));
         }
         _run_func = &CLIm2ColKernel::run_generic;
     }
@@ -206,7 +212,7 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
-    // Configure  kernel window
+    // Configure kernel window
     Window win;
     if(is_optimized_path)
     {
@@ -250,12 +256,12 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     _config_id += support::cpp11::to_string(output->info()->dimension(1));
 }
 
-Status CLIm2ColKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias)
+Status CLIm2ColKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation)
 {
     ARM_COMPUTE_UNUSED(kernel_dims);
     ARM_COMPUTE_UNUSED(conv_info);
     ARM_COMPUTE_UNUSED(has_bias);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, has_bias));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, has_bias, dilation));
     return Status{};
 }
 

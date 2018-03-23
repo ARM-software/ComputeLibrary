@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_CONVOLUTIONLAYERFIXTURE
-#define ARM_COMPUTE_TEST_CONVOLUTIONLAYERFIXTURE
+#ifndef ARM_COMPUTE_TEST_WINOGRADLAYERFIXTURE
+#define ARM_COMPUTE_TEST_WINOGRADLAYERFIXTURE
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -38,12 +38,14 @@ namespace benchmark
 {
 /** Fixture that can be used for NEON and CL */
 template <typename TensorType, typename Function, typename Accessor>
-class ConvolutionLayerFixture : public framework::Fixture
+class WinogradLayerFixture : public framework::Fixture
 {
 public:
     template <typename...>
     void setup(TensorShape src_shape, TensorShape weights_shape, TensorShape biases_shape, TensorShape dst_shape, PadStrideInfo info, Size2D dilation, DataType data_type, int batches)
     {
+        ARM_COMPUTE_UNUSED(dilation);
+
         // Set batched in source and destination shapes
         const unsigned int fixed_point_position = 4;
         src_shape.set(3 /* batch */, batches);
@@ -57,7 +59,7 @@ public:
         dst     = create_tensor<TensorType>(dst_shape, data_type, 1, fixed_point_position);
 
         // Create and configure function
-        conv_layer.configure(&src, &weights, &biases, &dst, info, WeightsInfo(), dilation);
+        conv_layer.configure(&src, &weights, &biases, &dst, info);
 
         // Allocate tensors
         src.allocator()->allocate();
@@ -95,4 +97,4 @@ private:
 } // namespace benchmark
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_CONVOLUTIONLAYERFIXTURE */
+#endif /* ARM_COMPUTE_TEST_WINOGRADLAYERFIXTURE */

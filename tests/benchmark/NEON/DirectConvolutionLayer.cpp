@@ -27,7 +27,7 @@
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"
-#include "tests/benchmark/fixtures/ConvolutionLayerFixture.h"
+#include "tests/benchmark/fixtures/DirectConvolutionLayerFixture.h"
 #include "tests/datasets/DirectConvolutionLayerDataset.h"
 #include "tests/datasets/system_tests/alexnet/AlexNetConvolutionLayerDataset.h"
 #include "tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1ConvolutionLayerDataset.h"
@@ -55,7 +55,7 @@ const auto data_types = framework::dataset::make("DataType", { DataType::F32 });
 #endif /* ARM_COMPUTE_ENABLE_F16 */
 } // namespace
 
-using NEConvolutionLayerFixture = ConvolutionLayerFixture<Tensor, NEDirectConvolutionLayer, Accessor>;
+using NEConvolutionLayerFixture = DirectConvolutionLayerFixture<Tensor, NEDirectConvolutionLayer, Accessor>;
 
 TEST_SUITE(NEON)
 

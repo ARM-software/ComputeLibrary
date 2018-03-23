@@ -70,6 +70,24 @@ public:
         return support::cpp11::to_string(width) + std::string("x") + support::cpp11::to_string(height);
     }
 
+    /** Semantic accessor for width as x.
+     *
+     * @return x.
+     */
+    size_t x() const
+    {
+        return width;
+    }
+
+    /** Semantic accessor for height as y.
+     *
+     * @return y.
+     */
+    size_t y() const
+    {
+        return height;
+    }
+
 public:
     size_t width  = {}; /**< Width of the image region or rectangle */
     size_t height = {}; /**< Height of the image region or rectangle */

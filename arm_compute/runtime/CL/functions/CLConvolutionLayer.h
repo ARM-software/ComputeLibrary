@@ -56,8 +56,10 @@ public:
      *                          Data types supported: Same as @p input.
      * @param[in]  conv_info    Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  weights_info Specifies if the weights tensor has been reshaped with CLWeightsReshapeKernel. Data type supported: Same as @p input.
+     * @param[in]  dilation     (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      */
-    void configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info = WeightsInfo());
+    void configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info = WeightsInfo(),
+                   const Size2D &dilation = Size2D(1U, 1U));
     /** Static function to check if given info will lead to a valid configuration of @ref CLConvolutionLayer
      *
      * @param[in] input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -69,11 +71,12 @@ public:
      *                         Data types supported: Same as @p input.
      * @param[in] conv_info    Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in] weights_info Specifies if the weights tensor has been reshaped with CLWeightsReshapeKernel. Data type supported: Same as @p input.
+     * @param[in] dilation     (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                           const WeightsInfo &weights_info = WeightsInfo());
+                           const WeightsInfo &weights_info = WeightsInfo(), const Size2D &dilation = Size2D(1U, 1U));
     /** Static function to check if given info will return the convolution called by @ref CLConvolutionLayer
      *
      * @param[in] input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -86,11 +89,12 @@ public:
      * @param[in] conv_info    Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in] weights_info Specifies if the weights tensor has been reshaped with CLWeightsReshapeKernel. Data type supported: Same as @p input.
      * @param[in] gpu_target   Specifies the @p GPUTarget.
+     * @param[in] dilation     (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      *
      * @return a status
      */
     static ConvolutionMethod get_convolution_method(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                                    const WeightsInfo &weights_info, const GPUTarget gpu_target);
+                                                    const WeightsInfo &weights_info, const GPUTarget gpu_target, const Size2D &dilation = Size2D(1U, 1U));
 
     // Inherited methods overridden:
     void run() override;

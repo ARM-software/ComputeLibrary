@@ -27,7 +27,7 @@
 #include "arm_compute/runtime/CL/CLTensorAllocator.h"
 #include "arm_compute/runtime/CL/functions/CLDirectConvolutionLayer.h"
 #include "tests/CL/CLAccessor.h"
-#include "tests/benchmark/fixtures/ConvolutionLayerFixture.h"
+#include "tests/benchmark/fixtures/DirectConvolutionLayerFixture.h"
 #include "tests/datasets/system_tests/alexnet/AlexNetConvolutionLayerDataset.h"
 #include "tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1ConvolutionLayerDataset.h"
 #include "tests/datasets/system_tests/googlenet/inceptionv4/GoogLeNetInceptionV4ConvolutionLayerDataset.h"
@@ -49,7 +49,7 @@ namespace
 const auto data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32 });
 } // namespace
 
-using CLConvolutionLayerFixture = ConvolutionLayerFixture<CLTensor, CLDirectConvolutionLayer, CLAccessor>;
+using CLConvolutionLayerFixture = DirectConvolutionLayerFixture<CLTensor, CLDirectConvolutionLayer, CLAccessor>;
 
 TEST_SUITE(CL)
 

@@ -46,7 +46,8 @@ namespace
 } // namespace
 
 template <typename T, typename TB>
-SimpleTensor<T> convolution_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, const TensorShape &output_shape, const PadStrideInfo &info)
+SimpleTensor<T> convolution_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, const TensorShape &output_shape, const PadStrideInfo &info,
+                                  const Size2D &dilation)
 {
     // Create reference
     SimpleTensor<T> dst{ output_shape, src.data_type(), 1, src.fixed_point_position(), src.quantization_info() };
@@ -66,10 +67,10 @@ SimpleTensor<T> convolution_layer(const SimpleTensor<T> &src, const SimpleTensor
     const int stride_xi      = info.stride().first;
     const int stride_yi      = info.stride().second;
 
-    auto output_wh = scaled_dimensions(width_in, height_in, width_weights, height_weights, info);
+    auto output_wh = scaled_dimensions(width_in, height_in, width_weights, height_weights, info, dilation);
 
-    const int start_xi    = width_weights / 2 - pad_left;
-    const int start_yi    = height_weights / 2 - pad_top;
+    const int start_xi    = (dilation.x() * (width_weights - 1) + 1) / 2 - pad_left;
+    const int start_yi    = (dilation.y() * (height_weights - 1) + 1) / 2 - pad_top;
     const int end_xi      = output_wh.first * stride_xi;
     const int end_yi      = output_wh.second * stride_yi;
     const int num_batches = src.shape().total_size() / (width_in * height_in * depth_in);
@@ -96,7 +97,7 @@ SimpleTensor<T> convolution_layer(const SimpleTensor<T> &src, const SimpleTensor
                                                           offset_in, ofm * width_weights * height_weights * depth_weights, ofm, offset_out,
                                                           xi, yi,
                                                           width_in, height_in, depth_in,
-                                                          width_weights, height_weights);
+                                                          width_weights, height_weights, dilation.x(), dilation.y());
                 }
             }
         }
@@ -106,15 +107,15 @@ SimpleTensor<T> convolution_layer(const SimpleTensor<T> &src, const SimpleTensor
 }
 
 template SimpleTensor<float> convolution_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &weights, const SimpleTensor<float> &bias, const TensorShape &output_shape,
-                                               const PadStrideInfo &info);
+                                               const PadStrideInfo &info, const Size2D &dilation);
 template SimpleTensor<half> convolution_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &weights, const SimpleTensor<half> &bias, const TensorShape &output_shape,
-                                              const PadStrideInfo &info);
+                                              const PadStrideInfo &info, const Size2D &dilation);
 template SimpleTensor<qint8_t> convolution_layer(const SimpleTensor<qint8_t> &src, const SimpleTensor<qint8_t> &weights, const SimpleTensor<qint8_t> &bias, const TensorShape &output_shape,
-                                                 const PadStrideInfo &info);
+                                                 const PadStrideInfo &info, const Size2D &dilation);
 template SimpleTensor<qint16_t> convolution_layer(const SimpleTensor<qint16_t> &src, const SimpleTensor<qint16_t> &weights, const SimpleTensor<qint16_t> &bias, const TensorShape &output_shape,
-                                                  const PadStrideInfo &info);
+                                                  const PadStrideInfo &info, const Size2D &dilation);
 template SimpleTensor<uint8_t> convolution_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &bias, const TensorShape &output_shape,
-                                                 const PadStrideInfo &info);
+                                                 const PadStrideInfo &info, const Size2D &dilation);
 } // namespace reference
 } // namespace validation
 } // namespace test

@@ -27,7 +27,7 @@
 #include "arm_compute/runtime/GLES_COMPUTE/GCTensorAllocator.h"
 #include "arm_compute/runtime/GLES_COMPUTE/functions/GCDirectConvolutionLayer.h"
 #include "tests/GLES_COMPUTE/GCAccessor.h"
-#include "tests/benchmark/fixtures/ConvolutionLayerFixture.h"
+#include "tests/benchmark/fixtures/DirectConvolutionLayerFixture.h"
 #include "tests/datasets/system_tests/alexnet/AlexNetConvolutionLayerDataset.h"
 #include "tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1ConvolutionLayerDataset.h"
 #include "tests/datasets/system_tests/googlenet/inceptionv4/GoogLeNetInceptionV4ConvolutionLayerDataset.h"
@@ -49,7 +49,7 @@ namespace
 const auto data_types = framework::dataset::make("DataType", { DataType::F32, DataType::F16 });
 } // namespace
 
-using GCConvolutionLayerFixture = ConvolutionLayerFixture<GCTensor, GCDirectConvolutionLayer, GCAccessor>;
+using GCConvolutionLayerFixture = DirectConvolutionLayerFixture<GCTensor, GCDirectConvolutionLayer, GCAccessor>;
 
 TEST_SUITE(GC)
 

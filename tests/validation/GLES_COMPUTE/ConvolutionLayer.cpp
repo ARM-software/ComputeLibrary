@@ -59,7 +59,7 @@ TEST_SUITE(GC)
 TEST_SUITE(ConvolutionLayer)
 
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallConvolutionLayerDataset(), datasets::LargeConvolutionLayerDataset()), CNNDataTypes),
-               input_shape, weights_shape, bias_shape, output_shape, info, data_type)
+               input_shape, weights_shape, bias_shape, output_shape, info, dilation, data_type)
 {
     // Set fixed point position data type allowed
     int fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
@@ -82,7 +82,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
 
     // Create and configure function
     GCConvolutionLayer conv;
-    conv.configure(&src, &weights, &bias, &dst, info);
+    conv.configure(&src, &weights, &bias, &dst, info, WeightsInfo(), dilation);
 
     // Validate valid region
     const ValidRegion src_valid_region     = shape_to_valid_region(input_shape);

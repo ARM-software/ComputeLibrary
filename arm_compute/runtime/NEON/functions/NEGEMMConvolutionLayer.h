@@ -115,8 +115,10 @@ public:
      * @param[in]  conv_info    Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  weights_info Specifies if the weights tensor has been reshaped with NEWeightsReshapeKernel. If this is not part of the fully connected layer the weights
      *                          tensor has also been transposed with NEGEMMTranspose1xWKernel. Data type supported: Same as @p input.
+     * @param[in]  dilation     (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      */
-    void configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info = WeightsInfo());
+    void configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info = WeightsInfo(),
+                   const Size2D &dilation = Size2D(1U, 1U));
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMConvolutionLayer
      *
      * @param[in] input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -130,11 +132,12 @@ public:
      * @param[in] conv_info    Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in] weights_info Specifies if the weights tensor has been reshaped with NEWeightsReshapeKernel. If this is not part of the fully connected layer the weights
      *                         tensor has also been transposed with NEGEMMTranspose1xWKernel. Data type supported: Same as @p input.
+     * @param[in] dilation     (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                           const WeightsInfo &weights_info = WeightsInfo());
+                           const WeightsInfo &weights_info = WeightsInfo(), const Size2D &dilation = Size2D(1U, 1U));
 
     // Inherited methods overridden:
     void run() override;

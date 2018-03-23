@@ -67,9 +67,11 @@ public:
     }
 
     template <typename...>
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info,
+    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, unsigned int dilation_x, unsigned int dilation_y,
                DataType data_type, int fractional_bits, QuantizationInfo quantization_info)
     {
+        ARM_COMPUTE_UNUSED(dilation_x, dilation_y);
+
         _fractional_bits   = fractional_bits;
         _quantization_info = quantization_info;
         _data_type         = data_type;
@@ -245,10 +247,11 @@ class DirectConvolutionValidationWithTensorShapesQuantizedTensorShiftFixture : p
 {
 public:
     template <typename...>
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info,
+    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, unsigned int dilation_x, unsigned int dilation_y,
                DataType data_type, QuantizationInfo quantization_info)
     {
-        DirectConvolutionValidationGenericTensorShiftFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, data_type, 0, quantization_info);
+        DirectConvolutionValidationGenericTensorShiftFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation_x, dilation_y, data_type, 0,
+                                                                                                               quantization_info);
     }
 };
 
@@ -257,10 +260,11 @@ class DirectConvolutionValidationWithTensorShapesTensorShiftFixture : public Dir
 {
 public:
     template <typename...>
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info,
+    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, unsigned int dilation_x, unsigned int dilation_y,
                DataType data_type)
     {
-        DirectConvolutionValidationGenericTensorShiftFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, data_type, 0, QuantizationInfo());
+        DirectConvolutionValidationGenericTensorShiftFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation_x, dilation_y, data_type, 0,
+                                                                                                               QuantizationInfo());
     }
 };
 

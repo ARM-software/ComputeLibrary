@@ -117,8 +117,10 @@ TEST_SUITE_END()
 TEST_SUITE(GEMMConvolutionLayer)
 
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallConvolutionLayerDataset(), datasets::LargeConvolutionLayerDataset()), CNNDataTypes),
-               input_shape, weights_shape, bias_shape, output_shape, info, data_type)
+               input_shape, weights_shape, bias_shape, output_shape, info, dilation, data_type)
 {
+    ARM_COMPUTE_UNUSED(dilation);
+
     // Set fixed point position data type allowed
     int fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
 

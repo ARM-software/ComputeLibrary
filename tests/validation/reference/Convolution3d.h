@@ -46,7 +46,7 @@ inline bool is_valid_pixel(int i, int min, int max)
 template < typename T, typename TB, typename std::enable_if < validation::is_floating_point<T>::value &&validation::is_floating_point<TB>::value, int >::type = 0 >
 inline void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, SimpleTensor<T> &out,
                           int i_offset, int w_offset, int b_offset, int o_offset,
-                          int xi, int yi, int width_in, int height_in, int depth_in, int width_weights, int height_weights)
+                          int xi, int yi, int width_in, int height_in, int depth_in, int width_weights, int height_weights, int dilation_x = 1, int dilation_y = 1)
 {
     const T *in_ptr  = in.data() + i_offset;
     const T *w_ptr   = weights.data() + w_offset;
@@ -73,12 +73,12 @@ inline void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<T> &weig
             for(int xk = -half_width_weights_start; xk <= half_width_weights_end; ++xk)
             {
                 // Check if the pixel is out-of-bound
-                if(is_valid_pixel(xi + xk, 0, width_in) && is_valid_pixel(yi + yk, 0, height_in))
+                if(is_valid_pixel(xi + xk * dilation_x, 0, width_in) && is_valid_pixel(yi + yk * dilation_y, 0, height_in))
                 {
                     const int idx = xk + half_width_weights_start;
                     const int idy = yk + half_height_weights_start;
 
-                    const T i_value = in_ptr[offset_slice_in + xk + yk * width_in];
+                    const T i_value = in_ptr[offset_slice_in + xk * dilation_x + yk * dilation_y * width_in];
                     const T w_value = w_ptr[idx + idy * width_weights + ifm * width_weights * height_weights];
 
                     acc += i_value * w_value;
@@ -95,7 +95,7 @@ inline void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<T> &weig
 template < typename T, typename TB, typename std::enable_if < std::is_integral<T>::value &&std::is_integral<TB>::value, int >::type = 0 >
 inline void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, SimpleTensor<T> &out,
                           int i_offset, int w_offset, int b_offset, int o_offset,
-                          int xi, int yi, int width_in, int height_in, int depth_in, int width_weights, int height_weights)
+                          int xi, int yi, int width_in, int height_in, int depth_in, int width_weights, int height_weights, int dilation_x = 1, int dilation_y = 1)
 {
     const T *in_ptr               = in.data() + i_offset;
     const T *w_ptr                = weights.data() + w_offset;
@@ -126,12 +126,12 @@ inline void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<T> &weig
             for(int xk = -half_width_weights_start; xk <= half_width_weights_end; ++xk)
             {
                 // Check if the pixel is out-of-bound
-                if(is_valid_pixel(xi + xk, 0, width_in) && is_valid_pixel(yi + yk, 0, height_in))
+                if(is_valid_pixel(xi + xk * dilation_x, 0, width_in) && is_valid_pixel(yi + yk * dilation_y, 0, height_in))
                 {
                     const int idx = xk + half_width_weights_start;
                     const int idy = yk + half_height_weights_start;
 
-                    const fixed_point<promoted_type> i_value(in_ptr[offset_slice_in + xk + yk * width_in], fixed_point_position, true);
+                    const fixed_point<promoted_type> i_value(in_ptr[offset_slice_in + xk * dilation_x + yk * dilation_y * width_in], fixed_point_position, true);
                     const fixed_point<promoted_type> w_value(w_ptr[idx + idy * width_weights + ifm * width_weights * height_weights], fixed_point_position, true);
                     const fixed_point<promoted_type> iw = i_value * w_value;
                     acc                                 = iw + acc;
@@ -153,7 +153,7 @@ inline void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<T> &weig
 template <>
 inline void convolution3d(const SimpleTensor<uint8_t> &in, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &bias, SimpleTensor<uint8_t> &out,
                           int i_offset, int w_offset, int b_offset, int o_offset,
-                          int xi, int yi, int width_in, int height_in, int depth_in, int width_weights, int height_weights)
+                          int xi, int yi, int width_in, int height_in, int depth_in, int width_weights, int height_weights, int dilation_x, int dilation_y)
 {
     const uint8_t *in_ptr  = in.data() + i_offset;
     const uint8_t *w_ptr   = weights.data() + w_offset;
@@ -192,12 +192,12 @@ inline void convolution3d(const SimpleTensor<uint8_t> &in, const SimpleTensor<ui
             for(int xk = -half_width_weights_start; xk <= half_width_weights_end; ++xk)
             {
                 // Check if the pixel is out-of-bound
-                if(is_valid_pixel(xi + xk, 0, width_in) && is_valid_pixel(yi + yk, 0, height_in))
+                if(is_valid_pixel(xi + xk * dilation_x, 0, width_in) && is_valid_pixel(yi + yk * dilation_y, 0, height_in))
                 {
                     const int idx = xk + half_width_weights_start;
                     const int idy = yk + half_height_weights_start;
 
-                    const uint8_t i_value = in_ptr[offset_slice_in + xk + yk * width_in];
+                    const uint8_t i_value = in_ptr[offset_slice_in + xk * dilation_x + yk * dilation_y * width_in];
                     const uint8_t w_value = w_ptr[idx + idy * width_weights + ifm * width_weights * height_weights];
 
                     acc += (i_value + input_offset) * (w_value + weights_offset);

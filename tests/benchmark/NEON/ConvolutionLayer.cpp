@@ -29,6 +29,7 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"
 #include "tests/benchmark/fixtures/ConvolutionLayerFixture.h"
+#include "tests/benchmark/fixtures/WinogradLayerFixture.h"
 #include "tests/datasets/system_tests/alexnet/AlexNetConvolutionLayerDataset.h"
 #include "tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1ConvolutionLayerDataset.h"
 #include "tests/datasets/system_tests/googlenet/inceptionv4/GoogLeNetInceptionV4ConvolutionLayerDataset.h"
@@ -61,7 +62,7 @@ using NEGEMMConvolutionLayerFixture = ConvolutionLayerFixture<Tensor, NEGEMMConv
 
 TEST_SUITE(NEON)
 #if defined(__aarch64__)
-using NEWinogradLayerFixture = ConvolutionLayerFixture<Tensor, NEWinogradLayer, Accessor>;
+using NEWinogradLayerFixture = WinogradLayerFixture<Tensor, NEWinogradLayer, Accessor>;
 
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetWinogradLayer, NEWinogradLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(datasets::AlexNetWinogradLayerDataset(), framework::dataset::make("DataType", DataType::F32)),

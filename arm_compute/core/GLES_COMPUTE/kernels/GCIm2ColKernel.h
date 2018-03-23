@@ -76,8 +76,9 @@ public:
      * @param[in]  kernel_dims The kernel dimensions (width and height).
      * @param[in]  conv_info   Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  has_bias    In case biases are provided expands the matrix with 1.
+     * @param[in]  dilation    (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      */
-    void configure(const IGCTensor *input, IGCTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias);
+    void configure(const IGCTensor *input, IGCTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation = Size2D(1U, 1U));
 
     // Inherited methods overridden:
     void run(const Window &window) override;
@@ -91,10 +92,11 @@ public:
      * @param[in] kernel_dims The kernel dimensions (width and height).
      * @param[in] conv_info   Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in] has_bias    In case biases are provided expands the matrix with 1.
+     * @param[in] dilation    (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation = Size2D(1U, 1U));
 
 private:
     /** Run the reshape kernel optimised for the special case (stride is 1, padding is 0 and kernel's low 3 dimensions are same as input)

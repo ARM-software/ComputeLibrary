@@ -680,6 +680,7 @@ __kernel void im2col_generic_padx0_pady0_dchw(
  * @note The pad_left, pad_right, pad_top and pad_bottom must be passed at compile time using -DPAD_LEFT, -DPAD_RIGHT, -DPAD_TOP and -DPAD_BOTTOM: e.g. -DPAD_LEFT=1, -DPAD_RIGHT=2, -DPAD_TOP=3 and -DPAD_BOTTOM=2
  * @note The zero value to store in case we load values out-of-bounds must be passed at compile time using -DPAD_VALUE: e.g. -DPAD_VALUE=0.0
  * @note The stride along the X and Y directions must be passed at compile time using -DSTRIDE_X and -DSTRIDE_Y: e.g. -DSTRIDE_X=1 and -DSTRIDE_Y=1
+ * @note The dilation_x and dilation_y must be passed at compile time using -DDILATION_X and -DDILATION_Y: e.g. -DDILATION_X=1, -DDILATION_Y=1
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  *
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/QASYMM8/QS16/F16/F32
@@ -722,10 +723,12 @@ __kernel void im2col_generic_dchw(
     __global DATA_TYPE *output_ptr = ((__global DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + yo * dst_stride_y + batch * dst_stride_w)) + xo;
 
     // Linearize convolution elements
-    for(int y = yi, y_e = yi + KERNEL_HEIGHT; y < y_e; ++y)
+    for(int yk = 0; yk < KERNEL_HEIGHT; ++yk)
     {
-        for(int x = xi, x_e = xi + KERNEL_WIDTH; x < x_e; ++x, ++output_ptr)
+        int y = yi + yk * DILATION_Y;
+        for(int xk = 0; xk < KERNEL_WIDTH; ++xk, ++output_ptr)
         {
+            int x = xi + xk * DILATION_X;
 #if PAD_LEFT == 0 && PAD_TOP == 0 && PAD_RIGHT == 0 && PAD_BOTTOM == 0
             *output_ptr = *((__global DATA_TYPE *)(input_ptr + x * src_stride_x + y * src_stride_y));
 #else  // PAD_LEFT == 0 && PAD_TOP == 0 && PAD_RIGHT == 0 && PAD_BOTTOM == 0

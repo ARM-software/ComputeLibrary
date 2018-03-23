@@ -893,12 +893,14 @@ const std::pair<unsigned int, unsigned int> deconvolution_output_dimensions(unsi
  * @param[in] kernel_width    Kernel width.
  * @param[in] kernel_height   Kernel height.
  * @param[in] pad_stride_info Pad and stride information.
+ * @param[in] dilation        (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
  *
  * @return A pair with the new width in the first position and the new height in the second.
  */
 const std::pair<unsigned int, unsigned int> scaled_dimensions(unsigned int width, unsigned int height,
                                                               unsigned int kernel_width, unsigned int kernel_height,
-                                                              const PadStrideInfo &pad_stride_info);
+                                                              const PadStrideInfo &pad_stride_info,
+                                                              const Size2D        &dilation = Size2D(1U, 1U));
 
 /** Convert a tensor format into a string.
  *

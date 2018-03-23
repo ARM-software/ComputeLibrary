@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,7 +54,7 @@ public:
 
 public:
     template <typename...>
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, bool reshape_weights,
+    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights,
                DataType data_type, int fractional_bits, QuantizationInfo quantization_info)
     {
         _data_type         = data_type;
@@ -63,8 +63,8 @@ public:
         _fractional_bits   = fractional_bits;
         _quantization_info = quantization_info;
 
-        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights);
-        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info);
+        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights, dilation);
+        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, dilation);
     }
 
 protected:
@@ -98,7 +98,7 @@ protected:
     }
 
     TensorType compute_target(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, const PadStrideInfo &info,
-                              bool reshape_weights)
+                              bool reshape_weights, const Size2D &dilation)
     {
         WeightsInfo weights_info(!reshape_weights, weights_shape.x(), weights_shape.y(), weights_shape[3]);
         TensorShape reshaped_weights_shape(weights_shape);
@@ -144,7 +144,7 @@ protected:
 
         // Create and configure function
         FunctionType conv;
-        conv.configure(&src, &weights, &bias, &dst, info, weights_info);
+        conv.configure(&src, &weights, &bias, &dst, info, weights_info, dilation);
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -220,7 +220,8 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, const PadStrideInfo &info)
+    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, const PadStrideInfo &info,
+                                      const Size2D &dilation)
     {
         // Create reference
         SimpleTensor<T>     src{ input_shape, _data_type, 1, _fractional_bits, _quantization_info };
@@ -232,7 +233,7 @@ protected:
         fill(weights, 1);
         fill(bias, 2);
 
-        return reference::convolution_layer<T>(src, weights, bias, output_shape, info);
+        return reference::convolution_layer<T>(src, weights, bias, output_shape, info, dilation);
     }
 
     TensorType       _target{};
@@ -293,9 +294,10 @@ class ConvolutionValidationFixture : public ConvolutionValidationGenericFixture<
 {
 public:
     template <typename...>
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, bool reshape_weights, DataType data_type)
+    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights, DataType data_type)
     {
-        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights, data_type, 0, QuantizationInfo());
+        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights, data_type, 0,
+                                                                                              QuantizationInfo());
     }
 };
 
@@ -304,9 +306,10 @@ class ConvolutionValidationFixedPointFixture : public ConvolutionValidationGener
 {
 public:
     template <typename...>
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, bool reshape_weights, DataType data_type, int fractional_bits)
+    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights, DataType data_type,
+               int fractional_bits)
     {
-        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights, data_type, fractional_bits,
+        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights, data_type, fractional_bits,
                                                                                               QuantizationInfo());
     }
 };
@@ -316,10 +319,11 @@ class ConvolutionValidationQuantizedFixture : public ConvolutionValidationGeneri
 {
 public:
     template <typename...>
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, bool reshape_weights, DataType data_type,
+    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights, DataType data_type,
                QuantizationInfo quantization_info)
     {
-        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights, data_type, 0, quantization_info);
+        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights, data_type, 0,
+                                                                                              quantization_info);
     }
 };
 } // namespace validation

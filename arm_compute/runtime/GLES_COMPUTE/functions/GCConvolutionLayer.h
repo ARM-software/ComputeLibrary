@@ -99,8 +99,10 @@ public:
      * @param[in]  conv_info    Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  weights_info Specifies if the weights tensor has been reshaped with GCWeightsReshapeKernel. If this is not part of the fully connected layer the weights
      *                          tensor has also been transposed with GCGEMMTranspose1xWKernel. Data type supported: Same as @p input.
+     * @param[in]  dilation     (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      */
-    void configure(const IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info = WeightsInfo());
+    void configure(const IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info = WeightsInfo(),
+                   const Size2D &dilation = Size2D(1U, 1U));
 
     // Inherited methods overridden:
     void run() override;

@@ -111,8 +111,10 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
 
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallLocallyConnectedDataset(), datasets::LargeLocallyConnectedDataset()),
                                                                    framework::dataset::make("DataType", DataType::F32)),
-               src_shape, weights_shape, bias_shape, dst_shape, info, data_type)
+               src_shape, weights_shape, bias_shape, dst_shape, info, dilation, data_type)
 {
+    ARM_COMPUTE_UNUSED(dilation);
+
     // Create tensors
     Tensor src     = create_tensor<Tensor>(src_shape, data_type);
     Tensor weights = create_tensor<Tensor>(weights_shape, data_type);
