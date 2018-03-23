@@ -198,6 +198,15 @@ public:
         _lws_hint = lws_hint;
     }
 
+    /** Return the Local-Workgroup-Size hint
+     *
+     * @return Current lws hint
+     */
+    cl::NDRange lws_hint() const
+    {
+        return _lws_hint;
+    }
+
     /** Get the configuration ID
      *
      * @note The configuration ID can be used by the caller to distinguish different calls of the same OpenCL kernel

@@ -113,7 +113,12 @@ bool CLTuner::tune_new_kernels() const
     return _tune_new_kernels;
 }
 
-void CLTuner::tune_kernel(ICLKernel &kernel)
+void CLTuner::tune_kernel_static(ICLKernel &kernel)
+{
+    ARM_COMPUTE_UNUSED(kernel);
+}
+
+void CLTuner::tune_kernel_dynamic(ICLKernel &kernel)
 {
     // Get the configuration ID from the kernel
     const std::string &config_id = kernel.config_id();

@@ -30,7 +30,7 @@
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/CLTuner.h"
+#include "arm_compute/runtime/CL/ICLTuner.h"
 
 #if defined(ARM_COMPUTE_DEBUG_ENABLED)
 namespace
@@ -194,17 +194,19 @@ public:
         return event;
     }
 
-private:
-    /** Tune OpenCL kernel
-     *
-     * @note This method uses a brute force approach to find the optimal LWS
+    /** Tunes OpenCL kernel
      *
      * @param[in] kernel Kernel to tune
-     *
-     * @return The optimal LWS for the specified kernel
      */
-    cl::NDRange tune_kernel(ICLKernel &kernel);
+    void tune_kernel_static(ICLKernel &kernel)
+    {
+        if(_cl_tuner != nullptr)
+        {
+            _cl_tuner->tune_kernel_static(kernel);
+        }
+    }
 
+private:
     /** Flag to ensure symbols initialisation is happening before Scheduler creation */
     static std::once_flag _initialize_symbols;
 

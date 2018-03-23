@@ -60,5 +60,16 @@ enum class CLVersion
     CL20,   /* the OpenCL 2.0 and above */
     UNKNOWN /* unkown version */
 };
-}
+
+/** OpenCL device options */
+struct CLDeviceOptions
+{
+    std::string name;        /**< Device name */
+    std::string extensions;  /**< List of supported extensions */
+    std::string ddk_version; /**< DDK version */
+    GPUTarget   gpu_target;  /**< GPU target architecture/instance */
+    size_t      num_cores;   /**< Number of cores */
+    size_t      cache_size;  /**< Cache size */
+};
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CL_TYPES_H__ */

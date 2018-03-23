@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,6 +52,9 @@ void CLDirectConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weig
         zero_value = PixelValue(static_cast<uint8_t>(input->info()->quantization_info().offset));
     }
     _input_border_handler.configure(input, _direct_conv_kernel.border_size(), BorderMode::CONSTANT, zero_value);
+
+    // Tune kernels
+    CLScheduler::get().tune_kernel_static(_direct_conv_kernel);
 }
 
 Status CLDirectConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info)

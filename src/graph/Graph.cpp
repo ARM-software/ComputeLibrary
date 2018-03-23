@@ -30,6 +30,7 @@
 #include "arm_compute/graph/Tensor.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/CLTuner.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "support/ToolchainSupport.h"
 

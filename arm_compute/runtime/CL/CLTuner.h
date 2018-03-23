@@ -99,7 +99,8 @@ public:
     void save_to_file(const std::string &filename) const;
 
     // Inherited methods overridden:
-    void tune_kernel(ICLKernel &kernel) override;
+    void tune_kernel_static(ICLKernel &kernel) override;
+    void tune_kernel_dynamic(ICLKernel &kernel) override;
 
     /** Is the kernel_event set ?
      *

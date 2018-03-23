@@ -52,7 +52,7 @@ void CLScheduler::enqueue(ICLKernel &kernel, bool flush)
     if(_cl_tuner != nullptr)
     {
         // Tune the OpenCL kernel
-        _cl_tuner->tune_kernel(kernel);
+        _cl_tuner->tune_kernel_dynamic(kernel);
     }
 
     // Run kernel

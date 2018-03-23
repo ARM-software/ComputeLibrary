@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,34 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_ICLTUNER_H__
-#define __ARM_COMPUTE_ICLTUNER_H__
+#ifndef __ARM_COMPUTE_TUNERS_BIFROST_TUNER_H__
+#define __ARM_COMPUTE_TUNERS_BIFROST_TUNER_H__
+
+#include "arm_compute/runtime/CL/ICLTuner.h"
 
 namespace arm_compute
 {
-class ICLKernel;
-
-/** Basic interface for tuning the OpenCL kernels */
-class ICLTuner
+namespace tuners
+{
+/** Bifrost based OpenCL tuner implementation */
+class BifrostTuner final : public ICLTuner
 {
 public:
-    /** Virtual destructor */
-    virtual ~ICLTuner() = default;
-    /** Tune OpenCL kernel statically
-     *
-     * @note Tuning is performed using only kernel and tensor metadata,
-     *       thus can be performed when memory is not available
-     *
-     * @param[in] kernel Kernel to tune
-     */
-    virtual void tune_kernel_static(ICLKernel &kernel) = 0;
-    /** Tune OpenCL kernel dynamically
-     *
-     * @note Tuning requires memory to be available on all kernel tensors and objects in order to be performed
-     *
-     * @param[in] kernel Kernel to tune
-     */
-    virtual void tune_kernel_dynamic(ICLKernel &kernel) = 0;
+    // Inherited overriden methods
+    void tune_kernel_static(ICLKernel &kernel) override;
+    void tune_kernel_dynamic(ICLKernel &kernel) override;
 };
-}
-#endif /*__ARM_COMPUTE_ICLTUNER_H__ */
+} // namespace tuners
+} // namespace arm_compute
+#endif /*__ARM_COMPUTE_TUNERS_BIFROST_TUNER_H__ */

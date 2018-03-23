@@ -186,6 +186,7 @@ if env['opencl']:
 
     runtime_files += Glob('src/runtime/CL/*.cpp')
     runtime_files += Glob('src/runtime/CL/functions/*.cpp')
+    runtime_files += Glob('src/runtime/CL/tuners/*.cpp')
 
     graph2_files += Glob('src/graph2/backends/CL/*.cpp')
 
