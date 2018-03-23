@@ -614,6 +614,8 @@ void NEGEMMConvolutionLayer::run()
     // Run input reshaping
     NEScheduler::get().schedule(&_input_im2col_kernel, Window::DimY);
 
+    std::fill_n(_gemm_output.buffer(), _gemm_output.info()->total_size(), 0);
+
     // Runs matrix multiply on reshaped matrices
     if(_mm_optimised_kernel != nullptr)
     {
