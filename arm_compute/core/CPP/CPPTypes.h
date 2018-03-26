@@ -39,7 +39,7 @@ enum class CPUTarget
     A5x        = 0x0050,
     DOT        = 0x1000,
 
-    A53     = (ARMV8 | A7x | 0x3),
+    A53     = (ARMV8 | A5x | 0x3),
     A55     = (ARMV8_2 | A5x | 0x5),
     A55_DOT = (A55 | DOT),
     A72     = (ARMV8 | A7x | 0x2),
