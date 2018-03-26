@@ -54,14 +54,17 @@ template <typename T>
 using CLDepthwiseConvolutionLayerFixture = DepthwiseConvolutionLayerValidationFixture<CLTensor, CLAccessor, CLDepthwiseConvolutionLayer, T>;
 
 TEST_SUITE(Generic)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallDepthwiseConvolutionLayerDataset(), framework::dataset::make("DataType",
-                                                                                                                 DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset(),
+                                                                                                                 framework::dataset::make("DataType",
+                                                                                                                         DataType::F32)),
+                                                                                                                 framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeDepthwiseConvolutionLayerDataset(),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset(),
                                                                                                                      framework::dataset::make("DataType",
-                                                                                                                             DataType::F32)))
+                                                                                                                             DataType::F32)),
+                                                                                                                     framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
@@ -73,15 +76,17 @@ using CLDepthwiseConvolutionLayerFixture3x3 = DepthwiseConvolutionLayerValidatio
 TEST_SUITE(Float)
 TEST_SUITE(F16)
 TEST_SUITE(W3x3)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::ALL, combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
                                                                                                                    framework::dataset::make("DataType",
-                                                                                                                           DataType::F16)))
+                                                                                                                           DataType::F16)),
+                                                                                                                   framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
                                                                                                                        framework::dataset::make("DataType",
-                                                                                                                               DataType::F16)))
+                                                                                                                               DataType::F16)),
+                                                                                                                       framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
@@ -90,15 +95,17 @@ TEST_SUITE_END()
 
 TEST_SUITE(FP32)
 TEST_SUITE(W3x3)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerFixture3x3<float>, framework::DatasetMode::ALL, combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerFixture3x3<float>, framework::DatasetMode::ALL, combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
                                                                                                                     framework::dataset::make("DataType",
-                                                                                                                            DataType::F32)))
+                                                                                                                            DataType::F32)),
+                                                                                                                    framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerFixture3x3<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerFixture3x3<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
                                                                                                                         framework::dataset::make("DataType",
-                                                                                                                                DataType::F32)))
+                                                                                                                                DataType::F32)),
+                                                                                                                        framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }

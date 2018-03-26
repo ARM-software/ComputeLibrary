@@ -82,6 +82,8 @@ private:
     bool                                      _is_quantized;
     bool                                      _is_optimized;
     bool                                      _are_weights_reshaped;
+    bool                                      _is_nchw;
+    bool                                      _is_first_run;
 };
 
 /** Basic function to execute a generic depthwise convolution. This function calls the following NEON kernels:

@@ -24,6 +24,7 @@
 #include "DepthwiseConvolutionLayer.h"
 
 #include "ConvolutionLayer.h"
+#include "Permute.h"
 #include "Utils.h"
 
 #include "tests/validation/FixedPoint.h"
@@ -50,11 +51,8 @@ namespace reference
  *
  */
 template <typename T, typename TB>
-SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &biases, const TensorShape &dst_shape, const PadStrideInfo &conv_info)
+void depthwise_convolution_nchw(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &biases, SimpleTensor<T> &dst, const PadStrideInfo &conv_info)
 {
-    // Create reference
-    SimpleTensor<T> dst{ dst_shape, src.data_type(), 1, src.fixed_point_position() };
-
     // Compute reference
     const int filter_width  = weights.shape().x();
     const int filter_height = weights.shape().y();
@@ -108,8 +106,6 @@ SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTe
             }
         }
     }
-
-    return dst;
 }
 
 template <>
@@ -191,6 +187,27 @@ SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, co
             }
         }
     }
+
+    return dst;
+}
+
+template <typename T, typename TB>
+SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &biases, const TensorShape &dst_shape, const PadStrideInfo &conv_info)
+{
+    SimpleTensor<T> dst{ dst_shape, src.data_type(), 1, src.fixed_point_position() };
+
+    if(src.data_layout() == DataLayout::NHWC && src.data_type() == DataType::F32)
+    {
+        SimpleTensor<T> src_nchw     = reference::permute<T>(src, PermutationVector(1U, 2U, 0U));
+        SimpleTensor<T> weights_nchw = reference::permute<T>(weights, PermutationVector(1U, 2U, 0U));
+        SimpleTensor<T> dst_nchw     = reference::permute<T>(dst, PermutationVector(1U, 2U, 0U));
+
+        depthwise_convolution_nchw<T, TB>(src_nchw, weights_nchw, biases, dst_nchw, conv_info);
+
+        return reference::permute<T>(dst_nchw, PermutationVector(2U, 0U, 1U));
+    }
+
+    depthwise_convolution_nchw<T, TB>(src, weights, biases, dst, conv_info);
 
     return dst;
 }

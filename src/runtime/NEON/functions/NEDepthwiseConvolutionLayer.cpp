@@ -37,7 +37,7 @@ using namespace arm_compute::misc::shape_calculator;
 
 NEDepthwiseConvolutionLayer3x3::NEDepthwiseConvolutionLayer3x3()
     : _dwc_kernel(), _output_stage_kernel(), _border_handler(), _permute_input(), _permute_weights(), _permute_output(), _accumulator(), _input_nhwc(), _weights_hwio(), _output_nhwc(), _has_bias(false),
-      _is_quantized(false), _is_optimized(false), _are_weights_reshaped(false)
+      _is_quantized(false), _is_optimized(false), _are_weights_reshaped(false), _is_nchw(true), _is_first_run(true)
 {
 }
 
@@ -52,30 +52,38 @@ void NEDepthwiseConvolutionLayer3x3::configure(ITensor *input, const ITensor *we
     _has_bias     = biases != nullptr;
     _is_optimized = NEDepthwiseConvolutionLayer3x3Kernel::is_optimized_execution_possible(input->info()->tensor_shape(),
                                                                                           conv_info,
-                                                                                          input->info()->data_type());
+                                                                                          input->info()->data_type(),
+                                                                                          input->info()->data_layout());
     _are_weights_reshaped = false;
+    _is_nchw              = input->info()->data_layout() == DataLayout::NCHW;
+
+    ARM_COMPUTE_ERROR_ON(!_is_optimized && !_is_nchw);
 
     if(_is_optimized)
     {
-        // Configure the function to transform the input tensor from NCHW -> NHWC
-        _permute_input.configure(input, &_input_nhwc, PermutationVector(2U, 0U, 1U));
+        if(_is_nchw)
+        {
+            // Configure the function to transform the input tensor from NCHW -> NHWC
+            _permute_input.configure(input, &_input_nhwc, PermutationVector(2U, 0U, 1U));
 
-        // Configure the function to transform the weights tensor from IHW -> HWI
-        _permute_weights.configure(weights, &_weights_hwio, PermutationVector(2U, 0U, 1U));
+            // Configure the function to transform the weights tensor from IHW -> HWI
+            _permute_weights.configure(weights, &_weights_hwio, PermutationVector(2U, 0U, 1U));
 
-        // Configure optimized depthwise
-        _dwc_kernel.configure(&_input_nhwc, &_weights_hwio, &_output_nhwc, conv_info, DataLayout::NHWC);
+            // Configure optimized depthwise
+            _dwc_kernel.configure(&_input_nhwc, &_weights_hwio, &_output_nhwc, conv_info, DataLayout::NHWC);
 
-        // Configure the function to transform the convoluted output to ACL's native ordering format NCHW
-        _permute_output.configure(&_output_nhwc, output, PermutationVector(1U, 2U, 0U));
+            // Configure the function to transform the convoluted output to ACL's native ordering format NCHW
+            _permute_output.configure(&_output_nhwc, output, PermutationVector(1U, 2U, 0U));
 
-        // Allocate tensors
-        _input_nhwc.allocator()->allocate();
-        _weights_hwio.allocator()->allocate();
-        _output_nhwc.allocator()->allocate();
-
-        // Create convolver (deferred)
-        _dwc_kernel.generate_convolver();
+            // Allocate tensors
+            _input_nhwc.allocator()->allocate();
+            _weights_hwio.allocator()->allocate();
+            _output_nhwc.allocator()->allocate();
+        }
+        else
+        {
+            _dwc_kernel.configure(input, weights, output, conv_info, DataLayout::NHWC);
+        }
     }
     else
     {
@@ -116,8 +124,15 @@ void NEDepthwiseConvolutionLayer3x3::configure(ITensor *input, const ITensor *we
 
 void NEDepthwiseConvolutionLayer3x3::run()
 {
+    if(_is_first_run && _is_optimized)
+    {
+        _is_first_run = false;
+        // Create convolver (deferred)
+        _dwc_kernel.generate_convolver();
+    }
+
     // Permute weights in HWIO format if the optimized kernel will be executedd
-    if(!_are_weights_reshaped && _is_optimized)
+    if(!_are_weights_reshaped && _is_optimized && _is_nchw)
     {
         _are_weights_reshaped = true;
         _permute_weights.run();
@@ -126,8 +141,11 @@ void NEDepthwiseConvolutionLayer3x3::run()
     // Handle input
     if(_is_optimized)
     {
-        // Permute input to NHWC format execution
-        _permute_input.run();
+        if(_is_nchw)
+        {
+            // Permute input to NHWC format execution
+            _permute_input.run();
+        }
     }
     else
     {
@@ -139,7 +157,7 @@ void NEDepthwiseConvolutionLayer3x3::run()
     NEScheduler::get().schedule(&_dwc_kernel, Window::DimX);
 
     // Permute output to ACL's native NCHW format in case of NHWC execution
-    if(_is_optimized)
+    if(_is_optimized && _is_nchw)
     {
         _permute_output.run();
     }

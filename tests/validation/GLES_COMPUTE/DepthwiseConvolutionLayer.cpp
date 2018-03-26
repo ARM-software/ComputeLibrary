@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,15 +55,17 @@ using GCDepthwiseConvolutionLayerFixture3x3 = DepthwiseConvolutionLayerValidatio
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
 TEST_SUITE(W3x3)
-FIXTURE_DATA_TEST_CASE(RunSmall, GCDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::ALL, combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
+FIXTURE_DATA_TEST_CASE(RunSmall, GCDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
                                                                                                                    framework::dataset::make("DataType",
-                                                                                                                           DataType::F16)))
+                                                                                                                           DataType::F16)),
+                                                                                                                   framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     validate(GCAccessor(_target), _reference, tolerance_fp16, tolerance_num);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, GCDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
+FIXTURE_DATA_TEST_CASE(RunLarge, GCDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
                                                                                                                        framework::dataset::make("DataType",
-                                                                                                                               DataType::F16)))
+                                                                                                                               DataType::F16)),
+                                                                                                                       framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     validate(GCAccessor(_target), _reference, tolerance_fp16, tolerance_num);
 }
