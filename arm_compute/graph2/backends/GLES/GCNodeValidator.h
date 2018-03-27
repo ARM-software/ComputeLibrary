@@ -21,49 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/graph2/frontend/Stream.h"
+#ifndef __ARM_COMPUTE_GRAPH2_GCNODEVALIDATOR_H__
+#define __ARM_COMPUTE_GRAPH2_GCNODEVALIDATOR_H__
 
-#include "arm_compute/graph2/Utils.h"
-#include "arm_compute/graph2/frontend/ILayer.h"
+#include "arm_compute/core/Error.h"
 
 namespace arm_compute
 {
 namespace graph2
 {
-namespace frontend
-{
-Stream::Stream(size_t id, std::string name)
-    : _manager(), _ctx(), _g(id, std::move(name))
-{
-}
+// Forward declarations
+class INode;
 
-void Stream::finalize(Target target, const GraphConfig &config)
+namespace backends
 {
-    PassManager pm = create_default_pass_manager(target);
-    _ctx.set_config(config);
-    _manager.finalize_graph(_g, _ctx, pm, target);
-}
-
-void Stream::run()
+class GCNodeValidator final
 {
-    _manager.execute_graph(_g);
-}
-
-void Stream::add_layer(ILayer &layer)
-{
-    auto nid   = layer.create_layer(*this);
-    _tail_node = nid;
-}
-
-const Graph &Stream::graph() const
-{
-    return _g;
-}
-
-Graph &Stream::graph()
-{
-    return _g;
-}
-} // namespace frontend
+public:
+    /** Validate a node
+     *
+     * @param[in] node Node to validate
+     *
+     * @return An error status
+     */
+    static Status validate(INode *node);
+};
+} // namespace backends
 } // namespace graph2
 } // namespace arm_compute
+#endif //__ARM_COMPUTE_GRAPH2_GCNODEVALIDATOR_H__

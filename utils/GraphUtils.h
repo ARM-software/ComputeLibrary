@@ -326,11 +326,15 @@ inline std::unique_ptr<graph::ITensorAccessor> get_output_accessor(const std::st
  */
 inline graph2::Target set_target_hint2(int target)
 {
-    ARM_COMPUTE_ERROR_ON_MSG(target > 2, "Invalid target. Target must be 0 (NEON) or 1 (OpenCL)");
+    ARM_COMPUTE_ERROR_ON_MSG(target > 3, "Invalid target. Target must be 0 (NEON), 1 (OpenCL), 2 (OpenCL + Tuner), 3 (GLES)");
     if((target == 1 || target == 2) && arm_compute::opencl_is_available())
     {
         // If type of target is OpenCL, check if OpenCL is available and initialize the scheduler
         return graph2::Target::CL;
+    }
+    else if(target == 3)
+    {
+        return graph2::Target::GC;
     }
     else
     {

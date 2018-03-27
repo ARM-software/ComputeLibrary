@@ -21,49 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/graph2/frontend/Stream.h"
+#ifndef __ARM_COMPUTE_GRAPH2_GCDEVICEBACKEND_H__
+#define __ARM_COMPUTE_GRAPH2_GCDEVICEBACKEND_H__
 
-#include "arm_compute/graph2/Utils.h"
-#include "arm_compute/graph2/frontend/ILayer.h"
+#include "arm_compute/graph2/IDeviceBackend.h"
+
+#include "arm_compute/runtime/GLES_COMPUTE/GCBufferAllocator.h"
 
 namespace arm_compute
 {
 namespace graph2
 {
-namespace frontend
+namespace backends
 {
-Stream::Stream(size_t id, std::string name)
-    : _manager(), _ctx(), _g(id, std::move(name))
+/** GLES Compute device backend */
+class GCDeviceBackend final : public IDeviceBackend
 {
-}
+public:
+    /** Default Constructor */
+    GCDeviceBackend();
 
-void Stream::finalize(Target target, const GraphConfig &config)
-{
-    PassManager pm = create_default_pass_manager(target);
-    _ctx.set_config(config);
-    _manager.finalize_graph(_g, _ctx, pm, target);
-}
+    // Inherited overridden methods
+    void initialize_backend() override;
+    void setup_backend_context(GraphContext &ctx) override;
+    std::unique_ptr<ITensorHandle> create_tensor(const Tensor &tensor) override;
+    std::unique_ptr<ITensorHandle> create_subtensor(ITensorHandle *parent, TensorShape shape, Coordinates coords, bool extend_parent) override;
+    std::unique_ptr<arm_compute::IFunction> configure_node(INode &node, GraphContext &ctx) override;
+    Status validate_node(INode &node) override;
+    std::shared_ptr<arm_compute::IMemoryManager> create_memory_manager(MemoryManagerAffinity affinity) override;
 
-void Stream::run()
-{
-    _manager.execute_graph(_g);
-}
-
-void Stream::add_layer(ILayer &layer)
-{
-    auto nid   = layer.create_layer(*this);
-    _tail_node = nid;
-}
-
-const Graph &Stream::graph() const
-{
-    return _g;
-}
-
-Graph &Stream::graph()
-{
-    return _g;
-}
-} // namespace frontend
+private:
+    GCBufferAllocator _allocator; /**< GLES buffer affinity allocator */
+};
+} // namespace backends
 } // namespace graph2
 } // namespace arm_compute
+#endif //__ARM_COMPUTE_GRAPH2_GCDEVICEBACKEND_H__

@@ -87,7 +87,8 @@ void validate_all_nodes(Graph &g)
             Target assigned_target = node->assigned_target();
             auto   backend         = backends::BackendRegistry::get().find_backend(assigned_target);
             ARM_COMPUTE_ERROR_ON_MSG(!backend, "Requested backend doesn't exist!");
-            backend->validate_node(*node);
+            Status status = backend->validate_node(*node);
+            ARM_COMPUTE_ERROR_ON_MSG(!bool(status), status.error_description().c_str());
         }
     }
 }

@@ -223,6 +223,8 @@ if env['gles_compute']:
     runtime_files += Glob('src/runtime/GLES_COMPUTE/*.cpp')
     runtime_files += Glob('src/runtime/GLES_COMPUTE/functions/*.cpp')
 
+    graph2_files += Glob('src/graph2/backends/GLES/*.cpp')
+
 arm_compute_core_a = build_library('arm_compute_core-static', core_files, static=True)
 Export('arm_compute_core_a')
 

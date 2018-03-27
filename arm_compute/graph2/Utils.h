@@ -84,9 +84,11 @@ Target get_default_target();
 void force_target_to_graph(Graph &g, Target target);
 /** Creates a default @ref PassManager
  *
+ * @param[in] target Target to create the pass manager for
+ *
  * @return A PassManager with default mutating passes
  */
-PassManager create_default_pass_manager();
+PassManager create_default_pass_manager(Target target);
 /** Default setups the graph context if not done manually
  *
  * @param[in] ctx Graph Context

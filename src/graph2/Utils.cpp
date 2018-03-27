@@ -46,7 +46,10 @@ Target get_default_target()
     {
         return Target::CL;
     }
-
+    if(is_target_supported(Target::GC))
+    {
+        return Target::GC;
+    }
     ARM_COMPUTE_ERROR("No backend exists!");
 }
 
@@ -71,14 +74,17 @@ void force_target_to_graph(Graph &g, Target target)
     }
 }
 
-PassManager create_default_pass_manager()
+PassManager create_default_pass_manager(Target target)
 {
     PassManager pm;
 
-    pm.append(support::cpp14::make_unique<InPlaceOperationMutator>());
-    pm.append(support::cpp14::make_unique<NodeFusionMutator>());
-    pm.append(support::cpp14::make_unique<SplitLayerSubTensorMutator>());
-    pm.append(support::cpp14::make_unique<DepthConcatSubTensorMutator>());
+    if(target != Target::GC)
+    {
+        pm.append(support::cpp14::make_unique<InPlaceOperationMutator>());
+        pm.append(support::cpp14::make_unique<NodeFusionMutator>());
+        pm.append(support::cpp14::make_unique<SplitLayerSubTensorMutator>());
+        pm.append(support::cpp14::make_unique<DepthConcatSubTensorMutator>());
+    }
 
     return pm;
 }

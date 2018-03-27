@@ -21,49 +21,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/graph2/frontend/Stream.h"
-
-#include "arm_compute/graph2/Utils.h"
-#include "arm_compute/graph2/frontend/ILayer.h"
+#include "arm_compute/graph2/backends/GLES/GCTensorHandle.h"
 
 namespace arm_compute
 {
 namespace graph2
 {
-namespace frontend
+namespace backends
 {
-Stream::Stream(size_t id, std::string name)
-    : _manager(), _ctx(), _g(id, std::move(name))
+GCTensorHandle::GCTensorHandle(const ITensorInfo &info)
+    : _tensor()
 {
+    _tensor.allocator()->init(info);
 }
 
-void Stream::finalize(Target target, const GraphConfig &config)
+void GCTensorHandle::allocate()
 {
-    PassManager pm = create_default_pass_manager(target);
-    _ctx.set_config(config);
-    _manager.finalize_graph(_g, _ctx, pm, target);
+    _tensor.allocator()->allocate();
 }
 
-void Stream::run()
+const arm_compute::ITensor &GCTensorHandle::tensor() const
 {
-    _manager.execute_graph(_g);
+    return _tensor;
 }
 
-void Stream::add_layer(ILayer &layer)
+arm_compute::ITensor &GCTensorHandle::tensor()
 {
-    auto nid   = layer.create_layer(*this);
-    _tail_node = nid;
+    return _tensor;
 }
 
-const Graph &Stream::graph() const
+void GCTensorHandle::map(bool blocking)
 {
-    return _g;
+    _tensor.map(blocking);
 }
 
-Graph &Stream::graph()
+void GCTensorHandle::unmap()
 {
-    return _g;
+    _tensor.unmap();
 }
-} // namespace frontend
+
+bool GCTensorHandle::is_subtensor() const
+{
+    return false;
+}
+} // namespace backends
 } // namespace graph2
 } // namespace arm_compute

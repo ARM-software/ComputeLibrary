@@ -21,49 +21,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/graph2/frontend/Stream.h"
+#ifndef __ARM_COMPUTE_GRAPH2_GCFUNCTIONFACTORY_H__
+#define __ARM_COMPUTE_GRAPH2_GCFUNCTIONFACTORY_H__
 
-#include "arm_compute/graph2/Utils.h"
-#include "arm_compute/graph2/frontend/ILayer.h"
+#include "arm_compute/runtime/IFunction.h"
+
+#include <memory>
 
 namespace arm_compute
 {
 namespace graph2
 {
-namespace frontend
-{
-Stream::Stream(size_t id, std::string name)
-    : _manager(), _ctx(), _g(id, std::move(name))
-{
-}
+// Forward declarations
+class INode;
+class GraphContext;
 
-void Stream::finalize(Target target, const GraphConfig &config)
+namespace backends
 {
-    PassManager pm = create_default_pass_manager(target);
-    _ctx.set_config(config);
-    _manager.finalize_graph(_g, _ctx, pm, target);
-}
-
-void Stream::run()
+/** Factory for generating GLES compute backend functions **/
+class GCFunctionFactory final
 {
-    _manager.execute_graph(_g);
-}
-
-void Stream::add_layer(ILayer &layer)
-{
-    auto nid   = layer.create_layer(*this);
-    _tail_node = nid;
-}
-
-const Graph &Stream::graph() const
-{
-    return _g;
-}
-
-Graph &Stream::graph()
-{
-    return _g;
-}
-} // namespace frontend
+public:
+    /** Create a backend execution function depending on the node type
+     *
+     * @param[in] node Node to create the backend function for
+     * @param[in] ctx  Context to use
+     *
+     * @return Backend function
+     */
+    static std::unique_ptr<arm_compute::IFunction> create(INode *node, GraphContext &ctx);
+};
+} // namespace backends
 } // namespace graph2
 } // namespace arm_compute
+#endif //__ARM_COMPUTE_GRAPH2_GCFUNCTIONFACTORY_H__
