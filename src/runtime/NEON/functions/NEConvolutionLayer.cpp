@@ -34,8 +34,9 @@
 
 namespace arm_compute
 {
-NEConvolutionLayer::NEConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_manager(std::move(memory_manager)), _function()
+NEConvolutionLayer::NEConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager) //NOLINT
+    : _memory_manager(std::move(memory_manager)),
+      _function()
 {
 }
 
