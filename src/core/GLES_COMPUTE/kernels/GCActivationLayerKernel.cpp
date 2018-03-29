@@ -111,8 +111,9 @@ void GCActivationLayerKernel::run(const Window &window)
 
     _output->set_needs_shifting(true);
 
-    Window slice    = window.first_slice_window_3D();
-    Window slice_in = window.first_slice_window_3D();
+    Window collapsed = window.collapse_if_possible(IGCKernel::window(), Window::DimZ);
+    Window slice     = collapsed.first_slice_window_3D();
+    Window slice_in  = collapsed.first_slice_window_3D();
 
     slice.shift(Window::DimX, -(_output->info()->padding()).left);
 
@@ -125,10 +126,10 @@ void GCActivationLayerKernel::run(const Window &window)
     {
         unsigned int idx     = 0;
         unsigned int binding = 1;
-        add_3D_tensor_argument(idx, _input, binding++, slice_in);
-        add_3D_tensor_argument(idx, _output, binding++, slice);
+        add_3D_tensor_argument(idx, _input, binding++, slice);
+        add_3D_tensor_argument(idx, _output, binding++, slice_in);
         _kernel.update_shader_params();
         enqueue(*this, slice);
     }
-    while(window.slide_window_slice_3D(slice) && window.slide_window_slice_3D(slice_in));
+    while(collapsed.slide_window_slice_3D(slice) && collapsed.slide_window_slice_3D(slice_in));
 }
