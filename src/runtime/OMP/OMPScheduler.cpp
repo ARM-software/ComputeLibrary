@@ -71,7 +71,7 @@ void OMPScheduler::schedule(ICPPKernel *kernel, unsigned int split_dimension)
     }
     else
     {
-        #pragma omp parallel private(info) num_threads(info.num_threads)
+        #pragma omp parallel firstprivate(info) num_threads(info.num_threads)
         {
             const int tid  = omp_get_thread_num();
             Window win     = max_window.split_window(split_dimension, tid, info.num_threads);
