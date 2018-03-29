@@ -53,8 +53,8 @@ public:
         std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<CaffePreproccessor>(mean_rgb);
 
         // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
-        const int target                   = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
-        Target    target_hint              = set_target_hint2(target);
+        const int target      = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
+        Target    target_hint = set_target_hint2(target);
 
         // TODO (geopin01) : Get GPU target somehow and set gemm also for midgard ?
         const bool        is_gemm_convolution5x5     = (target_hint == Target::NEON);

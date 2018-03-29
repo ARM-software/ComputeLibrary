@@ -26,31 +26,32 @@
 
 namespace arm_compute
 {
-    class SVMMemory final
+class SVMMemory final
+{
+public:
+    SVMMemory() = default;
+    SVMMemory(void *ptr, bool fine_grain)
+        : _ptr(ptr), _fine_grain(fine_grain), _size(0)
     {
-    public:
-        SVMMemory() = default;
-        SVMMemory(void *ptr, bool fine_grain)
-            : _ptr(ptr), _fine_grain(fine_grain), _size(0)
-        {
-        }
-        void *ptr() const
-        {
-            return _ptr;
-        }
-        bool fine_grain() const
-        {
-            return _fine_grain;
-        }
-        size_t size() const
-        {
-            return _size;
-        }
-        void *allocate(cl_context context, size_t size, cl_svm_mem_flags flags, cl_uint alignment);
-    private:
-        void *_ptr{ nullptr };
-        bool   _fine_grain{ false };
-        size_t _size{ 0 };
-    };
+    }
+    void *ptr() const
+    {
+        return _ptr;
+    }
+    bool fine_grain() const
+    {
+        return _fine_grain;
+    }
+    size_t size() const
+    {
+        return _size;
+    }
+    void *allocate(cl_context context, size_t size, cl_svm_mem_flags flags, cl_uint alignment);
+
+private:
+    void *_ptr{ nullptr };
+    bool   _fine_grain{ false };
+    size_t _size{ 0 };
+};
 }
 #endif /* __ARM_COMPUTE_SVMMEMORY_H__ */
