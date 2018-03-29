@@ -1851,6 +1851,9 @@ __kernel void gemm_mm_qs16(IMAGE_DECLARATION(src0),
     // Compute dst address
     __global uchar *dst_addr = offset(&dst, 0, 0);
 
+    // Add offset for batched GEMM
+    dst_addr += get_global_id(2) * dst_stride_z;
+
     // Multiply by the weight of matrix product and store the result
     short8 acc_qs16;
     acc_qs16 = convert_short8_sat(acc0);

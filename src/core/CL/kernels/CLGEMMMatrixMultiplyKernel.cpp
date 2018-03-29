@@ -162,12 +162,9 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
 
     // Collapse along the Z direction
     // This collapse needs to be here in order to tune the Z dimension of LWS
-    Window collapsed = win;
-    if(input1->num_dimensions() > 1)
-    {
-        const unsigned int dimension_to_collapse = std::min(static_cast<unsigned int>(input1->num_dimensions() - 1), 2u);
-        collapsed                                = win.collapse(win, dimension_to_collapse);
-    }
+    Window             collapsed             = win;
+    const unsigned int dimension_to_collapse = std::min(static_cast<unsigned int>(output->num_dimensions()), 2u);
+    collapsed                                = win.collapse(win, dimension_to_collapse);
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, collapsed);
