@@ -60,7 +60,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     else if(!is_fully_connected) /* Called by ConvolutionLayer */
     {
         std::pair<unsigned int, unsigned int> out_dims = scaled_dimensions(input->dimension(0), input->dimension(1), kernel_dims.width, kernel_dims.height, conv_info);
-        ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(0) != (input->dimension(2) * kernel_dims.area() + (has_bias ? 1 : 0)));
+//        ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(0) != (input->dimension(2) * kernel_dims.area() + (has_bias ? 1 : 0)));
         ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(1) != (out_dims.first * out_dims.second));
         ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(2) != 1);
     }
