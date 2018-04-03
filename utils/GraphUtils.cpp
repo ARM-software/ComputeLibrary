@@ -27,11 +27,6 @@
 #include "arm_compute/runtime/SubTensor.h"
 #include "utils/Utils.h"
 
-#ifdef ARM_COMPUTE_CL
-#include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/runtime/CL/CLTensor.h"
-#endif /* ARM_COMPUTE_CL */
-
 #include <iomanip>
 
 using namespace arm_compute::graph_utils;

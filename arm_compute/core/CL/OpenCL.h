@@ -119,6 +119,8 @@ public:
     DECLARE_FUNCTION_PTR(clSVMFree);
     DECLARE_FUNCTION_PTR(clEnqueueSVMMap);
     DECLARE_FUNCTION_PTR(clEnqueueSVMUnmap);
+    DECLARE_FUNCTION_PTR(clEnqueueMarker);
+    DECLARE_FUNCTION_PTR(clWaitForEvents);
 
 #undef DECLARE_FUNCTION_PTR
 

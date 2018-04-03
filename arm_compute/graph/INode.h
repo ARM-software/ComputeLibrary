@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,65 +24,228 @@
 #ifndef __ARM_COMPUTE_GRAPH_INODE_H__
 #define __ARM_COMPUTE_GRAPH_INODE_H__
 
-#include "arm_compute/graph/GraphContext.h"
-#include "arm_compute/graph/ITensorObject.h"
+#include "arm_compute/core/Error.h"
+#include "arm_compute/graph/TensorDescriptor.h"
 #include "arm_compute/graph/Types.h"
-#include "arm_compute/runtime/IFunction.h"
 
-#include <memory>
+#include <set>
 
 namespace arm_compute
 {
 namespace graph
 {
+// Forward declarations
+class Graph;
+class Edge;
+class INodeVisitor;
+class Tensor;
+
 /** Node interface */
 class INode
 {
 public:
-    /** Virtual Destructor */
+    /** Constructor */
+    INode();
+    /** Destructor **/
     virtual ~INode() = default;
-    /** Interface to be implemented that instantiates the node
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    INode(const INode &) = delete;
+    /** Prevent instances of this class from being copy assigned (As this class contains pointers) */
+    INode &operator=(const INode &) = delete;
+    /** Allow instances of this class to be moved */
+    INode(INode &&) = default;
+    /** Allow instances of this class to be move assigned */
+    INode &operator=(INode &&) = default;
+    /** Validate node
      *
-     * @param[in] ctx    Graph context to be used
-     * @param[in] input  Input tensor of the node
-     * @param[in] output Output tensor of the node
-     *
-     * @return a pointer to the function which implements the node.
+     * @return Status containing any errors
      */
-    virtual std::unique_ptr<arm_compute::IFunction> instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output) = 0;
-    /** Override the existing target hint
+    virtual Status validate() = 0;
+    /** Returns node's type
      *
-     * @note If the input is DONT_CARE then the method has to pick a technology,
-     *       else it can accept the hint or override it (But not with DONT_CARE)
-     *
-     * @param[in] target_hint Target hint to be considered
-     *
-     * @return The updated target hint
+     * @return Node's type
      */
-    TargetHint override_target_hint(TargetHint target_hint) const;
-    /** Method to check if the node supports in-place operations.
+    virtual NodeType type() const = 0;
+    /** Accepts a node visitor
      *
-     * @return True if the node supports in-place operations, false otherwise.
+     * @param[in] v Visitor to accept
      */
-    virtual bool supports_in_place() const;
-    /** Set the value of the _supports_in_place attribute.
+    virtual void accept(INodeVisitor &v) = 0;
+    /** Forwards descriptor information to outputs if possible
      *
-     * @param[in] value Boolean value to assign to _supports_in_place.
+     * @return True if descriptor information could be forwarded otherwise false
      */
-    void set_supports_in_place(bool value);
+    virtual bool forward_descriptors() = 0;
+    /** Calculates output configuration
+     *
+     * @param[in] idx Output index to configure
+     *
+     * @return Output descriptor configuration
+     */
+    virtual TensorDescriptor configure_output(size_t idx) const = 0;
+    /** Returns node's name
+     *
+     * @return Node name
+     */
+    std::string name() const;
+    /** Returns node's ID
+     *
+     * @return Node's ID
+     */
+    NodeID id() const;
+    /** Returns node's Graph
+     *
+     * @return Node's graph
+     */
+    const Graph *graph() const;
+    /** Returns node's Graph
+     *
+     * @return Node's graph
+     */
+    Graph *graph();
+    /** Sets the graph that this node is registered to
+     *
+     * @param[in] g Back reference to graph
+     */
+    void set_graph(Graph *g);
+    /** Sets the node id
+     *
+     * @param[in] id Node id
+     */
+    void set_id(NodeID id);
+    /** Sets common node parameters
+     *
+     * @param[in] common_params Common node parameters to set
+     */
+    void set_common_node_parameters(NodeParams common_params);
+    /** Sets target preference
+     *
+     * @note This is not the target that the graph executor might choose, its just an indication
+     *
+     * @param[in] target Target preference
+     */
+    void set_requested_target(Target target);
+    /** Sets the final execution target
+     *
+     * @note GraphManager might change this target
+     *
+     * @param[in] target Final execution target
+     */
+    void set_assigned_target(Target target);
+    /** Sets the output tensor of at a given index
+     *
+     * @note All edges will get updated
+     *
+     * @param[in] tid Tensor ID
+     * @param[in] idx Output index
+     */
+    void set_output_tensor(TensorID tid, size_t idx);
+    /** Returns inputs of the node
+     *
+     * @return Inputs of the node
+     */
+    const std::vector<TensorID> &inputs() const;
+    /** Returns outputs of the node
+     *
+     * @return Outputs of the node
+     */
+    const std::vector<TensorID> &outputs() const;
+    /** Returns input edge set
+     *
+     * @return Set of input edges
+     */
+    const std::vector<EdgeID> &input_edges() const;
+    /** Returns output edge set
+     *
+     * @return Set of output edges
+     */
+    const std::set<EdgeID> &output_edges() const;
+    /** Returns the tensor ID of a given input of the node
+     *
+     * @note Precondition : idx should be a valid input index
+     *
+     * @param[in] idx Index of the node input
+     *
+     * @return TensorID of the requested input
+     */
+    TensorID input_id(size_t idx) const;
+    /** Returns the tensor ID of a given output of the node
+     *
+     * @note Precondition : idx should be a valid output index
+     *
+     * @param[in] idx Index of the node output
+     *
+     * @return TensorID of the requested output
+     */
+    TensorID output_id(size_t idx) const;
+    /** Returns the tensor of a given input of the node
+     *
+     * @note Precondition : idx should be a valid input index
+     *
+     * @param[in] idx Index of the node input
+     *
+     * @return Tensor of the requested input
+     */
+    Tensor *input(size_t idx) const;
+    /** Returns the tensor of a given output of the node
+     *
+     * @note Precondition : idx should be a valid output index
+     *
+     * @param[in] idx Index of the node output
+     *
+     * @return Tensor of the requested output
+     */
+    Tensor *output(size_t idx) const;
+    /** Returns the edge ID of a given input of the node
+     *
+     * @note Precondition : idx should be a valid input index
+     *
+     * @param[in] idx Index of the node input
+     *
+     * @return EdgeID of the requested input
+     */
+    EdgeID input_edge_id(size_t idx) const;
+    /** Returns the edge of a given input of the node
+     *
+     * @note Precondition : idx should be a valid input index
+     *
+     * @param[in] idx Index of the node input
+     *
+     * @return Edge of the requested input
+     */
+    Edge *input_edge(size_t idx) const;
+    /** Returns number of inputs of the node
+     *
+     * @return Number of inputs
+     */
+    size_t num_inputs() const;
+    /** Returns number of outputs of the node
+     *
+     * @return Number of outputs
+     */
+    size_t num_outputs() const;
+    /** Returns requested target for this node
+     *
+     * @return Requested execution target
+     */
+    Target requested_target() const;
+    /** Returns assigned target for this node
+     *
+     * @return Assigned target of this node
+     */
+    Target assigned_target() const;
 
 protected:
-    /** Interface to be implement that override the hints
-     *
-     * @param[in] hints Hints to be considered
-     *
-     * @return The updated hints
-     */
-    virtual GraphHints node_override_hints(GraphHints hints) const;
+    friend class Graph;
 
 protected:
-    TargetHint _target_hint{ TargetHint::DONT_CARE };
-    bool       _supports_in_place{ false };
+    Graph                *_graph;           /**< Backward reference to graph owning the node */
+    NodeID                _id;              /**< Node ID */
+    NodeParams            _common_params;   /**< Node common params */
+    std::vector<TensorID> _outputs;         /**< Output of the node */
+    std::vector<EdgeID>   _input_edges;     /**< Inputs edge set */
+    std::set<EdgeID>      _output_edges;    /**< Output edge set */
+    Target                _assigned_target; /**< Assigned target by the Graph executor */
 };
 } // namespace graph
 } // namespace arm_compute

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,68 +21,74 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_CONTEXT_H__
-#define __ARM_COMPUTE_GRAPH_CONTEXT_H__
+#ifndef __ARM_COMPUTE_GRAPH_GRAPH_CONTEXT_H__
+#define __ARM_COMPUTE_GRAPH_GRAPH_CONTEXT_H__
 
 #include "arm_compute/graph/Types.h"
+
+#include "arm_compute/runtime/IMemoryManager.h"
+
+#include <map>
+#include <memory>
 
 namespace arm_compute
 {
 namespace graph
 {
-/** Hints that can be passed to the graph to expose parameterization */
-class GraphHints
+/** Contains structs required for memory management */
+struct MemoryManagerContext
 {
-public:
-    /** Default Constructor */
-    GraphHints(TargetHint            target_hint      = TargetHint::DONT_CARE,
-               ConvolutionMethodHint conv_method_hint = ConvolutionMethodHint::GEMM);
-    /** Sets target execution hint
-     *
-     * @param target_hint Target execution hint
-     */
-    void set_target_hint(TargetHint target_hint);
-    /** Sets convolution method to use
-     *
-     * @param convolution_method Convolution method to use
-     */
-    void set_convolution_method_hint(ConvolutionMethodHint convolution_method);
-    /** Returns target execution hint
-     *
-     * @return target execution hint
-     */
-    TargetHint target_hint() const;
-    /** Returns convolution method hint
-     *
-     * @return convolution method hint
-     */
-    ConvolutionMethodHint convolution_method_hint() const;
-
-private:
-    TargetHint            _target_hint;             /**< Target execution hint */
-    ConvolutionMethodHint _convolution_method_hint; /**< Convolution method hint */
+    Target                                       target = { Target::UNSPECIFIED }; /**< Target */
+    std::shared_ptr<arm_compute::IMemoryManager> mm     = { nullptr };             /**< Memory manager */
 };
 
-/** Graph context */
-class GraphContext
+/** Graph context **/
+class GraphContext final
 {
 public:
-    /** Default Constuctor */
+    /** Constructor */
     GraphContext();
-    /** Returns graph hints
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    GraphContext(const GraphContext &) = delete;
+    /** Default move constructor */
+    GraphContext(GraphContext &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    GraphContext &operator=(const GraphContext &) = delete;
+    /** Default move assignment operator */
+    GraphContext &operator=(GraphContext &&) = default;
+    /** Graph configuration accessor
      *
-     * @return Graph hints
-     */
-    GraphHints &hints();
-    /** Returns graph hints
+     * @note Every alteration has to be done before graph finalization
      *
-     * @return Graph hints
+     * @return The graph configuration
      */
-    const GraphHints &hints() const;
+    const GraphConfig &config() const;
+    /** Sets graph configuration
+     *
+     * @param[in] config Configuration to use
+     */
+    void set_config(const GraphConfig &config);
+    /** Inserts a memory manager context
+     *
+     * @param[in] memory_ctx Memory manage context
+     *
+     * @return If the insertion succeeded else false
+     */
+    bool insert_memory_management_ctx(MemoryManagerContext &&memory_ctx);
+    /** Gets a memory manager context for a given target
+     *
+     * @param[in] target To retrieve the management context
+     *
+     * @return Management context for the target if exists else nullptr
+     */
+    MemoryManagerContext *memory_management_ctx(Target target);
+    /** Finalizes memory managers in graph context */
+    void finalize();
 
 private:
-    GraphHints _hints; /**< Graph hints */
+    GraphConfig _config;                                     /**< Graph configuration */
+    std::map<Target, MemoryManagerContext> _memory_managers; /**< Memory managers for each target */
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_CONTEXT_H__ */
+#endif /* __ARM_COMPUTE_GRAPH_GRAPH_CONTEXT_H__ */

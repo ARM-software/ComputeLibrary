@@ -21,14 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/graph/Graph.h"
-#include "arm_compute/graph/Nodes.h"
+#include "arm_compute/graph.h"
 #include "support/ToolchainSupport.h"
 #include "utils/GraphUtils.h"
 #include "utils/Utils.h"
 
-using namespace arm_compute;
-using namespace arm_compute::graph;
+#include <cstdlib>
+
+using namespace arm_compute::utils;
+using namespace arm_compute::graph::frontend;
 using namespace arm_compute::graph_utils;
 
 /** Example demonstrating how to implement QASYMM8 MobileNet's network using the Compute Library's graph API
@@ -36,9 +37,11 @@ using namespace arm_compute::graph_utils;
  * @param[in] argc Number of arguments
  * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL, 2 = OpenCL with Tuner), [optional] Path to the weights folder, [optional] npy_input, [optional] labels )
  */
-class GraphMobileNetQASYMM8Example : public utils::Example
+class GraphMobileNetQASYMM8Example : public Example
 {
 public:
+    //FIXME: Missing quantization info to the tensor descriptor (Giorgio is working on it)
+#if 0
     void do_setup(int argc, char **argv) override
     {
         std::string data_path; /* Path to the trainable data */
@@ -217,6 +220,8 @@ private:
 
         return BranchLayer(std::move(sg));
     }
+#endif /* if 0 */
+    Stream graph { 0, "MobileNetV1_QASYMM8" };
 };
 /** Main program for MobileNetQASYMM8
  *
@@ -225,5 +230,5 @@ private:
  */
 int main(int argc, char **argv)
 {
-    return utils::run_example<GraphMobileNetQASYMM8Example>(argc, argv);
+    return arm_compute::utils::run_example<GraphMobileNetQASYMM8Example>(argc, argv);
 }

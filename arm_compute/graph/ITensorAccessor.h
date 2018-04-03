@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,10 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_ITENSORACCESSOR_H__
-#define __ARM_COMPUTE_GRAPH_ITENSORACCESSOR_H__
+#ifndef __ARM_COMPUTE_GRAPH_ITENSOR_ACCESSOR_H__
+#define __ARM_COMPUTE_GRAPH_ITENSOR_ACCESSOR_H__
 
-#include "arm_compute/graph/Types.h"
+#include "arm_compute/core/ITensor.h"
+
+#include <memory>
 
 namespace arm_compute
 {
@@ -44,6 +46,8 @@ public:
      */
     virtual bool access_tensor(ITensor &tensor) = 0;
 };
+
+using ITensorAccessorUPtr = std::unique_ptr<ITensorAccessor>;
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_ITENSORACCESSOR_H__ */
+#endif /* __ARM_COMPUTE_GRAPH_SUB_STREAM_H__ */

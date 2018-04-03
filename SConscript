@@ -170,9 +170,8 @@ runtime_files += Glob('src/runtime/CPP/functions/*.cpp')
 # CLHarrisCorners uses the Scheduler to run CPP kernels
 runtime_files += Glob('src/runtime/CPP/SingleThreadScheduler.cpp')
 
-# FIXME : Rename graph2 -> graph
-graph2_files = Glob('src/graph2/*.cpp')
-graph2_files += Glob('src/graph2/*/*.cpp')
+graph_files = Glob('src/graph/*.cpp')
+graph_files += Glob('src/graph/*/*.cpp')
 
 if env['cppthreads']:
      runtime_files += Glob('src/runtime/CPP/CPPScheduler.cpp')
@@ -188,7 +187,7 @@ if env['opencl']:
     runtime_files += Glob('src/runtime/CL/functions/*.cpp')
     runtime_files += Glob('src/runtime/CL/tuners/*.cpp')
 
-    graph2_files += Glob('src/graph2/backends/CL/*.cpp')
+    graph_files += Glob('src/graph/backends/CL/*.cpp')
 
 
 if env['neon']:
@@ -202,7 +201,7 @@ if env['neon']:
     core_files += Glob('src/core/NEON/kernels/convolution/winograd/*/*.cpp')
     arm_compute_env.Append(CPPPATH = ["arm_compute/core/NEON/kernels/winograd/", "arm_compute/core/NEON/kernels/assembly/"])
 
-    graph2_files += Glob('src/graph2/backends/NEON/*.cpp')
+    graph_files += Glob('src/graph/backends/NEON/*.cpp')
 
     if env['arch'] == "armv7a":
         core_files += Glob('src/core/NEON/kernels/arm_gemm/kernels/a32_*/*.cpp')
@@ -224,7 +223,7 @@ if env['gles_compute']:
     runtime_files += Glob('src/runtime/GLES_COMPUTE/*.cpp')
     runtime_files += Glob('src/runtime/GLES_COMPUTE/functions/*.cpp')
 
-    graph2_files += Glob('src/graph2/backends/GLES/*.cpp')
+    graph_files += Glob('src/graph/backends/GLES/*.cpp')
 
 arm_compute_core_a = build_library('arm_compute_core-static', core_files, static=True)
 Export('arm_compute_core_a')
@@ -241,37 +240,13 @@ if env['os'] != 'bare_metal' and not env['standalone']:
     Depends(arm_compute_so, arm_compute_core_so)
     Export('arm_compute_so')
 
-arm_compute_graph2_a = build_library('arm_compute_graph2-static', graph2_files, static=True, libs = [ arm_compute_a])
-Export('arm_compute_graph2_a')
+arm_compute_graph_a = build_library('arm_compute_graph-static', graph_files, static=True, libs = [ arm_compute_a])
+Export('arm_compute_graph_a')
 
 if env['os'] != 'bare_metal' and not env['standalone']:
-    arm_compute_graph2_so = build_library('arm_compute_graph2', graph2_files, static=False, libs = [ "arm_compute" , "arm_compute_core"])
-    Depends(arm_compute_graph2_so, arm_compute_so)
-    Export('arm_compute_graph2_so')
-
-if env['neon'] and env['opencl']:
-    Import('opencl')
-    graph_files = Glob('src/graph/*.cpp')
-    graph_files += Glob('src/graph/nodes/*.cpp')
-    graph_files += Glob('src/graph/operations/*.cpp')
-
-    graph_files += Glob('src/graph/CL/*.cpp')
-    graph_files += Glob('src/graph/NEON/*.cpp')
-
-    shared_graph_objects = [arm_compute_env.SharedObject(f) for f in graph_files]
-    static_graph_objects = [arm_compute_env.StaticObject(f) for f in graph_files]
-
-    arm_compute_graph_a = build_library('arm_compute_graph-static', static_graph_objects, static=True, libs = [ arm_compute_a ])
-    Export('arm_compute_graph_a')
-
-    arm_compute_env.Append(LIBPATH = ["#build/%s/opencl-1.2-stubs" % env['build_dir']])
-    arm_compute_graph_so = build_library('arm_compute_graph', shared_graph_objects, static=False, libs = [ "arm_compute", "arm_compute_core"])
+    arm_compute_graph_so = build_library('arm_compute_graph', graph_files, static=False, libs = [ "arm_compute" , "arm_compute_core"])
     Depends(arm_compute_graph_so, arm_compute_so)
-    Depends(arm_compute_graph_so, opencl)
     Export('arm_compute_graph_so')
-
-    graph_alias = arm_compute_env.Alias("arm_compute_graph", [arm_compute_graph_a, arm_compute_graph_so])
-    Default(graph_alias)
 
 if env['standalone']:
     alias = arm_compute_env.Alias("arm_compute", [arm_compute_a])

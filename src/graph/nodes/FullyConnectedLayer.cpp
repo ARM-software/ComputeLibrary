@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,18 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/graph/nodes/FullyConnectedLayer.h"
+#include "arm_compute/graph/nodes/FullyConnectedLayerNode.h"
 
-#include "arm_compute/graph/Error.h"
-#include "arm_compute/graph/NodeContext.h"
-#include "arm_compute/graph/OperationRegistry.h"
-#include "support/ToolchainSupport.h"
+#include "arm_compute/core/Utils.h"
+#include "arm_compute/graph/Graph.h"
+#include "arm_compute/graph/INodeVisitor.h"
 
-using namespace arm_compute::graph;
-
-namespace
+namespace arm_compute
 {
-TensorShape calculate_fullyconnected_layer_output_shape(const TensorShape &input_shape, unsigned int output_neurons)
+namespace graph
+{
+FullyConnectedLayerNode::FullyConnectedLayerNode(unsigned int num_outputs)
+    : _num_outputs(num_outputs)
+{
+    _input_edges.resize(3, EmptyEdgeID);
+    _outputs.resize(1, NullTensorID);
+}
+
+TensorShape FullyConnectedLayerNode::compute_weights_shape(TensorShape input_shape, unsigned int num_outputs)
+{
+    unsigned int num_weights    = 1;
+    unsigned int num_dimensions = input_shape.num_dimensions();
+    // Ignore the batch dimension if there is one:
+    if(num_dimensions == 2 || num_dimensions == 4)
+    {
+        num_dimensions--;
+    }
+    for(unsigned int i = 0; i < num_dimensions; i++)
+    {
+        num_weights *= input_shape[i];
+    }
+    return TensorShape(num_weights, num_outputs);
+}
+
+TensorShape FullyConnectedLayerNode::compute_output_shape(TensorShape input_shape, unsigned int num_outputs)
 {
     // Note: Only 1D batch space is supported at the moment
     unsigned int batches = input_shape[1];
@@ -40,67 +62,46 @@ TensorShape calculate_fullyconnected_layer_output_shape(const TensorShape &input
     {
         batches = input_shape[3];
     }
-    return TensorShape(output_neurons, batches);
+    return TensorShape(num_outputs, batches);
 }
-} // namespace
 
-std::unique_ptr<arm_compute::IFunction> FullyConnectedLayer::instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output)
+bool FullyConnectedLayerNode::forward_descriptors()
 {
-    ARM_COMPUTE_ERROR_ON_UNALLOCATED_TENSOR_OBJECT(input, output);
-
-    arm_compute::ITensor *in  = input->tensor();
-    arm_compute::ITensor *out = output->tensor();
-    _target_hint              = ctx.hints().target_hint();
-
-    if(_weights.tensor() == nullptr)
+    if((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
     {
-        unsigned int num_weights    = 1;
-        unsigned int num_dimensions = in->info()->num_dimensions();
-        // Ignore the batch dimension if there is one:
-        if(num_dimensions == 2 || num_dimensions == 4)
-        {
-            num_dimensions--;
-        }
-        for(unsigned int i = 0; i < num_dimensions; i++)
-        {
-            num_weights *= in->info()->dimension(i);
-        }
-        _weights.set_info(TensorInfo(TensorShape(num_weights, _num_neurons), in->info()->num_channels(), in->info()->data_type(), in->info()->fixed_point_position()));
+        Tensor *dst = output(0);
+        ARM_COMPUTE_ERROR_ON(dst == nullptr);
+        dst->desc() = configure_output(0);
+        return true;
     }
-    if(_biases.tensor() == nullptr)
-    {
-        _biases.set_info(TensorInfo(TensorShape(_num_neurons), in->info()->num_channels(), in->info()->data_type(), in->info()->fixed_point_position()));
-    }
-
-    // Auto configure output
-    arm_compute::auto_init_if_empty(*out->info(),
-                                    calculate_fullyconnected_layer_output_shape(in->info()->tensor_shape(), _num_neurons),
-                                    in->info()->num_channels(), in->info()->data_type(), in->info()->fixed_point_position());
-
-    bool weights_are_loaded = _weights.tensor() != nullptr;
-    bool biases_are_loaded  = _biases.tensor() != nullptr;
-
-    // Create node context
-    NodeContext node_ctx(OperationType::FullyConnectedLayer);
-    node_ctx.set_target(_target_hint);
-    node_ctx.add_input(in);
-    node_ctx.add_input(_weights.set_target(_target_hint));
-    node_ctx.add_input(_biases.set_target(_target_hint));
-    node_ctx.add_output(out);
-
-    // Configure operation
-    auto func = OperationRegistry::get().find_operation(OperationType::FullyConnectedLayer, _target_hint)->configure(node_ctx);
-
-    // Fill biases
-    if(!weights_are_loaded)
-    {
-        _weights.allocate_and_fill_if_needed();
-    }
-    if(!biases_are_loaded)
-    {
-        _biases.allocate_and_fill_if_needed();
-    }
-
-    // Get function
-    return func;
+    return false;
 }
+
+TensorDescriptor FullyConnectedLayerNode::configure_output(size_t idx) const
+{
+    ARM_COMPUTE_UNUSED(idx);
+    const Tensor *src = input(0);
+    ARM_COMPUTE_ERROR_ON(src == nullptr);
+
+    TensorDescriptor output_info  = src->desc();
+    TensorShape      output_shape = compute_output_shape(src->desc().shape, _num_outputs);
+    output_info.shape             = output_shape;
+    return output_info;
+}
+
+Status FullyConnectedLayerNode::validate()
+{
+    return Status{};
+}
+
+NodeType FullyConnectedLayerNode::type() const
+{
+    return NodeType::FullyConnectedLayer;
+}
+
+void FullyConnectedLayerNode::accept(INodeVisitor &v)
+{
+    v.visit(*this);
+}
+} // namespace graph
+} // namespace arm_compute

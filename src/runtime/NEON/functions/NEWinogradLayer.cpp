@@ -248,7 +248,7 @@ void NEWinogradLayer::run()
 Status NEWinogradLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, biases, output);
-    ARM_COMPUTE_RETURN_ERROR_ON(validate_arguments(input, weights, biases, output, conv_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, weights, biases, output, conv_info));
 
     return Status{};
 }

@@ -115,6 +115,8 @@ bool CLSymbols::load(const std::string &library)
     LOAD_FUNCTION_PTR(clSVMFree, handle);
     LOAD_FUNCTION_PTR(clEnqueueSVMMap, handle);
     LOAD_FUNCTION_PTR(clEnqueueSVMUnmap, handle);
+    LOAD_FUNCTION_PTR(clEnqueueMarker, handle);
+    LOAD_FUNCTION_PTR(clWaitForEvents, handle);
 
 #undef LOAD_FUNCTION_PTR
 
@@ -132,6 +134,36 @@ bool opencl_is_available()
     return CLSymbols::get().clBuildProgram_ptr != nullptr;
 }
 } // namespace arm_compute
+
+cl_int clEnqueueMarker(cl_command_queue command_queue,
+                       cl_event        *event)
+{
+    arm_compute::CLSymbols::get().load_default();
+    auto func = arm_compute::CLSymbols::get().clEnqueueMarker_ptr;
+    if(func != nullptr)
+    {
+        return func(command_queue, event);
+    }
+    else
+    {
+        return CL_OUT_OF_RESOURCES;
+    }
+}
+
+cl_int clWaitForEvents(cl_uint         num_events,
+                       const cl_event *event_list)
+{
+    arm_compute::CLSymbols::get().load_default();
+    auto func = arm_compute::CLSymbols::get().clWaitForEvents_ptr;
+    if(func != nullptr)
+    {
+        return func(num_events, event_list);
+    }
+    else
+    {
+        return CL_OUT_OF_RESOURCES;
+    }
+}
 
 cl_int clEnqueueSVMMap(cl_command_queue command_queue, cl_bool blocking_map, cl_map_flags flags, void *svm_ptr,
                        size_t size, cl_uint num_events_in_wait_list, const cl_event *event_wait_list, cl_event *event)

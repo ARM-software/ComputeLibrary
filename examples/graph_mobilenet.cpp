@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/graph2.h"
+#include "arm_compute/graph.h"
 #include "support/ToolchainSupport.h"
 #include "utils/GraphUtils.h"
 #include "utils/Utils.h"
@@ -29,7 +29,7 @@
 #include <cstdlib>
 
 using namespace arm_compute::utils;
-using namespace arm_compute::graph2::frontend;
+using namespace arm_compute::graph::frontend;
 using namespace arm_compute::graph_utils;
 
 /** Example demonstrating how to implement MobileNet's network using the Compute Library's graph API
@@ -51,7 +51,7 @@ public:
 
         // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
         const int                  target                     = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
-        Target                     target_hint                = set_target_hint2(target);
+        Target                     target_hint                = set_target_hint(target);
         ConvolutionMethod          convolution_hint           = ConvolutionMethod::GEMM;
         DepthwiseConvolutionMethod depthwise_convolution_hint = DepthwiseConvolutionMethod::OPTIMIZED_3x3;
 

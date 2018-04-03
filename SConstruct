@@ -246,7 +246,6 @@ if env['opencl']:
 
 if env['gles_compute'] and env['os'] != 'android':
     env.Append(CPPPATH = ['#/include/linux'])
-    env.Append(LIBPATH = ["#build/%s/opengles-3.1-stubs" % env['build_dir']])
     SConscript("./opengles-3.1-stubs/SConscript", variant_dir="build/%s/opengles-3.1-stubs" % env['build_dir'], duplicate=0)
 
 SConscript('./SConscript', variant_dir='#build/%s' % env['build_dir'], duplicate=0)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,37 +21,61 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/graph/nodes/ReshapeLayer.h"
+#include "arm_compute/graph/nodes/ReshapeLayerNode.h"
 
-#include "arm_compute/graph/Error.h"
-#include "arm_compute/graph/NodeContext.h"
-#include "arm_compute/graph/OperationRegistry.h"
-#include "support/ToolchainSupport.h"
+#include "arm_compute/graph/Graph.h"
+#include "arm_compute/graph/INodeVisitor.h"
 
-using namespace arm_compute::graph;
-
-ReshapeLayer::ReshapeLayer(TensorShape shape)
+namespace arm_compute
+{
+namespace graph
+{
+ReshapeLayerNode::ReshapeLayerNode(TensorShape shape)
     : _shape(shape)
 {
+    _input_edges.resize(1, EmptyEdgeID);
+    _outputs.resize(1, NullTensorID);
 }
 
-std::unique_ptr<arm_compute::IFunction> ReshapeLayer::instantiate_node(GraphContext &ctx, ITensorObject *input, ITensorObject *output)
+bool ReshapeLayerNode::forward_descriptors()
 {
-    ARM_COMPUTE_ERROR_ON_UNALLOCATED_TENSOR_OBJECT(input, output);
-
-    _target_hint              = ctx.hints().target_hint();
-    arm_compute::ITensor *in  = input->tensor();
-    arm_compute::ITensor *out = output->tensor();
-
-    // Auto configure output
-    arm_compute::auto_init_if_empty(*out->info(), _shape, 1, in->info()->data_type(), in->info()->fixed_point_position(), in->info()->quantization_info());
-
-    // Create node context
-    NodeContext node_ctx(OperationType::ReshapeLayer);
-    node_ctx.set_target(_target_hint);
-    node_ctx.add_input(in);
-    node_ctx.add_output(out);
-
-    // Get function
-    return OperationRegistry::get().find_operation(OperationType::ReshapeLayer, _target_hint)->configure(node_ctx);
+    if((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
+    {
+        Tensor *dst = output(0);
+        ARM_COMPUTE_ERROR_ON(dst == nullptr);
+        dst->desc() = configure_output(0);
+        return true;
+    }
+    return false;
 }
+
+TensorDescriptor ReshapeLayerNode::configure_output(size_t idx) const
+{
+    ARM_COMPUTE_UNUSED(idx);
+    ARM_COMPUTE_ERROR_ON(idx >= _outputs.size());
+
+    const Tensor *src = input(0);
+    ARM_COMPUTE_ERROR_ON(src == nullptr);
+
+    TensorDescriptor output_desc = src->desc();
+    output_desc.shape            = _shape;
+
+    return output_desc;
+}
+
+Status ReshapeLayerNode::validate()
+{
+    return Status{};
+}
+
+NodeType ReshapeLayerNode::type() const
+{
+    return NodeType::ReshapeLayer;
+}
+
+void ReshapeLayerNode::accept(INodeVisitor &v)
+{
+    v.visit(*this);
+}
+} // namespace graph
+} // namespace arm_compute

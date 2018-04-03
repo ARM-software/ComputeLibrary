@@ -29,10 +29,6 @@
 #include "arm_compute/graph/ITensorAccessor.h"
 #include "arm_compute/graph/Types.h"
 
-#include "arm_compute/core/CL/OpenCL.h"
-
-#include "arm_compute/graph2/Types.h"
-
 #include <array>
 #include <random>
 #include <string>
@@ -276,26 +272,6 @@ inline std::unique_ptr<graph::ITensorAccessor> get_input_accessor(const std::str
     }
 }
 
-/** Utility function to return the TargetHint
- *
- * @param[in] target Integer value which expresses the selected target. Must be 0 for NEON, 1 for OpenCL or 2 for OpenCL with Tuner
- *
- * @return the TargetHint
- */
-inline graph::TargetHint set_target_hint(int target)
-{
-    ARM_COMPUTE_ERROR_ON_MSG(target > 2, "Invalid target. Target must be 0 (NEON), 1 (OpenCL) or 2 (OpenCL with Tuner)");
-    if((target == 1 || target == 2) && graph::Graph::opencl_is_available())
-    {
-        // If type of target is OpenCL, check if OpenCL is available and initialize the scheduler
-        return graph::TargetHint::OPENCL;
-    }
-    else
-    {
-        return graph::TargetHint::NEON;
-    }
-}
-
 /** Generates appropriate output accessor according to the specified labels_path
  *
  * @note If labels_path is empty will generate a DummyAccessor else will generate a TopNPredictionsAccessor
@@ -324,21 +300,20 @@ inline std::unique_ptr<graph::ITensorAccessor> get_output_accessor(const std::st
  *
  * @return the TargetHint
  */
-inline graph2::Target set_target_hint2(int target)
+inline graph::Target set_target_hint(int target)
 {
     ARM_COMPUTE_ERROR_ON_MSG(target > 3, "Invalid target. Target must be 0 (NEON), 1 (OpenCL), 2 (OpenCL + Tuner), 3 (GLES)");
-    if((target == 1 || target == 2) && arm_compute::opencl_is_available())
+    if((target == 1 || target == 2))
     {
-        // If type of target is OpenCL, check if OpenCL is available and initialize the scheduler
-        return graph2::Target::CL;
+        return graph::Target::CL;
     }
     else if(target == 3)
     {
-        return graph2::Target::GC;
+        return graph::Target::GC;
     }
     else
     {
-        return graph2::Target::NEON;
+        return graph::Target::NEON;
     }
 }
 } // namespace graph_utils
