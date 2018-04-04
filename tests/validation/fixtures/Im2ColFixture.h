@@ -66,8 +66,7 @@ public:
         input_info.set_data_layout(_data_layout);
 
         const TensorShape output_shape = compute_im2col_conv_shape(&input_info, _kernel_dims, _conv_info, _has_bias, Size2D(1U, 1U));
-
-        _target = compute_target(input_shape, output_shape, data_type);
+        _target                        = compute_target(input_shape, output_shape, data_type);
 
         compute_reference(input_shape, output_shape, data_type);
     }

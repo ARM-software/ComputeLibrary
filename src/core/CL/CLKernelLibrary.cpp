@@ -272,6 +272,8 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "im2col_generic_dchw", "im2col.cl" },
     { "im2col_generic_padx0_pady0_dchw", "im2col.cl" },
     { "im2col_reduced_dchw", "im2col.cl" },
+    { "im2col3x3_nhwc", "im2col.cl" },
+    { "im2col_generic_nhwc", "im2col.cl" },
     { "init_level", "optical_flow_pyramid_lk.cl" },
     { "init_level_max", "optical_flow_pyramid_lk.cl" },
     { "init_level_max_initial_estimate", "optical_flow_pyramid_lk.cl" },
