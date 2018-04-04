@@ -270,7 +270,7 @@ TensorShape arm_compute::deconvolution_output_shape(const std::pair<unsigned int
     TensorShape out_shape(input);
     out_shape.set(0, out_dims.first);
     out_shape.set(1, out_dims.second);
-    out_shape.set(2, weights[3]);
+    out_shape.set(2, weights[2]);
     return out_shape;
 }
 
