@@ -85,9 +85,10 @@ public:
      * @param[in]  has_bias           In case biases are provided expands the matrix with 1.
      * @param[in]  is_fully_connected Determines whether this kernel will be called by @ref NEFullyConnectedLayer in order to validate the arguments
      * @param[in]  is_flatten         (Optional) Determines whether this kernel will be called by @ref NEFlattenLayer in order to validate the arguments
+     * @param[in]  is_transposed      (Optional) Determines whether this kernel will be called by @ref NEDeconvolutionLayer in order to validate the arguments
      */
     void configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
-                   bool has_bias, bool is_fully_connected = false, bool is_flatten = false);
+                   bool has_bias, bool is_fully_connected = false, bool is_flatten = false, bool is_transposed = false);
     /** Static function to check if given info will lead to a valid configuration of @ref NEIm2ColKernel
      *
      * @param[in] input              The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
@@ -99,11 +100,12 @@ public:
      * @param[in] has_bias           In case biases are provided expands the matrix with 1.
      * @param[in] is_fully_connected Determines whether this kernel will be called by @ref NEFullyConnectedLayer in order to validate the arguments
      * @param[in] is_flatten         (Optional) Determines whether this kernel will be called by @ref NEFlattenLayer in order to validate the arguments
+     * @param[in]  is_transposed     (Optional) Determines whether this kernel will be called by @ref NEDeconvolutionLayer in order to validate the arguments
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
-                           bool has_bias, bool is_fully_connected, bool is_flatten = false);
+                           bool has_bias, bool is_fully_connected, bool is_flatten = false, bool is_transposed = false);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

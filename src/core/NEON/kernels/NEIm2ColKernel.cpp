@@ -45,7 +45,7 @@ using namespace arm_compute;
 namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
-                          bool has_bias, bool is_fully_connected, bool is_flatten)
+                          bool has_bias, bool is_fully_connected, bool is_flatten, bool is_transposed)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
@@ -60,7 +60,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     else if(!is_fully_connected) /* Called by ConvolutionLayer */
     {
         std::pair<unsigned int, unsigned int> out_dims = scaled_dimensions(input->dimension(0), input->dimension(1), kernel_dims.width, kernel_dims.height, conv_info);
-//        ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(0) != (input->dimension(2) * kernel_dims.area() + (has_bias ? 1 : 0)));
+        ARM_COMPUTE_RETURN_ERROR_ON(!is_transposed && output->dimension(0) != (input->dimension(2) * kernel_dims.area() + (has_bias ? 1 : 0)));
         ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(1) != (out_dims.first * out_dims.second));
         ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(2) != 1);
     }
@@ -314,14 +314,14 @@ NEIm2ColKernel::NEIm2ColKernel()
 }
 
 void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
-                               bool has_bias, bool is_fully_connected, bool is_flatten)
+                               bool has_bias, bool is_fully_connected, bool is_flatten, bool is_transposed)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Perform validation step
     ARM_COMPUTE_UNUSED(is_fully_connected);
     ARM_COMPUTE_UNUSED(is_flatten);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), kernel_dims, conv_info, has_bias, is_fully_connected, is_flatten));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), kernel_dims, conv_info, has_bias, is_fully_connected, is_flatten, is_transposed));
 
     _input          = input;
     _output         = output;
@@ -408,9 +408,9 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
 }
 
 Status NEIm2ColKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
-                                bool has_bias, bool is_fully_connected, bool is_flatten)
+                                bool has_bias, bool is_fully_connected, bool is_flatten, bool is_transposed)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, kernel_dims, conv_info, has_bias, is_fully_connected, is_flatten));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, kernel_dims, conv_info, has_bias, is_fully_connected, is_flatten, is_transposed));
     return Status{};
 }
 

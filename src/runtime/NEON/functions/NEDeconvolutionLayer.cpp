@@ -75,7 +75,7 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
 
     // setup the function to convolve the upscaled output
     const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
-    _conv_f.configure(&_scaled_output, weights, bias, output, conv_info);
+    _conv_f.configure(&_scaled_output, weights, bias, output, conv_info, WeightsInfo(), true);
 
     // Allocate auxiliary tensors
     _scaled_output.allocator()->allocate();
