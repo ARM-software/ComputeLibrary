@@ -61,8 +61,9 @@ public:
      * @param[in]  conv_info    Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  weights_info Specifies if the weights tensor has been reshaped with NEWeightsReshapeKernel. If this is not part of the fully connected layer the weights
      *                          tensor has also been transposed with NEGEMMTranspose1xWKernel. Data type supported: Same as @p input.
+     * @param[in]  is_transposed     (Optional) Determines whether this kernel will be called by @ref NEDeconvolutionLayer in order to validate the arguments
      */
-    void configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info = WeightsInfo());
+    void configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info = WeightsInfo(), bool is_transposed = false);
     /** Static function to check if given info will lead to a valid configuration of @ref NEConvolutionLayer
      *
      * @param[in] input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -76,11 +77,12 @@ public:
      * @param[in] conv_info    Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in] weights_info Specifies if the weights tensor has been reshaped with NEWeightsReshapeKernel. If this is not part of the fully connected layer the weights
      *                         tensor has also been transposed with NEGEMMTranspose1xWKernel. Data type supported: Same as @p input.
+     * @param[in]  is_transposed     (Optional) Determines whether this kernel will be called by @ref NEDeconvolutionLayer in order to validate the arguments
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                           const WeightsInfo &weights_info = WeightsInfo());
+                           const WeightsInfo &weights_info = WeightsInfo(), bool is_transposed = false);
     /** Static function to check if given info will return the convolution called by @ref NEConvolutionLayer
      *
      * @param[in] input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],

@@ -38,7 +38,7 @@ NEConvolutionLayer::NEConvolutionLayer(std::shared_ptr<IMemoryManager> memory_ma
 {
 }
 
-void NEConvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info)
+void NEConvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info, bool is_transposed)
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
@@ -57,7 +57,7 @@ void NEConvolutionLayer::configure(ITensor *input, const ITensor *weights, const
         case ConvolutionMethod::GEMM:
         {
             auto f = arm_compute::support::cpp14::make_unique<NEGEMMConvolutionLayer>(_memory_manager);
-            f->configure(input, weights, biases, output, conv_info, weights_info);
+            f->configure(input, weights, biases, output, conv_info, weights_info, is_transposed);
             _function = std::move(f);
             break;
         }
@@ -75,7 +75,7 @@ void NEConvolutionLayer::configure(ITensor *input, const ITensor *weights, const
 }
 
 Status NEConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                    const WeightsInfo &weights_info)
+                                    const WeightsInfo &weights_info, bool is_transposed)
 {
     switch(NEConvolutionLayer::get_convolution_method(input, weights, biases, output, conv_info, weights_info))
     {
@@ -85,7 +85,7 @@ Status NEConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo 
             break;
         case ConvolutionMethod::GEMM:
             //Validate Gemm-based Convolution
-            NEGEMMConvolutionLayer::validate(input, weights, biases, output, conv_info, weights_info);
+            NEGEMMConvolutionLayer::validate(input, weights, biases, output, conv_info, weights_info, is_transposed);
             break;
         case ConvolutionMethod::DIRECT:
             //Validate Gemm-based Convolution

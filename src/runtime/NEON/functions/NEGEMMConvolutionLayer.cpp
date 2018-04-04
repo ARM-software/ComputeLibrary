@@ -180,12 +180,12 @@ Status validate_and_initialize_values(const ITensorInfo *input, const ITensorInf
                                       bool &are_weights_reshaped, unsigned int &kernel_width, unsigned int &kernel_height,
                                       bool &is_fully_connected_convolution, bool &is_interleaved, bool &is_quantized,
                                       unsigned int &mat_weights_cols, unsigned int &mat_weights_rows,
-                                      unsigned int &conv_w, unsigned int &conv_h)
+                                      unsigned int &conv_w, unsigned int &conv_h, bool is_transposed)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, weights);
-    ARM_COMPUTE_RETURN_ERROR_ON(!weights_info.are_reshaped() && weights->dimension(2) != input->dimension(2));
+    ARM_COMPUTE_RETURN_ERROR_ON(!is_transposed && !weights_info.are_reshaped() && weights->dimension(2) != input->dimension(2));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
     ARM_COMPUTE_RETURN_ERROR_ON(weights_info.are_reshaped() && is_data_type_quantized_asymmetric(input->data_type()));
 
@@ -275,7 +275,7 @@ void NEGEMMConvolutionLayer::configure_asm_mm(const struct CPUInfo &ci, int M, i
 #endif /* defined(__arm__) || defined(__aarch64__) */
 }
 
-void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info)
+void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info, bool is_transposed)
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
@@ -291,7 +291,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     Status status = validate_and_initialize_values(input->info(), weights->info(), (biases == nullptr) ? nullptr : biases->info(), conv_info, weights_info, dt, _append_bias, _are_weights_reshaped,
                                                    kernel_width, kernel_height,
                                                    _is_fully_connected_convolution, _is_interleaved, _is_quantized,
-                                                   mat_weights_cols, mat_weights_rows, conv_w, conv_h);
+                                                   mat_weights_cols, mat_weights_rows, conv_w, conv_h, is_transposed);
 
     ARM_COMPUTE_ERROR_THROW_ON(status);
 
@@ -400,7 +400,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
 
     // Configure kernels
     // Configure im2col
-    _input_im2col_kernel.configure(input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, _append_bias);
+    _input_im2col_kernel.configure(input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, _append_bias, is_transposed);
 
     // Configure matrix multiply
     if(_mm_optimised_kernel != nullptr)
@@ -477,7 +477,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
 }
 
 Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                        const WeightsInfo &weights_info)
+                                        const WeightsInfo &weights_info, bool is_transposed)
 {
     ARM_COMPUTE_UNUSED(output);
 
@@ -496,7 +496,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 
     Status status = validate_and_initialize_values(input, weights, biases, conv_info, weights_info, dt, append_bias, are_weights_reshaped, kernel_width, kernel_height,
                                                    is_fully_connected_convolution, is_interleaved, is_quantized, mat_weights_cols, mat_weights_rows,
-                                                   conv_w, conv_h);
+                                                   conv_w, conv_h, is_transposed);
 
     const Size2D kernel_weights = Size2D(kernel_width, kernel_height);
 
@@ -574,7 +574,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     shape_im2col.set(1, mat_input_rows);
     shape_im2col.set(2, 1);
     TensorInfo im2_col_info = input->clone()->set_tensor_shape(shape_im2col);
-    ARM_COMPUTE_RETURN_ON_ERROR(NEIm2ColKernel::validate(input, &im2_col_info, kernel_weights, conv_info, append_bias, false));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEIm2ColKernel::validate(input, &im2_col_info, kernel_weights, conv_info, append_bias, false, is_transposed));
 
     // Create GEMM output tensor
     TensorShape shape_gemm(im2_col_info.tensor_shape());
