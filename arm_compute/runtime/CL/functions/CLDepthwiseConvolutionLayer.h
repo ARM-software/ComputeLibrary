@@ -55,15 +55,17 @@ public:
     CLDepthwiseConvolutionLayer3x3();
     /** Initialize the function's source, destination, conv and border_size.
      *
-     * @param[in, out] input     Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
-     * @param[in]      weights   Weights tensor. A 3D tensor with shape [3, 3, IFM]. Data type supported: Same as @p input.
-     * @param[in]      biases    (Optional) Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
-     *                           Data type supported: Same as @p input.
-     * @param[out]     output    Destination tensor. Data type supported: same as @p input.
-     * @param[in]      conv_info Padding and stride information to use for the convolution.
-     * @param[in]      act_info  (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU for 3x3 QASYMM8 supported.
+     * @param[in, out] input            Source tensor. Data type supported: QASYMM8/F16/F32. (Written to only for border filling).
+     * @param[in]      weights          Weights tensor. A 3D tensor with shape [3, 3, IFM]. Data type supported: Same as @p input.
+     * @param[in]      biases           (Optional) Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
+     *                                  Data type supported: Same as @p input.
+     * @param[out]     output           Destination tensor. Data type supported: same as @p input.
+     * @param[in]      conv_info        Padding and stride information to use for the convolution.
+     * @param[in]      depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
+     * @param[in]      act_info         (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU for 3x3 QASYMM8 supported.
      */
-    void configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, ActivationLayerInfo act_info = ActivationLayerInfo());
+    void configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier = 1,
+                   ActivationLayerInfo act_info = ActivationLayerInfo());
 
     // Inherited methods overriden:
     void run() override;
@@ -96,14 +98,15 @@ public:
     CLDepthwiseConvolutionLayer &operator=(CLDepthwiseConvolutionLayer &&) = default;
     /** Initialize the function's source, destination, weights and convolution information.
      *
-     * @param[in, out] input     Source tensor. Data type supported: QASYMM8/F32. (Written to only for border filling).
-     * @param[in]      weights   Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM]. Data type supported: Same as @p input.
-     * @param[in]      biases    (Optional) Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
-     *                           Data type supported: Same as @p input, S32 when input is QASYMM8.
-     * @param[out]     output    Destination tensor. Data type supported: same as @p input.
-     * @param[in]      conv_info Padding and stride information to use for the convolution.
+     * @param[in, out] input            Source tensor. Data type supported: QASYMM8/F32. (Written to only for border filling).
+     * @param[in]      weights          Weights tensor. These are 3D tensors with shape [kernel_x, kernel_y, IFM]. Data type supported: Same as @p input.
+     * @param[in]      biases           (Optional) Biases tensor. A 1D tensor with shape [IFM]. Must be nullptr if not needed.
+     *                                  Data type supported: Same as @p input, S32 when input is QASYMM8.
+     * @param[out]     output           Destination tensor. Data type supported: same as @p input.
+     * @param[in]      conv_info        Padding and stride information to use for the convolution.
+     * @param[in]      depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
      */
-    void configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info);
+    void configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier = 1);
 
     // Inherited methods overriden:
     void run() override;

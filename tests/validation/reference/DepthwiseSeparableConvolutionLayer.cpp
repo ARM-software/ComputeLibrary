@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,7 +46,7 @@ SimpleTensor<T> depthwise_separable_convolution_layer(const SimpleTensor<T> &src
                                                       const SimpleTensor<T> &pointwise_biases, const TensorShape &dst_shape, const PadStrideInfo &depthwise_conv_info, const PadStrideInfo &pointwise_conv_info)
 {
     // Compute reference
-    SimpleTensor<T> depthwise_out = depthwise_convolution(src, depthwise_weights, depthwise_biases, depthwise_out_shape, depthwise_conv_info);
+    SimpleTensor<T> depthwise_out = depthwise_convolution(src, depthwise_weights, depthwise_biases, depthwise_out_shape, depthwise_conv_info, 1);
     SimpleTensor<T> dst           = convolution_layer(depthwise_out, pointwise_weights, pointwise_biases, dst_shape, pointwise_conv_info);
 
     return dst;

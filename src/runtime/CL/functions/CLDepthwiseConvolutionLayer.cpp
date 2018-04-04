@@ -39,7 +39,8 @@ CLDepthwiseConvolutionLayer3x3::CLDepthwiseConvolutionLayer3x3()
 {
 }
 
-void CLDepthwiseConvolutionLayer3x3::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, ActivationLayerInfo act_info)
+void CLDepthwiseConvolutionLayer3x3::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier,
+                                               ActivationLayerInfo act_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
@@ -54,7 +55,7 @@ void CLDepthwiseConvolutionLayer3x3::configure(ICLTensor *input, const ICLTensor
     }
 
     _kernel->set_target(CLScheduler::get().target());
-    _kernel->configure(input, weights, biases, output, conv_info, act_info);
+    _kernel->configure(input, weights, biases, output, conv_info, depth_multiplier, act_info);
 
     // Configure border handler
     PixelValue &&zero_value(0.f);
@@ -77,11 +78,11 @@ CLDepthwiseConvolutionLayer::CLDepthwiseConvolutionLayer()
 {
 }
 
-void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info)
+void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
-    ARM_COMPUTE_ERROR_ON(input->info()->dimension(2) != weights->info()->dimension(2));
+    ARM_COMPUTE_ERROR_ON((input->info()->dimension(2) * depth_multiplier) != weights->info()->dimension(2));
 
     const size_t weights_w = weights->info()->dimension(0);
     const size_t weights_h = weights->info()->dimension(1);
@@ -95,11 +96,15 @@ void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *w
     const GPUTarget gpu_target  = CLScheduler::get().target();
 
     // Calculate output shape
-    TensorShape dwc_output_shape = shape_calculator::compute_depthwise_convolution_shape(*input->info(), *weights->info(), conv_info);
+    TensorShape output_shape = shape_calculator::compute_depthwise_convolution_shape(*input->info(), *weights->info(), conv_info, depth_multiplier);
+
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
 
     // Output width and height
-    const unsigned int conv_w = dwc_output_shape.x();
-    const unsigned int conv_h = dwc_output_shape.y();
+    const unsigned int conv_w = output_shape.x();
+    const unsigned int conv_h = output_shape.y();
 
     // Set up intermediate tensors
     const size_t patch_size = weights_w * weights_h + ((append_bias) ? 1 : 0);
@@ -112,7 +117,7 @@ void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *w
     shape_im2col.set(2, weights_z);
     _input_reshaped.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_im2col));
     _im2col_kernel.set_target(gpu_target);
-    _im2col_kernel.configure(input, &_input_reshaped, Size2D(weights_w, weights_h), conv_info, append_bias);
+    _im2col_kernel.configure(input, &_input_reshaped, Size2D(weights_w, weights_h), conv_info, append_bias, depth_multiplier);
 
     // Weights reshape configuration
     const TensorShape shape_weights_reshape(patch_size, weights_z);
@@ -128,7 +133,7 @@ void CLDepthwiseConvolutionLayer::configure(ICLTensor *input, const ICLTensor *w
     _v2mm_output.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_data_type(v2mm_dt).set_tensor_shape(shape_v2mm_out));
     _v2mm_kernel.set_target(gpu_target);
     _v2mm_kernel.configure(&_input_reshaped, &_weights_reshaped, &_v2mm_output);
-    _output_reshaped.allocator()->init(_v2mm_output.info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(dwc_output_shape));
+    _output_reshaped.allocator()->init(_v2mm_output.info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape));
     _vector_to_tensor_kernel.configure(&_v2mm_output, (_is_quantized) ? &_output_reshaped : output, conv_w, conv_h);
 
     // Output staged configuration

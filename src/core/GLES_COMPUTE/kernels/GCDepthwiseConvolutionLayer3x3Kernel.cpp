@@ -33,31 +33,10 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 using namespace arm_compute;
-
-namespace
-{
-/** Calculates expected output shape dimension
- *
- * @param[in] Input shape
- *
- * @return Expected output shape
- */
-TensorShape get_output_shape(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info)
-{
-    unsigned int output_width  = 0;
-    unsigned int output_height = 0;
-
-    std::tie(output_width, output_height) = scaled_dimensions(input_shape.x(), input_shape.y(), weights_shape.x(), weights_shape.y(), conv_info);
-
-    TensorShape output_shape = input_shape;
-    output_shape.set(0, output_width);
-    output_shape.set(1, output_height);
-
-    return output_shape;
-}
-} // namespace
+using namespace arm_compute::misc::shape_calculator;
 
 GCDepthwiseConvolutionLayer3x3Kernel::GCDepthwiseConvolutionLayer3x3Kernel()
     : _border_size(0), _input(), _output(), _weights(), _biases(), _conv_stride_x(0), _conv_stride_y(0), _conv_pad_left(0), _conv_pad_top(0), _lws(gles::NDRange(1U, 1U, 1U))
@@ -69,7 +48,8 @@ BorderSize GCDepthwiseConvolutionLayer3x3Kernel::border_size() const
     return _border_size;
 }
 
-void GCDepthwiseConvolutionLayer3x3Kernel::configure(const IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, const PadStrideInfo &conv_info)
+void GCDepthwiseConvolutionLayer3x3Kernel::configure(const IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, const PadStrideInfo &conv_info,
+                                                     unsigned int depth_multiplier)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
@@ -83,7 +63,7 @@ void GCDepthwiseConvolutionLayer3x3Kernel::configure(const IGCTensor *input, con
     }
 
     // Get convolved dimensions
-    TensorShape output_shape = get_output_shape(input->info()->tensor_shape(), weights->info()->tensor_shape(), conv_info);
+    const TensorShape output_shape = compute_depthwise_convolution_shape(*input->info(), *weights->info(), conv_info, depth_multiplier);
 
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output->info(),
@@ -93,6 +73,7 @@ void GCDepthwiseConvolutionLayer3x3Kernel::configure(const IGCTensor *input, con
                        input->info()->fixed_point_position());
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
+    ARM_COMPUTE_ERROR_ON(output->info()->dimension(2) != weights->info()->dimension(2));
 
     _input         = input;
     _output        = output;
@@ -108,6 +89,7 @@ void GCDepthwiseConvolutionLayer3x3Kernel::configure(const IGCTensor *input, con
     ARM_COMPUTE_ERROR_ON(_conv_stride_x < 1 || _conv_stride_x > 3);
     std::set<std::string> options;
 
+    options.emplace("#define DEPTH_MULTIPLIER " + support::cpp11::to_string(depth_multiplier));
     options.emplace("#define LOCAL_SIZE_X " + support::cpp11::to_string(_lws[0]));
     options.emplace("#define LOCAL_SIZE_Y " + support::cpp11::to_string(_lws[1]));
     options.emplace("#define LOCAL_SIZE_Z " + support::cpp11::to_string(_lws[2]));

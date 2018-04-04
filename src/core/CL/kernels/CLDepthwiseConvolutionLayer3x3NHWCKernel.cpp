@@ -41,7 +41,7 @@ using namespace arm_compute::misc::shape_calculator;
 
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier,
                           const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8);
@@ -50,6 +50,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
                                     && (act_info.activation() != ActivationLayerInfo::ActivationFunction::RELU),
                                     "For QASYMM8 only relu, lower bounded relu and lower-upper bounded relu are supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+    ARM_COMPUTE_RETURN_ERROR_ON(depth_multiplier > 1); // COMPMID-1071 Add depth multiplier support for NHWC
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(1) != 3 || weights->dimension(2) != 3);
 
     if(biases != nullptr)
@@ -61,7 +62,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
 
     if(output->total_size() != 0)
     {
-        const TensorShape output_shape = compute_depthwise_convolution_shape(*input, *weights, conv_info);
+        const TensorShape output_shape = compute_depthwise_convolution_shape(*input, *weights, conv_info, depth_multiplier);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
     }
 
@@ -105,12 +106,13 @@ BorderSize CLDepthwiseConvolutionLayer3x3NHWCKernel::border_size() const
 }
 
 void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
+                                                         unsigned int        depth_multiplier,
                                                          ActivationLayerInfo act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
 
     // Get convolved dimensions
-    const TensorShape output_shape = compute_depthwise_convolution_shape(*input->info(), *weights->info(), conv_info);
+    const TensorShape output_shape = compute_depthwise_convolution_shape(*input->info(), *weights->info(), conv_info, depth_multiplier);
 
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output->info(),
@@ -120,7 +122,7 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
                        input->info()->fixed_point_position(),
                        input->info()->quantization_info());
 
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(), conv_info, act_info));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(), conv_info, depth_multiplier, act_info));
 
     const unsigned int conv_stride_x = conv_info.stride().first;
     ARM_COMPUTE_ERROR_ON(conv_stride_x < 1 || conv_stride_x > 2);
@@ -208,9 +210,10 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
 }
 
 Status CLDepthwiseConvolutionLayer3x3NHWCKernel::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
+                                                          unsigned int        depth_multiplier,
                                                           ActivationLayerInfo act_info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, weights, biases, output, conv_info, act_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, weights, biases, output, conv_info, depth_multiplier, act_info));
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), weights->clone().get(), output->clone().get(), conv_info).first);
 
     return Status{};

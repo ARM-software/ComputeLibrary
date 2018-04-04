@@ -47,14 +47,15 @@ public:
     GCDepthwiseConvolutionLayer3x3Kernel &operator=(GCDepthwiseConvolutionLayer3x3Kernel &&) = default;
     /** Initialize the function's source, destination, conv and border_size.
      *
-     * @param[in]  input     Source tensor. DataType supported: F16.
-     * @param[in]  weights   Weights tensor. A 3D tensor with dimensions [3, 3, IFM]. Data type supported: Same as @p input.
-     * @param[in]  biases    (Optional) Biases tensor. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
-     *                       Data type supported: Same as @p input.
-     * @param[out] output    Destination tensor. Data type supported: Same as @p input.
-     * @param[in]  conv_info Padding and stride information to use for the convolution.
+     * @param[in]  input            Source tensor. DataType supported: F16.
+     * @param[in]  weights          Weights tensor. A 3D tensor with dimensions [3, 3, IFM]. Data type supported: Same as @p input.
+     * @param[in]  biases           (Optional) Biases tensor. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
+     *                              Data type supported: Same as @p input.
+     * @param[out] output           Destination tensor. Data type supported: Same as @p input.
+     * @param[in]  conv_info        Padding and stride information to use for the convolution.
+     * @param[in]  depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
      */
-    void configure(const IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, const PadStrideInfo &conv_info);
+    void configure(const IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier = 1);
 
     // Inherited methods overridden:
     void run(const Window &window) override;

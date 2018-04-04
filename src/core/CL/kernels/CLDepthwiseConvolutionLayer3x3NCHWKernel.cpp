@@ -50,6 +50,7 @@ BorderSize CLDepthwiseConvolutionLayer3x3NCHWKernel::border_size() const
 }
 
 void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
+                                                         unsigned int        depth_multiplier,
                                                          ActivationLayerInfo act_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
@@ -73,7 +74,7 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input,
     }
 
     // Get convolved dimensions
-    const TensorShape output_shape = compute_depthwise_convolution_shape(*input->info(), *weights->info(), conv_info);
+    const TensorShape output_shape = compute_depthwise_convolution_shape(*input->info(), *weights->info(), conv_info, depth_multiplier);
 
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output->info(),
@@ -84,6 +85,7 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input,
                        input->info()->quantization_info());
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
+    ARM_COMPUTE_ERROR_ON(output->info()->dimension(2) != weights->info()->dimension(2));
 
     _input         = input;
     _output        = output;
@@ -98,6 +100,7 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input,
     // Set build options
     ARM_COMPUTE_ERROR_ON(_conv_stride_x < 1 || _conv_stride_x > 3);
     CLBuildOptions build_opts;
+    build_opts.add_option("-DDEPTH_MULTIPLIER=" + support::cpp11::to_string(depth_multiplier));
     build_opts.add_option("-DCONV_STRIDE_X=" + support::cpp11::to_string(_conv_stride_x));
     build_opts.add_option_if(_biases != nullptr, "-DHAS_BIAS");
 

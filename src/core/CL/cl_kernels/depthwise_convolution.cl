@@ -24,6 +24,7 @@
 
 #include "helpers.h"
 
+#if defined(DEPTH_MULTIPLIER)
 #if defined(CONV_STRIDE_X)
 
 #if CONV_STRIDE_X == 1
@@ -192,6 +193,8 @@ __kernel void depthwise_convolution_3x3(
     Vector biases = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
 #endif //defined(HAS_BIAS)
 
+    src.ptr -= (get_global_id(2) - get_global_id(2) / DEPTH_MULTIPLIER) * src_step_z;
+
     uchar3 offset          = (uchar3)(0, 1, 2) * (uchar3)weights_stride_y;
     float3 weights_values0 = vload3(0, (__global float *)(weights.ptr + offset.s0));
     float3 weights_values1 = vload3(0, (__global float *)(weights.ptr + offset.s1));
@@ -312,7 +315,7 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f32(
     float2 pixels3 = 0.0f;
 
     __global uchar *weights_addr = (__global uchar *)weights.ptr;
-    __global uchar *src_addr     = (__global uchar *)offset(&src, 0, 0);
+    __global uchar *src_addr     = src.ptr - (get_global_id(2) - get_global_id(2) / DEPTH_MULTIPLIER) * src_step_z;
 
     // Load the weights
     float3 weights_row0 = vload3(0, (__global float *)(weights_addr + 0 * weights_stride_y));
@@ -407,7 +410,7 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32(
     float2 pixels1 = 0.0f;
 
     __global uchar *weights_addr = (__global uchar *)weights.ptr;
-    __global uchar *src_addr     = (__global uchar *)offset(&src, 0, 0);
+    __global uchar *src_addr     = src.ptr - (get_global_id(2) - get_global_id(2) / DEPTH_MULTIPLIER) * src_step_z;
 
     // Load the weights
     float3 weights_row0 = vload3(0, (__global float *)(weights_addr + 0 * weights_stride_y));
@@ -445,6 +448,8 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32(
     vstore2(pixels0, 0, (__global float *)(dst.ptr + 0 * dst_stride_y));
     vstore2(pixels1, 0, (__global float *)(dst.ptr + 1 * dst_stride_y));
 }
+
+#endif // defined(DEPTH_MULTIPLIER)
 
 #if defined(SRC_WIDTH) && defined(DATA_TYPE)
 /** This kernel reshapes each of the tensor's low three dimensions to single rows.
@@ -501,11 +506,11 @@ __kernel void depthwise_weights_reshape(
 }
 #endif //defined(SRC_WIDTH) && defined(DATA_TYPE)
 
-#if defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP) && defined(PAD_RIGHT) && defined(PAD_BOTTOM) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(DATA_TYPE) && defined(PAD_VALUE)
+#if defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP) && defined(PAD_RIGHT) && defined(PAD_BOTTOM) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(DATA_TYPE) && defined(PAD_VALUE) && defined(DEPTH_MULTIPLIER)
 /** This kernel performs a reshaping of the input tensor to a tensor used to perform depthwise convolution using vector to matrix multiplication.
  *
  * @note The data type must be passed at compile time using -DDATA_TYPE: e.g. -DDATA_TYPE=float
- * @note The convolution information must be passed at compile time using -DSTRIDE_X, -DSTRIDE_Y, -DPAD_LEFT, -DPAD_TOP, -DPAD_RIGHT, -DPAD_BOTTOM, -DKERNEL_WIDHT, -DKERNEL_HEIGHT, -DSRC_WIDTH, -DSRC_HEIGHT
+ * @note The convolution information must be passed at compile time using -DSTRIDE_X, -DSTRIDE_Y, -DPAD_LEFT, -DPAD_TOP, -DPAD_RIGHT, -DPAD_BOTTOM, -DKERNEL_WIDHT, -DKERNEL_HEIGHT, -DSRC_WIDTH, -DSRC_HEIGHT, -DDEPTH_MULTIPLIER
  *
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/QS16/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -534,7 +539,7 @@ __kernel void depthwise_im2col(TENSOR3D_DECLARATION(src), TENSOR3D_DECLARATION(d
 
     const int src_x = -PAD_LEFT + src_pixel_linear % max_initial_x;
     const int src_y = -PAD_TOP + src_pixel_linear / max_initial_x * STRIDE_Y;
-    const int src_z = get_global_id(2);
+    const int src_z = get_global_id(2) / DEPTH_MULTIPLIER;
 
     __global uchar *input_ptr      = src_ptr + src_offset_first_element_in_bytes + src_z * src_stride_z;
     __global DATA_TYPE *output_ptr = ((__global DATA_TYPE *)(dst.ptr));
@@ -558,7 +563,7 @@ __kernel void depthwise_im2col(TENSOR3D_DECLARATION(src), TENSOR3D_DECLARATION(d
 #endif // defined(HAS_BIAS)
 }
 
-#endif //defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP) && defined(PAD_RIGHT) && defined(PAD_BOTTOM) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(SRC_WIDTH) && defined(DATA_TYPE) && defined(PAD_VALUE)
+#endif //defined(STRIDE_X) && defined(STRIDE_Y) && defined(PAD_LEFT) && defined(PAD_TOP) && defined(PAD_RIGHT) && defined(PAD_BOTTOM) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(SRC_WIDTH) && defined(DATA_TYPE) && defined(PAD_VALUE) && defined(DEPTH_MULTIPLIER)
 
 #if defined(CONV_WIDTH) && defined(CONV_HEIGHT) && defined(DATA_TYPE)
 
@@ -597,7 +602,7 @@ __kernel void depthwise_vector_to_tensor(
 
 #endif //defined(CONV_WIDTH) && defined(CONV_HEIGHT) && defined(DATA_TYPE)
 
-#if defined(ARM_COMPUTE_OPENCL_FP16_ENABLED)
+#if defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(DEPTH_MULTIPLIER)
 #if defined(CONV_STRIDE_X)
 #if CONV_STRIDE_X == 1
 #define convolution1x3_f16 convolution1x3_stride_1_f16
@@ -716,6 +721,8 @@ inline half4 convolution3x3_f16(
     return pixels;
 }
 
+#if defined(DEPTH_MULTIPLIER)
+
 /** This OpenCL kernel computes the depthwise convolution 3x3
  *
  * @param[in] src_ptr                               Pointer to the source image. Supported data types: F16
@@ -764,6 +771,8 @@ __kernel void depthwise_convolution_3x3_f16(
     Vector biases = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
 #endif //defined(HAS_BIAS)
 
+    src.ptr -= (get_global_id(2) - get_global_id(2) / DEPTH_MULTIPLIER) * src_step_z;
+
     uchar3 offset         = (uchar3)(0, 1, 2) * (uchar3)weights_stride_y;
     half3 weights_values0 = vload3(0, (__global half *)(weights.ptr + offset.s0));
     half3 weights_values1 = vload3(0, (__global half *)(weights.ptr + offset.s1));
@@ -778,6 +787,7 @@ __kernel void depthwise_convolution_3x3_f16(
 
     vstore4(pixels, 0, (__global half *)dst.ptr);
 }
+#endif // defined(DEPTH_MULTIPLIER)
 #endif // defined(CONV_STRIDE_X)
 
 /** This OpenCL kernel is optimized for Bifrost architectures and computes the 16bit floating point depthwise convolution 3x3
@@ -838,7 +848,7 @@ __kernel void depthwise_convolution_3x3_stridex1_stridey1_bifrost_f16(
     half4 pixels3 = 0.0f;
 
     __global uchar *weights_addr = (__global uchar *)weights.ptr;
-    __global uchar *src_addr     = (__global uchar *)offset(&src, 0, 0);
+    __global uchar *src_addr     = (__global uchar *)offset(&src, 0, 0) - (get_global_id(2) - get_global_id(2) / DEPTH_MULTIPLIER) * src_step_z;
 
     // Load the weights
     half3 weights_row0 = vload3(0, (__global half *)(weights_addr + 0 * weights_stride_y));
@@ -935,7 +945,7 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16(
     half4 pixels1 = 0.0f;
 
     __global uchar *weights_addr = (__global uchar *)weights.ptr;
-    __global uchar *src_addr     = (__global uchar *)offset(&src, 0, 0);
+    __global uchar *src_addr     = (__global uchar *)offset(&src, 0, 0) - (get_global_id(2) - get_global_id(2) / DEPTH_MULTIPLIER) * src_step_z;
 
     // Load the weights
     half3 weights_row0 = vload3(0, (__global half *)(weights_addr + 0 * weights_stride_y));
@@ -969,4 +979,4 @@ __kernel void depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16(
     vstore4(pixels0, 0, (__global half *)(dst.ptr + 0 * dst_stride_y));
     vstore4(pixels1, 0, (__global half *)(dst.ptr + 1 * dst_stride_y));
 }
-#endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED)
+#endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(DEPTH_MULTIPLIER)

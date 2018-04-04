@@ -51,7 +51,8 @@ namespace reference
  *
  */
 template <typename T, typename TB>
-void depthwise_convolution_nchw(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &biases, SimpleTensor<T> &dst, const PadStrideInfo &conv_info)
+void depthwise_convolution_nchw(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &biases, SimpleTensor<T> &dst, const PadStrideInfo &conv_info,
+                                unsigned int depth_multiplier)
 {
     // Compute reference
     const int filter_width  = weights.shape().x();
@@ -75,40 +76,47 @@ void depthwise_convolution_nchw(const SimpleTensor<T> &src, const SimpleTensor<T
     const int maximum_x = input_width + pad_left - filter_half_width + pad_right - filter_half_width;
     const int maximum_y = input_height + pad_top - filter_half_height + pad_bottom - filter_half_height;
 
+    const T border_value(0);
+
     int out_pos = 0;
     for(int r = 0; r < num_batches; ++r)
     {
         for(int z = 0; z < input_depth; ++z)
         {
-            for(int y = minimum_y; y < minimum_y + maximum_y; y += conv_info.stride().second)
+            for(unsigned int m = 0; m < depth_multiplier; ++m)
             {
-                for(int x = minimum_x; x < minimum_x + maximum_x; x += conv_info.stride().first)
-                {
-                    Coordinates coords(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z), static_cast<int>(r));
-                    size_t      filter_offset = filter_plane * z;
+                const int out_z = z * depth_multiplier + m;
 
-                    T val(0);
-                    for(int j = y - filter_half_height; j <= static_cast<int>(y + filter_half_height); ++j)
+                for(int y = minimum_y; y < minimum_y + maximum_y; y += conv_info.stride().second)
+                {
+                    for(int x = minimum_x; x < minimum_x + maximum_x; x += conv_info.stride().first)
                     {
-                        for(int i = x - filter_half_width; i <= static_cast<int>(x + filter_half_width); ++i)
+                        Coordinates coords(static_cast<int>(x), static_cast<int>(y), static_cast<int>(z), static_cast<int>(r));
+                        size_t      filter_offset = filter_plane * out_z;
+
+                        T val(0);
+                        for(int j = y - filter_half_height; j <= static_cast<int>(y + filter_half_height); ++j)
                         {
-                            coords.set(0, i);
-                            coords.set(1, j);
-                            T border_value(0);
-                            val += *(weights.data() + filter_offset) * tensor_elem_at(src, coords, BorderMode::CONSTANT, border_value);
-                            ++filter_offset;
+                            for(int i = x - filter_half_width; i <= static_cast<int>(x + filter_half_width); ++i)
+                            {
+                                coords.set(0, i);
+                                coords.set(1, j);
+
+                                val += *(weights.data() + filter_offset) * tensor_elem_at(src, coords, BorderMode::CONSTANT, border_value);
+                                ++filter_offset;
+                            }
                         }
+
+                        dst[out_pos++] = saturate_cast<T>(val + *static_cast<const TB *>(biases(Coordinates(out_z))));
                     }
-                    coords.set(0, x);
-                    coords.set(1, y);
-                    dst[out_pos++] = saturate_cast<T>(val + *static_cast<const TB *>(biases(Coordinates(z))));
                 }
             }
         }
     }
 }
 
-void depthwise_convolution_nchw(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &biases, SimpleTensor<uint8_t> &dst, const PadStrideInfo &conv_info)
+void depthwise_convolution_nchw(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &biases, SimpleTensor<uint8_t> &dst, const PadStrideInfo &conv_info,
+                                unsigned int depth_multiplier)
 {
     // Create reference
     const int   input_offset   = -src.quantization_info().offset;
@@ -150,89 +158,76 @@ void depthwise_convolution_nchw(const SimpleTensor<uint8_t> &src, const SimpleTe
     {
         for(int z = 0; z < input_depth; ++z)
         {
-            int32_t bias_val = *static_cast<const int32_t *>(biases(Coordinates(z)));
-            for(int y = minimum_y; y < minimum_y + maximum_y; y += conv_info.stride().second)
+            for(unsigned int m = 0; m < depth_multiplier; ++m)
             {
-                for(int x = minimum_x; x < minimum_x + maximum_x; x += conv_info.stride().first)
+                const int     out_z    = z * depth_multiplier + m;
+                const int32_t bias_val = *static_cast<const int32_t *>(biases(Coordinates(out_z)));
+
+                for(int y = minimum_y; y < minimum_y + maximum_y; y += conv_info.stride().second)
                 {
-                    Coordinates coords(x, y, z, r);
-                    int         filter_offset = filter_plane * z;
-
-                    int32_t val = 0;
-                    for(int j = y - filter_half_height; j <= (y + filter_half_height); ++j)
+                    for(int x = minimum_x; x < minimum_x + maximum_x; x += conv_info.stride().first)
                     {
-                        for(int i = x - filter_half_width; i <= (x + filter_half_width); ++i)
-                        {
-                            coords.set(0, i);
-                            coords.set(1, j);
-                            const auto    in_val = tensor_elem_at<uint8_t>(src, coords, BorderMode::CONSTANT, -input_offset);
-                            const uint8_t w_val  = *(weights.data() + filter_offset);
-                            val += (in_val + input_offset) * (w_val + weights_offset);
-                            ++filter_offset;
-                        }
-                    }
-                    val += bias_val;
-                    val = asymm_rounding_divide_by_pow2(asymm_int_mult(val, output_multiplier), output_shift);
-                    val += output_offset;
-                    val = std::max<int32_t>(val, 0);
-                    val = std::min<int32_t>(val, 255);
+                        Coordinates coords(x, y, z, r);
+                        int         filter_offset = filter_plane * out_z;
 
-                    // Store the result
-                    dst[out_pos++] = val;
+                        int32_t val = 0;
+                        for(int j = y - filter_half_height; j <= (y + filter_half_height); ++j)
+                        {
+                            for(int i = x - filter_half_width; i <= (x + filter_half_width); ++i)
+                            {
+                                coords.set(0, i);
+                                coords.set(1, j);
+                                const auto    in_val = tensor_elem_at<uint8_t>(src, coords, BorderMode::CONSTANT, -input_offset);
+                                const uint8_t w_val  = *(weights.data() + filter_offset);
+                                val += (in_val + input_offset) * (w_val + weights_offset);
+                                ++filter_offset;
+                            }
+                        }
+                        val += bias_val;
+                        val = asymm_rounding_divide_by_pow2(asymm_int_mult(val, output_multiplier), output_shift);
+                        val += output_offset;
+                        val = std::max<int32_t>(val, 0);
+                        val = std::min<int32_t>(val, 255);
+
+                        // Store the result
+                        dst[out_pos++] = val;
+                    }
                 }
             }
         }
     }
 }
 
-template <>
-SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &biases, const TensorShape &dst_shape,
-                                            const PadStrideInfo &conv_info)
+template <typename T, typename TB>
+SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &biases, const TensorShape &dst_shape, const PadStrideInfo &conv_info,
+                                      unsigned int depth_multiplier)
 {
-    SimpleTensor<uint8_t> dst{ dst_shape, src.data_type(), 1, src.fixed_point_position(), src.quantization_info() };
+    SimpleTensor<T> dst{ dst_shape, src.data_type(), 1, src.fixed_point_position(), src.quantization_info() };
 
     if(src.data_layout() == DataLayout::NHWC)
-    {
-        SimpleTensor<uint8_t> src_nchw     = reference::permute<uint8_t>(src, PermutationVector(1U, 2U, 0U));
-        SimpleTensor<uint8_t> weights_nchw = reference::permute<uint8_t>(weights, PermutationVector(1U, 2U, 0U));
-        SimpleTensor<uint8_t> dst_nchw     = reference::permute<uint8_t>(dst, PermutationVector(1U, 2U, 0U));
-
-        depthwise_convolution_nchw(src_nchw, weights_nchw, biases, dst_nchw, conv_info);
-
-        return reference::permute<uint8_t>(dst_nchw, PermutationVector(2U, 0U, 1U));
-    }
-
-    depthwise_convolution_nchw(src, weights, biases, dst, conv_info);
-
-    return dst;
-}
-
-template <typename T, typename TB>
-SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &biases, const TensorShape &dst_shape, const PadStrideInfo &conv_info)
-{
-    SimpleTensor<T> dst{ dst_shape, src.data_type(), 1, src.fixed_point_position() };
-
-    if(src.data_layout() == DataLayout::NHWC && src.data_type() == DataType::F32)
     {
         SimpleTensor<T> src_nchw     = reference::permute<T>(src, PermutationVector(1U, 2U, 0U));
         SimpleTensor<T> weights_nchw = reference::permute<T>(weights, PermutationVector(1U, 2U, 0U));
         SimpleTensor<T> dst_nchw     = reference::permute<T>(dst, PermutationVector(1U, 2U, 0U));
 
-        depthwise_convolution_nchw<T, TB>(src_nchw, weights_nchw, biases, dst_nchw, conv_info);
+        depthwise_convolution_nchw(src_nchw, weights_nchw, biases, dst_nchw, conv_info, depth_multiplier);
 
         return reference::permute<T>(dst_nchw, PermutationVector(2U, 0U, 1U));
     }
 
-    depthwise_convolution_nchw<T, TB>(src, weights, biases, dst, conv_info);
+    depthwise_convolution_nchw(src, weights, biases, dst, conv_info, depth_multiplier);
 
     return dst;
 }
 
+template SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &biases, const TensorShape &dst_shape,
+                                                     const PadStrideInfo &conv_info, unsigned int depth_multiplier);
+
 template SimpleTensor<float> depthwise_convolution(const SimpleTensor<float> &src, const SimpleTensor<float> &weights, const SimpleTensor<float> &biases, const TensorShape &dst_shape,
-                                                   const PadStrideInfo &conv_info);
+                                                   const PadStrideInfo &conv_info, unsigned int depth_multiplier);
 
 template SimpleTensor<half> depthwise_convolution(const SimpleTensor<half> &src, const SimpleTensor<half> &weights, const SimpleTensor<half> &biases, const TensorShape &dst_shape,
-                                                  const PadStrideInfo &conv_info);
+                                                  const PadStrideInfo &conv_info, unsigned int depth_multiplier);
 } // namespace reference
 } // namespace validation
 } // namespace test

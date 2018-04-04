@@ -42,13 +42,13 @@ CLDepthwiseIm2ColKernel::CLDepthwiseIm2ColKernel()
 {
 }
 
-void CLDepthwiseIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias)
+void CLDepthwiseIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, unsigned int depth_multiplier)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     ARM_COMPUTE_ERROR_ON(is_data_type_quantized_asymmetric(input->info()->data_type()) && has_bias);
-    ARM_COMPUTE_ERROR_ON(input->info()->dimension(2) != output->info()->dimension(2));
+    ARM_COMPUTE_ERROR_ON((input->info()->dimension(2) * depth_multiplier) != output->info()->dimension(2));
     ARM_COMPUTE_ERROR_ON(output->info()->dimension(0) != (kernel_dims.width * kernel_dims.height + ((has_bias) ? 1 : 0)));
 
     _input  = input;
@@ -68,6 +68,7 @@ void CLDepthwiseIm2ColKernel::configure(const ICLTensor *input, ICLTensor *outpu
     build_opts.add_option("-DSRC_HEIGHT=" + support::cpp11::to_string(input->info()->dimension(1)));
     build_opts.add_option("-DKERNEL_WIDTH=" + support::cpp11::to_string(kernel_dims.width));
     build_opts.add_option("-DKERNEL_HEIGHT=" + support::cpp11::to_string(kernel_dims.height));
+    build_opts.add_option("-DDEPTH_MULTIPLIER=" + support::cpp11::to_string(depth_multiplier));
     build_opts.add_option_if(has_bias, "-DHAS_BIAS");
     build_opts.add_option_if_else(is_data_type_quantized_asymmetric(input->info()->data_type()),
                                   "-DPAD_VALUE=" + support::cpp11::to_string(input->info()->quantization_info().offset),
@@ -85,8 +86,8 @@ void CLDepthwiseIm2ColKernel::configure(const ICLTensor *input, ICLTensor *outpu
     }
 
     // Configure  kernel window
-    Window win = calculate_max_window(*input->info(), Steps());
-    // The CLDepthwiseIm2ColKernel doesn't need padding so update_window_and_padding() can be skipped
+    Window win = calculate_max_window(*output->info(), Steps());
+    // CLDepthwiseIm2ColKernel doesn't need padding so update_window_and_padding() can be skipped
     output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     ICLKernel::configure(win);

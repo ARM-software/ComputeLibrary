@@ -54,15 +54,16 @@ public:
     NEDepthwiseIm2ColKernel &operator=(NEDepthwiseIm2ColKernel &&) = default;
     /** Set the input and output of the kernel.
      *
-     * @param[in]  input       The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
-     *                         while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8, F32
-     * @param[out] output      The output tensor. First 3 lower dimensions represent a transform of each 3D input,
-     *                         while every dimension above 3 represents a batch. Data types supported: Same as @p input
-     * @param[in]  kernel_dims The kernel dimensions (width and height).
-     * @param[in]  conv_info   Contains padding and stride information described in @ref PadStrideInfo.
-     * @param[in]  has_bias    Boolean that specifies if the depthwise convolution has bias.
+     * @param[in]  input            The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
+     *                              while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8, F32
+     * @param[out] output           The output tensor. First 3 lower dimensions represent a transform of each 3D input,
+     *                              while every dimension above 3 represents a batch. Data types supported: Same as @p input
+     * @param[in]  kernel_dims      The kernel dimensions (width and height).
+     * @param[in]  conv_info        Contains padding and stride information described in @ref PadStrideInfo.
+     * @param[in]  has_bias         Boolean that specifies if the depthwise convolution has bias.
+     * @param[in]  depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
      */
-    void configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias = false);
+    void configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias = false, unsigned int depth_multiplier = 1);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
@@ -87,6 +88,7 @@ private:
     Size2D                     _kernel_dims;
     PadStrideInfo              _conv_info;
     bool                       _has_bias;
+    unsigned int               _depth_multiplier;
 };
 } // arm_compute
 #endif /*__ARM_COMPUTE_NEDEPTHWISEIM2COLKERNEL_H__ */

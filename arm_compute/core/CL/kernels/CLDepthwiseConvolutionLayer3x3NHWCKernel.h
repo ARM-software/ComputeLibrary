@@ -40,29 +40,31 @@ public:
     /** Default move assignment operator. */
     /** Initialize the function's source, destination, conv and border_size.
      *
-     * @param[in]  input     Source tensor. DataType supported: QASYMM8.
-     * @param[in]  weights   Weights tensor. A 3D tensor with dimensions [IFM, 3, 3]. Data type supported: Same as @p input.
-     * @param[in]  biases    (Optional) Biases tensor. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
-     *                       Data type supported: Same as @p input.
-     * @param[out] output    Destination tensor. Data type supported: Same as @p input.
-     * @param[in]  conv_info Padding and stride information to use for the convolution.
-     * @param[in]  act_info  (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU are supported.
+     * @param[in]  input            Source tensor. DataType supported: QASYMM8.
+     * @param[in]  weights          Weights tensor. A 3D tensor with dimensions [IFM, 3, 3]. Data type supported: Same as @p input.
+     * @param[in]  biases           (Optional) Biases tensor. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
+     *                              Data type supported: Same as @p input.
+     * @param[out] output           Destination tensor. Data type supported: Same as @p input.
+     * @param[in]  conv_info        Padding and stride information to use for the convolution.
+     * @param[in]  depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
+     * @param[in]  act_info         (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU are supported.
      */
-    void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info,
+    void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier,
                    ActivationLayerInfo act_info) override;
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthwiseConvolutionLayer3x3NHWCKernel
      *
-     * @param[in] input     Source tensor. DataType supported: QASYMM8.
-     * @param[in] weights   Weights tensor. A 3D tensor with dimensions [IFM, 3, 3]. Data type supported: Same as @p input.
-     * @param[in] biases    (Optional) Biases tensor. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
-     *                      Data type supported: Same as @p input.
-     * @param[in] output    Destination tensor. Data type supported: Same as @p input.
-     * @param[in] conv_info Padding and stride information to use for the convolution.
-     * @param[in] act_info  (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU are supported.
+     * @param[in] input            Source tensor. DataType supported: QASYMM8.
+     * @param[in] weights          Weights tensor. A 3D tensor with dimensions [IFM, 3, 3]. Data type supported: Same as @p input.
+     * @param[in] biases           (Optional) Biases tensor. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
+     *                             Data type supported: Same as @p input.
+     * @param[in] output           Destination tensor. Data type supported: Same as @p input.
+     * @param[in] conv_info        Padding and stride information to use for the convolution.
+     * @param[in] depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
+     * @param[in] act_info         (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU are supported.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
+    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier,
                            ActivationLayerInfo act_info = ActivationLayerInfo());
 
     void run(const Window &window, cl::CommandQueue &queue) override;

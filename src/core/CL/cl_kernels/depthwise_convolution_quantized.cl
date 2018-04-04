@@ -126,6 +126,8 @@ __kernel void depthwise_convolution_3x3_quantized_nchw(
     int bias_value = *((__global int *)(vector_offset(&biases, get_global_id(2))));
 #endif //defined(HAS_BIAS)
 
+    src.ptr -= (get_global_id(2) - get_global_id(2) / DEPTH_MULTIPLIER) * src_step_z;
+
     uchar3 w0 = vload3(0, weights.ptr + 0 * weights_stride_y);
     uchar3 w1 = vload3(0, weights.ptr + 1 * weights_stride_y);
     uchar3 w2 = vload3(0, weights.ptr + 2 * weights_stride_y);

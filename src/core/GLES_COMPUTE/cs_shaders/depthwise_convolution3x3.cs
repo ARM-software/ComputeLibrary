@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -107,6 +107,8 @@ void main()
 
     uint z_index = gl_GlobalInvocationID.z;
     TENSOR_ITERATOR_ADVANCE_IN_BYTES(weights_iter, z_index * weights_attrs.stride_z);
+
+    src_iter.current_offset_in_bytes -= int((z_index - z_index / uint(DEPTH_MULTIPLIER)) * src_attrs.step_z);
 
     vec4 w[3];
     w[0] = LOAD_UNPACK4_CURRENT_ITEM_HALF(weights_ptr, weights_iter);
@@ -262,6 +264,8 @@ void main()
 
     uint z_index = gl_GlobalInvocationID.z;
     TENSOR_ITERATOR_ADVANCE_IN_BYTES(weights_iter, z_index * weights_attrs.stride_z);
+
+    src_iter.current_offset_in_bytes -= int((z_index - z_index / uint(DEPTH_MULTIPLIER)) * src_attrs.step_z);
 
     vec4 w[3];
     w[0] = LOAD_UNPACK4_CURRENT_ITEM_HALF(weights_ptr, weights_iter);

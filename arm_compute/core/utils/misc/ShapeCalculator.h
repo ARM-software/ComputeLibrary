@@ -125,7 +125,7 @@ inline TensorShape compute_transposed_shape(const ITensorInfo &input)
 
     return shape_transposed;
 }
-inline TensorShape compute_depthwise_convolution_shape(const ITensorInfo &input, const ITensorInfo &weights, PadStrideInfo conv_info)
+inline TensorShape compute_depthwise_convolution_shape(const ITensorInfo &input, const ITensorInfo &weights, PadStrideInfo conv_info, unsigned int depth_multiplier)
 {
     const TensorShape input_shape{ input.tensor_shape() };
     const TensorShape weights_shape{ weights.tensor_shape() };
@@ -133,6 +133,7 @@ inline TensorShape compute_depthwise_convolution_shape(const ITensorInfo &input,
     const DataLayout data_layout = input.data_layout();
     const int        width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const int        height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const int        channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
 
     unsigned int output_width  = 0;
     unsigned int output_height = 0;
@@ -143,6 +144,7 @@ inline TensorShape compute_depthwise_convolution_shape(const ITensorInfo &input,
     TensorShape output_shape{ input_shape };
     output_shape.set(width_idx, output_width);
     output_shape.set(height_idx, output_height);
+    output_shape.set(channel_idx, input_shape[channel_idx] * depth_multiplier);
 
     return output_shape;
 }

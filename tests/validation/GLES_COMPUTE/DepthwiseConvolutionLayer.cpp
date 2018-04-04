@@ -44,6 +44,8 @@ namespace
 {
 RelativeTolerance<half> tolerance_fp16(half(0.2)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
 constexpr float         tolerance_num = 0.07f;     /**< Tolerance number */
+
+const auto depth_multipliers = framework::dataset::make("DepthMultiplier", { 1, 2, 3 });
 } // namespace
 
 TEST_SUITE(GC)
@@ -55,14 +57,16 @@ using GCDepthwiseConvolutionLayerFixture3x3 = DepthwiseConvolutionLayerValidatio
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
 TEST_SUITE(W3x3)
-FIXTURE_DATA_TEST_CASE(RunSmall, GCDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
+FIXTURE_DATA_TEST_CASE(RunSmall, GCDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
+                                                                                                                   depth_multipliers),
                                                                                                                    framework::dataset::make("DataType",
                                                                                                                            DataType::F16)),
                                                                                                                    framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     validate(GCAccessor(_target), _reference, tolerance_fp16, tolerance_num);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, GCDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
+FIXTURE_DATA_TEST_CASE(RunLarge, GCDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
+                                                                                                                       depth_multipliers),
                                                                                                                        framework::dataset::make("DataType",
                                                                                                                                DataType::F16)),
                                                                                                                        framework::dataset::make("DataLayout", DataLayout::NCHW)))
