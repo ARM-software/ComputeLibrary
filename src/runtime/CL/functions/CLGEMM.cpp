@@ -44,7 +44,7 @@ inline bool is_interleaved_transposed(int m, int n, int k, DataType data_type, b
 {
     bool flag = true;
 
-    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72))
+    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX))
     {
         // COMPMID-852
         if(k > 256 && m > 4 && data_type == DataType::F32 && reshape_b_only_on_first_run)
@@ -126,7 +126,7 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
     int       mult_transpose1xW_width   = 1;
     int       mult_interleave4x4_height = 1;
 
-    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72))
+    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX))
     {
         mult_transpose1xW_width   = 4;
         mult_interleave4x4_height = 2;

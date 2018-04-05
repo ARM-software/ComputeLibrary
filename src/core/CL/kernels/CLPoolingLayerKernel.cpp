@@ -240,7 +240,7 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     // On Bifrost, this works for up to 35x35xC filters, for which the pooling_layer_3_optimized
     // kernel is launched with gws=(9, 33, C). In any case, the hint will be ignored if it is
     // invalid (e.g. exceeds the maximum workgroup size that the kernel can be launched with).
-    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72))
+    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX))
     {
         cl::NDRange gws = ICLKernel::gws_from_window(std::get<1>(win_config));
         _lws_hint       = cl::NDRange(gws[0], gws[1], 1);

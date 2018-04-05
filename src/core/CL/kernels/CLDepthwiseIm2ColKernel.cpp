@@ -79,7 +79,7 @@ void CLDepthwiseIm2ColKernel::configure(const ICLTensor *input, ICLTensor *outpu
     // via exhaustive autotuning for the MobileNets tensor shapes.
     const GPUTarget gpu_target = get_target();
 
-    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72))
+    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX))
     {
         _lws_hint = cl::NDRange(1, 2, 1);
     }

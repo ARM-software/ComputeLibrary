@@ -112,7 +112,7 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
     // Configure the local work size for Bifrost with a value obtained
     // via exhaustive autotuning over 30 representative tensor shapes.
     const GPUTarget gpu_target = get_target();
-    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72))
+    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX))
     {
         if((_convolved_dims.first == 7) || (_convolved_dims.first == 14))
         {

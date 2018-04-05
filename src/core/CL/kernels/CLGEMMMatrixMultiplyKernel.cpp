@@ -219,6 +219,10 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
             break;
         case GPUTarget::G71:
         case GPUTarget::G72:
+        case GPUTarget::G51:
+        case GPUTarget::G51BIG:
+        case GPUTarget::G51LIT:
+        case GPUTarget::TNOX:
             if(input1->info()->dimension(1) == 24)
             {
                 // LWS optimized for the 11x11 AlexNet convolution on Bifrost.
@@ -284,7 +288,7 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
         build_opts.add_option("-DCOLS_A=" + support::cpp11::to_string(input0->info()->dimension(0)));
 
         // Create kernels according to the architecture, data type and input size.
-        if((gpu_target == GPUTarget::G71 || gpu_target == GPUTarget::G72) && data_type == DataType::F32)
+        if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX) && data_type == DataType::F32)
         {
             // The first kernel is optimized for the case of 1000 or less output elements (e.g. FC8 of AlexNet and VGG-16, and
             // FC1 of Inception v3). The second kernel is optimized for the case of greater than 1000 output elements (e.g.

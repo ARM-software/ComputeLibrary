@@ -147,7 +147,7 @@ void CLDepthwiseConvolutionLayer3x3Kernel::configure(const ICLTensor *input, con
     // Configure the local work size for Bifrost with a value obtained
     // via exhaustive autotuning for the MobileNets tensor shapes.
     const GPUTarget gpu_target = get_target();
-    const bool      is_bifrost = gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72);
+    const bool      is_bifrost = gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX);
 
     // Configure kernel window
     unsigned int num_elems_read_per_iteration_x    = 0;
