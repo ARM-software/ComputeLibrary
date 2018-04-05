@@ -36,10 +36,11 @@ class ConvolutionLayerNode final : public INode
 public:
     /** Constructor
      *
-     * @param[in] info   Convolution layer attributes
-     * @param[in] method (Optional) Convolution method to use
+     * @param[in] info           Convolution layer attributes
+     * @param[in] method         (Optional) Convolution method to use
+     * @param[in] out_quant_info (Optional) Output quantization info
      */
-    ConvolutionLayerNode(PadStrideInfo info, ConvolutionMethod method = ConvolutionMethod::DEFAULT);
+    ConvolutionLayerNode(PadStrideInfo info, ConvolutionMethod method = ConvolutionMethod::DEFAULT, QuantizationInfo out_quant_info = QuantizationInfo());
     /** Sets the convolution layer method to use
      *
      * @param[in] method Method to use for convolution
@@ -78,6 +79,7 @@ public:
 private:
     PadStrideInfo     _info;
     ConvolutionMethod _method;
+    QuantizationInfo  _out_quant_info;
 };
 } // namespace graph
 } // namespace arm_compute

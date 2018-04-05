@@ -109,13 +109,17 @@ public:
      * @param[in] method                (Optional) Convolution method to use
      * @param[in] weights_accessor      (Optional) Accessor of the weights node data
      * @param[in] bias_accessor         (Optional) Accessor of the bias node data
+     * @param[in] weights_quant_info    (Optional) Weights quantization info
+     * @param[in] out_quant_info        (Optional) Output quantization info
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_convolution_node(Graph &g, NodeParams params, NodeIdxPair input,
                                        Size2D kernel_spatial_extend, unsigned int depth, PadStrideInfo conv_info,
                                        unsigned int num_groups = 1, ConvolutionMethod method = ConvolutionMethod::DEFAULT,
-                                       ITensorAccessorUPtr weights_accessor = nullptr, ITensorAccessorUPtr bias_accessor = nullptr);
+                                       ITensorAccessorUPtr weights_accessor = nullptr, ITensorAccessorUPtr bias_accessor = nullptr,
+                                       const QuantizationInfo weights_quant_info = QuantizationInfo(),
+                                       const QuantizationInfo out_quant_info     = QuantizationInfo());
     /** Adds a depth concatenate node to the graph
      *
      * @param[in] g      Graph to add the node to
@@ -135,13 +139,14 @@ public:
      * @param[in] method                (Optional) Convolution method to use
      * @param[in] weights_accessor      (Optional) Accessor of the weights node data
      * @param[in] bias_accessor         (Optional) Accessor of the bias node data
+     * @param[in] quant_info            (Optional) Weights quantization info
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_depthwise_convolution_node(Graph &g, NodeParams params, NodeIdxPair input,
                                                  Size2D kernel_spatial_extend, PadStrideInfo conv_info,
                                                  DepthwiseConvolutionMethod method    = DepthwiseConvolutionMethod::DEFAULT,
-                                                 ITensorAccessorUPtr weights_accessor = nullptr, ITensorAccessorUPtr bias_accessor = nullptr);
+                                                 ITensorAccessorUPtr weights_accessor = nullptr, ITensorAccessorUPtr bias_accessor = nullptr, const QuantizationInfo quant_info = QuantizationInfo());
     /** Adds an element-wise layer node to the graph
      *
      * @param[in] g         Graph to add the node to

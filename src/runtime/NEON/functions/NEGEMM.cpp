@@ -107,7 +107,10 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
 
             // Manage intermediate buffers
             _memory_group.manage(&_tmp_a);
-            _memory_group.manage(&_tmp_b);
+            if(!_reshape_b_only_on_first_run)
+            {
+                _memory_group.manage(&_tmp_b);
+            }
 
             int m = a->info()->dimension(1);
             int n = b->info()->dimension(0);

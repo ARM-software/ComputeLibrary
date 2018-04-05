@@ -160,28 +160,34 @@ class ConvolutionLayer final : public ILayer
 public:
     /** Construct a convolution layer.
      *
-     * @param[in] conv_width  Convolution width.
-     * @param[in] conv_height Convolution height.
-     * @param[in] ofm         Output feature map.
-     * @param[in] weights     Accessor to get kernel weights from.
-     * @param[in] bias        Accessor to get kernel bias from.
-     * @param[in] conv_info   Padding and stride information.
-     * @param[in] num_groups  (Optional) Number of groups. Default: 1.
+     * @param[in] conv_width         Convolution width.
+     * @param[in] conv_height        Convolution height.
+     * @param[in] ofm                Output feature map.
+     * @param[in] weights            Accessor to get kernel weights from.
+     * @param[in] bias               Accessor to get kernel bias from.
+     * @param[in] conv_info          Padding and stride information.
+     * @param[in] num_groups         (Optional) Number of groups. Default: 1.
+     * @param[in] weights_quant_info (Optional) Weights quantization information
+     * @param[in] out_quant_info     (Optional) Output quantization info
      */
-    ConvolutionLayer(unsigned int        conv_width,
-                     unsigned int        conv_height,
-                     unsigned int        ofm,
-                     ITensorAccessorUPtr weights,
-                     ITensorAccessorUPtr bias,
-                     PadStrideInfo       conv_info,
-                     unsigned int        num_groups = 1)
+    ConvolutionLayer(unsigned int           conv_width,
+                     unsigned int           conv_height,
+                     unsigned int           ofm,
+                     ITensorAccessorUPtr    weights,
+                     ITensorAccessorUPtr    bias,
+                     PadStrideInfo          conv_info,
+                     unsigned int           num_groups         = 1,
+                     const QuantizationInfo weights_quant_info = QuantizationInfo(),
+                     const QuantizationInfo out_quant_info     = QuantizationInfo())
         : _conv_width(conv_width),
           _conv_height(conv_height),
           _ofm(ofm),
           _conv_info(std::move(conv_info)),
           _num_groups(num_groups),
           _weights(std::move(weights)),
-          _bias(std::move(bias))
+          _bias(std::move(bias)),
+          _weights_quant_info(std::move(weights_quant_info)),
+          _out_quant_info(std::move(out_quant_info))
     {
     }
 
@@ -192,17 +198,19 @@ public:
         return GraphBuilder::add_convolution_node(s.graph(), common_params, input,
                                                   Size2D(_conv_width, _conv_height), _ofm, _conv_info, _num_groups,
                                                   s.hints().convolution_method_hint,
-                                                  std::move(_weights), std::move(_bias));
+                                                  std::move(_weights), std::move(_bias), std::move(_weights_quant_info), std::move(_out_quant_info));
     }
 
 private:
-    unsigned int        _conv_width;
-    unsigned int        _conv_height;
-    unsigned int        _ofm;
-    const PadStrideInfo _conv_info;
-    unsigned int        _num_groups;
-    ITensorAccessorUPtr _weights;
-    ITensorAccessorUPtr _bias;
+    unsigned int           _conv_width;
+    unsigned int           _conv_height;
+    unsigned int           _ofm;
+    const PadStrideInfo    _conv_info;
+    unsigned int           _num_groups;
+    ITensorAccessorUPtr    _weights;
+    ITensorAccessorUPtr    _bias;
+    const QuantizationInfo _weights_quant_info;
+    const QuantizationInfo _out_quant_info;
 };
 
 /** Depthwise Convolution Layer */
@@ -216,17 +224,20 @@ public:
      * @param[in] weights     Accessor to get kernel weights from.
      * @param[in] bias        Accessor to get kernel bias from.
      * @param[in] conv_info   Padding and stride information.
+     * @param[in] quant_info  (Optional) Quantization info used for weights
      */
-    DepthwiseConvolutionLayer(unsigned int        conv_width,
-                              unsigned int        conv_height,
-                              ITensorAccessorUPtr weights,
-                              ITensorAccessorUPtr bias,
-                              PadStrideInfo       conv_info)
+    DepthwiseConvolutionLayer(unsigned int           conv_width,
+                              unsigned int           conv_height,
+                              ITensorAccessorUPtr    weights,
+                              ITensorAccessorUPtr    bias,
+                              PadStrideInfo          conv_info,
+                              const QuantizationInfo quant_info = QuantizationInfo())
         : _conv_width(conv_width),
           _conv_height(conv_height),
           _conv_info(std::move(conv_info)),
           _weights(std::move(weights)),
-          _bias(std::move(bias))
+          _bias(std::move(bias)),
+          _quant_info(std::move(quant_info))
     {
     }
 
@@ -237,15 +248,16 @@ public:
         return GraphBuilder::add_depthwise_convolution_node(s.graph(), common_params,
                                                             input, Size2D(_conv_width, _conv_height), _conv_info,
                                                             s.hints().depthwise_convolution_method_hint,
-                                                            std::move(_weights), std::move(_bias));
+                                                            std::move(_weights), std::move(_bias), std::move(_quant_info));
     }
 
 private:
-    unsigned int        _conv_width;
-    unsigned int        _conv_height;
-    const PadStrideInfo _conv_info;
-    ITensorAccessorUPtr _weights;
-    ITensorAccessorUPtr _bias;
+    unsigned int           _conv_width;
+    unsigned int           _conv_height;
+    const PadStrideInfo    _conv_info;
+    ITensorAccessorUPtr    _weights;
+    ITensorAccessorUPtr    _bias;
+    const QuantizationInfo _quant_info;
 };
 
 /** Flatten Layer */

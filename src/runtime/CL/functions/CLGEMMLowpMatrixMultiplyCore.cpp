@@ -102,7 +102,10 @@ void CLGEMMLowpMatrixMultiplyCore::configure(const ICLTensor *a, const ICLTensor
         matrix_b = &_tmp_b;
 
         _memory_group.manage(&_tmp_a);
-        _memory_group.manage(&_tmp_b);
+        if(!_reshape_b_only_on_first_run)
+        {
+            _memory_group.manage(&_tmp_b);
+        }
 
         // Configure interleave kernel
         _mtx_a_reshape_kernel.configure(a, &_tmp_a, mult_interleave4x4_height);
@@ -119,7 +122,10 @@ void CLGEMMLowpMatrixMultiplyCore::configure(const ICLTensor *a, const ICLTensor
     {
         TensorInfo info_vector_sum_col(compute_reductionA_shape(*b->info()), 1, DataType::S32);
         _vector_sum_col.allocator()->init(info_vector_sum_col);
-        _memory_group.manage(&_vector_sum_col);
+        if(!_reshape_b_only_on_first_run)
+        {
+            _memory_group.manage(&_vector_sum_col);
+        }
 
         // Configure Matrix B reduction kernel
         _mtx_b_reduction_kernel.configure(b, &_vector_sum_col);

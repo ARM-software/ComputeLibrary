@@ -308,6 +308,14 @@ inline ::std::ostream &operator<<(::std::ostream &os, const PadStrideInfo &pad_s
 
     return os;
 }
+
+/** Formatted output of the QuantizationInfo type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const QuantizationInfo &quantization_info)
+{
+    os << "Scale:" << quantization_info.scale << "~"
+       << "Offset:" << quantization_info.offset;
+    return os;
+}
 } // namespace graph
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_GRAPH_TYPE_PRINTER_H__ */

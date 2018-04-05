@@ -154,10 +154,16 @@ std::unique_ptr<IFunction> create_convolution_layer(ConvolutionLayerNode &node, 
     ARM_COMPUTE_ERROR_ON(node.num_outputs() != 1);
 
     // Extract IO and info
-    IGCTensor              *input          = get_backing_tensor(node.input(0));
-    IGCTensor              *weights        = get_backing_tensor(node.input(1));
-    IGCTensor              *biases         = get_backing_tensor(node.input(2));
-    IGCTensor              *output         = get_backing_tensor(node.output(0));
+    IGCTensor *input   = get_backing_tensor(node.input(0));
+    IGCTensor *weights = get_backing_tensor(node.input(1));
+    IGCTensor *biases  = get_backing_tensor(node.input(2));
+    IGCTensor *output  = get_backing_tensor(node.output(0));
+
+    if(is_data_type_quantized_asymmetric(input->info()->data_type()))
+    {
+        biases->info()->set_data_type(DataType::S32);
+    }
+
     const PadStrideInfo     conv_info      = node.convolution_info();
     const ConvolutionMethod conv_algorithm = node.convolution_method();
 
@@ -180,6 +186,8 @@ std::unique_ptr<IFunction> create_convolution_layer(ConvolutionLayerNode &node, 
     // Log info
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << func_name
                                << " Data Type: " << input->info()->data_type()
+                               << " Input QuantInfo: " << input->info()->quantization_info()
+                               << " Weights QuantInfo: " << weights->info()->quantization_info()
                                << " Input shape: " << input->info()->tensor_shape()
                                << " Weights shape: " << weights->info()->tensor_shape()
                                << " Output shape: " << output->info()->tensor_shape()
@@ -241,10 +249,16 @@ std::unique_ptr<IFunction> create_depthwise_convolution_layer(DepthwiseConvoluti
     ARM_COMPUTE_ERROR_ON(node.num_outputs() != 1);
 
     // Extract IO and info
-    IGCTensor                       *input         = get_backing_tensor(node.input(0));
-    IGCTensor                       *weights       = get_backing_tensor(node.input(1));
-    IGCTensor                       *biases        = get_backing_tensor(node.input(2));
-    IGCTensor                       *output        = get_backing_tensor(node.output(0));
+    IGCTensor *input   = get_backing_tensor(node.input(0));
+    IGCTensor *weights = get_backing_tensor(node.input(1));
+    IGCTensor *biases  = get_backing_tensor(node.input(2));
+    IGCTensor *output  = get_backing_tensor(node.output(0));
+
+    if(is_data_type_quantized_asymmetric(input->info()->data_type()))
+    {
+        biases->info()->set_data_type(DataType::S32);
+    }
+
     const PadStrideInfo              conv_info     = node.convolution_info();
     const DepthwiseConvolutionMethod dwc_algorithm = node.depthwise_convolution_method();
 
@@ -264,6 +278,8 @@ std::unique_ptr<IFunction> create_depthwise_convolution_layer(DepthwiseConvoluti
     // Log info
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << func_name
                                << " Data Type: " << input->info()->data_type()
+                               << " Input QuantInfo: " << input->info()->quantization_info()
+                               << " Weights QuantInfo: " << weights->info()->quantization_info()
                                << " Input shape: " << input->info()->tensor_shape()
                                << " Weights shape: " << weights->info()->tensor_shape()
                                << " Output shape: " << output->info()->tensor_shape()

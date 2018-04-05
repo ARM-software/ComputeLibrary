@@ -63,7 +63,10 @@ TensorDescriptor SoftmaxLayerNode::configure_output(size_t idx) const
     const Tensor *src = input(0);
     ARM_COMPUTE_ERROR_ON(src == nullptr);
 
-    return src->desc();
+    TensorDescriptor out_desc = src->desc();
+    out_desc.quant_info       = QuantizationInfo(1.f / 256.f, 0);
+
+    return out_desc;
 }
 
 Status SoftmaxLayerNode::validate()

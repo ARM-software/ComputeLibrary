@@ -109,14 +109,6 @@ Status NEConvolutionLayerReshapeWeights::validate(const ITensorInfo *weights, co
         ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
     }
 
-    // Checks performed when biases are present
-    if(append_bias)
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(weights, biases);
-        ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != weights->dimension(3));
-        ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
-    }
-
     if(transpose1xW)
     {
         TensorInfo weights_reshaped = weights->clone()->set_tensor_shape(get_reshaped_weights_shape(weights, append_bias));
@@ -344,7 +336,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     _memory_group.manage(&_input_im2col_reshaped);
 
     // Create tensor (interleave) to prepare input tensor for GEMM
-    if(!_is_fully_connected_convolution && !run_optimised)
+    if(!_is_fully_connected_convolution && !run_optimised && _is_interleaved)
     {
         TensorShape shape_interleaved(shape_im2col);
         shape_interleaved.set(0, shape_interleaved.x() * 4);
@@ -362,7 +354,9 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     TensorInfo info_gemm(shape_gemm, 1, gemm_data_type, input->info()->fixed_point_position());
     info_gemm.set_quantization_info(output->info()->quantization_info());
     _gemm_output.allocator()->init(info_gemm);
-    _memory_group.manage(&_gemm_output);
+
+    // FIXME: enabling memory manager for _gemm_output gives incorrect results (maybe bound to the assembly kernel in GEMMLowp?)
+    //  _memory_group.manage(&_gemm_output);
 
     // Configure kernels
     // Configure im2col
@@ -491,7 +485,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
         reshaped_weights->set_tensor_shape(get_reshaped_weights_shape_conv(weights, append_bias, is_fully_connected_convolution));
         ARM_COMPUTE_RETURN_ON_ERROR(NEConvolutionLayerReshapeWeights::validate(weights, biases, reshaped_weights.get(), !is_fully_connected_convolution /* 1xW transpose */));
     }
-    else
+    else if(!is_quantized)
     {
         TensorShape reshaped_weights_shape;
 

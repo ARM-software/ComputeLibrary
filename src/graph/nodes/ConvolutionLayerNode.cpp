@@ -31,8 +31,8 @@ namespace arm_compute
 {
 namespace graph
 {
-ConvolutionLayerNode::ConvolutionLayerNode(PadStrideInfo info, ConvolutionMethod method)
-    : _info(std::move(info)), _method(method)
+ConvolutionLayerNode::ConvolutionLayerNode(PadStrideInfo info, ConvolutionMethod method, QuantizationInfo out_quant_info)
+    : _info(std::move(info)), _method(method), _out_quant_info(out_quant_info)
 {
     _input_edges.resize(3, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -90,6 +90,12 @@ TensorDescriptor ConvolutionLayerNode::configure_output(size_t idx) const
     TensorDescriptor output_info  = src->desc();
     TensorShape      output_shape = compute_output_shape(src->desc().shape, weights->desc().shape, _info);
     output_info.shape             = output_shape;
+
+    if(!_out_quant_info.empty())
+    {
+        output_info.quant_info = _out_quant_info;
+    }
+
     return output_info;
 }
 

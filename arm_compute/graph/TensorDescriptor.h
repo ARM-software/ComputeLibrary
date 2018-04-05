@@ -37,18 +37,20 @@ struct TensorDescriptor final
     TensorDescriptor() = default;
     /** Constructor
      *
-     * @param[in] tensor_shape     Tensor shape
-     * @param[in] tensor_data_type Tensor data type
-     * @param[in] tensor_target    Target to allocate the tensor for
+     * @param[in] tensor_shape      Tensor shape
+     * @param[in] tensor_data_type  Tensor data type
+     * @param[in] tensor_quant_info Tensor quantization info
+     * @param[in] tensor_target     Target to allocate the tensor for
      */
-    TensorDescriptor(TensorShape tensor_shape, DataType tensor_data_type, Target tensor_target = Target::UNSPECIFIED)
-        : shape(tensor_shape), data_type(tensor_data_type), target(tensor_target)
+    TensorDescriptor(TensorShape tensor_shape, DataType tensor_data_type, QuantizationInfo tensor_quant_info = QuantizationInfo(), Target tensor_target = Target::UNSPECIFIED)
+        : shape(tensor_shape), data_type(tensor_data_type), quant_info(tensor_quant_info), target(tensor_target)
     {
     }
 
-    TensorShape shape{};                        /**< Tensor shape */
-    DataType    data_type{ DataType::UNKNOWN }; /**< Data type */
-    Target      target{ Target::UNSPECIFIED };  /**< Target */
+    TensorShape      shape{};                        /**< Tensor shape */
+    DataType         data_type{ DataType::UNKNOWN }; /**< Data type */
+    QuantizationInfo quant_info{};                   /**< Quantization info */
+    Target           target{ Target::UNSPECIFIED };  /**< Target */
 };
 } // namespace graph
 } // namespace arm_compute

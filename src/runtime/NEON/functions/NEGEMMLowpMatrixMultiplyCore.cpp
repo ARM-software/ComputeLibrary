@@ -43,19 +43,19 @@ using namespace arm_compute::misc::shape_calculator;
 NEGEMMLowpMatrixMultiplyCore::NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _asm_glue_unsigned(), _asm_glue_signed(), _mm_kernel(nullptr), _mtx_a_reshape_kernel(nullptr), _mtx_b_reshape_kernel(nullptr), _mtx_a_reduction_kernel(),
       _mtx_b_reduction_kernel(), _offset_contribution_kernel(), _vector_sum_col(), _vector_sum_row(), _tmp_a(), _tmp_b(), _workspace(), _a_offset(0), _b_offset(0), _run_vector_matrix_multiplication(false),
-      _dot_product_path(false)
+      _dot_product_path(false), _is_first_run(true), _reshape_b_only_on_first_run(false)
 {
 }
 
 void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b, ITensor *output, const GEMMInfo &gemm_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, output);
-    ARM_COMPUTE_UNUSED(gemm_info);
     ARM_COMPUTE_ERROR_THROW_ON(NEGEMMLowpMatrixMultiplyCore::validate(a->info(), b->info(), output->info(), gemm_info));
 
     _a_offset                         = a->info()->quantization_info().offset;
     _b_offset                         = b->info()->quantization_info().offset;
     _run_vector_matrix_multiplication = a->info()->dimension(1) < 2;
+    _reshape_b_only_on_first_run      = gemm_info.reshape_b_only_on_first_run();
 
 #ifdef __aarch64__
     switch(a->info()->data_type())
@@ -98,7 +98,10 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
             _tmp_a.allocator()->init(info_a);
             _tmp_b.allocator()->init(info_b);
             _memory_group.manage(&_tmp_a);
-            _memory_group.manage(&_tmp_b);
+            if(!_reshape_b_only_on_first_run)
+            {
+                _memory_group.manage(&_tmp_b);
+            }
 
             // Configure interleave kernel
             {
@@ -129,7 +132,10 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
         TensorInfo info_vector_sum_col(compute_reductionA_shape(*b->info()), 1, DataType::S32);
 
         _vector_sum_col.allocator()->init(info_vector_sum_col);
-        _memory_group.manage(&_vector_sum_col);
+        if(!_reshape_b_only_on_first_run)
+        {
+            _memory_group.manage(&_vector_sum_col);
+        }
 
         // Configure Matrix B reduction kernel
         _mtx_b_reduction_kernel.configure(b, &_vector_sum_col, a->info()->dimension(0), false);
@@ -252,7 +258,7 @@ void NEGEMMLowpMatrixMultiplyCore::run()
             NEScheduler::get().schedule(_mtx_a_reshape_kernel.get(), Window::DimY);
         }
 
-        if(_mtx_b_reshape_kernel)
+        if(_mtx_b_reshape_kernel && (_is_first_run || !_reshape_b_only_on_first_run))
         {
             NEScheduler::get().schedule(_mtx_b_reshape_kernel.get(), Window::DimY);
         }
@@ -278,7 +284,7 @@ void NEGEMMLowpMatrixMultiplyCore::run()
     }
 
     // Run matrix B reduction kernel only if _a_offset is not equal to 0
-    if(_a_offset != 0)
+    if(_a_offset != 0 && (_is_first_run || !_reshape_b_only_on_first_run))
     {
         NEScheduler::get().schedule(&_mtx_b_reduction_kernel, Window::DimX);
     }
@@ -287,4 +293,6 @@ void NEGEMMLowpMatrixMultiplyCore::run()
     NEScheduler::get().schedule(&_offset_contribution_kernel, Window::DimY);
 
     _memory_group.release();
+
+    _is_first_run = false;
 }

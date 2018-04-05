@@ -106,6 +106,8 @@ private:
     int32_t                            _b_offset;
     bool                               _run_vector_matrix_multiplication;
     bool                               _dot_product_path;
+    bool                               _is_first_run;
+    bool                               _reshape_b_only_on_first_run;
 };
 }
 #endif /*__ARM_COMPUTE_NEGEMMLOWPMATRIXMULTIPLYCORE_H__ */

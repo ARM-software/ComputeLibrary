@@ -206,7 +206,9 @@ NodeID GraphBuilder::add_batch_normalization_node(Graph &g, NodeParams params, N
 NodeID GraphBuilder::add_convolution_node(Graph &g, NodeParams params, NodeIdxPair input,
                                           Size2D kernel_spatial_extend, unsigned int depth, PadStrideInfo conv_info,
                                           unsigned int num_groups, ConvolutionMethod method,
-                                          ITensorAccessorUPtr weights_accessor, ITensorAccessorUPtr bias_accessor)
+                                          ITensorAccessorUPtr weights_accessor, ITensorAccessorUPtr bias_accessor,
+                                          const QuantizationInfo weights_quant_info,
+                                          const QuantizationInfo out_quant_info)
 {
     CHECK_NODEIDX_PAIR(input, g);
     ARM_COMPUTE_ERROR_ON(depth == 0);
@@ -220,7 +222,13 @@ NodeID GraphBuilder::add_convolution_node(Graph &g, NodeParams params, NodeIdxPa
     // Create weights node
     TensorDescriptor w_desc = input_tensor_desc;
     w_desc.shape            = TensorShape(kernel_spatial_extend.width, kernel_spatial_extend.height, w_desc.shape.z() / num_groups, depth);
-    NodeID w_nid            = add_const_node_with_name(g, params, "Weights", w_desc, std::move(weights_accessor));
+
+    if(!weights_quant_info.empty())
+    {
+        w_desc.quant_info = weights_quant_info;
+    }
+
+    NodeID w_nid = add_const_node_with_name(g, params, "Weights", w_desc, std::move(weights_accessor));
 
     // Create bias nodes
     NodeID b_nid = EmptyNodeID;
@@ -234,7 +242,7 @@ NodeID GraphBuilder::add_convolution_node(Graph &g, NodeParams params, NodeIdxPa
     if(num_groups == 1)
     {
         // Create convolution node and connect
-        NodeID conv_nid = g.add_node<ConvolutionLayerNode>(conv_info, method);
+        NodeID conv_nid = g.add_node<ConvolutionLayerNode>(conv_info, method, out_quant_info);
         g.add_connection(input.node_id, input.index, conv_nid, 0);
         g.add_connection(w_nid, 0, conv_nid, 1);
         if(has_bias)
@@ -270,7 +278,7 @@ NodeID GraphBuilder::add_depth_concatenate_node(Graph &g, NodeParams params, std
 
 NodeID GraphBuilder::add_depthwise_convolution_node(Graph &g, NodeParams params, NodeIdxPair input, Size2D kernel_spatial_extend, PadStrideInfo conv_info,
                                                     DepthwiseConvolutionMethod method,
-                                                    ITensorAccessorUPtr weights_accessor, ITensorAccessorUPtr bias_accessor)
+                                                    ITensorAccessorUPtr weights_accessor, ITensorAccessorUPtr bias_accessor, const QuantizationInfo quant_info)
 {
     CHECK_NODEIDX_PAIR(input, g);
     ARM_COMPUTE_ERROR_ON((kernel_spatial_extend.width == 0) || (kernel_spatial_extend.height == 0));
@@ -283,7 +291,13 @@ NodeID GraphBuilder::add_depthwise_convolution_node(Graph &g, NodeParams params,
     // Create weights node
     TensorDescriptor w_desc = input_tensor_desc;
     w_desc.shape            = TensorShape(kernel_spatial_extend.width, kernel_spatial_extend.height, w_desc.shape.z());
-    NodeID w_nid            = add_const_node_with_name(g, params, "Weights", w_desc, std::move(weights_accessor));
+
+    if(!quant_info.empty())
+    {
+        w_desc.quant_info = quant_info;
+    }
+
+    NodeID w_nid = add_const_node_with_name(g, params, "Weights", w_desc, std::move(weights_accessor));
 
     // Create bias nodes
     NodeID b_nid = EmptyNodeID;

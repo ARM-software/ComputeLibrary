@@ -322,7 +322,7 @@ ITensorInfo &TensorInfo::set_data_type(DataType data_type)
 {
     _data_type = data_type;
     _format    = Format::UNKNOWN;
-    return *this;
+    return set_tensor_shape(tensor_shape()); // Force total size and strides to update
 }
 
 ITensorInfo &TensorInfo::set_num_channels(int num_channels)

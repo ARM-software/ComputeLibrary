@@ -93,7 +93,7 @@ std::unique_ptr<ITensorHandle> NEDeviceBackend::create_tensor(const Tensor &tens
     ARM_COMPUTE_ERROR_ON(tensor_desc.target != Target::NEON);
 
     // Create backend tensor handle
-    TensorInfo info(tensor_desc.shape, 1, tensor_desc.data_type);
+    TensorInfo info(tensor_desc.shape, 1, tensor_desc.data_type, tensor_desc.quant_info);
     auto       backend_tensor_handle = support::cpp14::make_unique<NETensorHandle>(info);
 
     return std::move(backend_tensor_handle);
