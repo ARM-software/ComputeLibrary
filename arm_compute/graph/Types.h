@@ -137,6 +137,7 @@ enum class NodeType
     NormalizationLayer,
     PoolingLayer,
     ReshapeLayer,
+    ScaleLayer,
     SoftmaxLayer,
     SplitLayer,
 

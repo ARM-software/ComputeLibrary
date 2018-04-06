@@ -399,6 +399,35 @@ NodeID GraphBuilder::add_reshape_node(Graph &g, NodeParams params, NodeIdxPair i
     return create_simple_single_input_output_node<ReshapeLayerNode>(g, params, input, shape);
 }
 
+NodeID GraphBuilder::add_scale_layer(Graph &g, const NodeParams &params, NodeIdxPair input, ITensorAccessorUPtr mul_accessor, ITensorAccessorUPtr add_accessor)
+{
+    CHECK_NODEIDX_PAIR(input, g);
+
+    // Get input tensor descriptor
+    const TensorDescriptor input_tensor_desc = get_tensor_descriptor(g, g.node(input.node_id)->outputs()[0]);
+
+    // Create mul node
+    TensorDescriptor mul_desc = input_tensor_desc;
+    const size_t     C        = input_tensor_desc.shape[get_dimension_idx(mul_desc, DataLayoutDimension::CHANNEL)];
+    mul_desc.shape.set(get_dimension_idx(input_tensor_desc, DataLayoutDimension::WIDTH), 1);
+    mul_desc.shape.set(get_dimension_idx(input_tensor_desc, DataLayoutDimension::HEIGHT), 1);
+    mul_desc.shape.set(get_dimension_idx(input_tensor_desc, DataLayoutDimension::CHANNEL), C);
+    NodeID      mul_const_nid   = add_const_node_with_name(g, params, "Mul", mul_desc, std::move(mul_accessor));
+    NodeIdxPair mul_const_nidxp = { mul_const_nid, 0 };
+
+    // Create add node
+    TensorDescriptor add_desc        = mul_desc;
+    NodeID           add_const_nid   = add_const_node_with_name(g, params, "Add", add_desc, std::move(add_accessor));
+    NodeIdxPair      add_const_nidxp = { add_const_nid, 0 };
+
+    // Create node and connect
+    NodeID      mul_node      = GraphBuilder::add_elementwise_node(g, params, input, mul_const_nidxp, EltwiseOperation::MUL);
+    NodeIdxPair mulnode_nidxp = { mul_node, 0 };
+    NodeID      add_node      = GraphBuilder::add_elementwise_node(g, params, mulnode_nidxp, add_const_nidxp, EltwiseOperation::ADD);
+
+    return add_node;
+}
+
 NodeID GraphBuilder::add_softmax_node(Graph &g, NodeParams params, NodeIdxPair input, float beta)
 {
     return create_simple_single_input_output_node<SoftmaxLayerNode>(g, params, input, beta);

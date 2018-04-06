@@ -301,10 +301,11 @@ std::unique_ptr<IFunction> create_eltwise_layer(EltwiseLayerNode &node)
     ARM_COMPUTE_ERROR_ON(node.num_outputs() != 1);
 
     // Extract IO and info
-    IGCTensor             *input1     = get_backing_tensor(node.input(0));
-    IGCTensor             *input2     = get_backing_tensor(node.input(1));
-    IGCTensor             *output     = get_backing_tensor(node.output(0));
-    const EltwiseOperation eltwise_op = node.eltwise_operation();
+    IGCTensor             *input1         = get_backing_tensor(node.input(0));
+    IGCTensor             *input2         = get_backing_tensor(node.input(1));
+    IGCTensor             *output         = get_backing_tensor(node.output(0));
+    const EltwiseOperation eltwise_op     = node.eltwise_operation();
+    const ConvertPolicy    convert_policy = node.convert_policy();
     ARM_COMPUTE_ERROR_ON(input1 == nullptr);
     ARM_COMPUTE_ERROR_ON(input2 == nullptr);
     ARM_COMPUTE_ERROR_ON(output == nullptr);
@@ -315,7 +316,7 @@ std::unique_ptr<IFunction> create_eltwise_layer(EltwiseLayerNode &node)
     {
         std::tie(func, func_name) = create_named_function<GCArithmeticAddition>(std::string("GCArithmeticAddition"),
                                                                                 input1, input2, output,
-                                                                                ConvertPolicy::SATURATE);
+                                                                                convert_policy);
     }
     else if(eltwise_op == EltwiseOperation::SUB)
     {

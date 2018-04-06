@@ -213,6 +213,20 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_reshape_node(Graph &g, NodeParams params, NodeIdxPair input, TensorShape shape);
+    /** Adds a scale layer node to the graph
+     * This layer computes a product of the input with a scale (read from mul_accessor) and it applies an offset (read from add_accessor).
+     * output = input * mul_w + add_w
+     *
+     * @param[in] g            Graph to add the layer to
+     * @param[in] params       Common node parameters
+     * @param[in] input        Input to the fully connected layer node as a NodeID-Index pair
+     * @param[in] mul_accessor (Optional) Accessor of the mul node data
+     * @param[in] add_accessor (Optional) Accessor of the add node data
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_scale_layer(Graph &g, const NodeParams &params, NodeIdxPair input,
+                                  ITensorAccessorUPtr mul_accessor = nullptr, ITensorAccessorUPtr add_accessor = nullptr);
     /** Adds a softmax node to the graph
      *
      * @param[in] g      Graph to add the node to

@@ -36,7 +36,7 @@ using namespace arm_compute::graph_utils;
 /** Example demonstrating how to implement InceptionV3's network using the Compute Library's graph API
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Path to the weights folder, [optional] image, [optional] labels, [optional] Fast math for convolution layer (0 = DISABLED, 1 = ENABLED) )
+ * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL, 2 = OpenCL with Tuner), [optional] Path to the weights folder, [optional] image, [optional] labels, [optional] Fast math for convolution layer (0 = DISABLED, 1 = ENABLED) )
  */
 class InceptionV3Example : public Example
 {

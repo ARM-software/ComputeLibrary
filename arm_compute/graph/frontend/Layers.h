@@ -380,6 +380,33 @@ private:
     TensorShape _shape;
 };
 
+/** Scale Layer */
+class ScaleLayer final : public ILayer
+{
+public:
+    /** Construct a scale layer.
+     *
+     * @param[in] mul_w Accessor to get mul weight from.
+     * @param[in] add_w Accessor to get add weight from.
+     */
+    ScaleLayer(ITensorAccessorUPtr mul_w,
+               ITensorAccessorUPtr add_w)
+        : _mul_w(std::move(mul_w)), _add_w(std::move(add_w))
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_scale_layer(s.graph(), common_params, input, std::move(_mul_w), std::move(_add_w));
+    }
+
+private:
+    ITensorAccessorUPtr _mul_w;
+    ITensorAccessorUPtr _add_w;
+};
+
 /** Softmax Layer */
 class SoftmaxLayer final : public ILayer
 {

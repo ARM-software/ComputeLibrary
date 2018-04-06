@@ -313,10 +313,11 @@ std::unique_ptr<IFunction> create_eltwise_layer(EltwiseLayerNode &node)
     ARM_COMPUTE_ERROR_ON(node.num_outputs() != 1);
 
     // Extract IO and info
-    ICLTensor             *input1     = get_backing_tensor(node.input(0));
-    ICLTensor             *input2     = get_backing_tensor(node.input(1));
-    ICLTensor             *output     = get_backing_tensor(node.output(0));
-    const EltwiseOperation eltwise_op = node.eltwise_operation();
+    ICLTensor             *input1         = get_backing_tensor(node.input(0));
+    ICLTensor             *input2         = get_backing_tensor(node.input(1));
+    ICLTensor             *output         = get_backing_tensor(node.output(0));
+    const EltwiseOperation eltwise_op     = node.eltwise_operation();
+    const ConvertPolicy    convert_policy = node.convert_policy();
     ARM_COMPUTE_ERROR_ON(input1 == nullptr);
     ARM_COMPUTE_ERROR_ON(input2 == nullptr);
     ARM_COMPUTE_ERROR_ON(output == nullptr);
@@ -327,18 +328,18 @@ std::unique_ptr<IFunction> create_eltwise_layer(EltwiseLayerNode &node)
     {
         std::tie(func, func_name) = create_named_function<CLArithmeticAddition>(std::string("CLArithmeticAddition"),
                                                                                 input1, input2, output,
-                                                                                ConvertPolicy::SATURATE);
+                                                                                convert_policy);
     }
     else if(eltwise_op == EltwiseOperation::SUB)
     {
         std::tie(func, func_name) = create_named_function<CLArithmeticSubtraction>(
-                                        std::string("CLArithmeticSubtraction"), input1, input2, output, ConvertPolicy::SATURATE);
+                                        std::string("CLArithmeticSubtraction"), input1, input2, output, convert_policy);
     }
     else if(eltwise_op == EltwiseOperation::MUL)
     {
         std::tie(func, func_name) = create_named_function<CLPixelWiseMultiplication>(
-                                        std::string("CLPixelWiseMultiplication"), input1, input2, output, 1.f, ConvertPolicy::SATURATE,
-                                        RoundingPolicy::TO_NEAREST_EVEN);
+                                        std::string("CLPixelWiseMultiplication"), input1, input2, output, 1.f, convert_policy,
+                                        node.rounding_policy());
     }
     else
     {

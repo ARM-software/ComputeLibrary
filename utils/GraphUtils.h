@@ -25,9 +25,11 @@
 #define __ARM_COMPUTE_GRAPH_UTILS_H__
 
 #include "arm_compute/core/PixelValue.h"
+#include "arm_compute/core/utils/misc/Utility.h"
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/ITensorAccessor.h"
 #include "arm_compute/graph/Types.h"
+#include "arm_compute/runtime/Tensor.h"
 
 #include <array>
 #include <random>
@@ -115,6 +117,37 @@ public:
 private:
     unsigned int _iterator;
     unsigned int _maximum;
+};
+
+/** NumPy accessor class */
+class NumPyAccessor final : public graph::ITensorAccessor
+{
+public:
+    /** Constructor
+     *
+     * @param[in]  npy_path      Path to npy file.
+     * @param[in]  shape         Shape of the numpy tensor data.
+     * @param[in]  data_type     DataType of the numpy tensor data.
+     * @param[out] output_stream (Optional) Output stream
+     */
+    NumPyAccessor(std::string npy_path, TensorShape shape, DataType data_type, std::ostream &output_stream = std::cout);
+    /** Allow instances of this class to be move constructed */
+    NumPyAccessor(NumPyAccessor &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NumPyAccessor(const NumPyAccessor &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NumPyAccessor &operator=(const NumPyAccessor &) = delete;
+
+    // Inherited methods overriden:
+    bool access_tensor(ITensor &tensor) override;
+
+private:
+    template <typename T>
+    void access_numpy_tensor(ITensor &tensor);
+
+    Tensor            _npy_tensor;
+    const std::string _filename;
+    std::ostream     &_output_stream;
 };
 
 /** PPM accessor class */
@@ -273,7 +306,14 @@ inline std::unique_ptr<graph::ITensorAccessor> get_input_accessor(const std::str
     }
     else
     {
-        return arm_compute::support::cpp14::make_unique<PPMAccessor>(ppm_path, bgr, std::move(preprocessor));
+        if(arm_compute::utility::endswith(ppm_path, ".npy"))
+        {
+            return arm_compute::support::cpp14::make_unique<NumPyBinLoader>(ppm_path);
+        }
+        else
+        {
+            return arm_compute::support::cpp14::make_unique<PPMAccessor>(ppm_path, bgr, std::move(preprocessor));
+        }
     }
 }
 
@@ -296,6 +336,28 @@ inline std::unique_ptr<graph::ITensorAccessor> get_output_accessor(const std::st
     else
     {
         return arm_compute::support::cpp14::make_unique<TopNPredictionsAccessor>(labels_path, top_n, output_stream);
+    }
+}
+/** Generates appropriate npy output accessor according to the specified npy_path
+ *
+ * @note If npy_path is empty will generate a DummyAccessor else will generate a NpyAccessor
+ *
+ * @param[in]  npy_path      Path to npy file.
+ * @param[in]  shape         Shape of the numpy tensor data.
+ * @param[in]  data_type     DataType of the numpy tensor data.
+ * @param[out] output_stream (Optional) Output stream
+ *
+ * @return An appropriate tensor accessor
+ */
+inline std::unique_ptr<graph::ITensorAccessor> get_npy_output_accessor(const std::string &npy_path, TensorShape shape, DataType data_type, std::ostream &output_stream = std::cout)
+{
+    if(npy_path.empty())
+    {
+        return arm_compute::support::cpp14::make_unique<DummyAccessor>(0);
+    }
+    else
+    {
+        return arm_compute::support::cpp14::make_unique<NumPyAccessor>(npy_path, shape, data_type, output_stream);
     }
 }
 

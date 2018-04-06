@@ -36,14 +36,28 @@ class EltwiseLayerNode final : public INode
 public:
     /** Constructor
      *
-     * @param[in] op Element-wise operation to perform
+     * @param[in] op       Element-wise operation to perform
+     * @param[in] c_policy (Optional) Convert policy used for the operation
+     * @param[in] r_policy (Optional) Rounding policy used for the operation
      */
-    EltwiseLayerNode(EltwiseOperation op);
+    EltwiseLayerNode(EltwiseOperation op, ConvertPolicy c_policy = ConvertPolicy::SATURATE, RoundingPolicy r_policy = RoundingPolicy::TO_ZERO);
     /** Eltwise operation accessor
      *
      * @return Eltwise operation that is to be performed by the node
      */
     EltwiseOperation eltwise_operation() const;
+
+    /** Convert policy accessor
+     *
+     * @return Convert policy that is used in the node
+     */
+    ConvertPolicy convert_policy() const;
+
+    /** Rounding policy accessor
+     *
+     * @return Convert policy that is used in the node
+     */
+    RoundingPolicy rounding_policy() const;
 
     // Inherited overridden methods:
     NodeType         type() const override;
@@ -53,6 +67,8 @@ public:
 
 private:
     EltwiseOperation _op;
+    ConvertPolicy    _convert_policy;
+    RoundingPolicy   _rounding_policy;
 };
 } // namespace graph
 } // namespace arm_compute

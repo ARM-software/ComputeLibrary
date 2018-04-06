@@ -294,10 +294,11 @@ std::unique_ptr<IFunction> create_eltwise_layer(EltwiseLayerNode &node)
     ARM_COMPUTE_ERROR_ON(node.num_outputs() != 1);
 
     // Extract IO and info
-    ITensor               *input1     = get_backing_tensor(node.input(0));
-    ITensor               *input2     = get_backing_tensor(node.input(1));
-    ITensor               *output     = get_backing_tensor(node.output(0));
-    const EltwiseOperation eltwise_op = node.eltwise_operation();
+    ITensor               *input1         = get_backing_tensor(node.input(0));
+    ITensor               *input2         = get_backing_tensor(node.input(1));
+    ITensor               *output         = get_backing_tensor(node.output(0));
+    const EltwiseOperation eltwise_op     = node.eltwise_operation();
+    const ConvertPolicy    convert_policy = node.convert_policy();
     ARM_COMPUTE_ERROR_ON(input1 == nullptr);
     ARM_COMPUTE_ERROR_ON(input2 == nullptr);
     ARM_COMPUTE_ERROR_ON(output == nullptr);
@@ -307,18 +308,18 @@ std::unique_ptr<IFunction> create_eltwise_layer(EltwiseLayerNode &node)
     if(eltwise_op == EltwiseOperation::ADD)
     {
         std::tie(func, func_name) = create_named_function<NEArithmeticAddition>(std::string("NEArithmeticAddition"),
-                                                                                input1, input2, output, ConvertPolicy::SATURATE);
+                                                                                input1, input2, output, convert_policy);
     }
     else if(eltwise_op == EltwiseOperation::SUB)
     {
         std::tie(func, func_name) = create_named_function<NEArithmeticSubtraction>(std::string("NEArithmeticSubtraction"),
-                                                                                   input1, input2, output, ConvertPolicy::SATURATE);
+                                                                                   input1, input2, output, convert_policy);
     }
     else if(eltwise_op == EltwiseOperation::MUL)
     {
         std::tie(func, func_name) = create_named_function<NEPixelWiseMultiplication>(std::string("NEPixelWiseMultiplication"),
                                                                                      input1, input2, output, 1.f,
-                                                                                     ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
+                                                                                     convert_policy, node.rounding_policy());
     }
     else
     {

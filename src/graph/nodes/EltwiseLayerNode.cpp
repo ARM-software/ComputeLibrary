@@ -30,8 +30,8 @@ namespace arm_compute
 {
 namespace graph
 {
-EltwiseLayerNode::EltwiseLayerNode(EltwiseOperation op)
-    : _op(op)
+EltwiseLayerNode::EltwiseLayerNode(EltwiseOperation op, ConvertPolicy c_policy, RoundingPolicy r_policy)
+    : _op(op), _convert_policy(c_policy), _rounding_policy(r_policy)
 {
     _input_edges.resize(2, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -40,6 +40,16 @@ EltwiseLayerNode::EltwiseLayerNode(EltwiseOperation op)
 EltwiseOperation EltwiseLayerNode::eltwise_operation() const
 {
     return _op;
+}
+
+ConvertPolicy EltwiseLayerNode::convert_policy() const
+{
+    return _convert_policy;
+}
+
+RoundingPolicy EltwiseLayerNode::rounding_policy() const
+{
+    return _rounding_policy;
 }
 
 bool EltwiseLayerNode::forward_descriptors()
@@ -56,8 +66,7 @@ bool EltwiseLayerNode::forward_descriptors()
 
 TensorDescriptor EltwiseLayerNode::configure_output(size_t idx) const
 {
-    ARM_COMPUTE_UNUSED(idx);
-    ARM_COMPUTE_UNUSED(_op);
+    ARM_COMPUTE_UNUSED(idx, _op, _convert_policy, _rounding_policy);
 
     const Tensor *src = input(0);
     ARM_COMPUTE_ERROR_ON(src == nullptr);

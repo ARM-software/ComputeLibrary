@@ -232,7 +232,7 @@ private:
 /** Main program for MobileNetV1
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL),
+ * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL, 2 = OpenCL with Tuner),
  *                             [optional] Model ID (0 = MobileNetV1_1.0_224, 1 = MobileNetV1_0.75_160),
  *                             [optional] Path to the weights folder,
  *                             [optional] image,

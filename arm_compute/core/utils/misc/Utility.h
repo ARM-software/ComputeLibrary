@@ -164,6 +164,16 @@ std::vector<size_t> sort_indices(const std::vector<T> &v)
 
     return idx;
 }
+
+inline bool endswith(const std::string &filename, const std::string &suffix)
+{
+    if(filename.size() < suffix.size())
+    {
+        return false;
+    }
+    return std::equal(suffix.rbegin(), suffix.rend(), filename.rbegin());
+}
+
 } // namespace utility
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_MISC_UTILITY_H__ */
