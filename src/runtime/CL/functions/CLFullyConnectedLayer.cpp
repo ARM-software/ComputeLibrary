@@ -37,10 +37,8 @@ using namespace arm_compute::misc::shape_calculator;
 
 namespace
 {
-Status validate_mm(const ITensorInfo &input, const ITensorInfo &weights, const ITensorInfo &output, bool is_interleaved_transposed)
+Status validate_mm(const ITensorInfo &input, const ITensorInfo &weights, const ITensorInfo &output)
 {
-    const GPUTarget gpu_target = CLScheduler::get().target();
-
     if(is_data_type_quantized_asymmetric(input.data_type()))
     {
         // Since we need negative offsets for computing convolution, we need to change QuantizationInfo()
@@ -55,7 +53,7 @@ Status validate_mm(const ITensorInfo &input, const ITensorInfo &weights, const I
     }
     else
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMMatrixMultiplyKernel::validate(&input, &weights, &output, 1.f, is_interleaved_transposed, GEMMReshapeInfo(), gpu_target));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMM::validate(&input, &weights, nullptr, &output, 1.f, 0.0f, GEMMInfo(false, false, true /* Reshape weights only for the first run */)));
     }
 
     return Status{};
@@ -75,12 +73,12 @@ Status CLFullyConnectedLayerReshapeWeights::validate(const ITensorInfo *input, c
 }
 
 CLFullyConnectedLayer::CLFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(memory_manager), _im2col_kernel(), _reshape_weights_kernel(), _mm_kernel(), _mm_gemmlowp(memory_manager), _gemmlowp_output_stage(), _accumulate_biases_kernel(), _im2col_output(),
-      _gemmlowp_output(), _reshape_weights_output(), _are_weights_reshaped(true), _is_fc_after_conv(true), _accumulate_biases(false), _is_quantized(false), _original_weights(nullptr)
+    : _memory_group(memory_manager), _im2col_kernel(), _reshape_weights_kernel(), _mm_gemm(memory_manager), _mm_gemmlowp(memory_manager), _gemmlowp_output_stage(), _accumulate_biases_kernel(),
+      _im2col_output(), _gemmlowp_output(), _reshape_weights_output(), _are_weights_reshaped(true), _is_fc_after_conv(true), _accumulate_biases(false), _is_quantized(false), _original_weights(nullptr)
 {
 }
 
-void CLFullyConnectedLayer::configure_mm(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, bool is_interleaved_transposed)
+void CLFullyConnectedLayer::configure_mm(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output)
 {
     if(_is_quantized)
     {
@@ -102,8 +100,7 @@ void CLFullyConnectedLayer::configure_mm(const ICLTensor *input, const ICLTensor
     else
     {
         // Configure matrix multiply kernel
-        _mm_kernel.set_target(CLScheduler::get().target());
-        _mm_kernel.configure(input, weights, output, 1.f, is_interleaved_transposed);
+        _mm_gemm.configure(input, weights, nullptr, output, 1.f, 0.0f, GEMMInfo(false, false, true /* Reshape weights only for the first run */));
     }
 }
 
@@ -122,7 +119,7 @@ void CLFullyConnectedLayer::configure_conv_fc(const ICLTensor *input, const ICLT
     _im2col_kernel.configure(input, &_im2col_output, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false);
 
     // Configure matrix multiply kernel
-    configure_mm(&_im2col_output, weights, output, false);
+    configure_mm(&_im2col_output, weights, output);
 
     // Allocate the output tensor for im2col once all the configure methods have been called
     _im2col_output.allocator()->allocate();
@@ -133,7 +130,7 @@ void CLFullyConnectedLayer::configure_fc_fc(const ICLTensor *input, const ICLTen
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(0) != weights->info()->dimension(1));
 
     // Configure matrix multiply kernel
-    configure_mm(input, weights, output, false);
+    configure_mm(input, weights, output);
 }
 
 void CLFullyConnectedLayer::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, bool transpose_weights, bool are_weights_reshaped)
@@ -301,7 +298,7 @@ Status CLFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
         ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(0) != weights_to_use->dimension(1));
     }
     // Validate matrix multiply kernel
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(*input_to_use, *weights_to_use, *tmp_output, false));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(*input_to_use, *weights_to_use, *tmp_output));
 
     // Validate output stage for asymmetric quantized types
     if(is_quantized)
@@ -341,7 +338,7 @@ void CLFullyConnectedLayer::run()
     }
     else
     {
-        CLScheduler::get().enqueue(_mm_kernel, !_accumulate_biases);
+        _mm_gemm.run();
     }
 
     // Accumulate biases if provided

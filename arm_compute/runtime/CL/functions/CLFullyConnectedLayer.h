@@ -27,11 +27,11 @@
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixAccumulateBiasesKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLIm2ColKernel.h"
 #include "arm_compute/core/CL/kernels/CLTransposeKernel.h"
 #include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
 
@@ -113,12 +113,12 @@ public:
 private:
     void configure_fc_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);
     void configure_conv_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);
-    void configure_mm(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, bool is_interleaved_transposed = true);
+    void configure_mm(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);
 
     CLMemoryGroup                                       _memory_group;
     CLIm2ColKernel                                      _im2col_kernel;
     CLFullyConnectedLayerReshapeWeights                 _reshape_weights_kernel;
-    CLGEMMMatrixMultiplyKernel                          _mm_kernel;
+    CLGEMM                                              _mm_gemm;
     CLGEMMLowpMatrixMultiplyCore                        _mm_gemmlowp;
     CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint _gemmlowp_output_stage;
     CLGEMMMatrixAccumulateBiasesKernel                  _accumulate_biases_kernel;
