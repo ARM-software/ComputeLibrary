@@ -63,7 +63,6 @@ bool CPUInfo::has_dotprod() const
 
 CPUModel CPUInfo::get_cpu_model(unsigned int cpuid) const
 {
-    ARM_COMPUTE_ERROR_ON(cpuid >= _percpu.size());
     if(cpuid < _percpu.size())
     {
         return _percpu[cpuid];
