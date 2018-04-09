@@ -157,6 +157,7 @@ const std::string &arm_compute::string_from_data_type(DataType dt)
         { DataType::F32, "F32" },
         { DataType::F64, "F64" },
         { DataType::SIZET, "SIZET" },
+        { DataType::QASYMM8, "QASYMM8" },
     };
 
     return dt_map[dt];
