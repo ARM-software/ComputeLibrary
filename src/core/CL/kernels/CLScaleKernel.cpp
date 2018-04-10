@@ -39,82 +39,210 @@
 
 using namespace arm_compute;
 
+namespace
+{
+inline std::pair<float, float> calculate_scale_factors(const ITensorInfo &input, const ITensorInfo &output)
+{
+    DataLayout data_layout = input.data_layout();
+    const int  idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int  idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+
+    // Compute the ratio between source width/height and destination width/height
+    const unsigned int input_width   = input.dimension(idx_width);
+    const unsigned int input_height  = input.dimension(idx_height);
+    const unsigned int output_width  = output.dimension(idx_width);
+    const unsigned int output_height = output.dimension(idx_height);
+
+    float wr = static_cast<float>(input_width) / static_cast<float>(output_width);
+    float hr = static_cast<float>(input_height) / static_cast<float>(output_height);
+
+    return std::make_pair(wr, hr);
+}
+
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON(output == input);
+
+    float wr = 0.f;
+    float hr = 0.f;
+    std::tie(wr, hr) = calculate_scale_factors(*input, *output);
+
+    ARM_COMPUTE_RETURN_ERROR_ON(policy == InterpolationPolicy::AREA && (wr > 1.f || hr > 1.f));
+
+    return Status{};
+}
+
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy, BorderSize &border)
+{
+    Window       win{};
+    bool         window_changed{};
+    unsigned int num_elems_processed_per_iteration = 0;
+    DataLayout   data_layout                       = input->data_layout();
+
+    switch(data_layout)
+    {
+        case DataLayout::NCHW:
+        {
+            if(border_mode == BorderMode::UNDEFINED)
+            {
+                border = BorderSize(0);
+            }
+
+            num_elems_processed_per_iteration = 4;
+            // Configure kernel window
+            win                                   = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
+            const ValidRegion &input_valid_region = input->valid_region();
+
+            // Reads can occur within the valid region of the input
+            AccessWindowStatic input_access(input,
+                                            input_valid_region.anchor[0] - border.left, input_valid_region.anchor[1] - border.top,
+                                            input_valid_region.anchor[0] + input_valid_region.shape[0] + border.right,
+                                            input_valid_region.anchor[1] + input_valid_region.shape[1] + border.bottom);
+            AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+
+            output_access.set_valid_region(win, calculate_valid_region_scale(*(input),
+                                                                             output->tensor_shape(),
+                                                                             policy,
+                                                                             sampling_policy,
+                                                                             border_mode == BorderMode::UNDEFINED));
+
+            window_changed = update_window_and_padding(win, input_access, output_access);
+        }
+        break;
+        case DataLayout::NHWC:
+        {
+            num_elems_processed_per_iteration = 1;
+            // Configure kernel window
+            win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
+            AccessWindowRectangle  input_access(input, -border.left, -border.top, num_elems_processed_per_iteration, num_elems_processed_per_iteration);
+            AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+            window_changed = update_window_and_padding(win, input_access, output_access);
+            output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
+        }
+        break;
+        default:
+            ARM_COMPUTE_ERROR("Data layout not supported");
+    }
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+} // namespace
+
 BorderSize CLScaleKernel::border_size() const
 {
     return BorderSize(1);
 }
 
-void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, bool border_undefined, SamplingPolicy sampling_policy)
+Status CLScaleKernel::validate(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy,
+                               BorderMode border_mode, SamplingPolicy sampling_policy)
 {
-    ARM_COMPUTE_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON(output == input);
+    BorderSize border = BorderSize(1);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, policy));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), policy, border_mode, sampling_policy, border).first);
 
+    return Status{};
+}
+
+void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy)
+{
     _input  = input;
     _output = output;
 
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), policy));
+
+    float wr = 0.f;
+    float hr = 0.f;
+    std::tie(wr, hr) = calculate_scale_factors(*input->info(), *output->info());
+
+    DataLayout data_layout = input->info()->data_layout();
+    const int  idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int  idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+
     // Compute the ratio between source width/height and destination width/height
-    const auto wr = static_cast<float>(input->info()->dimension(0)) / static_cast<float>(output->info()->dimension(0));
-    const auto hr = static_cast<float>(input->info()->dimension(1)) / static_cast<float>(output->info()->dimension(1));
+    const unsigned int input_width   = input->info()->dimension(idx_width);
+    const unsigned int input_height  = input->info()->dimension(idx_height);
+    const unsigned int output_width  = output->info()->dimension(idx_width);
+    const unsigned int output_height = output->info()->dimension(idx_height);
 
     // Compute actual border size
-    BorderSize border = border_undefined ? BorderSize(0) : border_size();
+    BorderSize border = border_size();
 
     // Area interpolation behaves as Nearest Neighbour in case of up-sampling
     if(policy == InterpolationPolicy::AREA && wr <= 1.f && hr <= 1.f)
     {
         policy = InterpolationPolicy::NEAREST_NEIGHBOR;
     }
-    else
-    {
-        ARM_COMPUTE_ERROR_ON(policy == InterpolationPolicy::AREA);
-    }
+
+    // Configure kernel window
+    auto win_config = validate_and_configure_window(input->info(), output->info(), policy, border_mode, sampling_policy, border);
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    ICLKernel::configure(win_config.second);
 
     // Create kernel
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DBORDER_SIZE=" + support::cpp11::to_string(border.right));
+    build_opts.add_option_if(border_mode == BorderMode::REPLICATE, "-DBORDER_MODE_REPLICATE");
     build_opts.add_option_if_else(sampling_policy == SamplingPolicy::CENTER, "-DSAMPLING_POLICY_CENTER", "-DSAMPLING_POLICY_TOP_LEFT");
 
     std::string interpolation_name = string_from_interpolation_policy(policy);
     std::transform(interpolation_name.begin(), interpolation_name.end(), interpolation_name.begin(), ::tolower);
-    std::string kernel_name = "scale_" + interpolation_name;
+    std::string kernel_name = "scale_" + interpolation_name + "_" + lower_string(string_from_data_layout(data_layout));
     _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
-    // Configure kernel window
-    constexpr unsigned int num_elems_processed_per_iteration = 4;
-
-    Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
-
-    const ValidRegion &input_valid_region = input->info()->valid_region();
-
-    // Reads can occur within the valid region of the input
-    AccessWindowStatic input_access(input->info(),
-                                    input_valid_region.anchor[0] - border.left, input_valid_region.anchor[1] - border.top,
-                                    input_valid_region.anchor[0] + input_valid_region.shape[0] + border.right,
-                                    input_valid_region.anchor[1] + input_valid_region.shape[1] + border.bottom);
-
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
-
-    update_window_and_padding(win, input_access, output_access);
-
-    output_access.set_valid_region(win, calculate_valid_region_scale(*(input->info()),
-                                                                     output->info()->tensor_shape(),
-                                                                     policy,
-                                                                     sampling_policy,
-                                                                     border_undefined));
-
-    ICLKernel::configure(win);
+    unsigned int idx = data_layout == DataLayout::NHWC ? 2 * num_arguments_per_3D_tensor() : 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
 
     // Set static kernel arguments
-    const float scale_x = static_cast<float>(input->info()->dimension(0)) / output->info()->dimension(0);
-    const float scale_y = static_cast<float>(input->info()->dimension(1)) / output->info()->dimension(1);
+    const float scale_x = static_cast<float>(input_width) / output_width;
+    const float scale_y = static_cast<float>(input_height) / output_height;
 
-    unsigned int idx = 2 * num_arguments_per_2D_tensor(); //Skip the input and output parameters
-    _kernel.setArg<float>(idx++, input->info()->dimension(0));
-    _kernel.setArg<float>(idx++, input->info()->dimension(1));
+    _kernel.setArg<float>(idx++, input_width);
+    _kernel.setArg<float>(idx++, input_height);
     _kernel.setArg<float>(idx++, scale_x);
     _kernel.setArg<float>(idx++, scale_y);
+}
+
+void CLScaleKernel::run(const Window &window, cl::CommandQueue &queue)
+{
+    ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
+    ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
+
+    switch(_input->info()->data_layout())
+    {
+        case DataLayout::NCHW:
+        {
+            Window slice = window.first_slice_window_2D();
+
+            do
+            {
+                unsigned int idx = 0;
+                add_2D_tensor_argument(idx, _input, slice);
+                add_2D_tensor_argument(idx, _output, slice);
+                enqueue(queue, *this, slice, _lws_hint);
+            }
+            while(window.slide_window_slice_2D(slice));
+            break;
+        }
+        case DataLayout::NHWC:
+        {
+            Window slice = window.first_slice_window_3D();
+
+            do
+            {
+                unsigned int idx = 0;
+                add_3D_tensor_argument(idx, _input, slice);
+                add_3D_tensor_argument(idx, _output, slice);
+                enqueue(queue, *this, slice, _lws_hint);
+            }
+            while(window.slide_window_slice_3D(slice));
+            break;
+        }
+        default:
+            ARM_COMPUTE_ERROR("Data layout not supported");
+    }
 }

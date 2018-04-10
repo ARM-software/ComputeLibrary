@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,14 @@ using namespace arm_compute;
 void CLScale::configure(ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy)
 {
     auto k = arm_compute::support::cpp14::make_unique<CLScaleKernel>();
-    k->configure(input, output, policy, border_mode == BorderMode::UNDEFINED, sampling_policy);
+    k->configure(input, output, policy, border_mode, sampling_policy);
     _kernel = std::move(k);
+
+    // In the case of NHWC we can't have undefined border mode as this would require to access elements outside z dimension,
+    // so we treat it like border constant.
+    if(border_mode == BorderMode::UNDEFINED && input->info()->data_layout() == DataLayout::NHWC)
+    {
+        border_mode = BorderMode::CONSTANT;
+    }
     _border_handler.configure(input, _kernel->border_size(), border_mode, constant_border_value);
 }
