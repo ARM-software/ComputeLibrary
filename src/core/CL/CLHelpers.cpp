@@ -93,12 +93,6 @@ arm_compute::GPUTarget get_midgard_target(const std::string &version)
     }
 }
 
-bool extension_support(const cl::Device &device, const char *extension_name)
-{
-    std::string extensions = device.getInfo<CL_DEVICE_EXTENSIONS>();
-    auto        pos        = extensions.find(extension_name);
-    return (pos != std::string::npos);
-}
 } // namespace
 
 namespace arm_compute
@@ -253,12 +247,12 @@ GPUTarget get_arch_from_target(GPUTarget target)
 
 bool non_uniform_workgroup_support(const cl::Device &device)
 {
-    return extension_support(device, "cl_arm_non_uniform_work_group_size");
+    return device_supports_extension(device, "cl_arm_non_uniform_work_group_size");
 }
 
 bool fp16_support(const cl::Device &device)
 {
-    return extension_support(device, "cl_khr_fp16");
+    return device_supports_extension(device, "cl_khr_fp16");
 }
 
 CLVersion get_cl_version(const cl::Device &device)
@@ -282,6 +276,14 @@ CLVersion get_cl_version(const cl::Device &device)
     }
 
     return CLVersion::UNKNOWN;
+}
+
+
+bool device_supports_extension(const cl::Device &device, const char *extension_name)
+{
+    std::string extensions = device.getInfo<CL_DEVICE_EXTENSIONS>();
+    auto        pos        = extensions.find(extension_name);
+    return (pos != std::string::npos);
 }
 
 } // namespace arm_compute

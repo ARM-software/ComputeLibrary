@@ -73,18 +73,28 @@ public:
         if(!_is_initialised)
         {
 #if defined(ARM_COMPUTE_DEBUG_ENABLED)
-            // Create a cl_context with a printf_callback and user specified buffer size.
-            cl_context_properties properties[] =
+            bool is_cl_arm_printf_supported = false;
+
+            //query devices in the context for cl_arm_printf support
+            std::vector<cl::Device> def_platform_devices;
+            cl::Platform::getDefault().getDevices(CL_DEVICE_TYPE_DEFAULT, &def_platform_devices);
+            is_cl_arm_printf_supported = device_supports_extension(def_platform_devices[0], "cl_arm_printf");
+
+            if(is_cl_arm_printf_supported)
             {
-                // Enable a printf callback function for this context.
-                CL_PRINTF_CALLBACK_ARM, reinterpret_cast<cl_context_properties>(printf_callback),
-                // Request a minimum printf buffer size of 4MB for devices in the
-                // context that support this extension.
-                CL_PRINTF_BUFFERSIZE_ARM, static_cast<cl_context_properties>(0x100000),
-                CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>(cl::Platform::get()()),
-                0
-            };
-            cl::Context::setDefault(cl::Context(CL_DEVICE_TYPE_DEFAULT, properties));
+                // Create a cl_context with a printf_callback and user specified buffer size.
+                cl_context_properties properties[] =
+                {
+                    // Enable a printf callback function for this context.
+                    CL_PRINTF_CALLBACK_ARM, reinterpret_cast<cl_context_properties>(printf_callback),
+                    // Request a minimum printf buffer size of 4MB for devices in the
+                    // context that support this extension.
+                    CL_PRINTF_BUFFERSIZE_ARM, static_cast<cl_context_properties>(0x100000),
+                    CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>(cl::Platform::get()()),
+                    0
+                };
+                cl::Context::setDefault(cl::Context(CL_DEVICE_TYPE_DEFAULT, properties));
+            }
 #endif // defined(ARM_COMPUTE_DEBUG_ENABLED)
 
             CLKernelLibrary::get().init("./cl_kernels/", cl::Context::getDefault(), cl::Device::getDefault());

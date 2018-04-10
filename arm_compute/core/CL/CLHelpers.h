@@ -134,6 +134,16 @@ GPUTarget get_arch_from_target(GPUTarget target);
  * @return the highest OpenCL version supported
  */
 CLVersion get_cl_version(const cl::Device &device);
+
+/** Helper function to check whether a given extension is supported
+ *
+ * @param[in] device         A CL device
+ * @param[in] extension_name Name of the extension to be checked
+ *
+ * @return True if the extension is supported
+ */
+bool device_supports_extension(const cl::Device &device, const char *extension_name);
+
 /** Helper function to check whether the cl_khr_fp16 extension is supported
  *
  * @param[in] device A CL device
