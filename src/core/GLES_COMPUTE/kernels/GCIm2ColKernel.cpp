@@ -113,7 +113,7 @@ void GCIm2ColKernel::configure(const IGCTensor *input, IGCTensor *output, const 
         _convolved_dims = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1),
                                             kernel_dims.width, kernel_dims.height,
                                             conv_info, dilation);
-        _num_elems_processed_per_iteration = 2;
+        _num_elems_processed_per_iteration = (input->info()->data_type() == DataType::F32) ? 1 : 2;
 
         build_opts.emplace("#define KERNEL_WIDTH " + support::cpp11::to_string(kernel_dims.width));
         build_opts.emplace("#define KERNEL_HEIGHT " + support::cpp11::to_string(kernel_dims.height));

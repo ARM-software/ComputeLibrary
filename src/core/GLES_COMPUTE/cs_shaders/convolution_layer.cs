@@ -62,7 +62,56 @@ SHADER_PARAMS_DECLARATION
     uint total_filters;
 };
 
-#if defined(DATA_TYPE_FP16)
+#if defined(DATA_TYPE_FP32)
+
+TENSOR_DECLARATION(1, srcBuffer, float, src_ptr, src_shift, 2, readonly);
+TENSOR_DECLARATION(2, dstBuffer, float, dst_ptr, dst_shift, 2, writeonly);
+#ifdef HAS_BIAS
+TENSOR_DECLARATION(3, biasesBuffer, float, biases_ptr, biases_shift, 2, readonly);
+#endif /* BIAS */
+
+void main()
+{
+    Tensor3DIterator src_iter = CONVERT_TO_TENSOR3D_ITERATOR(src_attrs, src_shift);
+    ImageIterator    dst_iter = CONVERT_TO_IMAGE_ITERATOR_NO_STEP(dst_attrs, dst_shift);
+#ifdef HAS_BIAS
+    VectorIterator biases_iter = CONVERT_TO_VECTOR_ITERATOR_NO_STEP(biases_attrs, biases_shift);
+#endif /* BIAS */
+
+    bool is_last_thread = (((int(gl_GlobalInvocationID.x)) == (int(gl_NumWorkGroups.x * gl_WorkGroupSize.x) - 1)) && ((int(gl_GlobalInvocationID.y)) == (int(gl_NumWorkGroups.y * gl_WorkGroupSize.y) - 1))
+                           && ((int(gl_GlobalInvocationID.z)) == (int(gl_NumWorkGroups.z * gl_WorkGroupSize.z) - 1)));
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(dst_iter, ((uint(gl_GlobalInvocationID.x) * uint(dst_attrs.stride_y)) + (uint(gl_GlobalInvocationID.y) * uint(width) * uint(dst_attrs.stride_y)) + (uint(
+                                                    gl_GlobalInvocationID.z)
+                                                * uint(width) * uint(height) * uint(dst_attrs.stride_y))));
+    // Linearize convolution elements
+    if(is_last_thread)
+    {
+        for(uint i = 0u; i < uint(total_filters); ++i)
+        {
+            float s0 = LOAD_CURRENT_ITEM(src_ptr, src_iter);
+            STORE_CURRENT_ITEM(dst_ptr, dst_iter, s0);
+            TENSOR_ITERATOR_ADVANCE_IN_BYTES(src_iter, (depth * src_attrs.stride_z));
+#ifdef HAS_BIAS
+            float b = LOAD_CURRENT_ITEM(biases_ptr, biases_iter);
+            STORE(dst_ptr, TENSOR_OFFSET_ADVANCE_IN_BYTES(dst_iter, dst_attrs.stride_y), b);
+            TENSOR_ITERATOR_ADVANCE_IN_BYTES(biases_iter, biases_attrs.stride_x);
+#endif /* HAS_BIAS */
+            TENSOR_ITERATOR_ADVANCE_IN_BYTES(dst_iter, dst_attrs.stride_x);
+        }
+    }
+    else
+    {
+        for(uint i = 0u; i < uint(total_filters); ++i)
+        {
+            float s0 = LOAD_CURRENT_ITEM(src_ptr, src_iter);
+            STORE_CURRENT_ITEM(dst_ptr, dst_iter, s0);
+            TENSOR_ITERATOR_ADVANCE_IN_BYTES(src_iter, (depth * src_attrs.stride_z));
+            TENSOR_ITERATOR_ADVANCE_IN_BYTES(dst_iter, dst_attrs.stride_x);
+        }
+    }
+}
+
+#elif defined(DATA_TYPE_FP16)
 
 TENSOR_DECLARATION(1, srcBuffer, uint, src_ptr, src_shift, 2, readonly);
 TENSOR_DECLARATION(2, dstBuffer, uint, dst_ptr, dst_shift, 2, writeonly);
@@ -72,10 +121,10 @@ TENSOR_DECLARATION(3, biasesBuffer, uint, biases_ptr, biases_shift, 2, readonly)
 
 void main()
 {
-    Tensor3DIterator src_iter = CONVERT_TO_TENSOR3D_ITERATOR(src_attrs, src_shift);
-    ImageIterator    dst_iter = CONVERT_TO_IMAGE_ITERATOR_NO_STEP(dst_attrs, dst_shift);
+    Tensor3DIterator src_iter    = CONVERT_TO_TENSOR3D_ITERATOR(src_attrs, src_shift);
+    ImageIterator    dst_iter    = CONVERT_TO_IMAGE_ITERATOR_NO_STEP(dst_attrs, dst_shift);
 #ifdef HAS_BIAS
-    VectorIterator biases_iter = CONVERT_TO_VECTOR_ITERATOR_NO_STEP(biases_attrs, biases_shift);
+    VectorIterator   biases_iter = CONVERT_TO_VECTOR_ITERATOR_NO_STEP(biases_attrs, biases_shift);
 #endif /* BIAS */
 
     bool is_last_thread = (((int(gl_GlobalInvocationID.x)) == (int(gl_NumWorkGroups.x * gl_WorkGroupSize.x) - 1)) && ((int(gl_GlobalInvocationID.y)) == (int(gl_NumWorkGroups.y * gl_WorkGroupSize.y) - 1))
@@ -151,7 +200,7 @@ void main()
     }
 }
 
-#endif /* DATA_TYPE_FP16 */
+#endif /* DATA_TYPE_FP32 */
 #endif // RESHAPE_TO_COLUMNS
 
 #ifdef IM2COL_GENERIC
@@ -193,30 +242,31 @@ void main(void)
     Tensor3DIterator src_iter = CONVERT_TO_TENSOR3D_ITERATOR_NO_STEP(src_attrs, src_shift);
     ImageIterator    dst_iter = CONVERT_TO_IMAGE_ITERATOR_NO_STEP(dst_attrs, dst_shift);
 
-    uint xc    = gl_GlobalInvocationID.x;                // x coordinate in the convolved tensor
-    uint yc    = gl_GlobalInvocationID.y;                // y coordinate in the convolved tensor
-    uint ch    = gl_GlobalInvocationID.z % KERNEL_DEPTH; // input feature map
-    uint batch = gl_GlobalInvocationID.z / KERNEL_DEPTH; // the batch
+    int xc    = int(gl_GlobalInvocationID.x);                // x coordinate in the convolved tensor
+    int yc    = int(gl_GlobalInvocationID.y);                // y coordinate in the convolved tensor
+    int ch    = int(gl_GlobalInvocationID.z) % KERNEL_DEPTH; // input feature map
+    int batch = int(gl_GlobalInvocationID.z) / KERNEL_DEPTH; // the batch
 
     // Calculate input indeces
-    uint xi = xc * uint(STRIDE_X) - uint(PAD_LEFT);
-    uint yi = yc * uint(STRIDE_Y) - uint(PAD_TOP);
-    TENSOR_ITERATOR_ADVANCE_IN_BYTES(src_iter, (ch * src_attrs.stride_z) + (batch * src_stride_w));
+    int xi = xc * STRIDE_X - PAD_LEFT;
+    int yi = yc * STRIDE_Y - PAD_TOP;
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(src_iter, (ch * int(src_attrs.stride_z)) + (batch * int(src_stride_w)));
 
     // Calculate output indeces
-    uint xo = ch * uint(KERNEL_WIDTH) * uint(KERNEL_HEIGHT);
-    uint yo = xc + yc * uint(CONVOLVED_WIDTH); // Index of the convolution
-    TENSOR_ITERATOR_ADVANCE_IN_BYTES(dst_iter, (yo * dst_attrs.stride_y) + (batch * dst_stride_w) + xo);
+    int xo = ch * KERNEL_WIDTH * KERNEL_HEIGHT;
+    int yo = xc + yc * CONVOLVED_WIDTH; // Index of the convolution
+    // sizeof is not available in GLES, so we'll use stride_x
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(dst_iter, (yo * int(dst_attrs.stride_y)) + (batch * int(dst_stride_w)) + xo * int(dst_attrs.stride_x));
 
     uint src_pos = 0u;
 
     // Linearize convolution elements
-    for(uint y = yi, y_e = yi + uint(KERNEL_HEIGHT) * uint(DILATION_Y); y < y_e; y += uint(DILATION_Y))
+    for(int y = yi, y_e = yi + KERNEL_HEIGHT * DILATION_Y; y < y_e; y += DILATION_Y)
     {
-        for(uint x = xi, x_e = xi + uint(KERNEL_WIDTH) * uint(DILATION_X); x < x_e; x += uint(DILATION_X), TENSOR_OFFSET_ADVANCE(dst_iter, 1u))
+        for(int x = xi, x_e = xi + KERNEL_WIDTH * DILATION_X; x < x_e; x += DILATION_X, TENSOR_ITERATOR_ADVANCE_IN_BYTES(dst_iter, int(dst_attrs.stride_x)))
         {
 #if PAD_LEFT == 0 && PAD_TOP == 0 && PAD_RIGHT == 0 && PAD_BOTTOM == 0
-            src_pos = TENSOR_OFFSET_ADVANCE_IN_BYTES(src_iter, x * src_attrs.stride_x + y * src_attrs.stride_y);
+            src_pos = TENSOR_OFFSET_ADVANCE_IN_BYTES(src_iter, x * int(src_attrs.stride_x) + y * int(src_attrs.stride_y));
             STORE_CURRENT_ITEM(dst_ptr, dst_iter, LOAD(src_ptr, src_pos));
 #else  /* PAD_LEFT == 0 && PAD_TOP == 0 && PAD_RIGHT == 0 && PAD_BOTTOM == 0 */
             if(x < 0 || x >= SRC_WIDTH || y < 0 || y >= SRC_HEIGHT)
@@ -225,7 +275,7 @@ void main(void)
             }
             else
             {
-                src_pos = TENSOR_OFFSET_ADVANCE_IN_BYTES(src_iter, x * src_attrs.stride_x + y * src_attrs.stride_y);
+                src_pos = TENSOR_OFFSET_ADVANCE_IN_BYTES(src_iter, x * int(src_attrs.stride_x) + y * int(src_attrs.stride_y));
                 STORE_CURRENT_ITEM(dst_ptr, dst_iter, LOAD(src_ptr, src_pos));
             }
 #endif /* PAD_LEFT == 0 && PAD_TOP == 0 && PAD_RIGHT == 0 && PAD_BOTTOM == 0 */
@@ -233,7 +283,7 @@ void main(void)
     }
 
 #ifdef HAS_BIAS
-    if(ch == (uint(KERNEL_DEPTH) - 1))
+    if(ch == (KERNEL_DEPTH - 1))
     {
         STORE_CURRENT_ITEM(dst_ptr, dst_iter, 1.0f);
     }
@@ -661,6 +711,7 @@ void main(void)
 #endif /* DATA_TYPE_FP32 */
 #endif /* IM2COL_REDUCED */
 
+#ifdef COL2IM
 #ifdef WIDTH_OUTPUT
 
 /** This kernel performs a reshaping of the output of the convolution layer.
@@ -694,10 +745,9 @@ void main(void)
     Tensor3DIterator dst_iter = CONVERT_TO_TENSOR3D_ITERATOR(dst_attrs, dst_shift);
 
     uvec3 pos = uvec3(gl_GlobalInvocationID.xyz);
-    TENSOR_ITERATOR_ADVANCE_IN_BYTES(src_iter, pos.x * src_attrs.step_y + pos.y * WIDTH_OUTPUT * src_attrs.step_y + (pos.z % dst_depth) * src_attrs.stride_x + (pos.z / dst_depth) * (src_attrs.stride_z));
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(src_iter, pos.x * src_attrs.step_y + pos.y * uint(WIDTH_OUTPUT) * src_attrs.step_y + (pos.z % dst_depth) * src_attrs.stride_x + (pos.z / dst_depth) * dst_strideZ);
 
-    STORE_CURRENT_ITEM(dst_ptr, dst_iter,
-                       LOAD_CURRENT_ITEM(src_ptr, src_iter));
+    STORE_CURRENT_ITEM(dst_ptr, dst_iter, LOAD_CURRENT_ITEM(src_ptr, src_iter));
 }
 
 #elif defined(DATA_TYPE_FP16)
@@ -737,4 +787,5 @@ void main(void)
 #else /* DATA_TYPE_FP32 */
 #error Data type not supported
 #endif /* DATA_TYPE_FP32 */
+#endif /* WIDTH_OUTPUT */
 #endif /* COL2IM */

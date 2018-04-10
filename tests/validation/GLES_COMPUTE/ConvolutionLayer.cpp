@@ -45,13 +45,14 @@ namespace validation
 namespace
 {
 RelativeTolerance<half_float::half> tolerance_f16(half_float::half(0.2)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+RelativeTolerance<float>            tolerance_f32(0.00001f);              /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 constexpr float                     tolerance_num = 0.07f;                /**< Tolerance number */
 
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
 {
     DataType::F16,
-    // DataType::F32,
+    DataType::F32,
 });
 const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
 {
@@ -133,6 +134,25 @@ FIXTURE_DATA_TEST_CASE(RunLarge, GCConvolutionLayerFixture<half>, framework::Dat
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f16, tolerance_num);
+}
+TEST_SUITE_END()
+
+TEST_SUITE(FP32)
+FIXTURE_DATA_TEST_CASE(RunSmall, GCConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
+                                                                                                                      framework::dataset::make("ReshapeWeights", { true, false })),
+                                                                                                                      framework::dataset::make("DataType", DataType::F32)),
+                                                                                                              ActivationFunctionsDataset))
+{
+    // Validate output
+    validate(GCAccessor(_target), _reference, tolerance_f32, tolerance_num);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, GCConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeConvolutionLayerDataset(),
+                                                                                                                    framework::dataset::make("ReshapeWeights", { true, false })),
+                                                                                                                    framework::dataset::make("DataType", DataType::F32)),
+                                                                                                            ActivationFunctionsDataset))
+{
+    // Validate output
+    validate(GCAccessor(_target), _reference, tolerance_f32, tolerance_num);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
