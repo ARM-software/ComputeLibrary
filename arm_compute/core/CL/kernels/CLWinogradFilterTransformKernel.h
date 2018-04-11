@@ -49,8 +49,7 @@ public:
     /** Set the input and output tensor.
      *
      * @note Winograd filter transform supports the following configurations:
-     *       Output tile size: 2x2, 4x4
-     *       Kernel size: 3x3
+     *       F(output tile, kernel size):F(2x2, 3x3), F(4x4, 3x3), F(4x4, 5x5)
      *       Strides: only unit strides
      *
      * @param[in]  input         Source tensor. The input is a 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] (NCHW data layout). Data types supported: F32.
@@ -61,8 +60,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLWinogradFilterTransformKernel
      *
      * @note Winograd filter transform supports the following configurations:
-     *       Output tile size: 2x2, 4x4
-     *       Kernel size: 3x3
+     *       F(output tile, kernel size):F(2x2, 3x3), F(4x4, 3x3), F(4x4, 5x5)
      *       Strides: only unit strides
      *
      * @param[in]  input         Source tensor. The input is a 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] (NCHW data layout). Data types supported: F32.

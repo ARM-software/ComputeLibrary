@@ -109,10 +109,12 @@ ConvolutionMethod NEConvolutionLayer::get_convolution_method(const ITensorInfo *
     ARM_COMPUTE_ERROR_ON_NULLPTR(weights);
     ARM_COMPUTE_UNUSED(output);
     ARM_COMPUTE_UNUSED(weights_info);
-    ARM_COMPUTE_UNUSED(act_info);
 
-    if((input->data_type() == DataType::F32) && (weights->dimension(0) == 3) && (weights->dimension(1) == 3) && (weights->num_dimensions() <= 4) && (conv_info.stride().first == 1)
-       && (conv_info.stride().second == 1) && (dilation == Size2D(1U, 1U)))
+    const size_t idx_w = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
+    const size_t idx_h = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
+
+    if((input->data_type() == DataType::F32) && (input->data_layout() == DataLayout::NCHW) && (weights->dimension(idx_w) == 3) && (weights->dimension(idx_h) == 3) && (weights->num_dimensions() <= 4)
+       && (conv_info.stride().first == 1) && (conv_info.stride().second == 1) && (dilation == Size2D(1U, 1U)) && (!act_info.enabled()))
     {
         //FIXME Until COMPMID-1041 is implemented Winograd is slower than GEMM on A53.
         if(Scheduler::get().cpu_info().get_cpu_model() != CPUModel::A53)

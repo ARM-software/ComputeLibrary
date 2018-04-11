@@ -40,8 +40,7 @@ public:
     /** Set the input and output tensors.
      *
      * @note Winograd input transform supports the following configurations:
-     *       Output tile size: 2x2
-     *       Kernel size: 3x3
+     *       F(output tile, kernel size):F(2x2, 3x3), F(4x4, 3x3), F(4x4, 5x5)
      *       Strides: only unit strides
      *
      * @param[in] input         The input tensor to transform. Data types supported: F32
@@ -52,8 +51,7 @@ public:
     /**  Static function to check if given info will lead to a valid configuration of @ref CLWinogradInputTransform.
      *
      * @note Winograd input transform supports the following configurations:
-     *       Output tile size: 2x2
-     *       Kernel size: 3x3
+     *       F(output tile, kernel size):F(2x2, 3x3), F(4x4, 3x3), F(4x4, 5x5)
      *       Strides: only unit strides
      *
      * @param[in] input         The input tensor to transform. Data types supported: F32

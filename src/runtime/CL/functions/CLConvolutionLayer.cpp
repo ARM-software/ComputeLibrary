@@ -48,9 +48,16 @@ void CLConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, c
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_ERROR_THROW_ON(CLConvolutionLayer::validate(input->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), output->info(), conv_info, weights_info, dilation, act_info));
 
-    switch(CLConvolutionLayer::get_convolution_method(input->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), output->info(), conv_info,
+    switch(CLConvolutionLayer::get_convolution_method(input->info(), weights->info(), output->info(), conv_info,
                                                       weights_info, act_info, CLScheduler::get().target(), dilation))
     {
+        case ConvolutionMethod::WINOGRAD:
+        {
+            auto f = arm_compute::support::cpp14::make_unique<CLWinogradConvolutionLayer>();
+            f->configure(input, weights, biases, output, conv_info);
+            _function = std::move(f);
+            break;
+        }
         case ConvolutionMethod::DIRECT:
         {
             auto f = arm_compute::support::cpp14::make_unique<CLDirectConvolutionLayer>();
@@ -79,8 +86,14 @@ Status CLConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo 
     //Configure if the parameters match the direct convolution or the gemm-based
     const GPUTarget gpu_target = CLScheduler::get().target();
 
-    switch(CLConvolutionLayer::get_convolution_method(input, weights, biases, output, conv_info, weights_info, act_info, gpu_target, dilation))
+    switch(CLConvolutionLayer::get_convolution_method(input, weights, output, conv_info, weights_info, act_info, gpu_target, dilation))
     {
+        case ConvolutionMethod::WINOGRAD:
+        {
+            //Validate Winograd
+            CLWinogradConvolutionLayer::validate(input, weights, biases, output, conv_info);
+            break;
+        }
         case ConvolutionMethod::DIRECT:
         {
             // Validate direct convolution layer
@@ -101,19 +114,25 @@ Status CLConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo 
     return Status{};
 }
 
-ConvolutionMethod CLConvolutionLayer::get_convolution_method(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
+ConvolutionMethod CLConvolutionLayer::get_convolution_method(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *output, const PadStrideInfo &conv_info,
                                                              const WeightsInfo &weights_info, const ActivationLayerInfo &act_info, const GPUTarget gpu_target, const Size2D &dilation)
 {
-    ARM_COMPUTE_UNUSED(input);
-    ARM_COMPUTE_UNUSED(weights);
-    ARM_COMPUTE_UNUSED(biases);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(weights);
     ARM_COMPUTE_UNUSED(output);
-    ARM_COMPUTE_UNUSED(conv_info);
     ARM_COMPUTE_UNUSED(weights_info);
     ARM_COMPUTE_UNUSED(gpu_target);
-    ARM_COMPUTE_UNUSED(dilation);
-    ARM_COMPUTE_UNUSED(act_info);
 
+    const size_t idx_w = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
+    const size_t idx_h = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
+    const size_t idx_c = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL);
+
+    if((input->data_type() == DataType::F32) && (input->data_layout() == DataLayout::NCHW) && (input->dimension(idx_c) > 3) && (weights->dimension(idx_w) == 3) && (weights->dimension(idx_h) == 3)
+       && (weights->num_dimensions() <= 4) && (conv_info.stride().first == 1) && (conv_info.stride().second == 1) && (dilation == Size2D(1U, 1U)) && (!act_info.enabled()))
+    {
+        return ConvolutionMethod::WINOGRAD;
+    }
     return ConvolutionMethod::GEMM;
 }
 

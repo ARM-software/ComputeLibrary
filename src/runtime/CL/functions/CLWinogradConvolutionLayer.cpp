@@ -44,13 +44,18 @@ void CLWinogradConvolutionLayer::configure(ICLTensor *input, const ICLTensor *we
     const size_t idx_height = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
 
     // Input shape
-    const TensorShape input_shape = input->info()->tensor_shape();
+    const TensorShape  input_shape = input->info()->tensor_shape();
+    const unsigned int input_w     = input->info()->tensor_shape()[idx_width];
+    const unsigned int input_h     = input->info()->tensor_shape()[idx_height];
 
     // Kernel size
     const unsigned int kernel_w = weights->info()->tensor_shape()[idx_width];
     const unsigned int kernel_h = weights->info()->tensor_shape()[idx_height];
 
-    const WinogradInfo winograd_info = WinogradInfo(Size2D(2, 2),
+    //Winograd output tile
+    const Size2D output_tile = (Size2D(kernel_w, kernel_h) == Size2D(3U, 3U) && input_w <= 4 && input_h <= 4) ? Size2D(2U, 2U) : Size2D(4U, 4U);
+
+    const WinogradInfo winograd_info = WinogradInfo(output_tile,
                                                     Size2D(kernel_w, kernel_h),
                                                     Size2D(input_shape[idx_width], input_shape[idx_height]),
                                                     conv_info,
@@ -95,13 +100,18 @@ Status CLWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITen
     const size_t idx_height = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
 
     // Input shape
-    const TensorShape input_shape = input->tensor_shape();
+    const TensorShape  input_shape = input->tensor_shape();
+    const unsigned int input_w     = input->tensor_shape()[idx_width];
+    const unsigned int input_h     = input->tensor_shape()[idx_height];
 
     // Kernel size
     const unsigned int kernel_w = weights->tensor_shape()[idx_width];
     const unsigned int kernel_h = weights->tensor_shape()[idx_height];
 
-    const WinogradInfo winograd_info = WinogradInfo(Size2D(2, 2),
+    //Winograd output tile
+    const Size2D output_tile = (Size2D(kernel_w, kernel_h) == Size2D(3U, 3U) && input_w <= 4 && input_h <= 4) ? Size2D(2U, 2U) : Size2D(4U, 4U);
+
+    const WinogradInfo winograd_info = WinogradInfo(output_tile,
                                                     Size2D(kernel_w, kernel_h),
                                                     Size2D(input_shape[idx_width], input_shape[idx_height]),
                                                     conv_info,

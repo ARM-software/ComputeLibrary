@@ -58,6 +58,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size != Size2D(3U, 3U) && kernel_size != Size2D(5U, 5U), "Only 3x3 and 5x5 kernels are supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size == Size2D(3U, 3U) && output_tile_size == Size2D(2U, 2U) && input->dimension(2) != 16, "Wrong number of batches");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size == Size2D(3U, 3U) && output_tile_size == Size2D(4U, 4U) && input->dimension(2) != 36, "Wrong number of batches");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size == Size2D(5U, 5U) && output_tile_size == Size2D(4U, 4U) && input->dimension(2) != 64, "Wrong number of batches");
 
     // Compute number of elements to process in the X and Y direction
@@ -67,7 +68,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
     const int num_tiles_y    = std::ceil(num_elements_y / static_cast<float>(output_tile_size.height));
 
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(1) != static_cast<unsigned int>((num_tiles_x * num_tiles_y)));
-    ARM_COMPUTE_UNUSED(output_tile_size);
 
     if(bias != nullptr)
     {

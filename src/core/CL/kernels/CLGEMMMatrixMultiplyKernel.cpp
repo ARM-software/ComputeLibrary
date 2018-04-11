@@ -286,17 +286,23 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
     else // The input tensors have not been reshaped
     {
         build_opts.add_option("-DCOLS_A=" + support::cpp11::to_string(input0->info()->dimension(0)));
+        build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
 
         // Create kernels according to the architecture, data type and input size.
         if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX) && is_data_type_float(data_type))
         {
-            kernel_name = "gemm_mm_floating_point_" + lower_string(string_from_data_type(data_type)) + "_bifrost";
-            // The first kernel is optimized for the case of 1000 or less output elements (e.g. FC8 of AlexNet and VGG-16, and
-            // FC1 of Inception v3). The second kernel is optimized for the case of greater than 1000 output elements (e.g.
-            // FC6 and FC7 of AlexNet and VGG-16).
-            if(input1->info()->dimension(0) <= 1000 && input0->info()->num_dimensions() == 1 && data_type == DataType::F32)
+            kernel_name = "gemm_mm_floating_point";
+
+            if(input0->info()->num_dimensions() != 1)
             {
-                kernel_name += "_1000";
+                kernel_name += "_" + lower_string(string_from_data_type(data_type)) + "_bifrost";
+            }
+            else if(input1->info()->dimension(0) <= 1000 && data_type == DataType::F32)
+            {
+                // The first kernel is optimized for the case of 1000 or less output elements (e.g. FC8 of AlexNet and VGG-16, and
+                // FC1 of Inception v3). The second kernel is optimized for the case of greater than 1000 output elements (e.g.
+                // FC6 and FC7 of AlexNet and VGG-16).
+                kernel_name += "_" + lower_string(string_from_data_type(data_type)) + "_bifrost_1000";
             }
 
             // The work-group size equal to the Bifrost quad size has been proved to be optimal for these kernels
@@ -309,7 +315,6 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
         }
         else // (MIDGARD and F32) or (F16)
         {
-            build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
             kernel_name = "gemm_mm_floating_point";
         }
         build_opts.add_option("-DNUM_ELEMS_PROCESSED_PER_THREAD_Y=" + support::cpp11::to_string(num_elements_processed.y()));

@@ -49,11 +49,10 @@ public:
     /** Set the input and output tensor.
      *
      * @note Winograd output transform supports the following configurations:
-     *       Output tile size: 2x2
-     *       Kernel size: 3x3
+     *       F(output tile, kernel size):F(2x2, 3x3), F(4x4, 3x3), F(4x4, 5x5)
      *       Strides: only unit strides
      *
-     * @param[in]  input         Source tensor with shape [C, N, 16, batches]. Data types supported: F32.
+     * @param[in]  input         Source tensor with shape [C, N, K, batches]. Data types supported: F32.
      * @param[in]  bias          Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. It can be a nullptr. Data type supported: as @p input
      * @param[out] output        The output tensor. The shape for this tensor can be calculated using the utility function @p compute_winograd_output_transform_shape. Data types supported: Same as @p input
      * @param[in]  winograd_info Contains Winograd's information described in @ref WinogradInfo
@@ -62,11 +61,10 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLWinogradOutputTransformKernel
      *
      * @note Winograd output transform supports the following configurations:
-     *       Output tile size: 2x2
-     *       Kernel size: 3x3
+     *       F(output tile, kernel size):F(2x2, 3x3), F(4x4, 3x3), F(4x4, 5x5)
      *       Strides: only unit strides
      *
-     * @param[in]  input         Source tensor with shape [C, N, 16, batches]. Data types supported: F32.
+     * @param[in]  input         Source tensor with shape [C, N, K, batches]. Data types supported: F32.
      * @param[in]  bias          Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. It can be a nullptr. Data type supported: as @p input
      * @param[out] output        The output tensor. The shape for this tensor can be calculated using the utility function @p compute_winograd_output_transform_shape. Data types supported: Same as @p input
      * @param[in]  winograd_info Contains Winograd's information described in @ref WinogradInfo

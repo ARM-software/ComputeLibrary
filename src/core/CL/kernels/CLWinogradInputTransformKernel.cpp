@@ -47,7 +47,9 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     const Size2D        kernel_size      = winograd_info.kernel_size;
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.stride().first != 1 || conv_info.stride().second != 1, "Winograd input transform only supports unit strides");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size != Size2D(3U, 3U) && kernel_size != Size2D(5U, 5U), "Winograd input transform only supports 3x3 and 5x5 kernels");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size == Size2D(3U, 3U) && output_tile_size != Size2D(2U, 2U), "Winograd input transform only supports 2x2 output tile for 3x3 kernels");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size == Size2D(3U, 3U) && output_tile_size != Size2D(2U, 2U)
+                                    && output_tile_size != Size2D(4U, 4U),
+                                    "Winograd input transform only supports 2x2 or 4x4 output tile for 3x3 kernels");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size == Size2D(5U, 5U) && output_tile_size != Size2D(4U, 4U), "Winograd input transform only supports 4x4 output tile for 5x5 kernels");
     ARM_COMPUTE_UNUSED(conv_info);
     ARM_COMPUTE_UNUSED(output_tile_size);
@@ -111,7 +113,6 @@ void CLWinogradInputTransformKernel::configure(const ICLTensor *input, ICLTensor
     const int num_elements_y = input->info()->dimension(1) - (kernel_size.height - 1) + conv_info.pad_top() + conv_info.pad_bottom();
 
     // Check if we need to extend the right or bottom border
-    // FIXME: This actually is not needed. Added just for validating the result;
     const unsigned int extra_border_right  = ((num_elements_x % output_tile_size.width) == 0) ? 0u : static_cast<unsigned int>(output_tile_size.width - 1);
     const unsigned int extra_border_bottom = ((num_elements_y % output_tile_size.height) == 0) ? 0u : static_cast<unsigned int>(output_tile_size.height - 1);
 
@@ -137,18 +138,12 @@ void CLWinogradInputTransformKernel::configure(const ICLTensor *input, ICLTensor
     std::string kernel_name = "winograd_input_transform_" + output_tile_size.to_string() + "_" + kernel_size.to_string();
 
     // Check optimized kernel if output_dims == 2x2
-    if(output_tile_size.width == 2 && output_tile_size.height == 2)
+    if(output_tile_size == Size2D(2U, 2U))
     {
-        if((_input->info()->dimension(2) % 2) != 0)
-        {
-            _step_z = 1;
-        }
-        else
-        {
-            _step_z   = 2;
-            _lws_hint = cl::NDRange(1, 1, 8);
-        }
+        _step_z = (_input->info()->dimension(2) % 2) != 0 ? 1 : 2;
     }
+
+    _lws_hint = cl::NDRange(1, 1, 8);
 
     // Append stepz and data layout
     kernel_name += "_stepz";

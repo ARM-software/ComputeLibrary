@@ -236,7 +236,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                                                         TensorInfo(TensorShape(512U, 49U, 16U, 5U), 1, DataType::F32),      // Valid
                                                                                         TensorInfo(TensorShape(13U, 108U, 16U, 4U), 1, DataType::F32),      // Padding needed
                                                                                         TensorInfo(TensorShape(7U, 20U, 16U, 7U), 1, DataType::F32),        // Valid
-                                                                                        TensorInfo(TensorShape(7U, 20U, 16U, 7U), 1, DataType::F32)         // Wrong WinogradInfo
+                                                                                        TensorInfo(TensorShape(7U, 20U, 16U, 7U), 1, DataType::F32),        // Wrong WinogradInfo
+                                                                                        TensorInfo(TensorShape(7U, 256U, 36U, 3U), 1, DataType::F32),       // Valid
+                                                                                        TensorInfo(TensorShape(7U, 256U, 16U, 3U), 1, DataType::F32)        // Wrong number of batches
                                                                                     }),
                                                 framework::dataset::make("BiasInfo", {
                                                                                         TensorInfo(TensorShape(512U), 1, DataType::F16),
@@ -244,6 +246,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                                                         TensorInfo(TensorShape(512U), 1, DataType::F32),
                                                                                         TensorInfo(TensorShape(512U), 1, DataType::F32),
                                                                                         TensorInfo(TensorShape(13U), 1, DataType::F32),
+                                                                                        TensorInfo(TensorShape(7U), 1, DataType::F32),
+                                                                                        TensorInfo(TensorShape(7U), 1, DataType::F32),
                                                                                         TensorInfo(TensorShape(7U), 1, DataType::F32),
                                                                                         TensorInfo(TensorShape(7U), 1, DataType::F32)
                                                                                     })),
@@ -254,7 +258,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                                                         TensorInfo(TensorShape(14U, 14U, 512U, 5U), 1, DataType::F32),
                                                                                         TensorInfo(TensorShape(17U, 23U, 13U, 4U), 1, DataType::F32),
                                                                                         TensorInfo(TensorShape(8U, 10U, 7U, 7U), 1, DataType::F32),
-                                                                                        TensorInfo(TensorShape(7U, 9U, 7U, 7U), 1, DataType::F32)
+                                                                                        TensorInfo(TensorShape(7U, 9U, 7U, 7U), 1, DataType::F32),
+                                                                                        TensorInfo(TensorShape(64U, 64U, 7U, 3U), 1, DataType::F32),
+                                                                                        TensorInfo(TensorShape(64U, 64U, 7U, 3U), 1, DataType::F32)
                                                                                     })),
                                                 framework::dataset::make("WinogradInfo", {
                                                                                         WinogradInfo(Size2D(2U, 2U), Size2D(3U, 3U), Size2D(14U, 14U), PadStrideInfo(1, 1, 1, 1), DataLayout::NCHW),
@@ -264,8 +270,10 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                                                         WinogradInfo(Size2D(2U, 2U), Size2D(3U, 3U), Size2D(17U, 23U), PadStrideInfo(1, 1, 1, 1), DataLayout::NCHW),
                                                                                         WinogradInfo(Size2D(2U, 2U), Size2D(3U, 3U), Size2D(8U, 10U), PadStrideInfo(1, 1, 1, 1), DataLayout::NCHW),
                                                                                         WinogradInfo(Size2D(2U, 3U), Size2D(3U, 3U), Size2D(8U, 10U), PadStrideInfo(1, 1, 0, 0), DataLayout::NCHW),
+                                                                                        WinogradInfo(Size2D(4U, 4U), Size2D(3U, 3U), Size2D(64U, 64U), PadStrideInfo(1, 1, 1, 1), DataLayout::NCHW),
+                                                                                        WinogradInfo(Size2D(4U, 4U), Size2D(3U, 3U), Size2D(64U, 64U), PadStrideInfo(1, 1, 1, 1), DataLayout::NCHW)
                                                                                     })),
-                                                framework::dataset::make("Expected", { false, false, false, true, false, true, false })),
+                                                framework::dataset::make("Expected", { false, false, false, true, false, true, false, true, false })),
                                             input_info, bias_info, output_info, winograd_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLWinogradOutputTransformKernel::validate(&input_info.clone()->set_is_resizable(false), &bias_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), winograd_info)) == expected, framework::LogLevel::ERRORS);
