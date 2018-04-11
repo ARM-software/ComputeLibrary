@@ -87,7 +87,7 @@ private:
  *
  * -# @ref CLIm2ColKernel
  * -# @ref CLGEMMLowpMatrixMultiplyCore (if quantized asymmetric)
- * -# @ref CLGEMMLowpQuantizeDownInt32ToUint8Scale (if quantized asymmetric)
+ * -# @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint (if quantized asymmetric)
  * -# @ref CLCol2ImKernel
  *
  * if the weights are already reshaped:
