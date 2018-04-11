@@ -51,8 +51,12 @@ public:
         std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<CaffePreproccessor>(mean_rgb);
 
         // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
-        const int target      = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
-        Target    target_hint = set_target_hint(target);
+        const int  target      = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
+        Target     target_hint = set_target_hint(target);
+        const bool is_opencl   = target_hint == Target::CL;
+
+        ConvolutionMethod first_convolution3x3_hint = is_opencl ? ConvolutionMethod::DIRECT : ConvolutionMethod::GEMM;
+        ConvolutionMethod convolution3x3_hint       = ConvolutionMethod::DEFAULT;
 
         // Parse arguments
         if(argc < 2)
@@ -87,6 +91,7 @@ public:
         }
 
         graph << target_hint
+              << first_convolution3x3_hint
               << InputLayer(TensorDescriptor(TensorShape(224U, 224U, 3U, 1U), DataType::F32),
                             get_input_accessor(image, std::move(preprocessor)))
               // Layer 1
@@ -96,6 +101,7 @@ public:
                   get_weights_accessor(data_path, "/cnn_data/vgg19_model/conv1_1_b.npy"),
                   PadStrideInfo(1, 1, 1, 1))
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+              << convolution3x3_hint
               << ConvolutionLayer(
                   3U, 3U, 64U,
                   get_weights_accessor(data_path, "/cnn_data/vgg19_model/conv1_2_w.npy"),
