@@ -264,8 +264,8 @@ inline ValidRegion shape_to_valid_region_gaussian_pyramid_half(const TensorShape
     // Compute tensor shape for level "i" of Gaussian Pyramid Half
     // dst_width  = (src_width + 1) * 0.5f
     // dst_height = (src_height + 1) * 0.5f
-    shape.set(0, (shape[0] + 1) * 0.5f);
-    shape.set(1, (shape[1] + 1) * 0.5f);
+    shape.set(0, (a_shape[0] + 1) * 0.5f);
+    shape.set(1, (a_shape[1] + 1) * 0.5f);
 
     if(border_undefined)
     {
@@ -279,8 +279,8 @@ inline ValidRegion shape_to_valid_region_gaussian_pyramid_half(const TensorShape
         // 1) If the width/height of the tensor shape is odd, we have to take the ceil value of (a_valid_region.anchor.x() + border_size) / 2.0f or (a_valid_region.anchor.y() + border_size / 2.0f
         // 2) If the width/height of the tensor shape is even, we have to take the floor value of (a_valid_region.anchor.x() + border_size) / 2.0f or (a_valid_region.anchor.y() + border_size) / 2.0f
         // In this manner we should be able to propagate correctly the valid region along all levels of the pyramid
-        invalid_border_left = (shape[0] % 2) ? std::ceil(invalid_border_left) : std::floor(invalid_border_left);
-        invalid_border_top  = (shape[1] % 2) ? std::ceil(invalid_border_top) : std::floor(invalid_border_top);
+        invalid_border_left = (a_shape[0] % 2) ? std::ceil(invalid_border_left) : std::floor(invalid_border_left);
+        invalid_border_top  = (a_shape[1] % 2) ? std::ceil(invalid_border_top) : std::floor(invalid_border_top);
 
         // Set the anchor point
         anchor.set(0, static_cast<int>(invalid_border_left));
@@ -288,8 +288,8 @@ inline ValidRegion shape_to_valid_region_gaussian_pyramid_half(const TensorShape
 
         // Compute shape
         // Calculate the right and bottom invalid borders at the previous level of the pyramid
-        const float prev_invalid_border_right  = static_cast<float>(shape[0] - (a_valid_region.anchor.x() + a_valid_region.shape[0]));
-        const float prev_invalid_border_bottom = static_cast<float>(shape[1] - (a_valid_region.anchor.y() + a_valid_region.shape[1]));
+        const float prev_invalid_border_right  = static_cast<float>(a_shape[0] - (a_valid_region.anchor.x() + a_valid_region.shape[0]));
+        const float prev_invalid_border_bottom = static_cast<float>(a_shape[1] - (a_valid_region.anchor.y() + a_valid_region.shape[1]));
 
         // Calculate the right and bottom invalid borders at the current level of the pyramid
         const float invalid_border_right  = std::ceil((prev_invalid_border_right + static_cast<float>(border_size)) / 2.0f);

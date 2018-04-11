@@ -232,7 +232,8 @@ public:
         TensorShape{ 42U, 37U },
                      TensorShape{ 57U, 60U },
                      TensorShape{ 128U, 64U },
-                     TensorShape{ 83U, 72U }
+                     TensorShape{ 83U, 72U },
+                     TensorShape{ 40U, 40U }
     })
     {
     }

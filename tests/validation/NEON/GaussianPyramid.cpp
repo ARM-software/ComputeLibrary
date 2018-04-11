@@ -46,7 +46,7 @@ namespace
 {
 constexpr AbsoluteTolerance<float> tolerance_fp32(1.0f); /**< Tolerance value for comparing reference's output against implementation's output */
 
-const auto small_gaussian_pyramid_levels = combine(datasets::Medium2DShapes(), datasets::BorderModes()) * framework::dataset::make("numlevels", 2, 3);
+const auto small_gaussian_pyramid_levels = combine(datasets::Medium2DShapes(), datasets::BorderModes()) * framework::dataset::make("numlevels", 2, 4);
 const auto large_gaussian_pyramid_levels = combine(datasets::Large2DShapes(), datasets::BorderModes()) * framework::dataset::make("numlevels", 2, 5);
 
 template <typename T, typename U>
@@ -102,7 +102,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallGaussianPyramidHalf, NEGaussianPyramidHalfFixture
 
 FIXTURE_DATA_TEST_CASE(RunLargeGaussianPyramidHalf, NEGaussianPyramidHalfFixture<uint8_t>, framework::DatasetMode::NIGHTLY, large_gaussian_pyramid_levels)
 {
-    validate_gaussian_pyramid(_target, _reference, _border_mode, tolerance_fp32, 0.01f /* FIXME COMPMID-850: Increase tolerance while waiting for bug fix*/);
+    validate_gaussian_pyramid(_target, _reference, _border_mode, tolerance_fp32);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
