@@ -55,10 +55,11 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     const size_t idx_w = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
     const size_t idx_h = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
 
-    ARM_COMPUTE_RETURN_ERROR_ON(kernel_size != Size2D(3U, 3U));
+    ARM_COMPUTE_RETURN_ERROR_ON(kernel_size != Size2D(3U, 3U) && kernel_size != Size2D(5U, 5U));
+    ARM_COMPUTE_RETURN_ERROR_ON(kernel_size == Size2D(3U, 3U) && output_tile_size != Size2D(2U, 2U) && output_tile_size != Size2D(4U, 4U));
+    ARM_COMPUTE_RETURN_ERROR_ON(kernel_size == Size2D(5U, 5U) && output_tile_size != Size2D(4U, 4U));
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(idx_w) != kernel_size.width || input->dimension(idx_h) != kernel_size.height);
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4);
-    ARM_COMPUTE_RETURN_ERROR_ON(output_tile_size != Size2D(2U, 2U) && output_tile_size != Size2D(4U, 4U));
 
     // Checks performed when output is configured
     if(output->total_size() != 0)
@@ -76,8 +77,8 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    constexpr unsigned int num_elems_processed_per_iteration_x = 3;
-    constexpr unsigned int num_elems_processed_per_iteration_y = 3;
+    const unsigned int num_elems_processed_per_iteration_x = input->dimension(get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH));
+    const unsigned int num_elems_processed_per_iteration_y = input->dimension(get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT));
 
     Window win            = calculate_max_window(*input, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
     bool   window_changed = false;

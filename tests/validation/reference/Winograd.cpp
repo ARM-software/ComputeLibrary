@@ -43,9 +43,6 @@ namespace
 template <typename T>
 void initialize_matrix_transform(SimpleTensor<T> &src, const Size2D &output_tile_size, const Size2D &kernel_size, WinogradTransformType winograd_transform_type)
 {
-    ARM_COMPUTE_ERROR_ON((output_tile_size != Size2D(2U, 2U)) && (output_tile_size != Size2D(4U, 4U)));
-    ARM_COMPUTE_ERROR_ON(kernel_size != Size2D(3U, 3U));
-
     // Winograd input transform matrices
     static const float imatrix2x2_3x3[] =
     {
@@ -86,6 +83,19 @@ void initialize_matrix_transform(SimpleTensor<T> &src, const Size2D &output_tile
         0.0f, 0.0f, 1.0f
     };
 
+    static const float fmatrix4x4_5x5[] =
+    {
+        1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+        -2.0f / 9.0f, -2.0f / 9.0f, -2.0f / 9.0f, -2.0f / 9.0f, -2.0f / 9.0f,
+        -2.0f / 9.0f, 2.0f / 9.0f, -2.0f / 9.0f, 2.0f / 9.0f, -2.0f / 9.0f,
+        1.0f / 90.0f, 1.0f / 45.0f, 2.0f / 45.0f, 4.0f / 45.0f, 8.0f / 45.0f,
+        1.0f / 90.0f, -1.0f / 45.0f, 2.0f / 45.0f, -4.0f / 45.0f, 8.0f / 45.0f,
+        4.0f / 45.0f, 2.0f / 45.0f, 1.0f / 45.0f, 1.0f / 90.0f, 1.0f / 180.0f,
+        4.0f / 45.0f, -2.0f / 45.0f, 1.0f / 45.0f, -1.0f / 90.0f, 1.0f / 180.0f,
+        0.0f, 0.0f, 0.0f, 0.0f, 1.0f
+
+    };
+
     // ------------------------------------------
 
     // Winograd output transform matrices
@@ -114,11 +124,12 @@ void initialize_matrix_transform(SimpleTensor<T> &src, const Size2D &output_tile
         { WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(3, 3), WinogradTransformType::INPUT), imatrix4x4_3x3 },
         { WinogradKey(std::pair<int, int>(2, 2), std::pair<int, int>(3, 3), WinogradTransformType::FILTER), fmatrix2x2_3x3 },
         { WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(3, 3), WinogradTransformType::FILTER), fmatrix4x4_3x3 },
+        { WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5), WinogradTransformType::FILTER), fmatrix4x4_5x5 },
         { WinogradKey(std::pair<int, int>(2, 2), std::pair<int, int>(3, 3), WinogradTransformType::OUTPUT), omatrix2x2_3x3 },
         { WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(3, 3), WinogradTransformType::OUTPUT), omatrix4x4_3x3 },
     };
 
-    // Find input matrix transform
+    // Find transformation matrix
     std::map<WinogradKey, const float *>::iterator it;
 
     it = matrix_map.find(WinogradKey(std::pair<int, int>(output_tile_size.width, output_tile_size.height),

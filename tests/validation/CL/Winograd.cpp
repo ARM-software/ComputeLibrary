@@ -201,19 +201,23 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
     winograd_filter_transform.configure(&a, &b, winograd_info);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradFilterTransformFixture, framework::DatasetMode::ALL, combine(combine(combine(datasets::Small3x3Shapes(),
-                                                                                                                        framework::dataset::make("OutputTile", { Size2D(2U, 2U), Size2D(4U, 4U) })),
-                                                                                                                framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                                                                                        framework::dataset::make("DataType", { DataType::F32 })))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradFilterTransformFixture, framework::DatasetMode::ALL,
+                       combine(combine(framework::dataset::concat(framework::dataset::concat(combine(datasets::Small3x3Shapes(), framework::dataset::make("OutputTile", Size2D(2U, 2U))), combine(datasets::Small3x3Shapes(),
+                                                                                             framework::dataset::make("OutputTile", Size2D(4U, 4U)))),
+                                                                  combine(datasets::Small5x5Shapes(), framework::dataset::make("OutputTile", Size2D(4U, 4U)))),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                               framework::dataset::make("DataType", { DataType::F32 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradFilterTransformFixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Large3x3Shapes(),
-                                                                                                                    framework::dataset::make("OutputTile", { Size2D(2U, 2U), Size2D(4U, 4U) })),
-                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                                                                                            framework::dataset::make("DataType", { DataType::F32 })))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradFilterTransformFixture, framework::DatasetMode::NIGHTLY,
+                       combine(combine(framework::dataset::concat(framework::dataset::concat(combine(datasets::Large3x3Shapes(), framework::dataset::make("OutputTile", Size2D(2U, 2U))), combine(datasets::Large3x3Shapes(),
+                                                                                             framework::dataset::make("OutputTile", Size2D(4U, 4U)))),
+                                                                  combine(datasets::Large5x5Shapes(), framework::dataset::make("OutputTile", Size2D(4U, 4U)))),
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                               framework::dataset::make("DataType", { DataType::F32 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);

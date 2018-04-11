@@ -405,6 +405,38 @@ public:
     }
 };
 
+/** Data set containing small 5x5 tensor shapes. */
+class Small5x5Shapes final : public ShapeDataset
+{
+public:
+    Small5x5Shapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 5U, 5U, 7U, 4U },
+                     TensorShape{ 5U, 5U, 4U, 13U },
+                     TensorShape{ 5U, 5U, 9U, 2U },
+                     TensorShape{ 5U, 5U, 3U, 5U },
+    })
+    {
+    }
+};
+
+/** Data set containing large 5x5 tensor shapes. */
+class Large5x5Shapes final : public ShapeDataset
+{
+public:
+    Large5x5Shapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 5U, 5U, 32U, 64U },
+                     TensorShape{ 5U, 5U, 51U, 13U },
+                     TensorShape{ 5U, 5U, 53U, 47U },
+                     TensorShape{ 5U, 5U, 128U, 384U },
+    })
+    {
+    }
+};
+
 /** Data set containing small tensor shapes for deconvolution. */
 class SmallDeconvolutionShapes final : public ShapeDataset
 {
