@@ -278,7 +278,6 @@ CLVersion get_cl_version(const cl::Device &device)
     return CLVersion::UNKNOWN;
 }
 
-
 bool device_supports_extension(const cl::Device &device, const char *extension_name)
 {
     std::string extensions = device.getInfo<CL_DEVICE_EXTENSIONS>();

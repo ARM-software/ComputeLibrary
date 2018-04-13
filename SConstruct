@@ -214,7 +214,12 @@ elif env['os'] == 'bare_metal':
 
 if env['opencl']:
     if env['os'] in ['bare_metal'] or env['standalone']:
-        print("Cannot link OpenCL statically, which is required on bare metal")
+        print("Cannot link OpenCL statically, which is required for bare metal / standalone builds")
+        Exit(1)
+
+if env['gles_compute']:
+    if env['os'] in ['bare_metal'] or env['standalone']:
+        print("Cannot link OpenGLES statically, which is required for bare metal / standalone builds")
         Exit(1)
 
 if env['opencl'] or env['gles_compute']:
