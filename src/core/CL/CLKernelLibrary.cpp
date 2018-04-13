@@ -771,6 +771,11 @@ Kernel CLKernelLibrary::create_kernel(const std::string &kernel_name, const Stri
     return Kernel(kernel_name, cl_program);
 }
 
+void CLKernelLibrary::add_built_program(const std::string &built_program_name, cl::Program program)
+{
+    _built_programs_map.emplace(built_program_name, program);
+}
+
 const Program &CLKernelLibrary::load_program(const std::string &program_name) const
 {
     const auto program_it = _programs_map.find(program_name);

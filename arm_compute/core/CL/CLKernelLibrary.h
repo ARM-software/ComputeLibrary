@@ -283,14 +283,6 @@ public:
      * @return The created kernel.
      */
     Kernel create_kernel(const std::string &kernel_name, const StringSet &build_options_set = {}) const;
-    /** Serializes and saves programs to a binary.
-     *
-     */
-    void save_binary();
-    /** Load serialized binary with all the programs.
-     *
-     */
-    void load_binary();
     /** Find the maximum number of local work items in a workgroup can be supported for the kernel.
      *
      */
@@ -307,6 +299,20 @@ public:
         _programs_map.clear();
         _built_programs_map.clear();
     }
+
+    /** Access the cache of built OpenCL programs
+     */
+    const std::map<std::string, cl::Program> &get_built_programs() const
+    {
+        return _built_programs_map;
+    }
+
+    /** Add a new built program to the cache
+     *
+     * @param[in] built_program_name Name of the program
+     * @param[in] program            Built program to add to the cache
+     */
+    void add_built_program(const std::string &built_program_name, cl::Program program);
 
 private:
     /** Load program and its dependencies.
