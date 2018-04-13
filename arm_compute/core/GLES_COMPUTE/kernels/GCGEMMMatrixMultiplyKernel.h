@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,15 +25,13 @@
 #define __ARM_COMPUTE_GCGEMMMATRIXMULTIPLYKERNEL_H__
 
 #include "arm_compute/core/GLES_COMPUTE/IGCKernel.h"
+#include "arm_compute/core/GPUTarget.h"
 
 namespace arm_compute
 {
 class IGCTensor;
 
 /** GLES Compute kernel to multiply two input matrices "A" and "B" or to multiply a vector "A" by a matrix "B". All elements of the output matrix/vector will be multiplied by alpha
- *
- * @note If the output tensor is a matrix, the implementation assumes that the input tensors @p input0 and @p input1 are both matrices and reshaped respectively with @ref GCGEMMInterleave4x4Kernel" and @ref GCGEMMTranspose1xWKernel
- * @note If the output tensor is a vector and the data type is F32, the implementation assumes that the first input tensor @p input0 is a vector and the second input tensor @p input1 a matrix. The implementation also assumes that both tensors have not been reshaped
  *
  * @attention The second input tensor must have at least 2 dimensions (matrix)
  *
@@ -64,8 +62,23 @@ public:
      * @param[out] output                    Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0
      * @param[in]  alpha                     Weight of the matrix product
      * @param[in]  is_interleaved_transposed (Optional) True if input0 and input1 have been reshaped respectively using @ref GCGEMMInterleave4x4Kernel and @ref GCGEMMTranspose1xWKernel
+     * @param[in]  reshape_info              (Optional) GEMM reshape info. If is_interleaved_transposed = true, this object must contain the information to understand how the matrix A and matrix B have been reshaped
      */
-    void configure(const IGCTensor *input0, const IGCTensor *input1, IGCTensor *output, float alpha, bool is_interleaved_transposed = true);
+    void configure(const IGCTensor *input0, const IGCTensor *input1, IGCTensor *output, float alpha, bool is_interleaved_transposed = true, const GEMMReshapeInfo &reshape_info = GEMMReshapeInfo());
+    /** Static function to check if given info will lead to a valid configuration of @ref GCGEMMMatrixMultiplyKernel
+     *
+     * @param[in] input0                    Input tensor containing the Matrix A. Data types supported: F16/F32
+     * @param[in] input1                    Input tensor containing the Matrix B. Data type supported: same as @p input0
+     * @param[in] output                    Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0
+     * @param[in] alpha                     Weight of the matrix product
+     * @param[in] is_interleaved_transposed True if input0 and input1 have been reshaped respectively using @ref GCGEMMInterleave4x4Kernel and @ref GCGEMMTranspose1xWKernel
+     * @param[in] reshape_info              GEMM reshape info. If is_interleaved_transposed = true, this object must contain the information to understand how the matrix A and matrix B have been reshaped
+     * @param[in] gpu_target                GPU Target
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output, float alpha, bool is_interleaved_transposed, const GEMMReshapeInfo &reshape_info,
+                           GPUTarget gpu_target);
 
     // Inherited methods overridden:
     void run(const Window &window) override;

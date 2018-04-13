@@ -69,6 +69,20 @@ public:
      *                       if the reshape of matrix B should happen only for the first run
      */
     void configure(const IGCTensor *a, const IGCTensor *b, const IGCTensor *c, IGCTensor *output, float alpha, float beta, const GEMMInfo &gemm_info = GEMMInfo());
+    /** Static function to check if given info will lead to a valid configuration of @ref GCGEMM.
+     *
+     * @param[in]  a         First input tensor  (Matrix or Vector A). Data types supported: F16/F32
+     * @param[in]  b         Second input tensor (Matrix B). Data type supported: same as @p a.
+     * @param[in]  c         Third input tensor  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a.
+     * @param[out] output    Output tensor. Data type supported: same as @p a
+     * @param[in]  alpha     Weight of the matrix product
+     * @param[in]  beta      Weight of matrix C
+     * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
+     *                       if the reshape of matrix B should happen only for the first run
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *a, const ITensorInfo *b, const IGCTensor *c, const ITensorInfo *output, const float alpha, const float beta, const GEMMInfo &gemm_info = GEMMInfo());
 
     // Inherited methods overridden:
     void run() override;
@@ -83,6 +97,8 @@ private:
     GCTensor                   _tmp_b;
     bool                       _is_interleaved_transposed;
     bool                       _run_addition;
+    bool                       _is_first_run;
+    bool                       _reshape_b_only_on_first_run;
 };
 }
 

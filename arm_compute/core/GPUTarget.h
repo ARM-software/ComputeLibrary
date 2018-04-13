@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,37 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CL_TYPES_H__
-#define __ARM_COMPUTE_CL_TYPES_H__
-
-#include "arm_compute/core/GPUTarget.h"
-
-#include <string>
+#ifndef __ARM_COMPUTE_GPUTARGET_H__
+#define __ARM_COMPUTE_GPUTARGET_H__
 
 namespace arm_compute
 {
-/** Default string for the CLKernel configuration id */
-static const std::string default_config_id = "no_config_id";
-
-/** Available OpenCL Version */
-enum class CLVersion
+/** Available GPU Targets */
+enum class GPUTarget
 {
-    CL10,   /* the OpenCL 1.0 */
-    CL11,   /* the OpenCL 1.1 */
-    CL12,   /* the OpenCL 1.2 */
-    CL20,   /* the OpenCL 2.0 and above */
-    UNKNOWN /* unkown version */
-};
-
-/** OpenCL device options */
-struct CLDeviceOptions
-{
-    std::string name;        /**< Device name */
-    std::string extensions;  /**< List of supported extensions */
-    std::string ddk_version; /**< DDK version */
-    GPUTarget   gpu_target;  /**< GPU target architecture/instance */
-    size_t      num_cores;   /**< Number of cores */
-    size_t      cache_size;  /**< Cache size */
+    UNKNOWN       = 0x101,
+    GPU_ARCH_MASK = 0xF00,
+    MIDGARD       = 0x100,
+    BIFROST       = 0x200,
+    T600          = 0x110,
+    T700          = 0x120,
+    T800          = 0x130,
+    G71           = 0x210,
+    G72           = 0x220,
+    G51           = 0x230,
+    G51BIG        = 0x231,
+    G51LIT        = 0x232,
+    TNOX          = 0x240,
+    TTRX          = 0x250,
+    TBOX          = 0x260
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_CL_TYPES_H__ */
+#endif /* __ARM_COMPUTE_GPUTARGET_H__ */
