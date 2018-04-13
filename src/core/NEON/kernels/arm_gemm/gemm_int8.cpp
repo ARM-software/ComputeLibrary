@@ -35,16 +35,17 @@ namespace arm_gemm
 {
 template <>
 UniqueGemmCommon<int8_t, int32_t> gemm<int8_t, int32_t>(const CPUInfo &ci, const unsigned int M, const unsigned int N, const unsigned int K,
+                                                        const unsigned int nbatches, const unsigned int nmulti,
                                                         const bool trA, const bool trB, const int32_t alpha, const int32_t beta,
                                                         const int maxthreads, const bool pretransposed_hint)
 {
     if(ci.has_dotprod())
     {
         // Dot product supporting CPUs.  This family has a special version for A55r1.
-        return UniqueGemmCommon<int8_t, int32_t>(new GemmInterleaved<gemm_s8_12x8, int8_t, int32_t>(&ci, M, N, K, trA, trB, alpha, beta, maxthreads, pretransposed_hint));
+        return UniqueGemmCommon<int8_t, int32_t>(new GemmInterleaved<gemm_s8_12x8, int8_t, int32_t>(&ci, M, N, K, nbatches, nmulti, trA, trB, alpha, beta, maxthreads, pretransposed_hint));
     }
 
-    return UniqueGemmCommon<int8_t, int32_t>(new GemmInterleaved<gemm_s8_4x4, int8_t, int32_t>(&ci, M, N, K, trA, trB, alpha, beta, maxthreads, pretransposed_hint));
+    return UniqueGemmCommon<int8_t, int32_t>(new GemmInterleaved<gemm_s8_4x4, int8_t, int32_t>(&ci, M, N, K, nbatches, nmulti, trA, trB, alpha, beta, maxthreads, pretransposed_hint));
 
     // TODO: There's a better approach for A53, but it doesn't work
     // well on heterogeneous systems as the required data formats

@@ -33,10 +33,11 @@ namespace arm_gemm
 {
 template <>
 UniqueGemmCommon<int16_t, int32_t> gemm<int16_t, int32_t>(const CPUInfo &ci, const unsigned int M, const unsigned int N, const unsigned int K,
+                                                          const unsigned int nbatches, const unsigned int nmulti,
                                                           const bool trA, const bool trB, const int32_t alpha, const int32_t beta,
                                                           const int maxthreads, const bool pretransposed_hint)
 {
-    return UniqueGemmCommon<int16_t, int32_t>(new GemmInterleaved<gemm_s16_12x8, int16_t, int32_t>(&ci, M, N, K, trA, trB, alpha, beta, maxthreads, pretransposed_hint));
+    return UniqueGemmCommon<int16_t, int32_t>(new GemmInterleaved<gemm_s16_12x8, int16_t, int32_t>(&ci, M, N, K, nbatches, nmulti, trA, trB, alpha, beta, maxthreads, pretransposed_hint));
 }
 
 // Instantiate static class members

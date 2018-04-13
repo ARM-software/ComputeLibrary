@@ -38,6 +38,7 @@ namespace arm_gemm
 {
 template <>
 UniqueGemmCommon<__fp16, __fp16> gemm(const CPUInfo &ci, const unsigned int M, const unsigned int N, const unsigned int K,
+                                      const unsigned int nbatches, const unsigned int nmulti,
                                       const bool trA, const bool trB, const __fp16 alpha, const __fp16 beta,
                                       const int maxthreads, const bool pretransposed_hint)
 {
@@ -56,15 +57,15 @@ UniqueGemmCommon<__fp16, __fp16> gemm(const CPUInfo &ci, const unsigned int M, c
     // If FP16 is supported, use it.
     if(use_fp16)
     {
-        return UniqueGemmCommon<__fp16, __fp16>(new GemmInterleaved<hgemm_24x8, __fp16, __fp16>(&ci, M, N, K, trA, trB, alpha, beta, maxthreads, pretransposed_hint));
+        return UniqueGemmCommon<__fp16, __fp16>(new GemmInterleaved<hgemm_24x8, __fp16, __fp16>(&ci, M, N, K, nbatches, nmulti, trA, trB, alpha, beta, maxthreads, pretransposed_hint));
     }
 #endif
 
     // Fallback to using the blocked SGEMM kernel.
-    return UniqueGemmCommon<__fp16, __fp16>(new GemmInterleaved<sgemm_12x8, __fp16, __fp16>(&ci, M, N, K, trA, trB, alpha, beta, maxthreads, pretransposed_hint));
+    return UniqueGemmCommon<__fp16, __fp16>(new GemmInterleaved<sgemm_12x8, __fp16, __fp16>(&ci, M, N, K, nbatches, nmulti, trA, trB, alpha, beta, maxthreads, pretransposed_hint));
 #else
     // For AArch32, only support the SGEMM route for now.
-    return UniqueGemmCommon<__fp16, __fp16>(new GemmInterleaved<sgemm_8x6, __fp16, __fp16>(&ci, M, N, K, trA, trB, alpha, beta, maxthreads, pretransposed_hint));
+    return UniqueGemmCommon<__fp16, __fp16>(new GemmInterleaved<sgemm_8x6, __fp16, __fp16>(&ci, M, N, K, nbatches, nmulti, trA, trB, alpha, beta, maxthreads, pretransposed_hint));
 #endif
 }
 

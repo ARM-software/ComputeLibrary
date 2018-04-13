@@ -47,6 +47,35 @@ private:
     int              currentevent      = 0;
     int              countfd           = 0;
 
+    class ScopedProfilerClass
+    {
+    private:
+        profiler &_parent;
+        bool      legal = false;
+
+    public:
+        ScopedProfilerClass(profiler &prof, int i, unsigned long u)
+            : _parent(prof)
+        {
+            if(prof.currentevent == maxevents)
+                return;
+
+            prof.events[prof.currentevent] = i;
+            prof.units[prof.currentevent]  = u;
+            legal                          = true;
+            start_counter(prof.countfd);
+        }
+
+        ~ScopedProfilerClass()
+        {
+            if(!legal)
+                return;
+
+            long long cycs                        = stop_counter(_parent.countfd);
+            _parent.times[_parent.currentevent++] = cycs;
+        }
+    };
+
 public:
     profiler()
     {
@@ -107,19 +136,9 @@ public:
             times[currentevent++] = cycs;
         }
     }
-};
-
-#else
-
-namespace arm_gemm
-{
-class profiler
-{
-public:
-    template <typename T>
-    void operator()(int i, unsigned long u, T func)
+    ScopedProfilerClass ScopedProfiler(int i, unsigned long u)
     {
-        func();
+        return ScopedProfilerClass(*this, i, u);
     }
 };
 

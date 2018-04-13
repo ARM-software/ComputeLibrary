@@ -34,6 +34,9 @@ template<typename Top, typename Tret>
 using UniqueGemmCommon = std::unique_ptr<GemmCommon<Top, Tret> >;
 
 template<typename Top, typename Tret>
-UniqueGemmCommon<Top, Tret> gemm(const CPUInfo &ci, const unsigned int M, const unsigned int N, const unsigned int K, const bool trA, const bool trB, const Tret alpha, const Tret beta, const int maxthreads, const bool pretransposed_hint);
-
+UniqueGemmCommon<Top, Tret> gemm(const CPUInfo &ci,
+                                 const unsigned int M, const unsigned int N, const unsigned int K,
+                                 const unsigned int nbatches, const unsigned int nmulti,
+                                 const bool trA, const bool trB, const Tret alpha, const Tret beta,
+                                 const int maxthreads, const bool pretransposed_hint);
 } // namespace arm_gemm
