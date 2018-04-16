@@ -980,4 +980,196 @@ __kernel void winograd_output_transform_2x2_3x3_nchw(
     vstore2((float2)(out00, out01), 0, (__global float *)(dst_addr + 0 * dst_stride_y));
     vstore2((float2)(out10, out11), 0, (__global float *)(dst_addr + 1 * dst_stride_y));
 }
+
+#define COMPUTE_TMP_COL(col, d0, d1, d2, d3, d4, d5, d6, d7, comm_fact)  \
+    ({                                                                   \
+        comm_fact.s0 = d1 + d2;                                          \
+        comm_fact.s1 = d3 + d4;                                          \
+        comm_fact.s2 = d5 + d6;                                          \
+        \
+        col.s0 = comm_fact.s0 + comm_fact.s1 + 8.f * comm_fact.s2 + d0;  \
+        col.s2 = comm_fact.s0 + 4.f * comm_fact.s1 + 2.f * comm_fact.s2; \
+        \
+        comm_fact.s0 = d1 - d2;                                          \
+        comm_fact.s1 = d3 - d4;                                          \
+        comm_fact.s2 = d5 - d6;                                          \
+        \
+        col.s1 = comm_fact.s0 + 2.f * comm_fact.s1 + 4.f * comm_fact.s2; \
+        col.s3 = comm_fact.s0 + 8.f * comm_fact.s1 + comm_fact.s2 + d7;  \
+    })
+
+/** This OpenCL kernel performs Winograd output transform when the output tile is 4x4, the filter size 5x5 and the data format is NCHW
+ *
+ * @note The number of tiles along the X direction must be passed at compile time using -DNUM_TILES_X: e.g. -DNUM_TILES_X=16
+ *
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F32
+ * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
+ * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
+ * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
+ * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
+ * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
+ * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ */
+__kernel void winograd_output_transform_4x4_5x5_nchw(
+    TENSOR3D_DECLARATION(src),
+    TENSOR3D_DECLARATION(dst)
+#if defined(HAS_BIAS)
+    ,
+    VECTOR_DECLARATION(bias)
+#endif // defined(HAS_BIAS)
+)
+{
+    // Each thread stores a 4x4 tile
+    Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
+
+    const __global uchar *src_addr = tensor3D_offset(&src, 0, 0, 0);
+
+    // Load the values across the 64 channels to compose the 8x8 input tile
+    float d00 = *((__global float *)(src_addr + 0 * src_stride_z));
+    float d01 = *((__global float *)(src_addr + 1 * src_stride_z));
+    float d02 = *((__global float *)(src_addr + 2 * src_stride_z));
+    float d03 = *((__global float *)(src_addr + 3 * src_stride_z));
+    float d04 = *((__global float *)(src_addr + 4 * src_stride_z));
+    float d05 = *((__global float *)(src_addr + 5 * src_stride_z));
+    float d06 = *((__global float *)(src_addr + 6 * src_stride_z));
+    float d07 = *((__global float *)(src_addr + 7 * src_stride_z));
+
+    float d10 = *((__global float *)(src_addr + 8 * src_stride_z));
+    float d11 = *((__global float *)(src_addr + 9 * src_stride_z));
+    float d12 = *((__global float *)(src_addr + 10 * src_stride_z));
+    float d13 = *((__global float *)(src_addr + 11 * src_stride_z));
+    float d14 = *((__global float *)(src_addr + 12 * src_stride_z));
+    float d15 = *((__global float *)(src_addr + 13 * src_stride_z));
+    float d16 = *((__global float *)(src_addr + 14 * src_stride_z));
+    float d17 = *((__global float *)(src_addr + 15 * src_stride_z));
+
+    float d20 = *((__global float *)(src_addr + 16 * src_stride_z));
+    float d21 = *((__global float *)(src_addr + 17 * src_stride_z));
+    float d22 = *((__global float *)(src_addr + 18 * src_stride_z));
+    float d23 = *((__global float *)(src_addr + 19 * src_stride_z));
+    float d24 = *((__global float *)(src_addr + 20 * src_stride_z));
+    float d25 = *((__global float *)(src_addr + 21 * src_stride_z));
+    float d26 = *((__global float *)(src_addr + 22 * src_stride_z));
+    float d27 = *((__global float *)(src_addr + 23 * src_stride_z));
+
+    float d30 = *((__global float *)(src_addr + 24 * src_stride_z));
+    float d31 = *((__global float *)(src_addr + 25 * src_stride_z));
+    float d32 = *((__global float *)(src_addr + 26 * src_stride_z));
+    float d33 = *((__global float *)(src_addr + 27 * src_stride_z));
+    float d34 = *((__global float *)(src_addr + 28 * src_stride_z));
+    float d35 = *((__global float *)(src_addr + 29 * src_stride_z));
+    float d36 = *((__global float *)(src_addr + 30 * src_stride_z));
+    float d37 = *((__global float *)(src_addr + 31 * src_stride_z));
+
+    float d40 = *((__global float *)(src_addr + 32 * src_stride_z));
+    float d41 = *((__global float *)(src_addr + 33 * src_stride_z));
+    float d42 = *((__global float *)(src_addr + 34 * src_stride_z));
+    float d43 = *((__global float *)(src_addr + 35 * src_stride_z));
+    float d44 = *((__global float *)(src_addr + 36 * src_stride_z));
+    float d45 = *((__global float *)(src_addr + 37 * src_stride_z));
+    float d46 = *((__global float *)(src_addr + 38 * src_stride_z));
+    float d47 = *((__global float *)(src_addr + 39 * src_stride_z));
+
+    float d50 = *((__global float *)(src_addr + 40 * src_stride_z));
+    float d51 = *((__global float *)(src_addr + 41 * src_stride_z));
+    float d52 = *((__global float *)(src_addr + 42 * src_stride_z));
+    float d53 = *((__global float *)(src_addr + 43 * src_stride_z));
+    float d54 = *((__global float *)(src_addr + 44 * src_stride_z));
+    float d55 = *((__global float *)(src_addr + 45 * src_stride_z));
+    float d56 = *((__global float *)(src_addr + 46 * src_stride_z));
+    float d57 = *((__global float *)(src_addr + 47 * src_stride_z));
+
+    float d60 = *((__global float *)(src_addr + 48 * src_stride_z));
+    float d61 = *((__global float *)(src_addr + 49 * src_stride_z));
+    float d62 = *((__global float *)(src_addr + 50 * src_stride_z));
+    float d63 = *((__global float *)(src_addr + 51 * src_stride_z));
+    float d64 = *((__global float *)(src_addr + 52 * src_stride_z));
+    float d65 = *((__global float *)(src_addr + 53 * src_stride_z));
+    float d66 = *((__global float *)(src_addr + 54 * src_stride_z));
+    float d67 = *((__global float *)(src_addr + 55 * src_stride_z));
+
+    float d70 = *((__global float *)(src_addr + 56 * src_stride_z));
+    float d71 = *((__global float *)(src_addr + 57 * src_stride_z));
+    float d72 = *((__global float *)(src_addr + 58 * src_stride_z));
+    float d73 = *((__global float *)(src_addr + 59 * src_stride_z));
+    float d74 = *((__global float *)(src_addr + 60 * src_stride_z));
+    float d75 = *((__global float *)(src_addr + 61 * src_stride_z));
+    float d76 = *((__global float *)(src_addr + 62 * src_stride_z));
+    float d77 = *((__global float *)(src_addr + 63 * src_stride_z));
+
+    // Compute the 8x4 intermediate tensor
+    float4 comm_fact0, comm_fact1, comm_fact2;
+    float4 tmp_col0, tmp_col1, tmp_col2, tmp_col3, tmp_col4, tmp_col5, tmp_col6, tmp_col7;
+
+    COMPUTE_TMP_COL(tmp_col0, d00, d10, d20, d30, d40, d50, d60, d70, comm_fact0);
+    COMPUTE_TMP_COL(tmp_col1, d01, d11, d21, d31, d41, d51, d61, d71, comm_fact0);
+    COMPUTE_TMP_COL(tmp_col2, d02, d12, d22, d32, d42, d52, d62, d72, comm_fact0);
+    COMPUTE_TMP_COL(tmp_col3, d03, d13, d23, d33, d43, d53, d63, d73, comm_fact0);
+    COMPUTE_TMP_COL(tmp_col4, d04, d14, d24, d34, d44, d54, d64, d74, comm_fact0);
+    COMPUTE_TMP_COL(tmp_col5, d05, d15, d25, d35, d45, d55, d65, d75, comm_fact0);
+    COMPUTE_TMP_COL(tmp_col6, d06, d16, d26, d36, d46, d56, d66, d76, comm_fact0);
+    COMPUTE_TMP_COL(tmp_col7, d07, d17, d27, d37, d47, d57, d67, d77, comm_fact0);
+
+    // Compute the 4x4 output tile
+    comm_fact0 = tmp_col1 + tmp_col2;
+    comm_fact1 = tmp_col3 + tmp_col4;
+    comm_fact2 = tmp_col5 + tmp_col6;
+
+    float4 out_col0 = comm_fact0 + comm_fact1 + 8.f * comm_fact2 + tmp_col0;
+    float4 out_col2 = comm_fact0 + 4.f * comm_fact1 + 2.f * comm_fact2;
+
+    comm_fact0 = tmp_col1 - tmp_col2;
+    comm_fact1 = tmp_col3 - tmp_col4;
+    comm_fact2 = tmp_col5 - tmp_col6;
+
+    float4 out_col1 = comm_fact0 + 2.f * comm_fact1 + 4.f * comm_fact2;
+    float4 out_col3 = comm_fact0 + 8.f * comm_fact1 + comm_fact2 + tmp_col7;
+
+    int y_in  = get_global_id(1);
+    int x_out = (y_in % NUM_TILES_X) * 4;
+    int y_out = (y_in / NUM_TILES_X) * 4;
+    int z_out = get_global_id(0);
+
+#if defined(HAS_BIAS)
+    // Add bias
+    Vector bias = CONVERT_TO_VECTOR_STRUCT_NO_STEP(bias);
+
+    float b = (float) * ((__global float *)(vector_offset(&bias, z_out)));
+
+    out_col0 += (float4)b;
+    out_col1 += (float4)b;
+    out_col2 += (float4)b;
+    out_col3 += (float4)b;
+#endif // defined(HAS_BIAS)
+
+    // Get output address
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x_out * dst_stride_x + y_out * dst_stride_y + z_out * dst_stride_z;
+
+    // Store the 4x4 output tile
+    *(__global float *)(dst_addr + 0 * dst_stride_x + 0 * dst_stride_y) = out_col0.s0;
+    *(__global float *)(dst_addr + 1 * dst_stride_x + 0 * dst_stride_y) = out_col1.s0;
+    *(__global float *)(dst_addr + 2 * dst_stride_x + 0 * dst_stride_y) = out_col2.s0;
+    *(__global float *)(dst_addr + 3 * dst_stride_x + 0 * dst_stride_y) = out_col3.s0;
+    *(__global float *)(dst_addr + 0 * dst_stride_x + 1 * dst_stride_y) = out_col0.s1;
+    *(__global float *)(dst_addr + 1 * dst_stride_x + 1 * dst_stride_y) = out_col1.s1;
+    *(__global float *)(dst_addr + 2 * dst_stride_x + 1 * dst_stride_y) = out_col2.s1;
+    *(__global float *)(dst_addr + 3 * dst_stride_x + 1 * dst_stride_y) = out_col3.s1;
+    *(__global float *)(dst_addr + 0 * dst_stride_x + 2 * dst_stride_y) = out_col0.s2;
+    *(__global float *)(dst_addr + 1 * dst_stride_x + 2 * dst_stride_y) = out_col1.s2;
+    *(__global float *)(dst_addr + 2 * dst_stride_x + 2 * dst_stride_y) = out_col2.s2;
+    *(__global float *)(dst_addr + 3 * dst_stride_x + 2 * dst_stride_y) = out_col3.s2;
+    *(__global float *)(dst_addr + 0 * dst_stride_x + 3 * dst_stride_y) = out_col0.s3;
+    *(__global float *)(dst_addr + 1 * dst_stride_x + 3 * dst_stride_y) = out_col1.s3;
+    *(__global float *)(dst_addr + 2 * dst_stride_x + 3 * dst_stride_y) = out_col2.s3;
+    *(__global float *)(dst_addr + 3 * dst_stride_x + 3 * dst_stride_y) = out_col3.s3;
+}
 #endif // defined(NUM_TILES_X)

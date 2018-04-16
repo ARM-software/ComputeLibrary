@@ -56,8 +56,9 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
     const Size2D        kernel_size      = winograd_info.kernel_size;
     const Size2D        input_dimensions = winograd_info.input_dimensions;
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size != Size2D(3U, 3U), "Only 3x3 kernels are supported");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->dimension(2) != 16, "Only 2x2 output tile is supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size != Size2D(3U, 3U) && kernel_size != Size2D(5U, 5U), "Only 3x3 and 5x5 kernels are supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size == Size2D(3U, 3U) && output_tile_size == Size2D(2U, 2U) && input->dimension(2) != 16, "Wrong number of batches");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size == Size2D(5U, 5U) && output_tile_size == Size2D(4U, 4U) && input->dimension(2) != 64, "Wrong number of batches");
 
     // Compute number of elements to process in the X and Y direction
     const int num_elements_x = input_dimensions.width - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right();

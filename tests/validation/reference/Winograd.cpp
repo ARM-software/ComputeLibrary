@@ -125,6 +125,14 @@ void initialize_matrix_transform(SimpleTensor<T> &src, const Size2D &output_tile
         0.0f, 1.0f, -1.0f, 8.0f, -8.0f, 1.0f
     };
 
+    static const float omatrix4x4_5x5[] =
+    {
+        1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 8.0f, 8.0f, 0.0f,
+        0.0f, 1.0f, -1.0f, 2.0f, -2.0f, 4.0f, -4.0f, 0.0f,
+        0.0f, 1.0f, 1.0f, 4.0f, 4.0f, 2.0f, 2.0f, 0.0f,
+        0.0f, 1.0f, -1.0f, 8.0f, -8.0f, 1.0f, -1.0f, 1.0f
+    };
+
     // ------------------------------------------
 
     using WinogradKey = std::tuple<std::pair<int, int>, std::pair<int, int>, WinogradTransformType>;
@@ -140,6 +148,7 @@ void initialize_matrix_transform(SimpleTensor<T> &src, const Size2D &output_tile
         { WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5), WinogradTransformType::FILTER), fmatrix4x4_5x5 },
         { WinogradKey(std::pair<int, int>(2, 2), std::pair<int, int>(3, 3), WinogradTransformType::OUTPUT), omatrix2x2_3x3 },
         { WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(3, 3), WinogradTransformType::OUTPUT), omatrix4x4_3x3 },
+        { WinogradKey(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5), WinogradTransformType::OUTPUT), omatrix4x4_5x5 },
     };
 
     // Find transformation matrix
