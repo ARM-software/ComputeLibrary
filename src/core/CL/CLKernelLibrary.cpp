@@ -699,6 +699,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
 CLKernelLibrary::CLKernelLibrary()
     : _context(), _device(), _kernel_path("."), _programs_map(), _built_programs_map()
 {
+    opencl_is_available(); // Make sure the OpenCL symbols are initialised *before* the CLKernelLibrary is built
 }
 
 CLKernelLibrary &CLKernelLibrary::get()
