@@ -288,12 +288,16 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
         build_opts.add_option("-DCOLS_A=" + support::cpp11::to_string(input0->info()->dimension(0)));
 
         // Create kernels according to the architecture, data type and input size.
-        if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX) && data_type == DataType::F32)
+        if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX) && is_data_type_float(data_type))
         {
+            kernel_name = "gemm_mm_floating_point_" + lower_string(string_from_data_type(data_type)) + "_bifrost";
             // The first kernel is optimized for the case of 1000 or less output elements (e.g. FC8 of AlexNet and VGG-16, and
             // FC1 of Inception v3). The second kernel is optimized for the case of greater than 1000 output elements (e.g.
             // FC6 and FC7 of AlexNet and VGG-16).
-            kernel_name = (input1->info()->dimension(0) <= 1000 && input0->info()->num_dimensions() == 1) ? "gemm_mm_floating_point_f32_bifrost_1000" : "gemm_mm_floating_point_f32_bifrost";
+            if(input1->info()->dimension(0) <= 1000 && input0->info()->num_dimensions() == 1 && data_type == DataType::F32)
+            {
+                kernel_name += "_1000";
+            }
 
             // The work-group size equal to the Bifrost quad size has been proved to be optimal for these kernels
             // via exhaustive autotuning over a range of representative layer configurations.
