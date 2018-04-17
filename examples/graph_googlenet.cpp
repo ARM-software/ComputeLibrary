@@ -113,19 +113,19 @@ public:
                   PadStrideInfo(1, 1, 1, 1))
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
               << NormalizationLayer(NormalizationLayerInfo(NormType::CROSS_MAP, 5, 0.0001f, 0.75f))
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)))
-              << get_inception_node(data_path, "inception_3a", 64, std::make_tuple(96U, 128U), std::make_tuple(16U, 32U), 32U)
-              << get_inception_node(data_path, "inception_3b", 128, std::make_tuple(128U, 192U), std::make_tuple(32U, 96U), 64U)
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)))
-              << get_inception_node(data_path, "inception_4a", 192, std::make_tuple(96U, 208U), std::make_tuple(16U, 48U), 64U)
-              << get_inception_node(data_path, "inception_4b", 160, std::make_tuple(112U, 224U), std::make_tuple(24U, 64U), 64U)
-              << get_inception_node(data_path, "inception_4c", 128, std::make_tuple(128U, 256U), std::make_tuple(24U, 64U), 64U)
-              << get_inception_node(data_path, "inception_4d", 112, std::make_tuple(144U, 288U), std::make_tuple(32U, 64U), 64U)
-              << get_inception_node(data_path, "inception_4e", 256, std::make_tuple(160U, 320U), std::make_tuple(32U, 128U), 128U)
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)))
-              << get_inception_node(data_path, "inception_5a", 256, std::make_tuple(160U, 320U), std::make_tuple(32U, 128U), 128U)
-              << get_inception_node(data_path, "inception_5b", 384, std::make_tuple(192U, 384U), std::make_tuple(48U, 128U), 128U)
-              << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, 7, PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL)))
+              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
+        graph << get_inception_node(data_path, "inception_3a", 64, std::make_tuple(96U, 128U), std::make_tuple(16U, 32U), 32U);
+        graph << get_inception_node(data_path, "inception_3b", 128, std::make_tuple(128U, 192U), std::make_tuple(32U, 96U), 64U);
+        graph << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
+        graph << get_inception_node(data_path, "inception_4a", 192, std::make_tuple(96U, 208U), std::make_tuple(16U, 48U), 64U);
+        graph << get_inception_node(data_path, "inception_4b", 160, std::make_tuple(112U, 224U), std::make_tuple(24U, 64U), 64U);
+        graph << get_inception_node(data_path, "inception_4c", 128, std::make_tuple(128U, 256U), std::make_tuple(24U, 64U), 64U);
+        graph << get_inception_node(data_path, "inception_4d", 112, std::make_tuple(144U, 288U), std::make_tuple(32U, 64U), 64U);
+        graph << get_inception_node(data_path, "inception_4e", 256, std::make_tuple(160U, 320U), std::make_tuple(32U, 128U), 128U);
+        graph << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
+        graph << get_inception_node(data_path, "inception_5a", 256, std::make_tuple(160U, 320U), std::make_tuple(32U, 128U), 128U);
+        graph << get_inception_node(data_path, "inception_5b", 384, std::make_tuple(192U, 384U), std::make_tuple(48U, 128U), 128U);
+        graph << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, 7, PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL)))
               << FullyConnectedLayer(
                   1000U,
                   get_weights_accessor(data_path, "/cnn_data/googlenet_model/loss3/loss3_classifier_w.npy"),

@@ -123,33 +123,33 @@ public:
                                          get_random_accessor(1.f, 1.f),
                                          get_weights_accessor(data_path, "/cnn_data/inceptionv4_model/Conv2d_2b_3x3_BatchNorm_beta.npy"),
                                          0.001f)
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
-              << get_mixed_3a(data_path)
-              << get_mixed_4a(data_path)
-              << get_mixed_5a(data_path)
-              // 4 inception A blocks
-              << get_inceptionA_block(data_path, "Mixed_5b")
-              << get_inceptionA_block(data_path, "Mixed_5c")
-              << get_inceptionA_block(data_path, "Mixed_5d")
-              << get_inceptionA_block(data_path, "Mixed_5e")
-              // reduction A block
-              << get_reductionA_block(data_path)
-              // 7 inception B blocks
-              << get_inceptionB_block(data_path, "Mixed_6b")
-              << get_inceptionB_block(data_path, "Mixed_6c")
-              << get_inceptionB_block(data_path, "Mixed_6d")
-              << get_inceptionB_block(data_path, "Mixed_6e")
-              << get_inceptionB_block(data_path, "Mixed_6f")
-              << get_inceptionB_block(data_path, "Mixed_6g")
-              << get_inceptionB_block(data_path, "Mixed_6h")
-              // reduction B block
-              << get_reductionB_block(data_path)
-              // 3 inception C blocks
-              << get_inceptionC_block(data_path, "Mixed_7b")
-              << get_inceptionC_block(data_path, "Mixed_7c")
-              << get_inceptionC_block(data_path, "Mixed_7d")
-              << PoolingLayer(PoolingLayerInfo(PoolingType::AVG))
+        graph << get_mixed_3a(data_path);
+        graph << get_mixed_4a(data_path);
+        graph << get_mixed_5a(data_path);
+        // 4 inception A blocks
+        graph << get_inceptionA_block(data_path, "Mixed_5b");
+        graph << get_inceptionA_block(data_path, "Mixed_5c");
+        graph << get_inceptionA_block(data_path, "Mixed_5d");
+        graph << get_inceptionA_block(data_path, "Mixed_5e");
+        // reduction A block
+        graph << get_reductionA_block(data_path);
+        // 7 inception B blocks
+        graph << get_inceptionB_block(data_path, "Mixed_6b");
+        graph << get_inceptionB_block(data_path, "Mixed_6c");
+        graph << get_inceptionB_block(data_path, "Mixed_6d");
+        graph << get_inceptionB_block(data_path, "Mixed_6e");
+        graph << get_inceptionB_block(data_path, "Mixed_6f");
+        graph << get_inceptionB_block(data_path, "Mixed_6g");
+        graph << get_inceptionB_block(data_path, "Mixed_6h");
+        // reduction B block
+        graph << get_reductionB_block(data_path);
+        // 3 inception C blocks
+        graph << get_inceptionC_block(data_path, "Mixed_7b");
+        graph << get_inceptionC_block(data_path, "Mixed_7c");
+        graph << get_inceptionC_block(data_path, "Mixed_7d");
+        graph << PoolingLayer(PoolingLayerInfo(PoolingType::AVG))
               << FlattenLayer()
               << FullyConnectedLayer(
                   1001U,

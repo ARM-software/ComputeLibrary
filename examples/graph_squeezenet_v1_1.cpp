@@ -110,60 +110,60 @@ public:
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire2_squeeze1x1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire2_squeeze1x1_b.npy"),
                   PadStrideInfo(1, 1, 0, 0))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-              << get_expand_fire_node(data_path, "fire2", 64U, 64U)
-              << ConvolutionLayer(
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+        graph << get_expand_fire_node(data_path, "fire2", 64U, 64U);
+        graph << ConvolutionLayer(
                   1U, 1U, 16U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire3_squeeze1x1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire3_squeeze1x1_b.npy"),
                   PadStrideInfo(1, 1, 0, 0))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-              << get_expand_fire_node(data_path, "fire3", 64U, 64U)
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)))
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+        graph << get_expand_fire_node(data_path, "fire3", 64U, 64U);
+        graph << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)))
               << ConvolutionLayer(
                   1U, 1U, 32U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire4_squeeze1x1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire4_squeeze1x1_b.npy"),
                   PadStrideInfo(1, 1, 0, 0))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-              << get_expand_fire_node(data_path, "fire4", 128U, 128U)
-              << ConvolutionLayer(
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+        graph << get_expand_fire_node(data_path, "fire4", 128U, 128U);
+        graph << ConvolutionLayer(
                   1U, 1U, 32U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire5_squeeze1x1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire5_squeeze1x1_b.npy"),
                   PadStrideInfo(1, 1, 0, 0))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-              << get_expand_fire_node(data_path, "fire5", 128U, 128U)
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)))
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+        graph << get_expand_fire_node(data_path, "fire5", 128U, 128U);
+        graph << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)))
               << ConvolutionLayer(
                   1U, 1U, 48U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire6_squeeze1x1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire6_squeeze1x1_b.npy"),
                   PadStrideInfo(1, 1, 0, 0))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-              << get_expand_fire_node(data_path, "fire6", 192U, 192U)
-              << ConvolutionLayer(
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+        graph << get_expand_fire_node(data_path, "fire6", 192U, 192U);
+        graph << ConvolutionLayer(
                   1U, 1U, 48U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire7_squeeze1x1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire7_squeeze1x1_b.npy"),
                   PadStrideInfo(1, 1, 0, 0))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-              << get_expand_fire_node(data_path, "fire7", 192U, 192U)
-              << ConvolutionLayer(
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+        graph << get_expand_fire_node(data_path, "fire7", 192U, 192U);
+        graph << ConvolutionLayer(
                   1U, 1U, 64U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire8_squeeze1x1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire8_squeeze1x1_b.npy"),
                   PadStrideInfo(1, 1, 0, 0))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-              << get_expand_fire_node(data_path, "fire8", 256U, 256U)
-              << ConvolutionLayer(
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+        graph << get_expand_fire_node(data_path, "fire8", 256U, 256U);
+        graph << ConvolutionLayer(
                   1U, 1U, 64U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire9_squeeze1x1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire9_squeeze1x1_b.npy"),
                   PadStrideInfo(1, 1, 0, 0))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-              << get_expand_fire_node(data_path, "fire9", 256U, 256U)
-              << ConvolutionLayer(
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+        graph << get_expand_fire_node(data_path, "fire9", 256U, 256U);
+        graph << ConvolutionLayer(
                   1U, 1U, 1000U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/conv10_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/conv10_b.npy"),

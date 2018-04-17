@@ -152,35 +152,35 @@ public:
                                          0.001f)
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
 
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)))
+              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
 
-              << get_inception_node_A(data_path, "Mixed_5b", 64U, std::make_tuple(48U, 64U), std::make_tuple(64U, 96U, 96U),
-                                      32U)
-              << get_inception_node_A(data_path, "Mixed_5c", 64U, std::make_tuple(48U, 64U), std::make_tuple(64U, 96U, 96U),
-                                      64U, true)
-              << get_inception_node_A(data_path, "Mixed_5d", 64U, std::make_tuple(48U, 64U), std::make_tuple(64U, 96U, 96U),
-                                      64U)
+        graph << get_inception_node_A(data_path, "Mixed_5b", 64U, std::make_tuple(48U, 64U), std::make_tuple(64U, 96U, 96U),
+                                      32U);
+        graph << get_inception_node_A(data_path, "Mixed_5c", 64U, std::make_tuple(48U, 64U), std::make_tuple(64U, 96U, 96U),
+                                      64U, true);
+        graph << get_inception_node_A(data_path, "Mixed_5d", 64U, std::make_tuple(48U, 64U), std::make_tuple(64U, 96U, 96U),
+                                      64U);
 
-              << get_inception_node_B(data_path, "Mixed_6a", 384U, std::make_tuple(64U, 96U, 96U))
+        graph << get_inception_node_B(data_path, "Mixed_6a", 384U, std::make_tuple(64U, 96U, 96U));
 
-              << get_inception_node_C(data_path, "Mixed_6b", 192U, std::make_tuple(128U, 128U, 192U),
-                                      std::make_tuple(128U, 128U, 128U, 128U, 192U), 192U)
-              << get_inception_node_C(data_path, "Mixed_6c", 192U, std::make_tuple(160U, 160U, 192U),
-                                      std::make_tuple(160U, 160U, 160U, 160U, 192U), 192U)
-              << get_inception_node_C(data_path, "Mixed_6d", 192U, std::make_tuple(160U, 160U, 192U),
-                                      std::make_tuple(160U, 160U, 160U, 160U, 192U), 192U)
-              << get_inception_node_C(data_path, "Mixed_6e", 192U, std::make_tuple(192U, 192U, 192U),
-                                      std::make_tuple(192U, 192U, 192U, 192U, 192U), 192U)
+        graph << get_inception_node_C(data_path, "Mixed_6b", 192U, std::make_tuple(128U, 128U, 192U),
+                                      std::make_tuple(128U, 128U, 128U, 128U, 192U), 192U);
+        graph << get_inception_node_C(data_path, "Mixed_6c", 192U, std::make_tuple(160U, 160U, 192U),
+                                      std::make_tuple(160U, 160U, 160U, 160U, 192U), 192U);
+        graph << get_inception_node_C(data_path, "Mixed_6d", 192U, std::make_tuple(160U, 160U, 192U),
+                                      std::make_tuple(160U, 160U, 160U, 160U, 192U), 192U);
+        graph << get_inception_node_C(data_path, "Mixed_6e", 192U, std::make_tuple(192U, 192U, 192U),
+                                      std::make_tuple(192U, 192U, 192U, 192U, 192U), 192U);
 
-              << get_inception_node_D(data_path, "Mixed_7a", std::make_tuple(192U, 320U),
-                                      std::make_tuple(192U, 192U, 192U, 192U))
+        graph << get_inception_node_D(data_path, "Mixed_7a", std::make_tuple(192U, 320U),
+                                      std::make_tuple(192U, 192U, 192U, 192U));
 
-              << get_inception_node_E(data_path, "Mixed_7b", 320U, std::make_tuple(384U, 384U, 384U),
-                                      std::make_tuple(448U, 384U, 384U, 384U), 192U)
-              << get_inception_node_E(data_path, "Mixed_7c", 320U, std::make_tuple(384U, 384U, 384U),
-                                      std::make_tuple(448U, 384U, 384U, 384U), 192U, true)
+        graph << get_inception_node_E(data_path, "Mixed_7b", 320U, std::make_tuple(384U, 384U, 384U),
+                                      std::make_tuple(448U, 384U, 384U, 384U), 192U);
+        graph << get_inception_node_E(data_path, "Mixed_7c", 320U, std::make_tuple(384U, 384U, 384U),
+                                      std::make_tuple(448U, 384U, 384U, 384U), 192U, true);
 
-              << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, 8, PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL)))
+        graph << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, 8, PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL)))
               << ConvolutionLayer(1U, 1U, 1001U, get_weights_accessor(data_path,
                                                                       "/cnn_data/inceptionv3_model/Logits_Conv2d_1c_1x1_weights.npy"),
                                   get_weights_accessor(data_path,
