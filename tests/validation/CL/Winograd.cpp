@@ -126,14 +126,14 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradInputTransformFixture, framework::Dat
                                                                                                                      framework::dataset::make("DataLayout", { DataLayout::NCHW })),
                                                                                                              framework::dataset::make("DataType", { DataType::F32 })))
 {
-    validate(CLAccessor(_target), _reference);
+    validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradInputTransformFixture, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeWinogradInputTransformDataset(),
                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW })),
                                                                                                            framework::dataset::make("DataType", { DataType::F32 })))
 {
-    validate(CLAccessor(_target), _reference);
+    validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 TEST_SUITE_END() // InputTransform
 

@@ -46,8 +46,9 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     const Size2D        output_tile_size = winograd_info.output_tile_size;
     const Size2D        kernel_size      = winograd_info.kernel_size;
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.stride().first != 1 || conv_info.stride().second != 1, "Winograd input transform only supports unit strides");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size != Size2D(3U, 3U), "Winograd input transform only supports 3x3 kernels");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(output_tile_size != Size2D(2U, 2U), "Winograd input transform only supports 2x2 output tile size");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size != Size2D(3U, 3U) && kernel_size != Size2D(5U, 5U), "Winograd input transform only supports 3x3 and 5x5 kernels");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size == Size2D(3U, 3U) && output_tile_size != Size2D(2U, 2U), "Winograd input transform only supports 2x2 output tile for 3x3 kernels");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size == Size2D(5U, 5U) && output_tile_size != Size2D(4U, 4U), "Winograd input transform only supports 4x4 output tile for 5x5 kernels");
     ARM_COMPUTE_UNUSED(conv_info);
     ARM_COMPUTE_UNUSED(output_tile_size);
     ARM_COMPUTE_UNUSED(kernel_size);
