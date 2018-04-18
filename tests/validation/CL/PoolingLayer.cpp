@@ -128,7 +128,7 @@ FIXTURE_DATA_TEST_CASE(RunSpecial, CLSpecialPoolingLayerFixture<float>, framewor
 }
 FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetFP, framework::dataset::make("DataType",
                                                                                                             DataType::F32))),
-                                                                                                    framework::dataset::make("DataLayout", DataLayout::NCHW)))
+                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -136,7 +136,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerFixture<float>, framework::Datase
 FIXTURE_DATA_TEST_CASE(RunLarge, CLPoolingLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), combine(PoolingLayerDatasetFP,
                                                                                                                 framework::dataset::make("DataType",
                                                                                                                         DataType::F32))),
-                                                                                                        framework::dataset::make("DataLayout", DataLayout::NCHW)))
+                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -146,14 +146,14 @@ TEST_SUITE_END() // FP32
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetFP,
                                                                                                            framework::dataset::make("DataType", DataType::F16))),
-                                                                                                   framework::dataset::make("DataLayout", DataLayout::NCHW)))
+                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLPoolingLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), combine(PoolingLayerDatasetFP,
                                                                                                                framework::dataset::make("DataType", DataType::F16))),
-                                                                                                       framework::dataset::make("DataLayout", DataLayout::NCHW)))
+                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
@@ -211,7 +211,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerQuantizedFixture<uint8_t>, framew
                                                                                                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255, 127),
                                                                                                                                QuantizationInfo(7.f / 255, 123)
                                                                                                                                                                     })),
-                                                                                                               framework::dataset::make("DataLayout", DataLayout::NCHW)))
+                                                                                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
@@ -219,14 +219,13 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerQuantizedFixture<uint8_t>, framew
 FIXTURE_DATA_TEST_CASE(RunLarge, CLPoolingLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), combine(PoolingLayerDatasetQASYMM8,
                                                                                                                    framework::dataset::make("DataType", DataType::QASYMM8))),
                                                                                                                    framework::dataset::make("QuantizationInfo", { QuantizationInfo(1.f / 255, 0) })),
-                                                                                                                   framework::dataset::make("DataLayout", DataLayout::NCHW)))
+                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
 TEST_SUITE_END() // QASYMM8
 TEST_SUITE_END() // Quantized
-
 TEST_SUITE_END() // PoolingLayer
 TEST_SUITE_END() // CL
 } // namespace validation

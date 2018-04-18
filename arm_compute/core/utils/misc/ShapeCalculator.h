@@ -324,6 +324,30 @@ inline TensorShape compute_min_max_shape(const ITensorInfo *input)
     return output_shape;
 }
 
+inline TensorShape compute_pool_shape(const ITensorInfo &input, PoolingLayerInfo pool_info)
+{
+    unsigned int pooled_w = 0;
+    unsigned int pooled_h = 0;
+
+    const bool         is_global_pooling = pool_info.is_global_pooling();
+    const int          idx_width         = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::WIDTH);
+    const int          idx_height        = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::HEIGHT);
+    const unsigned int pool_size_x       = is_global_pooling ? input.tensor_shape()[idx_width] : pool_info.pool_size().width;
+    const unsigned int pool_size_y       = is_global_pooling ? input.tensor_shape()[idx_height] : pool_info.pool_size().height;
+
+    std::tie(pooled_w, pooled_h) = scaled_dimensions(input.dimension(idx_width),
+                                                     input.dimension(idx_height),
+                                                     pool_size_x,
+                                                     pool_size_y,
+                                                     pool_info.pad_stride_info());
+
+    TensorShape output_shape{ input.tensor_shape() };
+    output_shape.set(get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::WIDTH), pooled_w);
+    output_shape.set(get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::HEIGHT), pooled_h);
+
+    return output_shape;
+}
+
 inline TensorShape compute_rnn_shape(const ITensorInfo *input, const unsigned int batch_size)
 {
     TensorShape output_shape{ input->tensor_shape() };
@@ -331,7 +355,6 @@ inline TensorShape compute_rnn_shape(const ITensorInfo *input, const unsigned in
 
     return output_shape;
 }
-
 } // namespace shape_calculator
 } // namespace misc
 } // namespace arm_compute
