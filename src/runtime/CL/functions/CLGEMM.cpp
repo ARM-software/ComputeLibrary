@@ -32,6 +32,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
@@ -47,7 +48,7 @@ inline bool is_interleaved_transposed(int m, int n, int k, DataType data_type, b
     if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX))
     {
         // COMPMID-852
-        if(k > 256 && m > 4 && data_type == DataType::F32 && reshape_b_only_on_first_run)
+        if(k > 256 && m > 4 && is_data_type_float(data_type) && reshape_b_only_on_first_run)
         {
             const float scale = k < 1024 ? 2.0f : 2.5f;
             flag              = (scale * n) > ((1.66f * n) + 38.4f);

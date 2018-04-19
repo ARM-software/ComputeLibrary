@@ -184,12 +184,12 @@ __kernel void gemm_interleave4x4(TENSOR3D_DECLARATION(src),
  * @param[in]  dst_step_y                         dst_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
  */
-__kernel void gemm_mm_interleaved_transposed_f32_midgard(IMAGE_DECLARATION(src0),
-                                                         IMAGE_DECLARATION(src1),
-                                                         IMAGE_DECLARATION(dst),
-                                                         uint src0_stride_z,
-                                                         uint src1_stride_z,
-                                                         uint dst_stride_z)
+__kernel void gemm_mm_interleaved_transposed_f32(IMAGE_DECLARATION(src0),
+                                                 IMAGE_DECLARATION(src1),
+                                                 IMAGE_DECLARATION(dst),
+                                                 uint src0_stride_z,
+                                                 uint src1_stride_z,
+                                                 uint dst_stride_z)
 {
     int x = get_global_id(0) / MULT_TRANSPOSE1XW_WIDTH;
     int y = get_global_id(1) / MULT_INTERLEAVE4X4_HEIGHT;
@@ -645,6 +645,215 @@ __kernel void gemm_mm_interleaved_transposed_f16(IMAGE_DECLARATION(src0),
         c10 += (half8)a0.s1 * b0;
         c20 += (half8)a0.s2 * b0;
         c30 += (half8)a0.s3 * b0;
+    }
+
+    // Compute destination address
+    Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
+
+#if defined(ALPHA)
+    // Multiply by the weight of matrix product
+    c00 = c00 * (half8)ALPHA;
+    c10 = c10 * (half8)ALPHA;
+    c20 = c20 * (half8)ALPHA;
+    c30 = c30 * (half8)ALPHA;
+#endif // defined(ALPHA)
+
+    // Compute dst address
+    __global uchar *dst_addr = offset(&dst, 0, 0);
+
+    // Add offset for batched GEMM
+    dst_addr += z * dst_stride_z;
+
+    // Store 4x8 block
+    vstore8(c00, 0, (__global half *)(dst_addr + 0 * dst_stride_y));
+    vstore8(c10, 0, (__global half *)(dst_addr + 1 * dst_stride_y));
+    vstore8(c20, 0, (__global half *)(dst_addr + 2 * dst_stride_y));
+    vstore8(c30, 0, (__global half *)(dst_addr + 3 * dst_stride_y));
+}
+
+/** This OpenCL kernel optimized for Bifrost architectures computes the matrix multiplication between matrix A (src0) and matrix B (src1)
+ *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_16bit and @ref gemm_transpose1x8 before running the matrix multiplication
+ *
+ * @note The number of columns of matrix B and the optional alpha's value need to be passed at compile time using -DCOLS_B and -DALPHA
+ * @note The multiplication factor for the transposition width (mult_transpose1xW_width) must be passed at compile time using -DMULT_TRANSPOSE1XW_WIDTH (i.e. -DMULT_TRANSPOSE1XW_WIDTH=2)
+ * @note The multiplication factor for the height of the 4x4 interleaved block must be passed at compile time using -DMULT_INTERLEAVE4X4_HEIGHT (i.e. -DMULT_INTERLEAVE4X4_HEIGHT=2)
+ * @note In case the matrix B has 3 dimensions and the matrix A more than 3, in order to avoid out-of-bounds reads, the number of channels of matrix B must be passed at compile time using MATRIX_B_DEPTH (i.e. -DMATRIX_B_DEPTH=16)
+ *       This case can happen when GEMM is used to perform the element-wise multiplication through a batched matrix multiplication (2D Winograd) and we have multiple inputs (i.e. a = [K, M, 16, Batches], b = [N, K, 16])
+ *
+ * @param[in]  src0_ptr                           Pointer to the source matrix. Supported data types: F16
+ * @param[in]  src0_stride_x                      Stride of the source matrix in X dimension (in bytes)
+ * @param[in]  src0_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src0_stride_y                      Stride of the source matrix in Y dimension (in bytes)
+ * @param[in]  src0_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src0_offset_first_element_in_bytes The offset of the first element in the source matrix
+ * @param[in]  src1_ptr                           Pointer to the source matrix. Supported data types: same as @p src0_ptr
+ * @param[in]  src1_stride_x                      Stride of the source matrix in X dimension (in bytes)
+ * @param[in]  src1_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src1_stride_y                      Stride of the source matrix in Y dimension (in bytes)
+ * @param[in]  src1_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src1_offset_first_element_in_bytes The offset of the first element in the source matrix
+ * @param[out] dst_ptr                            Pointer to the destination matrix Supported data types: same as @p src0_ptr
+ * @param[in]  dst_stride_x                       Stride of the destination matrix in X dimension (in bytes)
+ * @param[in]  dst_step_x                         dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
+ * @param[in]  dst_step_y                         dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
+ */
+__kernel void gemm_mm_interleaved_transposed_f16_bifrost(IMAGE_DECLARATION(src0),
+                                                         IMAGE_DECLARATION(src1),
+                                                         IMAGE_DECLARATION(dst),
+                                                         uint src0_stride_z,
+                                                         uint src1_stride_z,
+                                                         uint dst_stride_z)
+{
+    int x = get_global_id(0) / MULT_TRANSPOSE1XW_WIDTH;
+    int y = get_global_id(1) / MULT_INTERLEAVE4X4_HEIGHT;
+    int z = get_global_id(2);
+
+    // Offset
+    const int offset_row_a = (get_global_id(1) % MULT_INTERLEAVE4X4_HEIGHT) * 4;
+    const int offset_row_b = (get_global_id(0) % MULT_TRANSPOSE1XW_WIDTH) * 8;
+
+    // src_addr_a = address of matrix A
+    // src_addr_b = address of matrix B
+    int src0_addr_in_bytes = z * src0_stride_z + y * src0_stride_y + src0_offset_first_element_in_bytes;
+    int src1_addr_in_bytes = x * src1_stride_y + src1_offset_first_element_in_bytes;
+
+#if defined(MATRIX_B_DEPTH)
+    // Do not slide matrix B if the matrix B has 3 dimensions and matrix A more than 3
+    src1_addr_in_bytes += (z % MATRIX_B_DEPTH) * src1_stride_z;
+#else  // defined(MATRIX_B_DEPTH)
+    src1_addr_in_bytes += z * src1_stride_z;
+#endif // defined(MATRIX_B_DEPTH)
+
+    __global half *src_addr_a = (__global half *)(src0_ptr + src0_addr_in_bytes);
+    __global half *src_addr_b = (__global half *)(src1_ptr + src1_addr_in_bytes);
+
+    // Compute end row address for matrix B
+    __global half *src_end_addr_b = src_addr_b + COLS_B;
+
+    src_addr_a += offset_row_a;
+    src_addr_b += offset_row_b;
+
+    // Reset accumulators
+    half8 c00 = 0.0f;
+    half8 c10 = 0.0f;
+    half8 c20 = 0.0f;
+    half8 c30 = 0.0f;
+
+#define COLS_MTX_B (COLS_B / (8 * MULT_TRANSPOSE1XW_WIDTH))
+
+    int i = 0;
+    for(; i <= (int)(COLS_MTX_B - 4); i += 4)
+    {
+#if MULT_INTERLEAVE4X4_HEIGHT == 1
+        // Load values from matrix A (interleaved) and matrix B (transposed)
+        half8 a0 = vload8(0, src_addr_a);
+        half8 b0 = vload8(0, src_addr_b);
+
+        src_addr_a += 8 * MULT_INTERLEAVE4X4_HEIGHT;
+        src_addr_b += 8 * MULT_TRANSPOSE1XW_WIDTH;
+
+        c00 = fma((half8)a0.s0, b0, c00);
+        c10 = fma((half8)a0.s1, b0, c10);
+        c20 = fma((half8)a0.s2, b0, c20);
+        c30 = fma((half8)a0.s3, b0, c30);
+
+        // Load values from matrix B (transposed)
+        b0 = vload8(0, src_addr_b);
+
+        src_addr_b += 8 * MULT_TRANSPOSE1XW_WIDTH;
+
+        c00 = fma((half8)a0.s4, b0, c00);
+        c10 = fma((half8)a0.s5, b0, c10);
+        c20 = fma((half8)a0.s6, b0, c20);
+        c30 = fma((half8)a0.s7, b0, c30);
+
+        // Load values from matrix A (interleaved) and matrix B (transposed)
+        a0 = vload8(0, src_addr_a);
+        b0 = vload8(0, src_addr_b);
+
+        src_addr_a += 8 * MULT_INTERLEAVE4X4_HEIGHT;
+        src_addr_b += 8 * MULT_TRANSPOSE1XW_WIDTH;
+
+        c00 = fma((half8)a0.s0, b0, c00);
+        c10 = fma((half8)a0.s1, b0, c10);
+        c20 = fma((half8)a0.s2, b0, c20);
+        c30 = fma((half8)a0.s3, b0, c30);
+
+        // Load values from matrix B (transposed)
+        b0 = vload8(0, src_addr_b);
+
+        src_addr_b += 8 * MULT_TRANSPOSE1XW_WIDTH;
+
+        c00 = fma((half8)a0.s4, b0, c00);
+        c10 = fma((half8)a0.s5, b0, c10);
+        c20 = fma((half8)a0.s6, b0, c20);
+        c30 = fma((half8)a0.s7, b0, c30);
+#else  // MULT_INTERLEAVE4X4_HEIGHT == 1
+        // Load values from matrix A (interleaved) and matrix B (transposed)
+        half4 a0 = vload4(0, src_addr_a);
+        half8 b0 = vload8(0, src_addr_b);
+
+        src_addr_a += 4 * MULT_INTERLEAVE4X4_HEIGHT;
+        src_addr_b += 8 * MULT_TRANSPOSE1XW_WIDTH;
+
+        c00 = fma((half8)a0.s0, b0, c00);
+        c10 = fma((half8)a0.s1, b0, c10);
+        c20 = fma((half8)a0.s2, b0, c20);
+        c30 = fma((half8)a0.s3, b0, c30);
+
+        // Load values from matrix A (interleaved) and matrix B (transposed)
+        a0 = vload4(0, src_addr_a);
+        b0 = vload8(0, src_addr_b);
+
+        src_addr_a += 4 * MULT_INTERLEAVE4X4_HEIGHT;
+        src_addr_b += 8 * MULT_TRANSPOSE1XW_WIDTH;
+
+        c00 = fma((half8)a0.s0, b0, c00);
+        c10 = fma((half8)a0.s1, b0, c10);
+        c20 = fma((half8)a0.s2, b0, c20);
+        c30 = fma((half8)a0.s3, b0, c30);
+
+        // Load values from matrix A (interleaved) and matrix B (transposed)
+        a0 = vload4(0, src_addr_a);
+        b0 = vload8(0, src_addr_b);
+
+        src_addr_a += 4 * MULT_INTERLEAVE4X4_HEIGHT;
+        src_addr_b += 8 * MULT_TRANSPOSE1XW_WIDTH;
+
+        c00 = fma((half8)a0.s0, b0, c00);
+        c10 = fma((half8)a0.s1, b0, c10);
+        c20 = fma((half8)a0.s2, b0, c20);
+        c30 = fma((half8)a0.s3, b0, c30);
+
+        // Load values from matrix A (interleaved) and matrix B (transposed)
+        a0 = vload4(0, src_addr_a);
+        b0 = vload8(0, src_addr_b);
+
+        src_addr_a += 4 * MULT_INTERLEAVE4X4_HEIGHT;
+        src_addr_b += 8 * MULT_TRANSPOSE1XW_WIDTH;
+
+        c00 = fma((half8)a0.s0, b0, c00);
+        c10 = fma((half8)a0.s1, b0, c10);
+        c20 = fma((half8)a0.s2, b0, c20);
+        c30 = fma((half8)a0.s3, b0, c30);
+#endif // MULT_INTERLEAVE4X4_HEIGHT == 1
+    }
+
+    for(; i < (int)(COLS_MTX_B); ++i)
+    {
+        // Load values from matrix A (interleaved) and matrix B (transposed)
+        half4 a0 = vload4(0, src_addr_a);
+        half8 b0 = vload8(0, src_addr_b);
+
+        src_addr_a += 4 * MULT_INTERLEAVE4X4_HEIGHT;
+        src_addr_b += 8 * MULT_TRANSPOSE1XW_WIDTH;
+
+        c00 = fma((half8)a0.s0, b0, c00);
+        c10 = fma((half8)a0.s1, b0, c10);
+        c20 = fma((half8)a0.s2, b0, c20);
+        c30 = fma((half8)a0.s3, b0, c30);
     }
 
     // Compute destination address
