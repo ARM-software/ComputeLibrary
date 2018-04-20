@@ -300,8 +300,7 @@ public:
         _built_programs_map.clear();
     }
 
-    /** Access the cache of built OpenCL programs
-     */
+    /** Access the cache of built OpenCL programs */
     const std::map<std::string, cl::Program> &get_built_programs() const
     {
         return _built_programs_map;
