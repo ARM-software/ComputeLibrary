@@ -218,21 +218,15 @@ void NEIm2ColKernel::run_generic(const Window &window)
     const int start_x = -pad_left;
     const int start_y = -pad_top;
 
-    Window window_in(window);
-    // The first three dimensions of the input are increased by the inner loops
-    window_in.set(Window::DimX, Window::Dimension(0, 0, 0));
-    window_in.set(Window::DimY, Window::Dimension(0, 0, 0));
-    window_in.set(Window::DimZ, Window::Dimension(0, 0, 0));
-
-    // Setup output window
-    Window window_out(window);
-    window_out.set(width_idx, Window::Dimension(0, _output->info()->dimension(width_idx), _output->info()->strides_in_bytes()[width_idx + 1] / _output->info()->strides_in_bytes()[width_idx]));
-    window_out.set(height_idx, Window::Dimension(window[height_idx].start() * _convolved_dims.first, window[height_idx].end() * _convolved_dims.first, _convolved_dims.first));
-    window_out.set(channel_idx, Window::Dimension(0, 1, 1));
+    Window window_in_out(window);
+    // The first three dimensions of the input and output are increased by the inner loops
+    window_in_out.set(Window::DimX, Window::Dimension(0, 0, 0));
+    window_in_out.set(Window::DimY, Window::Dimension(0, 0, 0));
+    window_in_out.set(Window::DimZ, Window::Dimension(0, 0, 0));
 
     // Create iterators
-    Iterator in(_input, window_in);
-    Iterator out(_output, window_out);
+    Iterator in(_input, window_in_out);
+    Iterator out(_output, window_in_out);
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
@@ -241,7 +235,7 @@ void NEIm2ColKernel::run_generic(const Window &window)
 
         // Get pointers
         const uint8_t *const input_ptr  = in.ptr();
-        auto                 output_ptr = reinterpret_cast<T *>(out.ptr());
+        auto                 output_ptr = reinterpret_cast<T *>(out.ptr() + (id[width_idx] + id[height_idx] * _convolved_dims.first) * _output->info()->strides_in_bytes().y());
 
         // Linearize volume
         linearize_volume<T, has_pads>(input_ptr,
