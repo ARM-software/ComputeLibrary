@@ -726,7 +726,7 @@ Kernel CLKernelLibrary::create_kernel(const std::string &kernel_name, const Stri
     }
     std::string concat_str;
 
-    if(fp16_support(_device))
+    if(fp16_supported(_device))
     {
         concat_str += " -DARM_COMPUTE_OPENCL_FP16_ENABLED=1 ";
     }
@@ -735,7 +735,7 @@ Kernel CLKernelLibrary::create_kernel(const std::string &kernel_name, const Stri
     {
         concat_str += " -cl-std=CL2.0 ";
     }
-    else if(non_uniform_workgroup_support(_device))
+    else if(arm_non_uniform_workgroup_supported(_device))
     {
         concat_str += " -cl-arm-non-uniform-work-group-size ";
     }

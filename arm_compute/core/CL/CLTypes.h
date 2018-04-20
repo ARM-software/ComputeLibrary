@@ -34,7 +34,7 @@ static const std::string default_config_id = "no_config_id";
 /** Available GPU Targets */
 enum class GPUTarget
 {
-    UNKNOWN       = 0x000,
+    UNKNOWN       = 0x101,
     GPU_ARCH_MASK = 0xF00,
     MIDGARD       = 0x100,
     BIFROST       = 0x200,

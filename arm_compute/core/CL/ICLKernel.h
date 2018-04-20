@@ -193,7 +193,7 @@ public:
      *
      * @param[in] lws_hint Local-Workgroup-Size to use
      */
-    void set_lws_hint(cl::NDRange &lws_hint)
+    void set_lws_hint(const cl::NDRange &lws_hint)
     {
         _lws_hint = lws_hint;
     }

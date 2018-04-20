@@ -150,14 +150,14 @@ bool device_supports_extension(const cl::Device &device, const char *extension_n
  *
  * @return True if the extension is supported
  */
-bool fp16_support(const cl::Device &device);
+bool fp16_supported(const cl::Device &device);
 /** Helper function to check whether the arm_non_uniform_work_group_size extension is supported
  *
  * @param[in] device A CL device
  *
  * @return True if the extension is supported
  */
-bool non_uniform_workgroup_support(const cl::Device &device);
+bool arm_non_uniform_workgroup_supported(const cl::Device &device);
 /** Helper function to check whether a gpu target is equal to the provided targets
  *
  * @param[in] target_to_check gpu target to check

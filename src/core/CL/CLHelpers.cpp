@@ -227,8 +227,8 @@ GPUTarget get_target_from_name(const std::string &device_name)
     }
     else
     {
-        ARM_COMPUTE_LOG_INFO_MSG_CORE("Mali GPU unknown. Target is set to the default one.");
-        return GPUTarget::UNKNOWN;
+        ARM_COMPUTE_LOG_INFO_MSG_CORE("Mali GPU unknown. Target is set to the default one. (BIFROST)");
+        return GPUTarget::BIFROST;
     }
 }
 
@@ -245,12 +245,12 @@ GPUTarget get_arch_from_target(GPUTarget target)
     return (target & GPUTarget::GPU_ARCH_MASK);
 }
 
-bool non_uniform_workgroup_support(const cl::Device &device)
+bool arm_non_uniform_workgroup_supported(const cl::Device &device)
 {
     return device_supports_extension(device, "cl_arm_non_uniform_work_group_size");
 }
 
-bool fp16_support(const cl::Device &device)
+bool fp16_supported(const cl::Device &device)
 {
     return device_supports_extension(device, "cl_khr_fp16");
 }
