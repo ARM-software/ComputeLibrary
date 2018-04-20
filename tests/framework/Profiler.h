@@ -57,11 +57,29 @@ public:
      */
     void add(std::unique_ptr<Instrument> instrument);
 
-    /** Start all added instruments to measure performance. */
+    /** Call test_start() on all the added instruments
+     *
+     * Called before the test set up starts
+     */
+    void test_start();
+
+    /** Call start() on all the added instruments
+     *
+     * Called just before the run of the test starts
+     */
     void start();
 
-    /** Stop all added instruments. */
+    /** Call stop() on all the added instruments
+     *
+     * Called just after the run of the test ends
+    */
     void stop();
+
+    /** Call test_stop() on all the added instruments
+     *
+     * Called after the test teardown ended
+     */
+    void test_stop();
 
     /** Return measurements for all instruments.
      *

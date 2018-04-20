@@ -288,6 +288,8 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
 
         try
         {
+            profiler.test_start();
+
             test_case->do_setup();
 
             for(int i = 0; i < _num_iterations; ++i)
@@ -311,6 +313,8 @@ void Framework::run_test(const TestInfo &info, TestCaseFactory &test_factory)
             }
 
             test_case->do_teardown();
+
+            profiler.test_stop();
 
             // Change status to success if no error has happend
             if(result.status == TestResult::Status::NOT_RUN)

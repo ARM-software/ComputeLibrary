@@ -74,20 +74,57 @@ public:
     /** Identifier for the instrument */
     virtual std::string id() const = 0;
 
-    /** Start measuring. */
-    virtual void start() = 0;
+    /** Start of the test
+     *
+     * Called before the test set up starts
+     */
+    virtual void test_start()
+    {
+    }
 
-    /** Stop measuring. */
-    virtual void stop() = 0;
+    /** Start measuring.
+     *
+     * Called just before the run of the test starts
+     */
+    virtual void start()
+    {
+    }
 
+    /** Stop measuring.
+     *
+     * Called just after the run of the test ends
+    */
+    virtual void stop()
+    {
+    }
+
+    /** End of the test
+     *
+     * Called after the test teardown ended
+     */
+    virtual void test_stop()
+    {
+    }
     /** Map of measurements */
     using MeasurementsMap = std::map<std::string, Measurement>;
 
-    /** Return the latest measurement.
+    /** Return the latest measurements.
      *
-     * @return the latest measurement.
+     * @return the latest measurements.
      */
-    virtual MeasurementsMap measurements() const = 0;
+    virtual MeasurementsMap measurements() const
+    {
+        return MeasurementsMap();
+    }
+
+    /** Return the latest test measurements.
+     *
+     * @return the latest test measurements.
+     */
+    virtual MeasurementsMap test_measurements() const
+    {
+        return MeasurementsMap();
+    }
 
 protected:
     std::string _unit{};

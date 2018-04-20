@@ -216,6 +216,11 @@ public:
         }
     }
 
+    bool is_initialised() const
+    {
+        return _is_initialised;
+    }
+
 private:
     /** Flag to ensure symbols initialisation is happening before Scheduler creation */
     static std::once_flag _initialize_symbols;

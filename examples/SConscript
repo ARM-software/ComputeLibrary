@@ -52,7 +52,7 @@ for file in Glob("./graph_*.cpp"):
     prog = None
     arm_compute_graph_libs = arm_compute_libs
 
-    if env['os'] == 'android':
+    if env['os'] in ['android', 'bare_metal'] or env['standalone']:
         prog = examples_env.Program(example, ["{}.cpp".format(example), utils, graph_utils], LIBS = arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+['-Wl,--whole-archive',graph_dependency,'-Wl,--no-whole-archive'])
         Depends(prog, graph_dependency)
     else:
@@ -89,14 +89,7 @@ if env['neon']:
 if env['gles_compute']:
     for file in Glob("./gc_*.cpp"):
         example = os.path.basename(os.path.splitext(str(file))[0])
-        if env['os'] != 'android':
-            prog = examples_env.Program(example, ["{}.cpp".format(example), utils], CPPDEFINES=['ARM_COMPUTE_GC'], LIBS = arm_compute_libs)
-            Depends(prog, arm_compute_dependency)
-        else:
-            if env['arch'] != 'armv7a':
-                prog = examples_env.Program(example, ["{}.cpp".format(example), utils], CPPDEFINES=['ARM_COMPUTE_GC'], LIBS = arm_compute_libs)
-            else:
-                prog = examples_env.Program(example, ["{}.cpp".format(example), utils], CPPDEFINES=['ARM_COMPUTE_GC'], LIBS = arm_compute_libs)
-            Depends(prog, [arm_compute_dependency])
+        prog = examples_env.Program(example, ["{}.cpp".format(example), utils], CPPDEFINES=['ARM_COMPUTE_GC'], LIBS = arm_compute_libs)
+        Depends(prog, arm_compute_dependency)
         alias = examples_env.Alias(example, prog)
         Default(alias)

@@ -153,9 +153,6 @@ if env["build"] == "embed_only":
 arm_compute_env.Append(LINKFLAGS=['-Wl,--no-undefined'])
 arm_compute_env.Append(CPPPATH =[Dir("./src/core/").path] )
 
-if env["os"] not in ["android", "bare_metal"]:
-    arm_compute_env.Append(LIBS = ['pthread'])
-
 arm_compute_env.Append(LIBS = ['dl'])
 
 core_files = Glob('src/core/*.cpp')

@@ -158,7 +158,7 @@ if test_env['validation_tests']:
                 cl_examples += [ test_env.Program(example, [ test_env.Object(source=file, target=example) ] + files_validate_examples, LIBS = test_env["LIBS"]) ]
             arm_compute_validate_examples += cl_examples
             if test_env['opencl'] and test_env['neon']:
-                if env['os'] == 'android':
+                if env['os'] in ['android', 'bare_metal'] or env['standalone']:
                     Import('arm_compute_graph_a')
                     graph_dependency = [ arm_compute_graph_a]
                 else:
@@ -168,7 +168,7 @@ if test_env['validation_tests']:
                 graph_utils = test_env.Object(source="../utils/GraphUtils.cpp", target="GraphUtils")
                 for file in Glob("validate_examples/graph_*.cpp"):
                     example = "validate_" + os.path.basename(os.path.splitext(str(file))[0])
-                    if env['os'] == 'android':
+                    if env['os'] in ['android', 'bare_metal'] or env['standalone']:
                         prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils]+ files_validate_examples, LIBS = test_env["LIBS"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--whole-archive',graph_dependency,'-Wl,--no-whole-archive'])
                         Depends(prog, graph_dependency)
                         arm_compute_validate_examples += [ prog ]
@@ -201,7 +201,7 @@ if test_env['benchmark_examples']:
         arm_compute_benchmark_examples += cl_examples
 
     # Graph examples
-    if env['os'] == 'android':
+    if env['os'] in ['android', 'bare_metal'] or env['standalone']:
         Import('arm_compute_graph_a')
         graph_dependency = [arm_compute_graph_a]
     else:
@@ -210,7 +210,7 @@ if test_env['benchmark_examples']:
     graph_utils = test_env.Object(source="../utils/GraphUtils.cpp", target="GraphUtils")
     for file in Glob("../examples/graph_*.cpp"):
         example = "benchmark_" + os.path.basename(os.path.splitext(str(file))[0])
-        if env['os'] == 'android':
+        if env['os'] in ['android', 'bare_metal'] or env['standalone']:
             prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils]+ files_benchmark_examples, LIBS = test_env["LIBS"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--whole-archive',graph_dependency,'-Wl,--no-whole-archive'])
             Depends(prog, [graph_dependency])
             arm_compute_benchmark_examples += [ prog ]

@@ -40,14 +40,24 @@ namespace utils
  *
  * All examples with a validation stage have to inherit from this class.
  */
-class ValidateExample : public Example
+class ValidateExample
 {
 public:
+    /** Setup the example.
+     *
+     * @param[in] argc Argument count.
+     * @param[in] argv Argument values.
+     */
+    virtual void do_setup(int argc, char **argv) {};
+    /** Run the example. */
+    virtual void do_run() {};
     /** Run reference implementation and validate against the target output
      */
     virtual void do_validate()
     {
     }
+    /** Teardown the example. */
+    virtual void do_teardown() {};
     /** Print the example parameters
      *
      * @param[in,out] printer Printer to use to print the parameters
@@ -65,7 +75,7 @@ public:
  * @param[in] argv    Command line arguments
  * @param[in] example Example to run
  */
-int run_example(int argc, char **argv, ValidateExample &example);
+int run_example(int argc, char **argv, std::unique_ptr<ValidateExample> example);
 
 } // namespace utils
 } // namespace arm_compute

@@ -50,11 +50,17 @@ namespace arm_compute
 {
 namespace utils
 {
-static Example *g_example = nullptr;
+static std::unique_ptr<Example> g_example      = nullptr;
+static std::vector<char *>      g_example_argv = {};
 class ExampleTest : public arm_compute::test::framework::TestCase
 {
 public:
     ExampleTest() = default;
+    void do_setup() override
+    {
+        ARM_COMPUTE_ERROR_ON_NULLPTR(g_example.get());
+        g_example->do_setup(g_example_argv.size(), &g_example_argv[0]);
+    }
     void do_run() override
     {
         g_example->do_run();
@@ -62,10 +68,11 @@ public:
     void do_teardown() override
     {
         g_example->do_teardown();
+        g_example = nullptr;
     }
 };
 
-int run_example(int argc, char **argv, Example &example)
+int run_example(int argc, char **argv, std::unique_ptr<Example> example)
 {
     framework::CommandLineParser parser;
     framework::CommonOptions     options(parser);
@@ -82,41 +89,16 @@ int run_example(int argc, char **argv, Example &example)
     }
 
     std::vector<std::unique_ptr<framework::Printer>> printers = options.create_printers();
-    g_example                                                 = &example;
-    std::vector<char *> example_argv                          = {};
-    example_argv.clear();
-    example_argv.emplace_back(argv[0]);
+    g_example                                                 = std::move(example);
+    g_example_argv.clear();
+    g_example_argv.emplace_back(argv[0]);
     for(auto &arg : example_args->value())
     {
-        example_argv.emplace_back(const_cast<char *>(arg.c_str())); // NOLINT
+        g_example_argv.emplace_back(const_cast<char *>(arg.c_str())); // NOLINT
     }
 
     // Set number of threads in Scheduler
     Scheduler::get().set_num_threads(options.threads->value());
-
-    // We need to do the setup here because framework.init() will need CL / GLES to be initialised
-    try
-    {
-        example.do_setup(example_argv.size(), &example_argv[0]);
-    }
-#ifdef ARM_COMPUTE_CL
-    catch(cl::Error &err)
-    {
-        std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-        std::cerr << std::endl
-                  << "ERROR " << err.what() << "(" << err.err() << ")" << std::endl;
-        std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-        return 1;
-    }
-#endif /* ARM_COMPUTE_CL */
-    catch(std::runtime_error &err)
-    {
-        std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-        std::cerr << std::endl
-                  << "ERROR " << err.what() << " " << (errno ? strerror(errno) : "") << std::endl;
-        std::cerr << "!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-        return 1;
-    }
 
     if(options.log_level->value() > framework::LogLevel::NONE)
     {
@@ -134,6 +116,10 @@ int run_example(int argc, char **argv, Example &example)
 #ifdef ARM_COMPUTE_CL
             if(opencl_is_available())
             {
+                if(!CLScheduler::get().is_initialised())
+                {
+                    CLScheduler::get().default_init();
+                }
                 p->print_entry("CL_DEVICE_VERSION", CLKernelLibrary::get().get_device_version());
             }
             else

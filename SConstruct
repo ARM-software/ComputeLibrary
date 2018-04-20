@@ -196,8 +196,6 @@ if not GetOption("help"):
 if env['standalone']:
     env.Append(CXXFLAGS = ['-fPIC'])
     env.Append(LINKFLAGS = ['-static-libgcc','-static-libstdc++'])
-    if env['cppthreads']:
-        env.Append(LINKFLAGS = ['-lpthread'])
 
 if env['Werror']:
     env.Append(CXXFLAGS = ['-Werror'])
@@ -221,6 +219,9 @@ if env['gles_compute']:
     if env['os'] in ['bare_metal'] or env['standalone']:
         print("Cannot link OpenGLES statically, which is required for bare metal / standalone builds")
         Exit(1)
+
+if env["os"] not in ["android", "bare_metal"] and (env['opencl'] or env['cppthreads']):
+    env.Append(LIBS = ['pthread'])
 
 if env['opencl'] or env['gles_compute']:
     if env['embed_kernels']:

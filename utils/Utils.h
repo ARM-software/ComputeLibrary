@@ -83,13 +83,12 @@ public:
  * @param[in] argv    Command line arguments
  * @param[in] example Example to run
  */
-int run_example(int argc, char **argv, Example &example);
+int run_example(int argc, char **argv, std::unique_ptr<Example> example);
 
 template <typename T>
 int run_example(int argc, char **argv)
 {
-    T example;
-    return run_example(argc, argv, example);
+    return run_example(argc, argv, support::cpp14::make_unique<T>());
 }
 
 /** Draw a RGB rectangular window for the detected object
