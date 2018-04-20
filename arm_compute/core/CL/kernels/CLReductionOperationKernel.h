@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,12 +50,25 @@ public:
 
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: F32.
-     * @param[out] output Destination tensor. Data types supported: Same as @p input.
+     * @param[in]  input  Source tensor. Data types supported: F32. Data layouts supported: NCHW.
+     * @param[out] output Destination tensor. Data types and data layouts supported: Same as @p input.
+     *                    Output will have the same number of dimensions as input.
      * @param[in]  axis   Axis along which to reduce. Supported reduction axis : 0
      * @param[in]  op     Reduction operation to perform.
      */
     void configure(const ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op);
+
+    /** Static function to check if given info will lead to a valid configuration of @ref CLReductionOperationKernel.
+     *
+     * @param[in] input  Source tensor info. Data types supported: F32. Data layouts supported: NCHW.
+     * @param[in] output Destination tensor info. Data types and data layouts supported: Same as @p input.
+     *                   Output will have the same number of dimensions as input.
+     * @param[in] axis   Axis along which to reduce. Supported reduction axis : 0
+     * @param[in] op     Reduction operation to perform.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

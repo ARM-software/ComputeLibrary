@@ -38,6 +38,52 @@
 
 using namespace arm_compute;
 
+namespace
+{
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op)
+{
+    ARM_COMPUTE_UNUSED(op);
+
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() != DataLayout::NCHW);
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis >= TensorShape::num_max_dimensions, "Reduction axis greater than max number of dimensions");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis > 0, "Unsupported reduction axis, Supported axis is 0");
+
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON(output->data_layout() != DataLayout::NCHW);
+    }
+
+    return Status{};
+}
+
+std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, unsigned int axis)
+{
+    // Output tensor auto initialization if not yet initialized
+    TensorShape output_shape{ input->tensor_shape() };
+    output_shape.set(axis, 1);
+    auto_init_if_empty(*output, output_shape, 1, input->data_type(), input->fixed_point_position());
+
+    const unsigned int num_elems_processed_per_iteration = 16;
+
+    Window             win          = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+    const unsigned int border_width = ((input->dimension(0) % 128) != 0) ? 128 - input->dimension(0) % 128 : 0; // TODO (COMPMID-1143): Fix padding (possible value 127!)
+
+    AccessWindowStatic     input_access(input, 0, 0, input->dimension(0) + border_width, 1);
+    AccessWindowHorizontal output_access(output, 0, 1);
+
+    bool window_changed = update_window_and_padding(win, input_access, output_access);
+    output_access.set_valid_region(win, output->valid_region());
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+
+    return std::make_tuple(err, win);
+}
+} // namespace
+
 CLReductionOperationKernel::CLReductionOperationKernel()
     : _input(nullptr), _output(nullptr), _reduction_axis(0), _op(ReductionOperation::SUM_SQUARE), _border_size()
 {
@@ -50,17 +96,13 @@ BorderSize CLReductionOperationKernel::border_size() const
 
 void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output tensor auto initialization if not yet initialized
     TensorShape output_shape{ input->info()->tensor_shape() };
     output_shape.set(axis, 1);
-    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
 
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MSG(axis >= TensorShape::num_max_dimensions, "Reduction axis greater than max number of dimensions");
-    ARM_COMPUTE_ERROR_ON_MSG(axis > 0, "Unsupported reduction axis, Supported axis is 0");
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), axis, op));
 
     const unsigned int num_elems_processed_per_iteration = 16;
     const unsigned int border_width                      = ((input->info()->dimension(0) % 128) != 0) ? 128 - input->info()->dimension(0) % 128 : 0;
@@ -97,15 +139,19 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("reduction_operation", build_opts));
 
     // Configure kernel window
-    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+    auto win_config = validate_and_configure_window(_input->info(), _output->info(), axis);
 
-    AccessWindowStatic     input_access(input->info(), 0, 0, input->info()->dimension(0) + border_width, 1);
-    AccessWindowHorizontal output_access(output->info(), 0, 1);
+    ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
-    update_window_and_padding(win, input_access, output_access);
-    output_access.set_valid_region(win, output->info()->valid_region());
+    ICLKernel::configure(std::get<1>(win_config));
+}
 
-    ICLKernel::configure(win);
+Status CLReductionOperationKernel::validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, axis, op));
+    ARM_COMPUTE_RETURN_ON_ERROR(std::get<0>(validate_and_configure_window(input->clone().get(), output->clone().get(), axis)));
+
+    return Status{};
 }
 
 void CLReductionOperationKernel::run(const Window &window, cl::CommandQueue &queue)
