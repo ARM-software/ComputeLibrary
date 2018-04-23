@@ -45,7 +45,7 @@ public:
      *
      * @return A pointer to the tensor's allocator
      */
-    ITensorAllocator *allocator();
+    CLTensorAllocator *allocator();
     /** Enqueue a map operation of the allocated buffer.
      *
      * @param[in] blocking If true, then the mapping will be ready to use by the time

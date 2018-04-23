@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,10 @@
 #ifndef __ARM_COMPUTE_IALLOCATOR_H__
 #define __ARM_COMPUTE_IALLOCATOR_H__
 
+#include "arm_compute/runtime/IMemoryRegion.h"
+
 #include <cstddef>
+#include <memory>
 
 namespace arm_compute
 {
@@ -34,6 +37,7 @@ class IAllocator
 public:
     /** Default virtual destructor. */
     virtual ~IAllocator() = default;
+    // TODO (COMPMID-1088) : Change allocator and rest interfaces to use IMemoryRegion
     /** Interface to be implemented by the child class to allocate bytes
      *
      * @param[in] size      Size to allocate
@@ -44,6 +48,14 @@ public:
     virtual void *allocate(size_t size, size_t alignment) = 0;
     /** Interface to be implemented by the child class to free the allocated tensor */
     virtual void free(void *ptr) = 0;
+    /** Create self-managed memory region
+     *
+     * @param[in] size      Size of the memory region
+     * @param[in] alignment Alignment of the memory region
+     *
+     * @return The memory region object
+     */
+    virtual std::unique_ptr<IMemoryRegion> make_region(size_t size, size_t alignment) = 0;
 };
 } // arm_compute
 #endif /*__ARM_COMPUTE_IALLOCATOR_H__ */

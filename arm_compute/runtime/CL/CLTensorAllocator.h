@@ -24,10 +24,11 @@
 #ifndef __ARM_COMPUTE_CLTENSORALLOCATOR_H__
 #define __ARM_COMPUTE_CLTENSORALLOCATOR_H__
 
+#include "arm_compute/runtime/CL/CLMemory.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
 
 #include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/runtime/CL/SVMMemory.h"
+
 #include <cstdint>
 
 namespace arm_compute
@@ -47,8 +48,6 @@ public:
      * @param[in] owner (Optional) Owner of the allocator.
      */
     CLTensorAllocator(CLTensor *owner = nullptr);
-    /** Default destructor */
-    ~CLTensorAllocator();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLTensorAllocator(const CLTensorAllocator &) = delete;
     /** Prevent instances of this class from being copy assigned (As this class contains pointers) */
@@ -68,8 +67,6 @@ public:
      * @return pointer to the CL data.
      */
     const cl::Buffer &cl_data() const;
-    /** SVM memory */
-    void *svm_ptr();
 
     /** Enqueue a map operation of the allocated buffer on the given queue.
      *
@@ -104,6 +101,19 @@ public:
      *
      */
     void free() override;
+    /** Import an existing memory as a tensor's backing memory
+     *
+     * @warning If the tensor is flagged to be managed by a memory manager,
+     *          this call will lead to an error.
+     * @warning Ownership of memory depends on the way the @ref CLMemory object was constructed
+     * @note    Calling free on a tensor with imported memory will just clear
+     *          the internal pointer value.
+     *
+     * @param[in] memory Memory to import
+     *
+     * @return error status
+     */
+    arm_compute::Status import_memory(CLMemory memory);
     /** Associates the tensor with a memory group
      *
      * @param[in] associated_memory_group Memory group to associate the tensor with
@@ -121,10 +131,8 @@ protected:
 
 private:
     CLMemoryGroup *_associated_memory_group; /**< Registered memory manager */
-    cl::Buffer     _buffer;                  /**< OpenCL buffer containing the tensor data. */
-    uint8_t       *_mapping;                 /**< Pointer to the CPU mapping of the OpenCL buffer. */
+    CLMemory       _memory;                  /**< OpenCL memory */
     CLTensor      *_owner;                   /**< Owner of the allocator */
-    SVMMemory      _svm_memory;              /**< Svm memory */
 };
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLTENSORALLOCATOR_H__ */

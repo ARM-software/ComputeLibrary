@@ -48,4 +48,10 @@ void GCBufferAllocator::free(void *ptr)
     auto *gl_buffer = reinterpret_cast<GLBufferWrapper *>(ptr);
     delete gl_buffer;
 }
+
+std::unique_ptr<IMemoryRegion> GCBufferAllocator::make_region(size_t size, size_t alignment)
+{
+    ARM_COMPUTE_UNUSED(size, alignment);
+    return nullptr;
+}
 } // namespace arm_compute

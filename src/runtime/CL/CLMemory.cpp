@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,19 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/Memory.h"
+#include "arm_compute/runtime/CL/CLMemory.h"
 
-#include "arm_compute/runtime/MemoryRegion.h"
+#include "arm_compute/core/Error.h"
 
 namespace arm_compute
 {
-Memory::Memory()
+CLMemory::CLMemory()
     : _region(nullptr), _region_owned(nullptr)
 {
     create_empty_region();
 }
 
-Memory::Memory(std::shared_ptr<IMemoryRegion> memory)
+CLMemory::CLMemory(std::shared_ptr<ICLMemoryRegion> memory)
     : _region(nullptr), _region_owned(std::move(memory))
 {
     if(_region_owned == nullptr)
@@ -43,25 +43,25 @@ Memory::Memory(std::shared_ptr<IMemoryRegion> memory)
     _region = _region_owned.get();
 }
 
-Memory::Memory(IMemoryRegion *memory)
+CLMemory::CLMemory(ICLMemoryRegion *memory)
     : _region(memory), _region_owned(nullptr)
 {
     _region = memory;
 }
 
-IMemoryRegion *Memory::region()
+ICLMemoryRegion *CLMemory::region()
 {
     return _region;
 }
 
-IMemoryRegion *Memory::region() const
+ICLMemoryRegion *CLMemory::region() const
 {
     return _region;
 }
 
-void Memory::create_empty_region()
+void CLMemory::create_empty_region()
 {
-    _region_owned = std::make_shared<MemoryRegion>(0);
+    _region_owned = std::make_shared<CLBufferMemoryRegion>(cl::Context::getDefault(), CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, 0);
     _region       = _region_owned.get();
 }
 } // namespace arm_compute

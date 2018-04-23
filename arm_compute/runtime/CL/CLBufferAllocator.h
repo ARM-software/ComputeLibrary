@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,7 @@
 namespace arm_compute
 {
 /** Default OpenCL cl buffer allocator implementation */
-class CLBufferAllocator : public IAllocator
+class CLBufferAllocator final : public IAllocator
 {
 public:
     /** Default constructor */
@@ -43,6 +43,7 @@ public:
     // Inherited methods overridden:
     void *allocate(size_t size, size_t alignment) override;
     void free(void *ptr) override;
+    std::unique_ptr<IMemoryRegion> make_region(size_t size, size_t alignment) override;
 
 private:
     cl::Context _context;

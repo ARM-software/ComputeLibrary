@@ -21,37 +21,63 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_SVMMEMORY_H__
-#define __ARM_COMPUTE_SVMMEMORY_H__
+#ifndef __ARM_COMPUTE_RUNTIME_IMEMORY_REGION_H__
+#define __ARM_COMPUTE_RUNTIME_IMEMORY_REGION_H__
+
+#include <cstddef>
 
 namespace arm_compute
 {
-class SVMMemory final
+/** Memory region interface */
+class IMemoryRegion
 {
 public:
-    SVMMemory() = default;
-    SVMMemory(void *ptr, bool fine_grain)
-        : _ptr(ptr), _fine_grain(fine_grain), _size(0)
+    /** Default constructor
+     *
+     * @param[in] size Region size
+     */
+    IMemoryRegion(size_t size)
+        : _size(size)
     {
     }
-    void *ptr() const
-    {
-        return _ptr;
-    }
-    bool fine_grain() const
-    {
-        return _fine_grain;
-    }
-    size_t size() const
+    /** Virtual Destructor */
+    virtual ~IMemoryRegion() = default;
+    /** Returns the pointer to the allocated data.
+     *
+     * @return Pointer to the allocated data
+     */
+    virtual void *buffer() = 0;
+    /** Returns the pointer to the allocated data.
+     *
+     * @return Pointer to the allocated data
+     */
+    virtual void *buffer() const = 0;
+    /** Handle of internal memory
+     *
+     * @return Handle of memory
+     */
+    virtual void **handle() = 0;
+    /** Memory region size accessor
+     *
+     * @return Memory region size
+     */
+    size_t size()
     {
         return _size;
     }
-    void *allocate(cl_context context, size_t size, cl_svm_mem_flags flags, cl_uint alignment);
+    /** Sets size of region
+     *
+     * @warning This should only be used in correlation with handle
+     *
+     * @param[in] size Size to set
+     */
+    void set_size(size_t size)
+    {
+        _size = size;
+    }
 
-private:
-    void *_ptr{ nullptr };
-    bool   _fine_grain{ false };
-    size_t _size{ 0 };
+protected:
+    size_t _size;
 };
-}
-#endif /* __ARM_COMPUTE_SVMMEMORY_H__ */
+} // namespace arm_compute
+#endif /* __ARM_COMPUTE_RUNTIME_IMEMORY_REGION_H__ */

@@ -34,7 +34,7 @@
 namespace arm_compute
 {
 /** Default GLES buffer allocator implementation */
-class GCBufferAllocator : public IAllocator
+class GCBufferAllocator final : public IAllocator
 {
 public:
     /** Default constructor */
@@ -43,6 +43,7 @@ public:
     // Inherited methods overridden:
     void *allocate(size_t size, size_t alignment) override;
     void free(void *ptr) override;
+    std::unique_ptr<IMemoryRegion> make_region(size_t size, size_t alignment) override;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_GCBUFFERALLOCATOR_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,27 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_MEMORY_H__
-#define __ARM_COMPUTE_MEMORY_H__
+#ifndef __ARM_COMPUTE_RUNTIME_CL_CLMEMORY_H__
+#define __ARM_COMPUTE_RUNTIME_CL_CLMEMORY_H__
 
-#include "arm_compute/runtime/IMemoryRegion.h"
+#include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/runtime/CL/CLMemoryRegion.h"
 
 #include <cstddef>
 #include <memory>
 
 namespace arm_compute
 {
-/** CPU implementation of memory object */
-class Memory
+/** OpenCL implementation of memory object */
+class CLMemory
 {
 public:
     /** Default Constructor */
-    Memory();
+    CLMemory();
     /** Default Constructor
      *
      * @param[in] memory Memory to be imported
      */
-    Memory(std::shared_ptr<IMemoryRegion> memory);
+    CLMemory(std::shared_ptr<ICLMemoryRegion> memory);
     /** Default Constructor
      *
      * @note Ownership of the memory is not transferred to this object.
@@ -49,33 +50,33 @@ public:
      *
      * @param[in] memory Memory to be imported
      */
-    Memory(IMemoryRegion *memory);
+    CLMemory(ICLMemoryRegion *memory);
     /** Allow instances of this class to be copied */
-    Memory(const Memory &) = default;
+    CLMemory(const CLMemory &) = default;
     /** Allow instances of this class to be copy assigned */
-    Memory &operator=(const Memory &) = default;
+    CLMemory &operator=(const CLMemory &) = default;
     /** Allow instances of this class to be moved */
-    Memory(Memory &&) noexcept = default;
+    CLMemory(CLMemory &&) noexcept = default;
     /** Allow instances of this class to be move assigned */
-    Memory &operator=(Memory &&) noexcept = default;
+    CLMemory &operator=(CLMemory &&) noexcept = default;
     /** Region accessor
      *
      * @return Memory region
      */
-    IMemoryRegion *region();
+    ICLMemoryRegion *region();
     /** Region accessor
      *
      * @return Memory region
      */
-    IMemoryRegion *region() const;
+    ICLMemoryRegion *region() const;
 
 private:
     /** Creates empty region */
     void create_empty_region();
 
 private:
-    IMemoryRegion                 *_region;
-    std::shared_ptr<IMemoryRegion> _region_owned;
+    ICLMemoryRegion                 *_region;
+    std::shared_ptr<ICLMemoryRegion> _region_owned;
 };
-}
-#endif /* __ARM_COMPUTE_MEMORY_H__ */
+} // namespace arm_compute
+#endif /* __ARM_COMPUTE_RUNTIME_CL_CLMEMORY_H__ */
