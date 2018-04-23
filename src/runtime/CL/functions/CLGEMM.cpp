@@ -57,6 +57,11 @@ inline bool is_interleaved_transposed(int m, int n, int k, DataType data_type, b
             flag = false;
         }
     }
+    else
+    {
+        // We reshape the matrices only if we do not have the vector-by-matrix case and we reshape the matrix B only once
+        flag = m != 1 && reshape_b_only_on_first_run;
+    }
 
     return flag;
 }
