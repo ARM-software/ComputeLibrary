@@ -39,6 +39,159 @@
 using namespace arm_compute;
 using namespace arm_compute::misc::shape_calculator;
 
+namespace
+{
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier,
+                          const ActivationLayerInfo &act_info)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(act_info.enabled() && ((input->data_type() != DataType::QASYMM8) || ((act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
+                                                                                                         && (act_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
+                                                                                                         && (act_info.activation() != ActivationLayerInfo::ActivationFunction::RELU))),
+                                    "For QASYMM8 only relu, lower bounded relu and lower-upper bounded relu are supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(0) != 3 || weights->dimension(1) != 3);
+    ARM_COMPUTE_RETURN_ERROR_ON((input->dimension(2) * depth_multiplier) != output->dimension(2));
+    ARM_COMPUTE_RETURN_ERROR_ON(conv_info.stride().first < 1 || conv_info.stride().first > 3);
+
+    const bool is_qasymm = is_data_type_quantized_asymmetric(input->data_type());
+
+    if(biases != nullptr)
+    {
+        if(is_qasymm)
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
+        }
+        else
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(weights, biases);
+        }
+        ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != weights->dimension(2));
+        ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
+    }
+
+    if(output->total_size() != 0)
+    {
+        const TensorShape output_shape = compute_depthwise_convolution_shape(*input, *weights, conv_info, depth_multiplier);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
+    }
+
+    return Status{};
+}
+
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *weights, ITensorInfo *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier,
+                                                        GPUTarget gpu_target, std::string &kernel_name)
+{
+    // Output auto inizialitation if not yet initialized
+    const TensorShape output_shape = compute_depthwise_convolution_shape(*input, *weights, conv_info, depth_multiplier);
+    auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape));
+
+    const unsigned int conv_stride_x = conv_info.stride().first;
+    const unsigned int conv_stride_y = conv_info.stride().second;
+    const bool         is_qasymm     = is_data_type_quantized_asymmetric(input->data_type());
+    const bool         is_bifrost    = get_arch_from_target(gpu_target) == GPUTarget::BIFROST;
+
+    // Configure kernel window
+    unsigned int num_elems_read_per_iteration_x    = 0;
+    unsigned int num_elems_read_per_iteration_y    = 0;
+    unsigned int num_elems_written_per_iteration_x = 0;
+    unsigned int num_elems_written_per_iteration_y = 0;
+
+    if(input->data_type() == DataType::F16)
+    {
+        kernel_name                       = "depthwise_convolution_3x3_f16";
+        num_elems_written_per_iteration_x = 8 / data_size_from_type(input->data_type());
+        num_elems_written_per_iteration_y = 1;
+        num_elems_read_per_iteration_y    = 3;
+        switch(conv_stride_x)
+        {
+            case 1:
+                num_elems_read_per_iteration_x = 8;
+                break;
+            case 2:
+                num_elems_read_per_iteration_x = 9;
+                break;
+            case 3:
+                num_elems_read_per_iteration_x = 16;
+                break;
+            default:
+                num_elems_read_per_iteration_x = 3 + (num_elems_written_per_iteration_x - 1) * conv_stride_x;
+                break;
+        }
+        if(is_bifrost)
+        {
+            if(conv_stride_x == 1 && conv_stride_y == 1)
+            {
+                kernel_name                       = "depthwise_convolution_3x3_stridex1_stridey1_bifrost_f16";
+                num_elems_read_per_iteration_x    = 8;
+                num_elems_written_per_iteration_x = 4;
+                num_elems_read_per_iteration_y    = 6;
+                num_elems_written_per_iteration_y = 4;
+            }
+            else if(conv_stride_x == 2 && conv_stride_y == 2)
+            {
+                kernel_name                       = "depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16";
+                num_elems_read_per_iteration_x    = 10;
+                num_elems_written_per_iteration_x = 4;
+                num_elems_read_per_iteration_y    = 5;
+                num_elems_written_per_iteration_y = 2;
+            }
+        }
+    }
+    else if(input->data_type() == DataType::F32 && is_bifrost)
+    {
+        if(conv_stride_x == 1 && conv_stride_y == 1)
+        {
+            kernel_name                       = "depthwise_convolution_3x3_stridex1_stridey1_bifrost_f32";
+            num_elems_read_per_iteration_x    = 4;
+            num_elems_read_per_iteration_y    = 6;
+            num_elems_written_per_iteration_x = 2;
+            num_elems_written_per_iteration_y = 4;
+        }
+        else if(conv_stride_x == 2 && conv_stride_y == 2)
+        {
+            kernel_name                       = "depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32";
+            num_elems_read_per_iteration_x    = 6;
+            num_elems_read_per_iteration_y    = 5;
+            num_elems_written_per_iteration_x = 2;
+            num_elems_written_per_iteration_y = 2;
+        }
+        else
+        {
+            kernel_name                       = "depthwise_convolution_3x3";
+            num_elems_written_per_iteration_x = 8 / data_size_from_type(input->data_type());
+            num_elems_written_per_iteration_y = 1;
+            num_elems_read_per_iteration_x    = 3 + (num_elems_written_per_iteration_x - 1) * conv_stride_x;
+            num_elems_read_per_iteration_y    = 3;
+        }
+    }
+    else
+    {
+        kernel_name                       = is_qasymm ? "depthwise_convolution_3x3_quantized_nchw" : "depthwise_convolution_3x3";
+        num_elems_written_per_iteration_x = 8 / data_size_from_type(input->data_type());
+        num_elems_written_per_iteration_y = (is_qasymm && conv_stride_y < 3) ? (2 / conv_stride_y) : 1;
+        num_elems_read_per_iteration_x    = 3 + (num_elems_written_per_iteration_x - 1) * conv_stride_x;
+        num_elems_read_per_iteration_y    = num_elems_written_per_iteration_y + 2;
+    }
+
+    // Create window and update padding
+    Window win = calculate_max_window(*output, Steps(num_elems_written_per_iteration_x, num_elems_written_per_iteration_y));
+
+    AccessWindowRectangle input_access(input, -conv_info.pad_left(), -conv_info.pad_top(),
+                                       num_elems_read_per_iteration_x, num_elems_read_per_iteration_y,
+                                       conv_stride_x, conv_stride_y);
+    AccessWindowStatic    weights_access(weights, 0, 0, 3, 3);
+    AccessWindowRectangle output_access(output, 0, 0, num_elems_written_per_iteration_x, num_elems_written_per_iteration_y);
+
+    bool window_changed = update_window_and_padding(win, input_access, weights_access, output_access);
+
+    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+} // namespace
+
 CLDepthwiseConvolutionLayer3x3NCHWKernel::CLDepthwiseConvolutionLayer3x3NCHWKernel()
     : _conv_stride_x(0), _conv_pad_top(0)
 {
@@ -53,39 +206,9 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input,
                                                          unsigned int        depth_multiplier,
                                                          ActivationLayerInfo act_info)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
-    ARM_COMPUTE_ERROR_ON(weights->info()->dimension(0) != 3 || weights->info()->dimension(1) != 3);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
 
     bool is_qasymm = is_data_type_quantized_asymmetric(input->info()->data_type());
-
-    if(biases != nullptr)
-    {
-        if(is_qasymm)
-        {
-            ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(biases, 1, DataType::S32);
-        }
-        else
-        {
-            ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(weights, biases);
-        }
-        ARM_COMPUTE_ERROR_ON(biases->info()->dimension(0) != weights->info()->dimension(2));
-        ARM_COMPUTE_ERROR_ON(biases->info()->num_dimensions() > 1);
-    }
-
-    // Get convolved dimensions
-    const TensorShape output_shape = compute_depthwise_convolution_shape(*input->info(), *weights->info(), conv_info, depth_multiplier);
-
-    // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(),
-                       output_shape,
-                       1,
-                       input->info()->data_type(),
-                       input->info()->fixed_point_position(),
-                       input->info()->quantization_info());
-
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
-    ARM_COMPUTE_ERROR_ON(output->info()->dimension(2) != weights->info()->dimension(2));
 
     _input         = input;
     _output        = output;
@@ -98,7 +221,6 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input,
     _border_size   = BorderSize(_conv_pad_top, conv_info.pad_right(), conv_info.pad_bottom(), _conv_pad_left);
 
     // Set build options
-    ARM_COMPUTE_ERROR_ON(_conv_stride_x < 1 || _conv_stride_x > 3);
     CLBuildOptions build_opts;
     build_opts.add_option("-DDEPTH_MULTIPLIER=" + support::cpp11::to_string(depth_multiplier));
     build_opts.add_option("-DCONV_STRIDE_X=" + support::cpp11::to_string(_conv_stride_x));
@@ -147,109 +269,13 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input,
         }
     }
 
-    const GPUTarget gpu_target = get_target();
-    const bool      is_bifrost = gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX);
-
     // Configure kernel window
-    unsigned int num_elems_read_per_iteration_x    = 0;
-    unsigned int num_elems_read_per_iteration_y    = 0;
-    unsigned int num_elems_written_per_iteration_x = 0;
-    unsigned int num_elems_written_per_iteration_y = 0;
+    std::string     kernel_name;
+    const GPUTarget gpu_target = get_target();
 
-    // Create kernel
-    std::string kernel_name;
-
-    if(input->info()->data_type() == DataType::F16)
-    {
-        kernel_name                       = "depthwise_convolution_3x3_f16";
-        num_elems_written_per_iteration_x = 8 / data_size_from_type(input->info()->data_type());
-        num_elems_written_per_iteration_y = 1;
-        num_elems_read_per_iteration_y    = 3;
-        switch(_conv_stride_x)
-        {
-            case 1:
-                num_elems_read_per_iteration_x = 8;
-                break;
-            case 2:
-                num_elems_read_per_iteration_x = 9;
-                break;
-            case 3:
-                num_elems_read_per_iteration_x = 16;
-                break;
-            default:
-                num_elems_read_per_iteration_x = 3 + (num_elems_written_per_iteration_x - 1) * _conv_stride_x;
-                break;
-        }
-        if(is_bifrost)
-        {
-            if(_conv_stride_x == 1 && _conv_stride_y == 1)
-            {
-                kernel_name                       = "depthwise_convolution_3x3_stridex1_stridey1_bifrost_f16";
-                num_elems_read_per_iteration_x    = 8;
-                num_elems_written_per_iteration_x = 4;
-                num_elems_read_per_iteration_y    = 6;
-                num_elems_written_per_iteration_y = 4;
-            }
-            else if(_conv_stride_x == 2 && _conv_stride_y == 2)
-            {
-                kernel_name                       = "depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16";
-                num_elems_read_per_iteration_x    = 10;
-                num_elems_written_per_iteration_x = 4;
-                num_elems_read_per_iteration_y    = 5;
-                num_elems_written_per_iteration_y = 2;
-            }
-        }
-    }
-    else if(input->info()->data_type() == DataType::F32 && is_bifrost)
-    {
-        if(_conv_stride_x == 1 && _conv_stride_y == 1)
-        {
-            kernel_name                       = "depthwise_convolution_3x3_stridex1_stridey1_bifrost_f32";
-            num_elems_read_per_iteration_x    = 4;
-            num_elems_read_per_iteration_y    = 6;
-            num_elems_written_per_iteration_x = 2;
-            num_elems_written_per_iteration_y = 4;
-        }
-        else if(_conv_stride_x == 2 && _conv_stride_y == 2)
-        {
-            kernel_name                       = "depthwise_convolution_3x3_stridex2_stridey2_bifrost_f32";
-            num_elems_read_per_iteration_x    = 6;
-            num_elems_read_per_iteration_y    = 5;
-            num_elems_written_per_iteration_x = 2;
-            num_elems_written_per_iteration_y = 2;
-        }
-        else
-        {
-            kernel_name                       = "depthwise_convolution_3x3";
-            num_elems_written_per_iteration_x = 8 / data_size_from_type(input->info()->data_type());
-            num_elems_written_per_iteration_y = 1;
-            num_elems_read_per_iteration_x    = 3 + (num_elems_written_per_iteration_x - 1) * _conv_stride_x;
-            num_elems_read_per_iteration_y    = 3;
-        }
-    }
-    else
-    {
-        kernel_name                       = is_qasymm ? "depthwise_convolution_3x3_quantized_nchw" : "depthwise_convolution_3x3";
-        num_elems_written_per_iteration_x = 8 / data_size_from_type(input->info()->data_type());
-        num_elems_written_per_iteration_y = (is_qasymm && _conv_stride_y < 3) ? (2 / _conv_stride_y) : 1;
-        num_elems_read_per_iteration_x    = 3 + (num_elems_written_per_iteration_x - 1) * _conv_stride_x;
-        num_elems_read_per_iteration_y    = num_elems_written_per_iteration_y + 2;
-    }
-
-    // Create window and update padding
-    Window win = calculate_max_window(*output->info(), Steps(num_elems_written_per_iteration_x, num_elems_written_per_iteration_y));
-
-    AccessWindowRectangle input_access(input->info(), -_conv_pad_left, -_conv_pad_top,
-                                       num_elems_read_per_iteration_x, num_elems_read_per_iteration_y,
-                                       _conv_stride_x, _conv_stride_y);
-    AccessWindowStatic    weights_access(weights->info(), 0, 0, 3, 3);
-    AccessWindowRectangle output_access(output->info(), 0, 0, num_elems_written_per_iteration_x, num_elems_written_per_iteration_y);
-
-    update_window_and_padding(win, input_access, weights_access, output_access);
-
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
-
-    ICLKernel::configure(win);
+    auto win_config = validate_and_configure_window(input->info(), weights->info(), output->info(), conv_info, depth_multiplier, gpu_target, kernel_name);
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    ICLKernel::configure(win_config.second);
 
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
@@ -267,6 +293,17 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input,
     _config_id += support::cpp11::to_string(output->info()->dimension(0));
     _config_id += "_";
     _config_id += support::cpp11::to_string(output->info()->dimension(1));
+}
+
+Status CLDepthwiseConvolutionLayer3x3NCHWKernel::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
+                                                          unsigned int        depth_multiplier,
+                                                          ActivationLayerInfo act_info, GPUTarget gpu_target)
+{
+    std::string kernel_name;
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, weights, biases, output, conv_info, depth_multiplier, act_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), weights->clone().get(), output->clone().get(), conv_info, depth_multiplier, gpu_target, kernel_name).first);
+
+    return Status{};
 }
 
 void CLDepthwiseConvolutionLayer3x3NCHWKernel::run(const Window &window, cl::CommandQueue &queue)

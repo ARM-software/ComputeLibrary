@@ -50,6 +50,22 @@ public:
      */
     void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier,
                    ActivationLayerInfo act_info) override;
+    /** Static function to check if given info will lead to a valid configuration of @ref CLDepthwiseConvolutionLayer3x3NCHWKernel
+     *
+     * @param[in] input            Source tensor. DataType supported: F16/F32/QASYMM8.
+     * @param[in] weights          Weights tensor. A 3D tensor with dimensions [3, 3, IFM]. Data type supported: Same as @p input.
+     * @param[in] biases           Biases tensor. A 1D tensor with dimensions [IFM]. Must be nullptr if not needed.
+     *                             Data type supported: Same as @p input.
+     * @param[in] output           Destination tensor. Data type supported: Same as @p input.
+     * @param[in] conv_info        Padding and stride information to use for the convolution.
+     * @param[in] depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
+     * @param[in] act_info         (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU are supported.
+     * @param[in] gpu_target       (Optional) GPU target to validate the kernel for. Defaults to midgard.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier,
+                           ActivationLayerInfo act_info = ActivationLayerInfo(), GPUTarget gpu_target = GPUTarget::MIDGARD);
 
     void run(const Window &window, cl::CommandQueue &queue) override;
     BorderSize border_size() const override;

@@ -58,7 +58,16 @@ public:
      * @param[in]  conv_h The converted tensor's height.
      */
     void configure(const ICLTensor *input, ICLTensor *output, size_t conv_w, size_t conv_h);
-
+    /** Static function to check if given info will lead to a valid configuration of @ref CLDepthwiseVectorToTensorKernel
+     *
+     * @param[in] input  The input vector to convert. Data type supported: QASYMM8/S32/F16/F32.
+     * @param[in] output The output tensor. 3 lower dimensions represent a single input [width, height, IFM]. Data type supported: same as @p input.
+     * @param[in] conv_w The converted tensor's width.
+     * @param[in] conv_h The converted tensor's height.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, size_t conv_w, size_t conv_h);
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
 

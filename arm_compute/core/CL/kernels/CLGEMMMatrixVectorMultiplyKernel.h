@@ -51,6 +51,15 @@ public:
      * @param[out] output The output 2D tensor. Data types supported: Same as @p input
      */
     void configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMMatrixVectorMultiplyKernel
+     *
+     * @param[in] input0 The reshaped input tensor. Data types supported: QASYMM8/F16/F32
+     * @param[in] input1 The 2D reshaped weights tensor. Data type supported: Same as @p input, S32 for QASYMM8 input.
+     * @param[in] output The output 2D tensor. Data types supported: Same as @p input
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
