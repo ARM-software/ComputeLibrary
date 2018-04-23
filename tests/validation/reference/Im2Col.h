@@ -35,7 +35,7 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> im2col(const SimpleTensor<T> &src, const TensorShape &dst_shape, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias);
+void im2col(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias);
 } // namespace reference
 } // namespace validation
 } // namespace test

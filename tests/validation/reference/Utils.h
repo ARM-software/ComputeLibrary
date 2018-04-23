@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,11 +62,13 @@ T tensor_elem_at(const SimpleTensor<T> &src, Coordinates coord, BorderMode borde
 {
     const int x      = coord.x();
     const int y      = coord.y();
+    const int z      = coord.z();
     const int width  = src.shape().x();
     const int height = src.shape().y();
+    const int depth  = src.shape().z();
 
     // If coordinates beyond range of tensor's width or height
-    if(x < 0 || y < 0 || x >= width || y >= height)
+    if(x < 0 || y < 0 || z < 0 || x >= width || y >= height || z >= depth)
     {
         if(border_mode == BorderMode::REPLICATE)
         {
