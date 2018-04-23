@@ -26,6 +26,7 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
+#include "arm_compute/core/NEON/kernels/NEArithmeticAdditionKernel.h"
 #include "arm_compute/core/NEON/kernels/NECol2ImKernel.h"
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMAssemblyBaseKernel.h"
@@ -176,6 +177,7 @@ private:
     NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint _gemmlowp_output_stage;
     NECol2ImKernel                                      _output_col2im_kernel;
     NEActivationLayer                                   _activationlayer_function;
+    NEArithmeticAdditionKernel                          _add_bias_kernel;
 
     const ITensor *_original_weights;
 
@@ -187,12 +189,14 @@ private:
     Tensor _workspace;
     Tensor _B_pretransposed;
 
-    bool _append_bias;
-    bool _is_fully_connected_convolution;
-    bool _are_weights_reshaped;
-    bool _is_quantized;
-    bool _is_interleaved;
-    bool _is_activationlayer_enabled;
+    DataLayout _data_layout;
+    bool       _append_bias;
+    bool       _is_fully_connected_convolution;
+    bool       _are_weights_reshaped;
+    bool       _is_quantized;
+    bool       _is_interleaved;
+    bool       _is_activationlayer_enabled;
+    bool       _skip_im2col;
 };
 }
 #endif /* __ARM_COMPUTE_NECONVOLUTIONGEMMLAYER_H__ */

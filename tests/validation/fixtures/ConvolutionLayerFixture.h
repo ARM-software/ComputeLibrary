@@ -35,6 +35,7 @@
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/ActivationLayer.h"
 #include "tests/validation/reference/ConvolutionLayer.h"
+#include "tests/validation/reference/Permute.h"
 #include "tests/validation/reference/Utils.h"
 
 #include <random>
@@ -56,13 +57,14 @@ public:
 public:
     template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights,
-               DataType data_type, int fractional_bits, QuantizationInfo quantization_info, ActivationLayerInfo act_info)
+               DataType data_type, DataLayout data_layout, int fractional_bits, QuantizationInfo quantization_info, ActivationLayerInfo act_info)
     {
         _data_type         = data_type;
         _is_quantized      = is_data_type_quantized_asymmetric(data_type);
         _bias_data_type    = _is_quantized ? DataType::S32 : data_type;
         _fractional_bits   = fractional_bits;
         _quantization_info = quantization_info;
+        _data_layout       = data_layout;
 
         _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, reshape_weights, dilation, act_info);
         _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, dilation, act_info);
@@ -98,46 +100,27 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, const PadStrideInfo &info,
+    TensorType compute_target(TensorShape input_shape, TensorShape weights_shape, const TensorShape &bias_shape, TensorShape output_shape, const PadStrideInfo &info,
                               bool reshape_weights, const Size2D &dilation, const ActivationLayerInfo act_info)
     {
-        const bool is_optimised = std::is_same<FunctionType, NEConvolutionLayer>::value && _data_type == DataType::F32;
-
-        WeightsInfo weights_info(!reshape_weights, weights_shape.x(), weights_shape.y(), weights_shape[3]);
-        TensorShape reshaped_weights_shape(weights_shape);
-
-        if(!reshape_weights)
+        if(_data_layout == DataLayout::NHWC)
         {
-            // Check if its a "fully connected" convolution
-            const bool is_fully_connected_convolution = (output_shape.x() == 1 && output_shape.y() == 1);
-
-            reshaped_weights_shape.collapse(3);
-
-            if(bias_shape.total_size() > 0 && !_is_quantized)
-            {
-                // Add bias to the weights reshaped matrix
-                reshaped_weights_shape.set(0, reshaped_weights_shape.x() + 1);
-            }
-
-            if(is_fully_connected_convolution || is_optimised)
-            {
-                const size_t shape_x = reshaped_weights_shape.x();
-                reshaped_weights_shape.set(0, reshaped_weights_shape.y());
-                reshaped_weights_shape.set(1, shape_x);
-            }
-            else
-            {
-                const int interleave_width = 16 / data_size_from_type(_data_type);
-                reshaped_weights_shape.set(0, reshaped_weights_shape.x() * interleave_width);
-                reshaped_weights_shape.set(1, static_cast<unsigned int>(std::ceil(reshaped_weights_shape.y() / static_cast<float>(interleave_width))));
-            }
+            permute(input_shape, PermutationVector(2U, 0U, 1U));
+            permute(weights_shape, PermutationVector(2U, 0U, 1U));
+            permute(output_shape, PermutationVector(2U, 0U, 1U));
         }
 
+        const int idx_width  = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::WIDTH);
+        const int idx_height = get_data_layout_dimension_index(_data_layout, DataLayoutDimension::HEIGHT);
+
+        WeightsInfo weights_info(!reshape_weights, weights_shape[idx_width], weights_shape[idx_height], weights_shape[3]);
+        TensorShape reshaped_weights_shape(weights_shape);
+
         // Create tensors
-        TensorType src     = create_tensor<TensorType>(input_shape, _data_type, 1, _fractional_bits, _quantization_info);
-        TensorType weights = create_tensor<TensorType>(reshaped_weights_shape, _data_type, 1, _fractional_bits, _quantization_info);
-        TensorType bias    = create_tensor<TensorType>(bias_shape, _bias_data_type, 1, _fractional_bits, _quantization_info);
-        TensorType dst     = create_tensor<TensorType>(output_shape, _data_type, 1, _fractional_bits, _quantization_info);
+        TensorType src     = create_tensor<TensorType>(input_shape, _data_type, 1, _fractional_bits, _quantization_info, _data_layout);
+        TensorType weights = create_tensor<TensorType>(reshaped_weights_shape, _data_type, 1, _fractional_bits, _quantization_info, _data_layout);
+        TensorType bias    = create_tensor<TensorType>(bias_shape, _bias_data_type, 1, _fractional_bits, _quantization_info, _data_layout);
+        TensorType dst     = create_tensor<TensorType>(output_shape, _data_type, 1, _fractional_bits, _quantization_info, _data_layout);
 
         // Create and configure function
         FunctionType conv;
@@ -161,48 +144,8 @@ protected:
 
         // Fill tensors
         fill(AccessorType(src), 0);
-
-        if(!reshape_weights)
-        {
-            const bool      is_fully_connected_convolution = (output_shape.x() == 1 && output_shape.y() == 1);
-            TensorShape     tmp_weights_shape(weights_shape);
-            SimpleTensor<T> tmp_weights(tmp_weights_shape, _data_type, 1, _fractional_bits, _quantization_info);
-
-            // Fill with original shape
-            fill(tmp_weights, 1);
-
-            if(_is_quantized)
-            {
-                fill(AccessorType(bias), 2);
-                tmp_weights = linearise_weights(tmp_weights);
-            }
-            else
-            {
-                SimpleTensor<T> tmp_bias(bias_shape, _bias_data_type, 1, _fractional_bits, _quantization_info);
-                fill(tmp_bias, 2);
-                tmp_weights = linearise_weights(tmp_weights, &tmp_bias);
-            }
-
-            if(!is_fully_connected_convolution && !is_optimised)
-            {
-                // Transpose with interleave
-                const int interleave_size = 16 / tmp_weights.element_size();
-                tmp_weights               = transpose(std::move(tmp_weights), interleave_size);
-            }
-
-            AccessorType weights_accessor(weights);
-
-            for(int i = 0; i < tmp_weights.num_elements(); ++i)
-            {
-                Coordinates coord = index2coord(tmp_weights.shape(), i);
-                std::copy_n(static_cast<const T *>(tmp_weights(coord)), 1, static_cast<T *>(weights_accessor(coord)));
-            }
-        }
-        else
-        {
-            fill(AccessorType(weights), 1);
-            fill(AccessorType(bias), 2);
-        }
+        fill(AccessorType(weights), 1);
+        fill(AccessorType(bias), 2);
 
         // Compute NEConvolutionLayer function
         conv.run();
@@ -232,53 +175,10 @@ protected:
     SimpleTensor<T>  _reference{};
     DataType         _data_type{};
     DataType         _bias_data_type{};
+    DataLayout       _data_layout{};
     int              _fractional_bits{};
     QuantizationInfo _quantization_info{};
     bool             _is_quantized = false;
-
-private:
-    template <typename U>
-    SimpleTensor<U> linearise_weights(const SimpleTensor<U> &weights, const SimpleTensor<U> *biases = nullptr)
-    {
-        TensorShape dst_shape(weights.shape());
-        dst_shape.collapse(3);
-
-        if(biases != nullptr)
-        {
-            dst_shape.set(0, dst_shape.x() + 1);
-        }
-
-        const size_t shape_x = dst_shape.x();
-        dst_shape.set(0, dst_shape.y());
-        dst_shape.set(1, shape_x);
-
-        SimpleTensor<U> dst(dst_shape, weights.data_type());
-
-        // Don't iterate over biases yet
-        for(int weights_idx = 0; weights_idx < weights.num_elements(); ++weights_idx)
-        {
-            Coordinates weights_coord = index2coord(weights.shape(), weights_idx);
-            const int   dst_row       = weights_idx % weights.shape().total_size_lower(3);
-            Coordinates dst_coord{ weights_coord[3], dst_row, weights_coord[4] };
-            const int   dst_idx = coord2index(dst.shape(), dst_coord);
-
-            dst[dst_idx] = weights[weights_idx];
-        }
-        if(biases != nullptr)
-        {
-            // Fill last row with biases
-            for(int bias_idx = 0; bias_idx < biases->num_elements(); ++bias_idx)
-            {
-                Coordinates bias_coord = index2coord(biases->shape(), bias_idx);
-                Coordinates dst_coord{ bias_coord.x(), static_cast<int>(dst.shape().y()) - 1, bias_coord.y() };
-                int         dst_idx = coord2index(dst.shape(), dst_coord);
-
-                dst[dst_idx] = (*biases)[bias_idx];
-            }
-        }
-
-        return dst;
-    }
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
@@ -287,11 +187,10 @@ class ConvolutionValidationFixture : public ConvolutionValidationGenericFixture<
 public:
     template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights, DataType data_type,
-               ActivationLayerInfo act_info)
+               DataLayout data_layout, ActivationLayerInfo act_info)
     {
-        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights, data_type, 0,
-                                                                                              QuantizationInfo(),
-                                                                                              act_info);
+        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights, data_type, data_layout, 0,
+                                                                                              QuantizationInfo(), act_info);
     }
 };
 
@@ -301,11 +200,11 @@ class ConvolutionValidationFixedPointFixture : public ConvolutionValidationGener
 public:
     template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights, DataType data_type,
-               int                 fractional_bits,
-               ActivationLayerInfo act_info)
+               int fractional_bits, ActivationLayerInfo act_info)
     {
-        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights, data_type, fractional_bits,
-                                                                                              QuantizationInfo(), act_info);
+        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights, data_type,
+                                                                                              DataLayout::NCHW,
+                                                                                              fractional_bits, QuantizationInfo(), act_info);
     }
 };
 
@@ -317,7 +216,8 @@ public:
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights, DataType data_type,
                QuantizationInfo quantization_info, ActivationLayerInfo act_info)
     {
-        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights, data_type, 0,
+        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights, data_type,
+                                                                                              DataLayout::NCHW, 0,
                                                                                               quantization_info, act_info);
     }
 };

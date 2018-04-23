@@ -157,17 +157,19 @@ using NEGEMMDilatedConvolutionLayerFixture = ConvolutionValidationFixture<Tensor
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMDilatedConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallDilatedConvolutionLayerDataset(),
-                                                                                                                        framework::dataset::make("ReshapeWeights", { true, false })),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMDilatedConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallDilatedConvolutionLayerDataset(),
+                                                                                                                        framework::dataset::make("ReshapeWeights", { true })),
                                                                                                                         framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW })),
                                                                                                                         framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMDilatedConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeDilatedConvolutionLayerDataset(),
-                                                                                                                      framework::dataset::make("ReshapeWeights", { true, false })),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMDilatedConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeDilatedConvolutionLayerDataset(),
+                                                                                                                      framework::dataset::make("ReshapeWeights", { true })),
                                                                                                                       framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                      framework::dataset::make("DataLayout", { DataLayout::NCHW })),
                                                                                                                       framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output
@@ -177,17 +179,19 @@ TEST_SUITE_END()
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMDilatedConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallDilatedConvolutionLayerDataset(),
-                       framework::dataset::make("ReshapeWeights", { true, false })),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMDilatedConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallDilatedConvolutionLayerDataset(),
+                       framework::dataset::make("ReshapeWeights", { true })),
                        framework::dataset::make("DataType", DataType::F32)),
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                        framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMDilatedConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeDilatedConvolutionLayerDataset(),
-                                                                                                                       framework::dataset::make("ReshapeWeights", { true, false })),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMDilatedConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeDilatedConvolutionLayerDataset(),
+                                                                                                                       framework::dataset::make("ReshapeWeights", { true })),
                                                                                                                        framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                                        framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output
@@ -204,7 +208,7 @@ TEST_SUITE(QS8)
 // We test for fixed point precision [4,6]
 FIXTURE_DATA_TEST_CASE(RunTiny, NEGEMMDilatedConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(combine(datasets::TinyDilatedConvolutionLayerDataset(),
-                                                       framework::dataset::make("ReshapeWeights", { true, false })),
+                                                       framework::dataset::make("ReshapeWeights", { true })),
                                                framework::dataset::make("DataType", DataType::QS8)),
                                        framework::dataset::make("FractionalBits", 4, 7)),
                                framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
@@ -214,7 +218,7 @@ FIXTURE_DATA_TEST_CASE(RunTiny, NEGEMMDilatedConvolutionLayerFixedPointFixture<i
 }
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMDilatedConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(combine(datasets::SmallDilatedConvolutionLayerDataset(),
-                                                       framework::dataset::make("ReshapeWeights", { true, false })),
+                                                       framework::dataset::make("ReshapeWeights", { true })),
                                                framework::dataset::make("DataType", DataType::QS8)),
                                        framework::dataset::make("FractionalBits", 4, 7)),
                                framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
@@ -228,7 +232,7 @@ TEST_SUITE(QS16)
 // Testing for fixed point position [1,14)
 FIXTURE_DATA_TEST_CASE(RunTiny, NEGEMMDilatedConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT,
                        combine(combine(combine(combine(datasets::TinyDilatedConvolutionLayerDataset(),
-                                                       framework::dataset::make("ReshapeWeights", { true, false })),
+                                                       framework::dataset::make("ReshapeWeights", { true })),
                                                framework::dataset::make("DataType", DataType::QS16)),
                                        framework::dataset::make("FractionalBits", 1, 14)),
                                framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
@@ -238,7 +242,7 @@ FIXTURE_DATA_TEST_CASE(RunTiny, NEGEMMDilatedConvolutionLayerFixedPointFixture<i
 }
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMDilatedConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(combine(datasets::SmallDilatedConvolutionLayerDataset(),
-                                                       framework::dataset::make("ReshapeWeights", { true, false })),
+                                                       framework::dataset::make("ReshapeWeights", { true })),
                                                framework::dataset::make("DataType", DataType::QS16)),
                                        framework::dataset::make("FractionalBits", 1, 14)),
                                framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))

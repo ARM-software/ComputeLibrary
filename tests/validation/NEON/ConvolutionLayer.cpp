@@ -194,17 +194,19 @@ using NEGEMMConvolutionLayerFixture = ConvolutionValidationFixture<Tensor, Acces
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
-                                                                                                                 framework::dataset::make("ReshapeWeights", { true, false })),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
+                                                                                                                 framework::dataset::make("ReshapeWeights", { true })),
                                                                                                                  framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                 framework::dataset::make("DataLayout", { DataLayout::NCHW })),
                                                                                                                  ActivationFunctionsDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeConvolutionLayerDataset(),
-                                                                                                                       framework::dataset::make("ReshapeWeights", { true, false })),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeConvolutionLayerDataset(),
+                                                                                                                       framework::dataset::make("ReshapeWeights", { true })),
                                                                                                                        framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW })),
                                                                                                                ActivationFunctionsDataset))
 {
     // Validate output
@@ -214,17 +216,19 @@ TEST_SUITE_END()
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
-                                                                                                                  framework::dataset::make("ReshapeWeights", { true, false })),
+FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
+                                                                                                                  framework::dataset::make("ReshapeWeights", { true })),
                                                                                                                   framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                                   ActivationFunctionsDataset))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeConvolutionLayerDataset(),
-                                                                                                                        framework::dataset::make("ReshapeWeights", { true, false })),
+FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeConvolutionLayerDataset(),
+                                                                                                                        framework::dataset::make("ReshapeWeights", { true })),
                                                                                                                         framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                                 ActivationFunctionsDataset))
 {
     // Validate output
@@ -240,7 +244,7 @@ TEST_SUITE(FixedPoint)
 TEST_SUITE(QS8)
 // We test for fixed point precision [4,6]
 FIXTURE_DATA_TEST_CASE(RunTiny, NEGEMMConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::TinyConvolutionLayerDataset(),
-                       framework::dataset::make("ReshapeWeights", { true, false })),
+                       framework::dataset::make("ReshapeWeights", { true })),
                        framework::dataset::make("DataType", DataType::QS8)),
                        framework::dataset::make("FractionalBits", 4, 7)),
                        ActivationFunctionsDataset))
@@ -249,7 +253,7 @@ FIXTURE_DATA_TEST_CASE(RunTiny, NEGEMMConvolutionLayerFixedPointFixture<int8_t>,
     validate(Accessor(_target), _reference, tolerance_q);
 }
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
-                       framework::dataset::make("ReshapeWeights", { true, false })),
+                       framework::dataset::make("ReshapeWeights", { true })),
                        framework::dataset::make("DataType", DataType::QS8)),
                        framework::dataset::make("FractionalBits", 4, 7)),
                        ActivationFunctionsDataset))
@@ -262,7 +266,7 @@ TEST_SUITE_END()
 TEST_SUITE(QS16)
 // Testing for fixed point position [1,14)
 FIXTURE_DATA_TEST_CASE(RunTiny, NEGEMMConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::TinyConvolutionLayerDataset(),
-                       framework::dataset::make("ReshapeWeights", { true, false })),
+                       framework::dataset::make("ReshapeWeights", { true })),
                        framework::dataset::make("DataType", DataType::QS16)),
                        framework::dataset::make("FractionalBits", 1, 14)),
                        ActivationFunctionsDataset))
@@ -271,7 +275,7 @@ FIXTURE_DATA_TEST_CASE(RunTiny, NEGEMMConvolutionLayerFixedPointFixture<int16_t>
     validate(Accessor(_target), _reference, tolerance_q);
 }
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
-                       framework::dataset::make("ReshapeWeights", { true, false })),
+                       framework::dataset::make("ReshapeWeights", { true })),
                        framework::dataset::make("DataType", DataType::QS16)),
                        framework::dataset::make("FractionalBits", 1, 14)),
                        ActivationFunctionsDataset))
