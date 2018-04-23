@@ -69,7 +69,7 @@ else:
 
 if not env['opencl']:
     # Remove OpenCLTimer files
-    files = [f for f in files if "OpenCLTimer" not in os.path.basename(str(f))]
+    files = [f for f in files if "OpenCL" not in os.path.basename(str(f))]
 
 if not framework_env['mali']:
     # Remove MALI files

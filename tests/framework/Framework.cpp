@@ -59,6 +59,11 @@ Framework::Framework()
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::TIME_US), Instrument::make_instrument<OpenCLTimer, ScaleFactor::TIME_US>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::TIME_MS), Instrument::make_instrument<OpenCLTimer, ScaleFactor::TIME_MS>);
     _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::TIME_S), Instrument::make_instrument<OpenCLTimer, ScaleFactor::TIME_S>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_MEMORY_USAGE, ScaleFactor::NONE), Instrument::make_instrument<OpenCLMemoryUsage, ScaleFactor::NONE>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_MEMORY_USAGE, ScaleFactor::SCALE_1K),
+                                   Instrument::make_instrument<OpenCLMemoryUsage, ScaleFactor::SCALE_1K>);
+    _available_instruments.emplace(std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_MEMORY_USAGE, ScaleFactor::SCALE_1M),
+                                   Instrument::make_instrument<OpenCLMemoryUsage, ScaleFactor::SCALE_1M>);
 #endif /* ARM_COMPUTE_CL */
 }
 

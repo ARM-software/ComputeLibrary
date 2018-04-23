@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_TEST_INSTRUMENTS
 
 #include "MaliCounter.h"
+#include "OpenCLMemoryUsage.h"
 #include "OpenCLTimer.h"
 #include "PMUCounter.h"
 #include "SchedulerTimer.h"
@@ -50,6 +51,7 @@ enum class InstrumentType : unsigned int
     MALI                    = 0x0300,
     OPENCL_TIMER            = 0x0400,
     SCHEDULER_TIMER         = 0x0500,
+    OPENCL_MEMORY_USAGE     = 0x0600,
 };
 
 using InstrumentsDescription = std::pair<InstrumentType, ScaleFactor>;
@@ -152,6 +154,22 @@ inline ::std::stringstream &operator<<(::std::stringstream &stream, InstrumentsD
                     break;
                 case ScaleFactor::TIME_S:
                     stream << "OPENCL_TIMER_S";
+                    break;
+                default:
+                    throw std::invalid_argument("Unsupported instrument scale");
+            }
+            break;
+        case InstrumentType::OPENCL_MEMORY_USAGE:
+            switch(instrument.second)
+            {
+                case ScaleFactor::NONE:
+                    stream << "OPENCL_MEMORY_USAGE";
+                    break;
+                case ScaleFactor::SCALE_1K:
+                    stream << "OPENCL_MEMORY_USAGE_K";
+                    break;
+                case ScaleFactor::SCALE_1M:
+                    stream << "OPENCL_MEMORY_USAGE_M";
                     break;
                 default:
                     throw std::invalid_argument("Unsupported instrument scale");
