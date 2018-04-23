@@ -376,6 +376,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "winograd_output_transform_2x2_3x3_nchw", "winograd.cl" },
     { "winograd_output_transform_4x4_3x3_nchw", "winograd.cl" },
     { "winograd_output_transform_4x4_5x5_nchw", "winograd.cl" },
+    { "winograd_output_transform_4x4_3x3_nhwc", "winograd.cl" },
     { "YUYV422_to_IYUV_bt709", "color_convert.cl" },
     { "YUYV422_to_NV12_bt709", "color_convert.cl" },
     { "YUYV422_to_RGB888_bt709", "color_convert.cl" },

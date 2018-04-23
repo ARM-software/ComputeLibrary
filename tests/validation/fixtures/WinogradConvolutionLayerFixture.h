@@ -36,6 +36,7 @@
 #include "tests/validation/reference/ActivationLayer.h"
 #include "tests/validation/reference/ConvolutionLayer.h"
 #include "tests/validation/reference/GEMM.h"
+#include "tests/validation/reference/Permute.h"
 #include "tests/validation/reference/Utils.h"
 #include "tests/validation/reference/Winograd.h"
 
@@ -440,10 +441,8 @@ public:
     template <typename...>
     void setup(TensorShape input_shape, WinogradInfo winograd_info, DataType data_type)
     {
-        TensorShape output_shape = compute_winograd_output_transform_shape(TensorInfo(input_shape, 1, data_type), winograd_info);
-
-        _target    = compute_target(input_shape, output_shape, winograd_info, data_type);
-        _reference = compute_reference(input_shape, output_shape, winograd_info, data_type);
+        _target    = compute_target(input_shape, winograd_info, data_type);
+        _reference = compute_reference(input_shape, winograd_info, data_type);
     }
 
 protected:
@@ -467,8 +466,10 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape &input_shape, const TensorShape &output_shape, const WinogradInfo &winograd_info, DataType data_type)
+    TensorType compute_target(const TensorShape &input_shape, const WinogradInfo &winograd_info, DataType data_type)
     {
+        TensorShape output_shape = compute_winograd_output_transform_shape(TensorInfo(input_shape, 1, data_type), winograd_info);
+
         // Create tensors
         TensorType src = create_tensor<TensorType>(input_shape, data_type);
         TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1, 0, QuantizationInfo(), winograd_info.output_data_layout);
@@ -495,8 +496,11 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, const WinogradInfo &winograd_info, DataType data_type)
+    SimpleTensor<T> compute_reference(const TensorShape &input_shape, WinogradInfo winograd_info, DataType data_type)
     {
+        winograd_info.output_data_layout = DataLayout::NCHW;
+        TensorShape output_shape         = compute_winograd_output_transform_shape(TensorInfo(input_shape, 1, data_type), winograd_info);
+
         // Create reference
         SimpleTensor<T> src{ input_shape, data_type };
         SimpleTensor<T> bias{ TensorShape(input_shape[0]), data_type };

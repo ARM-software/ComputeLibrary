@@ -333,8 +333,6 @@ SimpleTensor<T> winograd_filter_transform(const SimpleTensor<T> &in, const Tenso
 template <typename T>
 SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const SimpleTensor<T> &b, const TensorShape &output_shape, const WinogradInfo &winograd_info)
 {
-    ARM_COMPUTE_ERROR_ON_MSG(winograd_info.output_data_layout != DataLayout::NCHW, "Only supported NCHW data format");
-
     const PadStrideInfo conv_info        = winograd_info.convolution_info;
     const Size2D        input_dimensions = winograd_info.input_dimensions;
     const Size2D        output_tile_size = winograd_info.output_tile_size;
@@ -350,7 +348,7 @@ SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const Simpl
     const unsigned int out_tile_h = output_tile_size.height;
 
     ARM_COMPUTE_ERROR_ON(in.shape()[2] != (in_tile_w * in_tile_h));
-    ARM_COMPUTE_ERROR_ON(in.shape()[0] != out.shape()[2]);
+    ARM_COMPUTE_ERROR_ON(in.shape()[0] != out.shape()[get_data_layout_dimension_index(winograd_info.output_data_layout, DataLayoutDimension::CHANNEL)]);
 
     // Compute tile dimensions
     // Input tile dimensions

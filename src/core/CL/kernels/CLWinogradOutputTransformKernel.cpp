@@ -48,7 +48,6 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const WinogradInfo &winograd_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON(winograd_info.output_data_layout != DataLayout::NCHW);
 
     const PadStrideInfo conv_info        = winograd_info.convolution_info;
     const Size2D        output_tile_size = winograd_info.output_tile_size;
@@ -146,7 +145,7 @@ void CLWinogradOutputTransformKernel::configure(const ICLTensor *input, const IC
     build_opts.add_option("-DNUM_TILES_X=" + support::cpp11::to_string(num_tiles_x));
 
     // Create kernel
-    std::string kernel_name = "winograd_output_transform_" + output_tile_size.to_string() + "_" + kernel_size.to_string() + "_nchw";
+    std::string kernel_name = "winograd_output_transform_" + output_tile_size.to_string() + "_" + kernel_size.to_string() + "_" + lower_string(string_from_data_layout(winograd_info.output_data_layout));
     _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     // Configure kernel window
