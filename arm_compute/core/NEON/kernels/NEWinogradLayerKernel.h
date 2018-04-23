@@ -124,7 +124,7 @@ public:
 
     /** Configure the output transform kernel.
      *
-     * @param[in]  input         Input tensor data
+     * @param[in]  input         Input tensor data. Data types supported: F32.
      * @param[in]  n_batches     Number of batches in input tensor.
      * @param[in]  n_rows        Number of rows in input tensor.
      * @param[in]  n_cols        Number of columns in input tensor.
@@ -151,6 +151,17 @@ public:
     using WinogradBase = winograd::WinogradGEMM<OutputTileRows, OutputTileCols, KernelCols, KernelCols>;
     /** Winograd convolution kernel */
     using WinogradConv = typename WinogradBase::template Convolution<T, T>;
+
+    /** Static function to check if given info will lead to a valid configuration of @ref NEWinogradLayerTransformInputKernel
+     *
+     * @param[in] input       First tensor input info. Data types supported: F32.
+     * @param[in] output      Output tensor info. Data types supported: same as @p input.
+     * @param[in] conv_info   Contains padding and stride information described in @ref PadStrideInfo. Currently only unit strides are supported.
+     * @param[in] kernel_dims Kernel dimensions. Currently only 3x3 and 5x5 kernels are supported
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PadStrideInfo &conv_info, const Size2D &kernel_dims);
 
 private:
     using InputTransform = typename WinogradBase::template InputTransform<T>;
@@ -301,6 +312,19 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
     bool is_parallelisable() const override;
 
+    /** Static function to check if given info will lead to a valid configuration of @ref NEWinogradLayerTransformOutputKernel
+     *
+     * @param[in]  input                 Source tensor with shape [C, N, 16, batches] or [C, N, 36, batches]. Data types supported: F32.
+     * @param[in]  bias                  Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. It can be a nullptr. Data type supported: as @p input
+     * @param[out] output                Destination tensor with shape [output_convolved_dims.width, output_convolved_dims.height, C, batches]. Data type supported: same as @p input
+     * @param[in]  kernel_dims           Kernel dimensions (Width and height). Currently only supported 3x3 and 5x5 kernels
+     * @param[in]  output_convolved_dims Output dimensions after the convolution (Width and height)
+     * @param[in]  num_tiles             Number of tiles of size 2x2 or 4x4 in the output tensor along the X and Y direction
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const Size2D &kernel_dims, const Size2D &output_convolved_dims, const Size2D &num_tiles);
+
 private:
     using WinogradBase    = winograd::WinogradGEMM<OutputTileRows, OutputTileCols, KernelRows, KernelCols>;
     using WinogradConv    = typename WinogradBase::template Convolution<T, T>;
@@ -365,6 +389,17 @@ public:
     {
         return "NEWinogradLayerTransformWeightsKernel";
     }
+
+    /** Static function to check if given info will lead to a valid configuration of @ref NEWinogradLayerTransformWeightsKernel
+     *
+     * @param[in] input       Source tensor info. The input is a 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] (NCHW data layout).
+     *                        kernel_x must be 3 and equal to kernel_y. Data types supported: F32.
+     * @param[in] output      Destination tensor info. The output is a 3D tensor with dimensions [OFM, IFM, 16] or [OFM, IFM, 36]. Data type supported: same as @p input
+     * @param[in] output_tile Output tile. Currently only 2x2 and 4x4 tiles are supported.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &output_tile);
 
     // Inherited methods overridden:
     void configure(const ITensor *weights_hwio, T *const output, const int matrix_stride, const int n_output_channels, const int n_input_channels) override;
@@ -495,6 +530,21 @@ public:
         TOut *const      c_ptr) override;
 
     void run(const Window &window, const ThreadInfo &info) override;
+
+    /** Static function to check if given info will lead to a valid configuration of @ref NEWinogradLayerBatchedGEMMKernel.
+     *
+     * @param[in]  a         First input tensor  (Matrix or Vector A). Data types supported: F32
+     * @param[in]  b         Second input tensor (Matrix B). Data type supported: same as @p a.
+     * @param[in]  c         Third input tensor  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a.
+     * @param[out] output    Output tensor. Data type supported: same as @p a
+     * @param[in]  alpha     Weight of the matrix product
+     * @param[in]  beta      Weight of matrix C
+     * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
+     *                       if the reshape of matrix B should happen only for the first run
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ITensor *c, const ITensorInfo *output, const float alpha, const float beta, const GEMMInfo &gemm_info = GEMMInfo());
 
 private:
     static const int           _output_tile_rows = OutputTileRows;

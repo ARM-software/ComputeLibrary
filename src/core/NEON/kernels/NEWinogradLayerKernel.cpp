@@ -23,15 +23,202 @@
  */
 #include "arm_compute/core/NEON/kernels/NEWinogradLayerKernel.h"
 
+#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/Validate.h"
+#include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "support/ToolchainSupport.h"
 
 namespace arm_compute
 {
 //Batched Gemms
+
+namespace
+{
+Status validate_arguments_winograd_gemm(const ITensorInfo *a, const ITensorInfo *b, const ITensor *c, const ITensorInfo *output, const float alpha, const float beta,
+                                        const GEMMInfo &gemm_info = GEMMInfo())
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(a);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(b);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
+
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(a, b);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_a_reshaped(), "Matrix A already reshaped is not supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_b_reshaped(), "Matrix B already reshaped is not supported");
+
+    if(c != nullptr)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(a, c->info());
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->dimension(1) != c->info()->dimension(1), "The matrix C must have the same number of rows as the matrix A");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(b->dimension(0) != c->info()->dimension(0), "The matrix C must have the same number of columns as the matrix B");
+    }
+
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(a, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(b->dimension(0) != output->dimension(0), "The output matrix must have the same number of columns as the matrix B");
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->dimension(1) != output->dimension(1), "The output matrix must have the same number of rows as the matrix A");
+        ARM_COMPUTE_RETURN_ERROR_ON(output->num_dimensions() != a->num_dimensions());
+    }
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->dimension(0) != b->dimension(1), "The product AB is defined only if the number of columns in A is equal to the number of rows in B");
+    ARM_COMPUTE_UNUSED(alpha, beta);
+    return Status{};
+}
+
+Status validate_arguments_winograd_weight_trans(const ITensorInfo *input, const ITensorInfo *output, const Size2D &output_tile)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
+
+    const size_t idx_width  = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
+    const size_t idx_height = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(idx_width) != 3 && input->dimension(idx_width) != 5);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(idx_width) != input->dimension(idx_height));
+    ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4);
+    ARM_COMPUTE_RETURN_ERROR_ON(output_tile != Size2D(2U, 2U) && output_tile != Size2D(4U, 4U));
+
+    // Checks performed when output is configured
+    if(output->total_size() != 0)
+    {
+        const TensorInfo tensor_info_output = input->clone()->set_tensor_shape(arm_compute::misc::shape_calculator::compute_winograd_filter_transform_shape(*input, output_tile));
+
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &tensor_info_output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    }
+
+    return Status{};
+}
+
+std::pair<Status, Window> validate_and_configure_window_winograd_weight_trans(ITensorInfo *input, ITensorInfo *output, const Size2D &output_tile, const Size2D &kernel_dims)
+{
+    ARM_COMPUTE_UNUSED(output_tile);
+
+    // Output tensor auto inizialitation if not yet initialized
+    auto_init_if_empty(*output, input->clone()->set_tensor_shape(arm_compute::misc::shape_calculator::compute_winograd_filter_transform_shape(*input, output_tile)));
+
+    unsigned int num_elems_processed_per_iteration_x = kernel_dims.width;
+    unsigned int num_elems_processed_per_iteration_y = kernel_dims.height;
+
+    Window win            = calculate_max_window(*input, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
+    bool   window_changed = false;
+
+    AccessWindowRectangle input_access(input, 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
+    AccessWindowStatic    output_access(output, 0, 0, output->dimension(0), output->dimension(1));
+    window_changed = update_window_and_padding(win, input_access, output_access);
+    output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), output->tensor_shape()));
+
+    Window win_collapsed = win.collapse(win, Window::DimZ);
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+
+    return std::make_pair(err, win_collapsed);
+}
+
+Status validate_arguments_winograd_input_trans(const ITensorInfo *input, const ITensorInfo *output, const PadStrideInfo &conv_info, const Size2D &kernel_dims)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.stride().first != 1 || conv_info.stride().second != 1, "Winograd input transform only supports unit strides");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((kernel_dims.width != 3U && kernel_dims.width != 5U), "Winograd input transform only supports 3x3 and 5x5 kernels");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((kernel_dims.width != kernel_dims.height), "Winograd input transform only supports 3x3 and 5x5 kernels");
+
+    // Validate configured output
+    if(output->total_size() != 0)
+    {
+        const TensorShape output_shape = misc::shape_calculator::compute_winograd_input_transform_shape(*input, conv_info, kernel_dims);
+
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    }
+
+    return Status{};
+}
+
+std::pair<Status, Window> validate_and_configure_window_winograd_input_trans(ITensorInfo *input, ITensorInfo *output, const PadStrideInfo &conv_info, const Size2D &kernel_dims,
+                                                                             const Size2D &tile_dims)
+{
+    const TensorShape output_shape = misc::shape_calculator::compute_winograd_input_transform_shape(*input, conv_info, kernel_dims);
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape));
+
+    unsigned int num_elems_read_per_iteration_x = (tile_dims.width + kernel_dims.width - 1);
+    unsigned int num_elems_read_per_iteration_y = (tile_dims.height + kernel_dims.height - 1);
+
+    Window win = calculate_max_window(*input, Steps(1, 1));
+
+    AccessWindowRectangle input_access(input, -conv_info.pad_left(), -conv_info.pad_top(), num_elems_read_per_iteration_x, num_elems_read_per_iteration_y);
+
+    bool window_changed = update_window_and_padding(win, input_access);
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+
+Status validate_arguments_winograd_output_trans(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const Size2D &kernel_dims, const Size2D &output_convolved_dims,
+                                                const Size2D &num_tiles)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(1) != num_tiles.area());
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((kernel_dims.width != 3U && kernel_dims.width != 5U), "Winograd output transform only supports 3x3 and 5x5 kernels");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((kernel_dims.width != kernel_dims.height), "Winograd output transform only supports 3x3 and 5x5 kernels");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(((input->dimension(2) != size_t(16U)) && (input->dimension(2) != size_t(36U))), "Only 2x2 and 4x4 output tile is supported");
+    ARM_COMPUTE_UNUSED(kernel_dims);
+    if(bias != nullptr)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, bias);
+        ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(0) != bias->dimension(0));
+        ARM_COMPUTE_RETURN_ERROR_ON(bias->num_dimensions() != size_t(1));
+    }
+
+    // Checks performed when output is configured
+    if(output->total_size() != 0)
+    {
+        const TensorInfo tensor_info_output = input->clone()->set_tensor_shape(arm_compute::misc::shape_calculator::compute_winograd_output_transform_shape(*input, output_convolved_dims, DataLayout::NCHW));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &tensor_info_output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    }
+    return Status{};
+}
+
+std::pair<Status, Window> validate_and_configure_window_winograd_output_trans(ITensorInfo *input, ITensorInfo *bias, ITensorInfo *output, const Size2D &output_convolved_dims)
+{
+    // Output tensor auto initialization if not yet initialized
+    auto_init_if_empty(*output, input->clone()->set_tensor_shape(arm_compute::misc::shape_calculator::compute_winograd_output_transform_shape(*input, output_convolved_dims, DataLayout::NCHW)));
+
+    constexpr unsigned int num_elems_processed_per_iteration = 1;
+
+    Window win            = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+    bool   window_changed = false;
+
+    AccessWindowRectangle input_access(input, 0, 0, num_elems_processed_per_iteration, num_elems_processed_per_iteration);
+    AccessWindowStatic    output_access(output, 0, 0, ceil_to_multiple(output->dimension(0), 2), ceil_to_multiple(output->dimension(1), 2));
+
+    if(bias != nullptr)
+    {
+        AccessWindowStatic bias_access(bias, 0, 0, bias->dimension(0), bias->dimension(1));
+        window_changed = update_window_and_padding(win, input_access, bias_access, output_access);
+    }
+    else
+    {
+        window_changed = update_window_and_padding(win, input_access, output_access);
+    }
+    output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+} // namespace
 template <typename TIn, typename TOut, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
 NEWinogradLayerBatchedGEMMKernel<TIn, TOut, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::NEWinogradLayerBatchedGEMMKernel()
     : _gemms()
@@ -93,6 +280,14 @@ int NEWinogradLayerBatchedGEMMKernel<TIn, TOut, OutputTileRows, OutputTileCols, 
     return WinogradConv::N_BLOCK;
 }
 
+template <typename TIn, typename TOut, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+Status NEWinogradLayerBatchedGEMMKernel<TIn, TOut, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensor *c,
+                                                                                                                     const ITensorInfo *output, const float alpha, const float beta, const GEMMInfo &gemm_info)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_winograd_gemm(a, b, c, output, alpha, beta, gemm_info));
+    return Status{};
+}
+
 template class NEWinogradLayerBatchedGEMMKernel<float, float, 2, 2, 3, 3>;
 template class NEWinogradLayerBatchedGEMMKernel<float, float, 2, 2, 5, 5>;
 
@@ -150,6 +345,14 @@ template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, in
 bool NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::is_parallelisable() const
 {
     return false;
+}
+
+template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+Status NEWinogradLayerTransformWeightsKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &output_tile)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_winograd_weight_trans(input, output, output_tile));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_winograd_weight_trans(input->clone().get(), output->clone().get(), output_tile, Size2D(KernelRows, KernelCols)).first);
+    return Status{};
 }
 
 template class NEWinogradLayerTransformWeightsKernel<float, 2, 2, 3, 3>;
@@ -220,6 +423,16 @@ template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, in
 bool NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::is_parallelisable() const
 {
     return false;
+}
+
+template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+Status NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::validate(const ITensorInfo *input, const ITensorInfo *output, const PadStrideInfo &conv_info,
+                                                                                                                const Size2D &kernel_dims)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_winograd_input_trans(input, output, conv_info, kernel_dims));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_winograd_input_trans(input->clone().get(), output->clone().get(), conv_info, kernel_dims, Size2D(OutputTileRows, OutputTileCols)).first);
+
+    return Status{};
 }
 
 template class NEWinogradLayerTransformInputKernel<float, 2, 2, 3, 3>;
@@ -316,6 +529,19 @@ template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, in
 bool NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::is_parallelisable() const
 {
     return false;
+}
+
+template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
+Status NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output,
+                                                                                                                 const Size2D &kernel_dims, const Size2D &output_convolved_dims,
+                                                                                                                 const Size2D &num_tiles)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_winograd_output_trans(input, (bias != nullptr ? bias->clone().get() : nullptr), output, kernel_dims, output_convolved_dims, num_tiles));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window_winograd_output_trans(input->clone().get(), (bias != nullptr ? bias->clone().get() : nullptr), output->clone().get(),
+                                                                                    output_convolved_dims)
+                                .first);
+
+    return Status{};
 }
 
 template class NEWinogradLayerTransformOutputKernel<float, 2, 2, 3, 3>;

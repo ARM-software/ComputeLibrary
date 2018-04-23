@@ -26,6 +26,8 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/core/Validate.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "support/ToolchainSupport.h"
 
@@ -51,6 +53,9 @@ namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(weights);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(0) != 3 && weights->dimension(0) != 5, "Only 3 and 5 kernels are supported");
@@ -69,7 +74,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(stride_y != 1 || stride_x != 1, "Winograd layer only supports unit strides.");
 
     ARM_COMPUTE_UNUSED(output);
-
     return Status{};
 }
 } //namespace
@@ -258,11 +262,107 @@ void NEWinogradLayer::run()
     _memory_group.release();
 }
 
-Status NEWinogradLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info)
+Status NEWinogradLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
+                                 const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_RETURN_ERROR_ON(validate_arguments(input, weights, biases, output, conv_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, weights, biases, output, conv_info));
 
+    // Get indices for the width and height
+    const size_t idx_width  = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
+    const size_t idx_height = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
+
+    // Kernel size
+    const unsigned int kernel_w = weights->tensor_shape()[idx_width];
+    const unsigned int kernel_h = weights->tensor_shape()[idx_height];
+
+    // Number of tiles along the X and Y direction
+    const unsigned int num_tiles_x = std::ceil((input->tensor_shape().x() - (kernel_w - 1) + conv_info.pad_left() + conv_info.pad_right()) / 2.f);
+    const unsigned int num_tiles_y = std::ceil((input->tensor_shape().y() - (kernel_h - 1) + conv_info.pad_top() + conv_info.pad_bottom()) / 2.f);
+
+    // Compute output shape
+    const TensorShape output_convolved_shape = misc::shape_calculator::compute_deep_convolution_shape(*input, *weights, conv_info);
+
+    // Validate input transform
+    const TensorShape input0_shape = misc::shape_calculator::compute_winograd_input_transform_shape(*input, conv_info, Size2D(kernel_w, kernel_h));
+    const TensorInfo  input0       = input->clone()->set_tensor_shape(input0_shape);
+    switch(weights->dimension(0))
+    {
+        case 3:
+        {
+            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformInputKernel<float, 2, 2, 3, 3>::validate(input, &input0, conv_info, Size2D(kernel_w, kernel_h))));
+            break;
+        }
+        case 5:
+        {
+            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformInputKernel<float, 2, 2, 5, 5>::validate(input, &input0, conv_info, Size2D(kernel_w, kernel_h))));
+            break;
+        }
+        default:
+        {
+            ARM_COMPUTE_RETURN_ERROR_MSG("Only 3x3 and 5x5 kernels supported.");
+            break;
+        }
+    }
+    // Validate filter transform
+    const TensorShape input1_shape = misc::shape_calculator::compute_winograd_filter_transform_shape(*weights, Size2D(2U, 2U));
+    const TensorInfo  input1       = weights->clone()->set_tensor_shape(input1_shape);
+
+    switch(weights->dimension(0))
+    {
+        case 3:
+        {
+            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformWeightsKernel<float, 2, 2, 3, 3>::validate(weights, &input1, Size2D(2U, 2U))));
+            break;
+        }
+        case 5:
+        {
+            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformWeightsKernel<float, 2, 2, 5, 5>::validate(weights, &input1, Size2D(2U, 2U))));
+            break;
+        }
+        default:
+        {
+            ARM_COMPUTE_RETURN_ERROR_MSG("Only 3x3 and 5x5 kernels supported.");
+            break;
+        }
+    }
+    // Validate batched matrix multiply
+    TensorShape batched_mm_output_shape = input0.tensor_shape();
+    batched_mm_output_shape[0]          = input1.tensor_shape()[0];
+    const TensorInfo batched_mm_output  = input0.clone()->set_tensor_shape(batched_mm_output_shape);
+    switch(weights->dimension(0))
+    {
+        case 3:
+        {
+            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerBatchedGEMMKernel<float, float, 2, 2, 3, 3>::validate(&input0, &input1, nullptr, &batched_mm_output, 1.0f, 0.0f, GEMMInfo(false, false,
+                                                                                                              true /* Reshape weights only for the first run*/))));
+            // Validate output transform
+            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformOutputKernel<float, 2, 2, 3, 3>::validate(&batched_mm_output, biases, output, Size2D(kernel_w, kernel_h), Size2D(output_convolved_shape[idx_width],
+                                                                                                           output_convolved_shape[idx_height]),
+                                                                                                           Size2D(num_tiles_x, num_tiles_y))));
+            break;
+        }
+        case 5:
+        {
+            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerBatchedGEMMKernel<float, float, 2, 2, 5, 5>::validate(&input0, &input1, nullptr, &batched_mm_output, 1.0f, 0.0f, GEMMInfo(false, false,
+                                                                                                              true /* Reshape weights only for the first run*/))));
+            // Validate output transform
+            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformOutputKernel<float, 2, 2, 5, 5>::validate(&batched_mm_output, biases, output, Size2D(kernel_w, kernel_h), Size2D(output_convolved_shape[idx_width],
+                                                                                                           output_convolved_shape[idx_height]),
+                                                                                                           Size2D(num_tiles_x, num_tiles_y))));
+            break;
+        }
+        default:
+        {
+            ARM_COMPUTE_RETURN_ERROR_MSG("Only 3x3 and 5x5 kernels supported.");
+            break;
+        }
+    }
+
+    // Validate Activation Layer
+    if(act_info.enabled())
+    {
+        NEActivationLayer::validate(output, nullptr, act_info);
+    }
     return Status{};
 }
 

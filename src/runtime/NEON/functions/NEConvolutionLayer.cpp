@@ -83,7 +83,7 @@ Status NEConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo 
     {
         case ConvolutionMethod::WINOGRAD:
             //Validate Winograd
-            NEWinogradLayer::validate(input, weights, biases, output, conv_info);
+            NEWinogradLayer::validate(input, weights, biases, output, conv_info, act_info);
             break;
         case ConvolutionMethod::GEMM:
             //Validate Gemm-based Convolution
