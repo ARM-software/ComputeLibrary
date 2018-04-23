@@ -333,7 +333,7 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc_stride1(
     const int src_offs2 = src_offs1 + src_stride_z;
 
     const int cond_top    = z - CONV_PAD_TOP < 0;
-    const int cond_bottom = z * (src_step_z / src_stride_z) + 2 >= SRC_DEPTH;
+    const int cond_bottom = z * (src_step_z / src_stride_z) + 2 > SRC_DEPTH;
 
     __global uchar *src_addr0 = first_elem + select(src_offs0, pad_offs, cond_top);
     __global uchar *src_addr1 = first_elem + src_offs1;
@@ -580,8 +580,7 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc_stride2(
     const int src_offs2 = src_offs1 + src_stride_z;
 
     const int cond_top    = z - CONV_PAD_TOP < 0;
-    const int cond_bottom = z * (src_step_z / src_stride_z) + 2 >= SRC_DEPTH;
-    ;
+    const int cond_bottom = z * (src_step_z / src_stride_z) + 2 > SRC_DEPTH;
 
     __global uchar *src_addr0 = first_elem + select(src_offs0, pad_offs, cond_top);
     __global uchar *src_addr1 = first_elem + src_offs1;
