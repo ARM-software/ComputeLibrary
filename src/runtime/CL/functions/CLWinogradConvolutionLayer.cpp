@@ -151,8 +151,6 @@ void CLWinogradConvolutionLayer::run()
     {
         // Run filter transform
         CLScheduler::get().enqueue(_filter_transform, false);
-
-        _is_first_run = false;
     }
 
     _memory_group.acquire();
@@ -163,6 +161,13 @@ void CLWinogradConvolutionLayer::run()
     // Run batched matrix multiplication
     _batched_mm.run();
 
+    // Release reshaped weights if marked unused by CLGEMM
+    if(_is_first_run && !_input1.is_used())
+    {
+        CLScheduler::get().queue().finish();
+        _input1.allocator()->free();
+    }
+
     // Run output transform
     CLScheduler::get().enqueue(_output_transform);
 
@@ -172,4 +177,6 @@ void CLWinogradConvolutionLayer::run()
     }
 
     _memory_group.release();
+
+    _is_first_run = false;
 }

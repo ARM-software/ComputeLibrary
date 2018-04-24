@@ -53,7 +53,7 @@ void CLConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, c
     {
         case ConvolutionMethod::WINOGRAD:
         {
-            auto f = arm_compute::support::cpp14::make_unique<CLWinogradConvolutionLayer>();
+            auto f = arm_compute::support::cpp14::make_unique<CLWinogradConvolutionLayer>(_memory_manager);
             f->configure(input, weights, biases, output, conv_info);
             _function = std::move(f);
             break;

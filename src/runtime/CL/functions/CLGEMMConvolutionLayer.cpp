@@ -374,7 +374,6 @@ void CLGEMMConvolutionLayer::run()
         ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
 
         _reshape_weights.run();
-        _is_first_run = false;
 
         // Mark original weights tensor as unused
         _original_weights->mark_as_unused();
@@ -398,6 +397,13 @@ void CLGEMMConvolutionLayer::run()
     {
         // Run gemm
         _mm_gemm.run();
+
+        // Release reshaped weights if marked unused by CLGEMM
+        if(_is_first_run && !_weights_reshaped.is_used())
+        {
+            CLScheduler::get().queue().finish();
+            _weights_reshaped.allocator()->free();
+        }
     }
 
     // Reshape output matrix
@@ -410,4 +416,6 @@ void CLGEMMConvolutionLayer::run()
     }
 
     _memory_group.release();
+
+    _is_first_run = false;
 }

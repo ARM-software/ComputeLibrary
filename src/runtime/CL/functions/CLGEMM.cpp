@@ -92,8 +92,8 @@ Status validate_arguments(const ITensorInfo *a, const ITensorInfo *b, const ICLT
 } // namespace
 
 CLGEMM::CLGEMM(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _ma_kernel(), _tmp_a(), _tmp_b(), _is_interleaved_transposed(false), _run_addition(false),
-      _is_first_run(true), _reshape_b_only_on_first_run(false)
+    : _memory_group(std::move(memory_manager)), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _ma_kernel(), _tmp_a(), _tmp_b(), _original_b(nullptr), _is_interleaved_transposed(false),
+      _run_addition(false), _is_first_run(true), _reshape_b_only_on_first_run(false)
 {
 }
 
@@ -103,6 +103,9 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
 
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(a->info(), b->info(), c, output->info(), alpha, beta, gemm_info));
+
+    // Store original b matrix
+    _original_b = b;
 
     // Check if we need to reshape the matrix B only on the first run
     _reshape_b_only_on_first_run = gemm_info.reshape_b_only_on_first_run();
@@ -192,7 +195,11 @@ void CLGEMM::run()
             // Run transpose kernel
             CLScheduler::get().enqueue(_transpose_kernel, false);
 
-            _is_first_run = false;
+            // Mark original b matrix as unused
+            if(_reshape_b_only_on_first_run)
+            {
+                _original_b->mark_as_unused();
+            }
         }
         else if(!_reshape_b_only_on_first_run)
         {
@@ -211,4 +218,6 @@ void CLGEMM::run()
     }
 
     _memory_group.release();
+
+    _is_first_run = false;
 }

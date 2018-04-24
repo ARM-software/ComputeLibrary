@@ -56,6 +56,14 @@ public:
      * @param[in] memory_manager (Optional) Memory manager.
      */
     CLGEMM(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLGEMM(const CLGEMM &) = delete;
+    /** Default move constructor */
+    CLGEMM(CLGEMM &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLGEMM &operator=(const CLGEMM &) = delete;
+    /** Default move assignment operator */
+    CLGEMM &operator=(CLGEMM &&) = default;
     /** Initialise the kernel's inputs and output
      *
      * @note GEMM: General Matrix Multiply - [alpha * A * B + beta * C].
@@ -101,6 +109,7 @@ private:
     CLGEMMMatrixAdditionKernel _ma_kernel;
     CLTensor                   _tmp_a;
     CLTensor                   _tmp_b;
+    const ICLTensor           *_original_b;
     bool                       _is_interleaved_transposed;
     bool                       _run_addition;
     bool                       _is_first_run;

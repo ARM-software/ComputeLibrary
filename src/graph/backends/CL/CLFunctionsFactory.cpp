@@ -174,8 +174,8 @@ std::unique_ptr<IFunction> create_convolution_layer(ConvolutionLayerNode &node, 
 
     if(conv_algorithm == ConvolutionMethod::WINOGRAD)
     {
-        std::tie(func, func_name) = create_named_function<CLWinogradConvolutionLayer>(
-                                        std::string("CLWinogradConvolutionLayer"), input, weights, biases, output, conv_info);
+        std::tie(func, func_name) = create_named_memory_managed_function<CLWinogradConvolutionLayer>(
+                                        std::string("CLWinogradConvolutionLayer"), mm, input, weights, biases, output, conv_info);
     }
     else if(conv_algorithm == ConvolutionMethod::DIRECT)
     {
