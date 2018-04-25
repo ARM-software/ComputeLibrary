@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,8 +34,6 @@
 namespace arm_compute
 {
 namespace test
-{
-namespace gles_compute
 {
 /** Helper to create an empty tensor.
  *
@@ -92,7 +90,6 @@ inline void print_tensor(ITensor &tensor, const std::string &name, IOFormatInfo 
     std::cout << s.str().c_str();
     t.unmap();
 }
-} // namespace gles_compute
 } // namespace test
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_TEST_GC_HELPER_H__ */

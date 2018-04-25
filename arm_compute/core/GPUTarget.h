@@ -24,6 +24,10 @@
 #ifndef __ARM_COMPUTE_GPUTARGET_H__
 #define __ARM_COMPUTE_GPUTARGET_H__
 
+#include "arm_compute/core/Helpers.h"
+
+#include <string>
+
 namespace arm_compute
 {
 /** Available GPU Targets */
@@ -45,5 +49,55 @@ enum class GPUTarget
     TTRX          = 0x250,
     TBOX          = 0x260
 };
+
+/** Enable bitwise operations on GPUTarget enumerations */
+template <>
+struct enable_bitwise_ops<arm_compute::GPUTarget>
+{
+    static constexpr bool value = true; /**< Enabled. */
+};
+
+/** Translates a given gpu device target to string.
+ *
+ * @param[in] target Given gpu target.
+ *
+ * @return The string describing the target.
+ */
+const std::string &string_from_target(GPUTarget target);
+
+/** Helper function to get the GPU target from a device name
+ *
+ * @param[in] device_name A device name
+ *
+ * @return the GPU target
+ */
+GPUTarget get_target_from_name(const std::string &device_name);
+
+/** Helper function to get the GPU arch
+ *
+ * @param[in] target GPU target
+ *
+ * @return the GPU target which shows the arch
+ */
+GPUTarget get_arch_from_target(GPUTarget target);
+/** Helper function to check whether a gpu target is equal to the provided targets
+ *
+ * @param[in] target_to_check gpu target to check
+ * @param[in] target          First target to compare against
+ * @param[in] targets         (Optional) Additional targets to compare with
+ *
+ * @return True if the target is equal with at least one of the targets.
+ */
+template <typename... Args>
+bool gpu_target_is_in(GPUTarget target_to_check, GPUTarget target, Args... targets)
+{
+    return (target_to_check == target) | gpu_target_is_in(target_to_check, targets...);
+}
+
+/** Variant of gpu_target_is_in for comparing two targets */
+inline bool gpu_target_is_in(GPUTarget target_to_check, GPUTarget target)
+{
+    return target_to_check == target;
+}
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_GPUTARGET_H__ */

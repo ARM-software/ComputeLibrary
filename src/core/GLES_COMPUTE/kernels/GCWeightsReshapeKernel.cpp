@@ -36,7 +36,6 @@
 #include "arm_compute/core/GLES_COMPUTE/GCHelpers.h"
 
 using namespace arm_compute;
-using namespace arm_compute::gles_compute;
 using namespace arm_compute::misc::shape_calculator;
 
 GCWeightsReshapeKernel::GCWeightsReshapeKernel()

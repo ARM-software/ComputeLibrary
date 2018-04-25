@@ -24,7 +24,6 @@
 #ifndef __ARM_COMPUTE_HELPERS_H__
 #define __ARM_COMPUTE_HELPERS_H__
 
-#include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/IAccessWindow.h"
@@ -63,6 +62,32 @@ typename std::enable_if<enable_bitwise_ops<T>::value, T>::type operator&(T lhs, 
     return static_cast<T>(static_cast<underlying_type>(lhs) & static_cast<underlying_type>(rhs));
 }
 #endif /* DOXYGEN_SKIP_THIS */
+
+/** Helper function to create and return a unique_ptr pointed to a CL/GLES kernel object
+ *  It also calls the kernel's configuration.
+ *
+ * @param[in] args All the arguments that need pass to kernel's configuration.
+ *
+ * @return A unique pointer pointed to a CL/GLES kernel object
+ */
+template <typename Kernel, typename... T>
+std::unique_ptr<Kernel> create_configure_kernel(T &&... args)
+{
+    std::unique_ptr<Kernel> k = arm_compute::support::cpp14::make_unique<Kernel>();
+    k->configure(std::forward<T>(args)...);
+    return k;
+}
+
+/** Helper function to create and return a unique_ptr pointed to a CL/GLES kernel object
+ *
+ * @return A unique pointer pointed to a Kernel kernel object
+ */
+template <typename Kernel>
+std::unique_ptr<Kernel> create_kernel()
+{
+    std::unique_ptr<Kernel> k = arm_compute::support::cpp14::make_unique<Kernel>();
+    return k;
+}
 
 namespace traits
 {

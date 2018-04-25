@@ -109,6 +109,10 @@ void GCConvolutionLayer::configure(const IGCTensor *input, const IGCTensor *weig
 
     const DataType dt = input->info()->data_type();
 
+    // Set the GPU target for im2col and col2im
+    _input_im2col_kernel.set_target(GCScheduler::get().get_target());
+    _output_col2im_kernel.set_target(GCScheduler::get().get_target());
+
     const bool       append_bias   = (biases != nullptr);
     const unsigned   bias_element  = (append_bias) ? 1 : 0;
     const IGCTensor *biases_to_use = (append_bias) ? biases : nullptr;

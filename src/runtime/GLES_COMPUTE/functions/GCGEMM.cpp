@@ -38,7 +38,6 @@
 #include "arm_compute/runtime/ITensorAllocator.h"
 
 using namespace arm_compute;
-using namespace arm_compute::gles_compute;
 
 namespace
 {
@@ -91,6 +90,13 @@ void GCGEMM::configure(const IGCTensor *a, const IGCTensor *b, const IGCTensor *
 
     const IGCTensor *matrix_a = a;
     const IGCTensor *matrix_b = b;
+
+    // Get the GPU target
+    const GPUTarget gpu_target = GCScheduler::get().get_target();
+
+    // Set the target for the kernels
+    _interleave_kernel.set_target(gpu_target);
+    _mm_kernel.set_target(gpu_target);
 
     // Arguments used by GEMMReshapeInfo
     // If we pass the matrix A and matrix B reshaped to GCGEMMMatrixMultiplyKernel, we need to pass m, n, k, mult_transpose1xW_width and mult_interleave4x4_height to GCGEMMReshapeInfo

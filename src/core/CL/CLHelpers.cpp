@@ -27,73 +27,7 @@
 #include "arm_compute/core/Log.h"
 #include "arm_compute/core/Types.h"
 
-#include <map>
-#include <regex>
 #include <vector>
-
-namespace
-{
-arm_compute::GPUTarget get_bifrost_target(const std::string &version)
-{
-    if(version == "G71")
-    {
-        return arm_compute::GPUTarget::G71;
-    }
-    else if(version == "G72")
-    {
-        return arm_compute::GPUTarget::G72;
-    }
-    else if(version == "G51")
-    {
-        return arm_compute::GPUTarget::G51;
-    }
-    else if(version == "G51BIG")
-    {
-        return arm_compute::GPUTarget::G51BIG;
-    }
-    else if(version == "G51LIT")
-    {
-        return arm_compute::GPUTarget::G51LIT;
-    }
-    else if(version == "TNOX")
-    {
-        return arm_compute::GPUTarget::TNOX;
-    }
-    else if(version == "TTRX")
-    {
-        return arm_compute::GPUTarget::TTRX;
-    }
-    else if(version == "TBOX")
-    {
-        return arm_compute::GPUTarget::TBOX;
-    }
-    else
-    {
-        return arm_compute::GPUTarget::BIFROST;
-    }
-}
-
-arm_compute::GPUTarget get_midgard_target(const std::string &version)
-{
-    if(version == "T600")
-    {
-        return arm_compute::GPUTarget::T600;
-    }
-    else if(version == "T700")
-    {
-        return arm_compute::GPUTarget::T700;
-    }
-    else if(version == "T800")
-    {
-        return arm_compute::GPUTarget::T800;
-    }
-    else
-    {
-        return arm_compute::GPUTarget::MIDGARD;
-    }
-}
-
-} // namespace
 
 namespace arm_compute
 {
@@ -177,72 +111,12 @@ std::string get_underlying_cl_type_from_data_type(const DataType &dt)
     }
 }
 
-const std::string &string_from_target(GPUTarget target)
-{
-    static std::map<GPUTarget, const std::string> gpu_target_map =
-    {
-        { GPUTarget::MIDGARD, "midgard" },
-        { GPUTarget::BIFROST, "bifrost" },
-        { GPUTarget::T600, "t600" },
-        { GPUTarget::T700, "t700" },
-        { GPUTarget::T800, "t800" },
-        { GPUTarget::G71, "g71" },
-        { GPUTarget::G72, "g72" },
-        { GPUTarget::G51, "g51" },
-        { GPUTarget::G51BIG, "g51big" },
-        { GPUTarget::G51LIT, "g51lit" },
-        { GPUTarget::TNOX, "tnox" },
-        { GPUTarget::TTRX, "ttrx" },
-        { GPUTarget::TBOX, "tbox" }
-    };
-
-    return gpu_target_map[target];
-}
-
-GPUTarget get_target_from_name(const std::string &device_name)
-{
-    std::regex  mali_regex(R"(Mali-(.*))");
-    std::smatch name_parts;
-    const bool  found_mali = std::regex_search(device_name, name_parts, mali_regex);
-
-    if(!found_mali)
-    {
-        ARM_COMPUTE_LOG_INFO_MSG_CORE("Can't find valid Mali GPU. Target is set to UNKNOWN.");
-        return GPUTarget::UNKNOWN;
-    }
-
-    const char         target  = name_parts.str(1)[0];
-    const std::string &version = name_parts.str(1);
-
-    std::regex future_regex(R"(.*X)");
-    const bool is_future_bifrost = std::regex_search(version, future_regex);
-
-    if(target == 'G' || is_future_bifrost)
-    {
-        return get_bifrost_target(version);
-    }
-    else if(target == 'T')
-    {
-        return get_midgard_target(version);
-    }
-    else
-    {
-        ARM_COMPUTE_LOG_INFO_MSG_CORE("Mali GPU unknown. Target is set to the default one. (BIFROST)");
-        return GPUTarget::BIFROST;
-    }
-}
-
 GPUTarget get_target_from_device(cl::Device &device)
 {
     // Query device name size
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();
 
     return get_target_from_name(device_name);
-}
-
-GPUTarget get_arch_from_target(GPUTarget target)
-{
-    return (target & GPUTarget::GPU_ARCH_MASK);
 }
 
 bool arm_non_uniform_workgroup_supported(const cl::Device &device)

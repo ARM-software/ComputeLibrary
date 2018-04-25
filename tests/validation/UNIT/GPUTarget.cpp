@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/CL/CLHelpers.h"
+#include "arm_compute/core/GPUTarget.h"
 #include "support/ToolchainSupport.h"
 #include "tests/AssetsLibrary.h"
 #include "tests/Globals.h"
@@ -35,7 +35,7 @@ namespace test
 namespace validation
 {
 TEST_SUITE(UNIT)
-TEST_SUITE(CLHelpers)
+TEST_SUITE(GPUTarget)
 
 TEST_CASE(GetGPUTargetFromName, framework::DatasetMode::ALL)
 {

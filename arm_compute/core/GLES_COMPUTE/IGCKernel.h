@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/GLES_COMPUTE/GCKernelLibrary.h"
 #include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
+#include "arm_compute/core/GPUTarget.h"
 
 #include "arm_compute/core/IKernel.h"
 
@@ -105,6 +106,24 @@ public:
         _lws_hint = lws_hint;
     }
 
+    /** Set the targeted GPU architecture
+     *
+     * @param[in] target The targeted GPU architecture
+     */
+    void set_target(GPUTarget target)
+    {
+        _target = target;
+    }
+
+    /** Get the targeted GPU architecture
+     *
+     * @return The targeted GPU architecture.
+     */
+    GPUTarget get_target() const
+    {
+        return _target;
+    }
+
 private:
     /** Add the passed tensor's parameters to the object's kernel's arguments starting from the index idx.
      *
@@ -126,6 +145,7 @@ private:
 protected:
     GCKernel      _kernel;   /**< GLES kernel to run */
     gles::NDRange _lws_hint; /**< Local workgroup size hint for the GLES kernel */
+    GPUTarget     _target;   /**< The targeted GPU */
 };
 
 /** Add the kernel to the command queue with the given window.

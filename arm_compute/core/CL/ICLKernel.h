@@ -27,6 +27,7 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/IKernel.h"
 
 #include <string>

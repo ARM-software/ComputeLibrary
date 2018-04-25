@@ -42,7 +42,6 @@
 #include <string>
 
 using namespace arm_compute;
-using namespace arm_compute::gles_compute;
 using namespace arm_compute::misc::shape_calculator;
 
 namespace
@@ -195,10 +194,13 @@ void GCGEMMMatrixMultiplyKernel::configure(const IGCTensor *input0, const IGCTen
     _input1 = input1;
     _output = output;
 
+    // Get target architecture
+    GPUTarget gpu_target = get_target();
+
     ElementsProcessed num_elements_processed{};
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input0->info(), input1->info(), output->info(), is_interleaved_transposed, reshape_info, GPUTarget::UNKNOWN, num_elements_processed);
+    auto win_config = validate_and_configure_window(input0->info(), input1->info(), output->info(), is_interleaved_transposed, reshape_info, gpu_target, num_elements_processed);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     IGCKernel::configure(win_config.second);
 

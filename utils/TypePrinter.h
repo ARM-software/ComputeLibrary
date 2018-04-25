@@ -27,6 +27,7 @@
 #include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/Dimensions.h"
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/HOGInfo.h"
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Strides.h"

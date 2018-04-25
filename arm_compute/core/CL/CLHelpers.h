@@ -24,7 +24,9 @@
 #ifndef __ARM_COMPUTE_CLHELPERS_H__
 #define __ARM_COMPUTE_CLHELPERS_H__
 
+#include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/Helpers.h"
 #include "support/ToolchainSupport.h"
 
@@ -33,14 +35,6 @@
 namespace arm_compute
 {
 enum class DataType;
-enum class GPUTarget;
-
-/** Enable bitwise operations on GPUTarget enumerations */
-template <>
-struct enable_bitwise_ops<arm_compute::GPUTarget>
-{
-    static constexpr bool value = true; /**< Enabled. */
-};
 
 /** Max vector width of an OpenCL vector */
 static constexpr unsigned int max_cl_vector_width = 16;
@@ -69,48 +63,6 @@ std::string get_data_size_from_data_type(const DataType &dt);
  */
 std::string get_underlying_cl_type_from_data_type(const DataType &dt);
 
-/** Translates a given gpu device target to string.
- *
- * @param[in] target Given gpu target.
- *
- * @return The string describing the target.
- */
-const std::string &string_from_target(GPUTarget target);
-
-/** Helper function to create and return a unique_ptr pointed to a CL kernel object
- *  It also calls the kernel's configuration.
- *
- * @param[in] args All the arguments that need pass to kernel's configuration.
- *
- * @return A unique pointer pointed to a CL kernel object
- */
-template <typename Kernel, typename... T>
-std::unique_ptr<Kernel> create_configure_kernel(T &&... args)
-{
-    std::unique_ptr<Kernel> k = arm_compute::support::cpp14::make_unique<Kernel>();
-    k->configure(std::forward<T>(args)...);
-    return k;
-}
-
-/** Helper function to create and return a unique_ptr pointed to a CL kernel object
- *
- * @return A unique pointer pointed to a CL kernel object
- */
-template <typename Kernel>
-std::unique_ptr<Kernel> create_kernel()
-{
-    std::unique_ptr<Kernel> k = arm_compute::support::cpp14::make_unique<Kernel>();
-    return k;
-}
-
-/** Helper function to get the GPU target from a device name
- *
- * @param[in] device_name A device name
- *
- * @return the GPU target
- */
-GPUTarget get_target_from_name(const std::string &device_name);
-
 /** Helper function to get the GPU target from CL device
  *
  * @param[in] device A CL device
@@ -118,14 +70,6 @@ GPUTarget get_target_from_name(const std::string &device_name);
  * @return the GPU target
  */
 GPUTarget get_target_from_device(cl::Device &device);
-
-/** Helper function to get the GPU arch
- *
- * @param[in] target GPU target
- *
- * @return the GPU target which shows the arch
- */
-GPUTarget get_arch_from_target(GPUTarget target);
 
 /** Helper function to get the highest OpenCL version supported
  *
@@ -158,24 +102,5 @@ bool fp16_supported(const cl::Device &device);
  * @return True if the extension is supported
  */
 bool arm_non_uniform_workgroup_supported(const cl::Device &device);
-/** Helper function to check whether a gpu target is equal to the provided targets
- *
- * @param[in] target_to_check gpu target to check
- * @param[in] target          First target to compare against
- * @param[in] targets         (Optional) Additional targets to compare with
- *
- * @return True if the target is equal with at least one of the targets.
- */
-template <typename... Args>
-bool gpu_target_is_in(GPUTarget target_to_check, GPUTarget target, Args... targets)
-{
-    return (target_to_check == target) | gpu_target_is_in(target_to_check, targets...);
-}
-
-/** Variant of gpu_target_is_in for comparing two targets */
-inline bool gpu_target_is_in(GPUTarget target_to_check, GPUTarget target)
-{
-    return target_to_check == target;
-}
 }
 #endif /* __ARM_COMPUTE_CLHELPERS_H__ */
