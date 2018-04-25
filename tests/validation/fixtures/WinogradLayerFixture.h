@@ -93,6 +93,7 @@ protected:
 
         // Create and configure function
         FunctionType conv;
+        ARM_COMPUTE_EXPECT(static_cast<bool>(conv.validate(src.info(), weights.info(), (use_bias) ? bias.info() : nullptr, dst.info(), info, act_info)), framework::LogLevel::ERRORS);
         conv.configure(&src, &weights, (use_bias) ? &bias : nullptr, &dst, info, act_info);
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);

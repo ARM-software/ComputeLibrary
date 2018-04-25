@@ -270,31 +270,32 @@ Status NEWinogradLayer::validate(const ITensorInfo *input, const ITensorInfo *we
     // Get indices for the width and height
     const size_t idx_width  = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
     const size_t idx_height = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
+    // Input shape
+    const TensorShape input_shape = input->tensor_shape();
 
     // Kernel size
     const unsigned int kernel_w = weights->tensor_shape()[idx_width];
     const unsigned int kernel_h = weights->tensor_shape()[idx_height];
 
-    // Number of tiles along the X and Y direction
-    const unsigned int num_tiles_x = std::ceil((input->tensor_shape().x() - (kernel_w - 1) + conv_info.pad_left() + conv_info.pad_right()) / 2.f);
-    const unsigned int num_tiles_y = std::ceil((input->tensor_shape().y() - (kernel_h - 1) + conv_info.pad_top() + conv_info.pad_bottom()) / 2.f);
-
-    // Compute output shape
-    const TensorShape output_convolved_shape = misc::shape_calculator::compute_deep_convolution_shape(*input, *weights, conv_info);
+    const WinogradInfo winograd_info = WinogradInfo(Size2D(2, 2),
+                                                    Size2D(kernel_w, kernel_h),
+                                                    Size2D(input_shape[idx_width], input_shape[idx_height]),
+                                                    conv_info,
+                                                    input->data_layout());
 
     // Validate input transform
-    const TensorShape input0_shape = misc::shape_calculator::compute_winograd_input_transform_shape(*input, conv_info, Size2D(kernel_w, kernel_h));
+    const TensorShape input0_shape = misc::shape_calculator::compute_winograd_input_transform_shape(*input, winograd_info);
     const TensorInfo  input0       = input->clone()->set_tensor_shape(input0_shape);
     switch(weights->dimension(0))
     {
         case 3:
         {
-            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformInputKernel<float, 2, 2, 3, 3>::validate(input, &input0, conv_info, Size2D(kernel_w, kernel_h))));
+            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformInputKernel<float, 2, 2, 3, 3>::validate(input, &input0, winograd_info)));
             break;
         }
         case 5:
         {
-            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformInputKernel<float, 2, 2, 5, 5>::validate(input, &input0, conv_info, Size2D(kernel_w, kernel_h))));
+            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformInputKernel<float, 2, 2, 5, 5>::validate(input, &input0, winograd_info)));
             break;
         }
         default:
@@ -304,19 +305,19 @@ Status NEWinogradLayer::validate(const ITensorInfo *input, const ITensorInfo *we
         }
     }
     // Validate filter transform
-    const TensorShape input1_shape = misc::shape_calculator::compute_winograd_filter_transform_shape(*weights, Size2D(2U, 2U));
+    const TensorShape input1_shape = misc::shape_calculator::compute_winograd_filter_transform_shape(*weights, winograd_info);
     const TensorInfo  input1       = weights->clone()->set_tensor_shape(input1_shape);
 
     switch(weights->dimension(0))
     {
         case 3:
         {
-            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformWeightsKernel<float, 2, 2, 3, 3>::validate(weights, &input1, Size2D(2U, 2U))));
+            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformWeightsKernel<float, 2, 2, 3, 3>::validate(weights, &input1, winograd_info)));
             break;
         }
         case 5:
         {
-            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformWeightsKernel<float, 2, 2, 5, 5>::validate(weights, &input1, Size2D(2U, 2U))));
+            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformWeightsKernel<float, 2, 2, 5, 5>::validate(weights, &input1, winograd_info)));
             break;
         }
         default:
@@ -336,9 +337,7 @@ Status NEWinogradLayer::validate(const ITensorInfo *input, const ITensorInfo *we
             ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerBatchedGEMMKernel<float, float, 2, 2, 3, 3>::validate(&input0, &input1, nullptr, &batched_mm_output, 1.0f, 0.0f, GEMMInfo(false, false,
                                                                                                               true /* Reshape weights only for the first run*/))));
             // Validate output transform
-            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformOutputKernel<float, 2, 2, 3, 3>::validate(&batched_mm_output, biases, output, Size2D(kernel_w, kernel_h), Size2D(output_convolved_shape[idx_width],
-                                                                                                           output_convolved_shape[idx_height]),
-                                                                                                           Size2D(num_tiles_x, num_tiles_y))));
+            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformOutputKernel<float, 2, 2, 3, 3>::validate(&batched_mm_output, biases, output, winograd_info)));
             break;
         }
         case 5:
@@ -346,9 +345,7 @@ Status NEWinogradLayer::validate(const ITensorInfo *input, const ITensorInfo *we
             ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerBatchedGEMMKernel<float, float, 2, 2, 5, 5>::validate(&input0, &input1, nullptr, &batched_mm_output, 1.0f, 0.0f, GEMMInfo(false, false,
                                                                                                               true /* Reshape weights only for the first run*/))));
             // Validate output transform
-            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformOutputKernel<float, 2, 2, 5, 5>::validate(&batched_mm_output, biases, output, Size2D(kernel_w, kernel_h), Size2D(output_convolved_shape[idx_width],
-                                                                                                           output_convolved_shape[idx_height]),
-                                                                                                           Size2D(num_tiles_x, num_tiles_y))));
+            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformOutputKernel<float, 2, 2, 5, 5>::validate(&batched_mm_output, biases, output, winograd_info)));
             break;
         }
         default:
