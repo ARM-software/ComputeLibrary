@@ -203,10 +203,12 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradFilterTransformFixture, framework::DatasetMode::ALL,
-                       combine(combine(framework::dataset::concat(framework::dataset::concat(combine(datasets::Small3x3Shapes(), framework::dataset::make("OutputTile", Size2D(2U, 2U))), combine(datasets::Small3x3Shapes(),
-                                                                                             framework::dataset::make("OutputTile", Size2D(4U, 4U)))),
-                                                                  combine(datasets::Small5x5Shapes(), framework::dataset::make("OutputTile", Size2D(4U, 4U)))),
-                                       framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                       combine(framework::dataset::concat(combine(framework::dataset::concat(framework::dataset::concat(combine(datasets::Small3x3Shapes(), framework::dataset::make("OutputTile", Size2D(2U, 2U))),
+                                                                                                                        combine(datasets::Small3x3Shapes(),
+                                                                                                                                framework::dataset::make("OutputTile", Size2D(4U, 4U)))),
+                                                                                             combine(datasets::Small5x5Shapes(), framework::dataset::make("OutputTile", Size2D(4U, 4U)))),
+                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                                          combine(combine(datasets::Small3x3Shapes(), framework::dataset::make("OutputTile", Size2D(4U, 4U))), framework::dataset::make("DataLayout", { DataLayout::NHWC }))),
                                framework::dataset::make("DataType", { DataType::F32 })))
 {
     // Validate output
@@ -214,10 +216,12 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradFilterTransformFixture, framework::Da
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradFilterTransformFixture, framework::DatasetMode::NIGHTLY,
-                       combine(combine(framework::dataset::concat(framework::dataset::concat(combine(datasets::Large3x3Shapes(), framework::dataset::make("OutputTile", Size2D(2U, 2U))), combine(datasets::Large3x3Shapes(),
-                                                                                             framework::dataset::make("OutputTile", Size2D(4U, 4U)))),
-                                                                  combine(datasets::Large5x5Shapes(), framework::dataset::make("OutputTile", Size2D(4U, 4U)))),
-                                       framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                       combine(framework::dataset::concat(combine(framework::dataset::concat(framework::dataset::concat(combine(datasets::Large3x3Shapes(), framework::dataset::make("OutputTile", Size2D(2U, 2U))),
+                                                                                                                        combine(datasets::Large3x3Shapes(),
+                                                                                                                                framework::dataset::make("OutputTile", Size2D(4U, 4U)))),
+                                                                                             combine(datasets::Large5x5Shapes(), framework::dataset::make("OutputTile", Size2D(4U, 4U)))),
+                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                                          combine(combine(datasets::Large3x3Shapes(), framework::dataset::make("OutputTile", Size2D(4U, 4U))), framework::dataset::make("DataLayout", { DataLayout::NHWC }))),
                                framework::dataset::make("DataType", { DataType::F32 })))
 {
     // Validate output

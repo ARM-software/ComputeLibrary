@@ -391,11 +391,16 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape &input_shape, const TensorShape &output_shape, const WinogradInfo &winograd_info, DataLayout data_layout, DataType data_type)
+    TensorType compute_target(TensorShape input_shape, const TensorShape &output_shape, const WinogradInfo &winograd_info, DataLayout data_layout, DataType data_type)
     {
+        if(data_layout == DataLayout::NHWC)
+        {
+            permute(input_shape, PermutationVector(2U, 0U, 1U));
+        }
+
         // Create tensors
         TensorType src = create_tensor<TensorType>(input_shape, data_type, 1, 0, QuantizationInfo(), data_layout);
-        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1, 0, QuantizationInfo(), data_layout);
+        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1, 0, QuantizationInfo());
 
         // Create and configure function
         FunctionType filter_transform;
@@ -422,7 +427,7 @@ protected:
     SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, const WinogradInfo &winograd_info, DataLayout data_layout, DataType data_type)
     {
         // Create reference
-        SimpleTensor<T> src{ input_shape, data_type, 1, 0, QuantizationInfo(), data_layout };
+        SimpleTensor<T> src{ input_shape, data_type, 1, 0, QuantizationInfo() };
 
         // Fill reference
         fill(src, 0, -1.f, 1.f);
