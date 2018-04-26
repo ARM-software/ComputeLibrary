@@ -30,7 +30,7 @@
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEDirectConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMConvolutionLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEWinogradLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEWinogradConvolutionLayer.h"
 #include <memory>
 
 namespace arm_compute
@@ -38,9 +38,9 @@ namespace arm_compute
 class ITensor;
 
 /** Basic function to simulate a convolution layer. This function calls one of the following NEON functions:
- * -# @ref NEGEMMConvolutionLayer   (executed only in case GEMM is required for the operation)
- * -# @ref NEWinogradLayer (executed only in case Winograd is required for the operation)
- * -# @ref NEDirectConvolutionLayer (executed only in case Direct Convolution is required for the operation)
+ * -# @ref NEGEMMConvolutionLayer     (executed only in case GEMM is required for the operation)
+ * -# @ref NEWinogradConvolutionLayer (executed only in case Winograd is required for the operation)
+ * -# @ref NEDirectConvolutionLayer   (executed only in case Direct Convolution is required for the operation)
  */
 class NEConvolutionLayer : public IFunction
 {

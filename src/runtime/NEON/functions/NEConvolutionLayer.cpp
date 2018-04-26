@@ -51,7 +51,7 @@ void NEConvolutionLayer::configure(ITensor *input, const ITensor *weights, const
     {
         case ConvolutionMethod::WINOGRAD:
         {
-            auto f = arm_compute::support::cpp14::make_unique<NEWinogradLayer>(_memory_manager);
+            auto f = arm_compute::support::cpp14::make_unique<NEWinogradConvolutionLayer>(_memory_manager);
             f->configure(input, weights, biases, output, conv_info, act_info);
             _function = std::move(f);
             break;
@@ -83,7 +83,7 @@ Status NEConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo 
     {
         case ConvolutionMethod::WINOGRAD:
             //Validate Winograd
-            NEWinogradLayer::validate(input, weights, biases, output, conv_info, act_info);
+            NEWinogradConvolutionLayer::validate(input, weights, biases, output, conv_info, act_info);
             break;
         case ConvolutionMethod::GEMM:
             //Validate Gemm-based Convolution

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/core/NEON/kernels/NEWinogradLayerKernel.h"
+#include "arm_compute/core/NEON/kernels/NEWinogradConvolutionLayerKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/Error.h"

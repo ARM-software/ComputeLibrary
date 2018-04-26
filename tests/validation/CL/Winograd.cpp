@@ -41,7 +41,7 @@
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
-#include "tests/validation/fixtures/WinogradLayerFixture.h"
+#include "tests/validation/fixtures/WinogradConvolutionLayerFixture.h"
 
 namespace arm_compute
 {

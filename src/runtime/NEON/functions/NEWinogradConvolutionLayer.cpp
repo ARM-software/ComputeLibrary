@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/NEON/functions/NEWinogradLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEWinogradConvolutionLayer.h"
 
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Utils.h"
@@ -32,7 +32,7 @@
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "support/ToolchainSupport.h"
 
-#include "arm_compute/core/NEON/kernels/NEWinogradLayerKernel.h"
+#include "arm_compute/core/NEON/kernels/NEWinogradConvolutionLayerKernel.h"
 
 #include "arm_compute/core/NEON/kernels/convolution/winograd/winograd_gemm.hpp"
 
@@ -79,14 +79,14 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
 }
 } //namespace
 
-NEWinogradLayer::NEWinogradLayer(std::shared_ptr<IMemoryManager> memory_manager)
+NEWinogradConvolutionLayer::NEWinogradConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _arm_gemm(nullptr), _gemm_kernel(nullptr), _transform_input_kernel(nullptr), _transform_output_kernel(nullptr), _transform_weights_kernel(nullptr),
       _activationlayer_function(), _permute_input(), _permute_weights(), _permute_output(), _input_workspace(), _output_workspace(), _kernel_storage(), _input_nhwc(), _output_nhwc(), _weights_hwio(),
       _workspace(), _input(), _weights(), _output(), _reshaped_kernel(false), _is_activationlayer_enabled(false)
 {
 } /* arm_compute */
 
-void NEWinogradLayer::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
+void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_UNUSED(conv_info);
@@ -255,7 +255,7 @@ void NEWinogradLayer::configure(const ITensor *input, const ITensor *weights, co
     }
 }
 
-void NEWinogradLayer::run()
+void NEWinogradConvolutionLayer::run()
 {
     _memory_group.acquire();
     if(!_reshaped_kernel)
@@ -286,8 +286,8 @@ void NEWinogradLayer::run()
     _memory_group.release();
 }
 
-Status NEWinogradLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                 const ActivationLayerInfo &act_info)
+Status NEWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
+                                            const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, weights, biases, output, conv_info));
 

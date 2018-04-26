@@ -111,6 +111,6 @@
 #include "arm_compute/core/NEON/kernels/NETransposeKernel.h"
 #include "arm_compute/core/NEON/kernels/NEWarpKernel.h"
 #include "arm_compute/core/NEON/kernels/NEWeightsReshapeKernel.h"
-#include "arm_compute/core/NEON/kernels/NEWinogradLayerKernel.h"
+#include "arm_compute/core/NEON/kernels/NEWinogradConvolutionLayerKernel.h"
 
 #endif /* __ARM_COMPUTE_NEKERNELS_H__ */

@@ -109,6 +109,6 @@
 #include "arm_compute/runtime/NEON/functions/NETranspose.h"
 #include "arm_compute/runtime/NEON/functions/NEWarpAffine.h"
 #include "arm_compute/runtime/NEON/functions/NEWarpPerspective.h"
-#include "arm_compute/runtime/NEON/functions/NEWinogradLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEWinogradConvolutionLayer.h"
 
 #endif /* __ARM_COMPUTE_NEFUNCTIONS_H__ */

@@ -29,7 +29,7 @@
 #include "arm_compute/runtime/CL/functions/CLWinogradConvolutionLayer.h"
 #include "tests/CL/CLAccessor.h"
 #include "tests/benchmark/fixtures/ConvolutionLayerFixture.h"
-#include "tests/benchmark/fixtures/WinogradLayerFixture.h"
+#include "tests/benchmark/fixtures/WinogradConvolutionLayerFixture.h"
 #include "tests/datasets/system_tests/alexnet/AlexNetConvolutionLayerDataset.h"
 #include "tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1ConvolutionLayerDataset.h"
 #include "tests/datasets/system_tests/googlenet/inceptionv4/GoogLeNetInceptionV4ConvolutionLayerDataset.h"
@@ -57,7 +57,7 @@ using CLGEMMConvolutionLayerFixture = ConvolutionLayerFixture<CLTensor, CLGEMMCo
 
 TEST_SUITE(CL)
 
-using CLWinogradLayerFixture = WinogradLayerFixture<CLTensor, CLWinogradConvolutionLayer, CLAccessor>;
+using CLWinogradLayerFixture = WinogradConvolutionLayerFixture<CLTensor, CLWinogradConvolutionLayer, CLAccessor>;
 
 REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetWinogradLayer, CLWinogradLayerFixture, framework::DatasetMode::ALL,
                                 framework::dataset::combine(framework::dataset::combine(framework::dataset::combine(datasets::AlexNetWinogradLayerDataset(),

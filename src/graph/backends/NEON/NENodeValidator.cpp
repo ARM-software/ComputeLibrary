@@ -51,7 +51,7 @@ Status NENodeValidator::validate(INode *node)
             return detail::validate_convolution_layer<NEConvolutionLayer,
                    NEDirectConvolutionLayer,
                    NEGEMMConvolutionLayer,
-                   NEWinogradLayer>(*polymorphic_downcast<ConvolutionLayerNode *>(node));
+                   NEWinogradConvolutionLayer>(*polymorphic_downcast<ConvolutionLayerNode *>(node));
         case NodeType::DepthwiseConvolutionLayer:
             return detail::validate_depthwise_convolution_layer<NEDepthwiseConvolutionLayer,
                    NEDepthwiseConvolutionLayer3x3>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));

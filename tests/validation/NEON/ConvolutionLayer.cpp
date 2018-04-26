@@ -24,7 +24,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMConvolutionLayer.h"
-#include "arm_compute/runtime/NEON/functions/NEWinogradLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEWinogradConvolutionLayer.h"
 #include "arm_compute/runtime/Tensor.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "tests/NEON/Accessor.h"
@@ -37,7 +37,7 @@
 #include "tests/framework/datasets/Datasets.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/ConvolutionLayerFixture.h"
-#include "tests/validation/fixtures/WinogradLayerFixture.h"
+#include "tests/validation/fixtures/WinogradConvolutionLayerFixture.h"
 
 namespace arm_compute
 {
@@ -109,10 +109,10 @@ TEST_SUITE_END()
 
 TEST_SUITE(WinogradLayer)
 template <typename T>
-using NEWinogradConvolutionLayerFixture = WinogradConvolutionLayerValidationFixture<Tensor, Accessor, NEWinogradLayer, T>;
+using NEWinogradConvolutionLayerFixture = WinogradConvolutionLayerValidationFixture<Tensor, Accessor, NEWinogradConvolutionLayer, T>;
 
 template <typename T>
-using NEWinogradConvolutionLayerNoBiasFixture = WinogradConvolutionLayerValidationFixture<Tensor, Accessor, NEWinogradLayer, T, false>;
+using NEWinogradConvolutionLayerNoBiasFixture = WinogradConvolutionLayerValidationFixture<Tensor, Accessor, NEWinogradConvolutionLayer, T, false>;
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEWinogradConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT,

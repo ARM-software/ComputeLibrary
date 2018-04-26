@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEWINOGRADLAYER_H__
-#define __ARM_COMPUTE_NEWINOGRADLAYER_H__
+#ifndef __ARM_COMPUTE_NEWINOGRADCONVOLUTIONLAYER_H__
+#define __ARM_COMPUTE_NEWINOGRADCONVOLUTIONLAYER_H__
 
 #include "arm_compute/runtime/IFunction.h"
 
@@ -46,11 +46,11 @@ class ITensor;
  * -# @ref NEWinogradLayerBatchedGEMMKernel
  * -# @ref CPPPermute (three times: weights, input and output)
  */
-class NEWinogradLayer : public IFunction
+class NEWinogradConvolutionLayer : public IFunction
 {
 public:
     /** Constructor */
-    NEWinogradLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NEWinogradConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
 
     /** Set the input and output tensors.
      *
@@ -89,9 +89,9 @@ public:
                            const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEWinogradLayer(const NEWinogradLayer &) = delete;
+    NEWinogradConvolutionLayer(const NEWinogradConvolutionLayer &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEWinogradLayer &operator=(const NEWinogradLayer &) = delete;
+    NEWinogradConvolutionLayer &operator=(const NEWinogradConvolutionLayer &) = delete;
 
 private:
     MemoryGroup _memory_group;
@@ -119,4 +119,4 @@ private:
     bool           _is_activationlayer_enabled;
 };
 }
-#endif /* __ARM_COMPUTE_NEWINOGRADLAYER_H__ */
+#endif /* __ARM_COMPUTE_NEWINOGRADCONVOLUTIONLAYER_H__ */
