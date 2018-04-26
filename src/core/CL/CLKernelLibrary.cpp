@@ -174,6 +174,9 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "concatenate_depth", "concatenate.cl" },
     { "convolution_rectangle", "convolution_rectangle.cl" },
     { "col2im", "col2im.cl" },
+    { "convert_depth_down", "depth_convert.cl" },
+    { "convert_depth_up", "depth_convert.cl" },
+    { "convert_fc_weights", "convert_fc_weights.cl" },
     { "convolution3x3_static", "convolution3x3.cl" },
     { "convolution5x5_static", "convolution5x5.cl" },
     { "convolution7x7_static", "convolution7x7.cl" },
@@ -184,8 +187,6 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "convolution_separable7x1_static", "convolution7x7.cl" },
     { "convolution_separable1x9_static", "convolution9x9.cl" },
     { "convolution_separable9x1_static", "convolution9x9.cl" },
-    { "convert_depth_down", "depth_convert.cl" },
-    { "convert_depth_up", "depth_convert.cl" },
     { "copy_tensor", "copy_tensor.cl" },
     { "copy_plane", "channel_extract.cl" },
     { "copy_planes_3p", "channel_combine.cl" },
@@ -432,6 +433,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "color_convert.cl",
 #include "./cl_kernels/color_convert.clembed"
+    },
+    {
+        "convert_fc_weights.cl",
+#include "./cl_kernels/convert_fc_weights.clembed"
     },
     {
         "convolution3x3.cl",

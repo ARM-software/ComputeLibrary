@@ -42,6 +42,7 @@
 #include "arm_compute/core/CL/kernels/CLChannelShuffleLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLCol2ImKernel.h"
 #include "arm_compute/core/CL/kernels/CLColorConvertKernel.h"
+#include "arm_compute/core/CL/kernels/CLConvertFullyConnectedWeightsKernel.h"
 #include "arm_compute/core/CL/kernels/CLConvolutionKernel.h"
 #include "arm_compute/core/CL/kernels/CLCopyKernel.h"
 #include "arm_compute/core/CL/kernels/CLDeconvolutionLayerUpsampleKernel.h"

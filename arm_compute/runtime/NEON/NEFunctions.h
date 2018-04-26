@@ -41,6 +41,7 @@
 #include "arm_compute/runtime/NEON/functions/NEChannelExtract.h"
 #include "arm_compute/runtime/NEON/functions/NECol2Im.h"
 #include "arm_compute/runtime/NEON/functions/NEColorConvert.h"
+#include "arm_compute/runtime/NEON/functions/NEConvertFullyConnectedWeights.h"
 #include "arm_compute/runtime/NEON/functions/NEConvolution.h"
 #include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEDeconvolutionLayer.h"
