@@ -84,12 +84,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEIm2ColFixture<float>, framework::DatasetMode:
     // Validate output
     validate(Accessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEIm2ColFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)),
-                                                                                                  conv_args))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
 TEST_SUITE_END()
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
@@ -97,12 +91,6 @@ TEST_SUITE_END()
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEIm2ColFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F16)),
                                                                                              conv_args))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, NEIm2ColFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F16)),
-                                                                                                 conv_args))
 {
     // Validate output
     validate(Accessor(_target), _reference);
@@ -116,12 +104,6 @@ TEST_SUITE_END()
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEIm2ColFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::QASYMM8)),
                                                                                                 conv_args))
-{
-    // Validate output
-    validate(Accessor(_target), _reference);
-}
-FIXTURE_DATA_TEST_CASE(RunLarge, NEIm2ColFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                    conv_args))
 {
     // Validate output
     validate(Accessor(_target), _reference);
