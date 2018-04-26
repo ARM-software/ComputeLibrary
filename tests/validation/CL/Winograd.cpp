@@ -53,6 +53,10 @@ namespace
 {
 constexpr AbsoluteTolerance<float> tolerance_f32(0.001f);
 constexpr AbsoluteTolerance<float> tolerance_convolution_layer_f32(0.1f);
+const auto                         SmallWinogradInputTransformDataset = framework::dataset::concat(datasets::SmallWinogradInputTransformDataset2x2_3x3(),
+                                                                                                   framework::dataset::concat(datasets::SmallWinogradInputTransformDataset4x4_3x3(), datasets::SmallWinogradInputTransformDataset4x4_5x5()));
+const auto LargeWinogradInputTransformDataset = framework::dataset::concat(datasets::LargeWinogradInputTransformDataset2x2_3x3(),
+                                                                           framework::dataset::concat(datasets::LargeWinogradInputTransformDataset4x4_3x3(), datasets::LargeWinogradInputTransformDataset4x4_5x5()));
 } // namespace
 
 using namespace arm_compute::misc::shape_calculator;
@@ -102,7 +106,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 
 using CLWinogradInputTransformFixture = WinogradInputTransformValidationFixture<CLTensor, CLAccessor, CLWinogradInputTransform, float>;
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallWinogradInputTransformDataset(), datasets::LargeWinogradInputTransformDataset()),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(SmallWinogradInputTransformDataset, LargeWinogradInputTransformDataset),
                                                                            framework::dataset::make("DataLayout", { DataLayout::NCHW })),
                                                                    framework::dataset::make("DataType", { DataType::F32 })),
                shape_in, winograd_info, data_layout, data_type)
@@ -123,15 +127,19 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
     winograd_input_transform.configure(&in, &out, winograd_info);
 }
 
-FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradInputTransformFixture, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallWinogradInputTransformDataset(),
-                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradInputTransformFixture, framework::DatasetMode::PRECOMMIT, combine(framework::dataset::concat(combine(SmallWinogradInputTransformDataset,
+                                                                                                             framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                                                                                             combine(datasets::SmallWinogradInputTransformDataset4x4_3x3(),
+                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NHWC }))),
                                                                                                              framework::dataset::make("DataType", { DataType::F32 })))
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradInputTransformFixture, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeWinogradInputTransformDataset(),
-                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradInputTransformFixture, framework::DatasetMode::NIGHTLY, combine(framework::dataset::concat(combine(LargeWinogradInputTransformDataset,
+                                                                                                           framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                                                                                           combine(datasets::LargeWinogradInputTransformDataset4x4_3x3(),
+                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NHWC }))),
                                                                                                            framework::dataset::make("DataType", { DataType::F32 })))
 {
     validate(CLAccessor(_target), _reference, tolerance_f32);

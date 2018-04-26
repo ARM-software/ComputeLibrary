@@ -40,13 +40,13 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const WinogradInfo &winograd_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() != DataLayout::NCHW);
 
     const PadStrideInfo conv_info        = winograd_info.convolution_info;
     const Size2D        output_tile_size = winograd_info.output_tile_size;
     const Size2D        kernel_size      = winograd_info.kernel_size;
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.stride().first != 1 || conv_info.stride().second != 1, "Winograd input transform only supports unit strides");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size != Size2D(3U, 3U) && kernel_size != Size2D(5U, 5U), "Winograd input transform only supports 3x3 and 5x5 kernels");
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::NHWC && (output_tile_size != Size2D(4U, 4U) || kernel_size != Size2D(3U, 3U)));
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size == Size2D(3U, 3U) && output_tile_size != Size2D(2U, 2U)
                                     && output_tile_size != Size2D(4U, 4U),
                                     "Winograd input transform only supports 2x2 or 4x4 output tile for 3x3 kernels");
@@ -75,12 +75,28 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     const Size2D        output_tile_size = winograd_info.output_tile_size;
     const Size2D        kernel_size      = winograd_info.kernel_size;
 
-    const unsigned int num_elems_read_per_iteration_x = output_tile_size.width + kernel_size.width - 1;
-    const unsigned int num_elems_read_per_iteration_y = output_tile_size.height + kernel_size.height - 1;
+    unsigned int num_elems_read_per_iteration_x = 0;
+    unsigned int num_elems_read_per_iteration_y = 0;
+    unsigned int pad_left                       = 0;
+    unsigned int pad_top                        = 0;
+
+    if(input->data_layout() == DataLayout::NCHW)
+    {
+        num_elems_read_per_iteration_x = output_tile_size.width + kernel_size.width - 1;
+        num_elems_read_per_iteration_y = output_tile_size.height + kernel_size.height - 1;
+        pad_left                       = conv_info.pad_left();
+        pad_top                        = conv_info.pad_top();
+    }
+    else
+    {
+        num_elems_read_per_iteration_x = 1;
+        num_elems_read_per_iteration_y = output_tile_size.width + kernel_size.width - 1;
+        pad_top                        = 1;
+    }
 
     Window win = calculate_max_window(*input, Steps(1, 1));
 
-    AccessWindowRectangle input_access(input, -conv_info.pad_left(), -conv_info.pad_top(), num_elems_read_per_iteration_x, num_elems_read_per_iteration_y);
+    AccessWindowRectangle input_access(input, -pad_left, -pad_top, num_elems_read_per_iteration_x, num_elems_read_per_iteration_y);
 
     bool window_changed = update_window_and_padding(win, input_access);
 
@@ -108,17 +124,27 @@ void CLWinogradInputTransformKernel::configure(const ICLTensor *input, ICLTensor
     const Size2D        output_tile_size = winograd_info.output_tile_size;
     const Size2D        kernel_size      = winograd_info.kernel_size;
 
+    const size_t idx_w = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::WIDTH);
+    const size_t idx_h = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
+
     // Compute number of elements to process in the X and Y direction
-    const int num_elements_x = input->info()->dimension(0) - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right();
-    const int num_elements_y = input->info()->dimension(1) - (kernel_size.height - 1) + conv_info.pad_top() + conv_info.pad_bottom();
+    const int num_elements_x = input->info()->dimension(idx_w) - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right();
+    const int num_elements_y = input->info()->dimension(idx_h) - (kernel_size.height - 1) + conv_info.pad_top() + conv_info.pad_bottom();
 
-    // Check if we need to extend the right or bottom border
-    const unsigned int extra_border_right  = ((num_elements_x % output_tile_size.width) == 0) ? 0u : static_cast<unsigned int>(output_tile_size.width - 1);
-    const unsigned int extra_border_bottom = ((num_elements_y % output_tile_size.height) == 0) ? 0u : static_cast<unsigned int>(output_tile_size.height - 1);
+    _input  = input;
+    _output = output;
+    if(input->info()->data_layout() == DataLayout::NCHW)
+    {
+        // Check if we need to extend the right or bottom border
+        const unsigned int extra_border_right  = ((num_elements_x % output_tile_size.width) == 0) ? 0u : static_cast<unsigned int>(output_tile_size.width - 1);
+        const unsigned int extra_border_bottom = ((num_elements_y % output_tile_size.height) == 0) ? 0u : static_cast<unsigned int>(output_tile_size.height - 1);
 
-    _input       = input;
-    _output      = output;
-    _border_size = BorderSize(conv_info.pad_top(), conv_info.pad_right() + extra_border_right, conv_info.pad_bottom() + extra_border_bottom, conv_info.pad_left());
+        _border_size = BorderSize(conv_info.pad_top(), conv_info.pad_right() + extra_border_right, conv_info.pad_bottom() + extra_border_bottom, conv_info.pad_left());
+    }
+    else
+    {
+        _border_size = BorderSize(1U, 0U, 1U, 0);
+    }
     _num_tiles_x = std::ceil(num_elements_x / static_cast<float>(output_tile_size.width));
     _num_tiles_y = std::ceil(num_elements_y / static_cast<float>(output_tile_size.height));
 
@@ -134,6 +160,12 @@ void CLWinogradInputTransformKernel::configure(const ICLTensor *input, ICLTensor
     build_opts.add_option("-DPAD_LEFT=" + support::cpp11::to_string(conv_info.pad_left()));
     build_opts.add_option("-DPAD_TOP=" + support::cpp11::to_string(conv_info.pad_top()));
 
+    if(input->info()->data_layout() == DataLayout::NHWC)
+    {
+        build_opts.add_option("-DSRC_DIM_1=" + support::cpp11::to_string(_input->info()->dimension(1)));
+        build_opts.add_option("-DSRC_DIM_2=" + support::cpp11::to_string(_input->info()->dimension(2)));
+    }
+
     // Create kernel
     std::string kernel_name = "winograd_input_transform_" + output_tile_size.to_string() + "_" + kernel_size.to_string();
 
@@ -148,7 +180,7 @@ void CLWinogradInputTransformKernel::configure(const ICLTensor *input, ICLTensor
     // Append stepz and data layout
     kernel_name += "_stepz";
     kernel_name += support::cpp11::to_string(_step_z);
-    kernel_name += "_nchw";
+    kernel_name += "_" + lower_string(string_from_data_layout(input->info()->data_layout()));
 
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
@@ -183,12 +215,16 @@ void CLWinogradInputTransformKernel::run(const Window &window, cl::CommandQueue 
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
 
-    Window slice = window.first_slice_window_3D();
-    slice.set(Window::DimX, Window::Dimension(0, _num_tiles_x, 1));
-    slice.set(Window::DimY, Window::Dimension(0, _num_tiles_y, 1));
+    const size_t idx_w = get_data_layout_dimension_index(_input->info()->data_layout(), DataLayoutDimension::WIDTH);
+    const size_t idx_h = get_data_layout_dimension_index(_input->info()->data_layout(), DataLayoutDimension::HEIGHT);
+    const size_t idx_c = get_data_layout_dimension_index(_input->info()->data_layout(), DataLayoutDimension::CHANNEL);
 
-    ARM_COMPUTE_ERROR_ON(((slice.z().end() - slice.z().start()) % _step_z) != 0);
-    slice.set(Window::DimZ, Window::Dimension(slice.z().start(), slice.z().end(), _step_z));
+    Window slice = window.first_slice_window_3D();
+    slice.set(idx_w, Window::Dimension(0, _num_tiles_x, 1));
+    slice.set(idx_h, Window::Dimension(0, _num_tiles_y, 1));
+
+    ARM_COMPUTE_ERROR_ON(((slice[idx_c].end() - slice[idx_c].start()) % _step_z) != 0);
+    slice.set(idx_c, Window::Dimension(slice[idx_c].start(), slice[idx_c].end(), _step_z));
 
     do
     {

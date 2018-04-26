@@ -377,6 +377,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "winograd_input_transform_2x2_3x3_stepz1_nchw", "winograd.cl" },
     { "winograd_input_transform_2x2_3x3_stepz2_nchw", "winograd.cl" },
     { "winograd_input_transform_4x4_3x3_stepz1_nchw", "winograd.cl" },
+    { "winograd_input_transform_4x4_3x3_stepz1_nhwc", "winograd.cl" },
     { "winograd_output_transform_2x2_3x3_nchw", "winograd.cl" },
     { "winograd_output_transform_4x4_3x3_nchw", "winograd.cl" },
     { "winograd_output_transform_4x4_5x5_nchw", "winograd.cl" },

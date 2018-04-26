@@ -250,11 +250,15 @@ inline TensorShape compute_winograd_input_transform_shape(const ITensorInfo &inp
     const Size2D        output_tile_size = winograd_info.output_tile_size;
     const Size2D        input_tile_size  = Size2D(output_tile_size.width + kernel_size.width - 1, output_tile_size.height + kernel_size.height - 1);
 
-    // Compute height
-    const unsigned int num_tiles_x = std::ceil((input.tensor_shape().x() - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right()) / static_cast<float>(output_tile_size.width));
-    const unsigned int num_tiles_y = std::ceil((input.tensor_shape().y() - (kernel_size.height - 1) + conv_info.pad_top() + conv_info.pad_bottom()) / static_cast<float>(output_tile_size.height));
+    const size_t idx_w = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::WIDTH);
+    const size_t idx_h = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::HEIGHT);
+    const size_t idx_c = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::CHANNEL);
 
-    const unsigned int width  = input.tensor_shape()[get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::CHANNEL)];
+    // Compute height
+    const unsigned int num_tiles_x = std::ceil((input.tensor_shape()[idx_w] - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right()) / static_cast<float>(output_tile_size.width));
+    const unsigned int num_tiles_y = std::ceil((input.tensor_shape()[idx_h] - (kernel_size.height - 1) + conv_info.pad_top() + conv_info.pad_bottom()) / static_cast<float>(output_tile_size.height));
+
+    const unsigned int width  = input.tensor_shape()[idx_c];
     const unsigned int height = num_tiles_x * num_tiles_y;
     const unsigned int depth  = input_tile_size.area();
 
