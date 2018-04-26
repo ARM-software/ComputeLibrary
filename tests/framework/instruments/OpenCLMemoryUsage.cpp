@@ -124,6 +124,7 @@ void OpenCLMemoryUsage::test_start()
             void *retval = this->real_clSVMAlloc(context, flags, size, alignment);
             if(retval != nullptr)
             {
+                _svm_allocations[retval] = size;
                 _now.num_allocations++;
                 _now.in_use += size;
                 _now.total_allocated += size;
