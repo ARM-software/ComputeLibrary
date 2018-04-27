@@ -65,11 +65,6 @@ TensorDescriptor ActivationLayerNode::configure_output(size_t idx) const
     return src->desc();
 }
 
-Status ActivationLayerNode::validate()
-{
-    return Status{};
-}
-
 NodeType ActivationLayerNode::type() const
 {
     return NodeType::ActivationLayer;

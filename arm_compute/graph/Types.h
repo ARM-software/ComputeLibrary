@@ -40,6 +40,8 @@ using arm_compute::Status;
 
 using arm_compute::Coordinates;
 using arm_compute::DataType;
+using arm_compute::DataLayout;
+using arm_compute::DataLayoutDimension;
 using arm_compute::TensorShape;
 using arm_compute::Size2D;
 
@@ -78,13 +80,6 @@ struct GraphConfig
     bool use_transition_memory_manager{ false }; /**< Use a memory manager to manager transition buffer memory */
     bool use_tuner{ false };                     /**< Use a tuner in tunable backends */
     int  num_threads{ -1 };                      /**< Number of threads to use (thread capable backends), if 0 the backend will auto-initialize, if -1 the backend will stay as it is. */
-};
-
-/**< Data layout format */
-enum class DataLayout
-{
-    NCHW, /** N(Batches), C(Channels), H(Height), W(Width) from slow to fast moving dimension */
-    NHWC  /** N(Batches), H(Height), W(Width), C(Channels) from slow to fast moving dimension */
 };
 
 /**< Device target types */

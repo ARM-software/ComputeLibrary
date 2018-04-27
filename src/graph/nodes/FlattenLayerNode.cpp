@@ -62,11 +62,6 @@ TensorDescriptor FlattenLayerNode::configure_output(size_t idx) const
     return output_desc;
 }
 
-Status FlattenLayerNode::validate()
-{
-    return Status{};
-}
-
 NodeType FlattenLayerNode::type() const
 {
     return NodeType::FlattenLayer;

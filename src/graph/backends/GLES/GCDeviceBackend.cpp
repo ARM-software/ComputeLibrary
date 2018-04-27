@@ -88,7 +88,8 @@ std::unique_ptr<ITensorHandle> GCDeviceBackend::create_tensor(const Tensor &tens
 
     // Create backend tensor handle
     TensorInfo info(tensor_desc.shape, 1, tensor_desc.data_type, tensor_desc.quant_info);
-    auto       backend_tensor_handle = support::cpp14::make_unique<GCTensorHandle>(info);
+    info.set_data_layout(tensor_desc.layout);
+    auto backend_tensor_handle = support::cpp14::make_unique<GCTensorHandle>(info);
 
     return std::move(backend_tensor_handle);
 }

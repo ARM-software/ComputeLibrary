@@ -94,6 +94,22 @@ PassManager create_default_pass_manager(Target target);
  * @param[in] ctx Graph Context
  */
 void setup_default_graph_context(GraphContext &ctx);
+/** Get size of a tensor's given dimension depending on its layout
+ *
+ * @param[in] descriptor            Descriptor
+ * @param[in] data_layout_dimension Tensor data layout dimension
+ *
+ * @return Size of requested dimension
+ */
+size_t get_dimension_size(const TensorDescriptor &descriptor, const DataLayoutDimension data_layout_dimension);
+/** Get index of a tensor's given dimension depending on its layout
+ *
+ * @param[in] descriptor            Descriptor
+ * @param[in] data_layout_dimension Tensor data layout dimension
+ *
+ * @return Idx of given dimension
+ */
+size_t get_dimension_idx(const TensorDescriptor &descriptor, const DataLayoutDimension data_layout_dimension);
 } // namespace graph
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_GRAPH_UTILS_H__ */

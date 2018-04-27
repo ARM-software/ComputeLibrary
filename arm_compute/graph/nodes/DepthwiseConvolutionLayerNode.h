@@ -58,18 +58,19 @@ public:
      * @return Convolution information
      */
     PadStrideInfo convolution_info() const;
-    /** Computes depthwise convolution output shape
+    /** Computes depthwise convolution output descriptor
      *
-     * @param[in] input_shape   Input shape
-     * @param[in] weights_shape Weights shape
-     * @param[in] info          Convolution operation attributes
+     * @param[in] input_descriptor   Input descriptor
+     * @param[in] weights_descriptor Weights descriptor
+     * @param[in] info               Convolution operation attributes
      *
-     * @return Output shape
+     * @return Output descriptor
      */
-    static TensorShape compute_output_shape(TensorShape input_shape, TensorShape weights_shape, PadStrideInfo info);
+    static TensorDescriptor compute_output_descriptor(const TensorDescriptor &input_descriptor,
+                                                      const TensorDescriptor &weights_descriptor,
+                                                      const PadStrideInfo    &info);
 
     // Inherited overridden methods:
-    Status           validate() override;
     NodeType         type() const override;
     bool             forward_descriptors() override;
     TensorDescriptor configure_output(size_t idx) const override;

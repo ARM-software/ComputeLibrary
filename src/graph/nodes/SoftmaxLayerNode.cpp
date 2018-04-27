@@ -69,11 +69,6 @@ TensorDescriptor SoftmaxLayerNode::configure_output(size_t idx) const
     return out_desc;
 }
 
-Status SoftmaxLayerNode::validate()
-{
-    return Status{};
-}
-
 NodeType SoftmaxLayerNode::type() const
 {
     return NodeType::SoftmaxLayer;

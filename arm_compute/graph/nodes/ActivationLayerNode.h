@@ -46,7 +46,6 @@ public:
     ActivationLayerInfo activation_info() const;
 
     // Inherited overridden methods:
-    Status           validate() override;
     NodeType         type() const override;
     bool             forward_descriptors() override;
     TensorDescriptor configure_output(size_t idx) const override;

@@ -66,11 +66,6 @@ TensorDescriptor NormalizationLayerNode::configure_output(size_t idx) const
     return src->desc();
 }
 
-Status NormalizationLayerNode::validate()
-{
-    return Status{};
-}
-
 NodeType NormalizationLayerNode::type() const
 {
     return NodeType::NormalizationLayer;

@@ -48,11 +48,6 @@ TensorDescriptor OutputNode::configure_output(size_t idx) const
     return TensorDescriptor();
 }
 
-Status OutputNode::validate()
-{
-    return Status{};
-}
-
 NodeType OutputNode::type() const
 {
     return NodeType::Output;

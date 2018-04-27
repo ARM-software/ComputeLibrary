@@ -62,8 +62,6 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     // Apply all mutating passes
     pm.run_all(graph);
 
-    // TODO (geopin01): Perform a graph validation
-
     // Perform topological sort
     // FIXME : Sort nodes and pass sorted indices in configure all nodes
 

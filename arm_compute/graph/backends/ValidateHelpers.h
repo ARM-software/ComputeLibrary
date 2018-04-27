@@ -30,6 +30,7 @@
 #include "arm_compute/graph/nodes/Nodes.h"
 
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensorInfo.h"
 
 namespace arm_compute
@@ -138,7 +139,7 @@ Status validate_depthwise_convolution_layer(DepthwiseConvolutionLayerNode &node)
 
     // TODO (geopin01) : Switch when validation is implemented
     // Validate function
-    if((dwc_algorithm == DepthwiseConvolutionMethod::OPTIMIZED_3x3) && (weights->tensor_shape().x() != 3))
+    if((dwc_algorithm == DepthwiseConvolutionMethod::OPTIMIZED_3x3) && (weights->tensor_shape()[get_data_layout_dimension_index(weights->data_layout(), DataLayoutDimension::WIDTH)] != 3))
     {
         ARM_COMPUTE_LOG_GRAPH_INFO("Switched DepthwiseConvolutionLayer method of node with ID : "
                                    << node.id() << " and Name: " << node.name() << std::endl);

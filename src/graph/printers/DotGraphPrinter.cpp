@@ -164,7 +164,7 @@ void DotGraphPrinter::print_edges(const Graph &g, std::ostream &os)
             os << source_node_id << " -> " << sink_node_id << " ";
             const Tensor *t = e->tensor();
             ARM_COMPUTE_ERROR_ON(t == nullptr);
-            os << R"([label = ")" << t->desc().shape << R"( \n )" << t->desc().data_type << R"("])";
+            os << R"([label = ")" << t->desc().shape << R"( \n )" << t->desc().data_type << R"( \n )" << t->desc().layout << R"("])";
             os << ";\n";
         }
     }

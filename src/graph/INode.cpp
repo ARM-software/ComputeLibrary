@@ -42,6 +42,11 @@ INode::INode()
 // clang-format on
 // *INDENT-ON*
 
+Status INode::validate() const
+{
+    return Status{};
+}
+
 void INode::set_graph(Graph *g)
 {
     ARM_COMPUTE_ERROR_ON(g == nullptr);

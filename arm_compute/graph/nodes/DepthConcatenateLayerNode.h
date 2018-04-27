@@ -39,13 +39,13 @@ public:
      * @param[in] total_nodes Number of nodes that will get concatenated
      */
     DepthConcatenateLayerNode(unsigned int total_nodes);
-    /** Computes depth concatenations output shape
+    /** Computes depth concatenations output descriptor
      *
-     * @param input_shapes   Shapes of the inputs
+     * @param[in] input_descriptors Input descriptors
      *
-     * @return Expected output shape
+     * @return Expected output descriptor
      */
-    static TensorShape compute_output_shape(const std::vector<TensorShape> &input_shapes);
+    static TensorDescriptor compute_output_descriptor(const std::vector<TensorDescriptor> &input_descriptors);
     /** Disables or not the depth concatenate node
      *
      * @warning This is used when depth concatenate is performed with sub-tensors,
@@ -63,7 +63,6 @@ public:
     bool is_enabled() const;
 
     // Inherited overridden methods:
-    Status           validate() override;
     NodeType         type() const override;
     bool             forward_descriptors() override;
     TensorDescriptor configure_output(size_t idx) const override;

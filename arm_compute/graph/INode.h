@@ -60,7 +60,7 @@ public:
      *
      * @return Status containing any errors
      */
-    virtual Status validate() = 0;
+    virtual Status validate() const;
     /** Returns node's type
      *
      * @return Node's type

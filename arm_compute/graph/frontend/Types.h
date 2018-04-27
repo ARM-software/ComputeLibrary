@@ -34,6 +34,7 @@ namespace frontend
 {
 // Import types for graph
 using graph::DataType;
+using graph::DataLayout;
 using graph::TensorShape;
 
 using graph::ActivationLayerInfo;

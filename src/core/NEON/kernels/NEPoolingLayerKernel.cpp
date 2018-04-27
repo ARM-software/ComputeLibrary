@@ -2719,7 +2719,7 @@ void NEPoolingLayerKernel::run(const Window &window, const ThreadInfo &info)
     }
     else
     {
-        window_input.set(Window::DimX, Window::Dimension(0, _input->info()->dimension(0), _num_elems_processed_per_iteration));
+        window_input.set(Window::DimX, Window::Dimension(window.x().start(), window.x().end(), _num_elems_processed_per_iteration));
         window_input.set(Window::DimY, Window::Dimension(0, _input->info()->dimension(1), pool_stride_x));
         window_input.set(Window::DimZ, Window::Dimension(0, _input->info()->dimension(2), pool_stride_y));
     }

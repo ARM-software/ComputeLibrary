@@ -75,7 +75,7 @@ void SplitLayerSubTensorMutator::mutate(Graph &g)
                     Tensor           *output_tensor = node->output(i);
                     const TensorShape output_shape  = output_tensor->desc().shape;
                     Coordinates       coords;
-                    std::tie(std::ignore, coords) = SplitLayerNode::compute_output_shape(input_tensor->desc().shape, num_splits, axis, i);
+                    std::tie(std::ignore, coords) = SplitLayerNode::compute_output_descriptor(input_tensor->desc(), num_splits, axis, i);
 
                     backends::IDeviceBackend      *backend = backends::BackendRegistry::get().find_backend(output_tensor->desc().target);
                     std::unique_ptr<ITensorHandle> handle  = backend->create_subtensor(input_tensor->handle(), output_shape, coords, extend_parent);

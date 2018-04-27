@@ -58,47 +58,62 @@ public:
         // Set model to execute. 0 (MobileNetV1_1.0_224), 1 (MobileNetV1_0.75_160)
         int model_id = (argc > 2) ? std::strtol(argv[2], nullptr, 10) : 0;
         ARM_COMPUTE_ERROR_ON_MSG(model_id > 1, "Invalid model ID. Model must be 0 (MobileNetV1_1.0_224) or 1 (MobileNetV1_0.75_160)");
-        float        depth_scale  = (model_id == 0) ? 1.f : 0.75;
-        unsigned int spatial_size = (model_id == 0) ? 224 : 160;
-        std::string  model_path   = (model_id == 0) ? "/cnn_data/mobilenet_v1_1_224_model/" : "/cnn_data/mobilenet_v1_075_160_model/";
+        int layout_id = (argc > 3) ? std::strtol(argv[3], nullptr, 10) : 0;
+        ARM_COMPUTE_ERROR_ON_MSG(layout_id > 1, "Invalid layout ID. Layout must be 0 (NCHW) or 1 (NHWC)");
+
+        float            depth_scale           = (model_id == 0) ? 1.f : 0.75;
+        unsigned int     spatial_size          = (model_id == 0) ? 224 : 160;
+        std::string      model_path            = (model_id == 0) ? "/cnn_data/mobilenet_v1_1_224_model/" : "/cnn_data/mobilenet_v1_075_160_model/";
+        TensorDescriptor input_descriptor_nchw = TensorDescriptor(TensorShape(spatial_size, spatial_size, 3U, 1U), DataType::F32);
+        TensorDescriptor input_descriptor_nhwc = TensorDescriptor(TensorShape(3U, spatial_size, spatial_size, 1U), DataType::F32).set_layout(DataLayout::NHWC);
+        TensorDescriptor input_descriptor      = (layout_id == 0) ? input_descriptor_nchw : input_descriptor_nhwc;
 
         // Parse arguments
         if(argc < 2)
         {
             // Print help
-            std::cout << "Usage: " << argv[0] << " [target] [model] [path_to_data] [image] [labels]\n\n";
+            std::cout << "Usage: " << argv[0] << " [target] [model] [layout] [path_to_data] [image] [labels]\n\n";
             std::cout << "No model ID provided: using MobileNetV1_1.0_224\n\n";
+            std::cout << "No data layout provided: using NCHW\n\n";
             std::cout << "No data folder provided: using random values\n\n";
         }
         else if(argc == 2)
         {
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " [model] [path_to_data] [image] [labels]\n\n";
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " [model] [layout] [path_to_data] [image] [labels]\n\n";
             std::cout << "No model ID provided: using MobileNetV1_1.0_224\n\n";
+            std::cout << "No data layout provided: using NCHW\n\n";
             std::cout << "No data folder provided: using random values\n\n";
         }
         else if(argc == 3)
         {
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " [path_to_data] [image] [labels]\n\n";
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " [layout] [path_to_data] [image] [labels]\n\n";
+            std::cout << "No data layout provided: using NCHW\n\n";
             std::cout << "No data folder provided: using random values\n\n";
         }
         else if(argc == 4)
         {
-            data_path = argv[3];
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " [image] [labels]\n\n";
-            std::cout << "No image provided: using random values\n\n";
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " [path_to_data] [image] [labels]\n\n";
+            std::cout << "No data folder provided: using random values\n\n";
         }
         else if(argc == 5)
         {
-            data_path = argv[3];
-            image     = argv[4];
+            data_path = argv[4];
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " " << argv[4] << " [image] [labels]\n\n";
+            std::cout << "No image provided: using random values\n\n";
+            std::cout << "No text file with labels provided: skipping output accessor\n\n";
+        }
+        else if(argc == 6)
+        {
+            data_path = argv[4];
+            image     = argv[5];
             std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " [labels]\n\n";
             std::cout << "No text file with labels provided: skipping output accessor\n\n";
         }
         else
         {
-            data_path = argv[3];
-            image     = argv[4];
-            label     = argv[5];
+            data_path = argv[4];
+            image     = argv[5];
+            label     = argv[6];
         }
 
         // Add model path to data path
@@ -110,11 +125,11 @@ public:
         graph << target_hint
               << convolution_hint
               << depthwise_convolution_hint
-              << InputLayer(TensorDescriptor(TensorShape(spatial_size, spatial_size, 3U, 1U), DataType::F32),
+              << InputLayer(input_descriptor,
                             get_input_accessor(image, std::move(preprocessor), false))
               << ConvolutionLayer(
                   3U, 3U, 32U * depth_scale,
-                  get_weights_accessor(data_path, "Conv2d_0_weights.npy"),
+                  get_weights_accessor(data_path, "Conv2d_0_weights.npy", DataLayout::NCHW),
                   std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                   PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR))
               << BatchNormalizationLayer(
@@ -140,7 +155,7 @@ public:
         graph << PoolingLayer(PoolingLayerInfo(PoolingType::AVG))
               << ConvolutionLayer(
                   1U, 1U, 1001U,
-                  get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_weights.npy"),
+                  get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_weights.npy", DataLayout::NCHW),
                   get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_biases.npy"),
                   PadStrideInfo(1, 1, 0, 0))
               << ReshapeLayer(TensorShape(1001U))
@@ -170,7 +185,7 @@ private:
         SubStream   sg(graph);
         sg << DepthwiseConvolutionLayer(
                3U, 3U,
-               get_weights_accessor(data_path, total_path + "depthwise_depthwise_weights.npy"),
+               get_weights_accessor(data_path, total_path + "depthwise_depthwise_weights.npy", DataLayout::NCHW),
                std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                dwc_pad_stride_info)
            << BatchNormalizationLayer(
@@ -182,7 +197,7 @@ private:
            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))
            << ConvolutionLayer(
                1U, 1U, conv_filt,
-               get_weights_accessor(data_path, total_path + "pointwise_weights.npy"),
+               get_weights_accessor(data_path, total_path + "pointwise_weights.npy", DataLayout::NCHW),
                std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                conv_pad_stride_info)
            << BatchNormalizationLayer(

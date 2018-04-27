@@ -76,11 +76,6 @@ TensorDescriptor BatchNormalizationLayerNode::configure_output(size_t idx) const
     return src->desc();
 }
 
-Status BatchNormalizationLayerNode::validate()
-{
-    return Status{};
-}
-
 NodeType BatchNormalizationLayerNode::type() const
 {
     return NodeType::BatchNormalizationLayer;

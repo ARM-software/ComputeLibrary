@@ -39,29 +39,28 @@ public:
      * @param[in] num_outputs Number of neurons in the layer
      */
     FullyConnectedLayerNode(unsigned int num_outputs);
-    /** Computes weights shape
+    /** Computes weights descriptor
      *
      * @warning Works for inputs with 1D batch space
      *
-     * @param[in] input_shape Input shape
-     * @param[in] num_outputs Number of output neurons
+     * @param[in] input_descriptor Input descriptor
+     * @param[in] num_outputs      Number of output neurons
      *
-     * @return Weights shape
+     * @return Weights descriptor
      */
-    static TensorShape compute_weights_shape(TensorShape input_shape, unsigned int num_outputs);
-    /** Computes fully connected layer output shape
+    static TensorDescriptor compute_weights_descriptor(const TensorDescriptor &input_descriptor, unsigned int num_outputs);
+    /** Computes fully connected layer output descriptor
      *
      * @warning Works for inputs with 1D batch space
      *
-     * @param[in] input_shape Input shape
-     * @param[in] num_outputs Number of output neurons
+     * @param[in] input_descriptor Input descriptor
+     * @param[in] num_outputs      Number of output neurons
      *
-     * @return Output shape
+     * @return Output descriptor
      */
-    static TensorShape compute_output_shape(TensorShape input_shape, unsigned int num_outputs);
+    static TensorDescriptor compute_output_descriptor(const TensorDescriptor &input_descriptor, unsigned int num_outputs);
 
     // Inherited overridden methods:
-    Status           validate() override;
     NodeType         type() const override;
     bool             forward_descriptors() override;
     TensorDescriptor configure_output(size_t idx) const override;

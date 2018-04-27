@@ -138,6 +138,24 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Target &target)
     return os;
 }
 
+/** Formatted output of the DataLayout */
+inline ::std::ostream &operator<<(::std::ostream &os, const DataLayout &data_layout)
+{
+    switch(data_layout)
+    {
+        case DataLayout::NCHW:
+            os << "NCHW";
+            break;
+        case DataLayout::NHWC:
+            os << "NHWC";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
 /** Formatted output of the activation function type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo::ActivationFunction &act_function)
 {

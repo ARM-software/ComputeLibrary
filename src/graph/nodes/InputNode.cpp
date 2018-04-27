@@ -31,7 +31,7 @@ namespace arm_compute
 namespace graph
 {
 InputNode::InputNode(TensorDescriptor desc)
-    : _desc(desc)
+    : _desc(std::move(desc))
 {
     _outputs.resize(1, NullTensorID);
 }
@@ -52,11 +52,6 @@ TensorDescriptor InputNode::configure_output(size_t idx) const
 {
     ARM_COMPUTE_UNUSED(idx);
     return _desc;
-}
-
-Status InputNode::validate()
-{
-    return Status{};
 }
 
 NodeType InputNode::type() const

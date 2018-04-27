@@ -63,11 +63,6 @@ TensorDescriptor ReshapeLayerNode::configure_output(size_t idx) const
     return output_desc;
 }
 
-Status ReshapeLayerNode::validate()
-{
-    return Status{};
-}
-
 NodeType ReshapeLayerNode::type() const
 {
     return NodeType::ReshapeLayer;

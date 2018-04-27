@@ -65,11 +65,6 @@ TensorDescriptor EltwiseLayerNode::configure_output(size_t idx) const
     return src->desc();
 }
 
-Status EltwiseLayerNode::validate()
-{
-    return Status{};
-}
-
 NodeType EltwiseLayerNode::type() const
 {
     return NodeType::EltwiseLayer;

@@ -42,16 +42,17 @@ public:
      * @param[in] axis       (Optional) Axis to split on. Supported axis >= 2. Defaults to 0
      */
     SplitLayerNode(unsigned int num_splits, unsigned int axis = 0);
-    /** Computes split layer output shape
+    /** Computes split layer output descriptor
      *
-     * @param[in] input_shape Shape of the input
-     * @param[in] num_splits  Number of splits
-     * @param[in] axis        Axis to perform the split on
-     * @param[in] idx         Index of the split
+     * @param[in] input_descriptor Descriptor of the input tensor
+     * @param[in] num_splits       Number of splits
+     * @param[in] axis             Axis to perform the split on
+     * @param[in] idx              Index of the split
      *
-     * @return  A pair with the shape of the split and the starting coordinates
+     * @return  A pair with the descriptor of the split and the starting coordinates
      */
-    static std::pair<TensorShape, Coordinates> compute_output_shape(TensorShape input_shape, unsigned int num_splits, unsigned int axis, unsigned int idx);
+    static std::pair<TensorDescriptor, Coordinates> compute_output_descriptor(const TensorDescriptor &input_descriptor,
+                                                                              unsigned int num_splits, unsigned int axis, unsigned int idx);
     /** Number of splits accessor
      *
      * @return Number of splits
@@ -64,7 +65,7 @@ public:
     unsigned int axis() const;
 
     // Inherited overridden methods:
-    Status           validate() override;
+    Status           validate() const override;
     NodeType         type() const override;
     bool             forward_descriptors() override;
     TensorDescriptor configure_output(size_t idx) const override;

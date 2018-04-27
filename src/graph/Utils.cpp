@@ -89,15 +89,46 @@ PassManager create_default_pass_manager(Target target)
     return pm;
 }
 
-/** Default setups a graph Context
- *
- * @param[in] ctx Context to default initialize
- */
 void setup_default_graph_context(GraphContext &ctx)
 {
     for(const auto &backend : backends::BackendRegistry::get().backends())
     {
         backend.second->setup_backend_context(ctx);
+    }
+}
+
+size_t get_dimension_size(const TensorDescriptor &descriptor, const DataLayoutDimension data_layout_dimension)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(descriptor.layout == DataLayout::UNKNOWN, "Cannot retrieve the dimension index for an unknown layout!");
+    return descriptor.shape[get_dimension_idx(descriptor, data_layout_dimension)];
+}
+
+size_t get_dimension_idx(const TensorDescriptor &descriptor, const DataLayoutDimension data_layout_dimension)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(descriptor.layout == DataLayout::UNKNOWN, "Cannot retrieve the dimension index for an unknown layout!");
+
+    /* Return the index based on the data layout
+     * [N C H W]
+     * [3 2 1 0]
+     * [N H W C]
+     */
+    switch(data_layout_dimension)
+    {
+        case DataLayoutDimension::CHANNEL:
+            return (descriptor.layout == DataLayout::NCHW) ? 2 : 0;
+            break;
+        case DataLayoutDimension::HEIGHT:
+            return (descriptor.layout == DataLayout::NCHW) ? 1 : 2;
+            break;
+        case DataLayoutDimension::WIDTH:
+            return (descriptor.layout == DataLayout::NCHW) ? 0 : 1;
+            break;
+        case DataLayoutDimension::BATCHES:
+            return 3;
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Data layout index not supported!");
+            break;
     }
 }
 } // namespace graph

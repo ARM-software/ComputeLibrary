@@ -44,17 +44,16 @@ public:
      * @return Pooling Layer info
      */
     PoolingLayerInfo pooling_info() const;
-    /** Computes pooling output shape
+    /** Computes pooling output descriptor
      *
-     * @param[in] input_shape Input shape
-     * @param[in] info        Pooling operation attributes
+     * @param[in] input_descriptor Input descriptor
+     * @param[in] info             Pooling operation attributes
      *
-     * @return Output shape
+     * @return Output descriptor
      */
-    static TensorShape compute_output_shape(TensorShape input_shape, PoolingLayerInfo info);
+    static TensorDescriptor compute_output_descriptor(const TensorDescriptor &input_descriptor, PoolingLayerInfo info);
 
     // Inherited overridden methods:
-    Status           validate() override;
     NodeType         type() const override;
     bool             forward_descriptors() override;
     TensorDescriptor configure_output(size_t idx) const override;

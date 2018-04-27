@@ -201,9 +201,10 @@ class NumPyBinLoader final : public graph::ITensorAccessor
 public:
     /** Default Constructor
      *
-     * @param filename Binary file name
+     * @param[in] filename    Binary file name
+     * @param[in] file_layout (Optional) Layout of the numpy tensor data. Defaults to NCHW
      */
-    NumPyBinLoader(std::string filename);
+    NumPyBinLoader(std::string filename, DataLayout file_layout = DataLayout::NCHW);
     /** Allows instances to move constructed */
     NumPyBinLoader(NumPyBinLoader &&) = default;
 
@@ -212,6 +213,7 @@ public:
 
 private:
     const std::string _filename;
+    const DataLayout  _file_layout;
 };
 
 /** Generates appropriate random accessor
@@ -231,12 +233,15 @@ inline std::unique_ptr<graph::ITensorAccessor> get_random_accessor(PixelValue lo
  *
  * @note If path is empty will generate a DummyAccessor else will generate a NumPyBinLoader
  *
- * @param[in] path      Path to the data files
- * @param[in] data_file Relative path to the data files from path
+ * @param[in] path        Path to the data files
+ * @param[in] data_file   Relative path to the data files from path
+ * @param[in] file_layout (Optional) Layout of file. Defaults to NCHW
  *
  * @return An appropriate tensor accessor
  */
-inline std::unique_ptr<graph::ITensorAccessor> get_weights_accessor(const std::string &path, const std::string &data_file)
+inline std::unique_ptr<graph::ITensorAccessor> get_weights_accessor(const std::string &path,
+                                                                    const std::string &data_file,
+                                                                    DataLayout         file_layout = DataLayout::NCHW)
 {
     if(path.empty())
     {
@@ -244,7 +249,7 @@ inline std::unique_ptr<graph::ITensorAccessor> get_weights_accessor(const std::s
     }
     else
     {
-        return arm_compute::support::cpp14::make_unique<NumPyBinLoader>(path + data_file);
+        return arm_compute::support::cpp14::make_unique<NumPyBinLoader>(path + data_file, file_layout);
     }
 }
 
