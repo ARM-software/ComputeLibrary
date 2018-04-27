@@ -65,25 +65,24 @@ using CLHOGDetectorFixture = HOGDetectorValidationFixture<CLTensor,
                                                           uint8_t,
                                                           float>;
 
-// TODO (COMPMID-1087) : CLHOGDetector fails on hikey
-DISABLED_FIXTURE_DATA_TEST_CASE(RunSmall, CLHOGDetectorFixture, framework::DatasetMode::PRECOMMIT,
-                                combine(combine(combine(
-                                DetectionWindowStrideDataset,
-                                datasets::SmallHOGDescriptorDataset()),
-                                framework::dataset::make("Format", Format::U8)),
-                                framework::dataset::make("BorderMode", {BorderMode::CONSTANT, BorderMode::REPLICATE})))
+FIXTURE_DATA_TEST_CASE(RunSmall, CLHOGDetectorFixture, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(
+                       DetectionWindowStrideDataset,
+                       datasets::SmallHOGDescriptorDataset()),
+                       framework::dataset::make("Format", Format::U8)),
+                       framework::dataset::make("BorderMode", {BorderMode::CONSTANT, BorderMode::REPLICATE})))
 
 {
     // Validate output
     validate_detection_windows(_target.begin(), _target.end(), _reference.begin(), _reference.end(), tolerance);
 }
 
-DISABLED_FIXTURE_DATA_TEST_CASE(RunLarge, CLHOGDetectorFixture, framework::DatasetMode::NIGHTLY,
-                                combine(combine(combine(
-                                DetectionWindowStrideDataset,
-                                datasets::LargeHOGDescriptorDataset()),
-                                framework::dataset::make("Format", Format::U8)),
-                                framework::dataset::make("BorderMode", {BorderMode::CONSTANT, BorderMode::REPLICATE})))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLHOGDetectorFixture, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(
+                       DetectionWindowStrideDataset,
+                       datasets::LargeHOGDescriptorDataset()),
+                       framework::dataset::make("Format", Format::U8)),
+                       framework::dataset::make("BorderMode", {BorderMode::CONSTANT, BorderMode::REPLICATE})))
 {
     // Validate output
     validate_detection_windows(_target.begin(), _target.end(), _reference.begin(), _reference.end(), tolerance);
