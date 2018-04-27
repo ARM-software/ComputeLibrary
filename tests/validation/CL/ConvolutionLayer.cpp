@@ -45,6 +45,7 @@ namespace validation
 {
 namespace
 {
+constexpr AbsoluteTolerance<float>  absolute_tolerance_float(0.0001f);    /**< Absolute Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 RelativeTolerance<float>            tolerance_f32(0.05f);                 /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 RelativeTolerance<half_float::half> tolerance_f16(half_float::half(0.2)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
 constexpr AbsoluteTolerance<float>  tolerance_fixed(1.0f);                /**< Tolerance value for comparing reference's output against implementation's output for fixed point data types */
@@ -209,7 +210,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMConvolutionLayerFixture<float>, framework
                                                                                                                 ActivationFunctionsDataset))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32);
+    validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, absolute_tolerance_float);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
