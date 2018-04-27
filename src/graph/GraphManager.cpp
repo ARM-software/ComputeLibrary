@@ -46,7 +46,10 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     setup_default_graph_context(ctx);
 
     // Check if graph has been registered
-    ARM_COMPUTE_ERROR_ON_MSG(_workloads.find(graph.id()) != std::end(_workloads), "Graph is already registered!");
+    if(_workloads.find(graph.id()) != std::end(_workloads))
+    {
+        ARM_COMPUTE_ERROR("Graph is already registered!");
+    }
 
     // Force target to all graph construct
     // TODO (geopin01) : Support heterogeneous execution
