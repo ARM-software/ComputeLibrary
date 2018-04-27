@@ -27,7 +27,6 @@
 #include "arm_compute/core/NEON/kernels/convolution/common/alloc.hpp"
 #include "arm_compute/core/NEON/kernels/convolution/common/convolution.hpp"
 #include "gemm.hpp"
-#include "arm_compute/core/NEON/kernels/convolution/common/profiler.hpp"
 #include "arm_compute/core/NEON/kernels/convolution/common/shims.hpp"
 #include "arm_compute/core/NEON/kernels/convolution/common/tensor.hpp"
 #include "arm_compute/core/NEON/kernels/convolution/common/utils.hpp"
@@ -439,8 +438,6 @@ class WinogradGEMM
         const int tile_rows;  /** Number of rows of tiles. */
         const int tile_cols;  /** Number of columns of tiles. */
         const int M, K, N;    /** Sizes of underlying fundamental matrix multiplications. */
-
-        profiler prof;
     };
 };
 

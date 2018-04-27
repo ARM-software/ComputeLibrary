@@ -24,6 +24,8 @@
 #include "arm_compute/core/NEON/kernels/convolution/winograd/winograd_gemm.hpp"
 #include "arm_compute/core/NEON/kernels/convolution/winograd/batched_blocked_gemm.hpp"
 
+#include <cstring>
+
 using namespace winograd;
 
 /** Get the output shape of a convolution. */
@@ -243,8 +245,7 @@ WinogradGEMM<output_tile_rows, output_tile_cols, kernel_rows, kernel_cols>::Conv
     tile_cols(iceildiv(output_shape.n_cols, output_tile_cols)),
     M(input_shape.n_batches * tile_rows * tile_cols),
     K(kernel_shape.n_input_channels),
-    N(kernel_shape.n_output_channels),
-    prof()
+    N(kernel_shape.n_output_channels)
 {
   // Create pointers to the kernel matrices
   const int kernel_matrix_size_bytes = get_kernel_matrix_size(kernel_shape);
@@ -317,20 +318,12 @@ Convolution<TOut, TIn>::transform_weights(
     kernel_hwio = reinterpret_cast<TIn *>(transform_working_space);
 
     // Re-order the weights from OIHW to HWIO
-    this->prof(
-      "Weight reorder",
-      [&kernel, &kernel_hwio, this] () {
-        reorder::ofm_ifm_h_w_to_h_w_ifm_ofm(
-          kernel, const_cast<TIn *>(kernel_hwio),
-          kernel_shape.n_output_channels,
-          kernel_shape.n_input_channels,
-          kernel_shape.n_rows,
-          kernel_shape.n_cols
-        );
-      },
-      kernel_shape.size() * sizeof(TIn),
-      0,
-      kernel_shape.size() * sizeof(TIn)
+    reorder::ofm_ifm_h_w_to_h_w_ifm_ofm(
+      kernel, const_cast<TIn *>(kernel_hwio),
+      kernel_shape.n_output_channels,
+      kernel_shape.n_input_channels,
+      kernel_shape.n_rows,
+      kernel_shape.n_cols
     );
   }
 
@@ -344,17 +337,7 @@ Convolution<TOut, TIn>::transform_weights(
   );
 
   // Transform the weights into the Winograd domain
-  auto kernel_prep = [&] ()
-  {
-    weights_transform.run(0, weights_transform.get_window());
-  };
-
-  prof(
-    "Kernel Prep", kernel_prep,
-    WeightsTransformT::bytes_read(kernel_shape),
-    WeightsTransformT::ops_performed(kernel_shape),
-    WeightsTransformT::bytes_written(kernel_shape)
-  );
+  weights_transform.run(0, weights_transform.get_window());
 
   // Free memory if we allocated it
   if (allocated_working_space)
@@ -419,18 +402,12 @@ Convolution<TOut, TIn>::execute(
       ws_bytes + N_GEMMS*(in_matrix_stride_bytes + out_matrix_stride_bytes)
     );
 
-    this->prof(
-      "NCHW -> NHWC",
-      [input, input_shape, input_nhwc] () {
-        reorder::nchw_to_nhwc(
-          input, const_cast<TIn *>(input_nhwc),
-          input_shape.n_batches,
-          input_shape.n_channels,
-          input_shape.n_rows,
-          input_shape.n_cols
-        );
-      },
-      input_shape.size(), 0, input_shape.size()
+    reorder::nchw_to_nhwc(
+      input, const_cast<TIn *>(input_nhwc),
+      input_shape.n_batches,
+      input_shape.n_channels,
+      input_shape.n_rows,
+      input_shape.n_cols
     );
   }
 
@@ -456,15 +433,7 @@ Convolution<TOut, TIn>::execute(
   );
 
   // Transform the input into the Winograd domain
-  auto input_prep = [&] () {
-    input_transform.run(0, input_transform.get_window());
-  };
-  prof(
-    "Input Prep", input_prep,
-    InputTransform<TIn>::bytes_read(input_shape),
-    InputTransform<TIn>::ops_performed(input_shape),
-    InputTransform<TIn>::bytes_written(input_shape)
-  );
+  input_transform.run(0, input_transform.get_window());
 
   // Perform the GEMMs
   const int kernel_matrix_stride_bytes = get_kernel_matrix_size(kernel_shape);
@@ -482,8 +451,7 @@ Convolution<TOut, TIn>::execute(
   );
   for (unsigned int i = 0; i < gemms.get_window(); i++)
   {
-    auto run_gemm = [&] () { gemms.run(i, i+1); };
-    prof("GEMM", run_gemm, 0, 0, 0);
+    gemms.run(i, i+1);
   }
 
   // If the output tensor needs to be in NCHW form then store the NHWC output
@@ -510,31 +478,17 @@ Convolution<TOut, TIn>::execute(
     output_shape.n_cols,
     output_shape.n_channels
   );
-  auto output_prep = [&] () {
-    output_transform.run(0, output_transform.get_window());
-  };
-  prof(
-    "Output Comp", output_prep,
-    OutputTransform<TOut>::bytes_read(output_shape),
-    OutputTransform<TOut>::ops_performed(output_shape),
-    OutputTransform<TOut>::bytes_written(output_shape)
-  );
+  output_transform.run(0, output_transform.get_window());
 
   // Reorder the output tensor if it is required to be in NCHW form.
   if (input_shape.ordering == NCHW)
   {
-    prof(
-      "NHWC -> NCHW",
-      [output_nhwc, output_shape, output] () {
-        reorder::nhwc_to_nchw(
-          output_nhwc, output,
-          output_shape.n_batches,
-          output_shape.n_rows,
-          output_shape.n_cols,
-          output_shape.n_channels
-        );
-      },
-      output_shape.size(), 0, output_shape.size()
+    reorder::nhwc_to_nchw(
+      output_nhwc, output,
+      output_shape.n_batches,
+      output_shape.n_rows,
+      output_shape.n_cols,
+      output_shape.n_channels
     );
   }
 
