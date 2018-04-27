@@ -305,7 +305,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     unsigned int mat_weights_cols = weights->dimension(3);
     unsigned int mat_weights_rows = weights->dimension(0) * weights->dimension(1) * weights->dimension(2) + bias_element;
 
-    CLConvolutionLayerReshapeWeights::validate(weights, biases, nullptr);
+    ARM_COMPUTE_RETURN_ON_ERROR(CLConvolutionLayerReshapeWeights::validate(weights, is_quantized? nullptr:biases, nullptr));
 
     // Create tensor info for im2col reshaped inputs
     const unsigned int mat_input_cols = mat_weights_rows;
@@ -316,7 +316,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     shape_im2col.set(2, 1);
     TensorInfo im2col_reshaped_info(shape_im2col, 1, dt, input->fixed_point_position());
     im2col_reshaped_info.set_quantization_info(input->quantization_info());
-    CLIm2ColKernel::validate(input, &im2col_reshaped_info, Size2D(kernel_width, kernel_height), conv_info, append_bias, dilation);
+    ARM_COMPUTE_RETURN_ON_ERROR(CLIm2ColKernel::validate(input, &im2col_reshaped_info, Size2D(kernel_width, kernel_height), conv_info, append_bias, dilation));
 
     // Create GEMM output tensor
     TensorShape shape_gemm = im2col_reshaped_info.tensor_shape();
@@ -327,9 +327,10 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     TensorInfo info_gemm(shape_gemm, 1, gemm_data_type, input->fixed_point_position());
     info_gemm.set_quantization_info(output->quantization_info());
 
-    validate_mm(&im2col_reshaped_info, weights, &info_gemm);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(&im2col_reshaped_info, weights, &info_gemm));
+    TensorInfo tmp_info(shape_gemm, 1, DataType::QASYMM8, input->fixed_point_position());
+    tmp_info.set_quantization_info(output->quantization_info());
 
-    TensorInfo tmp_info(input->tensor_shape(), 1, DataType::QASYMM8, input->fixed_point_position());
     if(is_quantized)
     {
         float multiplier = input->quantization_info().scale * weights->quantization_info().scale / output->quantization_info().scale;
@@ -340,7 +341,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     }
 
     // Validate Col2Im
-    CLCol2ImKernel::validate(is_quantized ? &tmp_info : &info_gemm, output, std::make_pair(conv_w, conv_h));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLCol2ImKernel::validate(is_quantized ? &tmp_info : &info_gemm, output, std::make_pair(conv_w, conv_h)));
 
     if(biases != nullptr)
     {
@@ -360,7 +361,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     //Validate Activation Layer
     if(act_info.enabled())
     {
-        CLActivationLayer::validate(output, nullptr, act_info);
+        ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayer::validate(output, nullptr, act_info));
     }
 
     return Status{};
