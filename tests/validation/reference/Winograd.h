@@ -51,7 +51,7 @@ template <typename T>
 SimpleTensor<T> winograd_filter_transform(const SimpleTensor<T> &in, const TensorShape &output_shape, const WinogradInfo &winograd_info);
 
 template <typename T>
-SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const TensorShape &output_shape, const WinogradInfo &winograd_info);
+SimpleTensor<T> winograd_output_transform(const SimpleTensor<T> &in, const SimpleTensor<T> &b, const TensorShape &output_shape, const WinogradInfo &winograd_info);
 } // namespace reference
 } // namespace validation
 } // namespace test

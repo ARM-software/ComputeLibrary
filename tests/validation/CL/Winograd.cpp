@@ -51,7 +51,8 @@ namespace validation
 {
 namespace
 {
-constexpr AbsoluteTolerance<float> tolerance_f32(0.001f);
+constexpr AbsoluteTolerance<float> tolerance_f32(0.0001f);
+constexpr AbsoluteTolerance<float> tolerance_fast_math_f32(0.1f);
 } // namespace
 
 using namespace arm_compute::misc::shape_calculator;
@@ -379,6 +380,27 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFixture, framework::D
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
+TEST_SUITE(EnableFastMath)
+using CLWinogradConvolutionLayerFastMathFixture = WinogradConvolutionLayerFastMathValidationFixture<CLTensor, CLAccessor, CLWinogradConvolutionLayer, float>;
+FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(framework::dataset::concat(datasets::SmallWinogradConvolutionLayer3x3Dataset(), datasets::SmallWinogradConvolutionLayer5x5Dataset()),
+                                       framework::dataset::make("DataType", { DataType::F32 })),
+                               framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_fast_math_f32);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::NIGHTLY,
+                       combine(combine(framework::dataset::concat(datasets::LargeWinogradConvolutionLayer3x3Dataset(), datasets::LargeWinogradConvolutionLayer5x5Dataset()),
+                                       framework::dataset::make("DataType", { DataType::F32 })),
+                               framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_fast_math_f32);
+}
+
+TEST_SUITE_END() // EnableFastMath
 TEST_SUITE_END() // ConvolutionLayer
 
 TEST_SUITE_END() // Winograd

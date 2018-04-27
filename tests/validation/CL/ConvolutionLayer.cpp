@@ -73,44 +73,72 @@ const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo
 TEST_SUITE(CL)
 TEST_SUITE(ConvolutionLayer)
 
-DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
-                                                                                           framework::dataset::make("InputInfo", { TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::F32, 0),
-                                                                                                                    TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::F32, 0),
-                                                                                                                    TensorInfo(TensorShape(23U, 27U, 5U, 4U), 1, DataType::F32, 0),
-                                                                                                                    TensorInfo(TensorShape(3U, 3U, 2U, 1U), 1, DataType::F32, 0),
-                                                                                                                    TensorInfo(TensorShape(33U, 27U, 7U, 4U), 1, DataType::F32, 0)
-                                                                                                                                 }),
-                                                                                           framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(5U, 5U, 2U, 19U), 1, DataType::F32, 0),
-                                                                                                                    TensorInfo(TensorShape(5U, 5U, 2U, 19U), 1, DataType::F32, 0),
-                                                                                                                    TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
-                                                                                                                    TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
-                                                                                                                    TensorInfo(TensorShape(5U, 5U, 7U, 16U), 1, DataType::F16, 0)
-                                                                                                                                   })),
-                                                                                       framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(15U, 15U, 19U), 1, DataType::F32, 0),
-                                                                                                                TensorInfo(TensorShape(15U, 15U, 19U), 1, DataType::F32, 0),
-                                                                                                                TensorInfo(TensorShape(21U, 25U, 21U, 4U), 1, DataType::F32, 0),
-                                                                                                                TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32, 0),
-                                                                                                                TensorInfo(TensorShape(11U, 12U, 16U, 4U), 1, DataType::F32, 0)
-                                                                                                                              })),
-                                                                                   framework::dataset::make("ConvInfo", { PadStrideInfo(1, 2, 1, 1),
-                                                                                                            PadStrideInfo(1, 2, 1, 1),
-                                                                                                            PadStrideInfo(1, 1, 0, 0),
-                                                                                                            PadStrideInfo(2, 1, 0, 0),
-                                                                                                            PadStrideInfo(3, 2, 1, 0)
-                                                                                                                        })),
-                                                                               framework::dataset::make("GpuTarget", { GPUTarget::BIFROST,
-                                                                                                                       GPUTarget::MIDGARD,
-                                                                                                                       GPUTarget::G71,
-                                                                                                                       GPUTarget::MIDGARD,
-                                                                                                                       GPUTarget::BIFROST
-                                                                                                                     })),
-
-                                                                           framework::dataset::make("Expected", { ConvolutionMethod::GEMM, ConvolutionMethod::GEMM, ConvolutionMethod::WINOGRAD, ConvolutionMethod::GEMM, ConvolutionMethod::GEMM })),
-               input_info, weights_info, output_info, conv_info, gpu_target, expected)
+DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(
+                                                                                                   framework::dataset::make("InputInfo", { TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::F32, 0),
+                                                                                                           TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::F32, 0),
+                                                                                                           TensorInfo(TensorShape(23U, 27U, 5U, 4U), 1, DataType::F32, 0),
+                                                                                                           TensorInfo(TensorShape(3U, 3U, 2U, 1U), 1, DataType::F32, 0),
+                                                                                                           TensorInfo(TensorShape(33U, 27U, 7U, 4U), 1, DataType::F32, 0),
+                                                                                                           TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::F32, 0),
+                                                                                                           TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::F32, 0)
+                                                                                                                                         }),
+                                                                                                   framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(5U, 5U, 2U, 19U), 1, DataType::F32, 0),
+                                                                                                           TensorInfo(TensorShape(5U, 5U, 2U, 19U), 1, DataType::F32, 0),
+                                                                                                           TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
+                                                                                                           TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
+                                                                                                           TensorInfo(TensorShape(5U, 5U, 7U, 16U), 1, DataType::F16, 0),
+                                                                                                           TensorInfo(TensorShape(5U, 5U, 2U, 19U), 1, DataType::F32, 0),
+                                                                                                           TensorInfo(TensorShape(5U, 5U, 2U, 19U), 1, DataType::F32, 0)
+                                                                                                                                           })),
+                                                                                               framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(15U, 15U, 19U), 1, DataType::F32, 0),
+                                                                                                                        TensorInfo(TensorShape(15U, 15U, 19U), 1, DataType::F32, 0),
+                                                                                                                        TensorInfo(TensorShape(21U, 25U, 21U, 4U), 1, DataType::F32, 0),
+                                                                                                                        TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32, 0),
+                                                                                                                        TensorInfo(TensorShape(11U, 12U, 16U, 4U), 1, DataType::F32, 0),
+                                                                                                                        TensorInfo(TensorShape(17U, 31U, 19U), 1, DataType::F32, 0),
+                                                                                                                        TensorInfo(TensorShape(17U, 31U, 19U), 1, DataType::F32, 0)
+                                                                                                                                      })),
+                                                                                           framework::dataset::make("ConvInfo", { PadStrideInfo(1, 2, 1, 1),
+                                                                                                                    PadStrideInfo(1, 2, 1, 1),
+                                                                                                                    PadStrideInfo(1, 1, 0, 0),
+                                                                                                                    PadStrideInfo(2, 1, 0, 0),
+                                                                                                                    PadStrideInfo(3, 2, 1, 0),
+                                                                                                                    PadStrideInfo(1, 1, 2, 2),
+                                                                                                                    PadStrideInfo(1, 1, 2, 2)
+                                                                                                                                })),
+                                                                                       framework::dataset::make("GpuTarget", { GPUTarget::BIFROST,
+                                                                                                                GPUTarget::MIDGARD,
+                                                                                                                GPUTarget::G71,
+                                                                                                                GPUTarget::MIDGARD,
+                                                                                                                GPUTarget::BIFROST,
+                                                                                                                GPUTarget::BIFROST,
+                                                                                                                GPUTarget::BIFROST
+                                                                                                                             })),
+                                                                                   framework::dataset::make("Dilation",
 {
-    ConvolutionMethod is_valid = CLConvolutionLayer::get_convolution_method(&input_info.clone()->set_is_resizable(false),
-                                                                            &weights_info.clone()->set_is_resizable(false),
-                                                                            &output_info.clone()->set_is_resizable(false), conv_info, WeightsInfo(), ActivationLayerInfo(), gpu_target);
+    Size2D(1U, 1U),
+    Size2D(1U, 1U),
+    Size2D(1U, 1U),
+    Size2D(1U, 1U),
+    Size2D(1U, 1U),
+    Size2D(1U, 1U),
+    Size2D(2U, 1U),
+})),
+framework::dataset::make("EnableFastMath", { false, false, false, false, false, true, true })),
+framework::dataset::make("Expected",
+{
+    ConvolutionMethod::GEMM, ConvolutionMethod::GEMM, ConvolutionMethod::WINOGRAD, ConvolutionMethod::GEMM, ConvolutionMethod::GEMM, ConvolutionMethod::WINOGRAD, ConvolutionMethod::GEMM,
+})),
+input_info, weights_info, output_info, conv_info, gpu_target, dilation, enable_fast_math, expected)
+{
+    ConvolutionMethod is_valid = CLConvolutionLayer::get_convolution_method(&input_info.clone()->set_is_resizable(true),
+                                                                            &weights_info.clone()->set_is_resizable(true),
+                                                                            &output_info.clone()->set_is_resizable(true), conv_info,
+                                                                            WeightsInfo(),
+                                                                            ActivationLayerInfo(),
+                                                                            gpu_target,
+                                                                            dilation,
+                                                                            enable_fast_math);
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
 TEST_SUITE_END()

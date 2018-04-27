@@ -104,9 +104,9 @@ DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(z
                                                                            framework::dataset::make("Expected", { ConvolutionMethod::GEMM, ConvolutionMethod::GEMM, ConvolutionMethod::WINOGRAD, ConvolutionMethod::GEMM, ConvolutionMethod::GEMM })),
                input_info, weights_info, output_info, conv_info, gpu_target, dilation, expected)
 {
-    ConvolutionMethod is_valid = CLConvolutionLayer::get_convolution_method(&input_info.clone()->set_is_resizable(false),
-                                                                            &weights_info.clone()->set_is_resizable(false),
-                                                                            &output_info.clone()->set_is_resizable(false), conv_info, WeightsInfo(), ActivationLayerInfo(), gpu_target, dilation);
+    ConvolutionMethod is_valid = CLConvolutionLayer::get_convolution_method(&input_info.clone()->set_is_resizable(true),
+                                                                            &weights_info.clone()->set_is_resizable(true),
+                                                                            &output_info.clone()->set_is_resizable(true), conv_info, WeightsInfo(), ActivationLayerInfo(), gpu_target, dilation);
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
 TEST_SUITE_END()

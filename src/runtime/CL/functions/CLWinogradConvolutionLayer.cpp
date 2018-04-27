@@ -31,33 +31,69 @@
 
 using namespace arm_compute;
 
+namespace
+{
+Size2D winograd_output_tile(const Size2D &input_dims, const Size2D &kernel_dims, bool enable_fast_math)
+{
+    Size2D output_tile = Size2D{};
+
+    if(kernel_dims == Size2D(3U, 3U))
+    {
+        output_tile = ((input_dims.width <= 4 && input_dims.height <= 4) || !enable_fast_math) ? Size2D(2U, 2U) : Size2D(4U, 4U);
+    }
+    else if(kernel_dims == Size2D(5U, 5U))
+    {
+        output_tile = Size2D(4U, 4U);
+    }
+
+    return output_tile;
+}
+
+bool check_support_fast_math(const Size2D &output_tile, const Size2D &kernel_size)
+{
+    // Check if we want to configure a Winograd configuration which requires fast math
+    using WinogradConfiguration = std::pair<std::pair<int, int>, std::pair<int, int>>;
+
+    std::vector<WinogradConfiguration> fast_math_winograd =
+    {
+        WinogradConfiguration(std::pair<int, int>(4, 4), std::pair<int, int>(3, 3)),
+        WinogradConfiguration(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5))
+    };
+
+    auto p = std::make_pair(std::pair<int, int>(output_tile.width, output_tile.height),
+                            std::pair<int, int>(kernel_size.width, kernel_size.height));
+
+    return std::find(fast_math_winograd.begin(), fast_math_winograd.end(), p) != fast_math_winograd.end();
+}
+} // namespace
+
 CLWinogradConvolutionLayer::CLWinogradConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(memory_manager), _batched_mm(memory_manager), _input_transform(), _filter_transform(), _output_transform(), _activationlayer_function(), _input0(), _input1(), _batched_mm_output(),
       _is_first_run(true), _is_activationlayer_enabled(false)
 {
 }
 
-void CLWinogradConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
+void CLWinogradConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info,
+                                           bool enable_fast_math)
 {
     // Get indices for the width and height
     const size_t idx_width  = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::WIDTH);
     const size_t idx_height = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
 
-    // Input shape
-    const TensorShape  input_shape = input->info()->tensor_shape();
-    const unsigned int input_w     = input->info()->tensor_shape()[idx_width];
-    const unsigned int input_h     = input->info()->tensor_shape()[idx_height];
+    // Input shape, kernel size and output tile
+    const Size2D input_dims  = Size2D(input->info()->tensor_shape()[idx_width], input->info()->tensor_shape()[idx_height]);
+    const Size2D kernel_size = Size2D(weights->info()->tensor_shape()[idx_width], weights->info()->tensor_shape()[idx_height]);
+    const Size2D output_tile = winograd_output_tile(input_dims, kernel_size, enable_fast_math);
 
-    // Kernel size
-    const unsigned int kernel_w = weights->info()->tensor_shape()[idx_width];
-    const unsigned int kernel_h = weights->info()->tensor_shape()[idx_height];
-
-    //Winograd output tile
-    const Size2D output_tile = (Size2D(kernel_w, kernel_h) == Size2D(3U, 3U) && input_w <= 4 && input_h <= 4) ? Size2D(2U, 2U) : Size2D(4U, 4U);
+    // Check if the Winograd configuration requires fast math
+    if(!enable_fast_math)
+    {
+        ARM_COMPUTE_ERROR_ON_MSG(check_support_fast_math(output_tile, kernel_size), "This Winograd configuration requires enable_fast_math=true");
+    }
 
     const WinogradInfo winograd_info = WinogradInfo(output_tile,
-                                                    Size2D(kernel_w, kernel_h),
-                                                    Size2D(input_shape[idx_width], input_shape[idx_height]),
+                                                    kernel_size,
+                                                    input_dims,
                                                     conv_info,
                                                     input->info()->data_layout());
 
@@ -93,27 +129,26 @@ void CLWinogradConvolutionLayer::configure(ICLTensor *input, const ICLTensor *we
 }
 
 Status CLWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                            const ActivationLayerInfo &act_info)
+                                            const ActivationLayerInfo &act_info, bool enable_fast_math)
 {
     // Get indeces for the width and height
     const size_t idx_width  = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
     const size_t idx_height = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
 
-    // Input shape
-    const TensorShape  input_shape = input->tensor_shape();
-    const unsigned int input_w     = input->tensor_shape()[idx_width];
-    const unsigned int input_h     = input->tensor_shape()[idx_height];
+    // Input shape, kernel size and output tile
+    const Size2D input_dims  = Size2D(input->tensor_shape()[idx_width], input->tensor_shape()[idx_height]);
+    const Size2D kernel_size = Size2D(weights->tensor_shape()[idx_width], weights->tensor_shape()[idx_height]);
+    const Size2D output_tile = winograd_output_tile(input_dims, kernel_size, enable_fast_math);
 
-    // Kernel size
-    const unsigned int kernel_w = weights->tensor_shape()[idx_width];
-    const unsigned int kernel_h = weights->tensor_shape()[idx_height];
-
-    //Winograd output tile
-    const Size2D output_tile = (Size2D(kernel_w, kernel_h) == Size2D(3U, 3U) && input_w <= 4 && input_h <= 4) ? Size2D(2U, 2U) : Size2D(4U, 4U);
+    // Check if the Winograd configuration requires fast math
+    if(!enable_fast_math)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(check_support_fast_math(output_tile, kernel_size), "This Winograd configuration requires enable_fast_math=true");
+    }
 
     const WinogradInfo winograd_info = WinogradInfo(output_tile,
-                                                    Size2D(kernel_w, kernel_h),
-                                                    Size2D(input_shape[idx_width], input_shape[idx_height]),
+                                                    kernel_size,
+                                                    input_dims,
                                                     conv_info,
                                                     input->data_layout());
 
@@ -139,7 +174,7 @@ Status CLWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITen
     // Validate Activation Layer
     if(act_info.enabled())
     {
-        CLActivationLayer::validate(output, nullptr, act_info);
+        ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayer::validate(output, nullptr, act_info));
     }
 
     return Status{};

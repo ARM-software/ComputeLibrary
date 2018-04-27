@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,23 +41,44 @@ SimpleTensor<T> gemm(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const S
     SimpleTensor<T> dst{ c.shape(), c.data_type(), 1, c.fixed_point_position() };
 
     // Compute reference
-    const int M = dst.shape().y();
-    const int N = dst.shape().x();
+    const int M = a.shape().y();
+    const int N = b.shape().x();
     const int K = a.shape().x();
+    const int D = a.shape().z(); // Number of matrices in a batch
+    const int W = a.shape()[3];  // Number of batched-gemm (Winograd case)
 
-    for(int row = 0; row < M; ++row)
+    const int a_stride_z = K * M;
+    const int a_stride_w = K * M * D;
+
+    const int b_stride_z = b.shape().num_dimensions() > 2 ? N * K : 0;     // Do not slide the matrix B along the 3th dimension in case matrix B has less than 3 dimensions
+    const int b_stride_w = b.shape().num_dimensions() > 3 ? K * N * D : 0; // Do not slide the matrix B along the 4th dimension in case matrix B has less than 4 dimensions
+
+    const int c_stride_z = N * M;
+    const int c_stride_w = N * M * D;
+
+    for(int w = 0; w < W; ++w)
     {
-        for(int col = 0; col < N; ++col)
+        for(int depth = 0; depth < D; ++depth)
         {
-            T acc(0);
+            const int base_addr_a = depth * a_stride_z + w * a_stride_w;
+            const int base_addr_b = depth * b_stride_z + w * b_stride_w;
+            const int base_addr_c = depth * c_stride_z + w * c_stride_w;
 
-            for(int k = 0; k < K; ++k)
+            for(int row = 0; row < M; ++row)
             {
-                acc += a[row * K + k] * b[k * N + col];
-            }
+                for(int col = 0; col < N; ++col)
+                {
+                    T acc(0);
 
-            // Finalize the result: alpha * A * B + beta * C
-            dst[col + row * N] = alpha * acc + beta * c[col + row * N];
+                    for(int k = 0; k < K; ++k)
+                    {
+                        acc += a[base_addr_a + k + row * K] * b[base_addr_b + col + k * N];
+                    }
+
+                    // Finalize the result: alpha * A * B + beta * C
+                    dst[base_addr_c + col + row * N] = alpha * acc + beta * c[base_addr_c + col + row * N];
+                }
+            }
         }
     }
 
@@ -75,37 +96,58 @@ SimpleTensor<T> gemm(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const S
     // Compute reference
     using promoted_type = fixed_point_arithmetic::traits::promote_t<T>;
 
-    const int M                    = dst.shape().y();
-    const int N                    = dst.shape().x();
-    const int K                    = a.shape().x();
-    const int fixed_point_position = a.fixed_point_position();
+    const int M = dst.shape().y();
+    const int N = dst.shape().x();
+    const int K = a.shape().x();
+    const int D = a.shape().z(); // Number of matrices in a batch
+    const int W = a.shape()[3];  // Number of batched-gemm (Winograd case)
 
+    const int a_stride_z = K * M;
+    const int a_stride_w = K * M * D;
+
+    const int b_stride_z = b.shape().num_dimensions() > 2 ? N * K : 0;     // Do not slide the matrix B along the 3th dimension in case matrix B has less than 3 dimensions
+    const int b_stride_w = b.shape().num_dimensions() > 3 ? K * N * D : 0; // Do not slide the matrix B along the 4th dimension in case matrix B has less than 4 dimensions
+
+    const int c_stride_z = N * M;
+    const int c_stride_w = N * M * D;
+
+    const int            fixed_point_position = a.fixed_point_position();
     const fixed_point<T> alpha_q(alpha, fixed_point_position);
     const fixed_point<T> beta_q(beta, fixed_point_position);
 
-    for(int row = 0; row < M; ++row)
+    for(int w = 0; w < W; ++w)
     {
-        for(int col = 0; col < N; ++col)
+        for(int depth = 0; depth < D; ++depth)
         {
-            fixed_point<promoted_type> acc_q(0, fixed_point_position);
+            const int base_addr_a = depth * a_stride_z + w * a_stride_w;
+            const int base_addr_b = depth * b_stride_z + w * b_stride_w;
+            const int base_addr_c = depth * c_stride_z + w * c_stride_w;
 
-            for(int k = 0; k < K; ++k)
+            for(int row = 0; row < M; ++row)
             {
-                const fixed_point<promoted_type> a0_q(a[row * K + k], fixed_point_position, true);
-                const fixed_point<promoted_type> b0_q(b[k * N + col], fixed_point_position, true);
+                for(int col = 0; col < N; ++col)
+                {
+                    fixed_point<promoted_type> acc_q(0, fixed_point_position);
 
-                acc_q = acc_q + (a0_q * b0_q);
+                    for(int k = 0; k < K; ++k)
+                    {
+                        const fixed_point<promoted_type> a0_q(a[base_addr_a + row * K + k], fixed_point_position, true);
+                        const fixed_point<promoted_type> b0_q(b[base_addr_b + k * N + col], fixed_point_position, true);
+
+                        acc_q = acc_q + (a0_q * b0_q);
+                    }
+
+                    // Finalize the result: alpha * A * B + beta * C
+                    const fixed_point<T> c0_q(c[base_addr_c + col + row * N], fixed_point_position, true);
+
+                    fixed_point<T> res_q(acc_q);
+                    res_q = alpha_q * res_q;
+                    res_q = res_q + (beta_q * c0_q);
+
+                    // Store the result
+                    dst[base_addr_c + col + row * N] = res_q.raw();
+                }
             }
-
-            // Finalize the result: alpha * A * B + beta * C
-            const fixed_point<T> c0_q(c[col + row * N], fixed_point_position, true);
-
-            fixed_point<T> res_q(acc_q);
-            res_q = alpha_q * res_q;
-            res_q = res_q + (beta_q * c0_q);
-
-            // Store the result
-            dst[col + row * N] = res_q.raw();
         }
     }
 
