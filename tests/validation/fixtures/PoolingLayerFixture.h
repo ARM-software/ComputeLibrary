@@ -53,14 +53,8 @@ public:
         _quantization_info = quantization_info;
         _pool_info         = pool_info;
 
-        // Change shape in case of NHWC.
-        if(data_layout == DataLayout::NHWC)
-        {
-            permute(shape, PermutationVector(2U, 0U, 1U));
-        }
-
         _target    = compute_target(shape, pool_info, data_type, data_layout, fractional_bits, quantization_info);
-        _reference = compute_reference(shape, pool_info, data_type, data_layout, fractional_bits, quantization_info);
+        _reference = compute_reference(shape, pool_info, data_type, fractional_bits, quantization_info);
     }
 
 protected:
@@ -84,9 +78,15 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape &shape, PoolingLayerInfo info,
+    TensorType compute_target(TensorShape shape, PoolingLayerInfo info,
                               DataType data_type, DataLayout data_layout, int fixed_point_position, QuantizationInfo quantization_info)
     {
+        // Change shape in case of NHWC.
+        if(data_layout == DataLayout::NHWC)
+        {
+            permute(shape, PermutationVector(2U, 0U, 1U));
+        }
+
         // Create tensors
         TensorType src = create_tensor<TensorType>(shape, data_type, 1, fixed_point_position, quantization_info, data_layout);
         TensorType dst;
@@ -115,10 +115,10 @@ protected:
     }
 
     SimpleTensor<T> compute_reference(const TensorShape &shape, PoolingLayerInfo info,
-                                      DataType data_type, DataLayout data_layout, int fixed_point_position, QuantizationInfo quantization_info)
+                                      DataType data_type, int fixed_point_position, QuantizationInfo quantization_info)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, data_type, 1, fixed_point_position, quantization_info, data_layout };
+        SimpleTensor<T> src{ shape, data_type, 1, fixed_point_position, quantization_info };
 
         // Fill reference
         fill(src);

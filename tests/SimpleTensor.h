@@ -235,7 +235,8 @@ SimpleTensor<T>::SimpleTensor(TensorShape shape, Format format, int fixed_point_
       _shape(shape),
       _format(format),
       _fixed_point_position(fixed_point_position),
-      _quantization_info()
+      _quantization_info(),
+      _data_layout(DataLayout::NCHW)
 {
     _num_channels = num_channels();
     _buffer       = support::cpp14::make_unique<T[]>(num_elements() * _num_channels);
@@ -262,7 +263,8 @@ SimpleTensor<T>::SimpleTensor(const SimpleTensor &tensor)
       _data_type(tensor.data_type()),
       _num_channels(tensor.num_channels()),
       _fixed_point_position(tensor.fixed_point_position()),
-      _quantization_info(tensor.quantization_info())
+      _quantization_info(tensor.quantization_info()),
+      _data_layout(tensor.data_layout())
 {
     _buffer = support::cpp14::make_unique<T[]>(tensor.num_elements() * num_channels());
     std::copy_n(tensor.data(), num_elements() * num_channels(), _buffer.get());

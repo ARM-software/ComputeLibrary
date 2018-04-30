@@ -52,13 +52,8 @@ public:
         _use_beta        = use_beta;
         _use_gamma       = use_gamma;
 
-        if(data_layout == DataLayout::NHWC)
-        {
-            permute(shape0, PermutationVector(2U, 0U, 1U));
-        }
-
         _target    = compute_target(shape0, shape1, epsilon, act_info, dt, data_layout, fractional_bits);
-        _reference = compute_reference(shape0, shape1, epsilon, act_info, dt, data_layout, fractional_bits);
+        _reference = compute_reference(shape0, shape1, epsilon, act_info, dt, fractional_bits);
     }
 
 protected:
@@ -125,8 +120,13 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape &shape0, const TensorShape &shape1, float epsilon, ActivationLayerInfo act_info, DataType dt, DataLayout data_layout, int fixed_point_position)
+    TensorType compute_target(TensorShape shape0, const TensorShape &shape1, float epsilon, ActivationLayerInfo act_info, DataType dt, DataLayout data_layout, int fixed_point_position)
     {
+        if(data_layout == DataLayout::NHWC)
+        {
+            permute(shape0, PermutationVector(2U, 0U, 1U));
+        }
+
         // Create tensors
         TensorType src   = create_tensor<TensorType>(shape0, dt, 1, fixed_point_position, QuantizationInfo(), data_layout);
         TensorType dst   = create_tensor<TensorType>(shape0, dt, 1, fixed_point_position, QuantizationInfo(), data_layout);
@@ -172,10 +172,10 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape0, const TensorShape &shape1, float epsilon, ActivationLayerInfo act_info, DataType dt, DataLayout data_layout, int fixed_point_position)
+    SimpleTensor<T> compute_reference(const TensorShape &shape0, const TensorShape &shape1, float epsilon, ActivationLayerInfo act_info, DataType dt, int fixed_point_position)
     {
         // Create reference
-        SimpleTensor<T> ref_src{ shape0, dt, 1, fixed_point_position, QuantizationInfo(), data_layout };
+        SimpleTensor<T> ref_src{ shape0, dt, 1, fixed_point_position };
         SimpleTensor<T> ref_mean{ shape1, dt, 1, fixed_point_position };
         SimpleTensor<T> ref_var{ shape1, dt, 1, fixed_point_position };
         SimpleTensor<T> ref_beta{ shape1, dt, 1, fixed_point_position };

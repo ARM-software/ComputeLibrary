@@ -83,7 +83,7 @@ protected:
     {
         // Create tensors
         TensorType src = create_tensor<TensorType>(input_shape, data_type, 1, 0, _quant_info, _data_layout);
-        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1, 0, _quant_info, _data_layout);
+        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1, 0, _quant_info);
 
         // Create and configure function
         FunctionType im2col_func;

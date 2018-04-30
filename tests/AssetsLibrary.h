@@ -456,10 +456,25 @@ void AssetsLibrary::fill(T &&tensor, D &&distribution, std::random_device::resul
 
     std::mt19937 gen(_seed + seed_offset);
 
+    const bool  is_nhwc = tensor.data_layout() == DataLayout::NHWC;
+    TensorShape shape(tensor.shape());
+
+    if(is_nhwc)
+    {
+        // Ensure that the equivalent tensors will be filled for both data layouts
+        permute(shape, PermutationVector(1U, 2U, 0U));
+    }
+
     // Iterate over all elements
     for(int element_idx = 0; element_idx < tensor.num_elements(); ++element_idx)
     {
-        const Coordinates id = index2coord(tensor.shape(), element_idx);
+        Coordinates id = index2coord(shape, element_idx);
+
+        if(is_nhwc)
+        {
+            // Write in the correct id for permuted shapes
+            permute(id, PermutationVector(2U, 0U, 1U));
+        }
 
         // Iterate over all channels
         for(int channel = 0; channel < tensor.num_channels(); ++channel)

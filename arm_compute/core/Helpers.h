@@ -527,11 +527,11 @@ inline void permute(Dimensions<T> &dimensions, const PermutationVector &perm)
  */
 inline void permute(TensorShape &shape, const PermutationVector &perm)
 {
-    auto shape_copy = utility::make_array<TensorShape::num_max_dimensions>(shape.begin(), shape.end());
+    TensorShape shape_copy = shape;
     for(unsigned int i = 0; i < perm.num_dimensions(); ++i)
     {
         size_t dimension_val = (perm[i] < shape.num_dimensions()) ? shape_copy[perm[i]] : 1;
-        shape.set(i, dimension_val);
+        shape.set(i, dimension_val, false); // Avoid changes in _num_dimension
     }
 }
 

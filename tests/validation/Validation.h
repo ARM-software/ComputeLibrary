@@ -137,18 +137,44 @@ inline ::std::ostream &operator<<(::std::ostream &os, const RelativeTolerance<T>
 }
 
 template <typename T>
-bool compare_dimensions(const Dimensions<T> &dimensions1, const Dimensions<T> &dimensions2)
+bool compare_dimensions(const Dimensions<T> &dimensions1, const Dimensions<T> &dimensions2, const DataLayout &data_layout = DataLayout::NCHW)
 {
-    if(dimensions1.num_dimensions() != dimensions2.num_dimensions())
-    {
-        return false;
-    }
+    ARM_COMPUTE_ERROR_ON(data_layout == DataLayout::UNKNOWN);
 
-    for(unsigned int i = 0; i < dimensions1.num_dimensions(); ++i)
+    if(data_layout == DataLayout::NCHW)
     {
-        if(dimensions1[i] != dimensions2[i])
+        if(dimensions1.num_dimensions() != dimensions2.num_dimensions())
         {
             return false;
+        }
+
+        for(unsigned int i = 0; i < dimensions1.num_dimensions(); ++i)
+        {
+            if(dimensions1[i] != dimensions2[i])
+            {
+                return false;
+            }
+        }
+    }
+    else
+    {
+        // In case a 2D shape becomes 3D after permutation, the permuted tensor will have one dimension more and the first value will be 1
+        if((dimensions1.num_dimensions() != dimensions2.num_dimensions()) && ((dimensions1.num_dimensions() != (dimensions2.num_dimensions() + 1)) || (dimensions1.x() != 1)))
+        {
+            return false;
+        }
+
+        if((dimensions1[0] != dimensions2[2]) || (dimensions1[1] != dimensions2[0]) || (dimensions1[2] != dimensions2[1]))
+        {
+            return false;
+        }
+
+        for(unsigned int i = 3; i < dimensions1.num_dimensions(); ++i)
+        {
+            if(dimensions1[i] != dimensions2[i])
+            {
+                return false;
+            }
         }
     }
 
@@ -342,14 +368,14 @@ template <typename T, typename U>
 void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, U tolerance_value, float tolerance_number, float absolute_tolerance_value)
 {
     // Validate with valid region covering the entire shape
-    validate(tensor, reference, shape_to_valid_region(tensor.shape()), tolerance_value, tolerance_number, absolute_tolerance_value);
+    validate(tensor, reference, shape_to_valid_region(reference.shape()), tolerance_value, tolerance_number, absolute_tolerance_value);
 }
 
 template <typename T, typename U, typename = typename std::enable_if<std::is_integral<T>::value>::type>
 void validate_wrap(const IAccessor &tensor, const SimpleTensor<T> &reference, U tolerance_value, float tolerance_number)
 {
     // Validate with valid region covering the entire shape
-    validate_wrap(tensor, reference, shape_to_valid_region(tensor.shape()), tolerance_value, tolerance_number);
+    validate_wrap(tensor, reference, shape_to_valid_region(reference.shape()), tolerance_value, tolerance_number);
 }
 
 template <typename T, typename U>
@@ -367,7 +393,7 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const V
     }
 
     ARM_COMPUTE_EXPECT_EQUAL(tensor.num_channels(), reference.num_channels(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(compare_dimensions(tensor.shape(), reference.shape()), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(compare_dimensions(tensor.shape(), reference.shape(), tensor.data_layout()), framework::LogLevel::ERRORS);
 
     const int min_elements = std::min(tensor.num_elements(), reference.num_elements());
     const int min_channels = std::min(tensor.num_channels(), reference.num_channels());
@@ -377,12 +403,18 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const V
     {
         const Coordinates id = index2coord(reference.shape(), element_idx);
 
+        Coordinates target_id(id);
+        if(tensor.data_layout() == DataLayout::NHWC)
+        {
+            permute(target_id, PermutationVector(2U, 0U, 1U));
+        }
+
         if(is_in_valid_region(valid_region, id))
         {
             // Iterate over all channels within one element
             for(int c = 0; c < min_channels; ++c)
             {
-                const T &target_value    = reinterpret_cast<const T *>(tensor(id))[c];
+                const T &target_value    = reinterpret_cast<const T *>(tensor(target_id))[c];
                 const T &reference_value = reinterpret_cast<const T *>(reference(id))[c];
 
                 if(!compare<U>(target_value, reference_value, tolerance_value))
@@ -436,7 +468,7 @@ void validate_wrap(const IAccessor &tensor, const SimpleTensor<T> &reference, co
     }
 
     ARM_COMPUTE_EXPECT_EQUAL(tensor.num_channels(), reference.num_channels(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(compare_dimensions(tensor.shape(), reference.shape()), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(compare_dimensions(tensor.shape(), reference.shape(), tensor.data_layout()), framework::LogLevel::ERRORS);
 
     const int min_elements = std::min(tensor.num_elements(), reference.num_elements());
     const int min_channels = std::min(tensor.num_channels(), reference.num_channels());
@@ -446,12 +478,18 @@ void validate_wrap(const IAccessor &tensor, const SimpleTensor<T> &reference, co
     {
         const Coordinates id = index2coord(reference.shape(), element_idx);
 
+        Coordinates target_id(id);
+        if(tensor.data_layout() == DataLayout::NHWC)
+        {
+            permute(target_id, PermutationVector(2U, 0U, 1U));
+        }
+
         if(is_in_valid_region(valid_region, id))
         {
             // Iterate over all channels within one element
             for(int c = 0; c < min_channels; ++c)
             {
-                const T &target_value    = reinterpret_cast<const T *>(tensor(id))[c];
+                const T &target_value    = reinterpret_cast<const T *>(tensor(target_id))[c];
                 const T &reference_value = reinterpret_cast<const T *>(reference(id))[c];
 
                 bool equal = compare<U>(target_value, reference_value, tolerance_value);
@@ -518,7 +556,7 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const S
     }
 
     ARM_COMPUTE_EXPECT_EQUAL(tensor.num_channels(), reference.num_channels(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(compare_dimensions(tensor.shape(), reference.shape()), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(compare_dimensions(tensor.shape(), reference.shape(), tensor.data_layout()), framework::LogLevel::ERRORS);
 
     const int min_elements = std::min(tensor.num_elements(), reference.num_elements());
     const int min_channels = std::min(tensor.num_channels(), reference.num_channels());
@@ -528,12 +566,18 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const S
     {
         const Coordinates id = index2coord(reference.shape(), element_idx);
 
+        Coordinates target_id(id);
+        if(tensor.data_layout() == DataLayout::NHWC)
+        {
+            permute(target_id, PermutationVector(2U, 0U, 1U));
+        }
+
         if(valid_mask[element_idx] == 1)
         {
             // Iterate over all channels within one element
             for(int c = 0; c < min_channels; ++c)
             {
-                const T &target_value    = reinterpret_cast<const T *>(tensor(id))[c];
+                const T &target_value    = reinterpret_cast<const T *>(tensor(target_id))[c];
                 const T &reference_value = reinterpret_cast<const T *>(reference(id))[c];
 
                 if(!compare<U>(target_value, reference_value, tolerance_value))

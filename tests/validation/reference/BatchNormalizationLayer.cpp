@@ -27,7 +27,6 @@
 
 #include "tests/validation/FixedPoint.h"
 #include "tests/validation/Helpers.h"
-#include "tests/validation/reference/Permute.h"
 
 namespace arm_compute
 {
@@ -42,7 +41,6 @@ template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::
 SimpleTensor<T> batch_normalization_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &mean, const SimpleTensor<T> &var, const SimpleTensor<T> &beta, const SimpleTensor<T> &gamma, float epsilon,
                                           ActivationLayerInfo act_info, int fixed_point_position)
 {
-    ARM_COMPUTE_ERROR_ON_MSG(src.data_layout() == DataLayout::NHWC, "Unsupported NHWC format");
     ARM_COMPUTE_UNUSED(act_info);
     SimpleTensor<T> result(src.shape(), src.data_type());
 
@@ -88,14 +86,12 @@ SimpleTensor<T> batch_normalization_layer(const SimpleTensor<T> &src, const Simp
 {
     ARM_COMPUTE_UNUSED(fixed_point_position);
 
-    const bool            is_nhwc  = src.data_layout() == DataLayout::NHWC;
-    const SimpleTensor<T> perm_src = (is_nhwc) ? permute(src, PermutationVector(1U, 2U, 0U)) : src;
-    SimpleTensor<T>       result(perm_src.shape(), perm_src.data_type());
+    SimpleTensor<T> result(src.shape(), src.data_type());
 
-    const auto cols       = static_cast<int>(perm_src.shape()[0]);
-    const auto rows       = static_cast<int>(perm_src.shape()[1]);
-    const auto depth      = static_cast<int>(perm_src.shape()[2]);
-    const int  upper_dims = perm_src.shape().total_size() / (cols * rows * depth);
+    const auto cols       = static_cast<int>(src.shape()[0]);
+    const auto rows       = static_cast<int>(src.shape()[1]);
+    const auto depth      = static_cast<int>(src.shape()[2]);
+    const int  upper_dims = src.shape().total_size() / (cols * rows * depth);
 
     for(int r = 0; r < upper_dims; ++r)
     {
@@ -107,7 +103,7 @@ SimpleTensor<T> batch_normalization_layer(const SimpleTensor<T> &src, const Simp
                 {
                     const int   pos         = l + k * cols + i * rows * cols + r * cols * rows * depth;
                     const float denominator = sqrt(var[i] + epsilon);
-                    const float numerator   = perm_src[pos] - mean[i];
+                    const float numerator   = src[pos] - mean[i];
                     const float x_bar       = numerator / denominator;
                     result[pos]             = beta[i] + x_bar * gamma[i];
                 }
@@ -120,10 +116,6 @@ SimpleTensor<T> batch_normalization_layer(const SimpleTensor<T> &src, const Simp
         result = activation_layer(result, act_info);
     }
 
-    if(is_nhwc)
-    {
-        result = permute(result, PermutationVector(2U, 0U, 1U));
-    }
     return result;
 }
 template SimpleTensor<float> batch_normalization_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &mean, const SimpleTensor<float> &var, const SimpleTensor<float> &beta,

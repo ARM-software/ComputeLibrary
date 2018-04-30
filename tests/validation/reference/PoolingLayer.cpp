@@ -23,7 +23,6 @@
  */
 #include "PoolingLayer.h"
 
-#include "Permute.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "tests/validation/FixedPoint.h"
@@ -39,10 +38,13 @@ namespace reference
 {
 using namespace arm_compute::misc::shape_calculator;
 
-template <typename T>
-SimpleTensor<T> pooling_layer_nchw(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const PoolingLayerInfo &info)
+template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
+SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, const PoolingLayerInfo &info)
 {
     ARM_COMPUTE_ERROR_ON(info.is_global_pooling() && (src.shape().x() != src.shape().y()));
+
+    // Create reference
+    SimpleTensor<T> dst{ compute_pool_shape(TensorInfo(src.shape(), 1, src.data_type(), src.fixed_point_position()), info), src.data_type(), 1, src.fixed_point_position() };
 
     const int   pool_size_x     = info.is_global_pooling() ? src.shape().x() : info.pool_size().width;
     const int   pool_size_y     = info.is_global_pooling() ? src.shape().y() : info.pool_size().height;
@@ -171,10 +173,7 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, const PoolingLayerInfo
     bool        exclude_padding = info.exclude_padding();
 
     // Create reference
-    TensorInfo src_info(src.shape(), 1, src.data_type(), src.fixed_point_position());
-    src_info.set_data_layout(src.data_layout());
-
-    SimpleTensor<T> dst{ compute_pool_shape(src_info, info), src.data_type(), 1, src.fixed_point_position() };
+    SimpleTensor<T> dst{ compute_pool_shape(TensorInfo(src.shape(), 1, src.data_type(), src.fixed_point_position()), info), src.data_type(), 1, src.fixed_point_position() };
 
     const auto w_dst = static_cast<int>(dst.shape()[0]);
     const auto h_dst = static_cast<int>(dst.shape()[1]);
@@ -282,29 +281,6 @@ SimpleTensor<uint8_t> pooling_layer<uint8_t>(const SimpleTensor<uint8_t> &src, c
     SimpleTensor<float>   dst_tmp = pooling_layer<float>(src_tmp, info);
     SimpleTensor<uint8_t> dst     = convert_to_asymmetric(dst_tmp, src.quantization_info());
     return dst;
-}
-
-template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
-SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, const PoolingLayerInfo &info)
-{
-    TensorInfo src_info(src.shape(), 1, src.data_type(), src.fixed_point_position());
-    src_info.set_data_layout(src.data_layout());
-
-    SimpleTensor<T> dst{ compute_pool_shape(src_info, info), src.data_type(), 1, src.fixed_point_position() };
-
-    if(src.data_layout() == DataLayout::NHWC)
-    {
-        SimpleTensor<T> src_nchw = reference::permute<T>(src, PermutationVector(1U, 2U, 0U));
-        SimpleTensor<T> dst_nchw = reference::permute<T>(dst, PermutationVector(1U, 2U, 0U));
-
-        pooling_layer_nchw<T>(src_nchw, dst_nchw, info);
-
-        return reference::permute<T>(dst_nchw, PermutationVector(2U, 0U, 1U));
-    }
-    else
-    {
-        return pooling_layer_nchw<T>(src, dst, info);
-    }
 }
 
 template SimpleTensor<float> pooling_layer(const SimpleTensor<float> &src, const PoolingLayerInfo &info);

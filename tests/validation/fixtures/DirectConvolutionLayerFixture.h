@@ -67,22 +67,13 @@ public:
         const PadStrideInfo info(stride_x, stride_y, pad_x, pad_y, DimensionRoundingType::FLOOR);
         const DataType      bias_data_type = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
 
-        if(data_layout == DataLayout::NHWC)
-        {
-            permute(input_shape, PermutationVector(2U, 0U, 1U));
-            permute(weights_shape, PermutationVector(2U, 0U, 1U));
-        }
-
         TensorInfo input_info   = TensorInfo(input_shape, 1, data_type, _fractional_bits);
         TensorInfo weights_info = TensorInfo(weights_shape, 1, data_type, _fractional_bits);
-
-        input_info.set_data_layout(data_layout);
-        weights_info.set_data_layout(data_layout);
 
         const TensorShape output_shape = compute_deep_convolution_shape(input_info, weights_info, info);
 
         _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, data_type, bias_data_type, fractional_bits, quantization_info, act_info, data_layout);
-        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, data_type, bias_data_type, fractional_bits, quantization_info, act_info, data_layout);
+        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, data_type, bias_data_type, fractional_bits, quantization_info, act_info);
     }
 
     template <typename...>
@@ -98,15 +89,8 @@ public:
 
         const DataType bias_data_type = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
 
-        if(data_layout == DataLayout::NHWC)
-        {
-            permute(input_shape, PermutationVector(2U, 0U, 1U));
-            permute(weights_shape, PermutationVector(2U, 0U, 1U));
-            permute(output_shape, PermutationVector(2U, 0U, 1U));
-        }
-
         _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, data_type, bias_data_type, fractional_bits, quantization_info, act_info, data_layout);
-        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, data_type, bias_data_type, fractional_bits, quantization_info, act_info, data_layout);
+        _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, data_type, bias_data_type, fractional_bits, quantization_info, act_info);
     }
 
 protected:
@@ -139,9 +123,16 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, const PadStrideInfo &info,
+    TensorType compute_target(TensorShape input_shape, TensorShape weights_shape, const TensorShape &bias_shape, TensorShape output_shape, const PadStrideInfo &info,
                               DataType data_type, DataType bias_data_type, int fixed_point_position, QuantizationInfo quantization_info, ActivationLayerInfo act_info, const DataLayout &data_layout)
     {
+        if(data_layout == DataLayout::NHWC)
+        {
+            permute(input_shape, PermutationVector(2U, 0U, 1U));
+            permute(weights_shape, PermutationVector(2U, 0U, 1U));
+            permute(output_shape, PermutationVector(2U, 0U, 1U));
+        }
+
         // Create tensors
         TensorType src     = create_tensor<TensorType>(input_shape, data_type, 1, fixed_point_position, quantization_info, data_layout);
         TensorType weights = create_tensor<TensorType>(weights_shape, data_type, 1, fixed_point_position, quantization_info, data_layout);
@@ -180,13 +171,11 @@ protected:
     }
 
     SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, const PadStrideInfo &info,
-                                      DataType data_type, DataType bias_data_type, int fixed_point_position, QuantizationInfo quantization_info, ActivationLayerInfo act_info, const DataLayout &data_layout)
+                                      DataType data_type, DataType bias_data_type, int fixed_point_position, QuantizationInfo quantization_info, ActivationLayerInfo act_info)
     {
-        ARM_COMPUTE_ERROR_ON(data_layout == DataLayout::UNKNOWN);
-
         // Create reference
-        SimpleTensor<T>     src{ input_shape, data_type, 1, fixed_point_position, quantization_info, data_layout };
-        SimpleTensor<T>     weights{ weights_shape, data_type, 1, fixed_point_position, quantization_info, data_layout };
+        SimpleTensor<T>     src{ input_shape, data_type, 1, fixed_point_position, quantization_info };
+        SimpleTensor<T>     weights{ weights_shape, data_type, 1, fixed_point_position, quantization_info };
         SimpleTensor<TBias> bias{ bias_shape, bias_data_type, 1, fixed_point_position, quantization_info };
 
         // Fill reference
@@ -194,23 +183,7 @@ protected:
         fill(weights, 1);
         fill(bias, 2);
 
-        SimpleTensor<T> dst;
-
-        // FIXME: move to reference once all functions that call reference::convolution_layer<>() support NHWC
-        if(src.data_layout() == DataLayout::NHWC)
-        {
-            SimpleTensor<T> src_nchw     = reference::permute<T>(src, PermutationVector(1U, 2U, 0U));
-            SimpleTensor<T> weights_nchw = reference::permute<T>(weights, PermutationVector(1U, 2U, 0U));
-
-            TensorShape output_shape_nchw{ output_shape };
-            permute(output_shape_nchw, PermutationVector(1U, 2U, 0U));
-
-            dst = reference::permute<T>(reference::convolution_layer<T>(src_nchw, weights_nchw, bias, output_shape_nchw, info), PermutationVector(2U, 0U, 1U));
-        }
-        else
-        {
-            dst = reference::convolution_layer<T>(src, weights, bias, output_shape, info);
-        }
+        SimpleTensor<T> dst = reference::convolution_layer<T>(src, weights, bias, output_shape, info);
 
         return (act_info.enabled()) ? reference::activation_layer<T>(dst, act_info) : dst;
     }

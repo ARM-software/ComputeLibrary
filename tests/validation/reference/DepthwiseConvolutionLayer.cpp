@@ -24,7 +24,6 @@
 #include "DepthwiseConvolutionLayer.h"
 
 #include "ConvolutionLayer.h"
-#include "Permute.h"
 #include "Utils.h"
 
 #include "tests/validation/FixedPoint.h"
@@ -51,9 +50,11 @@ namespace reference
  *
  */
 template <typename T, typename TB>
-void depthwise_convolution_nchw(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &biases, SimpleTensor<T> &dst, const PadStrideInfo &conv_info,
-                                unsigned int depth_multiplier)
+SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &biases, const TensorShape &dst_shape, const PadStrideInfo &conv_info,
+                                      unsigned int depth_multiplier)
 {
+    SimpleTensor<T> dst{ dst_shape, src.data_type(), 1, src.fixed_point_position() };
+
     // Compute reference
     const int filter_width  = weights.shape().x();
     const int filter_height = weights.shape().y();
@@ -113,11 +114,16 @@ void depthwise_convolution_nchw(const SimpleTensor<T> &src, const SimpleTensor<T
             }
         }
     }
+
+    return dst;
 }
 
-void depthwise_convolution_nchw(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &biases, SimpleTensor<uint8_t> &dst, const PadStrideInfo &conv_info,
-                                unsigned int depth_multiplier)
+template <>
+SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &biases, const TensorShape &dst_shape,
+                                            const PadStrideInfo &conv_info, unsigned int depth_multiplier)
 {
+    SimpleTensor<uint8_t> dst{ dst_shape, src.data_type(), 1, src.fixed_point_position(), src.quantization_info() };
+
     // Create reference
     const int   input_offset   = -src.quantization_info().offset;
     const float input_scale    = src.quantization_info().scale;
@@ -196,32 +202,9 @@ void depthwise_convolution_nchw(const SimpleTensor<uint8_t> &src, const SimpleTe
             }
         }
     }
-}
-
-template <typename T, typename TB>
-SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &biases, const TensorShape &dst_shape, const PadStrideInfo &conv_info,
-                                      unsigned int depth_multiplier)
-{
-    SimpleTensor<T> dst{ dst_shape, src.data_type(), 1, src.fixed_point_position(), src.quantization_info() };
-
-    if(src.data_layout() == DataLayout::NHWC)
-    {
-        SimpleTensor<T> src_nchw     = reference::permute<T>(src, PermutationVector(1U, 2U, 0U));
-        SimpleTensor<T> weights_nchw = reference::permute<T>(weights, PermutationVector(1U, 2U, 0U));
-        SimpleTensor<T> dst_nchw     = reference::permute<T>(dst, PermutationVector(1U, 2U, 0U));
-
-        depthwise_convolution_nchw(src_nchw, weights_nchw, biases, dst_nchw, conv_info, depth_multiplier);
-
-        return reference::permute<T>(dst_nchw, PermutationVector(2U, 0U, 1U));
-    }
-
-    depthwise_convolution_nchw(src, weights, biases, dst, conv_info, depth_multiplier);
 
     return dst;
 }
-
-template SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &biases, const TensorShape &dst_shape,
-                                                     const PadStrideInfo &conv_info, unsigned int depth_multiplier);
 
 template SimpleTensor<float> depthwise_convolution(const SimpleTensor<float> &src, const SimpleTensor<float> &weights, const SimpleTensor<float> &biases, const TensorShape &dst_shape,
                                                    const PadStrideInfo &conv_info, unsigned int depth_multiplier);
