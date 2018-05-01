@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,11 +43,11 @@ public:
     SqueezeNetPoolingLayerDataset()
     {
         // pool1
-        add_config(TensorShape(111U, 111U, 64U), TensorShape(55U, 55U, 64U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
+        add_config(TensorShape(111U, 111U, 64U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
         // pool3
-        add_config(TensorShape(55U, 55U, 128U), TensorShape(27U, 27U, 128U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
+        add_config(TensorShape(55U, 55U, 128U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
         // pool5
-        add_config(TensorShape(27U, 27U, 256U), TensorShape(13U, 13U, 256U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
+        add_config(TensorShape(27U, 27U, 256U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
         //FIXME: Add support for global pooling.
     }
 };

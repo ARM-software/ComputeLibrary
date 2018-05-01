@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,9 +42,9 @@ class AlexNetPoolingLayerDataset final : public PoolingLayerDataset
 public:
     AlexNetPoolingLayerDataset()
     {
-        add_config(TensorShape(55U, 55U, 96U), TensorShape(27U, 27U, 96U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0)));
-        add_config(TensorShape(27U, 27U, 256U), TensorShape(13U, 13U, 256U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0)));
-        add_config(TensorShape(13U, 13U, 256U), TensorShape(6U, 6U, 256U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0)));
+        add_config(TensorShape(55U, 55U, 96U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0)));
+        add_config(TensorShape(27U, 27U, 256U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0)));
+        add_config(TensorShape(13U, 13U, 256U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0)));
     }
 };
 } // namespace datasets

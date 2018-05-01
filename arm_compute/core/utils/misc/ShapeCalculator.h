@@ -331,21 +331,22 @@ inline TensorShape compute_pool_shape(const ITensorInfo &input, PoolingLayerInfo
     unsigned int pooled_w = 0;
     unsigned int pooled_h = 0;
 
-    const bool         is_global_pooling = pool_info.is_global_pooling();
-    const int          idx_width         = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::WIDTH);
-    const int          idx_height        = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::HEIGHT);
-    const unsigned int pool_size_x       = is_global_pooling ? input.tensor_shape()[idx_width] : pool_info.pool_size().width;
-    const unsigned int pool_size_y       = is_global_pooling ? input.tensor_shape()[idx_height] : pool_info.pool_size().height;
+    TensorShape output_shape{ input.tensor_shape() };
 
-    std::tie(pooled_w, pooled_h) = scaled_dimensions(input.dimension(idx_width),
-                                                     input.dimension(idx_height),
+    const bool         is_global_pooling = pool_info.is_global_pooling();
+    const unsigned int idx_width         = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::WIDTH);
+    const unsigned int idx_height        = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::HEIGHT);
+    const unsigned int pool_size_x       = is_global_pooling ? output_shape[idx_width] : pool_info.pool_size().width;
+    const unsigned int pool_size_y       = is_global_pooling ? output_shape[idx_height] : pool_info.pool_size().height;
+
+    std::tie(pooled_w, pooled_h) = scaled_dimensions(output_shape[idx_width],
+                                                     output_shape[idx_height],
                                                      pool_size_x,
                                                      pool_size_y,
                                                      pool_info.pad_stride_info());
 
-    TensorShape output_shape{ input.tensor_shape() };
-    output_shape.set(get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::WIDTH), pooled_w);
-    output_shape.set(get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::HEIGHT), pooled_h);
+    output_shape.set(idx_width, pooled_w);
+    output_shape.set(idx_height, pooled_h);
 
     return output_shape;
 }

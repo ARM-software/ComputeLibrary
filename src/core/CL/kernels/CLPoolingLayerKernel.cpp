@@ -143,7 +143,7 @@ std::tuple<Status, Window, CLPoolingConfig> validate_and_configure_window(ITenso
             win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
 
             AccessWindowRectangle input_access(input, -pool_pad_left, -pool_pad_top, num_elems_read_per_iteration, pool_size_y,
-                                               pool_stride_x * num_elems_processed_per_iteration, pool_stride_y);
+                                               pool_stride_x, pool_stride_y);
             AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
             window_changed = update_window_and_padding(win, input_access, output_access);
             output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
@@ -155,7 +155,7 @@ std::tuple<Status, Window, CLPoolingConfig> validate_and_configure_window(ITenso
             win                               = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
 
             AccessWindowRectangle input_access(input, -1, -1, num_elems_processed_per_iteration, pool_size_y,
-                                               pool_stride_x * num_elems_processed_per_iteration, pool_stride_y);
+                                               pool_stride_x, pool_stride_y);
             AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
             window_changed = update_window_and_padding(win, input_access, output_access);
             output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));

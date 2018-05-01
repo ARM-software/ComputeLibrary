@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,8 +42,8 @@ class LeNet5PoolingLayerDataset final : public PoolingLayerDataset
 public:
     LeNet5PoolingLayerDataset()
     {
-        add_config(TensorShape(24U, 24U, 20U), TensorShape(12U, 12U, 20U), PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0)));
-        add_config(TensorShape(8U, 8U, 50U), TensorShape(4U, 4U, 50U), PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0)));
+        add_config(TensorShape(24U, 24U, 20U), PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0)));
+        add_config(TensorShape(8U, 8U, 50U), PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0)));
     }
 };
 } // namespace datasets

@@ -175,9 +175,8 @@ class SpecialPoolingLayerValidationFixture : public PoolingLayerValidationGeneri
 {
 public:
     template <typename...>
-    void setup(TensorShape src_shape, TensorShape dst_shape, PoolingLayerInfo pool_info, DataType data_type)
+    void setup(TensorShape src_shape, PoolingLayerInfo pool_info, DataType data_type)
     {
-        ARM_COMPUTE_UNUSED(dst_shape);
         PoolingLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(src_shape, pool_info, data_type, DataLayout::NCHW, 0, QuantizationInfo());
     }
 };

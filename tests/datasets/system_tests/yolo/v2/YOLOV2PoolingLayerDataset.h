@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,15 +43,15 @@ public:
     YOLOV2PoolingLayerDataset()
     {
         // pool1
-        add_config(TensorShape(416U, 416U, 32U), TensorShape(208U, 208U, 32U), PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
+        add_config(TensorShape(416U, 416U, 32U), PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
         // pool2
-        add_config(TensorShape(208U, 208U, 64U), TensorShape(104U, 104U, 64U), PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
+        add_config(TensorShape(208U, 208U, 64U), PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
         // pool5
-        add_config(TensorShape(104U, 104U, 128U), TensorShape(52U, 52U, 128U), PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
+        add_config(TensorShape(104U, 104U, 128U), PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
         // pool8
-        add_config(TensorShape(52U, 52U, 256U), TensorShape(26U, 26U, 256U), PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
+        add_config(TensorShape(52U, 52U, 256U), PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
         // pool13
-        add_config(TensorShape(26U, 26U, 512U), TensorShape(13U, 13U, 512U), PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
+        add_config(TensorShape(26U, 26U, 512U), PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
     }
 };
 } // namespace datasets
