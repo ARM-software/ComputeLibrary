@@ -100,7 +100,8 @@ public:
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv1_1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv1_1_b.npy"),
                   PadStrideInfo(1, 1, 1, 1))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+              .set_name("conv1_1")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("conv1_1/Relu")
               << convolution3x3_hint
               // Layer 2
               << ConvolutionLayer(
@@ -108,108 +109,123 @@ public:
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv1_2_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv1_2_b.npy"),
                   PadStrideInfo(1, 1, 1, 1))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0)))
+              .set_name("conv1_2")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("conv1_2/Relu")
+              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0))).set_name("pool1")
               // Layer 3
               << ConvolutionLayer(
                   3U, 3U, 128U,
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv2_1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv2_1_b.npy"),
                   PadStrideInfo(1, 1, 1, 1))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+              .set_name("conv2_1")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("conv2_1/Relu")
               // Layer 4
               << ConvolutionLayer(
                   3U, 3U, 128U,
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv2_2_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv2_2_b.npy"),
                   PadStrideInfo(1, 1, 1, 1))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0)))
+              .set_name("conv2_2")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("conv2_2/Relu")
+              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0))).set_name("pool2")
               // Layer 5
               << ConvolutionLayer(
                   3U, 3U, 256U,
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv3_1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv3_1_b.npy"),
                   PadStrideInfo(1, 1, 1, 1))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+              .set_name("conv3_1")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("conv3_1/Relu")
               // Layer 6
               << ConvolutionLayer(
                   3U, 3U, 256U,
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv3_2_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv3_2_b.npy"),
                   PadStrideInfo(1, 1, 1, 1))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+              .set_name("conv3_2")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("conv3_2/Relu")
               // Layer 7
               << ConvolutionLayer(
                   3U, 3U, 256U,
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv3_3_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv3_3_b.npy"),
                   PadStrideInfo(1, 1, 1, 1))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0)))
+              .set_name("conv3_3")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("conv3_3/Relu")
+              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0))).set_name("pool3")
               // Layer 8
               << ConvolutionLayer(
                   3U, 3U, 512U,
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv4_1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv4_1_b.npy"),
                   PadStrideInfo(1, 1, 1, 1))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+              .set_name("conv4_1")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("conv4_1/Relu")
               // Layer 9
               << ConvolutionLayer(
                   3U, 3U, 512U,
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv4_2_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv4_2_b.npy"),
                   PadStrideInfo(1, 1, 1, 1))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+              .set_name("conv4_2")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("conv4_2/Relu")
               // Layer 10
               << ConvolutionLayer(
                   3U, 3U, 512U,
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv4_3_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv4_3_b.npy"),
                   PadStrideInfo(1, 1, 1, 1))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0)))
+              .set_name("conv4_3")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("conv4_3/Relu")
+              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0))).set_name("pool4")
               // Layer 11
               << ConvolutionLayer(
                   3U, 3U, 512U,
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv5_1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv5_1_b.npy"),
                   PadStrideInfo(1, 1, 1, 1))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+              .set_name("conv5_1")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("conv5_1/Relu")
               // Layer 12
               << ConvolutionLayer(
                   3U, 3U, 512U,
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv5_2_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv5_2_b.npy"),
                   PadStrideInfo(1, 1, 1, 1))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+              .set_name("conv5_2")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("conv5_2/Relu")
               // Layer 13
               << ConvolutionLayer(
                   3U, 3U, 512U,
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv5_3_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/conv5_3_b.npy"),
                   PadStrideInfo(1, 1, 1, 1))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0)))
+              .set_name("conv5_3")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("conv5_3/Relu")
+              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0))).set_name("pool5")
               // Layer 14
               << FullyConnectedLayer(
                   4096U,
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/fc6_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/fc6_b.npy"))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+              .set_name("fc6")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("Relu")
               // Layer 15
               << FullyConnectedLayer(
                   4096U,
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/fc7_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/fc7_b.npy"))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+              .set_name("fc7")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("Relu_1")
               // Layer 16
               << FullyConnectedLayer(
                   1000U,
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/fc8_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/vgg16_model/fc8_b.npy"))
+              .set_name("fc8")
               // Softmax
-              << SoftmaxLayer()
+              << SoftmaxLayer().set_name("prob")
               << OutputLayer(get_output_accessor(label, 5));
 
         // Finalize graph

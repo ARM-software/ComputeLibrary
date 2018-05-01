@@ -57,7 +57,7 @@ public:
 
     NodeID create_layer(IStream &s) override
     {
-        NodeParams common_params = { "", s.hints().target_hint };
+        NodeParams common_params = { name(), s.hints().target_hint };
         return GraphBuilder::add_input_node(s.graph(), common_params, _desc, std::move(_accessor));
     }
 
@@ -81,7 +81,7 @@ public:
 
     NodeID create_layer(IStream &s) override
     {
-        NodeParams  common_params = { "", s.hints().target_hint };
+        NodeParams  common_params = { name(), s.hints().target_hint };
         NodeIdxPair input         = { s.tail_node(), 0 };
         return GraphBuilder::add_output_node(s.graph(), common_params, input, std::move(_accessor));
     }
@@ -105,7 +105,7 @@ public:
 
     NodeID create_layer(IStream &s) override
     {
-        NodeParams  common_params = { "", s.hints().target_hint };
+        NodeParams  common_params = { name(), s.hints().target_hint };
         NodeIdxPair input         = { s.tail_node(), 0 };
         return GraphBuilder::add_activation_node(s.graph(), common_params, input, _act_info);
     }
@@ -140,7 +140,7 @@ public:
         ARM_COMPUTE_ERROR_ON(_mean == nullptr);
         ARM_COMPUTE_ERROR_ON(_var == nullptr);
 
-        NodeParams  common_params = { "", s.hints().target_hint };
+        NodeParams  common_params = { name(), s.hints().target_hint };
         NodeIdxPair input         = { s.tail_node(), 0 };
         return GraphBuilder::add_batch_normalization_node(s.graph(), common_params, input, _epsilon,
                                                           std::move(_mean), std::move(_var), std::move(_beta), std::move(_gamma));
@@ -194,7 +194,7 @@ public:
     NodeID create_layer(IStream &s) override
     {
         NodeIdxPair input         = { s.tail_node(), 0 };
-        NodeParams  common_params = { "", s.hints().target_hint };
+        NodeParams  common_params = { name(), s.hints().target_hint };
         return GraphBuilder::add_convolution_node(s.graph(), common_params, input,
                                                   Size2D(_conv_width, _conv_height), _ofm, _conv_info, _num_groups,
                                                   s.hints().convolution_method_hint,
@@ -244,7 +244,7 @@ public:
     NodeID create_layer(IStream &s) override
     {
         NodeIdxPair input         = { s.tail_node(), 0 };
-        NodeParams  common_params = { "", s.hints().target_hint };
+        NodeParams  common_params = { name(), s.hints().target_hint };
         return GraphBuilder::add_depthwise_convolution_node(s.graph(), common_params,
                                                             input, Size2D(_conv_width, _conv_height), _conv_info,
                                                             s.hints().depthwise_convolution_method_hint,
@@ -271,7 +271,7 @@ public:
 
     NodeID create_layer(IStream &s) override
     {
-        NodeParams  common_params = { "", s.hints().target_hint };
+        NodeParams  common_params = { name(), s.hints().target_hint };
         NodeIdxPair input         = { s.tail_node(), 0 };
         return GraphBuilder::add_flatten_node(s.graph(), common_params, input);
     }
@@ -296,7 +296,7 @@ public:
 
     NodeID create_layer(IStream &s) override
     {
-        NodeParams  common_params = { "", s.hints().target_hint };
+        NodeParams  common_params = { name(), s.hints().target_hint };
         NodeIdxPair input         = { s.tail_node(), 0 };
         return GraphBuilder::add_fully_connected_layer(s.graph(), common_params, input, _num_outputs,
                                                        std::move(_weights), std::move(_bias));
@@ -323,7 +323,7 @@ public:
 
     NodeID create_layer(IStream &s) override
     {
-        NodeParams  common_params = { "", s.hints().target_hint };
+        NodeParams  common_params = { name(), s.hints().target_hint };
         NodeIdxPair input         = { s.tail_node(), 0 };
         return GraphBuilder::add_normalization_node(s.graph(), common_params, input, _norm_info);
     }
@@ -347,7 +347,7 @@ public:
 
     NodeID create_layer(IStream &s) override
     {
-        NodeParams  common_params = { "", s.hints().target_hint };
+        NodeParams  common_params = { name(), s.hints().target_hint };
         NodeIdxPair input         = { s.tail_node(), 0 };
         return GraphBuilder::add_pooling_node(s.graph(), common_params, input, _pool_info);
     }
@@ -371,7 +371,7 @@ public:
 
     NodeID create_layer(IStream &s) override
     {
-        NodeParams  common_params = { "", s.hints().target_hint };
+        NodeParams  common_params = { name(), s.hints().target_hint };
         NodeIdxPair input         = { s.tail_node(), 0 };
         return GraphBuilder::add_reshape_node(s.graph(), common_params, input, _shape);
     }
@@ -395,7 +395,7 @@ public:
 
     NodeID create_layer(IStream &s) override
     {
-        NodeParams  common_params = { "", s.hints().target_hint };
+        NodeParams  common_params = { name(), s.hints().target_hint };
         NodeIdxPair input         = { s.tail_node(), 0 };
         return GraphBuilder::add_softmax_node(s.graph(), common_params, input, _beta);
     }
@@ -441,7 +441,7 @@ public:
     NodeID create_layer(IStream &s) override
     {
         NodeID     nid           = EmptyNodeID;
-        NodeParams common_params = { "", s.hints().target_hint };
+        NodeParams common_params = { name(), s.hints().target_hint };
         if(_sub_streams.size() == 1 && _sub_streams.at(0) != nullptr)
         {
             nid = _sub_streams[0]->tail_node();

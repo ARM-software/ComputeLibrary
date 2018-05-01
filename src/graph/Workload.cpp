@@ -32,9 +32,14 @@ namespace graph
 {
 void ExecutionTask::operator()()
 {
-    if(task)
+    TaskExecutor::get().execute_function(*this);
+}
+
+void execute_task(ExecutionTask &task)
+{
+    if(task.task)
     {
-        task->run();
+        task.task->run();
     }
 }
 
@@ -44,6 +49,17 @@ void ExecutionTask::prepare()
     {
         task->prepare();
     }
+}
+
+TaskExecutor::TaskExecutor()
+    : execute_function(execute_task)
+{
+}
+
+TaskExecutor &TaskExecutor::get()
+{
+    static TaskExecutor executor;
+    return executor;
 }
 } // namespace graph
 } // namespace arm_compute

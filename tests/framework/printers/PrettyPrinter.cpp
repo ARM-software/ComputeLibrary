@@ -129,8 +129,8 @@ void PrettyPrinter::print_measurements(const Profiler::MeasurementsMap &measurem
         if(instrument.second.size() > 1)
         {
             *_stream << ", STDDEV=" << arithmetic_to_string(stats.relative_standard_deviation(), 2) << " %";
-            *_stream << ", MIN=" << stats.min() << ", ";
-            *_stream << ", MAX=" << stats.max() << ", ";
+            *_stream << ", MIN=" << stats.min();
+            *_stream << ", MAX=" << stats.max();
             *_stream << ", MEDIAN=" << stats.median().value() << " " << stats.median().unit();
         }
         *_stream << end_color() << "\n";

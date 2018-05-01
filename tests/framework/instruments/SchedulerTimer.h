@@ -25,7 +25,9 @@
 #define ARM_COMPUTE_TEST_SCHEDULER_TIMER
 
 #include "Instrument.h"
+#include "arm_compute/graph/Workload.h"
 #include "arm_compute/runtime/Scheduler.h"
+
 #include <list>
 
 namespace arm_compute
@@ -50,8 +52,9 @@ public:
     SchedulerTimer &operator=(const SchedulerTimer &) = delete;
 
     std::string                 id() const override;
+    void                        test_start() override;
     void                        start() override;
-    void                        stop() override;
+    void                        test_stop() override;
     Instrument::MeasurementsMap measurements() const override;
 
     /** Kernel information */
@@ -59,13 +62,16 @@ public:
     {
         Instrument::MeasurementsMap measurements{}; /**< Time it took the kernel to run */
         std::string                 name{};         /**< Kernel name */
+        std::string                 prefix{};       /**< Kernel prefix */
     };
 
 private:
-    std::list<kernel_info> _kernels;
-    IScheduler            *_real_scheduler;
-    Scheduler::Type        _real_scheduler_type;
-    ScaleFactor            _scale_factor;
+    std::list<kernel_info>                       _kernels;
+    IScheduler                                  *_real_scheduler;
+    Scheduler::Type                              _real_scheduler_type;
+    std::function<decltype(graph::execute_task)> _real_graph_function;
+    ScaleFactor                                  _scale_factor;
+    std::shared_ptr<IScheduler>                  _interceptor;
 };
 } // namespace framework
 } // namespace test

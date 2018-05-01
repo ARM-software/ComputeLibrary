@@ -132,13 +132,15 @@ public:
                   get_weights_accessor(data_path, "Conv2d_0_weights.npy", DataLayout::NCHW),
                   std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                   PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR))
+              .set_name("Conv2d_0")
               << BatchNormalizationLayer(
                   get_weights_accessor(data_path, "Conv2d_0_BatchNorm_moving_mean.npy"),
                   get_weights_accessor(data_path, "Conv2d_0_BatchNorm_moving_variance.npy"),
                   get_weights_accessor(data_path, "Conv2d_0_BatchNorm_gamma.npy"),
                   get_weights_accessor(data_path, "Conv2d_0_BatchNorm_beta.npy"),
                   0.001f)
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f));
+              .set_name("Conv2d_0/BatchNorm")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f)).set_name("Conv2d_0/Relu6");
         graph << get_dwsc_node(data_path, "Conv2d_1", 64 * depth_scale, PadStrideInfo(1, 1, 1, 1), PadStrideInfo(1, 1, 0, 0));
         graph << get_dwsc_node(data_path, "Conv2d_2", 128 * depth_scale, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::CEIL), PadStrideInfo(1, 1, 0, 0));
         graph << get_dwsc_node(data_path, "Conv2d_3", 128 * depth_scale, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::CEIL), PadStrideInfo(1, 1, 0, 0));
@@ -152,14 +154,15 @@ public:
         graph << get_dwsc_node(data_path, "Conv2d_11", 512 * depth_scale, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::CEIL), PadStrideInfo(1, 1, 0, 0));
         graph << get_dwsc_node(data_path, "Conv2d_12", 1024 * depth_scale, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::CEIL), PadStrideInfo(1, 1, 0, 0));
         graph << get_dwsc_node(data_path, "Conv2d_13", 1024 * depth_scale, PadStrideInfo(1, 1, 1, 1, 1, 1, DimensionRoundingType::CEIL), PadStrideInfo(1, 1, 0, 0));
-        graph << PoolingLayer(PoolingLayerInfo(PoolingType::AVG))
+        graph << PoolingLayer(PoolingLayerInfo(PoolingType::AVG)).set_name("Logits/AvgPool_1a")
               << ConvolutionLayer(
                   1U, 1U, 1001U,
                   get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_weights.npy", DataLayout::NCHW),
                   get_weights_accessor(data_path, "Logits_Conv2d_1c_1x1_biases.npy"),
                   PadStrideInfo(1, 1, 0, 0))
-              << ReshapeLayer(TensorShape(1001U))
-              << SoftmaxLayer()
+              .set_name("Logits/Conv2d_1c_1x1")
+              << ReshapeLayer(TensorShape(1001U)).set_name("Reshape")
+              << SoftmaxLayer().set_name("Softmax")
               << OutputLayer(get_output_accessor(label, 5));
 
         // Finalize graph
@@ -188,25 +191,29 @@ private:
                get_weights_accessor(data_path, total_path + "depthwise_depthwise_weights.npy", DataLayout::NCHW),
                std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                dwc_pad_stride_info)
+           .set_name(total_path + "depthwise/depthwise")
            << BatchNormalizationLayer(
                get_weights_accessor(data_path, total_path + "depthwise_BatchNorm_moving_mean.npy"),
                get_weights_accessor(data_path, total_path + "depthwise_BatchNorm_moving_variance.npy"),
                get_weights_accessor(data_path, total_path + "depthwise_BatchNorm_gamma.npy"),
                get_weights_accessor(data_path, total_path + "depthwise_BatchNorm_beta.npy"),
                0.001f)
-           << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f))
+           .set_name(total_path + "depthwise/BatchNorm")
+           << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f)).set_name(total_path + "depthwise/Relu6")
            << ConvolutionLayer(
                1U, 1U, conv_filt,
                get_weights_accessor(data_path, total_path + "pointwise_weights.npy", DataLayout::NCHW),
                std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                conv_pad_stride_info)
+           .set_name(total_path + "pointwise/Conv2D")
            << BatchNormalizationLayer(
                get_weights_accessor(data_path, total_path + "pointwise_BatchNorm_moving_mean.npy"),
                get_weights_accessor(data_path, total_path + "pointwise_BatchNorm_moving_variance.npy"),
                get_weights_accessor(data_path, total_path + "pointwise_BatchNorm_gamma.npy"),
                get_weights_accessor(data_path, total_path + "pointwise_BatchNorm_beta.npy"),
                0.001f)
-           << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f));
+           .set_name(total_path + "pointwise/BatchNorm")
+           << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f)).set_name(total_path + "pointwise/Relu6");
 
         return BranchLayer(std::move(sg));
     }

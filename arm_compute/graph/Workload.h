@@ -39,6 +39,27 @@ class INode;
 class Tensor;
 class Graph;
 
+struct ExecutionTask;
+
+void execute_task(ExecutionTask &task);
+
+/** Task executor */
+class TaskExecutor final
+{
+private:
+    /** Default constructor **/
+    TaskExecutor();
+
+public:
+    /** Task executor accessor
+     *
+     * @return Task executor instance
+     */
+    static TaskExecutor &get();
+    /** Function that is responsible for executing tasks */
+    std::function<decltype(execute_task)> execute_function;
+};
+
 /** Execution task
  *
  * Contains all the information required to execute a given task

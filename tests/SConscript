@@ -60,12 +60,13 @@ test_env.Append(LIBS = arm_compute_test_framework)
 if env['os'] in ['android', 'bare_metal'] or env['standalone']:
     Import("arm_compute_a")
     Import("arm_compute_core_a")
-    test_env.Append(LIBS = [arm_compute_a, arm_compute_core_a])
-    arm_compute_lib = arm_compute_a
+    Import("arm_compute_graph_a")
+    test_env.Append(LIBS = [arm_compute_graph_a, arm_compute_a, arm_compute_core_a])
+    arm_compute_lib = arm_compute_graph_a
 else:
-    Import("arm_compute_so")
-    test_env.Append(LIBS = ["arm_compute", "arm_compute_core"])
-    arm_compute_lib = arm_compute_so
+    Import("arm_compute_graph_so")
+    test_env.Append(LIBS = ["arm_compute_graph", "arm_compute", "arm_compute_core"])
+    arm_compute_lib = arm_compute_graph_so
 
 #FIXME Delete before release
 if env['internal_only']:
@@ -158,24 +159,15 @@ if test_env['validation_tests']:
                 cl_examples += [ test_env.Program(example, [ test_env.Object(source=file, target=example) ] + files_validate_examples, LIBS = test_env["LIBS"]) ]
             arm_compute_validate_examples += cl_examples
             if test_env['opencl'] and test_env['neon']:
-                if env['os'] in ['android', 'bare_metal'] or env['standalone']:
-                    Import('arm_compute_graph_a')
-                    graph_dependency = [ arm_compute_graph_a]
-                else:
-                    Import('arm_compute_graph_so')
-                    graph_dependency = [ arm_compute_graph_so]
-
                 graph_utils = test_env.Object(source="../utils/GraphUtils.cpp", target="GraphUtils")
                 for file in Glob("validate_examples/graph_*.cpp"):
                     example = "validate_" + os.path.basename(os.path.splitext(str(file))[0])
                     if env['os'] in ['android', 'bare_metal'] or env['standalone']:
-                        prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils]+ files_validate_examples, LIBS = test_env["LIBS"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--whole-archive',graph_dependency,'-Wl,--no-whole-archive'])
-                        Depends(prog, graph_dependency)
+                        prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils]+ files_validate_examples, LIBS = test_env["LIBS"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--whole-archive',arm_compute_lib,'-Wl,--no-whole-archive'])
                         arm_compute_validate_examples += [ prog ]
                     else:
                         #-Wl,--allow-shlib-undefined: Ignore dependencies of dependencies
                         prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils]+ files_validate_examples, LIBS = test_env["LIBS"] + ["arm_compute_graph"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--allow-shlib-undefined'] )
-                        Depends(prog, graph_dependency)
                         arm_compute_validate_examples += [ prog ]
         Depends(arm_compute_validate_examples, arm_compute_test_framework)
         Depends(arm_compute_validate_examples, arm_compute_lib)
@@ -201,23 +193,15 @@ if test_env['benchmark_examples']:
         arm_compute_benchmark_examples += cl_examples
 
     # Graph examples
-    if env['os'] in ['android', 'bare_metal'] or env['standalone']:
-        Import('arm_compute_graph_a')
-        graph_dependency = [arm_compute_graph_a]
-    else:
-        Import('arm_compute_graph_so')
-        graph_dependency = [arm_compute_graph_so]
     graph_utils = test_env.Object(source="../utils/GraphUtils.cpp", target="GraphUtils")
     for file in Glob("../examples/graph_*.cpp"):
         example = "benchmark_" + os.path.basename(os.path.splitext(str(file))[0])
         if env['os'] in ['android', 'bare_metal'] or env['standalone']:
-            prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils]+ files_benchmark_examples, LIBS = test_env["LIBS"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--whole-archive',graph_dependency,'-Wl,--no-whole-archive'])
-            Depends(prog, [graph_dependency])
+            prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils]+ files_benchmark_examples, LIBS = test_env["LIBS"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--whole-archive',arm_compute_lib,'-Wl,--no-whole-archive'])
             arm_compute_benchmark_examples += [ prog ]
         else:
             #-Wl,--allow-shlib-undefined: Ignore dependencies of dependencies
             prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils]+ files_benchmark_examples, LIBS = test_env["LIBS"] + ["arm_compute_graph"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--allow-shlib-undefined'] )
-            Depends(prog, graph_dependency)
             arm_compute_benchmark_examples += [ prog ]
     Depends(arm_compute_benchmark_examples, arm_compute_test_framework)
     Depends(arm_compute_benchmark_examples, arm_compute_lib)

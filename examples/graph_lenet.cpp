@@ -84,23 +84,27 @@ public:
                   get_weights_accessor(data_path, "/cnn_data/lenet_model/conv1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/lenet_model/conv1_b.npy"),
                   PadStrideInfo(1, 1, 0, 0))
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0)))
+              .set_name("conv1")
+              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0))).set_name("pool1")
               << ConvolutionLayer(
                   5U, 5U, 50U,
                   get_weights_accessor(data_path, "/cnn_data/lenet_model/conv2_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/lenet_model/conv2_b.npy"),
                   PadStrideInfo(1, 1, 0, 0))
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0)))
+              .set_name("conv2")
+              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0))).set_name("pool2")
               << FullyConnectedLayer(
                   500U,
                   get_weights_accessor(data_path, "/cnn_data/lenet_model/ip1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/lenet_model/ip1_b.npy"))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+              .set_name("ip1")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("relu")
               << FullyConnectedLayer(
                   10U,
                   get_weights_accessor(data_path, "/cnn_data/lenet_model/ip2_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/lenet_model/ip2_b.npy"))
-              << SoftmaxLayer()
+              .set_name("ip2")
+              << SoftmaxLayer().set_name("prob")
               << OutputLayer(get_output_accessor(""));
 
         // Finalize graph

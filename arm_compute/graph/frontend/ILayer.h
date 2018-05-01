@@ -46,6 +46,28 @@ public:
      * @return ID of the created node.
      */
     virtual NodeID create_layer(IStream &s) = 0;
+    /** Sets the name of the layer
+     *
+     * @param[in] name Name of the layer
+     *
+     * @return The layer object
+     */
+    ILayer &set_name(std::string name)
+    {
+        _name = name;
+        return *this;
+    }
+    /** Layer name accessor
+     *
+     * @return Returns the name of the layer
+     */
+    const std::string &name() const
+    {
+        return _name;
+    }
+
+private:
+    std::string _name = {};
 };
 } // namespace frontend
 } // namespace graph

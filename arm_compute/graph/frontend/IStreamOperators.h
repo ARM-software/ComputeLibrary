@@ -48,6 +48,18 @@ inline IStream &operator<<(IStream &s, ILayer &&layer)
     s.add_layer(layer);
     return s;
 }
+/** Overloaded stream operator to add a node to the graph
+ *
+ * @param[in, out] s     Stream to add the tensor
+ * @param[in]      layer Layer to be added
+ *
+ * @return Updated stream
+ */
+inline IStream &operator<<(IStream &s, ILayer &layer)
+{
+    s.add_layer(layer);
+    return s;
+}
 /** Overloaded stream operator to provide a target hint to the graph
  *
  * @param[in, out] s           Stream to provide the hint to

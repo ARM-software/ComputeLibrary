@@ -103,9 +103,10 @@ public:
                   get_weights_accessor(data_path, "/cnn_data/alexnet_model/conv1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/alexnet_model/conv1_b.npy"),
                   PadStrideInfo(4, 4, 0, 0))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-              << NormalizationLayer(NormalizationLayerInfo(NormType::CROSS_MAP, 5, 0.0001f, 0.75f))
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0)))
+              .set_name("conv1")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("relu1")
+              << NormalizationLayer(NormalizationLayerInfo(NormType::CROSS_MAP, 5, 0.0001f, 0.75f)).set_name("norm1")
+              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0))).set_name("pool1")
               // Layer 2
               << convolution_5x5_hint
               << ConvolutionLayer(
@@ -113,9 +114,10 @@ public:
                   get_weights_accessor(data_path, "/cnn_data/alexnet_model/conv2_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/alexnet_model/conv2_b.npy"),
                   PadStrideInfo(1, 1, 2, 2), 2)
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-              << NormalizationLayer(NormalizationLayerInfo(NormType::CROSS_MAP, 5, 0.0001f, 0.75f))
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0)))
+              .set_name("conv2")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("relu2")
+              << NormalizationLayer(NormalizationLayerInfo(NormType::CROSS_MAP, 5, 0.0001f, 0.75f)).set_name("norm2")
+              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0))).set_name("pool2")
               << convolution_3x3_hint
               // Layer 3
               << ConvolutionLayer(
@@ -123,41 +125,47 @@ public:
                   get_weights_accessor(data_path, "/cnn_data/alexnet_model/conv3_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/alexnet_model/conv3_b.npy"),
                   PadStrideInfo(1, 1, 1, 1))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+              .set_name("conv3")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("relu3")
               // Layer 4
               << ConvolutionLayer(
                   3U, 3U, 384U,
                   get_weights_accessor(data_path, "/cnn_data/alexnet_model/conv4_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/alexnet_model/conv4_b.npy"),
                   PadStrideInfo(1, 1, 1, 1), 2)
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+              .set_name("conv4")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("relu4")
               // Layer 5
               << ConvolutionLayer(
                   3U, 3U, 256U,
                   get_weights_accessor(data_path, "/cnn_data/alexnet_model/conv5_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/alexnet_model/conv5_b.npy"),
                   PadStrideInfo(1, 1, 1, 1), 2)
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0)))
+              .set_name("conv5")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("relu5")
+              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0))).set_name("pool5")
               // Layer 6
               << FullyConnectedLayer(
                   4096U,
                   get_weights_accessor(data_path, "/cnn_data/alexnet_model/fc6_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/alexnet_model/fc6_b.npy"))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+              .set_name("fc6")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("relu6")
               // Layer 7
               << FullyConnectedLayer(
                   4096U,
                   get_weights_accessor(data_path, "/cnn_data/alexnet_model/fc7_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/alexnet_model/fc7_b.npy"))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
+              .set_name("fc7")
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("relu7")
               // Layer 8
               << FullyConnectedLayer(
                   1000U,
                   get_weights_accessor(data_path, "/cnn_data/alexnet_model/fc8_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/alexnet_model/fc8_b.npy"))
+              .set_name("fc8")
               // Softmax
-              << SoftmaxLayer()
+              << SoftmaxLayer().set_name("prob")
               << OutputLayer(get_output_accessor(label, 5));
 
         // Finalize graph

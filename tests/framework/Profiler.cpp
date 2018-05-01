@@ -55,9 +55,9 @@ void Profiler::start()
 
 void Profiler::stop()
 {
-    for(auto &instrument : _instruments)
+    for(auto instrument = _instruments.rbegin(); instrument != _instruments.rend(); instrument++)
     {
-        instrument->stop();
+        (*instrument)->stop();
     }
     for(const auto &instrument : _instruments)
     {
@@ -70,9 +70,9 @@ void Profiler::stop()
 
 void Profiler::test_stop()
 {
-    for(auto &instrument : _instruments)
+    for(auto instrument = _instruments.rbegin(); instrument != _instruments.rend(); instrument++)
     {
-        instrument->test_stop();
+        (*instrument)->test_stop();
     }
 
     for(const auto &instrument : _instruments)
