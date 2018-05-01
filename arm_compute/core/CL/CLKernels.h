@@ -39,6 +39,7 @@
 #include "arm_compute/core/CL/kernels/CLCannyEdgeKernel.h"
 #include "arm_compute/core/CL/kernels/CLChannelCombineKernel.h"
 #include "arm_compute/core/CL/kernels/CLChannelExtractKernel.h"
+#include "arm_compute/core/CL/kernels/CLChannelShuffleLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLCol2ImKernel.h"
 #include "arm_compute/core/CL/kernels/CLColorConvertKernel.h"
 #include "arm_compute/core/CL/kernels/CLConvolutionKernel.h"

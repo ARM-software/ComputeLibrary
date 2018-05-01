@@ -162,6 +162,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "channel_combine_RGBA8888", "channel_combine.cl" },
     { "channel_combine_UYVY422", "channel_combine.cl" },
     { "channel_combine_YUYV422", "channel_combine.cl" },
+    { "channel_shuffle_nchw", "channel_shuffle.cl" },
     { "channel_extract_NV12", "channel_extract.cl" },
     { "channel_extract_NV21", "channel_extract.cl" },
     { "channel_extract_RGB888", "channel_extract.cl" },
@@ -414,6 +415,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "channel_extract.cl",
 #include "./cl_kernels/channel_extract.clembed"
+    },
+    {
+        "channel_shuffle.cl",
+#include "./cl_kernels/channel_shuffle.clembed"
     },
     {
         "col2im.cl",
