@@ -100,6 +100,7 @@ public:
 
     // Inherited methods overridden:
     void run() override;
+    void prepare() override;
 
 private:
     CLMemoryGroup              _memory_group;
@@ -112,8 +113,8 @@ private:
     const ICLTensor           *_original_b;
     bool                       _is_interleaved_transposed;
     bool                       _run_addition;
-    bool                       _is_first_run;
     bool                       _reshape_b_only_on_first_run;
+    bool                       _is_prepared;
 };
 }
 

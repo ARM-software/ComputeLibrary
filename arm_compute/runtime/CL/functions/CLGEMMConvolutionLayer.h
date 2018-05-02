@@ -153,6 +153,7 @@ public:
 
     // Inherited methods overridden:
     void run() override;
+    void prepare() override;
 
 private:
     /** Configures the appropriate matrix multiply routine
@@ -192,8 +193,8 @@ private:
     CLTensor _tmp_output;
 
     bool _is_quantized;
-    bool _is_first_run;
     bool _is_activationlayer_enabled;
+    bool _is_prepared;
 };
 }
 #endif /* __ARM_COMPUTE_CLGEMMCONVOLUTIONLAYER_H__ */

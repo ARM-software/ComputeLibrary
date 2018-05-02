@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,8 @@ namespace arm_compute
 class IFunction
 {
 public:
+    /** Destructor */
+    virtual ~IFunction() = default;
     /** Run the kernels contained in the function
      *
      * For NEON kernels:
@@ -43,12 +45,18 @@ public:
      * - The queue is then flushed.
      *
      * @note The function will not block until the kernels are executed. It is the user's responsibility to wait.
+     * @note Will call prepare() on first run if hasn't been done
      */
     virtual void run() = 0;
-    /** Destructor
+    /** Prepare the function for executing
      *
+     * Any one off pre-processing step required by the function is handled here
+     *
+     * @note Prepare stage might not need all the function's buffers' backing memory to be available in order to execute
      */
-    virtual ~IFunction() = default;
+    virtual void prepare()
+    {
+    }
 };
 }
 #endif /*__ARM_COMPUTE_IFUNCTION_H__ */

@@ -37,5 +37,13 @@ void ExecutionTask::operator()()
         task->run();
     }
 }
+
+void ExecutionTask::prepare()
+{
+    if(task)
+    {
+        task->prepare();
+    }
+}
 } // namespace graph
 } // namespace arm_compute

@@ -37,6 +37,7 @@ namespace graph
 class ITensorHandle;
 class INode;
 class Tensor;
+class Graph;
 
 /** Execution task
  *
@@ -52,14 +53,18 @@ struct ExecutionTask
 
     /** Function operator */
     void operator()();
+
+    /** Prepare execution task */
+    void prepare();
 };
 
 /** Execution workload */
 struct ExecutionWorkload
 {
-    std::vector<Tensor *>      inputs  = {}; /**< Input handles */
-    std::vector<Tensor *>      outputs = {}; /**< Output handles */
-    std::vector<ExecutionTask> tasks   = {}; /**< Execution workload */
+    std::vector<Tensor *>      inputs  = {};      /**< Input handles */
+    std::vector<Tensor *>      outputs = {};      /**< Output handles */
+    std::vector<ExecutionTask> tasks   = {};      /**< Execution workload */
+    Graph                     *graph   = nullptr; /**< Graph bound to the workload */
 };
 } // namespace graph
 } // namespace arm_compute

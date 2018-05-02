@@ -49,6 +49,14 @@ class CLWinogradConvolutionLayer : public IFunction
 public:
     /** Default constructor */
     CLWinogradConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLWinogradConvolutionLayer(const CLWinogradConvolutionLayer &) = delete;
+    /** Default move constructor */
+    CLWinogradConvolutionLayer(CLWinogradConvolutionLayer &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLWinogradConvolutionLayer &operator=(const CLWinogradConvolutionLayer &) = delete;
+    /** Default move assignment operator */
+    CLWinogradConvolutionLayer &operator=(CLWinogradConvolutionLayer &&) = default;
     /** Set the input and output tensors.
      *
      * @note: This function only works with 3x3 and 5x5 kernels along with unit strides
@@ -92,6 +100,7 @@ public:
 
     // Inherited methods overridden:
     void run() override;
+    void prepare() override;
 
 private:
     CLMemoryGroup                   _memory_group;
@@ -103,7 +112,8 @@ private:
     CLTensor                        _input0;
     CLTensor                        _input1;
     CLTensor                        _batched_mm_output;
-    bool                            _is_first_run;
+    const ICLTensor                *_original_weights;
+    bool                            _is_prepared;
     bool                            _is_activationlayer_enabled;
 };
 }

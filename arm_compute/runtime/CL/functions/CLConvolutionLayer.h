@@ -106,10 +106,11 @@ public:
                                                     const WeightsInfo &weights_info, const ActivationLayerInfo &act_info, const GPUTarget gpu_target, const Size2D &dilation = Size2D(1U, 1U), bool enable_fast_math = false);
     // Inherited methods overridden:
     void run() override;
+    void prepare() override;
 
 private:
     std::shared_ptr<IMemoryManager> _memory_manager;
-    std::unique_ptr<IFunction>      _function; /**< Function to run */
+    std::unique_ptr<IFunction>      _function;
 };
 }
 #endif /* __ARM_COMPUTE_CLCONVOLUTIONLAYER_H__ */

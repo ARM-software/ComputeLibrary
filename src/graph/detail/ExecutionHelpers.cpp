@@ -61,15 +61,61 @@ void configure_all_tensors(Graph &g)
     }
 }
 
+void allocate_all_input_tensors(INode &node)
+{
+    for(unsigned int i = 0; i < node.num_inputs(); ++i)
+    {
+        Tensor *tensor = node.input(i);
+        if(tensor != nullptr && !tensor->bound_edges().empty())
+        {
+            ARM_COMPUTE_ERROR_ON_MSG(!tensor->handle(), "Tensor handle is not configured!");
+            tensor->handle()->allocate();
+        }
+    }
+}
+
+void allocate_all_output_tensors(INode &node)
+{
+    for(unsigned int i = 0; i < node.num_outputs(); ++i)
+    {
+        Tensor *tensor = node.output(i);
+        if(tensor != nullptr && !tensor->bound_edges().empty())
+        {
+            ARM_COMPUTE_ERROR_ON_MSG(!tensor->handle(), "Tensor handle is not configured!");
+            tensor->handle()->allocate();
+        }
+    }
+}
+
+void allocate_const_tensors(Graph &g)
+{
+    for(auto &node : g.nodes())
+    {
+        if(node != nullptr)
+        {
+            switch(node->type())
+            {
+                case NodeType::Const:
+                case NodeType::Input:
+                    allocate_all_output_tensors(*node);
+                    break;
+                case NodeType::Output:
+                    allocate_all_input_tensors(*node);
+                default:
+                    break;
+            }
+        }
+    }
+}
+
 void allocate_all_tensors(Graph &g)
 {
     auto &tensors = g.tensors();
 
     for(auto &tensor : tensors)
     {
-        if(tensor && !tensor->bound_edges().empty())
+        if(tensor && !tensor->bound_edges().empty() && tensor->handle() != nullptr && tensor->handle()->tensor().info()->is_resizable() && tensor->handle()->tensor().is_used())
         {
-            ARM_COMPUTE_ERROR_ON_MSG(!tensor->handle(), "Tensor handle is not configured!");
             tensor->handle()->allocate();
         }
     }
@@ -96,7 +142,8 @@ void validate_all_nodes(Graph &g)
 ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx)
 {
     ExecutionWorkload workload;
-    auto             &nodes = g.nodes();
+    workload.graph = &g;
+    auto &nodes    = g.nodes();
 
     // Create tasks
     for(auto &node : nodes)
@@ -173,6 +220,16 @@ void call_all_input_node_accessors(ExecutionWorkload &workload)
         {
             input->call_accessor();
         }
+    }
+}
+
+void prepare_all_tasks(ExecutionWorkload &workload)
+{
+    ARM_COMPUTE_ERROR_ON(workload.graph == nullptr);
+    for(auto &task : workload.tasks)
+    {
+        task.prepare();
+        release_unused_tensors(*workload.graph);
     }
 }
 

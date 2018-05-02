@@ -74,23 +74,47 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     auto workload = detail::configure_all_nodes(graph, ctx);
     ARM_COMPUTE_ERROR_ON_MSG(workload.tasks.empty(), "Could not configure all nodes!");
 
-    // Allocate all tensors
-    detail::allocate_all_tensors(graph);
+    // TODO (COMPMID-920) : Update prepare for NEON/GC
+    if(forced_target == Target::CL)
+    {
+        // Allocate const tensors and call accessors
+        detail::allocate_const_tensors(graph);
+        detail::call_all_const_node_accessors(graph);
 
-    // Call accessors on all Const nodes
-    detail::call_all_const_node_accessors(graph);
+        // Prepare graph
+        detail::prepare_all_tasks(workload);
 
-    _workloads.insert(std::make_pair(graph.id(), std::move(workload)));
-    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Created workload for graph with ID : " << graph.id().get() << std::endl);
+        // Allocate all tensors
+        detail::allocate_all_tensors(graph);
 
-    // Finalize Graph context
-    ctx.finalize();
+        // Finalize Graph context
+        ctx.finalize();
 
-    // Make first run
-    execute_graph(graph);
+        // Register graph
+        _workloads.insert(std::make_pair(graph.id(), std::move(workload)));
+        ARM_COMPUTE_LOG_GRAPH_VERBOSE("Created workload for graph with ID : " << graph.id().get() << std::endl);
+    }
+    else
+    {
+        // Allocate all tensors
+        detail::allocate_all_tensors(graph);
 
-    // Release all unused const nodes
-    detail::release_unused_tensors(graph);
+        // Call accessors on all Const nodes
+        detail::call_all_const_node_accessors(graph);
+
+        // Finalize Graph context
+        ctx.finalize();
+
+        // Register graph
+        _workloads.insert(std::make_pair(graph.id(), std::move(workload)));
+        ARM_COMPUTE_LOG_GRAPH_VERBOSE("Created workload for graph with ID : " << graph.id().get() << std::endl);
+
+        // Make first run
+        execute_graph(graph);
+
+        // Release all unused const tensors
+        detail::release_unused_tensors(graph);
+    }
 }
 
 void GraphManager::execute_graph(Graph &graph)

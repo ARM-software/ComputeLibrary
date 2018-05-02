@@ -109,6 +109,7 @@ public:
 
     //Inherited methods override
     void run() override;
+    void prepare() override;
 
 private:
     void configure_fc_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);

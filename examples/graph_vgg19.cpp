@@ -51,9 +51,8 @@ public:
         std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<CaffePreproccessor>(mean_rgb);
 
         // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
-        const int         target           = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
-        Target            target_hint      = set_target_hint(target);
-        ConvolutionMethod convolution_hint = ConvolutionMethod::DIRECT;
+        const int target      = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
+        Target    target_hint = set_target_hint(target);
 
         // Parse arguments
         if(argc < 2)
@@ -88,7 +87,6 @@ public:
         }
 
         graph << target_hint
-              << convolution_hint
               << InputLayer(TensorDescriptor(TensorShape(224U, 224U, 3U, 1U), DataType::F32),
                             get_input_accessor(image, std::move(preprocessor)))
               // Layer 1

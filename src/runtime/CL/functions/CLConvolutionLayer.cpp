@@ -135,5 +135,11 @@ ConvolutionMethod CLConvolutionLayer::get_convolution_method(const ITensorInfo *
 
 void CLConvolutionLayer::run()
 {
+    prepare();
     _function->run();
+}
+
+void CLConvolutionLayer::prepare()
+{
+    _function->prepare();
 }

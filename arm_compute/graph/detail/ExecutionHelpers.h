@@ -35,6 +35,7 @@ class Graph;
 class GraphContext;
 class ExecutionWorkload;
 class Tensor;
+class INode;
 
 namespace detail
 {
@@ -45,6 +46,21 @@ void default_initialize_backends();
  * @param[in] g Graph to configure
  */
 void configure_all_tensors(Graph &g);
+/** Allocates all input tensors of a node.
+ *
+ * @param[in] node Node to allocate the input tensor of
+ */
+void allocate_all_input_tensors(INode &node);
+/** Allocates all output tensors of a node.
+ *
+ * @param[in] node Node to allocate the output tensor of
+ */
+void allocate_all_output_tensors(INode &node);
+/** Allocates const tensor of a given graph
+ *
+ * @param[in] g Graph to allocate the tensors
+ */
+void allocate_const_tensors(Graph &g);
 /** Allocates all tensors of a graph
  *
  * @param[in] g Graph to allocate the tensors
@@ -88,6 +104,11 @@ void call_all_input_node_accessors(ExecutionWorkload &workload);
  * @param[in] workload Workload to execute
  */
 void call_all_output_node_accessors(ExecutionWorkload &workload);
+/** Prepares all tasks for execution
+ *
+ * @param[in] workload Workload to prepare
+ */
+void prepare_all_tasks(ExecutionWorkload &workload);
 /** Executes all tasks of a workload
  *
  * @param[in] workload Workload to execute
