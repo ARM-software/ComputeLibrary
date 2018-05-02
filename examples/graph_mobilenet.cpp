@@ -35,7 +35,7 @@ using namespace arm_compute::graph_utils;
 /** Example demonstrating how to implement MobileNet's network using the Compute Library's graph API
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL, 2 = OpenCL with Tuner), [optional] Path to the weights folder, [optional] image, [optional] labels )
+ * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL, 2 = OpenCL with Tuner), [optional] Path to the weights folder, [optional] image, [optional] labels, [optional] data layout, [optional] Fast math for convolution layer (0 = DISABLED, 1 = ENABLED) )
  */
 class GraphMobilenetExample : public Example
 {
@@ -54,6 +54,7 @@ public:
         Target                     target_hint                = set_target_hint(target);
         ConvolutionMethod          convolution_hint           = ConvolutionMethod::GEMM;
         DepthwiseConvolutionMethod depthwise_convolution_hint = DepthwiseConvolutionMethod::OPTIMIZED_3x3;
+        FastMathHint               fast_math_hint             = FastMathHint::DISABLED;
 
         // Set model to execute. 0 (MobileNetV1_1.0_224), 1 (MobileNetV1_0.75_160)
         int model_id = (argc > 2) ? std::strtol(argv[2], nullptr, 10) : 0;
@@ -72,33 +73,33 @@ public:
         if(argc < 2)
         {
             // Print help
-            std::cout << "Usage: " << argv[0] << " [target] [model] [layout] [path_to_data] [image] [labels]\n\n";
+            std::cout << "Usage: " << argv[0] << " [target] [model] [layout] [path_to_data] [image] [labels] [fast_math_hint]\n\n";
             std::cout << "No model ID provided: using MobileNetV1_1.0_224\n\n";
             std::cout << "No data layout provided: using NCHW\n\n";
             std::cout << "No data folder provided: using random values\n\n";
         }
         else if(argc == 2)
         {
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " [model] [layout] [path_to_data] [image] [labels]\n\n";
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " [model] [layout] [path_to_data] [image] [labels] [fast_math_hint]\n\n";
             std::cout << "No model ID provided: using MobileNetV1_1.0_224\n\n";
             std::cout << "No data layout provided: using NCHW\n\n";
             std::cout << "No data folder provided: using random values\n\n";
         }
         else if(argc == 3)
         {
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " [layout] [path_to_data] [image] [labels]\n\n";
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " [layout] [path_to_data] [image] [labels] [fast_math_hint]\n\n";
             std::cout << "No data layout provided: using NCHW\n\n";
             std::cout << "No data folder provided: using random values\n\n";
         }
         else if(argc == 4)
         {
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " [path_to_data] [image] [labels]\n\n";
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " [path_to_data] [image] [labels] [fast_math_hint]\n\n";
             std::cout << "No data folder provided: using random values\n\n";
         }
         else if(argc == 5)
         {
             data_path = argv[4];
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " " << argv[4] << " [image] [labels]\n\n";
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " " << argv[4] << " [image] [labels] [fast_math_hint]\n\n";
             std::cout << "No image provided: using random values\n\n";
             std::cout << "No text file with labels provided: skipping output accessor\n\n";
         }
@@ -106,14 +107,23 @@ public:
         {
             data_path = argv[4];
             image     = argv[5];
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " [labels]\n\n";
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " [labels] [fast_math_hint]\n\n";
             std::cout << "No text file with labels provided: skipping output accessor\n\n";
         }
-        else
+        else if(argc == 7)
         {
             data_path = argv[4];
             image     = argv[5];
             label     = argv[6];
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " " << argv[4] << " [fast_math_hint]\n\n";
+            std::cout << "No fast math info provided: disabling fast math\n\n";
+        }
+        else
+        {
+            data_path      = argv[4];
+            image          = argv[5];
+            label          = argv[6];
+            fast_math_hint = (std::strtol(argv[7], nullptr, 1) == 0) ? FastMathHint::DISABLED : FastMathHint::ENABLED;
         }
 
         // Add model path to data path
@@ -125,6 +135,7 @@ public:
         graph << target_hint
               << convolution_hint
               << depthwise_convolution_hint
+              << fast_math_hint
               << InputLayer(input_descriptor,
                             get_input_accessor(image, std::move(preprocessor), false))
               << ConvolutionLayer(
@@ -225,7 +236,9 @@ private:
  *                             [optional] Model ID (0 = MobileNetV1_1.0_224, 1 = MobileNetV1_0.75_160),
  *                             [optional] Path to the weights folder,
  *                             [optional] image,
- *                             [optional] labels )
+ *                             [optional] labels,
+ *                             [optional] data layout,
+ *                             [optional] Fast math for convolution layer (0 = DISABLED, 1 = ENABLED) )
  */
 int main(int argc, char **argv)
 {

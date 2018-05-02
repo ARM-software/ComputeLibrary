@@ -166,6 +166,7 @@ std::unique_ptr<IFunction> create_convolution_layer(ConvolutionLayerNode &node, 
 
     const PadStrideInfo     conv_info      = node.convolution_info();
     const ConvolutionMethod conv_algorithm = node.convolution_method();
+    const bool              fast_math      = node.fast_math_hint() == FastMathHint::ENABLED;
 
     // Create and configure function (we assume that functions have been validated before creation)
     std::shared_ptr<IMemoryManager> mm = get_memory_manager(ctx, Target::CL);
@@ -175,7 +176,7 @@ std::unique_ptr<IFunction> create_convolution_layer(ConvolutionLayerNode &node, 
     if(conv_algorithm == ConvolutionMethod::WINOGRAD)
     {
         std::tie(func, func_name) = create_named_memory_managed_function<CLWinogradConvolutionLayer>(
-                                        std::string("CLWinogradConvolutionLayer"), mm, input, weights, biases, output, conv_info);
+                                        std::string("CLWinogradConvolutionLayer"), mm, input, weights, biases, output, conv_info, ActivationLayerInfo(), fast_math);
     }
     else if(conv_algorithm == ConvolutionMethod::DIRECT)
     {
@@ -190,7 +191,7 @@ std::unique_ptr<IFunction> create_convolution_layer(ConvolutionLayerNode &node, 
     else
     {
         std::tie(func, func_name) = create_named_memory_managed_function<CLConvolutionLayer>(std::string("CLConvolutionLayer"), mm,
-                                                                                             input, weights, biases, output, conv_info);
+                                                                                             input, weights, biases, output, conv_info, WeightsInfo(), Size2D(1U, 1U), ActivationLayerInfo(), fast_math);
     }
 
     // Log info

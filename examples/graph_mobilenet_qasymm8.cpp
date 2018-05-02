@@ -36,7 +36,7 @@ using namespace arm_compute::graph_utils;
 /** Example demonstrating how to implement QASYMM8 MobileNet's network using the Compute Library's graph API
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL, 2 = OpenCL with Tuner), [optional] Path to the weights folder, [optional] npy_input, [optional] labels )
+ * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL, 2 = OpenCL with Tuner), [optional] Path to the weights folder, [optional] npy_input, [optional] labels, [optional] Fast math for convolution layer (0 = DISABLED, 1 = ENABLED) )
  */
 class GraphMobileNetQASYMM8Example : public Example
 {
@@ -92,37 +92,48 @@ public:
         };
 
         // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
-        const int target      = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
-        Target    target_hint = set_target_hint(target);
+        const int    target         = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
+        Target       target_hint    = set_target_hint(target);
+        FastMathHint fast_math_hint = FastMathHint::DISABLED;
 
         // Parse arguments
         if(argc < 2)
         {
             // Print help
-            std::cout << "Usage: " << argv[0] << " [target] [path_to_data] [npy_input] [labels]\n\n";
+            std::cout << "Usage: " << argv[0] << " [target] [path_to_data] [npy_input] [labels] [fast_math_hint]\n\n";
             std::cout << "No data folder provided: using random values\n\n";
         }
         else if(argc == 2)
         {
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " [path_to_data] [npy_input] [labels]\n\n";
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " [path_to_data] [npy_input] [labels] [fast_math_hint]\n\n";
             std::cout << "No input provided: using random values\n\n";
         }
         else if(argc == 4)
         {
             data_path = argv[2];
             input     = argv[3];
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " [labels]\n\n";
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " [labels] [fast_math_hint]\n\n";
             std::cout << "No text file with labels provided: skipping output accessor\n\n";
         }
-        else
+        else if(argc == 5)
         {
             data_path = argv[2];
             input     = argv[3];
             label     = argv[4];
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " " << argv[4] << " [fast_math_hint]\n\n";
+            std::cout << "No fast math info provided: disabling fast math\n\n";
+        }
+        else
+        {
+            data_path      = argv[2];
+            input          = argv[3];
+            label          = argv[4];
+            fast_math_hint = (std::strtol(argv[5], nullptr, 1) == 0) ? FastMathHint::DISABLED : FastMathHint::ENABLED;
         }
 
         graph << target_hint
               << DepthwiseConvolutionMethod::OPTIMIZED_3x3 // FIXME(COMPMID-1073): Add heuristics to automatically call the optimized 3x3 method
+              << fast_math_hint
               << InputLayer(TensorDescriptor(TensorShape(224U, 224U, 3U, 1U), DataType::QASYMM8, in_quant_info),
                             get_weights_accessor(data_path, "/cnn_data/mobilenet_qasymm8_model/" + input))
               << ConvolutionLayer(
@@ -220,7 +231,7 @@ private:
 /** Main program for MobileNetQASYMM8
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Path to the weights folder, [optional] npy_input, [optional] labels )
+ * @param[in] argv Arguments ( [optional] Path to the weights folder, [optional] npy_input, [optional] labels, [optional] Fast math for convolution layer (0 = DISABLED, 1 = ENABLED) )
  */
 int main(int argc, char **argv)
 {

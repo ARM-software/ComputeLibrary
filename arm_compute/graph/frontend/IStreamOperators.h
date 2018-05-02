@@ -96,6 +96,18 @@ inline IStream &operator<<(IStream &s, DepthwiseConvolutionMethod depthwise_conv
     s.hints().depthwise_convolution_method_hint = depthwise_convolution_method_hint;
     return s;
 }
+/** Overloaded stream operator to provide a fast math hint to the graph
+ *
+ * @param[in, out] s              Stream to provide the hint to
+ * @param[in]      fast_math_hint Convolution method hint to be considered
+ *
+ * @return Updated stream
+ */
+inline IStream &operator<<(IStream &s, FastMathHint fast_math_hint)
+{
+    s.hints().fast_math_hint = fast_math_hint;
+    return s;
+}
 } // namespace frontend
 } // namespace graph
 } // namespace arm_compute

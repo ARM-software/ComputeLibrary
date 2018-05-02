@@ -45,6 +45,7 @@ using graph::PoolingLayerInfo;
 using graph::PoolingType;
 using graph::Target;
 using graph::ConvolutionMethod;
+using graph::FastMathHint;
 using graph::DepthwiseConvolutionMethod;
 using graph::TensorDescriptor;
 using graph::DimensionRoundingType;
@@ -63,6 +64,7 @@ struct StreamHints
     Target                     target_hint                       = { Target::UNSPECIFIED };                 /**< Target execution hint */
     ConvolutionMethod          convolution_method_hint           = { ConvolutionMethod::DEFAULT };          /**< Convolution method hint */
     DepthwiseConvolutionMethod depthwise_convolution_method_hint = { DepthwiseConvolutionMethod::DEFAULT }; /**< Depthwise Convolution method hint */
+    FastMathHint               fast_math_hint                    = { FastMathHint::DISABLED };              /**< Fast math hint */
 };
 } // namespace frontend
 } // namespace graph

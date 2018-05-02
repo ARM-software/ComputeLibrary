@@ -99,6 +99,8 @@ public:
                                                ITensorAccessorUPtr beta_accessor = nullptr, ITensorAccessorUPtr gamma_accessor = nullptr);
     /** Adds a convolution layer node to the graph
      *
+     * TODO (COMPMID-1113): Add a graph descriptor for convolution layer node
+     *
      * @param[in] g                     Graph to add the node to
      * @param[in] params                Common node parameters
      * @param[in] input                 Input to the convolution layer node as a NodeID-Index pair
@@ -107,6 +109,7 @@ public:
      * @param[in] conv_info             Convolution layer information
      * @param[in] num_groups            (Optional) Number of groups for a grouped convolution. Defaults to 1
      * @param[in] method                (Optional) Convolution method to use
+     * @param[in] fast_math_hint        (Optional) Fast math hint
      * @param[in] weights_accessor      (Optional) Accessor of the weights node data
      * @param[in] bias_accessor         (Optional) Accessor of the bias node data
      * @param[in] weights_quant_info    (Optional) Weights quantization info
@@ -116,7 +119,7 @@ public:
      */
     static NodeID add_convolution_node(Graph &g, NodeParams params, NodeIdxPair input,
                                        Size2D kernel_spatial_extend, unsigned int depth, PadStrideInfo conv_info,
-                                       unsigned int num_groups = 1, ConvolutionMethod method = ConvolutionMethod::DEFAULT,
+                                       unsigned int num_groups = 1, ConvolutionMethod method = ConvolutionMethod::DEFAULT, FastMathHint fast_math_hint = FastMathHint::DISABLED,
                                        ITensorAccessorUPtr weights_accessor = nullptr, ITensorAccessorUPtr bias_accessor = nullptr,
                                        const QuantizationInfo weights_quant_info = QuantizationInfo(),
                                        const QuantizationInfo out_quant_info     = QuantizationInfo());

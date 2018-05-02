@@ -81,7 +81,7 @@ NodeID create_simple_single_input_output_node(Graph &g, NodeParams &params, Node
 }
 
 NodeID create_grouped_convolution(Graph &g, NodeParams &params, NodeIdxPair input, NodeID weights, NodeID bias,
-                                  PadStrideInfo conv_info, ConvolutionMethod method, unsigned int num_groups)
+                                  PadStrideInfo conv_info, ConvolutionMethod method, FastMathHint fast_math_hint, unsigned int num_groups)
 {
     bool has_bias = (bias != EmptyNodeID);
 
@@ -102,7 +102,7 @@ NodeID create_grouped_convolution(Graph &g, NodeParams &params, NodeIdxPair inpu
     std::vector<NodeIdxPair> convolution_outputs;
     for(unsigned int i = 0; i < num_groups; ++i)
     {
-        NodeID conv_nid = g.add_node<ConvolutionLayerNode>(conv_info, method);
+        NodeID conv_nid = g.add_node<ConvolutionLayerNode>(conv_info, method, fast_math_hint);
         g.add_connection(input_split, i, conv_nid, 0);
         g.add_connection(weights_split, i, conv_nid, 1);
         if(has_bias)
@@ -205,7 +205,7 @@ NodeID GraphBuilder::add_batch_normalization_node(Graph &g, NodeParams params, N
 
 NodeID GraphBuilder::add_convolution_node(Graph &g, NodeParams params, NodeIdxPair input,
                                           Size2D kernel_spatial_extend, unsigned int depth, PadStrideInfo conv_info,
-                                          unsigned int num_groups, ConvolutionMethod method,
+                                          unsigned int num_groups, ConvolutionMethod method, FastMathHint fast_math_hint,
                                           ITensorAccessorUPtr weights_accessor, ITensorAccessorUPtr bias_accessor,
                                           const QuantizationInfo weights_quant_info,
                                           const QuantizationInfo out_quant_info)
@@ -245,7 +245,7 @@ NodeID GraphBuilder::add_convolution_node(Graph &g, NodeParams params, NodeIdxPa
     if(num_groups == 1)
     {
         // Create convolution node and connect
-        NodeID conv_nid = g.add_node<ConvolutionLayerNode>(conv_info, method, out_quant_info);
+        NodeID conv_nid = g.add_node<ConvolutionLayerNode>(conv_info, method, fast_math_hint, out_quant_info);
         g.add_connection(input.node_id, input.index, conv_nid, 0);
         g.add_connection(w_nid, 0, conv_nid, 1);
         if(has_bias)
@@ -258,7 +258,7 @@ NodeID GraphBuilder::add_convolution_node(Graph &g, NodeParams params, NodeIdxPa
     }
     else
     {
-        return create_grouped_convolution(g, params, input, w_nid, b_nid, conv_info, method, num_groups);
+        return create_grouped_convolution(g, params, input, w_nid, b_nid, conv_info, method, fast_math_hint, num_groups);
     }
 }
 

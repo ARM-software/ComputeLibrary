@@ -295,6 +295,24 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ConvolutionMethod &m
     return os;
 }
 
+/** Formatted output of the FastMathHint type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const FastMathHint &hint)
+{
+    switch(hint)
+    {
+        case FastMathHint::ENABLED:
+            os << "ENABLED";
+            break;
+        case FastMathHint::DISABLED:
+            os << "DISABLED";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
 /** Formatted output of the DepthwiseConvolutionMethod type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const DepthwiseConvolutionMethod &method)
 {

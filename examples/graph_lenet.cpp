@@ -36,7 +36,7 @@ using namespace arm_compute::graph_utils;
 /** Example demonstrating how to implement LeNet's network using the Compute Library's graph API
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] batches )
+ * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] batches, [optional] Fast math for convolution layer (0 = DISABLED, 1 = ENABLED) )
  */
 class GraphLenetExample : public Example
 {
@@ -50,34 +50,45 @@ public:
         const int target      = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
         Target    target_hint = set_target_hint(target);
 
+        FastMathHint fast_math_hint = FastMathHint::DISABLED;
+
         // Parse arguments
         if(argc < 2)
         {
             // Print help
-            std::cout << "Usage: " << argv[0] << " [target] [path_to_data] [batches]\n\n";
+            std::cout << "Usage: " << argv[0] << " [target] [path_to_data] [batches] [fast_math_hint]\n\n";
             std::cout << "No data folder provided: using random values\n\n";
         }
         else if(argc == 2)
         {
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " [path_to_data] [batches]\n\n";
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " [path_to_data] [batches] [fast_math_hint]\n\n";
             std::cout << "No data folder provided: using random values\n\n";
         }
         else if(argc == 3)
         {
             //Do something with argv[1]
             data_path = argv[2];
-            std::cout << "Usage: " << argv[0] << " [path_to_data] [batches]\n\n";
+            std::cout << "Usage: " << argv[0] << " [path_to_data] [batches] [fast_math_hint]\n\n";
             std::cout << "No number of batches where specified, thus will use the default : " << batches << "\n\n";
+        }
+        else if(argc == 4)
+        {
+            data_path = argv[2];
+            batches   = std::strtol(argv[3], nullptr, 0);
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " [fast_math_hint]\n\n";
+            std::cout << "No fast math info provided: disabling fast math\n\n";
         }
         else
         {
             //Do something with argv[1] and argv[2]
-            data_path = argv[2];
-            batches   = std::strtol(argv[3], nullptr, 0);
+            data_path      = argv[2];
+            batches        = std::strtol(argv[3], nullptr, 0);
+            fast_math_hint = (std::strtol(argv[4], nullptr, 1) == 0) ? FastMathHint::DISABLED : FastMathHint::ENABLED;
         }
 
         //conv1 << pool1 << conv2 << pool2 << fc1 << act1 << fc2 << smx
         graph << target_hint
+              << fast_math_hint
               << InputLayer(TensorDescriptor(TensorShape(28U, 28U, 1U, batches), DataType::F32), get_input_accessor(""))
               << ConvolutionLayer(
                   5U, 5U, 20U,
@@ -125,7 +136,7 @@ private:
 /** Main program for LeNet
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] batches )
+ * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] batches, [optional] Fast math for convolution layer (0 = DISABLED, 1 = ENABLED) )
  */
 int main(int argc, char **argv)
 {

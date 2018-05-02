@@ -83,6 +83,7 @@ Status validate_convolution_layer(ConvolutionLayerNode &node)
 
     const PadStrideInfo     conv_info      = node.convolution_info();
     const ConvolutionMethod conv_algorithm = node.convolution_method();
+    //const bool              fast_math      = node.fast_math_hint() == FastMathHint::ENABLED;      // FIXME (COMPMID-1138): uncomment once NEON and GLES support fast_math
 
     // Validate function
     Status status{};
@@ -95,7 +96,7 @@ Status validate_convolution_layer(ConvolutionLayerNode &node)
             status = GEMMConvolutionLayer::validate(input, weights, biases, output, conv_info);
             break;
         case ConvolutionMethod::WINOGRAD:
-            status = WinogradConvolutionLayer::validate(input, weights, biases, output, conv_info);
+            status = WinogradConvolutionLayer::validate(input, weights, biases, output, conv_info /*, fast_math*/);
             break;
         case ConvolutionMethod::DEFAULT:
             status = ConvolutionLayer::validate(input, weights, biases, output, conv_info);
@@ -107,7 +108,7 @@ Status validate_convolution_layer(ConvolutionLayerNode &node)
     // If validation fails try the Default approach
     if(!bool(status))
     {
-        status = ConvolutionLayer::validate(input, weights, biases, output, conv_info);
+        status = ConvolutionLayer::validate(input, weights, biases, output, conv_info /*, fast_math*/);
         if(bool(status))
         {
             ARM_COMPUTE_LOG_GRAPH_INFO("Switched ConvolutionLayer method of node with ID : "

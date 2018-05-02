@@ -32,8 +32,8 @@ namespace arm_compute
 {
 namespace graph
 {
-ConvolutionLayerNode::ConvolutionLayerNode(PadStrideInfo info, ConvolutionMethod method, QuantizationInfo out_quant_info)
-    : _info(std::move(info)), _method(method), _out_quant_info(out_quant_info)
+ConvolutionLayerNode::ConvolutionLayerNode(PadStrideInfo info, ConvolutionMethod method, FastMathHint fast_math_hint, QuantizationInfo out_quant_info)
+    : _info(std::move(info)), _method(method), _fast_math_hint(fast_math_hint), _out_quant_info(out_quant_info)
 {
     _input_edges.resize(3, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -47,6 +47,16 @@ void ConvolutionLayerNode::set_convolution_method(ConvolutionMethod method)
 ConvolutionMethod ConvolutionLayerNode::convolution_method() const
 {
     return _method;
+}
+
+void ConvolutionLayerNode::set_fast_math_hint(FastMathHint hint)
+{
+    _fast_math_hint = hint;
+}
+
+FastMathHint ConvolutionLayerNode::fast_math_hint() const
+{
+    return _fast_math_hint;
 }
 
 PadStrideInfo ConvolutionLayerNode::convolution_info() const

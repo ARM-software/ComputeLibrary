@@ -40,7 +40,7 @@ namespace
 /** Example demonstrating how to implement Squeezenet's v1.1 network using the Compute Library's graph API
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] image, [optional] labels )
+ * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] image, [optional] labels, [optional] Fast math for convolution layer (0 = DISABLED, 1 = ENABLED) )
  */
 class GraphSqueezenet_v1_1Example : public Example
 {
@@ -59,40 +59,51 @@ public:
         const int         target           = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
         Target            target_hint      = set_target_hint(target);
         ConvolutionMethod convolution_hint = target_hint == Target::NEON ? ConvolutionMethod::GEMM : ConvolutionMethod::DEFAULT;
+        FastMathHint      fast_math_hint   = FastMathHint::DISABLED;
 
         // Parse arguments
         if(argc < 2)
         {
             // Print help
-            std::cout << "Usage: " << argv[0] << " [target] [path_to_data] [image] [labels]\n\n";
+            std::cout << "Usage: " << argv[0] << " [target] [path_to_data] [image] [labels] [fast_math_hint]\n\n";
             std::cout << "No data folder provided: using random values\n\n";
         }
         else if(argc == 2)
         {
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " [path_to_data] [image] [labels]\n\n";
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " [path_to_data] [image] [labels] [fast_math_hint]\n\n";
             std::cout << "No data folder provided: using random values\n\n";
         }
         else if(argc == 3)
         {
             data_path = argv[2];
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " [image] [labels]\n\n";
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " [image] [labels] [fast_math_hint]\n\n";
             std::cout << "No image provided: using random values\n\n";
         }
         else if(argc == 4)
         {
             data_path = argv[2];
             image     = argv[3];
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " [labels]\n\n";
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " [labels] [fast_math_hint]\n\n";
             std::cout << "No text file with labels provided: skipping output accessor\n\n";
         }
-        else
+        else if(argc == 5)
         {
             data_path = argv[2];
             image     = argv[3];
             label     = argv[4];
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " " << argv[4] << " [fast_math_hint]\n\n";
+            std::cout << "No fast math info provided: disabling fast math\n\n";
+        }
+        else
+        {
+            data_path      = argv[2];
+            image          = argv[3];
+            label          = argv[4];
+            fast_math_hint = (std::strtol(argv[5], nullptr, 1) == 0) ? FastMathHint::DISABLED : FastMathHint::ENABLED;
         }
 
         graph << target_hint
+              << fast_math_hint
               << InputLayer(TensorDescriptor(TensorShape(227U, 227U, 3U, 1U), DataType::F32),
                             get_input_accessor(image, std::move(preprocessor)))
               << ConvolutionMethod::DIRECT
@@ -214,7 +225,7 @@ private:
 /** Main program for Squeezenet v1.1
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] image, [optional] labels )
+ * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] image, [optional] labels, [optional] Fast math for convolution layer (0 = DISABLED, 1 = ENABLED) )
  */
 int main(int argc, char **argv)
 {

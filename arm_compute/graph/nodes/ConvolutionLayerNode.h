@@ -38,9 +38,11 @@ public:
      *
      * @param[in] info           Convolution layer attributes
      * @param[in] method         (Optional) Convolution method to use
+     * @param[in] fast_math_hint (Optional) Fast math hint
      * @param[in] out_quant_info (Optional) Output quantization info
      */
-    ConvolutionLayerNode(PadStrideInfo info, ConvolutionMethod method = ConvolutionMethod::DEFAULT, QuantizationInfo out_quant_info = QuantizationInfo());
+    ConvolutionLayerNode(PadStrideInfo info, ConvolutionMethod method = ConvolutionMethod::DEFAULT, FastMathHint fast_math_hint = FastMathHint::DISABLED,
+                         QuantizationInfo out_quant_info = QuantizationInfo());
     /** Sets the convolution layer method to use
      *
      * @param[in] method Method to use for convolution
@@ -51,9 +53,19 @@ public:
      * @note This is an indication on which convolution layer implementation to use,
      *       if it fails to be created the library's heuristic approach will be used
      *
-     * @return Convolution layer method do be used by the node
+     * @return Convolution layer method to be used by the node
      */
     ConvolutionMethod convolution_method() const;
+    /** Sets the fast math fast hint
+     *
+     * @param[in] hint Hint to use for convolution
+     */
+    void set_fast_math_hint(FastMathHint hint);
+    /** Fast math hint accessor
+     *
+     * @return Fast math hint to be used by the node
+     */
+    FastMathHint fast_math_hint() const;
     /** Convolution metadata accessor
      *
      * @return Convolution information
@@ -80,6 +92,7 @@ public:
 private:
     PadStrideInfo     _info;
     ConvolutionMethod _method;
+    FastMathHint      _fast_math_hint;
     QuantizationInfo  _out_quant_info;
 };
 } // namespace graph

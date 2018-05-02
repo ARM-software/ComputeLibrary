@@ -116,6 +116,13 @@ enum class DepthwiseConvolutionMethod
     OPTIMIZED_3x3, /**< Optimized 3x3 direct depthwise convolution */
 };
 
+/** Enable or disable fast math for Convolution layer */
+enum class FastMathHint
+{
+    ENABLED,  /**< Fast math enabled for Convolution layer */
+    DISABLED, /**< Fast math disabled for Convolution layer */
+};
+
 /** Supported nodes */
 enum class NodeType
 {
