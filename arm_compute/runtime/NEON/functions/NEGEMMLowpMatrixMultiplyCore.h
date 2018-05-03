@@ -102,6 +102,7 @@ private:
     Tensor                             _tmp_a;
     Tensor                             _tmp_b;
     Tensor                             _workspace;
+    Tensor                             _B_pretranspose;
     int32_t                            _a_offset;
     int32_t                            _b_offset;
     bool                               _run_vector_matrix_multiplication;

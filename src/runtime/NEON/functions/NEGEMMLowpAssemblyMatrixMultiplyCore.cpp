@@ -39,7 +39,7 @@ using namespace arm_compute;
 
 NEGEMMLowpAssemblyMatrixMultiplyCore::NEGEMMLowpAssemblyMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _asm_glue_unsigned(), _asm_glue_signed(), _mm_kernel(nullptr), _mtx_a_reshape_kernel(nullptr), _mtx_b_reshape_kernel(nullptr), _tmp_a(), _tmp_b(),
-      _workspace()
+      _workspace(), _B_pretransposed()
 {
 }
 
@@ -58,13 +58,13 @@ void NEGEMMLowpAssemblyMatrixMultiplyCore::configure(const ITensor *a, const ITe
     {
         case DataType::S8:
         {
-            run_optimised = setup_assembly_kernel(a, b, output, 1.f, 1.f, _workspace, _memory_group, _asm_glue_signed);
+            run_optimised = setup_assembly_kernel(a, b, output, 1.f, 1.f, true, _workspace, _B_pretransposed, _memory_group, _asm_glue_signed);
             break;
         }
         case DataType::QASYMM8:
         case DataType::U8:
         {
-            run_optimised = setup_assembly_kernel(a, b, output, 1.f, 1.f, _workspace, _memory_group, _asm_glue_unsigned);
+            run_optimised = setup_assembly_kernel(a, b, output, 1.f, 1.f, true, _workspace, _B_pretransposed, _memory_group, _asm_glue_unsigned);
             break;
         }
         default:

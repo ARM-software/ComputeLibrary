@@ -83,6 +83,7 @@ private:
     Tensor                     _tmp_a;
     Tensor                     _tmp_b;
     Tensor                     _workspace;
+    Tensor                     _B_pretransposed;
     bool                       _run_vector_matrix_multiplication;
     bool                       _run_addition;
     bool                       _is_first_run;

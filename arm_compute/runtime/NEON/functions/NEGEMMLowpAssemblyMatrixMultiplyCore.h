@@ -67,6 +67,7 @@ private:
     Tensor                     _tmp_a;
     Tensor                     _tmp_b;
     Tensor                     _workspace;
+    Tensor                     _B_pretransposed;
 };
 }
 #endif /*__ARM_COMPUTE_NEGEMMLOWPASSEMBLYMATRIXMULTIPLYCORE_H__ */

@@ -227,7 +227,7 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     if(workspace_size > 0)
     {
         const unsigned int alignment = 4096;
-        allocate_workspace(workspace_size, _workspace, _memory_group, alignment, 1);
+        allocate_workspace(workspace_size, _workspace, &_memory_group, alignment, 1);
         _arm_gemm->set_working_space(reinterpret_cast<float *>(_workspace.buffer()));
     }
 

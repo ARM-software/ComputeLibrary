@@ -212,7 +212,8 @@ Status validate_and_initialize_values(const ITensorInfo *input, const ITensorInf
 NEGEMMConvolutionLayer::NEGEMMConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager)
     : _asm_glue(), _memory_group(memory_manager), _input_im2col_kernel(), _input_interleave_kernel(), _reshape_weights(), _mm_kernel(), _mm_gemmlowp(memory_manager), _gemmlowp_output_stage(),
       _output_col2im_kernel(), _activationlayer_function(), _original_weights(nullptr), _input_im2col_reshaped(), _input_interleaved_reshaped(), _weights_reshaped(), _gemm_output(), _tmp_output(),
-      _workspace(), _append_bias(false), _is_fully_connected_convolution(false), _are_weights_reshaped(false), _is_quantized(false), _is_interleaved(false), _is_activationlayer_enabled(false)
+      _workspace(), _B_pretransposed(), _append_bias(false), _is_fully_connected_convolution(false), _are_weights_reshaped(false), _is_quantized(false), _is_interleaved(false),
+      _is_activationlayer_enabled(false)
 {
 }
 
@@ -365,7 +366,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     // Configure matrix multiply
     if(run_optimised)
     {
-        if(!setup_assembly_kernel(&_input_im2col_reshaped, weights, &_gemm_output, 1.f, 0.f, _workspace, _memory_group, _asm_glue))
+        if(!setup_assembly_kernel(&_input_im2col_reshaped, weights, &_gemm_output, 1.f, 0.f, true, _workspace, _B_pretransposed, _memory_group, _asm_glue))
         {
             ARM_COMPUTE_ERROR("setup_assembly_kernel failed.");
         }
@@ -559,6 +560,11 @@ void NEGEMMConvolutionLayer::run()
     if(_asm_glue._optimised_kernel != nullptr)
     {
         _asm_glue.run();
+        // Release weights in case buffer is pretransposed
+        if(_B_pretransposed.buffer() != nullptr && _weights_reshaped.is_used())
+        {
+            _weights_reshaped.allocator()->free();
+        }
     }
     else
     {

@@ -39,7 +39,7 @@
 namespace arm_compute
 {
 NEGEMM::NEGEMM(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _asm_glue(), _ma_kernel(), _tmp_a(), _tmp_b(), _workspace(),
+    : _memory_group(std::move(memory_manager)), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _asm_glue(), _ma_kernel(), _tmp_a(), _tmp_b(), _workspace(), _B_pretransposed(),
       _run_vector_matrix_multiplication(false), _run_addition(false), _is_first_run(true), _reshape_b_only_on_first_run(false)
 {
 }
@@ -66,7 +66,8 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
     _reshape_b_only_on_first_run      = gemm_info.reshape_b_only_on_first_run();
     _run_vector_matrix_multiplication = a->info()->dimension(1) < 2;
 
-    const bool run_optimised = a->info()->data_type() == DataType::F32 && (c == nullptr || beta == 0.f) && setup_assembly_kernel(a, b, d, alpha, beta, _workspace, _memory_group, _asm_glue);
+    const bool run_optimised = a->info()->data_type() == DataType::F32 && (c == nullptr || beta == 0.f)
+                               && setup_assembly_kernel(a, b, d, alpha, beta, _reshape_b_only_on_first_run, _workspace, _B_pretransposed, _memory_group, _asm_glue);
 
     // Check if the first input tensor is a vector.
     // If so, all the kernels for reshaping the tensors can be skipped

@@ -42,8 +42,8 @@ using namespace arm_compute::misc::shape_calculator;
 
 NEGEMMLowpMatrixMultiplyCore::NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _asm_glue_unsigned(), _asm_glue_signed(), _mm_kernel(nullptr), _mtx_a_reshape_kernel(nullptr), _mtx_b_reshape_kernel(nullptr), _mtx_a_reduction_kernel(),
-      _mtx_b_reduction_kernel(), _offset_contribution_kernel(), _vector_sum_col(), _vector_sum_row(), _tmp_a(), _tmp_b(), _workspace(), _a_offset(0), _b_offset(0), _run_vector_matrix_multiplication(false),
-      _dot_product_path(false), _is_first_run(true), _reshape_b_only_on_first_run(false)
+      _mtx_b_reduction_kernel(), _offset_contribution_kernel(), _vector_sum_col(), _vector_sum_row(), _tmp_a(), _tmp_b(), _workspace(), _B_pretranspose(), _a_offset(0), _b_offset(0),
+      _run_vector_matrix_multiplication(false), _dot_product_path(false), _is_first_run(true), _reshape_b_only_on_first_run(false)
 {
 }
 
@@ -62,13 +62,13 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
     {
         case DataType::S8:
         {
-            _dot_product_path = setup_assembly_kernel(a, b, output, 1.f, 1.f, _workspace, _memory_group, _asm_glue_signed);
+            _dot_product_path = setup_assembly_kernel(a, b, output, 1.f, 1.f, true, _workspace, _B_pretranspose, _memory_group, _asm_glue_signed);
             break;
         }
         case DataType::QASYMM8:
         case DataType::U8:
         {
-            _dot_product_path = setup_assembly_kernel(a, b, output, 1.f, 1.f, _workspace, _memory_group, _asm_glue_unsigned);
+            _dot_product_path = setup_assembly_kernel(a, b, output, 1.f, 1.f, true, _workspace, _B_pretranspose, _memory_group, _asm_glue_unsigned);
             break;
         }
         default:

@@ -185,6 +185,7 @@ private:
     Tensor _gemm_output;
     Tensor _tmp_output;
     Tensor _workspace;
+    Tensor _B_pretransposed;
 
     bool _append_bias;
     bool _is_fully_connected_convolution;
