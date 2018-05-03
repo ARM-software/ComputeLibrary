@@ -153,7 +153,7 @@ protected:
     SimpleTensor<T> _reference{};
 };
 
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
+template <typename TensorType, typename AccessorType, typename FunctionType, typename T, bool use_bias = true>
 class WinogradConvolutionLayerFastMathValidationFixture : public framework::Fixture
 {
 public:
@@ -198,8 +198,9 @@ protected:
 
         // Create and configure function
         FunctionType conv;
-        ARM_COMPUTE_EXPECT(static_cast<bool>(conv.validate(src.info(), weights.info(), bias.info(), dst.info(), info, act_info, true /* Enable fast math */)), framework::LogLevel::ERRORS);
-        conv.configure(&src, &weights, &bias, &dst, info, act_info, true /* Enable fast math */);
+        ARM_COMPUTE_EXPECT(static_cast<bool>(conv.validate(src.info(), weights.info(), (use_bias) ? bias.info() : nullptr, dst.info(), info, act_info, true /* Enable fast math */)),
+                           framework::LogLevel::ERRORS);
+        conv.configure(&src, &weights, (use_bias) ? &bias : nullptr, &dst, info, act_info, true /* Enable fast math */);
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -239,7 +240,14 @@ protected:
         // Fill reference
         fill(src, 0, -1.f, 1.f);
         fill(weights, 1, -1.f, 1.f);
-        fill(bias, 2, -1.f, 1.f);
+        if(use_bias)
+        {
+            fill(bias, 2, -1.f, 1.f);
+        }
+        else
+        {
+            fill(bias, 2, 0.f, 0.f);
+        }
 
         WinogradInfo winograd_info(Size2D(4U, 4U),
                                    Size2D(weights_shape[0], weights_shape[1]),

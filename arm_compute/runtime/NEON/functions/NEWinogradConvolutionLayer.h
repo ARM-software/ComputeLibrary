@@ -45,6 +45,8 @@ class ITensor;
  * -# @ref NEWinogradLayerTransformOutputKernel
  * -# @ref NEWinogradLayerBatchedGEMMKernel
  * -# @ref CPPPermute (three times: weights, input and output)
+ *
+ * @note  Some Winograd configurations (i.e. F(2x2, 5x5), F(4x4, 5x5)) are supported only with enable_fast_math = true
  */
 class NEWinogradConvolutionLayer : public IFunction
 {
@@ -54,39 +56,44 @@ public:
 
     /** Set the input and output tensors.
      *
-     * @param[in]  input     Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
-     *                       while every optional dimension from 4 and above represent a batch of inputs.
-     *                       Data types supported: F32.
-     * @param[in]  weights   Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: Same as @p input.
-     *                       Currently only 3x3 and 5x5 kernels are supported.
-     * @param[in]  biases    Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
-     * @param[out] output    Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
-     *                       Data types supported: Same as @p input.
-     * @param[in]  conv_info Contains padding and stride information described in @ref PadStrideInfo. Currently only unit strides are supported.
-     * @param[in]  act_info  (Optional) Activation layer information in case of a fused activation.
+     * @param[in]  input            Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
+     *                              while every optional dimension from 4 and above represent a batch of inputs.
+     *                              Data types supported: F32.
+     * @param[in]  weights          Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: Same as @p input.
+     *                              Currently only 3x3 and 5x5 kernels are supported.
+     * @param[in]  biases           Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
+     * @param[out] output           Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
+     *                              Data types supported: Same as @p input.
+     * @param[in]  conv_info        Contains padding and stride information described in @ref PadStrideInfo. Currently only unit strides are supported.
+     * @param[in]  act_info         (Optional) Activation layer information in case of a fused activation.
+     * @param[in]  enable_fast_math (Optional) Enable fast math computation. In case this flag were set, the function could dispatch the fastest implementation
+     *                              available which may introduce a drop of accuracy as well. Default is false
      */
-    void configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info = ActivationLayerInfo());
+    void configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info = ActivationLayerInfo(),
+                   bool enable_fast_math = false);
 
     // Inherited methods overridden:
     void run() override;
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMConvolutionLayer
      *
-     * @param[in] input     Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
-     *                      while every optional dimension from 4 and above represent a batch of inputs.
-     *                      Data types supported: F32.
-     * @param[in] weights   Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported:Same as @p input.
-     *                      Currently only 3x3 and 5x5 kernels are supported.
-     * @param[in] biases    Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
-     * @param[in] output    Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
-     *                      Data types supported: Same as @p input.
-     * @param[in] conv_info Contains padding and stride information described in @ref PadStrideInfo. Currently only unit strides are supported.
-     * @param[in] act_info  (Optional) Activation layer information in case of a fused activation.
+     * @param[in] input            Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
+     *                             while every optional dimension from 4 and above represent a batch of inputs.
+     *                             Data types supported: F32.
+     * @param[in] weights          Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported:Same as @p input.
+     *                             Currently only 3x3 and 5x5 kernels are supported.
+     * @param[in] biases           Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
+     * @param[in] output           Destination tensor. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
+     *                             Data types supported: Same as @p input.
+     * @param[in] conv_info        Contains padding and stride information described in @ref PadStrideInfo. Currently only unit strides are supported.
+     * @param[in] act_info         (Optional) Activation layer information in case of a fused activation.
+     * @param[in] enable_fast_math (Optional) Enable fast math computation. In case this flag were set, the function could dispatch the fastest implementation
+     *                              available which may introduce a drop of accuracy as well. Default is false
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                           const ActivationLayerInfo &act_info = ActivationLayerInfo());
+                           const ActivationLayerInfo &act_info = ActivationLayerInfo(), bool enable_fast_math = false);
 
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEWinogradConvolutionLayer(const NEWinogradConvolutionLayer &) = delete;

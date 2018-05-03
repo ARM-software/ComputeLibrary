@@ -41,18 +41,19 @@ NEConvolutionLayer::NEConvolutionLayer(std::shared_ptr<IMemoryManager> memory_ma
 }
 
 void NEConvolutionLayer::configure(ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
-                                   const Size2D &dilation, const ActivationLayerInfo &act_info)
+                                   const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math)
 {
     // Perform validate step
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_ERROR_THROW_ON(NEConvolutionLayer::validate(input->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), output->info(), conv_info, weights_info, dilation, act_info));
+    ARM_COMPUTE_ERROR_THROW_ON(NEConvolutionLayer::validate(input->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), output->info(), conv_info, weights_info, dilation, act_info,
+                                                            enable_fast_math));
 
     switch(NEConvolutionLayer::get_convolution_method(input->info(), weights->info(), output->info(), conv_info, weights_info, dilation, act_info))
     {
         case ConvolutionMethod::WINOGRAD:
         {
             auto f = arm_compute::support::cpp14::make_unique<NEWinogradConvolutionLayer>(_memory_manager);
-            f->configure(input, weights, biases, output, conv_info, act_info);
+            f->configure(input, weights, biases, output, conv_info, act_info, enable_fast_math);
             _function = std::move(f);
             break;
         }
@@ -77,13 +78,13 @@ void NEConvolutionLayer::configure(ITensor *input, const ITensor *weights, const
 }
 
 Status NEConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                    const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info)
+                                    const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math)
 {
     switch(NEConvolutionLayer::get_convolution_method(input, weights, output, conv_info, weights_info, dilation, act_info))
     {
         case ConvolutionMethod::WINOGRAD:
             //Validate Winograd
-            NEWinogradConvolutionLayer::validate(input, weights, biases, output, conv_info, act_info);
+            NEWinogradConvolutionLayer::validate(input, weights, biases, output, conv_info, act_info, enable_fast_math);
             break;
         case ConvolutionMethod::GEMM:
             //Validate Gemm-based Convolution
@@ -102,27 +103,18 @@ Status NEConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo 
 
 ConvolutionMethod NEConvolutionLayer::get_convolution_method(const ITensorInfo *input, const ITensorInfo *weights,
                                                              const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                                             const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info)
+                                                             const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, weights);
-    ARM_COMPUTE_UNUSED(output);
     ARM_COMPUTE_UNUSED(weights_info);
 
-    const size_t idx_w = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
-    const size_t idx_h = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
-    const size_t idx_c = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL);
-
-    if((input->data_type() == DataType::F32) && (input->data_layout() == DataLayout::NCHW) && (input->dimension(idx_c) > 16) && (weights->dimension(idx_w) == 3) && (weights->dimension(idx_h) == 3)
-       && (weights->num_dimensions() <= 4)
-       && (conv_info.stride().first == 1) && (conv_info.stride().second == 1) && (dilation == Size2D(1U, 1U)) && (!act_info.enabled()))
+    if(dilation != Size2D(1U, 1U) || Scheduler::get().cpu_info().get_cpu_model() == CPUModel::A53
+       || input->dimension(get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL)) <= 16)
     {
-        //FIXME Until COMPMID-1041 is implemented Winograd is slower than GEMM on A53.
-        if(Scheduler::get().cpu_info().get_cpu_model() != CPUModel::A53)
-        {
-            return ConvolutionMethod::WINOGRAD;
-        }
+        return ConvolutionMethod::GEMM;
     }
-    return ConvolutionMethod::GEMM;
+
+    return bool(NEWinogradConvolutionLayer::validate(input, weights, nullptr, output, conv_info, act_info, enable_fast_math)) ? ConvolutionMethod::WINOGRAD : ConvolutionMethod::GEMM;
 }
 
 void NEConvolutionLayer::run()

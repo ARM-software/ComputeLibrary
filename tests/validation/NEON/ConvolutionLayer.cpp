@@ -76,43 +76,48 @@ const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo
 TEST_SUITE(NEON)
 
 TEST_SUITE(ConvolutionLayer)
-DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(zip(zip(
-                                                                                       framework::dataset::make("InputInfo", { TensorInfo(TensorShape(8U, 8U, 2U), 1, DataType::F32, 0),
-                                                                                                                TensorInfo(TensorShape(23U, 27U, 32U, 4U), 1, DataType::F32, 0),
-                                                                                                                TensorInfo(TensorShape(3U, 3U, 2U, 1U), 1, DataType::F32, 0),
-                                                                                                                TensorInfo(TensorShape(33U, 27U, 7U, 4U), 1, DataType::F32, 0)
-                                                                                                                             }),
-                                                                                       framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
-                                                                                                                TensorInfo(TensorShape(3U, 3U, 32U, 21U), 1, DataType::F32, 0),
-                                                                                                                TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
-                                                                                                                TensorInfo(TensorShape(5U, 5U, 7U, 16U), 1, DataType::F16, 0)
-                                                                                                                               })),
-                                                                                   framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(6U, 6U, 1U), 1, DataType::F32, 0),
-                                                                                                            TensorInfo(TensorShape(21U, 25U, 21U, 4U), 1, DataType::F32, 0),
-                                                                                                            TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32, 0),
-                                                                                                            TensorInfo(TensorShape(11U, 12U, 16U, 4U), 1, DataType::F32, 0)
-                                                                                                                          })),
-                                                                               framework::dataset::make("ConvInfo", { PadStrideInfo(1, 1, 0, 0),
-                                                                                                                      PadStrideInfo(1, 1, 0, 0),
-                                                                                                                      PadStrideInfo(2, 1, 0, 0),
-                                                                                                                      PadStrideInfo(3, 2, 1, 0)
+DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
+                                                                                           framework::dataset::make("InputInfo", { TensorInfo(TensorShape(18U, 18U, 32U), 1, DataType::F32, 0),
+                                                                                                                    TensorInfo(TensorShape(23U, 27U, 32U, 4U), 1, DataType::F32, 0),
+                                                                                                                    TensorInfo(TensorShape(3U, 3U, 2U, 1U), 1, DataType::F32, 0),
+                                                                                                                    TensorInfo(TensorShape(33U, 27U, 7U, 4U), 1, DataType::F32, 0)
+                                                                                                                                 }),
+                                                                                           framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(3U, 3U, 32U, 21U), 1, DataType::F32, 0),
+                                                                                                                    TensorInfo(TensorShape(5U, 5U, 32U, 21U), 1, DataType::F32, 0),
+                                                                                                                    TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
+                                                                                                                    TensorInfo(TensorShape(5U, 5U, 7U, 16U), 1, DataType::F16, 0)
+                                                                                                                                   })),
+                                                                                       framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(16U, 16U, 21U), 1, DataType::F32, 0),
+                                                                                                                TensorInfo(TensorShape(19U, 23U, 21U, 4U), 1, DataType::F32, 0),
+                                                                                                                TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32, 0),
+                                                                                                                TensorInfo(TensorShape(11U, 12U, 16U, 4U), 1, DataType::F32, 0)
+                                                                                                                              })),
+                                                                                   framework::dataset::make("ConvInfo", { PadStrideInfo(1, 1, 0, 0),
+                                                                                                            PadStrideInfo(1, 1, 0, 0),
+                                                                                                            PadStrideInfo(2, 1, 0, 0),
+                                                                                                            PadStrideInfo(3, 2, 1, 0)
+                                                                                                                        })),
+                                                                               framework::dataset::make("FastMath", { true,
+                                                                                                                      true,
+                                                                                                                      false,
+                                                                                                                      false
                                                                                                                     })),
-                                                                           framework::dataset::make("Expected", { ConvolutionMethod::GEMM, ConvolutionMethod::WINOGRAD, ConvolutionMethod::GEMM, ConvolutionMethod::GEMM })),
-               input_info, weights_info, output_info, conv_info, expected)
+                                                                           framework::dataset::make("Expected", { ConvolutionMethod::WINOGRAD, ConvolutionMethod::WINOGRAD, ConvolutionMethod::GEMM, ConvolutionMethod::GEMM })),
+               input_info, weights_info, output_info, conv_info, fast_math, expected)
 {
-    ConvolutionMethod is_valid = NEConvolutionLayer::get_convolution_method(&input_info.clone()->set_is_resizable(false),
-                                                                            &weights_info.clone()->set_is_resizable(false),
-                                                                            &output_info.clone()->set_is_resizable(false), conv_info);
+    ConvolutionMethod is_valid = NEConvolutionLayer::get_convolution_method(&input_info.clone()->set_is_resizable(true),
+                                                                            &weights_info.clone()->set_is_resizable(true),
+                                                                            &output_info.clone()->set_is_resizable(true), conv_info, WeightsInfo(), Size2D(1U, 1U), ActivationLayerInfo(), fast_math);
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
 TEST_SUITE_END()
 
 TEST_SUITE(WinogradLayer)
 template <typename T>
-using NEWinogradConvolutionLayerFixture = WinogradConvolutionLayerValidationFixture<Tensor, Accessor, NEWinogradConvolutionLayer, T>;
+using NEWinogradConvolutionLayerFixture = WinogradConvolutionLayerFastMathValidationFixture<Tensor, Accessor, NEWinogradConvolutionLayer, T>;
 
 template <typename T>
-using NEWinogradConvolutionLayerNoBiasFixture = WinogradConvolutionLayerValidationFixture<Tensor, Accessor, NEWinogradConvolutionLayer, T, false>;
+using NEWinogradConvolutionLayerNoBiasFixture = WinogradConvolutionLayerFastMathValidationFixture<Tensor, Accessor, NEWinogradConvolutionLayer, T, false>;
 
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEWinogradConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
