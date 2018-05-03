@@ -21,40 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_NEDEVICEBACKEND_H__
-#define __ARM_COMPUTE_GRAPH_NEDEVICEBACKEND_H__
+#ifndef __ARM_COMPUTE_GRAPH_DETAIL_CROSS_LAYER_MEMORY_MANAGER_HELPERS_H__
+#define __ARM_COMPUTE_GRAPH_DETAIL_CROSS_LAYER_MEMORY_MANAGER_HELPERS_H__
 
-#include "arm_compute/graph/IDeviceBackend.h"
-
-#include "arm_compute/runtime/Allocator.h"
+#include <vector>
 
 namespace arm_compute
 {
 namespace graph
 {
-namespace backends
-{
-/** NEON device backend */
-class NEDeviceBackend final : public IDeviceBackend
-{
-public:
-    NEDeviceBackend();
+// Forward declarations
+class Graph;
+class GraphContext;
+class ExecutionWorkload;
+class ITransMemoryManager;
+class ITensorHandle;
 
-    // Inherited overridden methods
-    void initialize_backend() override;
-    void setup_backend_context(GraphContext &ctx) override;
-    bool                           is_backend_supported() override;
-    IAllocator                    *backend_allocator() override;
-    std::unique_ptr<ITensorHandle> create_tensor(const Tensor &tensor) override;
-    std::unique_ptr<ITensorHandle> create_subtensor(ITensorHandle *parent, TensorShape shape, Coordinates coords, bool extend_parent) override;
-    std::unique_ptr<arm_compute::IFunction> configure_node(INode &node, GraphContext &ctx) override;
-    Status validate_node(INode &node) override;
-    std::shared_ptr<arm_compute::IMemoryManager> create_memory_manager(MemoryManagerAffinity affinity) override;
-
-private:
-    Allocator _allocator; /**< NEON backend allocator */
-};
-} // namespace backends
+namespace detail
+{
+/** Configures transition manager and execution workload
+ *
+ * @param[in] g        Graph to configure
+ * @param[in] ctx      Graph context
+ * @param[in] workload Workload to configure
+ */
+void configure_transition_manager(Graph &g, GraphContext &ctx, ExecutionWorkload &workload);
+} // namespace detail
 } // namespace graph
 } // namespace arm_compute
-#endif //__ARM_COMPUTE_GRAPH_NEDEVICEBACKEND_H__
+#endif /* __ARM_COMPUTE_GRAPH_DETAIL_CROSS_LAYER_MEMORY_MANAGER_HELPERS_H__ */

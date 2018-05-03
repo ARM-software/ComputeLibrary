@@ -23,6 +23,9 @@
  */
 #include "arm_compute/graph/backends/NEON/NETensorHandle.h"
 
+#include "arm_compute/core/utils/misc/Cast.h"
+#include "arm_compute/runtime/MemoryGroup.h"
+
 namespace arm_compute
 {
 namespace graph
@@ -40,14 +43,18 @@ void NETensorHandle::allocate()
     _tensor.allocator()->allocate();
 }
 
-const arm_compute::ITensor &NETensorHandle::tensor() const
+void NETensorHandle::free()
 {
-    return _tensor;
+    _tensor.allocator()->free();
 }
 
-arm_compute::ITensor &NETensorHandle::tensor()
+void NETensorHandle::manage(IMemoryGroup *mg)
 {
-    return _tensor;
+    if(mg != nullptr)
+    {
+        auto *ne_mg = arm_compute::utils::cast::polymorphic_downcast<MemoryGroup *>(mg);
+        ne_mg->manage(&_tensor);
+    }
 }
 
 void NETensorHandle::map(bool blocking)
@@ -68,9 +75,29 @@ void NETensorHandle::release_if_unused()
     }
 }
 
+const arm_compute::ITensor &NETensorHandle::tensor() const
+{
+    return _tensor;
+}
+
+arm_compute::ITensor &NETensorHandle::tensor()
+{
+    return _tensor;
+}
+
+ITensorHandle *NETensorHandle::parent_handle()
+{
+    return this;
+}
+
 bool NETensorHandle::is_subtensor() const
 {
     return false;
+}
+
+Target NETensorHandle::target() const
+{
+    return Target::NEON;
 }
 } // namespace backends
 } // namespace graph

@@ -30,10 +30,11 @@ namespace graph
 namespace backends
 {
 NESubTensorHandle::NESubTensorHandle(ITensorHandle *parent_handle, const TensorShape &shape, const Coordinates &coords, bool extend_parent)
-    : _sub_tensor()
+    : _sub_tensor(), _parent_handle(nullptr)
 {
     ARM_COMPUTE_ERROR_ON(!parent_handle);
-    _sub_tensor = arm_compute::SubTensor(&parent_handle->tensor(), shape, coords, extend_parent);
+    _sub_tensor    = arm_compute::SubTensor(&parent_handle->tensor(), shape, coords, extend_parent);
+    _parent_handle = parent_handle;
 }
 
 void NESubTensorHandle::allocate()
@@ -41,14 +42,15 @@ void NESubTensorHandle::allocate()
     // noop
 }
 
-const arm_compute::ITensor &NESubTensorHandle::tensor() const
+void NESubTensorHandle::free()
 {
-    return _sub_tensor;
+    // noop
 }
 
-arm_compute::ITensor &NESubTensorHandle::tensor()
+void NESubTensorHandle::manage(IMemoryGroup *mg)
 {
-    return _sub_tensor;
+    ARM_COMPUTE_UNUSED(mg);
+    // noop
 }
 
 void NESubTensorHandle::map(bool blocking)
@@ -66,9 +68,30 @@ void NESubTensorHandle::release_if_unused()
     // noop
 }
 
+const arm_compute::ITensor &NESubTensorHandle::tensor() const
+{
+    return _sub_tensor;
+}
+
+arm_compute::ITensor &NESubTensorHandle::tensor()
+{
+    return _sub_tensor;
+}
+
+ITensorHandle *NESubTensorHandle::parent_handle()
+{
+    ARM_COMPUTE_ERROR_ON(_parent_handle == nullptr);
+    return _parent_handle->parent_handle();
+}
+
 bool NESubTensorHandle::is_subtensor() const
 {
     return true;
+}
+
+Target NESubTensorHandle::target() const
+{
+    return Target::NEON;
 }
 } // namespace backends
 } // namespace graph

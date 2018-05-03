@@ -24,7 +24,9 @@
 #ifndef __ARM_COMPUTE_GRAPH_WORKLOAD_H__
 #define __ARM_COMPUTE_GRAPH_WORKLOAD_H__
 
+#include "arm_compute/graph/GraphContext.h"
 #include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/runtime/IMemoryGroup.h"
 
 #include <functional>
 #include <memory>
@@ -68,10 +70,8 @@ public:
 struct ExecutionTask
 {
     // TODO (geopin01) : Support vector of functions?
-    std::unique_ptr<arm_compute::IFunction> task            = {}; /**< Task to execute */
-    INode                                  *node            = {}; /**< Node bound to this workload */
-    std::vector<ITensorHandle *>            commit_handles  = {}; /**< Handles needs to sync for this task to execute */
-    std::vector<ITensorHandle *>            release_handles = {}; /**< Handles that can be released after this node execution */
+    std::unique_ptr<arm_compute::IFunction> task = {}; /**< Task to execute */
+    INode                                  *node = {}; /**< Node bound to this workload */
 
     /** Function operator */
     void operator()();
@@ -83,10 +83,11 @@ struct ExecutionTask
 /** Execution workload */
 struct ExecutionWorkload
 {
-    std::vector<Tensor *>      inputs  = {};      /**< Input handles */
-    std::vector<Tensor *>      outputs = {};      /**< Output handles */
-    std::vector<ExecutionTask> tasks   = {};      /**< Execution workload */
-    Graph                     *graph   = nullptr; /**< Graph bound to the workload */
+    std::vector<Tensor *>      inputs  = {};          /**< Input handles */
+    std::vector<Tensor *>      outputs = {};          /**< Output handles */
+    std::vector<ExecutionTask> tasks   = {};          /**< Execution workload */
+    Graph                     *graph   = { nullptr }; /**< Graph bound to the workload */
+    GraphContext              *ctx     = { nullptr }; /**< Graph execution context */
 };
 } // namespace graph
 } // namespace arm_compute

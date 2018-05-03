@@ -60,13 +60,24 @@ MemoryManagerContext *GraphContext::memory_management_ctx(Target target)
     return (_memory_managers.find(target) != std::end(_memory_managers)) ? &_memory_managers[target] : nullptr;
 }
 
+std::map<Target, MemoryManagerContext> &GraphContext::memory_managers()
+{
+    return _memory_managers;
+}
+
 void GraphContext::finalize()
 {
     for(auto &mm_obj : _memory_managers)
     {
-        if(mm_obj.second.mm != nullptr)
+        // Finalize intra layer memory manager
+        if(mm_obj.second.intra_mm != nullptr)
         {
-            mm_obj.second.mm->finalize();
+            mm_obj.second.intra_mm->finalize();
+        }
+        // Finalize cross layer memory manager
+        if(mm_obj.second.cross_mm != nullptr)
+        {
+            mm_obj.second.cross_mm->finalize();
         }
     }
 }

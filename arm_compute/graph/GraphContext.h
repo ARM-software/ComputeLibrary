@@ -38,8 +38,10 @@ namespace graph
 /** Contains structs required for memory management */
 struct MemoryManagerContext
 {
-    Target                                       target = { Target::UNSPECIFIED }; /**< Target */
-    std::shared_ptr<arm_compute::IMemoryManager> mm     = { nullptr };             /**< Memory manager */
+    Target                                       target      = { Target::UNSPECIFIED }; /**< Target */
+    std::shared_ptr<arm_compute::IMemoryManager> intra_mm    = { nullptr };             /**< Intra-function memory manager */
+    std::shared_ptr<arm_compute::IMemoryManager> cross_mm    = { nullptr };             /**< Cross-function memory manager */
+    std::shared_ptr<arm_compute::IMemoryGroup>   cross_group = { nullptr };             /**< Cross-function memory group */
 };
 
 /** Graph context **/
@@ -82,6 +84,11 @@ public:
      * @return Management context for the target if exists else nullptr
      */
     MemoryManagerContext *memory_management_ctx(Target target);
+    /** Gets the memory managers map
+     *
+     * @return Memory manager contexts
+     */
+    std::map<Target, MemoryManagerContext> &memory_managers();
     /** Finalizes memory managers in graph context */
     void finalize();
 

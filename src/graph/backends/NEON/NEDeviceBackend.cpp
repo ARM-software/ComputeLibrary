@@ -37,6 +37,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/Allocator.h"
 #include "arm_compute/runtime/BlobLifetimeManager.h"
+#include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/OffsetLifetimeManager.h"
 #include "arm_compute/runtime/PoolManager.h"
@@ -74,8 +75,10 @@ void NEDeviceBackend::setup_backend_context(GraphContext &ctx)
     if(ctx.memory_management_ctx(Target::NEON) == nullptr)
     {
         MemoryManagerContext mm_ctx;
-        mm_ctx.target = Target::NEON;
-        mm_ctx.mm     = create_memory_manager(MemoryManagerAffinity::Buffer);
+        mm_ctx.target      = Target::NEON;
+        mm_ctx.intra_mm    = create_memory_manager(MemoryManagerAffinity::Offset);
+        mm_ctx.cross_mm    = create_memory_manager(MemoryManagerAffinity::Offset);
+        mm_ctx.cross_group = std::make_shared<MemoryGroup>(mm_ctx.cross_mm);
 
         ctx.insert_memory_management_ctx(std::move(mm_ctx));
     }
@@ -84,6 +87,11 @@ void NEDeviceBackend::setup_backend_context(GraphContext &ctx)
 bool NEDeviceBackend::is_backend_supported()
 {
     return true;
+}
+
+IAllocator *NEDeviceBackend::backend_allocator()
+{
+    return &_allocator;
 }
 
 std::unique_ptr<ITensorHandle> NEDeviceBackend::create_tensor(const Tensor &tensor)

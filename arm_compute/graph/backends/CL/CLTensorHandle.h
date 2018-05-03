@@ -51,13 +51,17 @@ public:
     CLTensorHandle &operator=(CLTensorHandle &&) = default;
 
     // Inherited overridden methods
-    void                        allocate() override;
+    void allocate() override;
+    void free() override;
+    void manage(IMemoryGroup *mg) override;
+    void map(bool blocking) override;
+    void                        unmap() override;
+    void                        release_if_unused() override;
     arm_compute::ITensor       &tensor() override;
     const arm_compute::ITensor &tensor() const override;
-    void map(bool blocking) override;
-    void unmap() override;
-    void release_if_unused() override;
-    bool is_subtensor() const override;
+    ITensorHandle              *parent_handle() override;
+    bool                        is_subtensor() const override;
+    Target                      target() const override;
 
 private:
     arm_compute::CLTensor _tensor; /**< Backend Tensor */

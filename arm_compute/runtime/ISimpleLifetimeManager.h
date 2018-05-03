@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,7 +30,9 @@
 #include "arm_compute/runtime/Types.h"
 
 #include <cstddef>
+#include <list>
 #include <map>
+#include <set>
 #include <vector>
 
 namespace arm_compute
@@ -77,9 +79,19 @@ protected:
         bool   status; /**< Lifetime status */
     };
 
-    IMemoryGroup        *_active_group;                               /**< Active group */
-    std::vector<Element> _active_elements;                            /**< A map that contains the active elements */
-    std::map<IMemoryGroup *, std::vector<Element>> _finalized_groups; /**< A map that contains the finalized groups */
+    /** Blob struct */
+    struct Blob
+    {
+        void            *id;
+        size_t           max_size;
+        std::set<void *> bound_elements;
+    };
+
+    IMemoryGroup *_active_group;                                           /**< Active group */
+    std::map<void *, Element> _active_elements;                            /**< A map that contains the active elements */
+    std::list<Blob> _free_blobs;                                           /**< Free blobs */
+    std::list<Blob> _occupied_blobs;                                       /**< Occupied blobs */
+    std::map<IMemoryGroup *, std::map<void *, Element>> _finalized_groups; /**< A map that contains the finalized groups */
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_ISIMPLELIFETIMEMANAGER_H__ */

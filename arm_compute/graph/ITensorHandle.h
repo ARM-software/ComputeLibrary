@@ -25,9 +25,13 @@
 #define __ARM_COMPUTE_GRAPH_ITENSORHANDLE_H__
 
 #include "arm_compute/core/ITensor.h"
+#include "arm_compute/graph/Types.h"
 
 namespace arm_compute
 {
+// Forward declarations
+class IMemoryGroup;
+
 namespace graph
 {
 /** Tensor handle interface object */
@@ -38,10 +42,13 @@ public:
     virtual ~ITensorHandle() = default;
     /** Allocates backend memory for the handle */
     virtual void allocate() = 0;
-    /** Backend tensor object accessor */
-    virtual arm_compute::ITensor &tensor() = 0;
-    /** Backend tensor object const accessor */
-    virtual const arm_compute::ITensor &tensor() const = 0;
+    /** Allocates backend memory for the handle */
+    virtual void free() = 0;
+    /** Set backend tensor to be managed by a memory group
+     *
+     * @param[in] mg Memory group
+     */
+    virtual void manage(IMemoryGroup *mg) = 0;
     /** Maps backend tensor object
      *
      * @param[in] blocking Flags if the mapping operations should be blocking
@@ -58,11 +65,25 @@ public:
      *          on the other hand if a sub-tensor is marked as unused then the parent tensor won't be released
      */
     virtual void release_if_unused() = 0;
+    /** Backend tensor object accessor */
+    virtual arm_compute::ITensor &tensor() = 0;
+    /** Backend tensor object const accessor */
+    virtual const arm_compute::ITensor &tensor() const = 0;
+    /** Return the parent tensor handle if is a subtensor else this
+     *
+     * @return Parent tensor handle
+     */
+    virtual ITensorHandle *parent_handle() = 0;
     /** Checks if a backing tensor is a sub-tensor object or not
      *
      * @return True if the backend tensor is a sub-tensor else false
      */
     virtual bool is_subtensor() const = 0;
+    /** Returns target type
+     *
+     * @return Target type
+     */
+    virtual Target target() const = 0;
 };
 } // namespace graph
 } // namespace arm_compute

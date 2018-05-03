@@ -52,18 +52,27 @@ public:
     CLSubTensorHandle(CLSubTensorHandle &&) = default;
     /** Allow instances of this class to be moved */
     CLSubTensorHandle &operator=(CLSubTensorHandle &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLSubTensorHandle(const CLSubTensorHandle &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLSubTensorHandle &operator=(const CLSubTensorHandle &) = delete;
 
     // Inherited overridden methods
-    void                        allocate() override;
+    void allocate() override;
+    void free() override;
+    void manage(IMemoryGroup *mg) override;
+    void map(bool blocking) override;
+    void                        unmap() override;
+    void                        release_if_unused() override;
     arm_compute::ITensor       &tensor() override;
     const arm_compute::ITensor &tensor() const override;
-    void map(bool blocking) override;
-    void unmap() override;
-    void release_if_unused() override;
-    bool is_subtensor() const override;
+    ITensorHandle              *parent_handle() override;
+    bool                        is_subtensor() const override;
+    Target                      target() const override;
 
 private:
-    arm_compute::CLSubTensor _sub_tensor; /**< Backend Sub-Tensor */
+    arm_compute::CLSubTensor _sub_tensor;    /**< Backend Sub-Tensor */
+    ITensorHandle           *_parent_handle; /**< Parent handle */
 };
 } // namespace backends
 } // namespace graph

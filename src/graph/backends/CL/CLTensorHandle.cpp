@@ -23,6 +23,9 @@
  */
 #include "arm_compute/graph/backends/CL/CLTensorHandle.h"
 
+#include "arm_compute/core/utils/misc/Cast.h"
+#include "arm_compute/runtime/CL/CLMemoryGroup.h"
+
 namespace arm_compute
 {
 namespace graph
@@ -40,14 +43,18 @@ void CLTensorHandle::allocate()
     _tensor.allocator()->allocate();
 }
 
-const arm_compute::ITensor &CLTensorHandle::tensor() const
+void CLTensorHandle::free()
 {
-    return _tensor;
+    _tensor.allocator()->free();
 }
 
-arm_compute::ITensor &CLTensorHandle::tensor()
+void CLTensorHandle::manage(IMemoryGroup *mg)
 {
-    return _tensor;
+    if(mg != nullptr)
+    {
+        auto *cl_mg = arm_compute::utils::cast::polymorphic_downcast<CLMemoryGroup *>(mg);
+        cl_mg->manage(&_tensor);
+    }
 }
 
 void CLTensorHandle::map(bool blocking)
@@ -69,9 +76,29 @@ void CLTensorHandle::release_if_unused()
     }
 }
 
+const arm_compute::ITensor &CLTensorHandle::tensor() const
+{
+    return _tensor;
+}
+
+arm_compute::ITensor &CLTensorHandle::tensor()
+{
+    return _tensor;
+}
+
+ITensorHandle *CLTensorHandle::parent_handle()
+{
+    return this;
+}
+
 bool CLTensorHandle::is_subtensor() const
 {
     return false;
+}
+
+Target CLTensorHandle::target() const
+{
+    return Target::CL;
 }
 } // namespace backends
 } // namespace graph

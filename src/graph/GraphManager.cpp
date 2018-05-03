@@ -28,6 +28,7 @@
 #include "arm_compute/graph/Logger.h"
 #include "arm_compute/graph/PassManager.h"
 #include "arm_compute/graph/Utils.h"
+#include "arm_compute/graph/detail/CrossLayerMemoryManagerHelpers.h"
 #include "arm_compute/graph/detail/ExecutionHelpers.h"
 
 namespace arm_compute
@@ -72,41 +73,37 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     auto workload = detail::configure_all_nodes(graph, ctx);
     ARM_COMPUTE_ERROR_ON_MSG(workload.tasks.empty(), "Could not configure all nodes!");
 
+    // Allocate const tensors and call accessors
+    detail::allocate_const_tensors(graph);
+    detail::call_all_const_node_accessors(graph);
+
     // TODO (COMPMID-920) : Update prepare for NEON/GC
     if(forced_target == Target::CL)
     {
-        // Allocate const tensors and call accessors
-        detail::allocate_const_tensors(graph);
-        detail::call_all_const_node_accessors(graph);
-
         // Prepare graph
         detail::prepare_all_tasks(workload);
+    }
 
-        // Allocate all tensors
-        detail::allocate_all_tensors(graph);
-
-        // Finalize Graph context
-        ctx.finalize();
-
-        // Register graph
-        _workloads.insert(std::make_pair(graph.id(), std::move(workload)));
-        ARM_COMPUTE_LOG_GRAPH_VERBOSE("Created workload for graph with ID : " << graph.id().get() << std::endl);
+    // Setup tensor memory (Allocate all tensors or setup transition manager)
+    if(ctx.config().use_transition_memory_manager)
+    {
+        detail::configure_transition_manager(graph, ctx, workload);
     }
     else
     {
-        // Allocate all tensors
         detail::allocate_all_tensors(graph);
+    }
 
-        // Call accessors on all Const nodes
-        detail::call_all_const_node_accessors(graph);
+    // Finalize Graph context
+    ctx.finalize();
 
-        // Finalize Graph context
-        ctx.finalize();
+    // Register graph
+    _workloads.insert(std::make_pair(graph.id(), std::move(workload)));
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Created workload for graph with ID : " << graph.id().get() << std::endl);
 
-        // Register graph
-        _workloads.insert(std::make_pair(graph.id(), std::move(workload)));
-        ARM_COMPUTE_LOG_GRAPH_VERBOSE("Created workload for graph with ID : " << graph.id().get() << std::endl);
-
+    // TODO (COMPMID-920) : Update prepare for NEON/GC
+    if(forced_target != Target::CL)
+    {
         // Make first run
         execute_graph(graph);
 

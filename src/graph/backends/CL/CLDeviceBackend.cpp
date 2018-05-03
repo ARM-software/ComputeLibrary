@@ -37,6 +37,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/BlobLifetimeManager.h"
 #include "arm_compute/runtime/CL/CLBufferAllocator.h"
+#include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/PoolManager.h"
@@ -107,8 +108,10 @@ void CLDeviceBackend::setup_backend_context(GraphContext &ctx)
     if(ctx.memory_management_ctx(Target::CL) == nullptr)
     {
         MemoryManagerContext mm_ctx;
-        mm_ctx.target = Target::CL;
-        mm_ctx.mm     = create_memory_manager(MemoryManagerAffinity::Buffer);
+        mm_ctx.target      = Target::CL;
+        mm_ctx.intra_mm    = create_memory_manager(MemoryManagerAffinity::Buffer);
+        mm_ctx.cross_mm    = create_memory_manager(MemoryManagerAffinity::Buffer);
+        mm_ctx.cross_group = std::make_shared<CLMemoryGroup>(mm_ctx.cross_mm);
 
         ctx.insert_memory_management_ctx(std::move(mm_ctx));
     }
@@ -117,6 +120,11 @@ void CLDeviceBackend::setup_backend_context(GraphContext &ctx)
 bool CLDeviceBackend::is_backend_supported()
 {
     return arm_compute::opencl_is_available();
+}
+
+IAllocator *CLDeviceBackend::backend_allocator()
+{
+    return &_allocator;
 }
 
 std::unique_ptr<ITensorHandle> CLDeviceBackend::create_tensor(const Tensor &tensor)

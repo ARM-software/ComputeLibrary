@@ -32,11 +32,12 @@ namespace graph
 namespace backends
 {
 CLSubTensorHandle::CLSubTensorHandle(ITensorHandle *parent_handle, const TensorShape &shape, const Coordinates &coords, bool extend_parent)
-    : _sub_tensor()
+    : _sub_tensor(), _parent_handle(nullptr)
 {
     ARM_COMPUTE_ERROR_ON(!parent_handle);
     auto parent_tensor = arm_compute::utils::cast::polymorphic_downcast<ICLTensor *>(&parent_handle->tensor());
     _sub_tensor        = arm_compute::CLSubTensor(parent_tensor, shape, coords, extend_parent);
+    _parent_handle     = parent_handle;
 }
 
 void CLSubTensorHandle::allocate()
@@ -44,14 +45,15 @@ void CLSubTensorHandle::allocate()
     // noop
 }
 
-const arm_compute::ITensor &CLSubTensorHandle::tensor() const
+void CLSubTensorHandle::free()
 {
-    return _sub_tensor;
+    // noop
 }
 
-arm_compute::ITensor &CLSubTensorHandle::tensor()
+void CLSubTensorHandle::manage(IMemoryGroup *mg)
 {
-    return _sub_tensor;
+    ARM_COMPUTE_UNUSED(mg);
+    // noop
 }
 
 void CLSubTensorHandle::map(bool blocking)
@@ -69,9 +71,30 @@ void CLSubTensorHandle::release_if_unused()
     // noop
 }
 
+const arm_compute::ITensor &CLSubTensorHandle::tensor() const
+{
+    return _sub_tensor;
+}
+
+arm_compute::ITensor &CLSubTensorHandle::tensor()
+{
+    return _sub_tensor;
+}
+
+ITensorHandle *CLSubTensorHandle::parent_handle()
+{
+    ARM_COMPUTE_ERROR_ON(_parent_handle == nullptr);
+    return _parent_handle->parent_handle();
+}
+
 bool CLSubTensorHandle::is_subtensor() const
 {
     return true;
+}
+
+Target CLSubTensorHandle::target() const
+{
+    return Target::CL;
 }
 } // namespace backends
 } // namespace graph

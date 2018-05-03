@@ -36,6 +36,7 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/runtime/BlobLifetimeManager.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCBufferAllocator.h"
+#include "arm_compute/runtime/GLES_COMPUTE/GCMemoryGroup.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
 #include "arm_compute/runtime/MemoryManagerOnDemand.h"
 #include "arm_compute/runtime/PoolManager.h"
@@ -68,8 +69,10 @@ void GCDeviceBackend::setup_backend_context(GraphContext &ctx)
     if(ctx.memory_management_ctx(Target::GC) == nullptr)
     {
         MemoryManagerContext mm_ctx;
-        mm_ctx.target = Target::GC;
-        mm_ctx.mm     = create_memory_manager(MemoryManagerAffinity::Buffer);
+        mm_ctx.target      = Target::GC;
+        mm_ctx.intra_mm    = create_memory_manager(MemoryManagerAffinity::Buffer);
+        mm_ctx.cross_mm    = create_memory_manager(MemoryManagerAffinity::Buffer);
+        mm_ctx.cross_group = std::make_shared<GCMemoryGroup>(mm_ctx.cross_mm);
 
         ctx.insert_memory_management_ctx(std::move(mm_ctx));
     }
@@ -78,6 +81,11 @@ void GCDeviceBackend::setup_backend_context(GraphContext &ctx)
 bool GCDeviceBackend::is_backend_supported()
 {
     return arm_compute::opengles31_is_available();
+}
+
+IAllocator *GCDeviceBackend::backend_allocator()
+{
+    return &_allocator;
 }
 
 std::unique_ptr<ITensorHandle> GCDeviceBackend::create_tensor(const Tensor &tensor)

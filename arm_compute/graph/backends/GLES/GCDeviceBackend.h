@@ -45,6 +45,7 @@ public:
     void initialize_backend() override;
     void setup_backend_context(GraphContext &ctx) override;
     bool                           is_backend_supported() override;
+    IAllocator                    *backend_allocator() override;
     std::unique_ptr<ITensorHandle> create_tensor(const Tensor &tensor) override;
     std::unique_ptr<ITensorHandle> create_subtensor(ITensorHandle *parent, TensorShape shape, Coordinates coords, bool extend_parent) override;
     std::unique_ptr<arm_compute::IFunction> configure_node(INode &node, GraphContext &ctx) override;

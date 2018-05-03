@@ -23,6 +23,9 @@
  */
 #include "arm_compute/graph/backends/GLES/GCTensorHandle.h"
 
+#include "arm_compute/core/utils/misc/Cast.h"
+#include "arm_compute/runtime/GLES_COMPUTE/GCMemoryGroup.h"
+
 namespace arm_compute
 {
 namespace graph
@@ -40,14 +43,18 @@ void GCTensorHandle::allocate()
     _tensor.allocator()->allocate();
 }
 
-const arm_compute::ITensor &GCTensorHandle::tensor() const
+void GCTensorHandle::free()
 {
-    return _tensor;
+    _tensor.allocator()->free();
 }
 
-arm_compute::ITensor &GCTensorHandle::tensor()
+void GCTensorHandle::manage(IMemoryGroup *mg)
 {
-    return _tensor;
+    if(mg != nullptr)
+    {
+        auto *gc_mg = arm_compute::utils::cast::polymorphic_downcast<GCMemoryGroup *>(mg);
+        gc_mg->manage(&_tensor);
+    }
 }
 
 void GCTensorHandle::map(bool blocking)
@@ -69,9 +76,29 @@ void GCTensorHandle::release_if_unused()
     }
 }
 
+const arm_compute::ITensor &GCTensorHandle::tensor() const
+{
+    return _tensor;
+}
+
+arm_compute::ITensor &GCTensorHandle::tensor()
+{
+    return _tensor;
+}
+
+ITensorHandle *GCTensorHandle::parent_handle()
+{
+    return this;
+}
+
 bool GCTensorHandle::is_subtensor() const
 {
     return false;
+}
+
+Target GCTensorHandle::target() const
+{
+    return Target::GC;
 }
 } // namespace backends
 } // namespace graph

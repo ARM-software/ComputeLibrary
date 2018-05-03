@@ -143,7 +143,9 @@ ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx)
 {
     ExecutionWorkload workload;
     workload.graph = &g;
-    auto &nodes    = g.nodes();
+    workload.ctx   = &ctx;
+
+    auto &nodes = g.nodes();
 
     // Create tasks
     for(auto &node : nodes)
@@ -235,9 +237,30 @@ void prepare_all_tasks(ExecutionWorkload &workload)
 
 void call_all_tasks(ExecutionWorkload &workload)
 {
+    ARM_COMPUTE_ERROR_ON(workload.ctx == nullptr);
+
+    // Acquire memory for the transition buffers
+    for(auto &mm_ctx : workload.ctx->memory_managers())
+    {
+        if(mm_ctx.second.cross_group != nullptr)
+        {
+            mm_ctx.second.cross_group->acquire();
+        }
+    }
+
+    // Execute tasks
     for(auto &task : workload.tasks)
     {
         task();
+    }
+
+    // Release memory for the transition buffers
+    for(auto &mm_ctx : workload.ctx->memory_managers())
+    {
+        if(mm_ctx.second.cross_group != nullptr)
+        {
+            mm_ctx.second.cross_group->release();
+        }
     }
 }
 

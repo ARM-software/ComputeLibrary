@@ -61,6 +61,11 @@ public:
      * @return True if the backend is supported else false
      */
     virtual bool is_backend_supported() = 0;
+    /** Gets a backend memory allocator
+     *
+     * @return Backend memory allocator
+     */
+    virtual IAllocator *backend_allocator() = 0;
     /** Create a backend Tensor
      *
      * @param[in] tensor The tensor we want to create a backend tensor for

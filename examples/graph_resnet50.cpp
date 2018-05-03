@@ -126,8 +126,7 @@ public:
 
         // Finalize graph
         GraphConfig config;
-        config.use_function_memory_manager = true;
-        config.use_tuner                   = (target == 2);
+        config.use_tuner = (target == 2);
         graph.finalize(target_hint, config);
     }
 
