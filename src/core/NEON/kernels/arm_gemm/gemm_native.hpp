@@ -87,8 +87,7 @@ public:
 #ifdef CYCLE_PROFILING
         profiler prof;
 #endif
-        strategy strat(_ci);
-
+        strategy           strat(_ci);
         const unsigned int window_per_batch = iceildiv(_Msize, strategy::out_height);
         const unsigned int window_per_multi = window_per_batch * _nbatches;
 
@@ -109,7 +108,7 @@ public:
             const unsigned int batch_0   = (multi == first_multi) ? first_batch : 0;
             const unsigned int batch_max = (multi == last_multi) ? last_batch : _nbatches;
 
-            for(unsigned int batch = batch_0; batch < batch_max; batch++)
+            for(unsigned int batch = batch_0; batch <= batch_max; batch++)
             {
                 const unsigned int m_start = ((multi == first_multi) && (batch == first_batch)) ? first_row : 0;
                 const unsigned int m_end   = ((multi == last_multi) && (batch == last_batch)) ? last_row : _Msize;
