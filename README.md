@@ -6,11 +6,21 @@ Please report issues here: https://github.com/ARM-software/ComputeLibrary/issues
 
 News:
 
-- We're hiring! [Senior Machine Learning C++ Software Engineer](https://careers.peopleclick.com/careerscp/client_arm/external/jobDetails.do?functionName=getJobDetail&jobPostId=36246&localeCode=en-us)
+- We're hiring: Senior Machine Learning C++ Software Engineer in Cambridge (UK)
+    - Required skills:
+        - Proficient in C++11.
+    - Preferred skills:
+        - Some SIMD (Preferably NEON and/or OpenCL) experience
+        - Some machine learning / computer vision knowledge
+        - Familiarity in developing compute-intensive applications and ideally industry experience of product development
+        - Experience programming in assembly language.
+
+    Interested ? Contact us: developer@arm.com
 - Come talk to us: [Gian Marco will be presenting his work at the EVS](https://www.embedded-vision.com/summit/even-faster-cnns-exploring-new-class-winograd-algorithms)
 
 Related projects:
 
+- [Arm NN SDK](https://github.com/arm-software/armnn)
 - [Caffe on Compute Library](https://github.com/OAID/Caffe-HRT)
 - [Tutorial: Cartoonifying Images on Raspberry Pi with the Compute Library](https://community.arm.com/graphics/b/blog/posts/cartoonifying-images-on-raspberry-pi-with-the-compute-library)
 - [Tutorial: Running AlexNet on Raspberry Pi with Compute Library](https://community.arm.com/processors/b/blog/posts/running-alexnet-on-raspberry-pi-with-compute-library)
