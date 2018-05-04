@@ -51,7 +51,7 @@ namespace validation
 {
 namespace
 {
-constexpr AbsoluteTolerance<float> tolerance_f32(0.0001f);
+constexpr AbsoluteTolerance<float> tolerance_f32(0.001f);
 constexpr AbsoluteTolerance<float> tolerance_fast_math_f32(0.1f);
 } // namespace
 
@@ -382,8 +382,9 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFixture, framework::D
 }
 TEST_SUITE(EnableFastMath)
 using CLWinogradConvolutionLayerFastMathFixture = WinogradConvolutionLayerFastMathValidationFixture<CLTensor, CLAccessor, CLWinogradConvolutionLayer, float>;
+TEST_SUITE(Conv3x3)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(framework::dataset::concat(datasets::SmallWinogradConvolutionLayer3x3Dataset(), datasets::SmallWinogradConvolutionLayer5x5Dataset()),
+                       combine(combine(datasets::SmallWinogradConvolutionLayer3x3Dataset(),
                                        framework::dataset::make("DataType", { DataType::F32 })),
                                framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })))
 {
@@ -392,13 +393,34 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, fram
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::NIGHTLY,
-                       combine(combine(framework::dataset::concat(datasets::LargeWinogradConvolutionLayer3x3Dataset(), datasets::LargeWinogradConvolutionLayer5x5Dataset()),
+                       combine(combine(datasets::LargeWinogradConvolutionLayer3x3Dataset(),
                                        framework::dataset::make("DataType", { DataType::F32 })),
                                framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fast_math_f32);
 }
+TEST_SUITE_END() // Conv3x3
+
+TEST_SUITE(Conv5x5)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(datasets::SmallWinogradConvolutionLayer5x5Dataset(),
+                                       framework::dataset::make("DataType", { DataType::F32 })),
+                               framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_fast_math_f32);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::NIGHTLY,
+                       combine(combine(datasets::LargeWinogradConvolutionLayer5x5Dataset(),
+                                       framework::dataset::make("DataType", { DataType::F32 })),
+                               framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_fast_math_f32);
+}
+TEST_SUITE_END() // Conv5x5
 
 TEST_SUITE_END() // EnableFastMath
 TEST_SUITE_END() // ConvolutionLayer
