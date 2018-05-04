@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/CL/kernels/CLGEMMTranspose1xWKernel.h"
 
+#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/AccessWindowTranspose.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
@@ -80,7 +81,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     // Configure window in case of configured output
     if(output->total_size() != 0)
     {
-        AccessWindowTranspose output_access(output, 0, 0, num_elems_processed_per_iteration, 1, scale_x, 1.f / scale_x);
+        AccessWindowStatic output_access(output, 0, 0, ceil_to_multiple(output->dimension(0), scale_x), output->dimension(1));
         window_changed = window_changed || update_window_and_padding(win, input_access, output_access);
         output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), input->tensor_shape()));
     }
