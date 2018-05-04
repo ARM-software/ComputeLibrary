@@ -33,35 +33,38 @@ namespace winograd
             int kernel_rows, int kernel_cols>
   template <typename T>
   void WinogradGEMM<output_tile_rows, output_tile_cols, kernel_rows, kernel_cols>::InputTransform<T>::execute(
-    const T *inptr,
-    const Tensor4DShape& input_shape,
-    const PaddingType padding_type,
+    const T* const input,        /** Input tensor data */
+    const int n_batches,         /** Number of batches in input tensor. */
+    const int in_batch_stride,   /** Stride between batches of the input. */
+    const int n_rows,            /** Number of rows in input tensor. */
+    const int in_row_stride,     /** Stride between rows of the input. */
+    const int n_cols,            /** Number of columns in input tensor. */
+    const int in_col_stride,     /** Stride between columns of the input. */
+    const int n_channels,        /** Number of channels in input tensor. */
+    const PaddingType padding,   /** Padding type. */
     const int tile_M,
     const int tile_N,
-    T *outptr_base,
-    const int matrix_stride,
-    const int matrix_batch_stride,
-    const int matrix_row_stride
+    T* const output,             /** Base of output matrices. */
+    const int matrix_stride,     /** Stride between output matrices. */
+    const int matrix_batch_stride,  /** Stride between batches within the matrix. */
+    const int matrix_row_stride  /** Stride within matrices. */
   )
   {
     // Compute the padding required on each edge of the image
-    const int pad_top = (padding_type == PADDING_SAME) ? (kernel_rows - 1) / 2 : 0;
-    const int pad_left = (padding_type == PADDING_SAME) ? (kernel_cols - 1) / 2 : 0;
+    const int pad_top = (padding == PADDING_SAME) ? (kernel_rows - 1) / 2 : 0;
+    const int pad_left = (padding == PADDING_SAME) ? (kernel_cols - 1) / 2 : 0;
     const int tile_overlap = kernel_rows - 1;
 
     // Compute striding values (assuming NHWC ordered data)
-    const int input_col_stride = input_shape.n_channels;
-    const int input_row_stride = input_shape.n_cols * input_col_stride;
-    const int input_batch_stride = input_shape.n_rows * input_row_stride;
     const int output_col_stride = matrix_row_stride;
     const int output_row_stride = tile_N * output_col_stride;
 
     // Loop over batches
-    for (int batch = 0; batch < input_shape.n_batches; batch++)
+    for (int batch = 0; batch < n_batches; batch++)
     {
       // Pointer to the batch
-      const T* const input_base_batch = inptr + batch * input_batch_stride;
-      T* const outptr_base_batch = outptr_base + batch * matrix_batch_stride;
+      const T* const input_base_batch = input + batch * in_batch_stride;
+      T* const outptr_base_batch = output + batch * matrix_batch_stride;
 
       // Loop over rows of tiles
       for (int tile_i = 0; tile_i < tile_M; tile_i++)
@@ -69,7 +72,7 @@ namespace winograd
         // Pointer to the row
         const int row_offset = (tile_i == 0) ? 0 : pad_top;
         const T* const input_base_row = (
-          input_base_batch + ((inner_tile_rows - (kernel_rows - 1))*tile_i - row_offset)*input_row_stride
+          input_base_batch + ((inner_tile_rows - (kernel_rows - 1))*tile_i - row_offset)*in_row_stride
         );
         T* const outptr_base_row = outptr_base_batch + tile_i*output_row_stride;
 
@@ -77,14 +80,14 @@ namespace winograd
         const int row_top = tile_i*(inner_tile_rows - tile_overlap) - pad_top;
         const int row_bottom = row_top + inner_tile_rows;
         const int row_pad_top = (tile_i == 0) ? pad_top : 0;
-        const int row_pad_bottom = (row_bottom <= input_shape.n_rows) ? 0 : row_bottom - input_shape.n_rows;
+        const int row_pad_bottom = (row_bottom <= n_rows) ? 0 : row_bottom - n_rows;
 
         // Process the row
         process_tile_row(
-          tile_N, input_shape.n_channels,
-          input_base_row, input_row_stride, input_col_stride,
+          tile_N, n_channels,
+          input_base_row, in_row_stride, in_col_stride,
           outptr_base_row, matrix_stride, matrix_row_stride,
-          row_pad_top, pad_left, row_pad_bottom, input_shape.n_cols
+          row_pad_top, pad_left, row_pad_bottom, n_cols
         );
       }
     }
@@ -152,7 +155,10 @@ namespace winograd
     const PaddingType padding,   /** Padding type. */
     T* const output,             /** Base of output matrices. */
     const int matrix_stride,     /** Stride between output matrices. */
-    const int matrix_row_stride  /** Stride within matrices. */
+    const int matrix_row_stride, /** Stride within matrices. */
+    const int in_batch_stride,   /** Stride between input batches. */
+    const int in_row_stride,     /** Stride between input rows. */
+    const int in_col_stride      /** Stride between input columns. */
   ) : _inptr(input), _outptr(output),
       _n_batches(n_batches), _n_rows(n_rows), _n_cols(n_cols), _n_channels(n_channels),
       _matrix_stride(matrix_stride), _matrix_row_stride(matrix_row_stride),
@@ -160,6 +166,9 @@ namespace winograd
                         output_tile_rows)),
       _tiles_N(iceildiv((padding == PADDING_SAME) ? n_cols : n_cols - kc + 1,
                         output_tile_cols)),
+      _in_col_stride(in_col_stride ? in_col_stride : n_channels),
+      _in_row_stride(in_row_stride ? in_row_stride : n_cols * _in_col_stride),
+      _in_batch_stride(in_batch_stride ? in_batch_stride : n_rows * _in_row_stride),
       _padding_type(padding)
   {
   }
@@ -168,10 +177,9 @@ namespace winograd
   template <typename T>
   unsigned int WinogradGEMM<otr, otc, kr, kc>::InputTransform<T>::get_window() const
   {
-    // TODO When the input transform supports multithreading, return the total
-    // number of tile rows (allowing for multiple batches). For now we return 1
-    // to indicate that the activations must be transformed as a single block.
-    return 1;  // TODO _tiles_M * _n_batches;
+    // The final window includes the tail, all other windows will be a multiple
+    // of the window block in size.
+    return iceildiv(_n_channels, WINDOW_BLOCK);
   }
 
   template <int otr, int otc, int kr, int kc>
@@ -180,18 +188,32 @@ namespace winograd
     const unsigned int start, const unsigned int stop
   )
   {
-    // TODO When the input transform supports multithreading call execute for a
-    // portion of the tile rows.
-    (void) start;
-    (void) stop;
+    if (start >= get_window())
+    {
+      return;
+    }
 
-    // For now, just do all of the work.
-    const Tensor4DShape input_shape = {
-      _n_batches, _n_rows, _n_cols, _n_channels, NHWC
-    };
+    // Determine the window of work to perform
+    const unsigned int start_channel = start * WINDOW_BLOCK;
+    const unsigned int stop_channel = std::min<const unsigned int>(
+      stop * WINDOW_BLOCK, _n_channels
+    );
+    const unsigned int n_channels = stop_channel - start_channel;
+
+    // Perform the work
     execute(
-      _inptr, input_shape, _padding_type, _tiles_M, _tiles_N, _outptr,
-      _matrix_stride, _matrix_row_stride * _tiles_M * _tiles_N, _matrix_row_stride
+      _inptr + start_channel,
+      _n_batches, _in_batch_stride,
+      _n_rows, _in_row_stride,
+      _n_cols, _in_col_stride,
+      n_channels,
+      _padding_type,
+      _tiles_M,
+      _tiles_N,
+      _outptr + start_channel,
+      _matrix_stride,
+      _matrix_row_stride * _tiles_M * _tiles_N,
+      _matrix_row_stride
     );
   }
 }

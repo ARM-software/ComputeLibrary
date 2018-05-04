@@ -23,7 +23,7 @@
  */
 
 #pragma once
-#include "arm_compute/core/NEON/kernels/convolution/winograd/winograd_gemm.hpp"
+#include "../winograd_gemm.hpp"
 
 namespace winograd
 {
@@ -31,7 +31,13 @@ namespace winograd
             int kernel_rows, int kernel_cols>
   template <typename T>
   void WinogradGEMM<output_tile_rows, output_tile_cols, kernel_rows, kernel_cols>::OutputTransform<T>::execute(
-    const Tensor4DShape &output_shape,
+    const int n_batches,
+    const int output_batch_stride,
+    const int n_rows,
+    const int output_row_stride,
+    const int n_cols,
+    const int output_col_stride,
+    const int n_channels,
     const T* const matrix_base,
     const int matrix_stride,
     const int matrix_row_stride,
@@ -41,19 +47,16 @@ namespace winograd
   {
     // Compute the number of tiles and hence the padding required on the bottom
     // and right of the image.
-    const int tile_M = iceildiv(output_shape.n_rows, output_tile_rows);
-    const int tile_N = iceildiv(output_shape.n_cols, output_tile_cols);
-    const int pad_bottom = output_tile_rows*tile_M - output_shape.n_rows;
-    const int pad_right = output_tile_cols*tile_N - output_shape.n_cols;
+    const int tile_M = iceildiv(n_rows, output_tile_rows);
+    const int tile_N = iceildiv(n_cols, output_tile_cols);
+    const int pad_bottom = output_tile_rows*tile_M - n_rows;
+    const int pad_right = output_tile_cols*tile_N - n_cols;
 
     const int matrix_tile_row_stride = tile_N * matrix_row_stride;
     const int matrix_batch_stride = tile_M * matrix_tile_row_stride;
-    const int output_col_stride = output_shape.n_channels;
-    const int output_row_stride = output_shape.n_cols * output_col_stride;
-    const int output_batch_stride = output_shape.n_rows * output_row_stride;
 
     // Perform the output transformation for each batch
-    for (int batch = 0; batch < output_shape.n_batches; batch++)
+    for (int batch = 0; batch < n_batches; batch++)
     {
       // Get batch offset for input and outputs.
       const T* const matrix_batch = matrix_base + batch*matrix_batch_stride;
@@ -69,7 +72,7 @@ namespace winograd
 
         // Process the row
         process_tile_row(
-          tile_N, output_shape.n_channels, matrix_tile_row, matrix_stride,
+          tile_N, n_channels, matrix_tile_row, matrix_stride,
           matrix_row_stride, biases,
           outptr_row, output_row_stride, output_col_stride, row_pad_bottom,
           pad_right
@@ -139,12 +142,18 @@ namespace winograd
     const int n_batches,
     const int n_rows,
     const int n_cols,
-    const int n_channels
+    const int n_channels,
+    const int out_batch_stride,
+    const int out_row_stride,
+    const int out_col_stride
   ) : _matrix_base(matrix_base), _biases(biases),
       _matrix_stride(matrix_stride), _matrix_row_stride(matrix_row_stride),
       _outptr(output), _n_batches(n_batches), _n_rows(n_rows), _n_cols(n_cols),
       _n_channels(n_channels), _tile_M(iceildiv(n_rows, output_tile_rows)),
-      _tile_N(iceildiv(n_cols, output_tile_cols))
+      _tile_N(iceildiv(n_cols, output_tile_cols)),
+      _out_col_stride(out_col_stride ? out_col_stride : n_channels),
+      _out_row_stride(out_row_stride ? out_row_stride : n_cols * _out_col_stride),
+      _out_batch_stride(out_batch_stride ? out_batch_stride : n_rows * _out_row_stride)
   {
   }
 
@@ -152,10 +161,9 @@ namespace winograd
   template <typename T>
   unsigned int WinogradGEMM<otr, otc, kr, kc>::OutputTransform<T>::get_window() const
   {
-    // TODO When the output transform supports multithreading, return the total
-    // number of tile rows (allowing for multiple batches). For now we return 1
-    // to indicate that the activations must be transformed as a single block.
-    return 1;  // TODO _tile_M * _n_batches;
+    // The final window includes the tail, all other windows will be a multiple
+    // of the window block in size.
+    return iceildiv(_n_channels, WINDOW_BLOCK);
   }
 
   template <int otr, int otc, int kr, int kc>
@@ -164,18 +172,31 @@ namespace winograd
     const unsigned int start, const unsigned int stop
   )
   {
-    // TODO When the output transform supports multithreading call execute for a
-    // portion of the tile rows.
-    (void) start;
-    (void) stop;
+    if (start >= get_window())
+    {
+      return;
+    }
 
-    // For now, just do all of the work.
-    const Tensor4DShape output_shape = {
-      _n_batches, _n_rows, _n_cols, _n_channels, NHWC
-    };
+    // Determine the window of work to perform
+    const unsigned int start_channel = start * WINDOW_BLOCK;
+    const unsigned int stop_channel = std::min<const unsigned int>(
+      stop * WINDOW_BLOCK, _n_channels
+    );
+    const unsigned int n_channels = stop_channel - start_channel;
+
     execute(
-      output_shape, _matrix_base, _matrix_stride, _matrix_row_stride, _biases,
-      _outptr
+      _n_batches,
+      _out_batch_stride,
+      _n_rows,
+      _out_row_stride,
+      _n_cols,
+      _out_col_stride,
+      n_channels,
+      _matrix_base + start_channel,
+      _matrix_stride,
+      _matrix_row_stride,
+      (_biases)?(_biases + start_channel):(nullptr),
+      _outptr + start_channel
     );
   }
 }  // namespace winograd

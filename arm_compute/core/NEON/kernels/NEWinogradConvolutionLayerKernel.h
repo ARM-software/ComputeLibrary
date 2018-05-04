@@ -145,7 +145,6 @@ public:
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
-    bool is_parallelisable() const override;
 
     /** Winograd base kernel */
     using WinogradBase = winograd::WinogradGEMM<OutputTileRows, OutputTileCols, KernelCols, KernelCols>;
@@ -309,7 +308,6 @@ public:
         const int      n_channels) override;
 
     void run(const Window &window, const ThreadInfo &info) override;
-    bool is_parallelisable() const override;
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEWinogradLayerTransformOutputKernel
      *

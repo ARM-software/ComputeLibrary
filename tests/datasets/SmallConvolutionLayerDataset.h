@@ -42,7 +42,8 @@ class SmallWinogradConvolutionLayer3x3Dataset final : public ConvolutionLayerDat
 public:
     SmallWinogradConvolutionLayer3x3Dataset()
     {
-        // Kernel size 3
+        // Channel size big enough to force multithreaded execution of the input transform
+        add_config(TensorShape(8U, 8U, 32U), TensorShape(3U, 3U, 32U, 1U), TensorShape(1U), TensorShape(6U, 6U, 1U), PadStrideInfo(1, 1, 0, 0));
         // Batch size 1
         add_config(TensorShape(8U, 8U, 2U), TensorShape(3U, 3U, 2U, 1U), TensorShape(1U), TensorShape(6U, 6U, 1U), PadStrideInfo(1, 1, 0, 0));
         // Batch size 4

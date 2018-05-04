@@ -433,12 +433,6 @@ void NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCols, Kern
 }
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-bool NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::is_parallelisable() const
-{
-    return false;
-}
-
-template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
 Status NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::validate(const ITensorInfo *input, const ITensorInfo *output, const WinogradInfo &winograd_info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments_winograd_input_trans(input, output, winograd_info));
@@ -535,12 +529,6 @@ void NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, Ker
     const size_t fst = window.x().start();
     const size_t lst = window.x().end();
     output_transform.run(fst, lst);
-}
-
-template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-bool NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, KernelRows, KernelCols>::is_parallelisable() const
-{
-    return false;
 }
 
 template <typename T, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
