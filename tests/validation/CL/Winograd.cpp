@@ -52,7 +52,7 @@ namespace validation
 namespace
 {
 constexpr AbsoluteTolerance<float> tolerance_f32(0.001f);
-constexpr AbsoluteTolerance<float> tolerance_fast_math_f32(0.1f);
+constexpr AbsoluteTolerance<float> tolerance_convolution_layer_f32(0.1f);
 } // namespace
 
 using namespace arm_compute::misc::shape_calculator;
@@ -364,23 +364,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
 // clang-format on
 // *INDENT-ON*
 
-using CLWinogradConvolutionLayerFixture = WinogradConvolutionLayerValidationFixture<CLTensor, CLAccessor, CLWinogradConvolutionLayer, float>;
-FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFixture, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallWinogradConvolutionLayer3x3Dataset(),
-                                                                                                                       framework::dataset::make("DataType", { DataType::F32 })),
-                                                                                                               framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32);
-}
-
-FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFixture, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeWinogradConvolutionLayer3x3Dataset(),
-                                                                                                                     framework::dataset::make("DataType", { DataType::F32 })),
-                                                                                                             framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32);
-}
-TEST_SUITE(EnableFastMath)
 using CLWinogradConvolutionLayerFastMathFixture = WinogradConvolutionLayerFastMathValidationFixture<CLTensor, CLAccessor, CLWinogradConvolutionLayer, float>;
 TEST_SUITE(Conv3x3)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::PRECOMMIT,
@@ -389,7 +372,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, fram
                                framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_fast_math_f32);
+    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::NIGHTLY,
@@ -398,7 +381,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture, fram
                                framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_fast_math_f32);
+    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);
 }
 TEST_SUITE_END() // Conv3x3
 
@@ -409,7 +392,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, fram
                                framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_fast_math_f32);
+    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::NIGHTLY,
@@ -418,11 +401,10 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture, fram
                                framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_fast_math_f32);
+    validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);
 }
 TEST_SUITE_END() // Conv5x5
 
-TEST_SUITE_END() // EnableFastMath
 TEST_SUITE_END() // ConvolutionLayer
 
 TEST_SUITE_END() // Winograd

@@ -33,13 +33,13 @@ using namespace arm_compute;
 
 namespace
 {
-Size2D winograd_output_tile(const Size2D &input_dims, const Size2D &kernel_dims, bool enable_fast_math)
+Size2D winograd_output_tile(const Size2D &input_dims, const Size2D &kernel_dims)
 {
     Size2D output_tile = Size2D{};
 
     if(kernel_dims == Size2D(3U, 3U))
     {
-        output_tile = ((input_dims.width <= 4 && input_dims.height <= 4) || !enable_fast_math) ? Size2D(2U, 2U) : Size2D(4U, 4U);
+        output_tile = (input_dims.width <= 4 && input_dims.height <= 4) ? Size2D(2U, 2U) : Size2D(4U, 4U);
     }
     else if(kernel_dims == Size2D(5U, 5U))
     {
@@ -56,7 +56,6 @@ bool check_support_fast_math(const Size2D &output_tile, const Size2D &kernel_siz
 
     std::vector<WinogradConfiguration> fast_math_winograd =
     {
-        WinogradConfiguration(std::pair<int, int>(4, 4), std::pair<int, int>(3, 3)),
         WinogradConfiguration(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5))
     };
 
@@ -83,7 +82,7 @@ void CLWinogradConvolutionLayer::configure(ICLTensor *input, const ICLTensor *we
     // Input shape, kernel size and output tile
     const Size2D input_dims  = Size2D(input->info()->tensor_shape()[idx_width], input->info()->tensor_shape()[idx_height]);
     const Size2D kernel_size = Size2D(weights->info()->tensor_shape()[idx_width], weights->info()->tensor_shape()[idx_height]);
-    const Size2D output_tile = winograd_output_tile(input_dims, kernel_size, enable_fast_math);
+    const Size2D output_tile = winograd_output_tile(input_dims, kernel_size);
 
     // Check if the Winograd configuration requires fast math
     if(!enable_fast_math)
@@ -140,7 +139,7 @@ Status CLWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITen
     // Input shape, kernel size and output tile
     const Size2D input_dims  = Size2D(input->tensor_shape()[idx_width], input->tensor_shape()[idx_height]);
     const Size2D kernel_size = Size2D(weights->tensor_shape()[idx_width], weights->tensor_shape()[idx_height]);
-    const Size2D output_tile = winograd_output_tile(input_dims, kernel_size, enable_fast_math);
+    const Size2D output_tile = winograd_output_tile(input_dims, kernel_size);
 
     // Check if the Winograd configuration requires fast math
     if(!enable_fast_math)
