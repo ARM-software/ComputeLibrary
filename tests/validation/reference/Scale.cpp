@@ -23,6 +23,7 @@
  */
 
 #include "Scale.h"
+
 #include "Utils.h"
 #include "arm_compute/core/utils/misc/Utility.h"
 #include "support/ToolchainSupport.h"

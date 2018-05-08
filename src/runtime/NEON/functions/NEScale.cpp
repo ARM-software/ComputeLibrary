@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -102,17 +102,17 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
     ARM_COMPUTE_ERROR_ON(nullptr == input);
     ARM_COMPUTE_ERROR_ON(nullptr == output);
 
-    for(size_t i = 2; i < Coordinates::num_max_dimensions; ++i)
-    {
-        ARM_COMPUTE_ERROR_ON(input->info()->dimension(i) != output->info()->dimension(i));
-    }
+    // Get data layout and width/height indices
+    const DataLayout data_layout = input->info()->data_layout();
+    const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
     // Get the tensor shape
-    const TensorShape shape(output->info()->dimension(0), output->info()->dimension(1));
+    const TensorShape shape(output->info()->dimension(idx_width), output->info()->dimension(idx_height));
 
     // Compute the ratio between source width/height and destination width/height
-    const auto wr = static_cast<float>(input->info()->dimension(0)) / static_cast<float>(output->info()->dimension(0));
-    const auto hr = static_cast<float>(input->info()->dimension(1)) / static_cast<float>(output->info()->dimension(1));
+    const auto wr = static_cast<float>(input->info()->dimension(idx_width)) / static_cast<float>(output->info()->dimension(idx_width));
+    const auto hr = static_cast<float>(input->info()->dimension(idx_height)) / static_cast<float>(output->info()->dimension(idx_height));
 
     // Get the element size of the input image
     const size_t input_element_size = input->info()->element_size();
@@ -123,9 +123,6 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
         policy = InterpolationPolicy::NEAREST_NEIGHBOR;
     }
 
-    // Check if the border mode is UNDEFINED
-    const bool border_undefined = border_mode == BorderMode::UNDEFINED;
-
     switch(policy)
     {
         case InterpolationPolicy::NEAREST_NEIGHBOR:
@@ -133,7 +130,7 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
             TensorInfo tensor_info_offsets(shape, Format::S32);
             _offsets.allocator()->init(tensor_info_offsets);
 
-            _scale_kernel.configure(input, nullptr, nullptr, &_offsets, output, policy, border_undefined, sampling_policy);
+            _scale_kernel.configure(input, nullptr, nullptr, &_offsets, output, policy, border_mode, sampling_policy);
 
             // Allocate once the configure methods have been called
             _offsets.allocator()->allocate();
@@ -151,7 +148,7 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
             _dx.allocator()->init(tensor_info_dxdy);
             _dy.allocator()->init(tensor_info_dxdy);
 
-            _scale_kernel.configure(input, &_dx, &_dy, &_offsets, output, policy, border_undefined, sampling_policy);
+            _scale_kernel.configure(input, &_dx, &_dy, &_offsets, output, policy, border_mode, sampling_policy);
 
             // Allocate once the configure methods have been called
             _offsets.allocator()->allocate();
@@ -164,7 +161,7 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
         }
         case InterpolationPolicy::AREA:
         {
-            _scale_kernel.configure(input, nullptr, nullptr, nullptr, output, policy, border_undefined);
+            _scale_kernel.configure(input, nullptr, nullptr, nullptr, output, policy, border_mode);
             break;
         }
         default:

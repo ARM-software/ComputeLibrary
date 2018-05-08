@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,11 +50,13 @@ using CLScaleFixture = ScaleFixture<CLTensor, CLScale, CLAccessor>;
 
 TEST_SUITE(CL)
 TEST_SUITE(Scale)
-REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallImageShapes(), framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
+REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, CLScaleFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallImageShapes(), framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
+                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW })),
                                                                                                                      interpolation_types),
                                                                                                              datasets::BorderModes()),
                                                                                                      datasets::SamplingPolicies()));
-REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleFixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeImageShapes(), framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
+REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, CLScaleFixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(datasets::LargeImageShapes(), framework::dataset::make("DataType", { DataType::F16, DataType::F32 })),
+                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW })),
                                                                                                                    interpolation_types),
                                                                                                            datasets::BorderModes()),
                                                                                                    datasets::SamplingPolicies()));

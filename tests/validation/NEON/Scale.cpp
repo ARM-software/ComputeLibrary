@@ -55,6 +55,13 @@ const auto ScaleDataTypes = framework::dataset::make("DataType",
     DataType::F32,
 });
 
+/** Scale data types */
+const auto ScaleDataLayouts = framework::dataset::make("DataLayout",
+{
+    DataLayout::NCHW,
+    DataLayout::NHWC,
+});
+
 /** Tolerance */
 constexpr AbsoluteTolerance<uint8_t> tolerance_u8(1);
 constexpr AbsoluteTolerance<int16_t> tolerance_s16(1);
@@ -67,29 +74,42 @@ constexpr float tolerance_num_f32 = 0.01f;
 TEST_SUITE(NEON)
 TEST_SUITE(Scale)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), ScaleDataTypes),
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), ScaleDataTypes), ScaleDataLayouts),
                                                                                    framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
                                                                            datasets::BorderModes()),
                                                                    framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER })),
-               shape, data_type, policy, border_mode, sampling_policy)
+               shape, data_type, data_layout, policy, border_mode, sampling_policy)
 {
     std::mt19937                          generator(library->seed());
     std::uniform_real_distribution<float> distribution_float(0.25, 2);
     const float                           scale_x               = distribution_float(generator);
     const float                           scale_y               = distribution_float(generator);
     uint8_t                               constant_border_value = 0;
+    TensorShape                           src_shape             = shape;
     if(border_mode == BorderMode::CONSTANT)
     {
         std::uniform_int_distribution<uint8_t> distribution_u8(0, 255);
         constant_border_value = distribution_u8(generator);
     }
 
+    // Get width/height indices depending on layout
+    const int idx_width  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int idx_height = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+
+    // Change shape in case of NHWC.
+    if(data_layout == DataLayout::NHWC)
+    {
+        permute(src_shape, PermutationVector(2U, 0U, 1U));
+    }
+
+    // Calculate scaled shape
+    TensorShape shape_scaled(src_shape);
+    shape_scaled.set(idx_width, src_shape[idx_width] * scale_x);
+    shape_scaled.set(idx_height, src_shape[idx_height] * scale_y);
+
     // Create tensors
-    Tensor      src = create_tensor<Tensor>(shape, data_type);
-    TensorShape shape_scaled(shape);
-    shape_scaled.set(0, shape[0] * scale_x);
-    shape_scaled.set(1, shape[1] * scale_y);
-    Tensor dst = create_tensor<Tensor>(shape_scaled, data_type);
+    Tensor src = create_tensor<Tensor>(src_shape, data_type, 1, 0, QuantizationInfo(), data_layout);
+    Tensor dst = create_tensor<Tensor>(shape_scaled, data_type, 1, 0, QuantizationInfo(), data_layout);
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -100,14 +120,26 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
 
     // Validate valid region
     const ValidRegion dst_valid_region = calculate_valid_region_scale(*(src.info()), shape_scaled, policy, sampling_policy, (border_mode == BorderMode::UNDEFINED));
-
     validate(dst.info()->valid_region(), dst_valid_region);
 
     // Validate padding
-    PaddingCalculator calculator(shape_scaled.x(), 16);
+    int num_elements_processed_x = 16;
+    if(data_layout == DataLayout::NHWC)
+    {
+        num_elements_processed_x = (policy == InterpolationPolicy::BILINEAR) ? 1 : 16 / src.info()->element_size();
+    }
+    PaddingCalculator calculator(shape_scaled.x(), num_elements_processed_x);
     calculator.set_border_mode(border_mode);
 
-    const PaddingSize read_padding(1);
+    PaddingSize read_padding(1);
+    if(data_layout == DataLayout::NHWC)
+    {
+        read_padding = calculator.required_padding(PaddingCalculator::Option::EXCLUDE_BORDER);
+        if(border_mode == BorderMode::CONSTANT && policy == InterpolationPolicy::BILINEAR)
+        {
+            read_padding.top = 1;
+        }
+    }
     const PaddingSize write_padding = calculator.required_padding(PaddingCalculator::Option::EXCLUDE_BORDER);
     validate(src.info()->padding(), read_padding);
     validate(dst.info()->padding(), write_padding);
@@ -118,8 +150,9 @@ using NEScaleFixture = ScaleValidationFixture<Tensor, Accessor, NEScale, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
                                                                                                                      DataType::F32)),
+                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                              framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
                                                                                                      datasets::BorderModes()),
                                                                                              framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER })))
@@ -131,8 +164,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<float>, framework::DatasetMode::
     // Validate output
     validate(Accessor(_target), _reference, valid_region, tolerance_f32, tolerance_num_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
                                                                                                                  DataType::F32)),
+                                                                                                                 framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                                  framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
                                                                                                          datasets::BorderModes()),
                                                                                                  framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER })))
@@ -149,8 +183,9 @@ TEST_SUITE_END()
 
 TEST_SUITE(Integer)
 TEST_SUITE(U8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
                                                                                                                        DataType::U8)),
+                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                                framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
                                                                                                        datasets::BorderModes()),
                                                                                                framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER })))
@@ -162,8 +197,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<uint8_t>, framework::DatasetMode
     // Validate output
     validate(Accessor(_target), _reference, valid_region, tolerance_u8);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
                                                                                                                    DataType::U8)),
+                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                                    framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
                                                                                                            datasets::BorderModes()),
                                                                                                    framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER })))
@@ -177,8 +213,9 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<uint8_t>, framework::DatasetMode
 }
 TEST_SUITE_END()
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType",
                                                                                                                        DataType::S16)),
+                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                                framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
                                                                                                        datasets::BorderModes()),
                                                                                                framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER })))
@@ -190,8 +227,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture<int16_t>, framework::DatasetMode
     // Validate output
     validate(Accessor(_target), _reference, valid_region, tolerance_s16, tolerance_num_s16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType",
                                                                                                                    DataType::S16)),
+                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                                                                                                                    framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
                                                                                                            datasets::BorderModes()),
                                                                                                    framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER })))
