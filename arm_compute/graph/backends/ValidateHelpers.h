@@ -103,7 +103,6 @@ Status validate_convolution_layer(ConvolutionLayerNode &node)
     // If validation fails try the Default approach
     if(!bool(status) || (conv_algorithm == ConvolutionMethod::DEFAULT))
     {
-        std::cout << status.error_description() << std::endl;
         status = ConvolutionLayer::validate(input, weights, biases, output, conv_info);
         if(bool(status))
         {

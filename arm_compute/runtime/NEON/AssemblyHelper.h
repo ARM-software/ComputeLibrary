@@ -100,6 +100,7 @@ public:
         {
             ARM_COMPUTE_ERROR_ON(_pretranspose == nullptr || _pretranspose->buffer() == nullptr);
             _gemm_kernel_asm->pretranspose_B_array(reinterpret_cast<void *>(_pretranspose->buffer()), in1_ptr, ldb, multi_stride_b);
+            _b->mark_as_unused();
         }
 
         NEScheduler::get().schedule(_optimised_kernel.get(), Window::DimX);

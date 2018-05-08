@@ -561,7 +561,7 @@ void NEGEMMConvolutionLayer::run()
     {
         _asm_glue.run();
         // Release weights in case buffer is pretransposed
-        if(_B_pretransposed.buffer() != nullptr && _weights_reshaped.is_used())
+        if(!_weights_reshaped.is_used())
         {
             _weights_reshaped.allocator()->free();
         }
