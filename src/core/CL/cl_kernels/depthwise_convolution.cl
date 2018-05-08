@@ -500,7 +500,7 @@ __kernel void depthwise_weights_reshape(
 #if defined(HAS_BIAS)
     if(get_global_id(1) == 0)
     {
-        *((__global DATA_TYPE *)(output_ptr + SRC_WIDTH * get_global_size(1) * dst_stride_x)) = *((__global float *)(biases.ptr + get_global_id(2) * biases_stride_x));
+        *((__global DATA_TYPE *)(output_ptr + SRC_WIDTH * get_global_size(1) * dst_stride_x)) = *((__global DATA_TYPE *)(biases.ptr + get_global_id(2) * biases_stride_x));
     }
 #endif // defined(HAS_BIAS)
 }

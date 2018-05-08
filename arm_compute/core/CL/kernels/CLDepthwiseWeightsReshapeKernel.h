@@ -51,7 +51,7 @@ public:
     /** Set the input and output of the kernel.
      *
      * @param[in]  input  The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM].
-     *                    Data type supported: QASYMM8/F32.
+     *                    Data type supported: QASYMM8/F16/F32.
      * @param[out] output The output tensor. Data type supported: same as @p input.
      * @param[in]  biases (Optional) The input biases to add. Shape [IFM]. Data type supported: same as @p input.
      */
