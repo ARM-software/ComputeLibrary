@@ -29,15 +29,18 @@
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMTranspose1xWKernel.h"
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
 
 using namespace arm_compute;
+using namespace arm_compute::misc::shape_calculator;
 
 namespace
 {
@@ -66,35 +69,6 @@ inline bool is_interleaved_transposed(int m, int n, int k, DataType data_type, b
 
     return flag;
 }
-
-Status validate_arguments(const ITensorInfo *a, const ITensorInfo *b, const ICLTensor *c, const ITensorInfo *output, const float alpha, const float beta, const GEMMInfo &gemm_info = GEMMInfo())
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, output);
-
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(a, b);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_a_reshaped(), "Matrix A already reshaped is not supported");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(gemm_info.is_b_reshaped(), "Matrix B already reshaped is not supported");
-
-    if(c != nullptr)
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(a, c->info());
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->dimension(1) != c->info()->dimension(1), "The matrix C must have the same number of rows as the matrix A");
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(b->dimension(0) != c->info()->dimension(0), "The matrix C must have the same number of columns as the matrix B");
-    }
-
-    if(output->total_size() != 0)
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(b->dimension(0) != output->dimension(0), "The output matrix must have the same number of columns as the matrix B");
-        ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->dimension(1) != output->dimension(1), "The output matrix must have the same number of rows as the matrix A");
-    }
-
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->dimension(0) != b->dimension(1), "The product AB is defined only if the number of columns in A is equal to the number of rows in B");
-
-    ARM_COMPUTE_UNUSED(alpha);
-    ARM_COMPUTE_UNUSED(beta);
-    return Status{};
-}
 } // namespace
 
 CLGEMM::CLGEMM(std::shared_ptr<IMemoryManager> memory_manager)
@@ -108,7 +82,7 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
     ARM_COMPUTE_ERROR_ON_NULLPTR(a, b, output);
 
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(a->info(), b->info(), c, output->info(), alpha, beta, gemm_info));
+    ARM_COMPUTE_ERROR_THROW_ON(validate(a->info(), b->info(), c != nullptr ? c->info() : nullptr, output->info(), alpha, beta, gemm_info));
 
     // Store original b matrix
     _original_b = b;
@@ -136,7 +110,7 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
     int       mult_transpose1xW_width   = 1;
     int       mult_interleave4x4_height = 1;
 
-    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX))
+    if(get_arch_from_target(gpu_target) == GPUTarget::BIFROST)
     {
         mult_transpose1xW_width   = 4;
         mult_interleave4x4_height = 2;
@@ -185,9 +159,67 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
     }
 }
 
-Status CLGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ICLTensor *c, const ITensorInfo *output, const float alpha, const float beta, const GEMMInfo &gemm_info)
+Status CLGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(a, b, c, output, alpha, beta, gemm_info));
+    ARM_COMPUTE_UNUSED(alpha);
+
+    // Check if we need to reshape the matrix B only on the first run
+    const bool reshape_b_only_on_first_run = gemm_info.reshape_b_only_on_first_run();
+
+    const ITensorInfo *matrix_a_info = a;
+    const ITensorInfo *matrix_b_info = b;
+
+    TensorInfo tmp_a_info{};
+    TensorInfo tmp_b_info{};
+    TensorInfo tmp_output_info = *output->clone();
+
+    // Get the GPU target
+    const GPUTarget gpu_target = CLScheduler::get().target();
+
+    // Arguments used by GEMMReshapeInfo
+    // If we pass the matrix A and matrix B reshaped to CLGEMMMatrixMultiplyKernel, we need to pass m, n, k, mult_transpose1xW_width and mult_interleave4x4_height to CLGEMMReshapeInfo
+    // in order to know how the matrices have been reshaped
+    const int m                         = a->dimension(1);
+    const int n                         = b->dimension(0);
+    const int k                         = a->dimension(0);
+    int       mult_transpose1xW_width   = 1;
+    int       mult_interleave4x4_height = 1;
+
+    if(get_arch_from_target(gpu_target) == GPUTarget::BIFROST)
+    {
+        mult_transpose1xW_width   = 4;
+        mult_interleave4x4_height = 2;
+    }
+
+    const GEMMReshapeInfo reshape_info = GEMMReshapeInfo(m, n, k, mult_transpose1xW_width, mult_interleave4x4_height);
+
+    // Check if we need to reshape the matrix A and matrix B
+    const bool run_interleave_transpose = is_interleaved_transposed(m, n, k, a->data_type(), reshape_b_only_on_first_run, gpu_target);
+
+    if(run_interleave_transpose)
+    {
+        matrix_a_info = &tmp_a_info;
+        matrix_b_info = &tmp_b_info;
+
+        // Validate interleave kernel
+        auto_init_if_empty(tmp_a_info, a->clone()->set_tensor_shape(compute_interleaved_shape(*a, mult_interleave4x4_height)));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMInterleave4x4Kernel::validate(a, &tmp_a_info, mult_interleave4x4_height));
+
+        // Validate transpose kernel
+        auto_init_if_empty(tmp_b_info, b->clone()->set_tensor_shape(compute_transpose1xW_with_element_size_shape(*b, mult_transpose1xW_width)));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMTranspose1xWKernel::validate(b, &tmp_b_info, mult_transpose1xW_width));
+    }
+
+    // Validate matrix multiply
+    auto_init_if_empty(tmp_output_info, matrix_a_info->clone()->set_tensor_shape(compute_mm_shape(*matrix_a_info, *matrix_b_info, run_interleave_transpose, reshape_info)));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, &tmp_output_info, alpha, run_interleave_transpose, reshape_info, gpu_target));
+
+    if(beta != 0 && c != nullptr)
+    {
+        // Validate matrix addition kernel
+        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMMatrixAdditionKernel::validate(c, &tmp_output_info, beta));
+    }
+
     return Status{};
 }
 

@@ -85,10 +85,10 @@ public:
     void configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, float alpha, float beta, const GEMMInfo &gemm_info = GEMMInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMM.
      *
-     * @param[in]  a         First input tensor  (Matrix or Vector A). Data types supported: QS8/QS16/F16/F32
-     * @param[in]  b         Second input tensor (Matrix B). Data type supported: same as @p a.
-     * @param[in]  c         Third input tensor  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a.
-     * @param[out] output    Output tensor. Data type supported: same as @p a
+     * @param[in]  a         First input tensor info  (Matrix or Vector A). Data types supported: QS8/QS16/F16/F32
+     * @param[in]  b         Second input tensor info (Matrix B). Data type supported: same as @p a.
+     * @param[in]  c         Third input tensor info  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a.
+     * @param[out] output    Output tensor info. Data type supported: same as @p a
      * @param[in]  alpha     Weight of the matrix product
      * @param[in]  beta      Weight of matrix C
      * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
@@ -96,7 +96,7 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ICLTensor *c, const ITensorInfo *output, const float alpha, const float beta, const GEMMInfo &gemm_info = GEMMInfo());
+    static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info = GEMMInfo());
 
     // Inherited methods overridden:
     void run() override;

@@ -78,17 +78,13 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
     AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
 
+    // Output tensor auto inizialitation if not yet initialized
+    auto_init_if_empty(*output, input->clone()->set_tensor_shape(compute_transpose1xW_with_element_size_shape(*input, mult_transpose1xW_width)));
+
     // Configure window in case of configured output
-    if(output->total_size() != 0)
-    {
-        AccessWindowStatic output_access(output, 0, 0, ceil_to_multiple(output->dimension(0), scale_x), output->dimension(1));
-        window_changed = window_changed || update_window_and_padding(win, input_access, output_access);
-        output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), input->tensor_shape()));
-    }
-    else
-    {
-        window_changed = window_changed || update_window_and_padding(win, input_access);
-    }
+    AccessWindowStatic output_access(output, 0, 0, ceil_to_multiple(output->dimension(0), scale_x), output->dimension(1));
+    window_changed = window_changed || update_window_and_padding(win, input_access, output_access);
+    output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), input->tensor_shape()));
 
     // Collapse along the Z direction
     Window collapsed = win.collapse(win, Window::DimZ);

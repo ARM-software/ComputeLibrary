@@ -69,16 +69,16 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     AccessWindowRectangle input_access(input, 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
     window_changed = window_changed || update_window_and_padding(win, input_access);
 
-    // Configure window in case of configured output
-    if(output->total_size() != 0)
-    {
-        const float scale_x = 4.0f * static_cast<float>(mult_interleave4x4_height);
-        const float scale_y = 1.0f / (scale_x);
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output, input->clone()->set_tensor_shape(compute_interleaved_shape(*input, mult_interleave4x4_height)));
 
-        AccessWindowRectangle output_access(output, 0, 0, num_elems_written_per_iteration, 1, scale_x, scale_y);
-        window_changed = window_changed || update_window_and_padding(win, output_access);
-        output_access.set_valid_region(win, input->valid_region());
-    }
+    // Configure window
+    const float scale_x = 4.0f * static_cast<float>(mult_interleave4x4_height);
+    const float scale_y = 1.0f / (scale_x);
+
+    AccessWindowRectangle output_access(output, 0, 0, num_elems_written_per_iteration, 1, scale_x, scale_y);
+    window_changed = window_changed || update_window_and_padding(win, output_access);
+    output_access.set_valid_region(win, input->valid_region());
 
     // Collapse along the Z direction
     // This collapse needs to be here in order to tune the Z dimension of LWS

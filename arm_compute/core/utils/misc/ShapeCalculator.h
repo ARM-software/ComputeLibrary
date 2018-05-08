@@ -358,6 +358,14 @@ inline TensorShape compute_rnn_shape(const ITensorInfo *input, const unsigned in
 
     return output_shape;
 }
+inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo &input1, bool is_interleaved_transposed, const GEMMReshapeInfo &reshape_info)
+{
+    TensorShape tensor_shape{ input0.tensor_shape() };
+    tensor_shape.set(0, is_interleaved_transposed ? reshape_info.n() : input1.dimension(0));
+    tensor_shape.set(1, is_interleaved_transposed ? reshape_info.m() : input0.dimension(1));
+
+    return tensor_shape;
+}
 } // namespace shape_calculator
 } // namespace misc
 } // namespace arm_compute

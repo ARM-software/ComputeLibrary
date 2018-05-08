@@ -58,16 +58,15 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const float beta)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, float beta)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_UNUSED(input, output, beta);
 
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(0) != output->dimension(0));
-    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(1) != output->dimension(1));
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
 
-    ARM_COMPUTE_UNUSED(beta);
     return Status{};
 }
 } // namespace
@@ -114,11 +113,10 @@ void CLGEMMMatrixAdditionKernel::configure(const ICLTensor *input, ICLTensor *ou
     ICLKernel::configure(win_config.second);
 }
 
-Status CLGEMMMatrixAdditionKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const float beta)
+Status CLGEMMMatrixAdditionKernel::validate(const ITensorInfo *input, const ITensorInfo *output, float beta)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON(validate_arguments(input, output, beta));
-    ARM_COMPUTE_RETURN_ERROR_ON(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, beta));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get()).first);
     return Status{};
 }
 
