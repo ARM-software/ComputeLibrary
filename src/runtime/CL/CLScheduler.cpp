@@ -31,7 +31,7 @@ using namespace arm_compute;
 std::once_flag CLScheduler::_initialize_symbols;
 
 CLScheduler::CLScheduler()
-    : _context(), _queue(), _target(GPUTarget::MIDGARD), _is_initialised(false), _cl_tuner()
+    : _queue(), _target(GPUTarget::MIDGARD), _is_initialised(false), _cl_tuner()
 {
 }
 

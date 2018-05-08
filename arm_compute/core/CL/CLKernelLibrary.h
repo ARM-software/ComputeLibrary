@@ -261,6 +261,16 @@ public:
             _device = cl_devices[0];
         }
     }
+
+    /** Accessor for the associated CL context.
+     *
+     * @return A CL context.
+     */
+    cl::Context &context()
+    {
+        return _context;
+    }
+
     /** Sets the CL device for which the programs are created.
      *
      * @param[in] device A CL device.
