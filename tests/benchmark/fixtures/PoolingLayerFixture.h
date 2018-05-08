@@ -50,6 +50,12 @@ public:
         // Set batched in source and destination shapes
         const unsigned int fixed_point_position = 4;
 
+        // Permute shape if NHWC format
+        if(data_layout == DataLayout::NHWC)
+        {
+            permute(src_shape, PermutationVector(2U, 0U, 1U));
+        }
+
         TensorInfo src_info(src_shape, 1, data_type, fixed_point_position);
         src_info.set_data_layout(data_layout);
 
