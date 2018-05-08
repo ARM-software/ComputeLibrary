@@ -50,14 +50,29 @@ public:
     NEReductionOperationKernel &operator=(NEReductionOperationKernel &&) = default;
     /** Default destructor */
     ~NEReductionOperationKernel() = default;
+
     /** Set the source, destination of the kernel
      *
-     * @param[in]  input  Source tensor. Data type supported: F32.
-     * @param[out] output Destination tensor.Data types supported: same as @p input.
+     * @param[in]  input  Source tensor. Data type supported: F32. Data layouts supported: NCHW.
+     * @param[out] output Destination tensor.Data types and data layouts supported: same as @p input.
+     *                    Output will have the same number of dimensions as input.
      * @param[in]  axis   Axis along which to reduce. Supported reduction axis : 0
      * @param[in]  op     Reduction operation to perform.
      */
     void configure(const ITensor *input, ITensor *output, unsigned int axis, ReductionOperation op);
+
+    /** Static function to check if given info will lead to a valid configuration of @ref NEReductionOperationKernel.
+     *
+     * @param[in] input  Source tensor info. Data type supported: F32. Data layouts supported: NCHW.
+     * @param[in] output Destination tensor info.Data types and data layouts supported: same as @p input.
+     *                   Output will have the same number of dimensions as input.
+     * @param[in] axis   Axis along which to reduce. Supported reduction axis : 0
+     * @param[in] op     Reduction operation to perform.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op);
+
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
     BorderSize border_size() const override;

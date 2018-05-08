@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -61,6 +61,13 @@ BorderMode reduction_operation_border_mode(ReductionOperation op)
 NEReductionOperation::NEReductionOperation()
     : _reduction_kernel(), _fill_border_kernel(), _window_split(0)
 {
+}
+
+Status NEReductionOperation::validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(NEReductionOperationKernel::validate(input, output, axis, op));
+
+    return Status{};
 }
 
 void NEReductionOperation::configure(ITensor *input, ITensor *output, unsigned int axis, ReductionOperation op)
