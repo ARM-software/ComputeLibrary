@@ -148,6 +148,14 @@ void fill_mask_from_pattern(uint8_t *mask, int cols, int rows, MatrixPattern pat
  */
 TensorShape calculate_depth_concatenate_shape(const std::vector<TensorShape> &input_shapes);
 
+/** Calculate output tensor shape give a vector of input tensor to concatenate
+ *
+ * @param[in] input_shapes Shapes of the tensors to concatenate across width.
+ *
+ * @return The shape of output concatenated tensor.
+ */
+TensorShape calculate_width_concatenate_shape(const std::vector<TensorShape> &input_shapes);
+
 /** Parameters of Harris Corners algorithm. */
 struct HarrisCornersParameters
 {

@@ -523,6 +523,21 @@ public:
     }
 };
 
+/** Data set containing tensor shapes for WidthConcatenateLayer. */
+class WidthConcatenateLayerShapes final : public ShapeDataset
+{
+public:
+    WidthConcatenateLayerShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 232U, 65U, 3U },
+                     TensorShape{ 432U, 65U, 3U },
+                     TensorShape{ 124U, 65U, 3U }
+    })
+    {
+    }
+};
+
 /** Data set containing global pooling tensor shapes. */
 class GlobalPoolingShapes final : public ShapeDataset
 {

@@ -366,6 +366,35 @@ inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo
 
     return tensor_shape;
 }
+
+template <typename T>
+inline TensorShape get_shape_from_info(T *info)
+{
+    return info->info()->tensor_shape();
+}
+
+inline TensorShape get_shape_from_info(ITensorInfo *info)
+{
+    return info->tensor_shape();
+}
+
+template <typename T>
+inline TensorShape calculate_width_concatenate_shape(const std::vector<T *> &inputs_vector)
+{
+    TensorShape out_shape = get_shape_from_info(inputs_vector[0]);
+
+    size_t width = 0;
+    for(const auto &tensor : inputs_vector)
+    {
+        ARM_COMPUTE_ERROR_ON(tensor == nullptr);
+        const TensorShape shape = get_shape_from_info(tensor);
+        width += shape.x();
+    }
+
+    out_shape.set(0, width);
+
+    return out_shape;
+}
 } // namespace shape_calculator
 } // namespace misc
 } // namespace arm_compute

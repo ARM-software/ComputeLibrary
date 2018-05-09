@@ -98,6 +98,21 @@ TensorShape calculate_depth_concatenate_shape(const std::vector<TensorShape> &in
     return out_shape;
 }
 
+TensorShape calculate_width_concatenate_shape(const std::vector<TensorShape> &input_shapes)
+{
+    ARM_COMPUTE_ERROR_ON(input_shapes.empty());
+
+    TensorShape out_shape = input_shapes[0];
+
+    int width = std::accumulate(input_shapes.begin(), input_shapes.end(), 0, [](int sum, const TensorShape & shape)
+    {
+        return sum + shape.x();
+    });
+    out_shape.set(0, width);
+
+    return out_shape;
+}
+
 HarrisCornersParameters harris_corners_parameters()
 {
     HarrisCornersParameters params;

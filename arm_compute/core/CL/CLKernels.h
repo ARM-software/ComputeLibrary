@@ -113,6 +113,7 @@
 #include "arm_compute/core/CL/kernels/CLWarpAffineKernel.h"
 #include "arm_compute/core/CL/kernels/CLWarpPerspectiveKernel.h"
 #include "arm_compute/core/CL/kernels/CLWeightsReshapeKernel.h"
+#include "arm_compute/core/CL/kernels/CLWidthConcatenateLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLWinogradFilterTransformKernel.h"
 #include "arm_compute/core/CL/kernels/CLWinogradInputTransformKernel.h"
 #include "arm_compute/core/CL/kernels/CLWinogradOutputTransformKernel.h"

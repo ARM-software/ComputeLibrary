@@ -172,6 +172,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "combine_gradients_L1", "canny.cl" },
     { "combine_gradients_L2", "canny.cl" },
     { "concatenate_depth", "concatenate.cl" },
+    { "concatenate_width", "concatenate.cl" },
     { "convolution_rectangle", "convolution_rectangle.cl" },
     { "col2im", "col2im.cl" },
     { "convert_depth_down", "depth_convert.cl" },
