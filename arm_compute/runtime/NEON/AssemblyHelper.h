@@ -98,8 +98,13 @@ public:
         _gemm_kernel_asm->set_arrays(in0_ptr, lda, batch_stride_a, multi_stride_a, in1_ptr, ldb, multi_stride_b, out_ptr, ldd, batch_stride_d, multi_stride_d);
         if(_gemm_kernel_asm->B_pretranspose_required())
         {
+            // Forcing 128-byte alignment (required by 32-bit kernels)
+            const unsigned int alignment   = 128;
+            void              *raw_ptr     = reinterpret_cast<void *>(_pretranspose->buffer());
+            size_t             space       = _pretranspose->info()->total_size();
+            void              *aligned_ptr = support::cpp11::align(alignment, _gemm_kernel_asm->get_B_pretransposed_array_size(), raw_ptr, space);
             ARM_COMPUTE_ERROR_ON(_pretranspose == nullptr || _pretranspose->buffer() == nullptr);
-            _gemm_kernel_asm->pretranspose_B_array(reinterpret_cast<void *>(_pretranspose->buffer()), in1_ptr, ldb, multi_stride_b);
+            _gemm_kernel_asm->pretranspose_B_array(aligned_ptr, in1_ptr, ldb, multi_stride_b);
             _b->mark_as_unused();
         }
 
@@ -190,8 +195,10 @@ inline bool setup_assembly_kernel(const ITensor *a, const ITensor *b, ITensor *d
         // Check for pre-transposed support
         if(asm_gemm->B_pretranspose_required())
         {
-            const size_t B_pretranspose_size = asm_gemm->get_B_pretransposed_array_size();
-            allocate_workspace(B_pretranspose_size, B_pretranspose, nullptr, 1, 1);
+            // Forcing 128-byte alignment (required by 32-bit kernels)
+            const unsigned int alignment           = 128;
+            const size_t       B_pretranspose_size = asm_gemm->get_B_pretransposed_array_size();
+            allocate_workspace(B_pretranspose_size, B_pretranspose, nullptr, alignment, 1);
             ARM_COMPUTE_ERROR_ON_NULLPTR(B_pretranspose.buffer());
             asm_glue._pretranspose = &B_pretranspose;
         }
