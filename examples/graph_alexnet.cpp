@@ -57,10 +57,9 @@ public:
         Target    target_hint = set_target_hint(target);
 
         // TODO (geopin01) : Get GPU target somehow and set gemm also for midgard ?
-        const bool        is_gemm_convolution5x5     = (target_hint == Target::NEON);
-        const bool        is_winograd_convolution3x3 = target_hint == Target::CL;
-        ConvolutionMethod convolution_5x5_hint       = is_gemm_convolution5x5 ? ConvolutionMethod::GEMM : ConvolutionMethod::DIRECT;
-        ConvolutionMethod convolution_3x3_hint       = is_winograd_convolution3x3 ? ConvolutionMethod::WINOGRAD : ConvolutionMethod::GEMM;
+        const bool        is_neon              = (target_hint == Target::NEON);
+        ConvolutionMethod convolution_5x5_hint = is_neon ? ConvolutionMethod::GEMM : ConvolutionMethod::DIRECT;
+        ConvolutionMethod convolution_3x3_hint = is_neon ? ConvolutionMethod::GEMM : ConvolutionMethod::DEFAULT;
 
         // Parse arguments
         if(argc < 2)

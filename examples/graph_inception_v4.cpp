@@ -54,10 +54,9 @@ public:
         std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<TFPreproccessor>();
 
         // Set target. 0 (NEON), 1 (OpenCL). By default it is NEON
-        const int target      = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
-        Target    target_hint = set_target_hint(target);
-
-        ConvolutionMethod convolution_hint = (target_hint == Target::CL) ? ConvolutionMethod::WINOGRAD : ConvolutionMethod::GEMM;
+        const int         target           = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
+        Target            target_hint      = set_target_hint(target);
+        ConvolutionMethod convolution_hint = target_hint == Target::NEON ? ConvolutionMethod::GEMM : ConvolutionMethod::DEFAULT;
 
         // Parse arguments
         if(argc < 2)

@@ -54,7 +54,7 @@ public:
         // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
         const int         target           = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
         Target            target_hint      = set_target_hint(target);
-        ConvolutionMethod convolution_hint = (target_hint == Target::CL) ? ConvolutionMethod::WINOGRAD : ConvolutionMethod::GEMM;
+        ConvolutionMethod convolution_hint = target_hint == Target::NEON ? ConvolutionMethod::GEMM : ConvolutionMethod::DEFAULT;
 
         // Parse arguments
         if(argc < 2)
@@ -96,10 +96,10 @@ public:
                   get_weights_accessor(data_path, "/cnn_data/googlenet_model/conv1/conv1_7x7_s2_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/googlenet_model/conv1/conv1_7x7_s2_b.npy"),
                   PadStrideInfo(2, 2, 3, 3))
+              << convolution_hint
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
               << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)))
               << NormalizationLayer(NormalizationLayerInfo(NormType::CROSS_MAP, 5, 0.0001f, 0.75f))
-              << convolution_hint
               << ConvolutionLayer(
                   1U, 1U, 64U,
                   get_weights_accessor(data_path, "/cnn_data/googlenet_model/conv2/conv2_3x3_reduce_w.npy"),

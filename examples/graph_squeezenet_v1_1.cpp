@@ -56,10 +56,9 @@ public:
         std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<CaffePreproccessor>(mean_rgb);
 
         // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
-        const int target      = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
-        Target    target_hint = set_target_hint(target);
-
-        ConvolutionMethod convolution_hint = (target_hint == Target::CL) ? ConvolutionMethod::WINOGRAD : ConvolutionMethod::GEMM;
+        const int         target           = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
+        Target            target_hint      = set_target_hint(target);
+        ConvolutionMethod convolution_hint = target_hint == Target::NEON ? ConvolutionMethod::GEMM : ConvolutionMethod::DEFAULT;
 
         // Parse arguments
         if(argc < 2)
@@ -102,9 +101,10 @@ public:
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/conv1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/conv1_b.npy"),
                   PadStrideInfo(2, 2, 0, 0))
+              << convolution_hint
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
               << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)))
-              << convolution_hint
+              << ConvolutionMethod::DEFAULT
               << ConvolutionLayer(
                   1U, 1U, 16U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire2_squeeze1x1_w.npy"),
