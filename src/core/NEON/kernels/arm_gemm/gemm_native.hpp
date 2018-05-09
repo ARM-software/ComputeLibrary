@@ -106,7 +106,7 @@ public:
         for(unsigned int multi = first_multi; multi <= last_multi; multi++)
         {
             const unsigned int batch_0   = (multi == first_multi) ? first_batch : 0;
-            const unsigned int batch_max = (multi == last_multi) ? last_batch : _nbatches;
+            const unsigned int batch_max = (multi == last_multi) ? last_batch : _nbatches - 1;
 
             for(unsigned int batch = batch_0; batch <= batch_max; batch++)
             {
