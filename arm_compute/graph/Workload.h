@@ -26,6 +26,7 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
+#include <functional>
 #include <memory>
 #include <vector>
 
