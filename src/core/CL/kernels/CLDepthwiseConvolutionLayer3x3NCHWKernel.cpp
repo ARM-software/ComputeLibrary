@@ -68,7 +68,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(weights, biases);
         }
-        ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != weights->dimension(2));
+        ARM_COMPUTE_RETURN_ERROR_ON((biases->dimension(0) != weights->dimension(2)) && (weights->dimension(2) != 1 || biases->dimension(0) != weights->dimension(3)));
         ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
     }
 
