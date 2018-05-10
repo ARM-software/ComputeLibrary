@@ -97,12 +97,15 @@ Status validate_convolution_layer(ConvolutionLayerNode &node)
         case ConvolutionMethod::WINOGRAD:
             status = WinogradConvolutionLayer::validate(input, weights, biases, output, conv_info);
             break;
+        case ConvolutionMethod::DEFAULT:
+            status = ConvolutionLayer::validate(input, weights, biases, output, conv_info);
+            break;
         default:
             break;
     }
 
     // If validation fails try the Default approach
-    if(!bool(status) || (conv_algorithm == ConvolutionMethod::DEFAULT))
+    if(!bool(status))
     {
         status = ConvolutionLayer::validate(input, weights, biases, output, conv_info);
         if(bool(status))
