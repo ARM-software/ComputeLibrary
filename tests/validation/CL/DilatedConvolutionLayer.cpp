@@ -201,7 +201,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMDilatedConvolutionLayerFixture<float>, fr
                                                                                                                        framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32);
+    validate(CLAccessor(_target), _reference, tolerance_f32, 0.00002);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
