@@ -28,7 +28,7 @@ namespace arm_compute
 namespace graph
 {
 Tensor::Tensor(TensorID id, TensorDescriptor desc)
-    : _id(id), _desc(desc), _handle(nullptr), _accessor(nullptr), _bound_edges()
+    : _id(id), _desc(std::move(desc)), _handle(nullptr), _accessor(nullptr), _bound_edges()
 {
 }
 
