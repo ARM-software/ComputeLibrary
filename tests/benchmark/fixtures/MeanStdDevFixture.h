@@ -46,10 +46,6 @@ public:
         // Create tensors
         src = create_tensor<TensorType>(shape, format);
 
-        // Create output variables
-        float mean    = 0.0f;
-        float std_dev = 0.0f;
-
         // Create and configure function
         mean_std_dev_func.configure(&src, &mean, &std_dev);
 
@@ -75,6 +71,8 @@ public:
 private:
     TensorType src{};
     Function   mean_std_dev_func{};
+    float      mean{ 0.0f };
+    float      std_dev{ 0.0f };
 };
 } // namespace benchmark
 } // namespace test
