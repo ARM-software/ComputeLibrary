@@ -103,7 +103,7 @@ HarrisCornersParameters harris_corners_parameters()
     HarrisCornersParameters params;
 
     std::mt19937                           gen(library->seed());
-    std::uniform_real_distribution<float>  threshold_dist(0.f, 0.01f);
+    std::uniform_real_distribution<float>  threshold_dist(0.f, 0.001f);
     std::uniform_real_distribution<float>  sensitivity(0.04f, 0.15f);
     std::uniform_real_distribution<float>  euclidean_distance(0.f, 30.f);
     std::uniform_int_distribution<uint8_t> int_dist(0, 255);
