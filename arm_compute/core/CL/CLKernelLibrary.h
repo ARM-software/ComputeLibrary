@@ -249,16 +249,22 @@ public:
     void set_context(cl::Context context)
     {
         _context = std::move(context);
-
-        const auto cl_devices = _context.getInfo<CL_CONTEXT_DEVICES>();
-
-        if(cl_devices.empty())
+        if(_context.get() == nullptr)
         {
             _device = cl::Device();
         }
         else
         {
-            _device = cl_devices[0];
+            const auto cl_devices = _context.getInfo<CL_CONTEXT_DEVICES>();
+
+            if(cl_devices.empty())
+            {
+                _device = cl::Device();
+            }
+            else
+            {
+                _device = cl_devices[0];
+            }
         }
     }
 
