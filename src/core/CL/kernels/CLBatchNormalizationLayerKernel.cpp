@@ -83,7 +83,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output,
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output,
+                                                        ITensorInfo *mean, ITensorInfo *var, ITensorInfo *beta, ITensorInfo *gamma)
 {
     if(output != nullptr)
     {
@@ -107,6 +108,24 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     else
     {
         window_changed = update_window_and_padding(win, input_access);
+    }
+
+    if(input->data_layout() == DataLayout::NHWC)
+    {
+        AccessWindowHorizontal mean_access(mean, 0, num_elems_processed_per_iteration);
+        AccessWindowHorizontal var_access(var, 0, num_elems_processed_per_iteration);
+        window_changed = window_changed || update_window_and_padding(win, mean_access, var_access);
+
+        if(beta != nullptr)
+        {
+            AccessWindowHorizontal beta_access(beta, 0, num_elems_processed_per_iteration);
+            window_changed = window_changed || update_window_and_padding(win, beta_access);
+        }
+        if(gamma != nullptr)
+        {
+            AccessWindowHorizontal gamma_access(gamma, 0, num_elems_processed_per_iteration);
+            window_changed = window_changed || update_window_and_padding(win, gamma_access);
+        }
     }
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
@@ -169,7 +188,10 @@ void CLBatchNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *out
     _kernel.setArg<cl_float>(idx++, _epsilon);
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), (_run_in_place) ? nullptr : output->info());
+    auto win_config = validate_and_configure_window(input->info(), (_run_in_place) ? nullptr : output->info(),
+                                                    mean->info(), var->info(),
+                                                    (beta != nullptr) ? beta->info() : nullptr,
+                                                    (gamma != nullptr) ? gamma->info() : nullptr);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure(win_config.second);
 
@@ -192,7 +214,11 @@ Status CLBatchNormalizationLayerKernel::validate(const ITensorInfo *input, const
 {
     const bool run_in_place = (output == nullptr) || (output == input);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, mean, var, beta, gamma, epsilon, act_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), (run_in_place) ? nullptr : output->clone().get()).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), (run_in_place) ? nullptr : output->clone().get(),
+                                                              mean->clone().get(), var->clone().get(),
+                                                              (beta != nullptr) ? beta->clone().get() : nullptr,
+                                                              (gamma != nullptr) ? gamma->clone().get() : nullptr)
+                                .first);
 
     return Status{};
 }
