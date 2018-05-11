@@ -36,31 +36,35 @@
 
 #include "arm_compute/core/NEON/kernels/convolution/winograd/winograd_gemm.hpp"
 
-namespace
-{
-inline Tensor4DShape internal_get_input_shape(const arm_compute::ITensor *input)
-{
-    const int in_width    = input->info()->dimension(0);
-    const int in_height   = input->info()->dimension(1);
-    const int in_batches  = input->info()->dimension(3);
-    const int in_channels = input->info()->dimension(2);
-    return Tensor4DShape({ in_batches, in_height, in_width, in_channels });
-}
-} /* namespace */
-
 namespace arm_compute
 {
 namespace
 {
+inline Tensor4DShape internal_get_input_shape(const arm_compute::ITensor *input)
+{
+    const DataLayout data_layout = input->info()->data_layout();
+    const int        in_width    = input->info()->dimension(get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH));
+    const int        in_height   = input->info()->dimension(get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT));
+    const int        in_channels = input->info()->dimension(get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL));
+    const int        in_batches  = input->info()->dimension(3);
+
+    return Tensor4DShape({ in_batches, in_height, in_width, in_channels });
+}
+
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(weights);
-    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
+    const DataLayout   data_layout = input->data_layout();
+    const unsigned int width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const unsigned int height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+
+    ARM_COMPUTE_UNUSED(output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(0) != 3 && weights->dimension(0) != 5, "Only 3 and 5 kernels are supported");
+    ARM_COMPUTE_RETURN_ERROR_ON(data_layout != DataLayout::NCHW); // COMPMID-1162
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(width_idx) != 3 && weights->dimension(height_idx) != 5, "Only 3 and 5 kernels are supported");
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.stride().first != 1 || conv_info.stride().second != 1, "Winograd layer only supports unit strides.");
 
     if(biases != nullptr)
     {
@@ -68,13 +72,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
         ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
     }
 
-    // Get parameters from conv_info
-    unsigned int stride_x = 0;
-    unsigned int stride_y = 0;
-    std::tie(stride_x, stride_y) = conv_info.stride();
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(stride_y != 1 || stride_x != 1, "Winograd layer only supports unit strides.");
-
-    ARM_COMPUTE_UNUSED(output);
     return Status{};
 }
 } //namespace
@@ -89,36 +86,51 @@ NEWinogradConvolutionLayer::NEWinogradConvolutionLayer(std::shared_ptr<IMemoryMa
 void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_UNUSED(conv_info);
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(), conv_info));
 
     _weights = weights;
     _input   = input;
     _output  = output;
 
+    // Get indices for the width and height
+    const DataLayout   data_layout = input->info()->data_layout();
+    const unsigned int width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const unsigned int height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const unsigned int channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
+
     std::unique_ptr<INEWinogradLayerTransformInputKernel<float>>   transform_input_kernel;
     std::unique_ptr<INEWinogradLayerTransformWeightsKernel<float>> transform_weights_kernel;
     std::unique_ptr<INEWinogradLayerTransformOutputKernel<float>>  transform_output_kernel;
 
-    const int weights_width  = weights->info()->dimension(0);
-    const int weights_height = weights->info()->dimension(1);
+    const int weights_width  = weights->info()->dimension(width_idx);
+    const int weights_height = weights->info()->dimension(height_idx);
 
-    int output_tile_rows = 0;
-    int output_tile_cols = 0;
-    int n_gemms          = 0;
-    int N_BLOCK          = 0; // Size of block used by GEMM.
+    Size2D output_tile{};
+    int    n_gemms = 0;
+    int    N_BLOCK = 0; // Size of block used by GEMM.
 
     switch(weights_width)
     {
         case 3:
         {
-            transform_input_kernel   = support::cpp14::make_unique<NEWinogradLayerTransformInputKernel<float, 2, 2, 3, 3>>();
-            transform_weights_kernel = support::cpp14::make_unique<NEWinogradLayerTransformWeightsKernel<float, 2, 2, 3, 3>>();
-            transform_output_kernel  = support::cpp14::make_unique<NEWinogradLayerTransformOutputKernel<float, 2, 2, 3, 3>>();
-            output_tile_rows         = 2;
-            output_tile_cols         = 2;
-            n_gemms                  = NEWinogradLayerBatchedGEMMKernel<float, float, 2, 2, 3, 3>::WinogradBase::N_GEMMS;
-            N_BLOCK                  = NEWinogradLayerBatchedGEMMKernel<float, float, 2, 2, 3, 3>::WinogradConv::N_BLOCK;
+            if(input->info()->dimension(width_idx) > 4 && input->info()->dimension(height_idx) > 4)
+            {
+                transform_input_kernel   = support::cpp14::make_unique<NEWinogradLayerTransformInputKernel<float, 4, 4, 3, 3>>();
+                transform_weights_kernel = support::cpp14::make_unique<NEWinogradLayerTransformWeightsKernel<float, 4, 4, 3, 3>>();
+                transform_output_kernel  = support::cpp14::make_unique<NEWinogradLayerTransformOutputKernel<float, 4, 4, 3, 3>>();
+                output_tile              = Size2D(4U, 4U);
+                n_gemms                  = NEWinogradLayerBatchedGEMMKernel<float, float, 4, 4, 3, 3>::WinogradBase::N_GEMMS;
+                N_BLOCK                  = NEWinogradLayerBatchedGEMMKernel<float, float, 4, 4, 3, 3>::WinogradConv::N_BLOCK;
+            }
+            else
+            {
+                transform_input_kernel   = support::cpp14::make_unique<NEWinogradLayerTransformInputKernel<float, 2, 2, 3, 3>>();
+                transform_weights_kernel = support::cpp14::make_unique<NEWinogradLayerTransformWeightsKernel<float, 2, 2, 3, 3>>();
+                transform_output_kernel  = support::cpp14::make_unique<NEWinogradLayerTransformOutputKernel<float, 2, 2, 3, 3>>();
+                output_tile              = Size2D(2U, 2U);
+                n_gemms                  = NEWinogradLayerBatchedGEMMKernel<float, float, 2, 2, 3, 3>::WinogradBase::N_GEMMS;
+                N_BLOCK                  = NEWinogradLayerBatchedGEMMKernel<float, float, 2, 2, 3, 3>::WinogradConv::N_BLOCK;
+            }
             break;
         }
         case 5:
@@ -126,8 +138,7 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
             transform_input_kernel   = support::cpp14::make_unique<NEWinogradLayerTransformInputKernel<float, 2, 2, 5, 5>>();
             transform_weights_kernel = support::cpp14::make_unique<NEWinogradLayerTransformWeightsKernel<float, 2, 2, 5, 5>>();
             transform_output_kernel  = support::cpp14::make_unique<NEWinogradLayerTransformOutputKernel<float, 2, 2, 5, 5>>();
-            output_tile_rows         = 2;
-            output_tile_cols         = 2;
+            output_tile              = Size2D(2U, 2U);
             n_gemms                  = NEWinogradLayerBatchedGEMMKernel<float, float, 2, 2, 5, 5>::WinogradBase::N_GEMMS;
             N_BLOCK                  = NEWinogradLayerBatchedGEMMKernel<float, float, 2, 2, 5, 5>::WinogradConv::N_BLOCK;
             break;
@@ -142,15 +153,9 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     const PaddingType use_padding_type = (conv_info.pad_left() != 0u) ? PADDING_SAME : PADDING_VALID;
     const bool        use_same_padding = use_padding_type == PADDING_SAME;
 
-    // Get parameters from conv_info
-    unsigned int stride_x = 0;
-    unsigned int stride_y = 0;
-    std::tie(stride_x, stride_y) = conv_info.stride();
-    ARM_COMPUTE_ERROR_ON_MSG(stride_y != 1 || stride_x != 1, "Winograd layer only supports unit strides.");
-
     // Get convolved dimensions
-    const int in_channels  = input->info()->dimension(2);
-    const int out_channels = output->info()->dimension(2);
+    const int in_channels  = input->info()->dimension(channel_idx);
+    const int out_channels = output->info()->dimension(channel_idx);
 
     const Tensor4DShape in_shape(internal_get_input_shape(input));
     const size_t        data_type_size = input->info()->element_size();
@@ -205,8 +210,8 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
                                        in_shape.n_batches, output_shape.n_rows, output_shape.n_cols, out_channels);
 
     // Configure GEMM
-    const int    tile_rows                = iceildiv(output_shape.n_rows, output_tile_rows);
-    const int    tile_cols                = iceildiv(output_shape.n_cols, output_tile_cols);
+    const int    tile_rows                = iceildiv(output_shape.n_rows, output_tile.height);
+    const int    tile_cols                = iceildiv(output_shape.n_cols, output_tile.width);
     const int    m                        = in_shape.n_batches * tile_rows * tile_cols;
     const int    k                        = in_shape.n_channels;
     const int    n                        = out_channels;
@@ -289,19 +294,24 @@ void NEWinogradConvolutionLayer::run()
 Status NEWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
                                             const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, weights, biases, output, conv_info));
 
     // Get indices for the width and height
     const size_t idx_width  = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
     const size_t idx_height = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
     // Input shape
-    const TensorShape input_shape = input->tensor_shape();
+    const TensorShape  input_shape = input->tensor_shape();
+    const unsigned int input_w     = input_shape[idx_width];
+    const unsigned int input_h     = input_shape[idx_height];
 
     // Kernel size
     const unsigned int kernel_w = weights->tensor_shape()[idx_width];
     const unsigned int kernel_h = weights->tensor_shape()[idx_height];
 
-    const WinogradInfo winograd_info = WinogradInfo(Size2D(2, 2),
+    const Size2D output_tile = (Size2D(kernel_w, kernel_h) == Size2D(3U, 3U) && input_w > 4 && input_h > 4) ? Size2D(4U, 4U) : Size2D(2U, 2U);
+
+    const WinogradInfo winograd_info = WinogradInfo(output_tile,
                                                     Size2D(kernel_w, kernel_h),
                                                     Size2D(input_shape[idx_width], input_shape[idx_height]),
                                                     conv_info,
@@ -310,11 +320,18 @@ Status NEWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITen
     // Validate input transform
     const TensorShape input0_shape = misc::shape_calculator::compute_winograd_input_transform_shape(*input, winograd_info);
     const TensorInfo  input0       = input->clone()->set_tensor_shape(input0_shape);
-    switch(weights->dimension(0))
+    switch(weights->dimension(idx_width))
     {
         case 3:
         {
-            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformInputKernel<float, 2, 2, 3, 3>::validate(input, &input0, winograd_info)));
+            if(input_w > 4 && input_h > 4)
+            {
+                ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformInputKernel<float, 4, 4, 3, 3>::validate(input, &input0, winograd_info)));
+            }
+            else
+            {
+                ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformInputKernel<float, 2, 2, 3, 3>::validate(input, &input0, winograd_info)));
+            }
             break;
         }
         case 5:
@@ -332,11 +349,18 @@ Status NEWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITen
     const TensorShape input1_shape = misc::shape_calculator::compute_winograd_filter_transform_shape(*weights, winograd_info);
     const TensorInfo  input1       = weights->clone()->set_tensor_shape(input1_shape);
 
-    switch(weights->dimension(0))
+    switch(weights->dimension(idx_width))
     {
         case 3:
         {
-            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformWeightsKernel<float, 2, 2, 3, 3>::validate(weights, &input1, winograd_info)));
+            if(input_w > 4 && input_h > 4)
+            {
+                ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformWeightsKernel<float, 4, 4, 3, 3>::validate(weights, &input1, winograd_info)));
+            }
+            else
+            {
+                ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformWeightsKernel<float, 2, 2, 3, 3>::validate(weights, &input1, winograd_info)));
+            }
             break;
         }
         case 5:
@@ -354,20 +378,24 @@ Status NEWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITen
     TensorShape batched_mm_output_shape = input0.tensor_shape();
     batched_mm_output_shape[0]          = input1.tensor_shape()[0];
     const TensorInfo batched_mm_output  = input0.clone()->set_tensor_shape(batched_mm_output_shape);
-    switch(weights->dimension(0))
+    switch(weights->dimension(idx_width))
     {
         case 3:
         {
-            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerBatchedGEMMKernel<float, float, 2, 2, 3, 3>::validate(&input0, &input1, nullptr, &batched_mm_output, 1.0f, 0.0f, GEMMInfo(false, false,
-                                                                                                              true /* Reshape weights only for the first run*/))));
-            // Validate output transform
-            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformOutputKernel<float, 2, 2, 3, 3>::validate(&batched_mm_output, biases, output, winograd_info)));
+            if(input_w > 4 && input_h > 4)
+            {
+                // Validate output transform
+                ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformOutputKernel<float, 4, 4, 3, 3>::validate(&batched_mm_output, biases, output, winograd_info)));
+            }
+            else
+            {
+                // Validate output transform
+                ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformOutputKernel<float, 2, 2, 3, 3>::validate(&batched_mm_output, biases, output, winograd_info)));
+            }
             break;
         }
         case 5:
         {
-            ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerBatchedGEMMKernel<float, float, 2, 2, 5, 5>::validate(&input0, &input1, nullptr, &batched_mm_output, 1.0f, 0.0f, GEMMInfo(false, false,
-                                                                                                              true /* Reshape weights only for the first run*/))));
             // Validate output transform
             ARM_COMPUTE_RETURN_ON_ERROR((NEWinogradLayerTransformOutputKernel<float, 2, 2, 5, 5>::validate(&batched_mm_output, biases, output, winograd_info)));
             break;
