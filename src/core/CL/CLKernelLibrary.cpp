@@ -201,6 +201,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "dilate", "dilate.cl" },
     { "direct_convolution1x1", "direct_convolution1x1.cl" },
     { "direct_convolution1x1_f32_bifrost", "direct_convolution1x1.cl" },
+    { "direct_convolution1x1_f32_bifrost_x", "direct_convolution1x1.cl" },
     { "direct_convolution3x3", "direct_convolution3x3.cl" },
     { "direct_convolution3x3_f32_bifrost", "direct_convolution3x3.cl" },
     { "direct_convolution5x5", "direct_convolution5x5.cl" },

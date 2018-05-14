@@ -136,15 +136,24 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     if((target == GPUTarget::BIFROST) && (kernel_size <= 5) && (conv_stride_x == 1) && (conv_stride_y == 1) && (data_type == DataType::F32))
     {
         // Configure kernel window
-
         switch(kernel_size)
         {
             case 1:
             {
-                num_elems_read_per_iteration_x    = 4;
-                num_elems_read_per_iteration_y    = 4;
-                num_elems_written_per_iteration_x = 4;
-                num_elems_written_per_iteration_y = 4;
+                if(weights->dimension(2) % 4 == 0)
+                {
+                    num_elems_read_per_iteration_x    = 4;
+                    num_elems_written_per_iteration_x = 4;
+                    num_elems_read_per_iteration_y    = 2;
+                    num_elems_written_per_iteration_y = 2;
+                }
+                else
+                {
+                    num_elems_read_per_iteration_x    = 4;
+                    num_elems_written_per_iteration_x = 4;
+                    num_elems_read_per_iteration_y    = 4;
+                    num_elems_written_per_iteration_y = 4;
+                }
                 break;
             }
             case 3:
@@ -309,9 +318,17 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
 
     if((gpu_target == GPUTarget::BIFROST) && (kernel_size <= 5) && (_conv_stride_x == 1) && (_conv_stride_y == 1) && (data_type == DataType::F32))
     {
-        build_options.add_option(std::string("-DWEIGHTS_DEPTH=" + support::cpp11::to_string(_weights->info()->dimension(2))));
+        int weights_depth = _weights->info()->dimension(2);
+        build_options.add_option(std::string("-DWEIGHTS_DEPTH=" + support::cpp11::to_string(weights_depth)));
 
-        kernel_name << "_f32_bifrost";
+        if(kernel_size == 1 && weights_depth % 4 == 0)
+        {
+            kernel_name << "_f32_bifrost_x";
+        }
+        else
+        {
+            kernel_name << "_f32_bifrost";
+        }
         _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name.str(), build_options.options()));
 
         // Through extensive experimentation with over 30 representative tensor
@@ -345,7 +362,7 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
                 }
                 else
                 {
-                    _lws_hint = cl::NDRange(1, 1, 2);
+                    _lws_hint = cl::NDRange(2, 1, 2);
                 }
                 break;
             }

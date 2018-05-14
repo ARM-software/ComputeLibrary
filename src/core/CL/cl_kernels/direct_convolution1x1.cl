@@ -327,3 +327,117 @@ __kernel void direct_convolution1x1_f32_bifrost(
     vstore4(acc3, 0, (__global float *)(dst.ptr + 3 * dst_stride_y));
 }
 #endif // defined(WEIGHTS_DEPTH)
+
+#if defined(WEIGHTS_DEPTH)
+
+#define CONVOLUTION1x1_BIFROST_X(acc, src, weight_value) \
+    ({                                                   \
+        acc.s0 = mad(src.s0, weight_value, acc.s0);      \
+        acc.s1 = mad(src.s1, weight_value, acc.s1);      \
+        acc.s2 = mad(src.s2, weight_value, acc.s2);      \
+        acc.s3 = mad(src.s3, weight_value, acc.s3);      \
+    })
+
+/** An optimized direct convolution 1x1 OpenCL kernel for Bifrost architectures when the data type is F32
+ *
+ * @note This OpenCL kernel works only with stride_x and stride_y equal to 1
+ * @note The third dimensions of the weights tensors must be passed at compile time using -DWEIGHTS_DEPTH
+ * @note In case biases, -DHAS_BIAS must to be passed at compile
+ *
+ * @param[in]  src_ptr                               Pointer to the source tensor. Supported data types: F32
+ * @param[in]  src_stride_x                          Stride of the source tensor in X dimension (in bytes)
+ * @param[in]  src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  src_stride_y                          Stride of the source tensor in Y dimension (in bytes)
+ * @param[in]  src_step_y                            src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_stride_z                          Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  src_step_z                            src_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  src_offset_first_element_in_bytes     The offset of the first element in the source tensor
+ * @param[out] dst_ptr                               Pointer to the destination tensor. Supported data types: same as @p src_ptr
+ * @param[in]  dst_stride_x                          Stride of the destination tensor in X dimension (in bytes)
+ * @param[in]  dst_step_x                            dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  dst_stride_y                          Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in]  dst_step_y                            dst_stride_y * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                          Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                            dst_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  dst_offset_first_element_in_bytes     The offset of the first element in the destination tensor
+ * @param[in]  weights_ptr                           Pointer to the weights tensor. Supported data types: same as @p src_ptr
+ * @param[in]  weights_stride_x                      Stride of the weights tensor in X dimension (in bytes)
+ * @param[in]  weights_step_x                        weights_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  weights_stride_y                      Stride of the weights tensor in Y dimension (in bytes)
+ * @param[in]  weights_step_y                        weights_stride_y * number of elements along y processed per workitem(in bytes)
+ * @param[in]  weights_stride_z                      Stride of the weights tensor in Z dimension (in bytes)
+ * @param[in]  weights_step_z                        weights_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  weights_offset_first_element_in_bytes The offset of the first element in the weights tensor
+ * @param[in]  biases_ptr                            Pointer to the biases tensor. Same as @p src_ptr
+ * @param[in]  biases_stride_x                       Stride of the biases tensor in X dimension (in bytes)
+ * @param[in]  biases_step_x                         biases_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  biases_offset_first_element_in_bytes  The offset of the first element in the biases tensor
+ * @param[in]  weights_stride_w                      Stride of the weights tensor in the 4th dimension
+ */
+__kernel void direct_convolution1x1_f32_bifrost_x(
+    TENSOR3D_DECLARATION(src),
+    TENSOR3D_DECLARATION(dst),
+    TENSOR3D_DECLARATION(weights),
+#ifdef HAS_BIAS
+    VECTOR_DECLARATION(biases),
+#endif /* defined(HAS_BIAS) */
+    unsigned int weights_stride_w)
+{
+    // Get the kernel index
+    const int kernel_index = get_global_id(2);
+    Image     src          = CONVERT_TO_IMAGE_STRUCT(src);
+
+    float4   acc0                = 0.0f;
+    float4   acc1                = 0.0f;
+    __global uchar *weights_addr = (__global uchar *)(weights_ptr + weights_offset_first_element_in_bytes + kernel_index * weights_stride_w);
+    __global uchar *src_addr     = (__global uchar *)offset(&src, 0, 0);
+    for(ushort d = 0; d < (ushort)(WEIGHTS_DEPTH / 4); ++d)
+    {
+        // Load the weights
+        float4 weight = vload4(0, (__global float *)(weights_addr));
+
+        // Load values from row0 of input tensor
+        float4 src00 = vload4(0, (__global float *)(src_addr + src_stride_z * 0));
+        float4 src01 = vload4(0, (__global float *)(src_addr + src_stride_z * 1));
+        float4 src02 = vload4(0, (__global float *)(src_addr + src_stride_z * 2));
+        float4 src03 = vload4(0, (__global float *)(src_addr + src_stride_z * 3));
+
+        CONVOLUTION1x1_BIFROST_X(acc0, src00, weight.s0);
+        CONVOLUTION1x1_BIFROST_X(acc0, src01, weight.s1);
+        CONVOLUTION1x1_BIFROST_X(acc0, src02, weight.s2);
+        CONVOLUTION1x1_BIFROST_X(acc0, src03, weight.s3);
+
+        src00 = vload4(0, (__global float *)(src_addr + src_stride_z * 0 + src_stride_y));
+        src01 = vload4(0, (__global float *)(src_addr + src_stride_z * 1 + src_stride_y));
+        src02 = vload4(0, (__global float *)(src_addr + src_stride_z * 2 + src_stride_y));
+        src03 = vload4(0, (__global float *)(src_addr + src_stride_z * 3 + src_stride_y));
+
+        CONVOLUTION1x1_BIFROST_X(acc1, src00, weight.s0);
+        CONVOLUTION1x1_BIFROST_X(acc1, src01, weight.s1);
+        CONVOLUTION1x1_BIFROST_X(acc1, src02, weight.s2);
+        CONVOLUTION1x1_BIFROST_X(acc1, src03, weight.s3);
+
+        src_addr += 4 * src_stride_z;
+        weights_addr += 4 * weights_stride_z;
+    }
+
+#ifdef HAS_BIAS
+    Vector biases = CONVERT_TO_VECTOR_STRUCT_NO_STEP(biases);
+
+    float bias = (float) * ((__global float *)(vector_offset(&biases, kernel_index)));
+
+    acc0.s0 += bias;
+    acc0.s1 += bias;
+    acc0.s2 += bias;
+    acc0.s3 += bias;
+    acc1.s0 += bias;
+    acc1.s1 += bias;
+    acc1.s2 += bias;
+    acc1.s3 += bias;
+#endif /* defined(HAS_BIAS) */
+
+    Tensor3D dst = CONVERT_TO_TENSOR3D_STRUCT(dst);
+    vstore4(acc0, 0, (__global float *)(dst.ptr + 0 * dst_stride_y));
+    vstore4(acc1, 0, (__global float *)(dst.ptr + 1 * dst_stride_y));
+}
+#endif // defined(WEIGHTS_DEPTH)
