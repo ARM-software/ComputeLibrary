@@ -2143,14 +2143,14 @@ void NEPoolingLayerKernel::poolingMxN_f16_nhwc(const Window &window_input, const
 
             for(int y = 0; y < pool_size_y; ++y)
             {
-                if(y + idx_height > window_input.z().end() || y + idx_height - pool_pad_top < window_input.z().start())
+                if(y + idx_height - pool_pad_top >= window_input.z().end() || y + idx_height - pool_pad_top < window_input.z().start())
                 {
                     continue;
                 }
 
                 for(int x = 0; x < pool_size_x; ++x)
                 {
-                    if(x + idx_width > window_input.y().end() || x + idx_width - pool_pad_left < window_input.y().start())
+                    if(x + idx_width - pool_pad_left >= window_input.y().end() || x + idx_width - pool_pad_left < window_input.y().start())
                     {
                         continue;
                     }
@@ -2374,14 +2374,14 @@ void NEPoolingLayerKernel::poolingMxN_f32_nhwc(const Window &window_input, const
 
             for(int y = 0; y < pool_size_y; ++y)
             {
-                if(y + idx_height > window_input.z().end() || y + idx_height - pool_pad_top < window_input.z().start())
+                if(y + idx_height - pool_pad_top >= window_input.z().end() || y + idx_height - pool_pad_top < window_input.z().start())
                 {
                     continue;
                 }
 
                 for(int x = 0; x < pool_size_x; ++x)
                 {
-                    if(x + idx_width > window_input.y().end() || x + idx_width - pool_pad_left < window_input.y().start())
+                    if(x + idx_width - pool_pad_left >= window_input.y().end() || x + idx_width - pool_pad_left < window_input.y().start())
                     {
                         continue;
                     }
@@ -2408,14 +2408,14 @@ void NEPoolingLayerKernel::poolingMxN_f32_nhwc(const Window &window_input, const
             vres = vdupq_n_f32(std::numeric_limits<float>::lowest());
             for(int y = 0; y < pool_size_y; ++y)
             {
-                if(y + idx_height > window_input.z().end() || y + idx_height - pool_pad_top < window_input.z().start())
+                if(y + idx_height - pool_pad_top >= window_input.z().end() || y + idx_height - pool_pad_top < window_input.z().start())
                 {
                     continue;
                 }
 
                 for(int x = 0; x < pool_size_x; ++x)
                 {
-                    if(x + idx_width > window_input.y().end() || x + idx_width - pool_pad_left < window_input.y().start())
+                    if(x + idx_width - pool_pad_left >= window_input.y().end() || x + idx_width - pool_pad_left < window_input.y().start())
                     {
                         continue;
                     }
@@ -2571,14 +2571,14 @@ void NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc(const Window &window_input, c
             // Perform pooling
             for(int y = 0; y < pool_size_y; ++y)
             {
-                if(y + idx_height > window_input.z().end() || y + idx_height - pool_pad_top < window_input.z().start())
+                if(y + idx_height - pool_pad_top >= window_input.z().end() || y + idx_height - pool_pad_top < window_input.z().start())
                 {
                     continue;
                 }
 
                 for(int x = 0; x < pool_size_x; ++x)
                 {
-                    if(x + idx_width > window_input.y().end() || x + idx_width - pool_pad_left < window_input.y().start())
+                    if(x + idx_width - pool_pad_left >= window_input.y().end() || x + idx_width - pool_pad_left < window_input.y().start())
                     {
                         continue;
                     }
@@ -2606,14 +2606,14 @@ void NEPoolingLayerKernel::poolingMxN_qasymm8_nhwc(const Window &window_input, c
 
             for(int y = 0; y < pool_size_y; ++y)
             {
-                if(y + idx_height > window_input.z().end() || y + idx_height - pool_pad_top < window_input.z().start())
+                if(y + idx_height - pool_pad_top >= window_input.z().end() || y + idx_height - pool_pad_top < window_input.z().start())
                 {
                     continue;
                 }
 
                 for(int x = 0; x < pool_size_x; ++x)
                 {
-                    if(x + idx_width > window_input.y().end() || x + idx_width - pool_pad_left < window_input.y().start())
+                    if(x + idx_width - pool_pad_left >= window_input.y().end() || x + idx_width - pool_pad_left < window_input.y().start())
                     {
                         continue;
                     }
