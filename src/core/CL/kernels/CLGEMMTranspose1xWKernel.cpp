@@ -71,11 +71,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     // Configure kernel window
     Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
 
-    if((win.x().end() / scale_x) == 0)
-    {
-        return std::make_pair(ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Transposed shape would be 0 in the second dimension"), win);
-    }
-
     AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
 
     // Output tensor auto inizialitation if not yet initialized

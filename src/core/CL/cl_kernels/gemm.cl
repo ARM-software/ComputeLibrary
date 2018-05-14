@@ -543,6 +543,9 @@ __kernel void gemm_mm_interleaved_transposed_f32_bifrost(IMAGE_DECLARATION(src0)
     vstore4((float4)(c30, c31, c32, c33), 0, (__global float *)(dst_addr + 3 * dst_stride_y));
 }
 
+// Undefine local defines
+#undef COLS_MTX_B
+
 #if defined(ARM_COMPUTE_OPENCL_FP16_ENABLED)
 /** This OpenCL kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1)
  *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_16bit and @ref gemm_transpose1x8 before running the matrix multiplication
@@ -879,6 +882,10 @@ __kernel void gemm_mm_interleaved_transposed_f16_bifrost(IMAGE_DECLARATION(src0)
     vstore8(c20, 0, (__global half *)(dst_addr + 2 * dst_stride_y));
     vstore8(c30, 0, (__global half *)(dst_addr + 3 * dst_stride_y));
 }
+
+// Undefine local defines
+#undef COLS_MTX_B
+
 #endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED)
 
 #if defined(FIXED_POINT_POSITION)
