@@ -39,6 +39,6 @@ void CLPermute::configure(const ICLTensor *input, ICLTensor *output, const Permu
 
 Status CLPermute::validate(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON(CLPermuteKernel::validate(input, output, perm));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLPermuteKernel::validate(input, output, perm));
     return Status{};
 }

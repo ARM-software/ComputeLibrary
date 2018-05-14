@@ -125,7 +125,7 @@ void CLPermuteKernel::configure(const ICLTensor *input, ICLTensor *output, const
 Status CLPermuteKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON(validate_arguments(input, output, perm));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, perm));
 
     return Status{};
 }
