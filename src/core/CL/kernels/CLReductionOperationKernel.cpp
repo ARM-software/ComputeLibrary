@@ -98,10 +98,6 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    // Output tensor auto initialization if not yet initialized
-    TensorShape output_shape{ input->info()->tensor_shape() };
-    output_shape.set(axis, 1);
-
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), axis, op));
 
     const unsigned int num_elems_processed_per_iteration = 16;
