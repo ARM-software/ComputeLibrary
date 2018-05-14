@@ -91,19 +91,19 @@ Status CLConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo 
         case ConvolutionMethod::WINOGRAD:
         {
             //Validate Winograd
-            CLWinogradConvolutionLayer::validate(input, weights, biases, output, conv_info, act_info, enable_fast_math);
+            ARM_COMPUTE_RETURN_ON_ERROR(CLWinogradConvolutionLayer::validate(input, weights, biases, output, conv_info, act_info, enable_fast_math));
             break;
         }
         case ConvolutionMethod::DIRECT:
         {
             // Validate direct convolution layer
-            CLDirectConvolutionLayer::validate(input, weights, biases, output, conv_info, act_info);
+            ARM_COMPUTE_RETURN_ON_ERROR(CLDirectConvolutionLayer::validate(input, weights, biases, output, conv_info, act_info));
             break;
         }
         case ConvolutionMethod::GEMM:
         {
             // Validate gemm-based convolution layer
-            CLGEMMConvolutionLayer::validate(input, weights, biases, output, conv_info, weights_info, dilation, act_info);
+            ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMConvolutionLayer::validate(input, weights, biases, output, conv_info, weights_info, dilation, act_info));
             break;
         }
         default:

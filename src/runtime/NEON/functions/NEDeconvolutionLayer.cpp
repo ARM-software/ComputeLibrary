@@ -91,7 +91,7 @@ Status NEDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
         ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(i) != scale_out_info.dimension(i));
     }
 
-    ARM_COMPUTE_RETURN_ON_ERROR(NEConvolutionLayer::validate(&scale_out_info, weights, bias, output, info, WeightsInfo()));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEConvolutionLayer::validate(&scale_out_info, weights, bias, output, conv_info, WeightsInfo()));
 
     return Status{};
 }
