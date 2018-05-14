@@ -51,13 +51,13 @@ template <typename T>
 using CLConvertFullyConnectedWeightsFixture = ConvertFullyConnectedWeightsValidationFixture<CLTensor, CLAccessor, CLConvertFullyConnectedWeights, T>;
 
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLConvertFullyConnectedWeightsFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), combine(params, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLConvertFullyConnectedWeightsFixture<float>, framework::DatasetMode::ALL, combine(datasets::Small3DShapes(), combine(params, framework::dataset::make("DataType",
                                                                                                                     DataType::F32))))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLConvertFullyConnectedWeightsFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), combine(params, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, CLConvertFullyConnectedWeightsFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::Large3DShapes(), combine(params, framework::dataset::make("DataType",
                                                                                                                         DataType::F32))))
 {
     // Validate output
@@ -66,13 +66,13 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLConvertFullyConnectedWeightsFixture<float>, f
 TEST_SUITE_END()
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLConvertFullyConnectedWeightsFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), combine(params, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLConvertFullyConnectedWeightsFixture<half>, framework::DatasetMode::ALL, combine(datasets::Small3DShapes(), combine(params, framework::dataset::make("DataType",
                                                                                                                    DataType::F16))))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLConvertFullyConnectedWeightsFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), combine(params, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, CLConvertFullyConnectedWeightsFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::Large3DShapes(), combine(params, framework::dataset::make("DataType",
                                                                                                                        DataType::F16))))
 {
     // Validate output
@@ -81,14 +81,15 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLConvertFullyConnectedWeightsFixture<half>, fr
 TEST_SUITE_END()
 
 TEST_SUITE(QASYMM8)
-FIXTURE_DATA_TEST_CASE(RunSmall, CLConvertFullyConnectedWeightsFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), combine(params, framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLConvertFullyConnectedWeightsFixture<uint8_t>, framework::DatasetMode::ALL, combine(datasets::Small3DShapes(), combine(params, framework::dataset::make("DataType",
                                                                                                                       DataType::QASYMM8))))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, CLConvertFullyConnectedWeightsFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), combine(params, framework::dataset::make("DataType",
-                       DataType::QASYMM8))))
+FIXTURE_DATA_TEST_CASE(RunLarge, CLConvertFullyConnectedWeightsFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Large3DShapes(), combine(params,
+                       framework::dataset::make("DataType",
+                                                DataType::QASYMM8))))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
