@@ -74,6 +74,57 @@ constexpr float tolerance_num_f32 = 0.01f;
 TEST_SUITE(NEON)
 TEST_SUITE(Scale)
 
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
+        framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::U8, 0),  // Mismatching data type
+                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Unsupported sampling point
+                                                TensorInfo(TensorShape(4U, 27U, 13U), 1, DataType::F32, 0), // Invalid policy
+                                                TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Insufficient padding
+                                                TensorInfo(TensorShape(4U, 27U, 13U), 1, DataType::F32, 0),
+                                              }),
+        framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(132U, 25U, 2U), 1, DataType::F32, 0),
+                                                TensorInfo(TensorShape(132U, 25U, 2U), 1, DataType::F32, 0),
+                                                TensorInfo(TensorShape(4U, 132U, 25U), 1, DataType::F32, 0),
+                                                TensorInfo(TensorShape(132U, 25U, 2U), 1, DataType::F32, 0),
+                                                TensorInfo(TensorShape(4U, 132U, 25U), 1, DataType::F32, 0),
+                                              })),
+        framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR,
+                                                          InterpolationPolicy::NEAREST_NEIGHBOR,
+                                                          InterpolationPolicy::AREA,
+                                                          InterpolationPolicy::AREA,
+                                                          InterpolationPolicy::NEAREST_NEIGHBOR,
+                                                        })),
+        framework::dataset::make("BorderMode",  { BorderMode::UNDEFINED,
+                                                  BorderMode::UNDEFINED,
+                                                  BorderMode::UNDEFINED,
+                                                  BorderMode::UNDEFINED,
+                                                  BorderMode::REPLICATE,
+                                                })),
+        framework::dataset::make("SamplingPolicy",  { SamplingPolicy::CENTER,
+                                                      SamplingPolicy::TOP_LEFT,
+                                                      SamplingPolicy::CENTER,
+                                                      SamplingPolicy::CENTER,
+                                                      SamplingPolicy::CENTER,
+                                                    })),
+        framework::dataset::make("DataLayout",  { DataLayout::NCHW,
+                                                  DataLayout::NCHW,
+                                                  DataLayout::NHWC,
+                                                  DataLayout::NCHW,
+                                                  DataLayout::NHWC,
+                                                })),
+        framework::dataset::make("Expected", { false, false, false, false ,true })),
+        input_info, output_info, policy,border_mode, sampling_policy, data_layout, expected)
+{
+    const PixelValue constant_border(5);
+    Status status = NEScale::validate(&input_info.clone()->set_is_resizable(false).set_data_layout(data_layout),
+                                           &output_info.clone()->set_is_resizable(false).set_data_layout(data_layout),
+                                           policy, border_mode, constant_border, sampling_policy);
+    ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), ScaleDataTypes), ScaleDataLayouts),
                                                                                    framework::dataset::make("InterpolationPolicy", { InterpolationPolicy::NEAREST_NEIGHBOR, InterpolationPolicy::BILINEAR })),
                                                                            datasets::BorderModes()),

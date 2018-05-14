@@ -42,52 +42,122 @@ namespace arm_compute
 {
 namespace
 {
-Window configure_nchw(const ITensor *input, const ITensor *dx, const ITensor *dy, const ITensor *offsets, ITensor *output,
-                      InterpolationPolicy policy, bool border_undefined, SamplingPolicy sampling_policy, BorderSize border_size)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *dx, const ITensorInfo *dy,
+                          const ITensorInfo *offsets, ITensorInfo *output, InterpolationPolicy policy,
+                          BorderMode border_mode, SamplingPolicy sampling_policy)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON(output == input);
+    ARM_COMPUTE_RETURN_ERROR_ON(sampling_policy != SamplingPolicy::CENTER);
+    ARM_COMPUTE_UNUSED(border_mode);
+
+    const DataLayout data_layout = input->data_layout();
+    ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH)) == 0);
+    ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT)) == 0);
+
+    if(policy == InterpolationPolicy::NEAREST_NEIGHBOR)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(offsets, 1, DataType::S32);
+    }
+
+    if(policy == InterpolationPolicy::BILINEAR)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(offsets, 1, DataType::S32);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dx, 1, DataType::F32);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dy, 1, DataType::F32);
+    }
+
+    if(policy == InterpolationPolicy::AREA)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON(data_layout != DataLayout::NCHW);
+    }
+
+    return Status{};
+}
+
+std::pair<Status, Window> validate_and_configure_window_nchw(ITensorInfo *input, ITensorInfo *dx, ITensorInfo *dy, ITensorInfo *offsets, ITensorInfo *output,
+                                                             InterpolationPolicy policy, bool border_undefined, SamplingPolicy sampling_policy, BorderSize border_size)
+{
+    bool   window_changed{ false };
+    Window win{};
+
     constexpr unsigned int num_elems_processed_per_iteration = 16;
 
     // Configure kernel window
-    Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
+    win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
 
-    const ValidRegion &input_valid_region = input->info()->valid_region();
+    const ValidRegion &input_valid_region = input->valid_region();
+
+    if(offsets != nullptr)
+    {
+        AccessWindowHorizontal offsets_access(offsets, 0, num_elems_processed_per_iteration);
+        window_changed = window_changed || update_window_and_padding(win, offsets_access);
+    }
+    if(dx != nullptr && dy != nullptr)
+    {
+        AccessWindowHorizontal dx_access(dx, 0, num_elems_processed_per_iteration);
+        AccessWindowHorizontal dy_access(dy, 0, num_elems_processed_per_iteration);
+        window_changed = window_changed || update_window_and_padding(win, dx_access, dy_access);
+    }
 
     // Reads can occur within the valid region of the input
-    AccessWindowStatic input_access(input->info(), input_valid_region.anchor[0] - border_size.left,
+    AccessWindowStatic input_access(input, input_valid_region.anchor[0] - border_size.left,
                                     input_valid_region.anchor[1] - border_size.top,
                                     input_valid_region.anchor[0] + input_valid_region.shape[0] + border_size.right,
                                     input_valid_region.anchor[1] + input_valid_region.shape[1] + border_size.bottom);
-    AccessWindowHorizontal offsets_access(offsets == nullptr ? nullptr : offsets->info(), 0,
-                                          num_elems_processed_per_iteration);
-    AccessWindowHorizontal dx_access(dx == nullptr ? nullptr : dx->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal dy_access(dy == nullptr ? nullptr : dy->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
-
-    update_window_and_padding(win, input_access, offsets_access, dx_access, dy_access, output_access);
-
-    output_access.set_valid_region(win, calculate_valid_region_scale(*(input->info()), output->info()->tensor_shape(),
+    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+    window_changed = window_changed || update_window_and_padding(win, input_access, output_access);
+    output_access.set_valid_region(win, calculate_valid_region_scale(*input, output->tensor_shape(),
                                                                      policy, sampling_policy, border_undefined));
 
-    return win;
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
 }
-Window configure_nhwc(const ITensor *input, ITensor *output,
-                      InterpolationPolicy policy, bool border_undefined, SamplingPolicy sampling_policy, BorderSize border_size)
+
+std::pair<Status, Window> validate_and_configure_window_nhwc(ITensorInfo *input, ITensorInfo *output,
+                                                             InterpolationPolicy policy, bool border_undefined,
+                                                             SamplingPolicy sampling_policy, BorderSize border_size)
 {
-    unsigned int num_elems_processed_per_iteration = (policy == InterpolationPolicy::NEAREST_NEIGHBOR) ? 16 / input->info()->element_size() : 1;
+    bool   window_changed{ false };
+    Window win{};
+
+    const unsigned int num_elems_processed_per_iteration = (policy == InterpolationPolicy::NEAREST_NEIGHBOR) ? 16 / input->element_size() : 1;
 
     // Configure kernel window
-    Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
+    win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
 
-    AccessWindowStatic input_access(input->info(), 0, -border_size.top,
-                                    ceil_to_multiple(input->info()->tensor_shape()[0], num_elems_processed_per_iteration),
-                                    input->info()->tensor_shape()[1]);
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
+    AccessWindowStatic input_access(input, 0, -border_size.top,
+                                    ceil_to_multiple(input->tensor_shape()[0], num_elems_processed_per_iteration),
+                                    input->tensor_shape()[1]);
+    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
 
-    update_window_and_padding(win, input_access, output_access);
-    output->info()->set_valid_region(calculate_valid_region_scale(*(input->info()), output->info()->tensor_shape(),
-                                                                  policy, sampling_policy, border_undefined));
+    window_changed = update_window_and_padding(win, input_access, output_access);
+    output->set_valid_region(calculate_valid_region_scale(*input, output->tensor_shape(),
+                                                          policy, sampling_policy, border_undefined));
 
-    return win;
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *dx, ITensorInfo *dy, ITensorInfo *offsets, ITensorInfo *output,
+                                                        InterpolationPolicy policy, bool border_undefined, SamplingPolicy sampling_policy, BorderSize border_size)
+{
+    std::pair<Status, Window> win_config;
+    switch(input->data_layout())
+    {
+        case DataLayout::NCHW:
+            win_config = validate_and_configure_window_nchw(input, dx, dy, offsets, output, policy, border_undefined, sampling_policy, border_size);
+            break;
+        case DataLayout::NHWC:
+            win_config = validate_and_configure_window_nhwc(input, output, policy, border_undefined, sampling_policy, border_size);
+            break;
+        default:
+            win_config = std::make_pair(ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Unsupported data layout!"), Window{});
+    }
+
+    return win_config;
 }
 
 template <typename T>
@@ -197,32 +267,20 @@ BorderSize NEScaleKernel::border_size() const
 void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITensor *dy, const ITensor *offsets,
                               ITensor *output, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON(output == input);
-    ARM_COMPUTE_ERROR_ON(sampling_policy != SamplingPolicy::CENTER);
-    ARM_COMPUTE_UNUSED(sampling_policy);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    if(policy == InterpolationPolicy::NEAREST_NEIGHBOR)
-    {
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(offsets, 1, DataType::S32);
-    }
-
-    if(policy == InterpolationPolicy::BILINEAR)
-    {
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(offsets, 1, DataType::S32);
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dx, 1, DataType::F32);
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(dy, 1, DataType::F32);
-    }
+    // Perform validation step
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(),
+                                                  dx != nullptr ? dx->info() : nullptr,
+                                                  dy != nullptr ? dy->info() : nullptr,
+                                                  offsets != nullptr ? offsets->info() : nullptr,
+                                                  output->info(),
+                                                  policy, border_mode, sampling_policy));
 
     // Get data layout and width/height indices
     const DataLayout data_layout = input->info()->data_layout();
     const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-
-    ARM_COMPUTE_ERROR_ON(output->info()->dimension(idx_width) == 0);
-    ARM_COMPUTE_ERROR_ON(output->info()->dimension(idx_height) == 0);
 
     _input       = input;
     _output      = output;
@@ -259,16 +317,11 @@ void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITe
         }
         case InterpolationPolicy::BILINEAR:
         {
-            ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(_dx, 1, DataType::F32);
-            ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(_dy, 1, DataType::F32);
-
             _func = (data_layout == DataLayout::NCHW) ? &NEScaleKernel::scale_bilinear_nchw : &NEScaleKernel::scale_nhwc;
             break;
         }
         case InterpolationPolicy::AREA:
         {
-            ARM_COMPUTE_ERROR_ON(data_layout != DataLayout::NCHW);
-
             _func = &NEScaleKernel::scale_area_nchw;
             break;
         }
@@ -277,19 +330,14 @@ void NEScaleKernel::configure(const ITensor *input, const ITensor *dx, const ITe
     }
 
     // Configure window
-    Window win{};
-    switch(data_layout)
-    {
-        case DataLayout::NCHW:
-            win = configure_nchw(input, dx, dy, offsets, output, policy, border_mode == BorderMode::UNDEFINED, sampling_policy, border_size());
-            break;
-        case DataLayout::NHWC:
-            win = configure_nhwc(input, output, policy, border_mode == BorderMode::UNDEFINED, sampling_policy, border_size());
-            break;
-        default:
-            ARM_COMPUTE_ERROR("Unsupported data layout");
-    }
-    INEKernel::configure(win);
+    std::pair<Status, Window> win_config = validate_and_configure_window(input->info(),
+                                                                         dx != nullptr ? dx->info() : nullptr,
+                                                                         dy != nullptr ? dy->info() : nullptr,
+                                                                         offsets != nullptr ? offsets->info() : nullptr,
+                                                                         output->info(),
+                                                                         policy, border_mode == BorderMode::UNDEFINED, sampling_policy, border_size());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    INEKernel::configure(win_config.second);
 }
 
 void NEScaleKernel::scale_nearest_nchw(const Window &window)
@@ -663,8 +711,6 @@ void NEScaleKernel::scale_area_nchw(const Window &window)
 
 void NEScaleKernel::scale_nhwc(const Window &window)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(_input, 1, DataType::U8, DataType::S16, DataType::F32);
-
     // Get data layout and width/height indices
     const DataLayout data_layout  = _input->info()->data_layout();
     const int        idx_channels = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
@@ -730,6 +776,28 @@ void NEScaleKernel::scale_nhwc(const Window &window)
             ARM_COMPUTE_ERROR("Not supported");
             break;
     }
+}
+
+Status NEScaleKernel::validate(const ITensorInfo *input, const ITensorInfo *dx, const ITensorInfo *dy,
+                               const ITensorInfo *offsets, ITensorInfo *output, InterpolationPolicy policy,
+                               BorderMode border_mode, SamplingPolicy sampling_policy)
+{
+    BorderSize border_size(1);
+    if(input->data_layout() == DataLayout::NHWC)
+    {
+        border_size = (border_mode == BorderMode::CONSTANT && policy == InterpolationPolicy::BILINEAR) ? BorderSize(1, 0, 0, 0) : BorderSize(0);
+    }
+
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, dx, dy, offsets, output, policy, border_mode, sampling_policy));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(),
+                                                              dx != nullptr ? dx->clone().get() : nullptr,
+                                                              dy != nullptr ? dy->clone().get() : nullptr,
+                                                              offsets != nullptr ? offsets->clone().get() : nullptr,
+                                                              output->clone().get(),
+                                                              policy, border_mode == BorderMode::UNDEFINED, sampling_policy, border_size)
+                                .first);
+
+    return Status{};
 }
 
 void NEScaleKernel::run(const Window &window, const ThreadInfo &info)
