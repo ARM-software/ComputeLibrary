@@ -69,7 +69,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *weights, ITensorInfo *output, const PadStrideInfo &conv_info)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *weights, ITensorInfo *bias, ITensorInfo *output,
+                                                        const PadStrideInfo &conv_info)
 {
     const unsigned int num_rows_processed_per_iteration = 4;
     const unsigned int num_elems_accessed_per_iteration = 4;
@@ -87,6 +88,12 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     AccessWindowHorizontal weights_access(weights, 0, num_elems_accessed_per_iteration);
 
     bool window_changed = update_window_and_padding(win, input_access, weights_access, output_access);
+
+    if(bias != nullptr)
+    {
+        AccessWindowHorizontal bias_access(bias, 0, num_elems_accessed_per_iteration);
+        window_changed = window_changed || update_window_and_padding(win, bias_access);
+    }
 
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
 
@@ -191,7 +198,7 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
     _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), weights->info(), output->info(), conv_info);
+    auto win_config = validate_and_configure_window(input->info(), weights->info(), biases != nullptr ? biases->info() : nullptr, output->info(), conv_info);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure(win_config.second);
 
@@ -214,7 +221,10 @@ Status CLDepthwiseConvolutionLayer3x3NHWCKernel::validate(const ITensorInfo *inp
                                                           ActivationLayerInfo act_info)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, weights, biases, output, conv_info, depth_multiplier, act_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), weights->clone().get(), output->clone().get(), conv_info).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), weights->clone().get(),
+                                                              biases != nullptr ? biases->clone().get() : nullptr,
+                                                              output->clone().get(), conv_info)
+                                .first);
 
     return Status{};
 }
