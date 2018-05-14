@@ -78,12 +78,12 @@ TEST_SUITE(NEON)
 TEST_SUITE(ConvolutionLayer)
 DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(zip(zip(
                                                                                        framework::dataset::make("InputInfo", { TensorInfo(TensorShape(8U, 8U, 2U), 1, DataType::F32, 0),
-                                                                                                                TensorInfo(TensorShape(23U, 27U, 5U, 4U), 1, DataType::F32, 0),
+                                                                                                                TensorInfo(TensorShape(23U, 27U, 32U, 4U), 1, DataType::F32, 0),
                                                                                                                 TensorInfo(TensorShape(3U, 3U, 2U, 1U), 1, DataType::F32, 0),
                                                                                                                 TensorInfo(TensorShape(33U, 27U, 7U, 4U), 1, DataType::F32, 0)
                                                                                                                              }),
                                                                                        framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
-                                                                                                                TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
+                                                                                                                TensorInfo(TensorShape(3U, 3U, 32U, 21U), 1, DataType::F32, 0),
                                                                                                                 TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
                                                                                                                 TensorInfo(TensorShape(5U, 5U, 7U, 16U), 1, DataType::F16, 0)
                                                                                                                                })),
@@ -97,7 +97,7 @@ DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(z
                                                                                                                       PadStrideInfo(2, 1, 0, 0),
                                                                                                                       PadStrideInfo(3, 2, 1, 0)
                                                                                                                     })),
-                                                                           framework::dataset::make("Expected", { ConvolutionMethod::WINOGRAD, ConvolutionMethod::WINOGRAD, ConvolutionMethod::GEMM, ConvolutionMethod::GEMM })),
+                                                                           framework::dataset::make("Expected", { ConvolutionMethod::GEMM, ConvolutionMethod::WINOGRAD, ConvolutionMethod::GEMM, ConvolutionMethod::GEMM })),
                input_info, weights_info, output_info, conv_info, expected)
 {
     ConvolutionMethod is_valid = NEConvolutionLayer::get_convolution_method(&input_info.clone()->set_is_resizable(false),

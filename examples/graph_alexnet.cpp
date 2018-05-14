@@ -56,10 +56,9 @@ public:
         const int target      = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
         Target    target_hint = set_target_hint(target);
 
-        // TODO (geopin01) : Get GPU target somehow and set gemm also for midgard ?
         const bool        is_neon              = (target_hint == Target::NEON);
         ConvolutionMethod convolution_5x5_hint = is_neon ? ConvolutionMethod::GEMM : ConvolutionMethod::DIRECT;
-        ConvolutionMethod convolution_3x3_hint = is_neon ? ConvolutionMethod::GEMM : ConvolutionMethod::DEFAULT;
+        ConvolutionMethod convolution_3x3_hint = ConvolutionMethod::DEFAULT;
         FastMathHint      fast_math_hint       = FastMathHint::DISABLED;
 
         // Parse arguments

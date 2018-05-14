@@ -54,10 +54,9 @@ public:
         std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<TFPreproccessor>();
 
         // Set target. 0 (NEON), 1 (OpenCL). By default it is NEON
-        const int         target           = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
-        Target            target_hint      = set_target_hint(target);
-        ConvolutionMethod convolution_hint = target_hint == Target::NEON ? ConvolutionMethod::GEMM : ConvolutionMethod::DEFAULT;
-        FastMathHint      fast_math_hint   = FastMathHint::DISABLED;
+        const int    target         = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
+        Target       target_hint    = set_target_hint(target);
+        FastMathHint fast_math_hint = FastMathHint::DISABLED;
 
         // Parse arguments
         if(argc < 2)
@@ -114,7 +113,6 @@ public:
                                          get_weights_accessor(data_path, "/cnn_data/inceptionv4_model/Conv2d_1a_3x3_BatchNorm_beta.npy"),
                                          0.001f)
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-              << convolution_hint
               // Conv2d_2a_3x3
               << ConvolutionLayer(3U, 3U, 32U,
                                   get_weights_accessor(data_path, "/cnn_data/inceptionv4_model/Conv2d_2a_3x3_weights.npy"),

@@ -123,7 +123,9 @@ ConvolutionMethod CLConvolutionLayer::get_convolution_method(const ITensorInfo *
     ARM_COMPUTE_UNUSED(weights_info);
     ARM_COMPUTE_UNUSED(gpu_target);
 
-    if(dilation != Size2D(1U, 1U))
+    const size_t idx_c = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL);
+
+    if(dilation != Size2D(1U, 1U) || (input->dimension(idx_c) < 16))
     {
         return ConvolutionMethod::GEMM;
     }

@@ -104,16 +104,16 @@ ConvolutionMethod NEConvolutionLayer::get_convolution_method(const ITensorInfo *
                                                              const ITensorInfo *output, const PadStrideInfo &conv_info,
                                                              const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(weights);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, weights);
     ARM_COMPUTE_UNUSED(output);
     ARM_COMPUTE_UNUSED(weights_info);
 
     const size_t idx_w = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
     const size_t idx_h = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
+    const size_t idx_c = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL);
 
-    if((input->data_type() == DataType::F32) && (input->data_layout() == DataLayout::NCHW) && (weights->dimension(idx_w) == 3) && (weights->dimension(idx_h) == 3) && (weights->num_dimensions() <= 4)
+    if((input->data_type() == DataType::F32) && (input->data_layout() == DataLayout::NCHW) && (input->dimension(idx_c) > 16) && (weights->dimension(idx_w) == 3) && (weights->dimension(idx_h) == 3)
+       && (weights->num_dimensions() <= 4)
        && (conv_info.stride().first == 1) && (conv_info.stride().second == 1) && (dilation == Size2D(1U, 1U)) && (!act_info.enabled()))
     {
         //FIXME Until COMPMID-1041 is implemented Winograd is slower than GEMM on A53.

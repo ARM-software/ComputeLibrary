@@ -66,13 +66,13 @@ TEST_SUITE(DilatedConvolutionLayer)
 DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
                                                                                                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::F32, 0),
                                                                                                                         TensorInfo(TensorShape(17U, 31U, 2U), 1, DataType::F32, 0),
-                                                                                                                        TensorInfo(TensorShape(23U, 27U, 5U, 4U), 1, DataType::F32, 0),
+                                                                                                                        TensorInfo(TensorShape(23U, 27U, 23U, 4U), 1, DataType::F32, 0),
                                                                                                                         TensorInfo(TensorShape(3U, 3U, 2U, 1U), 1, DataType::F32, 0),
                                                                                                                         TensorInfo(TensorShape(33U, 27U, 7U, 4U), 1, DataType::F32, 0)
                                                                                                                                      }),
                                                                                                framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(5U, 5U, 2U, 19U), 1, DataType::F32, 0),
                                                                                                                         TensorInfo(TensorShape(5U, 5U, 2U, 19U), 1, DataType::F32, 0),
-                                                                                                                        TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
+                                                                                                                        TensorInfo(TensorShape(3U, 3U, 23U, 21U), 1, DataType::F32, 0),
                                                                                                                         TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
                                                                                                                         TensorInfo(TensorShape(5U, 5U, 7U, 16U), 1, DataType::F16, 0)
                                                                                                                                        })),

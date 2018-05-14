@@ -52,10 +52,9 @@ public:
                                                                                                                    false /* Do not convert to BGR */);
 
         // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
-        const int         target           = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
-        Target            target_hint      = set_target_hint(target);
-        ConvolutionMethod convolution_hint = target_hint == Target::NEON ? ConvolutionMethod::GEMM : ConvolutionMethod::DEFAULT;
-        FastMathHint      fast_math_hint   = FastMathHint::DISABLED;
+        const int    target         = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
+        Target       target_hint    = set_target_hint(target);
+        FastMathHint fast_math_hint = FastMathHint::DISABLED;
 
         // Parse arguments
         if(argc < 2)
@@ -108,7 +107,6 @@ public:
                   std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                   PadStrideInfo(2, 2, 3, 3))
               .set_name("conv1/convolution")
-              << convolution_hint
               << BatchNormalizationLayer(
                   get_weights_accessor(data_path, "/cnn_data/resnet50_model/conv1_BatchNorm_moving_mean.npy"),
                   get_weights_accessor(data_path, "/cnn_data/resnet50_model/conv1_BatchNorm_moving_variance.npy"),
