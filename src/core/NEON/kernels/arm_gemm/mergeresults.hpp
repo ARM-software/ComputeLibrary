@@ -61,7 +61,7 @@ inline void MergeResults(Tout *out, const Tin *in, int ldc, int y0, int ymax, in
                 {
                     Tout &p = out[(ybase + row) * ldc + xbase + col];
 
-                    p = (p * alpha) + (beta * in[row * width + col]);
+                    p = (p * beta) + (alpha * in[row * width + col]);
                 }
             }
 

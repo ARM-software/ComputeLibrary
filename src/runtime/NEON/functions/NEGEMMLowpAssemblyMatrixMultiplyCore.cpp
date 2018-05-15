@@ -58,13 +58,13 @@ void NEGEMMLowpAssemblyMatrixMultiplyCore::configure(const ITensor *a, const ITe
     {
         case DataType::S8:
         {
-            run_optimised = setup_assembly_kernel(a, b, output, 1.f, 1.f, true, _workspace, _B_pretransposed, _memory_group, _asm_glue_signed);
+            run_optimised = setup_assembly_kernel(a, b, output, 1.f, 0.f, true, _workspace, _B_pretransposed, _memory_group, _asm_glue_signed);
             break;
         }
         case DataType::QASYMM8:
         case DataType::U8:
         {
-            run_optimised = setup_assembly_kernel(a, b, output, 1.f, 1.f, true, _workspace, _B_pretransposed, _memory_group, _asm_glue_unsigned);
+            run_optimised = setup_assembly_kernel(a, b, output, 1.f, 0.f, true, _workspace, _B_pretransposed, _memory_group, _asm_glue_unsigned);
             break;
         }
         default:
