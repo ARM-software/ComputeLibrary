@@ -61,13 +61,13 @@ __kernel void channel_shuffle_nchw(TENSOR3D_DECLARATION(src),
     Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
     Tensor3D dst = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(dst);
 
-    const uint curr_channel = get_global_id(2);          // channel id of input
-    const uint group_id     = curr_channel / NUM_GROUPS; // group id
-    const uint channel_id   = curr_channel % NUM_GROUPS; // channel id within the group
+    const uint curr_channel = get_global_id(2); // channel id of input
+    const uint group_id     = curr_channel / K; // group id
+    const uint channel_id   = curr_channel % K; // channel id within the group
 
     const uint x = get_global_id(0) * BLOCK_SIZE;
     const uint y = get_global_id(1) * BLOCK_SIZE;
-    const uint z = channel_id * K + group_id;
+    const uint z = channel_id * NUM_GROUPS + group_id;
 
     // Load the NxN block
     TYPE u0 = VLOAD(BLOCK_SIZE)(0, (__global DATA_TYPE *)tensor3D_offset(&src, 0, 0, 0));

@@ -57,13 +57,13 @@ SimpleTensor<T> channel_shuffle(const SimpleTensor<T> &src, int num_groups)
         {
             // Gather the group g block (of size channels_in_group * MxN) from output channels
             // g + 0 * G, g + 1 * G, g + 2 * G, g + G * (K - 1) etc.
-            const T *src_ptr = src_ref + g * MxN + n * num_channels * MxN;
-            T       *dst_ptr = dst_ref + g * channels_in_group * MxN + n * num_channels * MxN;
+            const T *src_ptr = src_ref + g * channels_in_group * MxN + n * num_channels * MxN;
+            T       *dst_ptr = dst_ref + g * MxN + n * num_channels * MxN;
             for(int i = 0; i < channels_in_group; ++i)
             {
-                std::copy(src_ptr + i * num_groups * MxN,
-                          src_ptr + (i * num_groups + 1) * MxN,
-                          dst_ptr + i * MxN);
+                std::copy(src_ptr + i * MxN,
+                          src_ptr + (i + 1) * MxN,
+                          dst_ptr + i * num_groups * MxN);
             }
         }
     }
