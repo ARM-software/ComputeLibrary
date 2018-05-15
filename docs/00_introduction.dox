@@ -196,10 +196,60 @@ If there is more than one release in a month then an extra sequential number is 
 @subsection S2_2_changelog Changelog
 
 v18.05 Public maintenance release
+ - Various bug fixes.
+ - Various optimisations.
  - Major redesign in the interface for the neon kernels implemented in assembly.
  - Removed arm_compute::NEGEMMLowpAArch64A53Kernel / arm_compute::NEGEMMLowpAArch64Kernel / arm_compute::NEGEMMLowpAArch64V8P4Kernel / arm_compute::NEGEMMInterleavedBlockedKernel / arm_compute::NEGEMMLowpAssemblyMatrixMultiplyCore / arm_compute::NEHGEMMAArch64FP16Kernel
  - Added NEGEMMAssemblyWrapper and AssemblyKernelGlue which are used to execute assembly kernels in neon functions.
  - Minor changes to the CPUInfo type to make it compatible with the new assembly gemm interface.
+ - Moved neon assembly kernels to the folder src/core/NEON/kernels/arm_gemm.
+ - Improved doxygen documentation.
+ - Improved memory management for layer's transitions.
+ - Added support for NHWC data layout in tensors.
+ - Added NHWC data layout support to:
+    - @ref NEGEMMConvolutionLayer
+    - @ref NEDirectConvolutionLayer
+    - @ref NEPoolingLayer / @ref CLPoolingLayer
+    - @ref NEBatchNormalizationLayer / @ref CLBatchNormalizationLayer
+    - @ref NEDepthwiseConvolutionLayer
+    - @ref NEScale
+    - @ref NEIm2Col
+ - Added support for dilated convolutions in @ref NEConvolutionLayer and @ref CLConvolutionLayer.
+ - New OpenCL kernels / functions:
+    - @ref CLChannelShuffleLayer / @ref CLChannelShuffleLayerKernel
+    - @ref CLConvertFullyConnectedWeightsKernel / @ref CLConvertFullyConnectedWeights
+    - @ref CLCopy / @ref CLCopyKernel
+    - @ref CLRNNLayer
+    - @ref CLWidthConcatenateLayer / @ref CLWidthConcatenateLayerKernel
+    - @ref CLWinogradFilterTransformKernel / @ref CLWinogradInputTransformKernel / @ref CLWinogradConvolutionLayer
+    - @ref CLWinogradInputTransformKernel / @ref CLWinogradInputTransform
+ - New Neon kernels / functions:
+    - @ref CLRNNLayer
+    - @ref NEConvertFullyConnectedWeightsKernel / @ref NEConvertFullyConnectedWeights.
+ - Created the validate method in @ref CLDepthwiseConvolutionLayer.
+ - Beta and gamma are no longer mandatory arguments in @ref NEBatchNormalizationLayer and @ref CLBatchNormalizationLayer.
+ - Added depth multiplier support in @ref NEDepthwiseConvolutionLayer and @ref CLDepthwiseConvolutionLayer.
+ - Added broadcast multiply support in @ref NEPixelWiseMultiplication / @ref NEPixelWiseMultiplicationKernel.
+ - Port mobilenet example to NHWC data layout.
+ - Enabled Winograd method in @ref CLConvolutionLayer.
+ - Renamed NEWinogradLayer to @ref NEWinogradConvolutionLayer.
+ - Updated @ref NEWinogradConvolutionLayer to use highly optimised assembly kernels in src/core/NEON/kernels/arm_gemm.
+ - Added memory manager support in GLES functions.
+ - Major refactoring of the graph API.
+ - Added GLES backend in the graph API.
+ - Added support for the memory manager in the graph API.
+ - Enabled Winograd Convolution method in the graph API.
+ - Added support for grouped convolutions in the graph API.
+ - Replaced NEDeconvolutionLayerUpsampleKernel with @ref NEScaleKernel in @ref NEDeconvolutionLayer.
+ - Added fast maths flag in @ref CLConvolutionLayer.
+ - Added new tests and benchmarks in validation and benchmark frameworks
+ - Merge Activation layer with Convolution Layer (NEON. CL, GLES)
+ - Added support to OpenCL 2.0 SVM
+ - Added support to import memory in OpenCL tensors.
+ - Added the prepare() method to perform any one off pre-processing before running the function.
+ - Added new examples:
+    - graph_inception_v4.cpp
+ - Added memory measurement instrument for CL.
 
 v18.03 Public maintenance release
  - Various bug fixes.
