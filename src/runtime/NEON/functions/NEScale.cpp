@@ -65,7 +65,7 @@ void precompute_dx_dy_offsets(ITensor *dx, ITensor *dy, ITensor *offsets, float 
             const int   in_xi = std::floor(in_x);
             const int   in_yi = std::floor(in_y);
 
-            *reinterpret_cast<int32_t *>(offsets_it.ptr()) = in_xi * input_element_size;
+            *reinterpret_cast<int32_t *>(offsets_it.ptr()) = in_xi * static_cast<int>(input_element_size);
             *reinterpret_cast<float *>(dx_it.ptr())        = in_x - in_xi;
             *reinterpret_cast<float *>(dy_it.ptr())        = in_y - in_yi;
         },
