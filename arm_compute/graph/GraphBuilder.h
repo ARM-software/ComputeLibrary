@@ -97,6 +97,16 @@ public:
     static NodeID add_batch_normalization_node(Graph &g, NodeParams params, NodeIdxPair input, float epsilon,
                                                ITensorAccessorUPtr mean_accessor = nullptr, ITensorAccessorUPtr var_accessor = nullptr,
                                                ITensorAccessorUPtr beta_accessor = nullptr, ITensorAccessorUPtr gamma_accessor = nullptr);
+    /** Adds an channel shuffle layer node to the graph
+     *
+     * @param[in] g          Graph to add the node to
+     * @param[in] params     Common node parameters
+     * @param[in] input      Input to the activation layer node as a NodeID-Index pair
+     * @param[in] num_groups Number of groups
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_channel_shuffle_node(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_groups);
     /** Adds a convolution layer node to the graph
      *
      * TODO (COMPMID-1113): Add a graph descriptor for convolution layer node
@@ -123,6 +133,23 @@ public:
                                        ITensorAccessorUPtr weights_accessor = nullptr, ITensorAccessorUPtr bias_accessor = nullptr,
                                        const QuantizationInfo weights_quant_info = QuantizationInfo(),
                                        const QuantizationInfo out_quant_info     = QuantizationInfo());
+    /** Adds a deconvolution layer node to the graph
+     *
+     * @param[in] g                     Graph to add the node to
+     * @param[in] params                Common node parameters
+     * @param[in] input                 Input to the convolution layer node as a NodeID-Index pair
+     * @param[in] kernel_spatial_extend Spatial extend of convolution kernels
+     * @param[in] depth                 Number of convolution kernels
+     * @param[in] deconv_info           Convolution layer information
+     * @param[in] inner_border          Inner border (right, top)
+     * @param[in] weights_accessor      (Optional) Accessor of the weights node data
+     * @param[in] bias_accessor         (Optional) Accessor of the bias node data
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_deconvolution_node(Graph &g, NodeParams params, NodeIdxPair input,
+                                         Size2D kernel_spatial_extend, unsigned int depth, PadStrideInfo deconv_info, Size2D inner_border,
+                                         ITensorAccessorUPtr weights_accessor = nullptr, ITensorAccessorUPtr bias_accessor = nullptr);
     /** Adds a depth concatenate node to the graph
      *
      * @param[in] g      Graph to add the node to
@@ -161,6 +188,18 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_elementwise_node(Graph &g, NodeParams params, NodeIdxPair input0, NodeIdxPair input1, EltwiseOperation operation);
+    /** Adds a Dummy node to the graph
+     *
+     * @note this node if for debugging purposes. Just alters the shape of the graph pipeline as requested.
+     *
+     * @param[in] g      Graph to add the node to
+     * @param[in] params Common node parameters
+     * @param[in] input  Input to the dummy node as a NodeID-Index pair
+     * @param[in] shape  Output shape
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_dummy_node(Graph &g, NodeParams params, NodeIdxPair input, TensorShape shape);
     /** Adds a flatten layer node to the graph
      *
      * @param[in] g      Graph to add the node to
@@ -213,6 +252,18 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_reshape_node(Graph &g, NodeParams params, NodeIdxPair input, TensorShape shape);
+    /** Adds a resize layer node to the graph
+     *
+     * @param[in] g            Graph to add the node to
+     * @param[in] params       Common node parameters
+     * @param[in] input        Input to the reshape layer node as a NodeID-Index pair
+     * @param[in] policy       Interpolation policy
+     * @param[in] width_scale  Width scaling factor
+     * @param[in] height_scale Height scaling factor
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_resize_node(Graph &g, NodeParams params, NodeIdxPair input, InterpolationPolicy policy, float width_scale, float height_scale);
     /** Adds a scale layer node to the graph
      * This layer computes a product of the input with a scale (read from mul_accessor) and it applies an offset (read from add_accessor).
      * output = input * mul_w + add_w

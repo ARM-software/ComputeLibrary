@@ -21,35 +21,58 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_NODES_FWD_H__
-#define __ARM_COMPUTE_GRAPH_NODES_FWD_H__
+#include "arm_compute/graph/nodes/DummyNode.h"
+
+#include "arm_compute/core/Error.h"
+#include "arm_compute/graph/Graph.h"
+#include "arm_compute/graph/INodeVisitor.h"
+#include "arm_compute/graph/Tensor.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-// Forward declarations
-class INode;
-class ActivationLayerNode;
-class BatchNormalizationLayerNode;
-class ChannelShuffleLayerNode;
-class ConstNode;
-class ConvolutionLayerNode;
-class DeconvolutionLayerNode;
-class DepthConcatenateLayerNode;
-class DepthwiseConvolutionLayerNode;
-class DummyNode;
-class EltwiseLayerNode;
-class FlattenLayerNode;
-class FullyConnectedLayerNode;
-class InputNode;
-class NormalizationLayerNode;
-class OutputNode;
-class PoolingLayerNode;
-class ReshapeLayerNode;
-class ResizeLayerNode;
-class SoftmaxLayerNode;
-class SplitLayerNode;
+DummyNode::DummyNode(TensorShape shape)
+    : _shape(shape)
+{
+    _input_edges.resize(1, EmptyEdgeID);
+    _outputs.resize(1, NullTensorID);
+}
+
+bool DummyNode::forward_descriptors()
+{
+    if((input_id(0) != NullTensorID) && (output_id(0) != NullTensorID))
+    {
+        Tensor *dst = output(0);
+        ARM_COMPUTE_ERROR_ON(dst == nullptr);
+        dst->desc() = configure_output(0);
+        return true;
+    }
+    return false;
+}
+
+TensorDescriptor DummyNode::configure_output(size_t idx) const
+{
+    ARM_COMPUTE_UNUSED(idx);
+    ARM_COMPUTE_ERROR_ON(idx >= _outputs.size());
+
+    const Tensor *src = input(0);
+    ARM_COMPUTE_ERROR_ON(src == nullptr);
+
+    TensorDescriptor output_desc = src->desc();
+    output_desc.shape            = _shape;
+
+    return output_desc;
+}
+
+NodeType DummyNode::type() const
+{
+    return NodeType::Dummy;
+}
+
+void DummyNode::accept(INodeVisitor &v)
+{
+    v.visit(*this);
+}
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_NODES_FWD_H__ */

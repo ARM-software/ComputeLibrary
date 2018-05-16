@@ -141,6 +141,38 @@ std::unique_ptr<IFunction> create_batch_normalization_layer(BatchNormalizationLa
     return std::move(func);
 }
 
+/** Create a backend channel shuffle layer function
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend channel shuffle layer function
+ */
+std::unique_ptr<IFunction> create_channel_shuffle_layer(ChannelShuffleLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE(
+        "Creating CL Channel Shuffle node with ID : " << node.id() << " and Name: " << node.name()
+        << std::endl);
+    ARM_COMPUTE_ERROR_ON(node.num_inputs() != 1);
+    ARM_COMPUTE_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract IO and info
+    ICLTensor         *input      = get_backing_tensor(node.input(0));
+    ICLTensor         *output     = get_backing_tensor(node.output(0));
+    const unsigned int num_groups = node.num_groups();
+
+    // Create function
+    auto func = support::cpp14::make_unique<CLChannelShuffleLayer>();
+    func->configure(input, output, num_groups);
+
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated CLChannelShuffleLayer"
+                               << " Data Type: " << input->info()->data_type()
+                               << " Shape: " << input->info()->tensor_shape()
+                               << " Num groups: " << num_groups
+                               << std::endl);
+
+    return std::move(func);
+}
+
 /** Create a backend convolution layer function
  *
  * @param[in] node Node to create the backend function for
@@ -199,6 +231,46 @@ std::unique_ptr<IFunction> create_convolution_layer(ConvolutionLayerNode &node, 
                                << " Data Type: " << input->info()->data_type()
                                << " Input QuantInfo: " << input->info()->quantization_info()
                                << " Weights QuantInfo: " << weights->info()->quantization_info()
+                               << " Input shape: " << input->info()->tensor_shape()
+                               << " Weights shape: " << weights->info()->tensor_shape()
+                               << " Output shape: " << output->info()->tensor_shape()
+                               << std::endl);
+    return func;
+}
+
+/** Create a backend deconvolution layer function
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend deconvolution layer function
+ */
+std::unique_ptr<IFunction> create_deconvolution_layer(DeconvolutionLayerNode &node, GraphContext &ctx)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Creating CL DeconvolutionLayer node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_ERROR_ON(node.num_inputs() != 3);
+    ARM_COMPUTE_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract IO and info
+    ICLTensor *input   = get_backing_tensor(node.input(0));
+    ICLTensor *weights = get_backing_tensor(node.input(1));
+    ICLTensor *biases  = get_backing_tensor(node.input(2));
+    ICLTensor *output  = get_backing_tensor(node.output(0));
+
+    const PadStrideInfo deconv_info  = node.deconvolution_info();
+    const Size2D        inner_border = node.inner_border();
+
+    // Create and configure function (we assume that functions have been validated before creation)
+    std::shared_ptr<IMemoryManager> mm = get_memory_manager(ctx, Target::CL);
+    std::unique_ptr<IFunction>      func;
+    std::string                     func_name;
+
+    std::tie(func, func_name) = create_named_memory_managed_function<CLDeconvolutionLayer>(std::string("CLDeconvolutionLayer"), mm,
+                                                                                           input, weights, biases, output,
+                                                                                           deconv_info, inner_border.x(), inner_border.y());
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << func_name
+                               << " Data Type: " << input->info()->data_type()
                                << " Input shape: " << input->info()->tensor_shape()
                                << " Weights shape: " << weights->info()->tensor_shape()
                                << " Output shape: " << output->info()->tensor_shape()
@@ -530,6 +602,41 @@ std::unique_ptr<IFunction> create_reshape_layer(ReshapeLayerNode &node)
     return std::move(func);
 }
 
+/** Create a backend resize layer function
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend resize layer function
+ */
+std::unique_ptr<IFunction> create_resize_layer(ResizeLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE(
+        "Creating CL Resize node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_ERROR_ON(node.num_inputs() != 1);
+    ARM_COMPUTE_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract IO and info
+    ICLTensor *input  = get_backing_tensor(node.input(0));
+    ICLTensor *output = get_backing_tensor(node.output(0));
+    ARM_COMPUTE_ERROR_ON(input == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr);
+    const InterpolationPolicy policy = node.policy();
+
+    // Create and configure function
+    auto func = support::cpp14::make_unique<CLScale>();
+    func->configure(input, output, policy, BorderMode::CONSTANT);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated CLScale"
+                               << " Data Type: " << input->info()->data_type()
+                               << " Input shape: " << input->info()->tensor_shape()
+                               << " Output shape: " << output->info()->tensor_shape()
+                               << " Interpolation: " << policy
+                               << std::endl);
+
+    return std::move(func);
+}
+
 /** Create a backend softmax layer function
  *
  * @param[in] node Node to create the backend function for
@@ -579,8 +686,12 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
             return create_activation_layer(*polymorphic_downcast<ActivationLayerNode *>(node));
         case NodeType::BatchNormalizationLayer:
             return create_batch_normalization_layer(*polymorphic_downcast<BatchNormalizationLayerNode *>(node));
+        case NodeType::ChannelShuffleLayer:
+            return create_channel_shuffle_layer(*polymorphic_downcast<ChannelShuffleLayerNode *>(node));
         case NodeType::ConvolutionLayer:
             return create_convolution_layer(*polymorphic_downcast<ConvolutionLayerNode *>(node), ctx);
+        case NodeType::DeconvolutionLayer:
+            return create_deconvolution_layer(*polymorphic_downcast<DeconvolutionLayerNode *>(node), ctx);
         case NodeType::DepthConcatenateLayer:
             return create_depth_concatenate_layer(*polymorphic_downcast<DepthConcatenateLayerNode *>(node));
         case NodeType::DepthwiseConvolutionLayer:
@@ -597,6 +708,8 @@ std::unique_ptr<IFunction> CLFunctionFactory::create(INode *node, GraphContext &
             return create_pooling_layer(*polymorphic_downcast<PoolingLayerNode *>(node));
         case NodeType::ReshapeLayer:
             return create_reshape_layer(*polymorphic_downcast<ReshapeLayerNode *>(node));
+        case NodeType::ResizeLayer:
+            return create_resize_layer(*polymorphic_downcast<ResizeLayerNode *>(node));
         case NodeType::SoftmaxLayer:
             return create_softmax_layer(*polymorphic_downcast<SoftmaxLayerNode *>(node), ctx);
         default:

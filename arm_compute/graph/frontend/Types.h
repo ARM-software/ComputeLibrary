@@ -50,6 +50,8 @@ using graph::DepthwiseConvolutionMethod;
 using graph::TensorDescriptor;
 using graph::DimensionRoundingType;
 using graph::GraphConfig;
+using graph::InterpolationPolicy;
+using graph::Size2D;
 
 /** Branch layer merging method */
 enum class BranchMergeMethod

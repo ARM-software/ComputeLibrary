@@ -52,6 +52,7 @@ using arm_compute::PadStrideInfo;
 using arm_compute::PoolingLayerInfo;
 using arm_compute::PoolingType;
 using arm_compute::DimensionRoundingType;
+using arm_compute::InterpolationPolicy;
 
 /** TODO (geopin01): Make ids strongly typed */
 using TensorID   = unsigned int;
@@ -128,7 +129,9 @@ enum class NodeType
 {
     ActivationLayer,
     BatchNormalizationLayer,
+    ChannelShuffleLayer,
     ConvolutionLayer,
+    DeconvolutionLayer,
     DepthConcatenateLayer,
     DepthwiseConvolutionLayer,
     EltwiseLayer,
@@ -137,13 +140,15 @@ enum class NodeType
     NormalizationLayer,
     PoolingLayer,
     ReshapeLayer,
-    ScaleLayer,
+    ResizeLayer,
     SoftmaxLayer,
     SplitLayer,
 
     Input,
     Output,
     Const,
+
+    Dummy
 };
 
 /** Backend Memory Manager affinity **/

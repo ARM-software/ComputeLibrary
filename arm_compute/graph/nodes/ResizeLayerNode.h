@@ -21,35 +21,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_NODES_FWD_H__
-#define __ARM_COMPUTE_GRAPH_NODES_FWD_H__
+#ifndef __ARM_COMPUTE_GRAPH_RESIZE_LAYER_NODE_H__
+#define __ARM_COMPUTE_GRAPH_RESIZE_LAYER_NODE_H__
+
+#include "arm_compute/graph/INode.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-// Forward declarations
-class INode;
-class ActivationLayerNode;
-class BatchNormalizationLayerNode;
-class ChannelShuffleLayerNode;
-class ConstNode;
-class ConvolutionLayerNode;
-class DeconvolutionLayerNode;
-class DepthConcatenateLayerNode;
-class DepthwiseConvolutionLayerNode;
-class DummyNode;
-class EltwiseLayerNode;
-class FlattenLayerNode;
-class FullyConnectedLayerNode;
-class InputNode;
-class NormalizationLayerNode;
-class OutputNode;
-class PoolingLayerNode;
-class ReshapeLayerNode;
-class ResizeLayerNode;
-class SoftmaxLayerNode;
-class SplitLayerNode;
+/** Resize Layer node */
+class ResizeLayerNode final : public INode
+{
+public:
+    /** Default Constructor */
+    ResizeLayerNode(InterpolationPolicy policy, float scale_width, float scale_height);
+    /** Interpolation policy accessor
+     *
+     * @return Interpolation policy
+     */
+    InterpolationPolicy policy() const;
+    /** Scaling factor accessors
+     *
+     * @return Scaling factors (width, height)
+     */
+    std::pair<float, float> scaling_factor() const;
+
+    // Inherited overridden methods:
+    NodeType         type() const override;
+    bool             forward_descriptors() override;
+    TensorDescriptor configure_output(size_t idx) const override;
+    void accept(INodeVisitor &v) override;
+
+private:
+    InterpolationPolicy _policy;
+    float               _scale_width;
+    float               _scale_height;
+};
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_NODES_FWD_H__ */
+#endif /* __ARM_COMPUTE_GRAPH_RESIZE_LAYER_NODE_H__ */

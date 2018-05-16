@@ -352,6 +352,33 @@ inline ::std::ostream &operator<<(::std::ostream &os, const QuantizationInfo &qu
        << "Offset:" << quantization_info.offset;
     return os;
 }
+
+/** Formatted output of the Interpolation policy type.
+ *
+ * @param[out] os     Output stream.
+ * @param[in]  policy Interpolation policy to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const InterpolationPolicy &policy)
+{
+    switch(policy)
+    {
+        case InterpolationPolicy::NEAREST_NEIGHBOR:
+            os << "NEAREST NEIGHBOR";
+            break;
+        case InterpolationPolicy::BILINEAR:
+            os << "BILINEAR";
+            break;
+        case InterpolationPolicy::AREA:
+            os << "AREA";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
 } // namespace graph
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_GRAPH_TYPE_PRINTER_H__ */

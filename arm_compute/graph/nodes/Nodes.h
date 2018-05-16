@@ -26,10 +26,13 @@
 
 #include "arm_compute/graph/nodes/ActivationLayerNode.h"
 #include "arm_compute/graph/nodes/BatchNormalizationLayerNode.h"
+#include "arm_compute/graph/nodes/ChannelShuffleLayerNode.h"
 #include "arm_compute/graph/nodes/ConstNode.h"
 #include "arm_compute/graph/nodes/ConvolutionLayerNode.h"
+#include "arm_compute/graph/nodes/DeconvolutionLayerNode.h"
 #include "arm_compute/graph/nodes/DepthConcatenateLayerNode.h"
 #include "arm_compute/graph/nodes/DepthwiseConvolutionLayerNode.h"
+#include "arm_compute/graph/nodes/DummyNode.h"
 #include "arm_compute/graph/nodes/EltwiseLayerNode.h"
 #include "arm_compute/graph/nodes/FlattenLayerNode.h"
 #include "arm_compute/graph/nodes/FullyConnectedLayerNode.h"
@@ -38,6 +41,7 @@
 #include "arm_compute/graph/nodes/OutputNode.h"
 #include "arm_compute/graph/nodes/PoolingLayerNode.h"
 #include "arm_compute/graph/nodes/ReshapeLayerNode.h"
+#include "arm_compute/graph/nodes/ResizeLayerNode.h"
 #include "arm_compute/graph/nodes/SoftmaxLayerNode.h"
 #include "arm_compute/graph/nodes/SplitLayerNode.h"
 

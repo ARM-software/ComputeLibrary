@@ -154,6 +154,30 @@ private:
     float               _epsilon;
 };
 
+/** Channel Shuffle Layer */
+class ChannelShuffleLayer final : public ILayer
+{
+public:
+    /** Construct a Channel Shuffle layer.
+     *
+     * @param[in] num_groups Number of groups
+     */
+    ChannelShuffleLayer(unsigned int num_groups)
+        : _num_groups(num_groups)
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_channel_shuffle_node(s.graph(), common_params, input, _num_groups);
+    }
+
+private:
+    unsigned int _num_groups;
+};
+
 /** Convolution Layer */
 class ConvolutionLayer final : public ILayer
 {
@@ -213,6 +237,56 @@ private:
     const QuantizationInfo _out_quant_info;
 };
 
+/** Deconvolution Layer */
+class DeconvolutionLayer final : public ILayer
+{
+public:
+    /** Construct a convolution layer.
+     *
+     * @param[in] conv_width   Convolution width.
+     * @param[in] conv_height  Convolution height.
+     * @param[in] ofm          Output feature map.
+     * @param[in] weights      Accessor to get kernel weights from.
+     * @param[in] bias         Accessor to get kernel bias from.
+     * @param[in] deconv_info  Padding and stride information.
+     * @param[in] inner_border Inner border padding (right, top)
+     */
+    DeconvolutionLayer(unsigned int        conv_width,
+                       unsigned int        conv_height,
+                       unsigned int        ofm,
+                       ITensorAccessorUPtr weights,
+                       ITensorAccessorUPtr bias,
+                       PadStrideInfo       deconv_info,
+                       Size2D              inner_border)
+        : _conv_width(conv_width),
+          _conv_height(conv_height),
+          _ofm(ofm),
+          _deconv_info(std::move(deconv_info)),
+          _inner_border(inner_border),
+          _weights(std::move(weights)),
+          _bias(std::move(bias))
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        return GraphBuilder::add_deconvolution_node(s.graph(), common_params, input,
+                                                    Size2D(_conv_width, _conv_height), _ofm, _deconv_info, _inner_border,
+                                                    std::move(_weights), std::move(_bias));
+    }
+
+private:
+    unsigned int        _conv_width;
+    unsigned int        _conv_height;
+    unsigned int        _ofm;
+    const PadStrideInfo _deconv_info;
+    Size2D              _inner_border;
+    ITensorAccessorUPtr _weights;
+    ITensorAccessorUPtr _bias;
+};
+
 /** Depthwise Convolution Layer */
 class DepthwiseConvolutionLayer final : public ILayer
 {
@@ -258,6 +332,30 @@ private:
     ITensorAccessorUPtr    _weights;
     ITensorAccessorUPtr    _bias;
     const QuantizationInfo _quant_info;
+};
+
+/** Dummy Layer */
+class DummyLayer final : public ILayer
+{
+public:
+    /** Construct an input layer.
+     *
+     * @param[in] shape Output shape
+     */
+    DummyLayer(TensorShape shape)
+        : _shape(shape)
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_dummy_node(s.graph(), common_params, input, _shape);
+    }
+
+private:
+    TensorShape _shape;
 };
 
 /** Flatten Layer */
@@ -378,6 +476,28 @@ public:
 
 private:
     TensorShape _shape;
+};
+
+/** Resize Layer */
+class ResizeLayer final : public ILayer
+{
+public:
+    ResizeLayer(InterpolationPolicy policy, float width_scale, float height_scale)
+        : _policy(policy), _width_scale(width_scale), _height_scale(height_scale)
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_resize_node(s.graph(), common_params, input, _policy, _width_scale, _height_scale);
+    }
+
+private:
+    InterpolationPolicy _policy;
+    float               _width_scale;
+    float               _height_scale;
 };
 
 /** Scale Layer */

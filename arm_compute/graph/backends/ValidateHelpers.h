@@ -52,6 +52,29 @@ inline arm_compute::ITensorInfo *get_backing_tensor_info(arm_compute::graph::Ten
     return ((tensor == nullptr) || (tensor->handle() == nullptr)) ? nullptr : tensor->handle()->tensor().info();
 }
 
+/** Validates a Channel Shuffle layer node
+ *
+ * @tparam ChannelShuffleLayer  Channel Shuffle layer function type
+ *
+ * @param[in] node Node to validate
+ *
+ * @return Status
+ */
+template <typename ChannelShuffleLayer>
+Status validate_channel_shuffle_layer(ChannelShuffleLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Validating ChannelShuffle node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_inputs() != 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
+
+    // Extract IO and info
+    arm_compute::ITensorInfo *input      = get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo *output     = get_backing_tensor_info(node.output(0));
+    const unsigned int        num_groups = node.num_groups();
+
+    return ChannelShuffleLayer::validate(input, output, num_groups);
+}
+
 /** Validates a Convolution layer node
  *
  * @tparam ConvolutionLayer          Default Convolution layer function type
