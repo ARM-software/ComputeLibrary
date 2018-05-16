@@ -45,7 +45,7 @@ std::string OpenCLTimer::id() const
 }
 
 OpenCLTimer::OpenCLTimer(ScaleFactor scale_factor)
-    : _kernels(), _real_function(nullptr), _real_graph_function(nullptr), _prefix()
+    : _kernels(), _real_function(nullptr), _real_graph_function(nullptr), _prefix(), _timer_enabled(false)
 {
     auto                        q     = CLScheduler::get().queue();
     cl_command_queue_properties props = q.getInfo<CL_QUEUE_PROPERTIES>();
@@ -95,27 +95,34 @@ void OpenCLTimer::test_start()
                                const cl_event * event_wait_list,
                                cl_event *       event)
     {
-        ARM_COMPUTE_ERROR_ON_MSG(event != nullptr, "Not supported");
-        ARM_COMPUTE_UNUSED(event);
+        if(this->_timer_enabled)
+        {
+            ARM_COMPUTE_ERROR_ON_MSG(event != nullptr, "Not supported");
+            ARM_COMPUTE_UNUSED(event);
 
-        OpenCLTimer::kernel_info info;
-        cl::Kernel               cpp_kernel(kernel, true);
-        std::stringstream        ss;
-        ss << this->_prefix << cpp_kernel.getInfo<CL_KERNEL_FUNCTION_NAME>();
-        if(gws != nullptr)
-        {
-            ss << " GWS[" << gws[0] << "," << gws[1] << "," << gws[2] << "]";
+            OpenCLTimer::kernel_info info;
+            cl::Kernel               cpp_kernel(kernel, true);
+            std::stringstream        ss;
+            ss << this->_prefix << cpp_kernel.getInfo<CL_KERNEL_FUNCTION_NAME>();
+            if(gws != nullptr)
+            {
+                ss << " GWS[" << gws[0] << "," << gws[1] << "," << gws[2] << "]";
+            }
+            if(lws != nullptr)
+            {
+                ss << " LWS[" << lws[0] << "," << lws[1] << "," << lws[2] << "]";
+            }
+            info.name = ss.str();
+            cl_event tmp;
+            cl_int   retval = this->_real_function(command_queue, kernel, work_dim, gwo, gws, lws, num_events_in_wait_list, event_wait_list, &tmp);
+            info.event      = tmp;
+            this->_kernels.push_back(std::move(info));
+            return retval;
         }
-        if(lws != nullptr)
+        else
         {
-            ss << " LWS[" << lws[0] << "," << lws[1] << "," << lws[2] << "]";
+            return this->_real_function(command_queue, kernel, work_dim, gwo, gws, lws, num_events_in_wait_list, event_wait_list, event);
         }
-        info.name = ss.str();
-        cl_event tmp;
-        cl_int   retval = this->_real_function(command_queue, kernel, work_dim, gwo, gws, lws, num_events_in_wait_list, event_wait_list, &tmp);
-        info.event      = tmp;
-        this->_kernels.push_back(std::move(info));
-        return retval;
     };
 
     // Start intercepting tasks:
@@ -140,6 +147,11 @@ void OpenCLTimer::test_start()
 void OpenCLTimer::start()
 {
     _kernels.clear();
+    _timer_enabled = true;
+}
+void OpenCLTimer::stop()
+{
+    _timer_enabled = false;
 }
 
 void OpenCLTimer::test_stop()

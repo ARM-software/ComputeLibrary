@@ -52,6 +52,7 @@ public:
     std::string     id() const override;
     void            test_start() override;
     void            start() override;
+    void            stop() override;
     void            test_stop() override;
     MeasurementsMap measurements() const override;
 
@@ -66,6 +67,7 @@ private:
     std::function<decltype(clEnqueueNDRangeKernel)> _real_function;
     std::function<decltype(graph::execute_task)>    _real_graph_function;
     std::string                                     _prefix;
+    bool                                            _timer_enabled;
 #endif /* ARM_COMPUTE_CL */
 
 private:
