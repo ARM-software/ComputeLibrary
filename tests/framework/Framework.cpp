@@ -24,6 +24,9 @@
 #include "Framework.h"
 
 #include "support/ToolchainSupport.h"
+#ifdef ARM_COMPUTE_CL
+#include "arm_compute/runtime/CL/CLScheduler.h"
+#endif /* ARM_COMPUTE_CL */
 
 #include <chrono>
 #include <iostream>
@@ -517,7 +520,8 @@ bool Framework::run()
 
     const std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
 
-    int id = 0;
+    int id          = 0;
+    int id_run_test = 0;
 
     for(auto &test_factory : _test_factories)
     {
@@ -526,7 +530,21 @@ bool Framework::run()
 
         if(_test_filter.is_selected(test_info))
         {
+#ifdef ARM_COMPUTE_CL
+            // Every 5000 tests, reset the OpenCL context to release the allocated memory
+            if((id_run_test % 5000) == 0)
+            {
+                cl::Context::setDefault(cl::Context());
+                CLScheduler::get().set_context(cl::Context());
+                CLKernelLibrary::get().clear_programs_cache();
+
+                cl::Context::setDefault(cl::Context(CL_DEVICE_TYPE_DEFAULT));
+                CLScheduler::get().set_context(cl::Context::getDefault());
+            }
+#endif // ARM_COMPUTE_CL
             run_test(test_info, *test_factory);
+
+            ++id_run_test;
         }
 
         ++id;
