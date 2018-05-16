@@ -42,6 +42,8 @@ namespace validation
 {
 namespace
 {
+constexpr AbsoluteTolerance<float> atolerance_f32(0.00001f); /**< Absolute Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+RelativeTolerance<float>           rtolerance_f32(0.05f);    /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 } // namespace
 
 TEST_SUITE(CL)
@@ -141,7 +143,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLLocallyConnectedFixture<float>, framework::Da
                                                                                                                       DataType::F32)))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference);
+    validate(CLAccessor(_target), _reference, rtolerance_f32, 0.f, atolerance_f32);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLLocallyConnectedFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeLocallyConnectedDataset(),
@@ -149,7 +151,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLLocallyConnectedFixture<float>, framework::Da
                                                                                                                     DataType::F32)))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference);
+    validate(CLAccessor(_target), _reference, rtolerance_f32, 0.f, atolerance_f32);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
