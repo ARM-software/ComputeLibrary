@@ -27,14 +27,18 @@
 
 namespace arm_gemm
 {
+
+/* "Batched GEMV" (where M=1 and nbatches>1) can be executed much more
+ * efficiently as a GEMM (with M'=nbatches and nbatches'=1).  This wrapper
+ * implements this.  */
 template <typename To, typename Tr>
-class GemmBatched : public GemmCommon<To, Tr>
+class GemvBatched : public GemmCommon<To, Tr>
 {
 private:
     UniqueGemmCommon<To, Tr> _subgemm = nullptr;
 
 public:
-    GemmBatched(const CPUInfo &ci, const unsigned int M, const unsigned int N, const unsigned int K,
+    GemvBatched(const CPUInfo &ci, const unsigned int M, const unsigned int N, const unsigned int K,
                 const unsigned int nbatches, const unsigned int nmulti, const bool trA, const bool trB,
                 const To alpha, const To beta, const int maxthreads, const bool pretransposed_hint)
     {
