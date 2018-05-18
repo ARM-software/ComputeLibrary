@@ -59,6 +59,7 @@ std::string to_string_if_not_null(T *arg)
         return to_string(*arg);
     }
 }
+
 /** Formatted output of the Dimensions type.
  *
  * @param[out] os         Output stream.
@@ -1091,7 +1092,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GEMMInfo &info)
     os << "{is_a_reshaped=" << info.is_a_reshaped() << ",";
     os << "is_b_reshaped=" << info.is_b_reshaped() << ",";
     os << "reshape_b_only_on_first_run=" << info.reshape_b_only_on_first_run() << ",";
-    os << "}";
+    os << "depth_output_gemm3d=" << info.depth_output_gemm3d() << ",";
+    os << "reinterpret_input_as_3d=" << info.reinterpret_input_as_3d() << ",";
+    os << "retain_internal_weights=" << info.retain_internal_weights() << ",";
+    os << "fp_mixed_precision=" << info.fp_mixed_precision() << ",";
+    os << "broadcast_bias=" << info.broadcast_bias() << ",";
+    os << "pretranpose_B=" << info.pretranpose_B() << ",";
 
     return os;
 }

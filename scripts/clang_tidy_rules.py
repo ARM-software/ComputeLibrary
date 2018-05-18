@@ -28,7 +28,10 @@ def filter_files( list_files ):
         if os.path.splitext(f)[1] != ".cpp":
             continue
         # Skip OMPScheduler as it causes problems in clang
-        if "OMPScheduler.cpp" in f:
+        if (("OMPScheduler.cpp" in f) or
+            ("CLTracePoint.cpp" in f) or
+            ("NETracePoint.cpp" in f) or
+            ("TracePoint.cpp" in f)):
             continue
         to_check.append(f)
     return to_check
