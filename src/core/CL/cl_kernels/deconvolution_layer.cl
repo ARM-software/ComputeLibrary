@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,13 +25,13 @@
 
 /** This function applies upsample on an input image.
  *
- * @param[in]  src_ptr                           Pointer to the source image. Supported data types: F32
+ * @param[in]  src_ptr                           Pointer to the source image. Supported data types: F16/F32
  * @param[in]  src_stride_x                      Stride of the source image in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source image in Y dimension (in bytes)
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source image
- * @param[out] dst_ptr                           Pointer to the destination image. Supported data types: F32
+ * @param[out] dst_ptr                           Pointer to the destination image. Supported data types: F16/F32
  * @param[in]  dst_stride_x                      Stride of the destination image in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination image in Y dimension (in bytes)
@@ -46,5 +46,5 @@ __kernel void deconvolution_upsample(
     Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
 
     // Store result
-    *((__global float *)dst.ptr) = *((__global float *)src.ptr);
+    *((__global DATA_TYPE *)dst.ptr) = *((__global DATA_TYPE *)src.ptr);
 }

@@ -91,6 +91,8 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
 
 template SimpleTensor<float> deconvolution_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &weights, const SimpleTensor<float> &bias, const TensorShape &output_shape,
                                                  const PadStrideInfo &info, const std::pair<unsigned int, unsigned int> &a);
+template SimpleTensor<half> deconvolution_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &weights, const SimpleTensor<half> &bias, const TensorShape &output_shape,
+                                                const PadStrideInfo &info, const std::pair<unsigned int, unsigned int> &a);
 } // namespace reference
 } // namespace validation
 } // namespace test
