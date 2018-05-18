@@ -30,20 +30,24 @@
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source image in Y dimension (in bytes)
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source image
  * @param[out] dst_ptr                           Pointer to the destination image. Supported data types: F16/F32
  * @param[in]  dst_stride_x                      Stride of the destination image in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination image in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination image
  */
 __kernel void deconvolution_upsample(
-    IMAGE_DECLARATION(src),
-    IMAGE_DECLARATION(dst))
+    TENSOR3D_DECLARATION(src),
+    TENSOR3D_DECLARATION(dst))
 {
-    Image src = CONVERT_TO_IMAGE_STRUCT(src);
-    Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
+    Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
+    Tensor3D dst = CONVERT_TO_TENSOR3D_STRUCT(dst);
 
     // Store result
     *((__global DATA_TYPE *)dst.ptr) = *((__global DATA_TYPE *)src.ptr);
