@@ -374,9 +374,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
         TensorInfo info_gemm(shape_gemm, 1, gemm_data_type, input->info()->fixed_point_position());
         info_gemm.set_quantization_info(output->info()->quantization_info());
         _gemm_output.allocator()->init(info_gemm);
-
-        // FIXME: enabling memory manager for _gemm_output gives incorrect results (maybe bound to the assembly kernel in GEMMLowp?)
-        //  _memory_group.manage(&_gemm_output);
+        _memory_group.manage(&_gemm_output);
 
         // Configure im2col
         _input_im2col_kernel.configure(input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, _append_bias, false, false, dilation);
