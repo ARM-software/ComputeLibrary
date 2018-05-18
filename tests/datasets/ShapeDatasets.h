@@ -281,7 +281,6 @@ public:
         // Batch size 1
         TensorShape{ 1921U, 1083U },
                      TensorShape{ 641U, 485U, 2U, 3U },
-                     TensorShape{ 4159U, 3117U },
                      // Batch size 4
                      TensorShape{ 799U, 595U, 1U, 4U },
     })
