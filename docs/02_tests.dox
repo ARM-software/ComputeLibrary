@@ -306,39 +306,8 @@ provide a good overview how test cases are structured.
   Typically the will be multiple tests for different data types and for
   different execution modes, e.g. precommit and nightly.
 
-<!-- FIXME: Remove before release -->
-@section building_test_dependencies Building dependencies
-
-@note Only required when tests from the old validation framework need to be run.
-
-The tests currently make use of Boost (Test and Program options) for
-validation. Below are instructions about how to build these 3rd party
-libraries.
-
-@note By default the build of the validation and benchmark tests is disabled, to enable it use `validation_tests=1` and `benchmark_tests=1`
-
-@subsection building_boost Building Boost
-
-First follow the instructions from the Boost library on how to setup the Boost
-build system
-(http://www.boost.org/doc/libs/1_64_0/more/getting_started/index.html).
-Afterwards the required libraries can be build with:
-
-    ./b2 --with-program_options --with-test link=static \
-    define=BOOST_TEST_ALTERNATIVE_INIT_API
-
-Additionally, depending on your environment, it might be necessary to specify
-the ```toolset=``` option to choose the right compiler. Moreover,
-```address-model=32``` can be used to force building for 32bit and
-```target-os=android``` must be specified to build for Android.
-
-After executing the build command the libraries
-```libboost_program_options.a``` and ```libboost_unit_test_framework.a``` can
-be found in ```./stage/lib```.
-<!-- FIXME: end remove -->
-
 @section tests_running_tests Running tests
-@subsection tests_running_tests_benchmarking Benchmarking
+@subsection tests_running_tests_benchmark_and_validation Benchmarking and validation suites
 @subsubsection tests_running_tests_benchmarking_filter Filter tests
 All tests can be run by invoking
 
@@ -412,37 +381,6 @@ To run the OpenCL precommit benchmark tests with OpenCL kernel timers in milisec
 
 	LD_LIBRARY_PATH=. ./arm_compute_benchmark --mode=precommit --filter="^CL.*" --instruments="opencl_timer_ms" --iterations=10
 
-<!-- FIXME: Remove before release and change above to benchmark and validation -->
-@subsection tests_running_tests_validation Validation
-
-@note The new validation tests have the same interface as the benchmarking tests.
-
-@subsubsection tests_running_tests_validation_filter Filter tests
-All tests can be run by invoking
-
-    ./arm_compute_validation -- ./data
-
-where `./data` contains the assets needed by the tests.
-
-As running all tests can take a lot of time the suite is split into "precommit" and "nightly" tests. The precommit tests will be fast to execute but still cover the most important features. In contrast the nightly tests offer more extensive coverage but take longer. The different subsets can be selected from the command line as follows:
-
-    ./arm_compute_validation -t @precommit -- ./data
-    ./arm_compute_validation -t @nightly -- ./data
-
-Additionally it is possible to select specific suites or tests:
-
-    ./arm_compute_validation -t CL -- ./data
-    ./arm_compute_validation -t NEON/BitwiseAnd/RunSmall/_0 -- ./data
-
-All available tests can be displayed with the `--list_content` switch.
-
-    ./arm_compute_validation --list_content -- ./data
-
-For a complete list of possible selectors please see: http://www.boost.org/doc/libs/1_64_0/libs/test/doc/html/boost_test/runtime_config/test_unit_filtering.html
-
-@subsubsection tests_running_tests_validation_verbosity Verbosity
-There are two separate flags to control the verbosity of the test output. `--report_level` controls the verbosity of the summary produced after all tests have been executed. `--log_level` controls the verbosity of the information generated during the execution of tests. All available settings can be found in the Boost documentation for [--report_level](http://www.boost.org/doc/libs/1_64_0/libs/test/doc/html/boost_test/utf_reference/rt_param_reference/report_level.html) and [--log_level](http://www.boost.org/doc/libs/1_64_0/libs/test/doc/html/boost_test/utf_reference/rt_param_reference/log_level.html), respectively.
-<!-- FIXME: end remove -->
 */
 } // namespace test
 } // namespace arm_compute

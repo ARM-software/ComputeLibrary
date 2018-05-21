@@ -71,20 +71,34 @@ You should have the following file organisation:
 	│   │   │   └── OpenGLES.h --> Wrapper to configure the Khronos EGL and OpenGL ES C header
 	│   │   ├── NEON
 	│   │   │   ├── kernels --> Folder containing all the NEON kernels
-	│   │   │   │   ├── arm64 --> Folder containing the interfaces for the assembly arm64 NEON kernels
-	│   │   │   │   ├── arm32 --> Folder containing the interfaces for the assembly arm32 NEON kernels
-	│   │   │   │   ├── assembly --> Folder containing the NEON assembly routines.
+	│   │   │   │   ├── assembly --> headers for assembly optimised NEON kernels.
+	│   │   │   │   ├── convolution --> headers for convolution assembly optimised NEON kernels.
+	│   │   │   │   │   ├── common --> headers for code which is common to several convolution implementations.
+	│   │   │   │   │   ├── depthwise --> headers for Depthwise convolultion assembly implementation
+	│   │   │   │   │   └── winograd --> headers for Winograd convolution assembly implementation
+	│   │   │   │   ├── detail --> Common code for several intrinsics implementations.
 	│   │   │   │   └── NE*Kernel.h
 	│   │   │   └── NEKernels.h --> Includes all the NEON kernels at once
 	│   │   ├── All common basic types (Types.h, Window, Coordinates, Iterator, etc.)
 	│   │   ├── All generic objects interfaces (ITensor, IImage, etc.)
 	│   │   └── Objects metadata classes (ImageInfo, TensorInfo, MultiImageInfo)
 	│   ├── graph
-	│   │   ├── CL --> OpenCL specific operations
-	│   │   │   └── CLMap.h / CLUnmap.h
+	│   │   ├── algorithms
+	│   │   │   └── Generic algorithms used by the graph backend (e.g Order of traversal)
+	│   │   ├── backends --> The backend specific code
+	│   │   │   ├── CL --> OpenCL specific operations
+	│   │   │   ├── GLES  --> OpenGLES Compute Shaders specific operations
+	│   │   │   └── NEON --> NEON specific operations
+	│   │   ├── detail
+	│   │   │   └── Collection of internal utilities.
+	│   │   ├── frontend
+	│   │   │   └── Code related to the stream frontend interface.
+	│   │   ├── mutators
+	│   │   │   └── Used to modify / optimise the Graph intermediate representation(Operator fusion, in place operations, etc.)
 	│   │   ├── nodes
 	│   │   │   └── The various nodes supported by the graph API
-	│   │   ├── Nodes.h --> Includes all the Graph nodes at once.
+	│   │   ├── printers
+	│   │   │   └── Debug printers
 	│   │   └── Graph objects ( INode, ITensorAccessor, Graph, etc.)
 	│   └── runtime
 	│       ├── CL
@@ -92,10 +106,14 @@ You should have the following file organisation:
 	│       │   ├── functions --> Folder containing all the OpenCL functions
 	│       │   │   └── CL*.h
 	│       │   ├── CLScheduler.h --> Interface to enqueue OpenCL kernels and get/set the OpenCL CommandQueue and ICLTuner.
-	│       │   └── CLFunctions.h --> Includes all the OpenCL functions at once
+	│       │   ├── CLFunctions.h --> Includes all the OpenCL functions at once
+	│       │   └── tuners
+	│       │       └── Local workgroup size tuners for specific architectures / GPUs
 	│       ├── CPP
 	│       │   ├── CPPKernels.h --> Includes all the CPP functions at once.
-	│       │   └── CPPScheduler.h --> Basic pool of threads to execute CPP/NEON code on several cores in parallel
+	│       │   ├── CPPScheduler.h --> Basic pool of threads to execute CPP/NEON code on several cores in parallel
+	│       │   └── functions --> Folder containing all the CPP functions
+	│       │       └── CPP*.h
 	│       ├── GLES_COMPUTE
 	│       │   ├── GLES objects & allocators (GCArray, GCImage, GCTensor, etc.)
 	│       │   ├── functions --> Folder containing all the GLES functions
@@ -122,6 +140,7 @@ You should have the following file organisation:
 	│   ├── graph_*.cpp --> Graph examples
 	│   ├── neoncl_*.cpp --> NEON / OpenCL interoperability examples
 	│   └── neon_*.cpp --> NEON examples
+	├── graph.h --> Includes all the Graph headers at once.
 	├── include
 	│   ├── CL
 	│   │   └── Khronos OpenCL C headers and C++ wrapper
@@ -152,31 +171,32 @@ You should have the following file organisation:
 	│   └── Various headers to work around toolchains / platform issues.
 	├── tests
 	│   ├── All test related files shared between validation and benchmark
+	│   ├── benchmark --> Sources for benchmarking
+	│   │   ├── Benchmark specific files
+	│   │   ├── fixtures
+	│   │   │   └── Backend agnostic fixtures to initialise and run the functions to test.
+	│   │   ├── CL --> OpenCL benchmarking tests
+	│   │   ├── GLES_COMPUTE --> GLES benchmarking tests
+	│   │   └── NEON --> NEON benchmarking tests
 	│   ├── CL --> OpenCL accessors
 	│   ├── GLES_COMPUTE --> GLES accessors
 	│   ├── NEON --> NEON accessors
-	│   ├── benchmark --> Sources for benchmarking
-	│   │   ├── Benchmark specific files
-	│   │   ├── CL --> OpenCL benchmarking tests
-	│   │   ├── GLES_COMPUTE --> GLES benchmarking tests
-	│   │   ├── fixtures
-	│   │   │   └── Fixtures to initialise and run the runtime Functions.
-	│   │   └── NEON --> NEON benchmarking tests
 	│   ├── datasets
 	│   │   └── Datasets for all the validation / benchmark tests, layer configurations for various networks, etc.
 	│   ├── framework
 	│   │   └── Boiler plate code for both validation and benchmark test suites (Command line parsers, instruments, output loggers, etc.)
 	│   ├── networks
 	│   │   └── Examples of how to instantiate networks.
-	│   ├── validation --> Sources for validation
-	│   │   ├── Validation specific files
-	│   │   ├── CL --> OpenCL validation tests
-	│   │   ├── GLES_COMPUTE --> GLES validation tests
-	│   │   ├── CPP --> C++ reference implementations
-	│   │   ├── fixtures
-	│   │   │   └── Fixtures to initialise and run the runtime Functions.
-	│   │   └── NEON --> NEON validation tests
-	│   └── dataset --> Datasets defining common sets of input parameters
+	│   └── validation --> Sources for validation
+	│       ├── Validation specific files
+	│       ├── fixtures
+	│       │   └── Backend agnostic fixtures to initialise and run the functions to test.
+	│       ├── reference
+	│       │   └── Reference implementation used to validate the results of the various backends.
+	│       ├── CL --> OpenCL validation tests
+	│       ├── GLES_COMPUTE --> GLES validation tests
+	│       ├── CPP --> C++ reference implementations
+	│       └── NEON --> NEON validation tests
 	└── utils --> Boiler plate code used by examples
 	    └── Various utilities to print types, load / store assets, etc.
 
@@ -219,6 +239,7 @@ v18.05 Public maintenance release
     - @ref CLChannelShuffleLayer / @ref CLChannelShuffleLayerKernel
     - @ref CLConvertFullyConnectedWeightsKernel / @ref CLConvertFullyConnectedWeights
     - @ref CLCopy / @ref CLCopyKernel
+    - @ref CLLSTMLayer
     - @ref CLRNNLayer
     - @ref CLWidthConcatenateLayer / @ref CLWidthConcatenateLayerKernel
     - @ref CLWinogradFilterTransformKernel / @ref CLWinogradInputTransformKernel / @ref CLWinogradConvolutionLayer
@@ -249,6 +270,7 @@ v18.05 Public maintenance release
  - Added the prepare() method to perform any one off pre-processing before running the function.
  - Added new examples:
     - graph_inception_v4.cpp
+    - graph_resnext50.cpp
  - Added memory measurement instrument for CL.
 
 v18.03 Public maintenance release
@@ -812,6 +834,7 @@ or
 @note Examples accept different types of arguments, to find out what they are run the example without any argument and the help will be displayed at the beginning of the run.
 
 For example:
+
 	LD_LIBRARY_PATH=. ./graph_lenet
 
 	./graph_lenet
@@ -835,13 +858,18 @@ Here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_
 - Download the NDK r16b from here: https://developer.android.com/ndk/downloads/index.html
 - Make sure you have Python 2 installed on your machine.
 - Generate the 32 and/or 64 toolchains by running the following commands:
+<!-- Leave 2 blank lines here or the formatting of the commands below gets messed up --!>
 
+
+<!-- End of the 2 blank lines --!>
 	$NDK/build/tools/make_standalone_toolchain.py --arch arm64 --install-dir $MY_TOOLCHAINS/aarch64-linux-android-ndk-r16b --stl gnustl --api 21
 	$NDK/build/tools/make_standalone_toolchain.py --arch arm --install-dir $MY_TOOLCHAINS/arm-linux-android-ndk-r16b --stl gnustl --api 21
 
 @attention Due to some NDK issues make sure you use clang++ & gnustl
 
-@note Make sure to add the toolchains to your PATH: export PATH=$PATH:$MY_TOOLCHAINS/aarch64-linux-android-4.9/bin:$MY_TOOLCHAINS/arm-linux-androideabi-4.9/bin
+@note Make sure to add the toolchains to your PATH:
+
+	export PATH=$PATH:$MY_TOOLCHAINS/aarch64-linux-android-ndk-r16b/bin:$MY_TOOLCHAINS/arm-linux-android-ndk-r16b/bin
 
 @subsubsection S3_3_1_library How to build the library ?
 
