@@ -1899,6 +1899,7 @@ __kernel void gemm_mm_floating_point_f32_bifrost_1000(IMAGE_DECLARATION(src0),
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 }
 
+#if defined(ARM_COMPUTE_OPENCL_FP16_ENABLED)
 /** This OpenCL kernel computes the matrix by matrix multiplication between the matrix A (src0) and matrix B (src1) in case both matrices have not beed reshaped
  *
  * @note This OpenCL kernel works with the 16-bit floating point data type (half) and uses the fma units.
@@ -2103,6 +2104,7 @@ __kernel void gemm_mm_floating_point_f16_bifrost(IMAGE_DECLARATION(src0),
     vstore8(acc3, 0, (__global half *)(dst_addr + 3 * dst_stride_y));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
 }
+#endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED)
 
 #if defined(FIXED_POINT_POSITION)
 /** This OpenCL kernel computes the matrix by matrix multiplication between the matrix A (src0) and matrix B (src1) in case both matrices have not beed reshaped

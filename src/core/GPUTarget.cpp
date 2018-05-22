@@ -122,8 +122,8 @@ GPUTarget get_target_from_name(const std::string &device_name)
 
     if(!found_mali)
     {
-        ARM_COMPUTE_LOG_INFO_MSG_CORE("Can't find valid Mali GPU. Target is set to UNKNOWN.");
-        return GPUTarget::UNKNOWN;
+        ARM_COMPUTE_LOG_INFO_MSG_CORE("Can't find valid Mali GPU. Target is set to default.");
+        return GPUTarget::MIDGARD;
     }
 
     const char         target  = name_parts.str(1)[0];
