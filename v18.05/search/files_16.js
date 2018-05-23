@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['wallclocktimer_2ecpp',['WallClockTimer.cpp',['../_wall_clock_timer_8cpp.xhtml',1,'']]],
+  ['wallclocktimer_2eh',['WallClockTimer.h',['../_wall_clock_timer_8h.xhtml',1,'']]],
+  ['warp_5faffine_2ecl',['warp_affine.cl',['../warp__affine_8cl.xhtml',1,'']]],
+  ['warp_5fhelpers_2eh',['warp_helpers.h',['../warp__helpers_8h.xhtml',1,'']]],
+  ['warp_5fperspective_2ecl',['warp_perspective.cl',['../warp__perspective_8cl.xhtml',1,'']]],
+  ['warpaffine_2ecpp',['WarpAffine.cpp',['../_c_l_2_warp_affine_8cpp.xhtml',1,'']]],
+  ['warpaffine_2ecpp',['WarpAffine.cpp',['../_n_e_o_n_2_warp_affine_8cpp.xhtml',1,'']]],
+  ['warpaffine_2ecpp',['WarpAffine.cpp',['../reference_2_warp_affine_8cpp.xhtml',1,'']]],
+  ['warpaffine_2eh',['WarpAffine.h',['../_warp_affine_8h.xhtml',1,'']]],
+  ['warpperspective_2ecpp',['WarpPerspective.cpp',['../reference_2_warp_perspective_8cpp.xhtml',1,'']]],
+  ['warpperspective_2ecpp',['WarpPerspective.cpp',['../_c_l_2_warp_perspective_8cpp.xhtml',1,'']]],
+  ['warpperspective_2ecpp',['WarpPerspective.cpp',['../_n_e_o_n_2_warp_perspective_8cpp.xhtml',1,'']]],
+  ['warpperspective_2eh',['WarpPerspective.h',['../_warp_perspective_8h.xhtml',1,'']]],
+  ['widthconcatenatelayer_2ecpp',['WidthConcatenateLayer.cpp',['../_c_l_2_width_concatenate_layer_8cpp.xhtml',1,'']]],
+  ['widthconcatenatelayer_2ecpp',['WidthConcatenateLayer.cpp',['../reference_2_width_concatenate_layer_8cpp.xhtml',1,'']]],
+  ['widthconcatenatelayer_2eh',['WidthConcatenateLayer.h',['../_width_concatenate_layer_8h.xhtml',1,'']]],
+  ['window_2eh',['Window.h',['../_window_8h.xhtml',1,'']]],
+  ['window_2einl',['Window.inl',['../_window_8inl.xhtml',1,'']]],
+  ['winograd_2ecl',['winograd.cl',['../winograd_8cl.xhtml',1,'']]],
+  ['winograd_2ecpp',['Winograd.cpp',['../reference_2_winograd_8cpp.xhtml',1,'']]],
+  ['winograd_2ecpp',['Winograd.cpp',['../_c_l_2_winograd_8cpp.xhtml',1,'']]],
+  ['winograd_2eh',['Winograd.h',['../_winograd_8h.xhtml',1,'']]],
+  ['workload_2eh',['Workload.h',['../_workload_8h.xhtml',1,'']]],
+  ['wrapper_2eh',['wrapper.h',['../wrapper_8h.xhtml',1,'']]]
+];

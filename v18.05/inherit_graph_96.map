@@ -1,0 +1,7 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classarm__compute_1_1_i_distribution.xhtml" title="Interface for distribution objects. " alt="" coords="5,31,104,57"/>
+<area shape="rect" id="node2" href="$classarm__compute_1_1_i_distribution1_d.xhtml" title="1D Distribution interface " alt="" coords="152,31,268,57"/>
+<area shape="rect" id="node3" href="$classarm__compute_1_1_distribution1_d.xhtml" title="Basic implementation of the 1D distribution interface. " alt="" coords="325,5,439,32"/>
+<area shape="rect" id="node4" href="$classarm__compute_1_1_i_c_l_distribution1_d.xhtml" title="ICLDistribution1D interface class. " alt="" coords="316,56,448,83"/>
+<area shape="rect" id="node5" href="$classarm__compute_1_1_c_l_distribution1_d.xhtml" title="CLDistribution1D object class. " alt="" coords="496,56,625,83"/>
+</map>
