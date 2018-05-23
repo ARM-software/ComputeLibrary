@@ -62,6 +62,8 @@
 
 #endif /* FIXED_POINT_POSITION */
 
+#define DIV_OP_NHWC(x, y) (x * (VEC_DATA_TYPE(DATA_TYPE, 8))(1.f / y))
+
 #if STRIDE_X == 1
 #define POOLING3x3(res, input, output) POOLING3x3_STRIDE1(res, input, output)
 #elif STRIDE_X == 2 /* STRIDE_X == 1 */
@@ -423,7 +425,7 @@ __kernel void pooling_layer_optimized_3(
 
 #endif // POOL_AVG
 
-/** Performs a pooling function of pool size equal to N
+/** Performs a pooling function of pool size equal to N  (NCHW)
  *
  * @note Datatype must be passed using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types are QS8/QS16/F16/F32;
  * @note -DFP16 must be passed at compile time if half float data type is used
@@ -451,7 +453,7 @@ __kernel void pooling_layer_optimized_3(
  * @param[in]  output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  output_offset_first_element_in_bytes The offset of the first element in the destination image
  */
-__kernel void pooling_layer_MxN(
+__kernel void pooling_layer_MxN_nchw(
     TENSOR3D_DECLARATION(input),
     TENSOR3D_DECLARATION(output))
 {
@@ -512,3 +514,97 @@ __kernel void pooling_layer_MxN(
     *(__global DATA_TYPE *)output.ptr = res;
 }
 #endif // defined(POOL_SIZE_X) && defined(POOL_SIZE_Y)
+
+DATA_TYPE calculate_avg_scale_nhwc(const int pool_size_x, const int pool_size_y, int upper_bound_w, int upper_bound_h,
+                                   const int pad_x, const int pad_y, const int stride_x, const int stride_y)
+{
+    int start_x = get_global_id(1) * stride_x - pad_x;
+    int start_y = get_global_id(2) * stride_y - pad_y;
+
+#if !defined(EXCLUDE_PADDING)
+    upper_bound_w += pad_x;
+    upper_bound_h += pad_y;
+#endif /* defined(EXCLUDE_PADDING) */
+    const int end_x = min(start_x + pool_size_x, upper_bound_w);
+    const int end_y = min(start_y + pool_size_y, upper_bound_h);
+#if defined(EXCLUDE_PADDING)
+    start_x = max(0, start_x);
+    start_y = max(0, start_y);
+#endif /* defined(EXCLUDE_PADDING) */
+    return ((end_y - start_y) * (end_x - start_x));
+}
+
+/** Performs a pooling function of pool size equal to N (NHWC)
+ *
+ * @note Datatype must be passed using -DDATA_TYPE e.g. -DDATA_TYPE=float. Supported data types are F16/F32
+ * @note -DFP16 must be passed at compile time if half float data type is used
+ * @note Pool sizes must be passed using -DPOOL_SIZE_X and -DPOOL_SIZE_Y e.g. -DPOOL_SIZE_X=13;
+ * @note Tensors width and height must be passed at compile time using -DMAX_WIDTH and -DMAX_HEIGHT
+ * @note Strides must be passed at compile time using -DSTRIDE_X and -DSTRIDE_Y which are the steps of the window along the x and y directions
+ * @note Pad values must be passed at compile time using -DPAD_X and -DPAD_Y which are the pooling paddings in x and y dimension
+ * @note In case of average pooling the following information must be passed at compile time:
+ *       -DPOOL_AVG must be provided otherwise max pooling will be performed.
+ *
+ * @param[in]  input_ptr                            Pointer to the source image. Supported data types: F16/F32
+ * @param[in]  input_stride_x                       Stride of the source image in X dimension (in bytes)
+ * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  input_stride_y                       Stride of the source image in Y dimension (in bytes)
+ * @param[in]  input_step_y                         input_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  input_stride_z                       Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  input_step_z                         input_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  input_offset_first_element_in_bytes  The offset of the first element in the source image
+ * @param[out] output_ptr                           Pointer to the destination image. Supported data types: same as @p input_ptr
+ * @param[in]  output_stride_x                      Stride of the destination image in X dimension (in bytes)
+ * @param[in]  output_step_x                        output_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in]  output_stride_y                      Stride of the destination image in Y dimension (in bytes)
+ * @param[in]  output_step_y                        output_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  output_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in]  output_step_z                        output_stride_z * number of elements along Z processed per workitem(in bytes)
+ * @param[in]  output_offset_first_element_in_bytes The offset of the first element in the destination image
+ */
+__kernel void pooling_layer_MxN_nhwc(
+    TENSOR3D_DECLARATION(input),
+    TENSOR3D_DECLARATION(output))
+{
+    // Get pixels pointer
+    Tensor3D input  = CONVERT_TO_TENSOR3D_STRUCT(input);
+    Tensor3D output = CONVERT_TO_TENSOR3D_STRUCT(output);
+
+    VEC_DATA_TYPE(DATA_TYPE, 8)
+    vdata           = INITIAL_VALUE;
+    DATA_TYPE sdata = INITIAL_VALUE;
+
+    const int idx_width  = get_global_id(1) * STRIDE_X;
+    const int idx_height = get_global_id(2) * STRIDE_Y;
+
+    for(int y = 0; y < POOL_SIZE_Y; ++y)
+    {
+        int y1 = select(y, PAD_Y - idx_height, y + idx_height < PAD_Y || y + idx_height > MAX_HEIGHT);
+        for(int x = 0; x < POOL_SIZE_X; ++x)
+        {
+            int x1 = select(x, PAD_X - idx_width - 1, x + idx_width < PAD_X || x + idx_width > MAX_WIDTH);
+            x1     = select(x1, PAD_X - idx_width - 1, y != y1);
+
+            VEC_DATA_TYPE(DATA_TYPE, 8)
+            data0 = vload8(0, (__global DATA_TYPE *)tensor3D_offset(&input, 0, x1 - PAD_X, y1 - PAD_Y));
+#if defined(POOL_L2)
+            // Raise to power of 2 for L2 Pooling
+            data0 *= data0;
+#endif /* defined(POOL_L2) */
+            vdata = POOL_OP(vdata, data0);
+        }
+    }
+
+#if defined(POOL_AVG) || defined(POOL_L2)
+    // Divide by pool region in case of average pooling
+    vdata = DIV_OP_NHWC(vdata, calculate_avg_scale_nhwc(POOL_SIZE_X, POOL_SIZE_Y, MAX_WIDTH, MAX_HEIGHT, PAD_X, PAD_Y, STRIDE_X, STRIDE_Y));
+#endif /* defined(POOL_AVG) || defined(POOL_L2) */
+
+#if defined(POOL_L2)
+    // Take square root of the result in L2 pooling
+    vdata = SQRT_OP(vdata);
+#endif /* defined(POOL_L2) */
+
+    // Store result
+    vstore8(vdata, 0, (__global DATA_TYPE *)output.ptr);
+}

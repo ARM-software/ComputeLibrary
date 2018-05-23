@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -120,7 +120,7 @@ $(document).ready(function(){initNavTree('arm__compute_2core_2_utils_8h.xhtml','
 <div class="title">Utils.h File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="core_2_error_8h_source.xhtml">arm_compute/core/Error.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="_error_8h_source.xhtml">arm_compute/core/Error.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_rounding_8h_source.xhtml">arm_compute/core/Rounding.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">arm_compute/core/Types.h</a>&quot;</code><br />
 <code>#include &lt;algorithm&gt;</code><br />
@@ -148,11 +148,11 @@ Functions</h2></td></tr>
 <tr class="memdesc:a12705a88669cb9fb90451ebe0db53c41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the rounded up quotient of val / m.  <a href="namespacearm__compute.xhtml#a12705a88669cb9fb90451ebe0db53c41">More...</a><br /></td></tr>
 <tr class="separator:a12705a88669cb9fb90451ebe0db53c41"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adf0c6059174045f80af46a0f1fb57bc6"><td class="memTemplParams" colspan="2">template&lt;typename S , typename T &gt; </td></tr>
-<tr class="memitem:adf0c6059174045f80af46a0f1fb57bc6"><td class="memTemplItemLeft" align="right" valign="top">auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#adf0c6059174045f80af46a0f1fb57bc6">ceil_to_multiple</a> (S <a class="el" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>, T divisor) -&gt; decltype(((<a class="el" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>+divisor-1)/divisor)*divisor)</td></tr>
+<tr class="memitem:adf0c6059174045f80af46a0f1fb57bc6"><td class="memTemplItemLeft" align="right" valign="top">auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#adf0c6059174045f80af46a0f1fb57bc6">ceil_to_multiple</a> (S value, T divisor) -&gt; decltype(((value+divisor-1)/divisor)*divisor)</td></tr>
 <tr class="memdesc:adf0c6059174045f80af46a0f1fb57bc6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes the smallest number larger or equal to value that is a multiple of divisor.  <a href="namespacearm__compute.xhtml#adf0c6059174045f80af46a0f1fb57bc6">More...</a><br /></td></tr>
 <tr class="separator:adf0c6059174045f80af46a0f1fb57bc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6959e681668a37a9242d2aae4e8b4375"><td class="memTemplParams" colspan="2">template&lt;typename S , typename T &gt; </td></tr>
-<tr class="memitem:a6959e681668a37a9242d2aae4e8b4375"><td class="memTemplItemLeft" align="right" valign="top">auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a6959e681668a37a9242d2aae4e8b4375">floor_to_multiple</a> (S <a class="el" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>, T divisor) -&gt; decltype((<a class="el" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>/divisor)*divisor)</td></tr>
+<tr class="memitem:a6959e681668a37a9242d2aae4e8b4375"><td class="memTemplItemLeft" align="right" valign="top">auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a6959e681668a37a9242d2aae4e8b4375">floor_to_multiple</a> (S value, T divisor) -&gt; decltype((value/divisor)*divisor)</td></tr>
 <tr class="memdesc:a6959e681668a37a9242d2aae4e8b4375"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes the largest number smaller or equal to value that is a multiple of divisor.  <a href="namespacearm__compute.xhtml#a6959e681668a37a9242d2aae4e8b4375">More...</a><br /></td></tr>
 <tr class="separator:a6959e681668a37a9242d2aae4e8b4375"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a64c17a5a42d2499a1626222ff9753b4d"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a64c17a5a42d2499a1626222ff9753b4d">build_information</a> ()</td></tr>
@@ -194,7 +194,7 @@ Functions</h2></td></tr>
 <tr class="memitem:a95358b677c5c17f5cc1e369e4a27e2c2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a95358b677c5c17f5cc1e369e4a27e2c2">has_format_vertical_subsampling</a> (Format format)</td></tr>
 <tr class="memdesc:a95358b677c5c17f5cc1e369e4a27e2c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if the given format has vertical subsampling.  <a href="namespacearm__compute.xhtml#a95358b677c5c17f5cc1e369e4a27e2c2">More...</a><br /></td></tr>
 <tr class="separator:a95358b677c5c17f5cc1e369e4a27e2c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a18ec57dffc5c26864be77318111dfb2a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a18ec57dffc5c26864be77318111dfb2a">separate_matrix</a> (const int16_t *conv, int16_t *conv_col, int16_t *conv_row, uint8_t <a class="el" href="hwc_8hpp.xhtml#ab2c6b258f02add8fdf4cfc7c371dd772">size</a>)</td></tr>
+<tr class="memitem:a18ec57dffc5c26864be77318111dfb2a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a18ec57dffc5c26864be77318111dfb2a">separate_matrix</a> (const int16_t *conv, int16_t *conv_col, int16_t *conv_row, uint8_t size)</td></tr>
 <tr class="memdesc:a18ec57dffc5c26864be77318111dfb2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Separate a 2D convolution into two 1D convolutions.  <a href="namespacearm__compute.xhtml#a18ec57dffc5c26864be77318111dfb2a">More...</a><br /></td></tr>
 <tr class="separator:a18ec57dffc5c26864be77318111dfb2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0101a40c4a6acc2af3b55afa7632f16a"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a0101a40c4a6acc2af3b55afa7632f16a">calculate_matrix_scale</a> (const int16_t *matrix, unsigned int matrix_size)</td></tr>
@@ -210,10 +210,10 @@ Functions</h2></td></tr>
 <tr class="memitem:a9d714e1b7d9d7818309138b7d830ebcb"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a9d714e1b7d9d7818309138b7d830ebcb">calculate_subsampled_shape</a> (const TensorShape &amp;shape, Format format, Channel channel=Channel::UNKNOWN)</td></tr>
 <tr class="memdesc:a9d714e1b7d9d7818309138b7d830ebcb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate subsampled shape for a given format and channel.  <a href="namespacearm__compute.xhtml#a9d714e1b7d9d7818309138b7d830ebcb">More...</a><br /></td></tr>
 <tr class="separator:a9d714e1b7d9d7818309138b7d830ebcb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a01adc12d8e07c06cdb0f03c56a455bf3"><td class="memItemLeft" align="right" valign="top">std::pair&lt; DataType, DataType &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a01adc12d8e07c06cdb0f03c56a455bf3">data_type_for_convolution</a> (const int16_t *conv_col, const int16_t *conv_row, size_t <a class="el" href="hwc_8hpp.xhtml#ab2c6b258f02add8fdf4cfc7c371dd772">size</a>)</td></tr>
+<tr class="memitem:a01adc12d8e07c06cdb0f03c56a455bf3"><td class="memItemLeft" align="right" valign="top">std::pair&lt; DataType, DataType &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a01adc12d8e07c06cdb0f03c56a455bf3">data_type_for_convolution</a> (const int16_t *conv_col, const int16_t *conv_row, size_t size)</td></tr>
 <tr class="memdesc:a01adc12d8e07c06cdb0f03c56a455bf3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate accurary required by the horizontal and vertical convolution computations.  <a href="namespacearm__compute.xhtml#a01adc12d8e07c06cdb0f03c56a455bf3">More...</a><br /></td></tr>
 <tr class="separator:a01adc12d8e07c06cdb0f03c56a455bf3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3992df9e8723140a53e49dc194d89ef5"><td class="memItemLeft" align="right" valign="top">DataType&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a3992df9e8723140a53e49dc194d89ef5">data_type_for_convolution_matrix</a> (const int16_t *conv, size_t <a class="el" href="hwc_8hpp.xhtml#ab2c6b258f02add8fdf4cfc7c371dd772">size</a>)</td></tr>
+<tr class="memitem:a3992df9e8723140a53e49dc194d89ef5"><td class="memItemLeft" align="right" valign="top">DataType&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a3992df9e8723140a53e49dc194d89ef5">data_type_for_convolution_matrix</a> (const int16_t *conv, size_t size)</td></tr>
 <tr class="memdesc:a3992df9e8723140a53e49dc194d89ef5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the accuracy required by the squared convolution calculation.  <a href="namespacearm__compute.xhtml#a3992df9e8723140a53e49dc194d89ef5">More...</a><br /></td></tr>
 <tr class="separator:a3992df9e8723140a53e49dc194d89ef5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afa7962c747457714d0944af80cb07058"><td class="memItemLeft" align="right" valign="top">PadStrideInfo&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#afa7962c747457714d0944af80cb07058">calculate_same_pad</a> (TensorShape input_shape, TensorShape weights_shape, PadStrideInfo conv_info)</td></tr>
@@ -225,15 +225,18 @@ Functions</h2></td></tr>
 <tr class="memitem:a5c7b26988083a67a91cd3e7962f38521"><td class="memItemLeft" align="right" valign="top">const std::pair&lt; unsigned int, unsigned int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a5c7b26988083a67a91cd3e7962f38521">deconvolution_output_dimensions</a> (unsigned int in_width, unsigned int in_height, unsigned int kernel_width, unsigned int kernel_height, unsigned int padx, unsigned int pady, unsigned int inner_border_right, unsigned int inner_border_top, unsigned int stride_x, unsigned int stride_y)</td></tr>
 <tr class="memdesc:a5c7b26988083a67a91cd3e7962f38521"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns expected width and height of the deconvolution's output tensor.  <a href="namespacearm__compute.xhtml#a5c7b26988083a67a91cd3e7962f38521">More...</a><br /></td></tr>
 <tr class="separator:a5c7b26988083a67a91cd3e7962f38521"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3d3d8bf7b86db4d7d4ebfe5b332f41b3"><td class="memItemLeft" align="right" valign="top">const std::pair&lt; unsigned int, unsigned int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a3d3d8bf7b86db4d7d4ebfe5b332f41b3">scaled_dimensions</a> (unsigned int width, unsigned int height, unsigned int kernel_width, unsigned int kernel_height, const PadStrideInfo &amp;pad_stride_info)</td></tr>
-<tr class="memdesc:a3d3d8bf7b86db4d7d4ebfe5b332f41b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns expected width and height of output scaled tensor depending on dimensions rounding mode.  <a href="namespacearm__compute.xhtml#a3d3d8bf7b86db4d7d4ebfe5b332f41b3">More...</a><br /></td></tr>
-<tr class="separator:a3d3d8bf7b86db4d7d4ebfe5b332f41b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac78192301777700de24d8c75667baf35"><td class="memItemLeft" align="right" valign="top">const std::pair&lt; unsigned int, unsigned int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ac78192301777700de24d8c75667baf35">scaled_dimensions</a> (unsigned int width, unsigned int height, unsigned int kernel_width, unsigned int kernel_height, const PadStrideInfo &amp;pad_stride_info, const Size2D &amp;dilation=Size2D(1U, 1U))</td></tr>
+<tr class="memdesc:ac78192301777700de24d8c75667baf35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns expected width and height of output scaled tensor depending on dimensions rounding mode.  <a href="namespacearm__compute.xhtml#ac78192301777700de24d8c75667baf35">More...</a><br /></td></tr>
+<tr class="separator:ac78192301777700de24d8c75667baf35"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9c92c867fc64454545668d87b20979eb"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a9c92c867fc64454545668d87b20979eb">string_from_format</a> (Format format)</td></tr>
 <tr class="memdesc:a9c92c867fc64454545668d87b20979eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert a tensor format into a string.  <a href="namespacearm__compute.xhtml#a9c92c867fc64454545668d87b20979eb">More...</a><br /></td></tr>
 <tr class="separator:a9c92c867fc64454545668d87b20979eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a106c203dd6af234d38452ea0ee7b2ddc"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a106c203dd6af234d38452ea0ee7b2ddc">string_from_channel</a> (Channel channel)</td></tr>
 <tr class="memdesc:a106c203dd6af234d38452ea0ee7b2ddc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert a channel identity into a string.  <a href="namespacearm__compute.xhtml#a106c203dd6af234d38452ea0ee7b2ddc">More...</a><br /></td></tr>
 <tr class="separator:a106c203dd6af234d38452ea0ee7b2ddc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa7755f939796ad7076886813ff89ed77"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#aa7755f939796ad7076886813ff89ed77">string_from_data_layout</a> (DataLayout dl)</td></tr>
+<tr class="memdesc:aa7755f939796ad7076886813ff89ed77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert a data layout identity into a string.  <a href="namespacearm__compute.xhtml#aa7755f939796ad7076886813ff89ed77">More...</a><br /></td></tr>
+<tr class="separator:aa7755f939796ad7076886813ff89ed77"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aefa1d9648995e5eccc693c690e27aa88"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#aefa1d9648995e5eccc693c690e27aa88">string_from_data_type</a> (DataType dt)</td></tr>
 <tr class="memdesc:aefa1d9648995e5eccc693c690e27aa88"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert a data type identity into a string.  <a href="namespacearm__compute.xhtml#aefa1d9648995e5eccc693c690e27aa88">More...</a><br /></td></tr>
 <tr class="separator:aefa1d9648995e5eccc693c690e27aa88"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -297,7 +300,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml">core</a></li><li class="navelem"><a class="el" href="arm__compute_2core_2_utils_8h.xhtml">Utils.h</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:55 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:38 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,7 +59,9 @@ using GCGlobalPoolingLayerFixture = GlobalPoolingLayerValidationFixture<GCTensor
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunGlobalPooling, GCGlobalPoolingLayerFixture<float>, framework::DatasetMode::ALL, combine(GlobalPoolingLayerDataset, framework::dataset::make("DataType", DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunGlobalPooling, GCGlobalPoolingLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(GlobalPoolingLayerDataset, framework::dataset::make("DataType",
+                                                                                                                  DataType::F32)),
+                                                                                                                  framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f32);
@@ -67,8 +69,9 @@ FIXTURE_DATA_TEST_CASE(RunGlobalPooling, GCGlobalPoolingLayerFixture<float>, fra
 TEST_SUITE_END()
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunGlobalPooling, GCGlobalPoolingLayerFixture<half>, framework::DatasetMode::ALL, combine(GlobalPoolingLayerDataset, framework::dataset::make("DataType",
-                                                                                                                 DataType::F16)))
+FIXTURE_DATA_TEST_CASE(RunGlobalPooling, GCGlobalPoolingLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(GlobalPoolingLayerDataset, framework::dataset::make("DataType",
+                                                                                                                 DataType::F16)),
+                                                                                                                 framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f16);

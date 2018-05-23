@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 #include "InstrumentsStats.h"
-#include "arm_compute/core/utils/misc/utility.h"
+#include "arm_compute/core/utils/misc/Utility.h"
 
 namespace arm_compute
 {

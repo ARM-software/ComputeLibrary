@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,138 +23,89 @@
  */
 #include "arm_compute/graph/Tensor.h"
 
-#include "arm_compute/core/Error.h"
-#include "arm_compute/core/Helpers.h"
-#include "arm_compute/core/Validate.h"
-#include "arm_compute/runtime/CL/CLTensor.h"
-#include "arm_compute/runtime/Tensor.h"
-#include "utils/TypePrinter.h"
-
-using namespace arm_compute::graph;
-
-namespace
+namespace arm_compute
 {
-template <typename TensorType>
-std::unique_ptr<arm_compute::ITensor> initialise_tensor(TensorInfo &info)
+namespace graph
 {
-    auto tensor = arm_compute::support::cpp14::make_unique<TensorType>();
-    tensor->allocator()->init(info);
-    return std::move(tensor);
-}
-
-template <typename TensorType>
-void tensor_allocate(arm_compute::ITensor &tensor)
-{
-    auto itensor = dynamic_cast<TensorType *>(&tensor);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(itensor);
-    itensor->allocator()->allocate();
-}
-} // namespace
-
-Tensor::Tensor(TensorInfo &&info)
-    : _target(TargetHint::DONT_CARE), _info(info), _accessor(nullptr), _tensor(nullptr)
+Tensor::Tensor(TensorID id, TensorDescriptor desc)
+    : _id(id), _desc(std::move(desc)), _handle(nullptr), _accessor(nullptr), _bound_edges()
 {
 }
 
-Tensor::Tensor(Tensor &&src) noexcept
-    : _target(src._target),
-      _info(std::move(src._info)),
-      _accessor(std::move(src._accessor)),
-      _tensor(std::move(src._tensor))
+TensorID Tensor::id() const
 {
+    return _id;
 }
 
-void Tensor::set_info(TensorInfo &&info)
+TensorDescriptor &Tensor::desc()
 {
-    _info = info;
+    return _desc;
+}
+
+const TensorDescriptor &Tensor::desc() const
+{
+    return _desc;
+}
+
+void Tensor::set_handle(std::unique_ptr<ITensorHandle> backend_tensor)
+{
+    _handle = std::move(backend_tensor);
+}
+
+ITensorHandle *Tensor::handle()
+{
+    return _handle.get();
+}
+
+void Tensor::set_accessor(std::unique_ptr<ITensorAccessor> accessor)
+{
+    _accessor = std::move(accessor);
+}
+
+ITensorAccessor *Tensor::accessor()
+{
+    return _accessor.get();
 }
 
 bool Tensor::call_accessor()
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(_accessor.get());
-    auto cl_tensor = dynamic_cast<arm_compute::CLTensor *>(_tensor.get());
-    if(cl_tensor != nullptr && cl_tensor->buffer() == nullptr)
+    // Early exit guard
+    if(!_accessor || !_handle)
     {
-        cl_tensor->map();
+        return false;
     }
-    bool retval = _accessor->access_tensor(*_tensor);
-    if(cl_tensor != nullptr)
+
+    // Map tensor
+    _handle->map(true);
+
+    // Return in case of null backend buffer
+    if(_handle->tensor().buffer() == nullptr)
     {
-        cl_tensor->unmap();
+        return false;
     }
-    return retval;
+
+    // Call accessor
+    _accessor->access_tensor(_handle->tensor());
+
+    // Unmap tensor
+    _handle->unmap();
+
+    return true;
 }
 
-bool Tensor::has_accessor() const
+void Tensor::bind_edge(EdgeID eid)
 {
-    return (_accessor != nullptr);
+    _bound_edges.insert(eid);
 }
 
-arm_compute::ITensor *Tensor::tensor()
+void Tensor::unbind_edge(EdgeID eid)
 {
-    return _tensor.get();
+    _bound_edges.erase(eid);
 }
 
-const arm_compute::ITensor *Tensor::tensor() const
+const std::set<EdgeID> Tensor::bound_edges() const
 {
-    return _tensor.get();
+    return _bound_edges;
 }
-
-const TensorInfo &Tensor::info() const
-{
-    return _info;
-}
-
-arm_compute::ITensor *Tensor::set_target(TargetHint target)
-{
-    if(_tensor != nullptr)
-    {
-        ARM_COMPUTE_ERROR_ON(target != _target);
-    }
-    else
-    {
-        switch(target)
-        {
-            case TargetHint::OPENCL:
-                _tensor = initialise_tensor<arm_compute::CLTensor>(_info);
-                break;
-            case TargetHint::NEON:
-                _tensor = initialise_tensor<arm_compute::Tensor>(_info);
-                break;
-            default:
-                ARM_COMPUTE_ERROR("Invalid TargetHint");
-        }
-        _target = target;
-    }
-    return _tensor.get();
-}
-
-void Tensor::allocate()
-{
-    ARM_COMPUTE_ERROR_ON_NULLPTR(_tensor.get());
-    switch(_target)
-    {
-        case TargetHint::OPENCL:
-            tensor_allocate<arm_compute::CLTensor>(*_tensor);
-            break;
-        case TargetHint::NEON:
-            tensor_allocate<arm_compute::Tensor>(*_tensor);
-            break;
-        default:
-            ARM_COMPUTE_ERROR("Invalid TargetHint");
-    }
-}
-
-void Tensor::allocate_and_fill_if_needed()
-{
-    allocate();
-    if(_accessor != nullptr)
-    {
-        call_accessor();
-    }
-}
-
-TargetHint Tensor::target() const
-{
-    return _target;
-}
+} // namespace graph
+} // namespace arm_compute

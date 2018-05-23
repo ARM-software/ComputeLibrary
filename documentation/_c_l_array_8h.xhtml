@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -123,7 +123,7 @@ $(document).ready(function(){initNavTree('_c_l_array_8h.xhtml','');});
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="_i_c_l_array_8h_source.xhtml">arm_compute/core/CL/ICLArray.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_open_c_l_8h_source.xhtml">arm_compute/core/CL/OpenCL.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="core_2_error_8h_source.xhtml">arm_compute/core/Error.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_error_8h_source.xhtml">arm_compute/core/Error.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">arm_compute/core/Types.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_scheduler_8h_source.xhtml">arm_compute/runtime/CL/CLScheduler.h</a>&quot;</code><br />
 </div>
@@ -144,26 +144,37 @@ Namespaces</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
 <tr class="memitem:a55e1c5ed17b7ee3762198a38eb50650a"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a55e1c5ed17b7ee3762198a38eb50650a">CLKeyPointArray</a> = CLArray&lt; KeyPoint &gt;</td></tr>
+<tr class="memdesc:a55e1c5ed17b7ee3762198a38eb50650a"><td class="mdescLeft">&#160;</td><td class="mdescRight">OpenCL <a class="el" href="classarm__compute_1_1_array.xhtml" title="Basic implementation of the IArray interface which allocates a static number of T values...">Array</a> of Key Points.  <a href="namespacearm__compute.xhtml#a55e1c5ed17b7ee3762198a38eb50650a">More...</a><br /></td></tr>
 <tr class="separator:a55e1c5ed17b7ee3762198a38eb50650a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0fd5f0310a26faad00b905bac3792726"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a0fd5f0310a26faad00b905bac3792726">CLCoordinates2DArray</a> = CLArray&lt; <a class="el" href="struct_coordinates2_d.xhtml">Coordinates2D</a> &gt;</td></tr>
+<tr class="memdesc:a0fd5f0310a26faad00b905bac3792726"><td class="mdescLeft">&#160;</td><td class="mdescRight">OpenCL <a class="el" href="classarm__compute_1_1_array.xhtml" title="Basic implementation of the IArray interface which allocates a static number of T values...">Array</a> of 2D <a class="el" href="classarm__compute_1_1_coordinates.xhtml" title="Coordinates of an item. ">Coordinates</a>.  <a href="namespacearm__compute.xhtml#a0fd5f0310a26faad00b905bac3792726">More...</a><br /></td></tr>
 <tr class="separator:a0fd5f0310a26faad00b905bac3792726"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab8d2c7efb7643ce8f9e5446dbe1da0b4"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ab8d2c7efb7643ce8f9e5446dbe1da0b4">CLDetectionWindowArray</a> = CLArray&lt; <a class="el" href="struct_detection_window.xhtml">DetectionWindow</a> &gt;</td></tr>
+<tr class="memdesc:ab8d2c7efb7643ce8f9e5446dbe1da0b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">OpenCL <a class="el" href="classarm__compute_1_1_array.xhtml" title="Basic implementation of the IArray interface which allocates a static number of T values...">Array</a> of Detection Windows.  <a href="namespacearm__compute.xhtml#ab8d2c7efb7643ce8f9e5446dbe1da0b4">More...</a><br /></td></tr>
 <tr class="separator:ab8d2c7efb7643ce8f9e5446dbe1da0b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7d756aef16b9c22456bb7aca8fbb4f4c"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a7d756aef16b9c22456bb7aca8fbb4f4c">CLROIArray</a> = CLArray&lt; ROI &gt;</td></tr>
+<tr class="memdesc:a7d756aef16b9c22456bb7aca8fbb4f4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">OpenCL <a class="el" href="classarm__compute_1_1_array.xhtml" title="Basic implementation of the IArray interface which allocates a static number of T values...">Array</a> of ROIs.  <a href="namespacearm__compute.xhtml#a7d756aef16b9c22456bb7aca8fbb4f4c">More...</a><br /></td></tr>
 <tr class="separator:a7d756aef16b9c22456bb7aca8fbb4f4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3f9ab729931f4e4fa36ff1683186d988"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a3f9ab729931f4e4fa36ff1683186d988">CLSize2DArray</a> = CLArray&lt; Size2D &gt;</td></tr>
+<tr class="memdesc:a3f9ab729931f4e4fa36ff1683186d988"><td class="mdescLeft">&#160;</td><td class="mdescRight">OpenCL <a class="el" href="classarm__compute_1_1_array.xhtml" title="Basic implementation of the IArray interface which allocates a static number of T values...">Array</a> of 2D Sizes.  <a href="namespacearm__compute.xhtml#a3f9ab729931f4e4fa36ff1683186d988">More...</a><br /></td></tr>
 <tr class="separator:a3f9ab729931f4e4fa36ff1683186d988"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa031694bb03711e09e25546ad2b643cc"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#aa031694bb03711e09e25546ad2b643cc">CLUInt8Array</a> = CLArray&lt; cl_uchar &gt;</td></tr>
+<tr class="memdesc:aa031694bb03711e09e25546ad2b643cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">OpenCL <a class="el" href="classarm__compute_1_1_array.xhtml" title="Basic implementation of the IArray interface which allocates a static number of T values...">Array</a> of uint8s.  <a href="namespacearm__compute.xhtml#aa031694bb03711e09e25546ad2b643cc">More...</a><br /></td></tr>
 <tr class="separator:aa031694bb03711e09e25546ad2b643cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7b4c4a79c73a3f85ba89aff03fddefa7"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a7b4c4a79c73a3f85ba89aff03fddefa7">CLUInt16Array</a> = CLArray&lt; cl_ushort &gt;</td></tr>
+<tr class="memdesc:a7b4c4a79c73a3f85ba89aff03fddefa7"><td class="mdescLeft">&#160;</td><td class="mdescRight">OpenCL <a class="el" href="classarm__compute_1_1_array.xhtml" title="Basic implementation of the IArray interface which allocates a static number of T values...">Array</a> of uint16s.  <a href="namespacearm__compute.xhtml#a7b4c4a79c73a3f85ba89aff03fddefa7">More...</a><br /></td></tr>
 <tr class="separator:a7b4c4a79c73a3f85ba89aff03fddefa7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1d7d89b7e990055dc95ed37dfb24da48"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a1d7d89b7e990055dc95ed37dfb24da48">CLUInt32Array</a> = CLArray&lt; cl_uint &gt;</td></tr>
+<tr class="memdesc:a1d7d89b7e990055dc95ed37dfb24da48"><td class="mdescLeft">&#160;</td><td class="mdescRight">OpenCL <a class="el" href="classarm__compute_1_1_array.xhtml" title="Basic implementation of the IArray interface which allocates a static number of T values...">Array</a> of uint32s.  <a href="namespacearm__compute.xhtml#a1d7d89b7e990055dc95ed37dfb24da48">More...</a><br /></td></tr>
 <tr class="separator:a1d7d89b7e990055dc95ed37dfb24da48"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5fb8cb339705102066c915d18f0701ac"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a5fb8cb339705102066c915d18f0701ac">CLInt16Array</a> = CLArray&lt; cl_short &gt;</td></tr>
+<tr class="memdesc:a5fb8cb339705102066c915d18f0701ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">OpenCL <a class="el" href="classarm__compute_1_1_array.xhtml" title="Basic implementation of the IArray interface which allocates a static number of T values...">Array</a> of int16s.  <a href="namespacearm__compute.xhtml#a5fb8cb339705102066c915d18f0701ac">More...</a><br /></td></tr>
 <tr class="separator:a5fb8cb339705102066c915d18f0701ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8a401a071524761c661a75969c951cf5"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a8a401a071524761c661a75969c951cf5">CLInt32Array</a> = CLArray&lt; cl_int &gt;</td></tr>
+<tr class="memdesc:a8a401a071524761c661a75969c951cf5"><td class="mdescLeft">&#160;</td><td class="mdescRight">OpenCL <a class="el" href="classarm__compute_1_1_array.xhtml" title="Basic implementation of the IArray interface which allocates a static number of T values...">Array</a> of int32s.  <a href="namespacearm__compute.xhtml#a8a401a071524761c661a75969c951cf5">More...</a><br /></td></tr>
 <tr class="separator:a8a401a071524761c661a75969c951cf5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a193a4859b365f3ef4e0d73a1e6b12c85"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a193a4859b365f3ef4e0d73a1e6b12c85">CLFloatArray</a> = CLArray&lt; cl_float &gt;</td></tr>
+<tr class="memdesc:a193a4859b365f3ef4e0d73a1e6b12c85"><td class="mdescLeft">&#160;</td><td class="mdescRight">OpenCL <a class="el" href="classarm__compute_1_1_array.xhtml" title="Basic implementation of the IArray interface which allocates a static number of T values...">Array</a> of floats.  <a href="namespacearm__compute.xhtml#a193a4859b365f3ef4e0d73a1e6b12c85">More...</a><br /></td></tr>
 <tr class="separator:a193a4859b365f3ef4e0d73a1e6b12c85"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
@@ -172,7 +183,7 @@ Typedefs</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_8bc26130589aa16388b5a02f17abf2c2.xhtml">runtime</a></li><li class="navelem"><a class="el" href="dir_b986aa98f9b6490bb4fc7918500346fb.xhtml">CL</a></li><li class="navelem"><a class="el" href="_c_l_array_8h.xhtml">CLArray.h</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:55 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:38 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

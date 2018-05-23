@@ -21,9 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/graph/Graph.h"
-#include "arm_compute/graph/Nodes.h"
-#include "arm_compute/graph/SubGraph.h"
+#include "arm_compute/graph.h"
 #include "support/ToolchainSupport.h"
 #include "utils/GraphUtils.h"
 #include "utils/Utils.h"
@@ -32,9 +30,8 @@
 #include <tuple>
 
 using namespace arm_compute::utils;
-using namespace arm_compute::graph;
+using namespace arm_compute::graph::frontend;
 using namespace arm_compute::graph_utils;
-using namespace arm_compute::logging;
 
 namespace
 {
@@ -43,7 +40,7 @@ namespace
 /** Example demonstrating how to implement Squeezenet's v1.1 network using the Compute Library's graph API
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] image, [optional] labels )
+ * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL, 2 = OpenCL with Tuner), [optional] Path to the weights folder, [optional] image, [optional] labels, [optional] Fast math for convolution layer (0 = DISABLED, 1 = ENABLED) )
  */
 class GraphSqueezenet_v1_1Example : public Example
 {
@@ -59,44 +56,56 @@ public:
         std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<CaffePreproccessor>(mean_rgb);
 
         // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
-        const int  int_target_hint = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
-        TargetHint target_hint     = set_target_hint(int_target_hint);
+        const int    target         = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
+        Target       target_hint    = set_target_hint(target);
+        FastMathHint fast_math_hint = FastMathHint::DISABLED;
 
         // Parse arguments
         if(argc < 2)
         {
             // Print help
-            std::cout << "Usage: " << argv[0] << " [target] [path_to_data] [image] [labels]\n\n";
+            std::cout << "Usage: " << argv[0] << " [target] [path_to_data] [image] [labels] [fast_math_hint]\n\n";
             std::cout << "No data folder provided: using random values\n\n";
         }
         else if(argc == 2)
         {
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " [path_to_data] [image] [labels]\n\n";
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " [path_to_data] [image] [labels] [fast_math_hint]\n\n";
             std::cout << "No data folder provided: using random values\n\n";
         }
         else if(argc == 3)
         {
             data_path = argv[2];
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " [image] [labels]\n\n";
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " [image] [labels] [fast_math_hint]\n\n";
             std::cout << "No image provided: using random values\n\n";
         }
         else if(argc == 4)
         {
             data_path = argv[2];
             image     = argv[3];
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " [labels]\n\n";
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " [labels] [fast_math_hint]\n\n";
             std::cout << "No text file with labels provided: skipping output accessor\n\n";
         }
-        else
+        else if(argc == 5)
         {
             data_path = argv[2];
             image     = argv[3];
             label     = argv[4];
+            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " " << argv[4] << " [fast_math_hint]\n\n";
+            std::cout << "No fast math info provided: disabling fast math\n\n";
+        }
+        else
+        {
+            data_path      = argv[2];
+            image          = argv[3];
+            label          = argv[4];
+            fast_math_hint = (std::strtol(argv[5], nullptr, 1) == 0) ? FastMathHint::DISABLED : FastMathHint::ENABLED;
         }
 
         graph << target_hint
-              << Tensor(TensorInfo(TensorShape(227U, 227U, 3U, 1U), 1, DataType::F32),
-                        get_input_accessor(image, std::move(preprocessor)))
+              << fast_math_hint
+              << InputLayer(TensorDescriptor(TensorShape(227U, 227U, 3U, 1U), DataType::F32),
+                            get_input_accessor(image, std::move(preprocessor)))
+              << ConvolutionMethod::DIRECT
               << ConvolutionLayer(
                   3U, 3U, 64U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/conv1_w.npy"),
@@ -104,65 +113,66 @@ public:
                   PadStrideInfo(2, 2, 0, 0))
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
               << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)))
+              << ConvolutionMethod::DEFAULT
               << ConvolutionLayer(
                   1U, 1U, 16U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire2_squeeze1x1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire2_squeeze1x1_b.npy"),
                   PadStrideInfo(1, 1, 0, 0))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-              << get_expand_fire_node(data_path, "fire2", 64U, 64U)
-              << ConvolutionLayer(
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+        graph << get_expand_fire_node(data_path, "fire2", 64U, 64U);
+        graph << ConvolutionLayer(
                   1U, 1U, 16U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire3_squeeze1x1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire3_squeeze1x1_b.npy"),
                   PadStrideInfo(1, 1, 0, 0))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-              << get_expand_fire_node(data_path, "fire3", 64U, 64U)
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)))
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+        graph << get_expand_fire_node(data_path, "fire3", 64U, 64U);
+        graph << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)))
               << ConvolutionLayer(
                   1U, 1U, 32U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire4_squeeze1x1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire4_squeeze1x1_b.npy"),
                   PadStrideInfo(1, 1, 0, 0))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-              << get_expand_fire_node(data_path, "fire4", 128U, 128U)
-              << ConvolutionLayer(
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+        graph << get_expand_fire_node(data_path, "fire4", 128U, 128U);
+        graph << ConvolutionLayer(
                   1U, 1U, 32U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire5_squeeze1x1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire5_squeeze1x1_b.npy"),
                   PadStrideInfo(1, 1, 0, 0))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-              << get_expand_fire_node(data_path, "fire5", 128U, 128U)
-              << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)))
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+        graph << get_expand_fire_node(data_path, "fire5", 128U, 128U);
+        graph << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)))
               << ConvolutionLayer(
                   1U, 1U, 48U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire6_squeeze1x1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire6_squeeze1x1_b.npy"),
                   PadStrideInfo(1, 1, 0, 0))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-              << get_expand_fire_node(data_path, "fire6", 192U, 192U)
-              << ConvolutionLayer(
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+        graph << get_expand_fire_node(data_path, "fire6", 192U, 192U);
+        graph << ConvolutionLayer(
                   1U, 1U, 48U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire7_squeeze1x1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire7_squeeze1x1_b.npy"),
                   PadStrideInfo(1, 1, 0, 0))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-              << get_expand_fire_node(data_path, "fire7", 192U, 192U)
-              << ConvolutionLayer(
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+        graph << get_expand_fire_node(data_path, "fire7", 192U, 192U);
+        graph << ConvolutionLayer(
                   1U, 1U, 64U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire8_squeeze1x1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire8_squeeze1x1_b.npy"),
                   PadStrideInfo(1, 1, 0, 0))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-              << get_expand_fire_node(data_path, "fire8", 256U, 256U)
-              << ConvolutionLayer(
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+        graph << get_expand_fire_node(data_path, "fire8", 256U, 256U);
+        graph << ConvolutionLayer(
                   1U, 1U, 64U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire9_squeeze1x1_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire9_squeeze1x1_b.npy"),
                   PadStrideInfo(1, 1, 0, 0))
-              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
-              << get_expand_fire_node(data_path, "fire9", 256U, 256U)
-              << ConvolutionLayer(
+              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
+        graph << get_expand_fire_node(data_path, "fire9", 256U, 256U);
+        graph << ConvolutionLayer(
                   1U, 1U, 1000U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/conv10_w.npy"),
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/conv10_b.npy"),
@@ -171,10 +181,12 @@ public:
               << PoolingLayer(PoolingLayerInfo(PoolingType::AVG))
               << FlattenLayer()
               << SoftmaxLayer()
-              << Tensor(get_output_accessor(label, 5));
+              << OutputLayer(get_output_accessor(label, 5));
 
-        // In order to enable the OpenCL tuner, graph_init() has to be called only when all nodes have been instantiated
-        graph.graph_init(int_target_hint == 2);
+        // Finalize graph
+        GraphConfig config;
+        config.use_tuner = (target == 2);
+        graph.finalize(target_hint, config);
     }
     void do_run() override
     {
@@ -183,12 +195,12 @@ public:
     }
 
 private:
-    Graph graph{};
+    Stream graph{ 0, "SqueezeNetV1.1" };
 
     BranchLayer get_expand_fire_node(const std::string &data_path, std::string &&param_path, unsigned int expand1_filt, unsigned int expand3_filt)
     {
         std::string total_path = "/cnn_data/squeezenet_v1_1_model/" + param_path + "_";
-        SubGraph    i_a;
+        SubStream   i_a(graph);
         i_a << ConvolutionLayer(
                 1U, 1U, expand1_filt,
                 get_weights_accessor(data_path, total_path + "expand1x1_w.npy"),
@@ -196,7 +208,7 @@ private:
                 PadStrideInfo(1, 1, 0, 0))
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
-        SubGraph i_b;
+        SubStream i_b(graph);
         i_b << ConvolutionLayer(
                 3U, 3U, expand3_filt,
                 get_weights_accessor(data_path, total_path + "expand3x3_w.npy"),
@@ -211,7 +223,7 @@ private:
 /** Main program for Squeezenet v1.1
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL), [optional] Path to the weights folder, [optional] image, [optional] labels )
+ * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL, 2 = OpenCL with Tuner), [optional] Path to the weights folder, [optional] image, [optional] labels, [optional] Fast math for convolution layer (0 = DISABLED, 1 = ENABLED) )
  */
 int main(int argc, char **argv)
 {

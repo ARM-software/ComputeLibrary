@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,15 +54,26 @@ namespace traits
 // Promote types
 // *INDENT-OFF*
 // clang-format off
+/** Promote a type */
 template <typename T> struct promote { };
-template <> struct promote<uint8_t> { using type = uint16_t; };
-template <> struct promote<int8_t> { using type = int16_t; };
-template <> struct promote<uint16_t> { using type = uint32_t; };
-template <> struct promote<int16_t> { using type = int32_t; };
-template <> struct promote<uint32_t> { using type = uint64_t; };
-template <> struct promote<int32_t> { using type = int64_t; };
-template <> struct promote<uint64_t> { using type = uint64_t; };
-template <> struct promote<int64_t> { using type = int64_t; };
+/** Promote uint8_t to uint16_t */
+template <> struct promote<uint8_t> { using type = uint16_t; /**< Promoted type */ };
+/** Promote int8_t to int16_t */
+template <> struct promote<int8_t> { using type = int16_t; /**< Promoted type */ };
+/** Promote uint16_t to uint32_t */
+template <> struct promote<uint16_t> { using type = uint32_t; /**< Promoted type */ };
+/** Promote int16_t to int32_t */
+template <> struct promote<int16_t> { using type = int32_t; /**< Promoted type */ };
+/** Promote uint32_t to uint64_t */
+template <> struct promote<uint32_t> { using type = uint64_t; /**< Promoted type */ };
+/** Promote int32_t to int64_t */
+template <> struct promote<int32_t> { using type = int64_t; /**< Promoted type */ };
+/** Promote float to float */
+template <> struct promote<float> { using type = float; /**< Promoted type */ };
+/** Promote half to half */
+template <> struct promote<half> { using type = half; /**< Promoted type */ };
+
+/** Get promoted type */
 template <typename T>
 using promote_t = typename promote<T>::type;
 // clang-format on
@@ -281,6 +292,7 @@ constexpr int clz(T value)
     return __builtin_clz(value) - (32 - std::numeric_limits<unsigned_T>::digits);
 }
 
+/** Constant expressions */
 template <typename T>
 struct constant_expr
 {
@@ -362,6 +374,7 @@ struct constant_expr
         return static_cast<T>(std::min<U>(std::max<U>(val, static_cast<U>(std::numeric_limits<T>::min())), static_cast<U>(std::numeric_limits<T>::max())));
     }
 };
+/** Functions */
 struct functions
 {
     /** Output stream operator

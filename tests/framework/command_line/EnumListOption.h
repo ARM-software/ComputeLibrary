@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,7 +60,12 @@ public:
     EnumListOption(std::string name, std::set<T> allowed_values, std::initializer_list<T> &&default_values);
 
     bool parse(std::string value) override;
-    std::string           help() const override;
+    std::string help() const override;
+
+    /** Get the values of the option.
+     *
+     * @return a list of the selected option values.
+     */
     const std::vector<T> &value() const;
 
 private:

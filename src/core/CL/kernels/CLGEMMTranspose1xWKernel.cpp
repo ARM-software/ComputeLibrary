@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/CL/kernels/CLGEMMTranspose1xWKernel.h"
 
+#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/AccessWindowTranspose.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
@@ -70,24 +71,21 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     // Configure kernel window
     Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
 
-    if((win.x().end() / scale_x) == 0)
-    {
-        return std::make_pair(ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Transposed shape would be 0 in the second dimension"), win);
-    }
-
     AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
-    window_changed = window_changed || update_window_and_padding(win, input_access);
+
+    // Output tensor auto inizialitation if not yet initialized
+    auto_init_if_empty(*output, input->clone()->set_tensor_shape(compute_transpose1xW_with_element_size_shape(*input, mult_transpose1xW_width)));
 
     // Configure window in case of configured output
-    if(output->total_size() != 0)
-    {
-        AccessWindowTranspose output_access(output, 0, 0, num_elems_processed_per_iteration, 1, scale_x, 1.f / scale_x);
-        window_changed = window_changed || update_window_and_padding(win, output_access);
-        output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), input->tensor_shape()));
-    }
+    AccessWindowStatic output_access(output, 0, 0, ceil_to_multiple(output->dimension(0), scale_x), output->dimension(1));
+    window_changed = window_changed || update_window_and_padding(win, input_access, output_access);
+    output_access.set_valid_region(win, ValidRegion(Coordinates(0, 0), input->tensor_shape()));
+
+    // Collapse along the Z direction
+    Window collapsed = win.collapse(win, Window::DimZ);
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
-    return std::make_pair(err, win);
+    return std::make_pair(err, collapsed);
 }
 } // namespace
 
@@ -151,15 +149,15 @@ void CLGEMMTranspose1xWKernel::run(const Window &window, cl::CommandQueue &queue
     out_window.set(Window::DimX, window.y());
     out_window.set(Window::DimY, window.x());
 
-    Window in_slice  = window.first_slice_window_2D();
-    Window out_slice = out_window.first_slice_window_2D();
+    Window in_slice  = window.first_slice_window_3D();
+    Window out_slice = out_window.first_slice_window_3D();
 
     do
     {
         unsigned int idx = 0;
-        add_2D_tensor_argument(idx, _input, in_slice);
-        add_2D_tensor_argument(idx, _output, out_slice);
+        add_3D_tensor_argument(idx, _input, in_slice);
+        add_3D_tensor_argument(idx, _output, out_slice);
         enqueue(queue, *this, in_slice, _lws_hint);
     }
-    while(window.slide_window_slice_2D(in_slice) && out_window.slide_window_slice_2D(out_slice));
+    while(window.slide_window_slice_3D(in_slice) && out_window.slide_window_slice_3D(out_slice));
 }

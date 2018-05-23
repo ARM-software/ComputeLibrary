@@ -34,13 +34,16 @@ namespace arm_compute
 {
 namespace test
 {
+namespace benchmark
+{
 /** Fixture that can be used for NEON and CL */
 template <typename TensorType, typename Function, typename Accessor>
 class ConvolutionLayerFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape src_shape, TensorShape weights_shape, TensorShape biases_shape, TensorShape dst_shape, PadStrideInfo info, DataType data_type, int batches)
+    void setup(TensorShape src_shape, TensorShape weights_shape, TensorShape biases_shape, TensorShape dst_shape, PadStrideInfo info, Size2D dilation, ActivationLayerInfo act_info, DataType data_type,
+               int batches)
     {
         // Set batched in source and destination shapes
         const unsigned int fixed_point_position = 4;
@@ -55,7 +58,7 @@ public:
         dst     = create_tensor<TensorType>(dst_shape, data_type, 1, fixed_point_position);
 
         // Create and configure function
-        conv_layer.configure(&src, &weights, &biases, &dst, info);
+        conv_layer.configure(&src, &weights, &biases, &dst, info, WeightsInfo(), dilation, act_info);
 
         // Allocate tensors
         src.allocator()->allocate();
@@ -90,6 +93,7 @@ private:
     TensorType dst{};
     Function   conv_layer{};
 };
+} // namespace benchmark
 } // namespace test
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_TEST_CONVOLUTIONLAYERFIXTURE */

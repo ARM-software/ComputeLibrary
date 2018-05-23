@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -135,12 +135,12 @@ Collaboration diagram for GCFullyConnectedLayer:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a72b2bdf0cae7f6e47b0d5f957de6d304"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_fully_connected_layer.xhtml#a72b2bdf0cae7f6e47b0d5f957de6d304">GCFullyConnectedLayer</a> ()</td></tr>
-<tr class="memdesc:a72b2bdf0cae7f6e47b0d5f957de6d304"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#a72b2bdf0cae7f6e47b0d5f957de6d304">More...</a><br /></td></tr>
-<tr class="separator:a72b2bdf0cae7f6e47b0d5f957de6d304"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a68a5db52b1ed7f7ca1d619ac1263ab38"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_fully_connected_layer.xhtml#a68a5db52b1ed7f7ca1d619ac1263ab38">configure</a> (const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *input, const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *weights, const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *biases, <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *output, bool transpose_weights=true, bool are_weights_reshaped=false)</td></tr>
-<tr class="memdesc:a68a5db52b1ed7f7ca1d619ac1263ab38"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the input and output tensors.  <a href="#a68a5db52b1ed7f7ca1d619ac1263ab38">More...</a><br /></td></tr>
-<tr class="separator:a68a5db52b1ed7f7ca1d619ac1263ab38"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac0ce422247b7eae1a1931b9717c86ba5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_fully_connected_layer.xhtml#ac0ce422247b7eae1a1931b9717c86ba5">GCFullyConnectedLayer</a> (std::shared_ptr&lt; <a class="el" href="classarm__compute_1_1_i_memory_manager.xhtml">IMemoryManager</a> &gt; memory_manager=nullptr)</td></tr>
+<tr class="memdesc:ac0ce422247b7eae1a1931b9717c86ba5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#ac0ce422247b7eae1a1931b9717c86ba5">More...</a><br /></td></tr>
+<tr class="separator:ac0ce422247b7eae1a1931b9717c86ba5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62aa742a849322e6955bf78f4acebe88"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_fully_connected_layer.xhtml#a62aa742a849322e6955bf78f4acebe88">configure</a> (const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *input, const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *weights, const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *biases, <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *output, bool transpose_weights=true, bool are_weights_reshaped=false, bool retain_internal_weights=false)</td></tr>
+<tr class="memdesc:a62aa742a849322e6955bf78f4acebe88"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the input and output tensors.  <a href="#a62aa742a849322e6955bf78f4acebe88">More...</a><br /></td></tr>
+<tr class="separator:a62aa742a849322e6955bf78f4acebe88"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad1717410afd0be936c6213a63c8005fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_fully_connected_layer.xhtml#ad1717410afd0be936c6213a63c8005fb">run</a> () override</td></tr>
 <tr class="memdesc:ad1717410afd0be936c6213a63c8005fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the kernels contained in the function.  <a href="#ad1717410afd0be936c6213a63c8005fb">More...</a><br /></td></tr>
 <tr class="separator:ad1717410afd0be936c6213a63c8005fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -148,6 +148,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_function.xhtml#ab921ecc3f3f6ae2b4bd61f3e1998d8c4">~IFunction</a> ()=default</td></tr>
 <tr class="memdesc:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#ab921ecc3f3f6ae2b4bd61f3e1998d8c4">More...</a><br /></td></tr>
 <tr class="separator:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a820f7291c24155a2980512fae45aac26 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c24155a2980512fae45aac26">prepare</a> ()</td></tr>
+<tr class="memdesc:a820f7291c24155a2980512fae45aac26 inherit pub_methods_classarm__compute_1_1_i_function"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prepare the function for executing.  <a href="#a820f7291c24155a2980512fae45aac26">More...</a><br /></td></tr>
+<tr class="separator:a820f7291c24155a2980512fae45aac26 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Basic function to compute a Fully Connected layer on OpenGL ES. </p>
@@ -160,16 +163,17 @@ Public Member Functions</h2></td></tr>
 </ol>
 <dl class="section note"><dt>Note</dt><dd>The fully connected layer accepts "weights" tensors only with 2 dimensions. </dd></dl>
 
-<p>Definition at line <a class="el" href="_g_c_fully_connected_layer_8h_source.xhtml#l00062">62</a> of file <a class="el" href="_g_c_fully_connected_layer_8h_source.xhtml">GCFullyConnectedLayer.h</a>.</p>
+<p>Definition at line <a class="el" href="_g_c_fully_connected_layer_8h_source.xhtml#l00063">63</a> of file <a class="el" href="_g_c_fully_connected_layer_8h_source.xhtml">GCFullyConnectedLayer.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a72b2bdf0cae7f6e47b0d5f957de6d304"></a>
+<a class="anchor" id="ac0ce422247b7eae1a1931b9717c86ba5"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname"><a class="el" href="classarm__compute_1_1_g_c_fully_connected_layer.xhtml">GCFullyConnectedLayer</a> </td>
           <td>(</td>
-          <td class="paramname"></td><td>)</td>
+          <td class="paramtype">std::shared_ptr&lt; <a class="el" href="classarm__compute_1_1_i_memory_manager.xhtml">IMemoryManager</a> &gt;&#160;</td>
+          <td class="paramname"><em>memory_manager</em> = <code>nullptr</code></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -180,7 +184,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a68a5db52b1ed7f7ca1d619ac1263ab38"></a>
+<a class="anchor" id="a62aa742a849322e6955bf78f4acebe88"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -218,7 +222,13 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>are_weights_reshaped</em> = <code>false</code>&#160;</td>
+          <td class="paramname"><em>are_weights_reshaped</em> = <code>false</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>retain_internal_weights</em> = <code>false</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -237,6 +247,7 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor. Data type supported: Same as <code>input</code>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">transpose_weights</td><td>(Optional) Transpose weights if true. Defaults to true. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">are_weights_reshaped</td><td>(Optional) Reshape the weights tensor if false. Defaults to false. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">retain_internal_weights</td><td>(Optional) Retain internal reshaped weights. Defaults to false. Used for reconfiguration purposes. </td></tr>
   </table>
   </dd>
 </dl>
@@ -274,7 +285,9 @@ Public Member Functions</h2></td></tr>
 <li>All the kernels are enqueued on the queue associated with <a class="el" href="classarm__compute_1_1_c_l_scheduler.xhtml" title="Provides global access to a CL context and command queue. ">CLScheduler</a>.</li>
 <li>The queue is then flushed.</li>
 </ul>
-<dl class="section note"><dt>Note</dt><dd>The function will not block until the kernels are executed. It is the user's responsibility to wait. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The function will not block until the kernels are executed. It is the user's responsibility to wait. </dd>
+<dd>
+Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c24155a2980512fae45aac26" title="Prepare the function for executing. ">prepare()</a> on first run if hasn't been done </dd></dl>
 
 <p>Implements <a class="el" href="classarm__compute_1_1_i_function.xhtml#a18954417d3124a8095783ea13dc6d00b">IFunction</a>.</p>
 
@@ -289,7 +302,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_g_c_fully_connected_layer.xhtml">GCFullyConnectedLayer</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:58 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:41 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

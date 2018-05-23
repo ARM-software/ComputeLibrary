@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,6 +49,37 @@ constexpr AbsoluteTolerance<float> tolerance_f32(0.00001f);
 
 TEST_SUITE(CL)
 TEST_SUITE(L2NormalizeLayer)
+
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+    framework::dataset::make("InputInfo",  { TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Mismatching data type input/output
+                                             TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Mismatching shape input/output
+                                             TensorInfo(TensorShape(128U, 64U), 2, DataType::F32), // Number of Input channels != 1
+                                             TensorInfo(TensorShape(128U, 64U), 1, DataType::S16), // DataType != F32
+                                             TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Axis >= num_max_dimensions
+                                             TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Axis > 0
+                                             TensorInfo(TensorShape(128U, 64U), 1, DataType::F32)
+                                           }),
+    framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(128U, 64U), 1, DataType::F16),
+                                             TensorInfo(TensorShape(256U, 64U), 1, DataType::F32),
+                                             TensorInfo(TensorShape(128U, 64U), 1, DataType::F32),
+                                             TensorInfo(TensorShape(128U, 64U), 1, DataType::S16),
+                                             TensorInfo(TensorShape(128U, 64U), 1, DataType::F32),
+                                             TensorInfo(TensorShape(128U, 64U), 1, DataType::F32),
+                                             TensorInfo(TensorShape(128U, 64U), 1, DataType::F32)
+                                           })),
+    framework::dataset::make("Axis",       { 0U, 0U, 0U, 0U, static_cast<unsigned int>(TensorShape::num_max_dimensions), 1U, 0U })),
+    framework::dataset::make("Expected",   { false, false, false, false, false, false, true })),
+    input_info, output_info, axis, expected)
+{
+    bool is_valid = bool(CLL2NormalizeLayer::validate(&input_info.clone()->set_is_resizable(false),
+                                                      &output_info.clone()->set_is_resizable(false),
+                                                      axis));
+    ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
 
 template <typename T>
 using CLL2NormalizeLayerFixture = L2NormalizeLayerValidationFixture<CLTensor, CLAccessor, CLL2NormalizeLayer, T>;

@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -119,11 +119,11 @@ $(document).ready(function(){initNavTree('graph__mobilenet__qasymm8_8cpp.xhtml',
 <div class="title">graph_mobilenet_qasymm8.cpp File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="_graph_8h_source.xhtml">arm_compute/graph/Graph.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_nodes_8h_source.xhtml">arm_compute/graph/Nodes.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="graph_8h_source.xhtml">arm_compute/graph.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_toolchain_support_8h_source.xhtml">support/ToolchainSupport.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_graph_utils_8h_source.xhtml">utils/GraphUtils.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="utils_2_utils_8h_source.xhtml">utils/Utils.h</a>&quot;</code><br />
+<code>#include &lt;cstdlib&gt;</code><br />
 </div>
 <p><a href="graph__mobilenet__qasymm8_8cpp_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -162,13 +162,13 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">argc</td><td>Number of arguments </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">argv</td><td>Arguments ( [optional] Path to the weights folder, [optional] npy_input, [optional] labels ) </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">argv</td><td>Arguments ( [optional] Path to the weights folder, [optional] npy_input, [optional] labels, [optional] Fast math for convolution layer (0 = DISABLED, 1 = ENABLED) ) </td></tr>
   </table>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="graph__mobilenet__qasymm8_8cpp_source.xhtml#l00226">226</a> of file <a class="el" href="graph__mobilenet__qasymm8_8cpp_source.xhtml">graph_mobilenet_qasymm8.cpp</a>.</p>
-<div class="fragment"><div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;{</div><div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;    <span class="keywordflow">return</span> utils::run_example&lt;GraphMobileNetQASYMM8Example&gt;(argc, argv);</div><div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;}</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="graph__mobilenet__qasymm8_8cpp_source.xhtml#l00236">236</a> of file <a class="el" href="graph__mobilenet__qasymm8_8cpp_source.xhtml">graph_mobilenet_qasymm8.cpp</a>.</p>
+<div class="fragment"><div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;{</div><div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;    <span class="keywordflow">return</span> arm_compute::utils::run_example&lt;GraphMobileNetQASYMM8Example&gt;(argc, argv);</div><div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
 </div><!-- contents -->
@@ -177,7 +177,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_d28a4824dc47e487b107a5db32ef43c4.xhtml">examples</a></li><li class="navelem"><a class="el" href="graph__mobilenet__qasymm8_8cpp.xhtml">graph_mobilenet_qasymm8.cpp</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:55 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:38 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

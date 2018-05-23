@@ -30,7 +30,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/misc/ICloneable.h"
-#include "arm_compute/core/utils/misc/utility.h"
+#include "arm_compute/core/utils/misc/Utility.h"
 
 #include <cstddef>
 
@@ -97,6 +97,13 @@ public:
      * @return Reference to this ITensorInfo object
      */
     virtual ITensorInfo &set_quantization_info(const QuantizationInfo &quantization_info) = 0;
+    /** Set the data layout of the tensor.
+     *
+     * @param[in] data_layout DataLayout containing the layout data information.
+     *
+     * @return Reference to this ITensorInfo object
+     */
+    virtual ITensorInfo &set_data_layout(const DataLayout &data_layout) = 0;
     /** Resets the padding settings of the tensor.
     *
     * @return Reference to this ITensorInfo object
@@ -125,6 +132,13 @@ public:
      * @return Dimension of the requested dimension
      */
     virtual size_t dimension(size_t index) const = 0;
+    /** Return the size of the requested data layout dimension
+     *
+     * @param[in] dimension DataLayoutDimension of the dimension
+     *
+     * @return Dimension of the requested dimension
+     */
+    virtual size_t dimension(DataLayoutDimension dimension) const = 0;
     /** The strides in bytes for accessing each dimension of the tensor
      *
      * @return Strides in bytes for each tensor dimension
@@ -222,6 +236,11 @@ public:
     * @return A QuantizationInfo containing the scale and offset.
     */
     virtual QuantizationInfo quantization_info() const = 0;
+    /** Get the data layout of the tensor.
+    *
+    * @return A DataLayout containing the layout data information.
+    */
+    virtual DataLayout data_layout() const = 0;
 
     /** If infos are broadcast compatible tensor info's, return the broadcasted shape and the intersection of
      * the broadcasted valid regions of the tensors.

@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -127,12 +127,12 @@ $(document).ready(function(){initNavTree('benchmark_2_n_e_o_n_2_normalization_la
 <code>#include &quot;<a class="el" href="runtime_2_tensor_8h_source.xhtml">arm_compute/runtime/Tensor.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_tensor_allocator_8h_source.xhtml">arm_compute/runtime/TensorAllocator.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_accessor_8h_source.xhtml">tests/NEON/Accessor.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="benchmark_2fixtures_2_normalization_layer_fixture_8h_source.xhtml">tests/benchmark/fixtures/NormalizationLayerFixture.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_alex_net_normalization_layer_dataset_8h_source.xhtml">tests/datasets/system_tests/alexnet/AlexNetNormalizationLayerDataset.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_goog_le_net_inception_v1_normalization_layer_dataset_8h_source.xhtml">tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1NormalizationLayerDataset.h</a>&quot;</code><br />
+<code>#include &quot;tests/benchmark/fixtures/NormalizationLayerFixture.h&quot;</code><br />
+<code>#include &quot;tests/datasets/system_tests/alexnet/AlexNetNormalizationLayerDataset.h&quot;</code><br />
+<code>#include &quot;tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1NormalizationLayerDataset.h&quot;</code><br />
 <code>#include &quot;<a class="el" href="tests_2framework_2_macros_8h_source.xhtml">tests/framework/Macros.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_datasets_8h_source.xhtml">tests/framework/datasets/Datasets.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_type_printer_8h_source.xhtml">utils/TypePrinter.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="utils_2_type_printer_8h_source.xhtml">utils/TypePrinter.h</a>&quot;</code><br />
 </div>
 <p><a href="benchmark_2_n_e_o_n_2_normalization_layer_8cpp_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -143,22 +143,24 @@ Namespaces</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacearm__compute_1_1test"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml">arm_compute::test</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:namespacearm__compute_1_1test_1_1benchmark"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml">arm_compute::test::benchmark</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:acc2c4764a300b505b50e9ba0642eff2b"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#acc2c4764a300b505b50e9ba0642eff2b">NENormalizationLayerFixture</a> = NormalizationLayerFixture&lt; Tensor, NENormalizationLayer, Accessor &gt;</td></tr>
+<tr class="memitem:acc2c4764a300b505b50e9ba0642eff2b"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#acc2c4764a300b505b50e9ba0642eff2b">NENormalizationLayerFixture</a> = NormalizationLayerFixture&lt; Tensor, NENormalizationLayer, Accessor &gt;</td></tr>
 <tr class="separator:acc2c4764a300b505b50e9ba0642eff2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a3d815590d056717dde89027c469fba5a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a3d815590d056717dde89027c469fba5a">REGISTER_FIXTURE_DATA_TEST_CASE</a> (AlexNetNormalizationLayer, NENormalizationLayerFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(datasets::AlexNetNormalizationLayerDataset(), data_types), framework::dataset::make(&quot;Batches&quot;, 1)))</td></tr>
-<tr class="separator:a3d815590d056717dde89027c469fba5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a04a6f03a4f0b85f507735cd409a8b74d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a04a6f03a4f0b85f507735cd409a8b74d">REGISTER_FIXTURE_DATA_TEST_CASE</a> (GoogLeNetInceptionV1NormalizationLayer, NENormalizationLayerFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1NormalizationLayerDataset(), data_types), framework::dataset::make(&quot;Batches&quot;, 1)))</td></tr>
-<tr class="separator:a04a6f03a4f0b85f507735cd409a8b74d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a962c45074ad2b94899bc7003b3db0509"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a962c45074ad2b94899bc7003b3db0509">REGISTER_FIXTURE_DATA_TEST_CASE</a> (AlexNetNormalizationLayer, NENormalizationLayerFixture, framework::DatasetMode::NIGHTLY, framework::dataset::combine(framework::dataset::combine(datasets::AlexNetNormalizationLayerDataset(), data_types), framework::dataset::make(&quot;Batches&quot;,{4, 8})))</td></tr>
-<tr class="separator:a962c45074ad2b94899bc7003b3db0509"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab17878545b689878d626f8e2298d2b1b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#ab17878545b689878d626f8e2298d2b1b">REGISTER_FIXTURE_DATA_TEST_CASE</a> (GoogLeNetInceptionV1NormalizationLayer, NENormalizationLayerFixture, framework::DatasetMode::NIGHTLY, framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1NormalizationLayerDataset(), data_types), framework::dataset::make(&quot;Batches&quot;,{4, 8})))</td></tr>
-<tr class="separator:ab17878545b689878d626f8e2298d2b1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaa6f215191d7304e523d8bfab9bf517d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#aaa6f215191d7304e523d8bfab9bf517d">REGISTER_FIXTURE_DATA_TEST_CASE</a> (AlexNetNormalizationLayer, NENormalizationLayerFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(datasets::AlexNetNormalizationLayerDataset(), data_types), framework::dataset::make(&quot;Batches&quot;, 1)))</td></tr>
+<tr class="separator:aaa6f215191d7304e523d8bfab9bf517d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7afa86fe61a4d4a0de8ae9456fb3d9b8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a7afa86fe61a4d4a0de8ae9456fb3d9b8">REGISTER_FIXTURE_DATA_TEST_CASE</a> (GoogLeNetInceptionV1NormalizationLayer, NENormalizationLayerFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1NormalizationLayerDataset(), data_types), framework::dataset::make(&quot;Batches&quot;, 1)))</td></tr>
+<tr class="separator:a7afa86fe61a4d4a0de8ae9456fb3d9b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac39ee5dcf88090eda93bbdabc776a8b8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#ac39ee5dcf88090eda93bbdabc776a8b8">REGISTER_FIXTURE_DATA_TEST_CASE</a> (AlexNetNormalizationLayer, NENormalizationLayerFixture, framework::DatasetMode::NIGHTLY, framework::dataset::combine(framework::dataset::combine(datasets::AlexNetNormalizationLayerDataset(), data_types), framework::dataset::make(&quot;Batches&quot;,{4, 8})))</td></tr>
+<tr class="separator:ac39ee5dcf88090eda93bbdabc776a8b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d1ddd51bccc6748b9a05616bf0eb630"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a8d1ddd51bccc6748b9a05616bf0eb630">REGISTER_FIXTURE_DATA_TEST_CASE</a> (GoogLeNetInceptionV1NormalizationLayer, NENormalizationLayerFixture, framework::DatasetMode::NIGHTLY, framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1NormalizationLayerDataset(), data_types), framework::dataset::make(&quot;Batches&quot;,{4, 8})))</td></tr>
+<tr class="separator:a8d1ddd51bccc6748b9a05616bf0eb630"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -166,7 +168,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_4f2df8950dc650bf7cf9176fae02facc.xhtml">benchmark</a></li><li class="navelem"><a class="el" href="dir_ec05701f68bea22653d08da5856c9ffc.xhtml">NEON</a></li><li class="navelem"><a class="el" href="benchmark_2_n_e_o_n_2_normalization_layer_8cpp.xhtml">NormalizationLayer.cpp</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:56 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -122,6 +122,9 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_g_c_weights_resh
 </div><!--header-->
 <div class="contents">
 
+<p>GLES Compute kernel to perform reshaping on the weights used by convolution and locally connected layer.  
+ <a href="classarm__compute_1_1_g_c_weights_reshape_kernel.xhtml#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="_g_c_weights_reshape_kernel_8h_source.xhtml">GCWeightsReshapeKernel.h</a>&gt;</code></p>
 <div class="dynheader">
 Collaboration diagram for GCWeightsReshapeKernel:</div>
@@ -184,6 +187,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3c6173aecfebc9030bf8a0bee0c0ced8 inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_g_c_kernel.xhtml#a3c6173aecfebc9030bf8a0bee0c0ced8">set_lws_hint</a> (<a class="el" href="classarm__compute_1_1gles_1_1_n_d_range.xhtml">gles::NDRange</a> &amp;lws_hint)</td></tr>
 <tr class="memdesc:a3c6173aecfebc9030bf8a0bee0c0ced8 inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the Local-Workgroup-Size hint.  <a href="#a3c6173aecfebc9030bf8a0bee0c0ced8">More...</a><br /></td></tr>
 <tr class="separator:a3c6173aecfebc9030bf8a0bee0c0ced8 inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad5ba9d34a3a855bf1dd2e36316ff550a inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_g_c_kernel.xhtml#ad5ba9d34a3a855bf1dd2e36316ff550a">set_target</a> (<a class="el" href="namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3">GPUTarget</a> target)</td></tr>
+<tr class="memdesc:ad5ba9d34a3a855bf1dd2e36316ff550a inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the targeted GPU architecture.  <a href="#ad5ba9d34a3a855bf1dd2e36316ff550a">More...</a><br /></td></tr>
+<tr class="separator:ad5ba9d34a3a855bf1dd2e36316ff550a inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a646cd535a16835b246c3367a63d96250 inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3">GPUTarget</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_g_c_kernel.xhtml#a646cd535a16835b246c3367a63d96250">get_target</a> () const </td></tr>
+<tr class="memdesc:a646cd535a16835b246c3367a63d96250 inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the targeted GPU architecture.  <a href="#a646cd535a16835b246c3367a63d96250">More...</a><br /></td></tr>
+<tr class="separator:a646cd535a16835b246c3367a63d96250 inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classarm__compute_1_1_i_kernel"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1_i_kernel')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_kernel.xhtml">IKernel</a></td></tr>
 <tr class="memitem:a7250cb8cbaa4104a93a2d77155085507 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a7250cb8cbaa4104a93a2d77155085507">IKernel</a> ()</td></tr>
 <tr class="memdesc:a7250cb8cbaa4104a93a2d77155085507 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#a7250cb8cbaa4104a93a2d77155085507">More...</a><br /></td></tr>
@@ -202,8 +211,13 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a3f5646133956f06348b310ccc3d36353 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p>Definition at line <a class="el" href="_g_c_weights_reshape_kernel_8h_source.xhtml#l00031">31</a> of file <a class="el" href="_g_c_weights_reshape_kernel_8h_source.xhtml">GCWeightsReshapeKernel.h</a>.</p>
+<div class="textblock"><p>GLES Compute kernel to perform reshaping on the weights used by convolution and locally connected layer. </p>
+<p>Rearranges each 3-dimensional kernel to a single row leading to a matrix with linearized kernels. In combination with the <a class="el" href="classarm__compute_1_1_g_c_im2_col_kernel.xhtml">GCIm2ColKernel</a> can transform a convolution to a matrix multiplication.</p>
+<p>For example assuming a 3D weight kernel of 3x3 dimensions and depth of 2 we have: </p><p class="formulaDsp">
+\[ \left( \begin{array}{ccc} a000 &amp; a001 &amp; a002 \\ a010 &amp; a011 &amp; a012 \\ a020 &amp; a021 &amp; a022 \\ \end{array} \right) \left( \begin{array}{ccc} a100 &amp; a101 &amp; a102 \\ a110 &amp; a111 &amp; a112 \\ a120 &amp; a121 &amp; a122 \\ \end{array} \right) \rightarrow \left( \begin{array}{ccccccccc} a000 &amp; a001 &amp; a002 &amp; a010 &amp; a011 &amp; a012 &amp; a020 &amp; a021 &amp; a022 &amp; a100 &amp; a101 &amp; a102 &amp; a110 &amp; a111 &amp; a112 &amp; a120 &amp; a121 &amp; a122 \\ \end{array} \right) \]
+</p>
+ 
+<p>Definition at line <a class="el" href="_g_c_weights_reshape_kernel_8h_source.xhtml#l00054">54</a> of file <a class="el" href="_g_c_weights_reshape_kernel_8h_source.xhtml">GCWeightsReshapeKernel.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a29432f2725083d73e198001a805bb862"></a>
 <div class="memitem">
@@ -443,7 +457,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_g_c_weights_reshape_kernel.xhtml">GCWeightsReshapeKernel</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:58 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:41 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

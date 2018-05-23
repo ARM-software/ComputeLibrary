@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,6 +44,26 @@ void NEL2NormalizeLayer::configure(ITensor *input, ITensor *output, unsigned int
 
     // Allocate intermediate tensors
     _sumsq.allocator()->allocate();
+}
+
+Status NEL2NormalizeLayer::validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, float epsilon)
+{
+    TensorShape shape(input->tensor_shape());
+
+    // Create intermediate tensor info
+    TensorInfo sum_sq;
+    sum_sq.set_data_type(input->data_type());
+    sum_sq.set_tensor_shape(shape);
+
+    ARM_COMPUTE_RETURN_ON_ERROR(NEReductionOperation::validate(input, &sum_sq, axis, ReductionOperation::SUM_SQUARE));
+
+    // Reduce shape on axis (supported axis is 0)
+    shape.set(0, 1);
+    sum_sq.set_tensor_shape(shape);
+
+    ARM_COMPUTE_RETURN_ON_ERROR(NEL2NormalizeLayerKernel::validate(input, &sum_sq, output, axis, epsilon));
+
+    return Status{};
 }
 
 void NEL2NormalizeLayer::run()

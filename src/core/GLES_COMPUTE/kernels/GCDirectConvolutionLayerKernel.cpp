@@ -50,7 +50,8 @@ BorderSize             GCDirectConvolutionLayerKernel<kernel_size>::border_size(
 }
 
 template <unsigned int kernel_size>
-void GCDirectConvolutionLayerKernel<kernel_size>::configure(const IGCTensor *input, const IGCTensor *weights, const IGCTensor *bias, IGCTensor *output, const PadStrideInfo &conv_info)
+void GCDirectConvolutionLayerKernel<kernel_size>::configure(const IGCTensor *input, const IGCTensor *weights, const IGCTensor *bias, IGCTensor *output,
+                                                            const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON(weights->info()->dimension(2) != input->info()->dimension(2));
@@ -58,6 +59,7 @@ void GCDirectConvolutionLayerKernel<kernel_size>::configure(const IGCTensor *inp
     ARM_COMPUTE_ERROR_ON(weights->info()->num_dimensions() > 4);
     ARM_COMPUTE_ERROR_ON_MSG((kernel_size == 3 && std::get<0>(conv_info.stride()) > 2), "Strides larger than 2 not supported in 3x3 direct convolution!");
     ARM_COMPUTE_ERROR_ON(kernel_size != weights->info()->dimension(0));
+    ARM_COMPUTE_ERROR_ON(act_info.enabled() && act_info.activation() != ActivationLayerInfo::ActivationFunction::RELU && act_info.activation() != ActivationLayerInfo::ActivationFunction::LOGISTIC);
 
     if(bias != nullptr)
     {
@@ -105,6 +107,16 @@ void GCDirectConvolutionLayerKernel<kernel_size>::configure(const IGCTensor *inp
 
     std::string dt_name = (input->info()->data_type() == DataType::F32) ? "DATA_TYPE_FP32" : "DATA_TYPE_FP16";
     options.emplace(("#define " + dt_name));
+
+    // Activation information in case of a fused activation
+    if(act_info.enabled())
+    {
+        options.emplace("#define FUSED_ACTIVATION");
+        options.emplace(("#define " + string_from_activation_func(act_info.activation())));
+        options.emplace(("#define ACT_OP  " + lower_string(string_from_activation_func(act_info.activation())) + "_op"));
+        options.emplace(("#define A_VAL " + float_to_string_with_full_precision(act_info.a())));
+        options.emplace(("#define B_VAL " + float_to_string_with_full_precision(act_info.b())));
+    }
 
     unsigned int num_elems_read_per_iteration_x    = kernel_size * _conv_stride_x;
     unsigned int num_elems_read_per_iteration_y    = 1;

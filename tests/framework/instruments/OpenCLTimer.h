@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,8 @@
 #include "arm_compute/core/CL/OpenCL.h"
 #endif /* ARM_COMPUTE_CL */
 
+#include "arm_compute/graph/Workload.h"
+
 #include <list>
 
 namespace arm_compute
@@ -42,19 +44,30 @@ namespace framework
 class OpenCLTimer : public Instrument
 {
 public:
+    /** Construct an OpenCL timer.
+     *
+     * @param[in] scale_factor Measurement scale factor.
+     */
     OpenCLTimer(ScaleFactor scale_factor);
     std::string     id() const override;
+    void            test_start() override;
     void            start() override;
     void            stop() override;
+    void            test_stop() override;
     MeasurementsMap measurements() const override;
+
+private:
 #ifdef ARM_COMPUTE_CL
     struct kernel_info
     {
         cl::Event   event{}; /**< OpenCL event associated to the kernel enqueue */
         std::string name{};  /**< OpenCL Kernel name */
     };
-    std::list<kernel_info>                          kernels{};
-    std::function<decltype(clEnqueueNDRangeKernel)> real_function;
+    std::list<kernel_info>                          _kernels;
+    std::function<decltype(clEnqueueNDRangeKernel)> _real_function;
+    std::function<decltype(graph::execute_task)>    _real_graph_function;
+    std::string                                     _prefix;
+    bool                                            _timer_enabled;
 #endif /* ARM_COMPUTE_CL */
 
 private:

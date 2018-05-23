@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,7 @@
 using namespace arm_compute;
 
 ISimpleLifetimeManager::ISimpleLifetimeManager()
-    : _active_group(nullptr), _active_elements(), _finalized_groups()
+    : _active_group(nullptr), _active_elements(), _free_blobs(), _occupied_blobs(), _finalized_groups()
 {
 }
 
@@ -53,14 +53,21 @@ void ISimpleLifetimeManager::register_group(IMemoryGroup *group)
 void ISimpleLifetimeManager::start_lifetime(void *obj)
 {
     ARM_COMPUTE_ERROR_ON(obj == nullptr);
-    ARM_COMPUTE_ERROR_ON_MSG(std::find_if(std::begin(_active_elements), std::end(_active_elements), [&obj](const Element & e)
+    ARM_COMPUTE_ERROR_ON_MSG(_active_elements.find(obj) != std::end(_active_elements), "Memory object is already registered!");
+
+    // Check if there is a free blob
+    if(_free_blobs.empty())
     {
-        return obj == e.id;
-    }) != std::end(_active_elements),
-    "Memory object is already registered!");
+        _occupied_blobs.emplace_front(Blob{ obj, 0, { obj } });
+    }
+    else
+    {
+        _occupied_blobs.splice(std::begin(_occupied_blobs), _free_blobs, std::begin(_free_blobs));
+        _occupied_blobs.front().id = obj;
+    }
 
     // Insert object in groups and mark its finalized state to false
-    _active_elements.emplace_back(obj);
+    _active_elements.insert(std::make_pair(obj, obj));
 }
 
 void ISimpleLifetimeManager::end_lifetime(void *obj, void **handle, size_t size)
@@ -68,36 +75,50 @@ void ISimpleLifetimeManager::end_lifetime(void *obj, void **handle, size_t size)
     ARM_COMPUTE_ERROR_ON(obj == nullptr);
 
     // Find object
-    auto it = std::find_if(std::begin(_active_elements), std::end(_active_elements), [&obj](const Element & e)
-    {
-        return obj == e.id;
-    });
-    ARM_COMPUTE_ERROR_ON(it == std::end(_active_elements));
+    auto active_object_it = _active_elements.find(obj);
+    ARM_COMPUTE_ERROR_ON(active_object_it == std::end(_active_elements));
 
     // Update object fields and mark object as complete
-    it->handle = handle;
-    it->size   = size;
-    it->status = true;
+    Element &el = active_object_it->second;
+    el.handle   = handle;
+    el.size     = size;
+    el.status   = true;
+
+    // Find object in the occupied lists
+    auto occupied_blob_it = std::find_if(std::begin(_occupied_blobs), std::end(_occupied_blobs), [&obj](const Blob & b)
+    {
+        return obj == b.id;
+    });
+    ARM_COMPUTE_ERROR_ON(occupied_blob_it == std::end(_occupied_blobs));
+
+    // Update occupied blob and return as free
+    occupied_blob_it->bound_elements.insert(obj);
+    occupied_blob_it->max_size = std::max(occupied_blob_it->max_size, size);
+    occupied_blob_it->id       = nullptr;
+    _free_blobs.splice(std::begin(_free_blobs), _occupied_blobs, occupied_blob_it);
 
     // Check if all object are finalized and reset active group
     if(are_all_finalized())
     {
-        // Update finalized groups
-        _finalized_groups[_active_group].insert(std::end(_finalized_groups[_active_group]), std::begin(_active_elements), std::end(_active_elements));
+        ARM_COMPUTE_ERROR_ON(!_occupied_blobs.empty());
 
         // Update blobs and group mappings
         update_blobs_and_mappings();
 
+        // Update finalized groups
+        _finalized_groups[_active_group] = std::move(_active_elements);
+
         // Reset state
         _active_elements.clear();
         _active_group = nullptr;
+        _free_blobs.clear();
     }
 }
 
 bool ISimpleLifetimeManager::are_all_finalized() const
 {
-    return !std::any_of(std::begin(_active_elements), std::end(_active_elements), [](const Element e)
+    return !std::any_of(std::begin(_active_elements), std::end(_active_elements), [](const std::pair<void *, Element> &e)
     {
-        return !e.status;
+        return !e.second.status;
     });
 }

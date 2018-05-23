@@ -26,6 +26,7 @@
 #include "../Framework.h"
 #include "../Utils.h"
 
+#include "arm_compute/graph/INode.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
 #ifndef ARM_COMPUTE_CL
@@ -43,55 +44,8 @@ std::string OpenCLTimer::id() const
     return "OpenCLTimer";
 }
 
-/* Function to be used to intercept kernel enqueues and store their OpenCL Event */
-class Interceptor
-{
-public:
-    explicit Interceptor(OpenCLTimer &timer)
-        : _timer(timer)
-    {
-    }
-
-    cl_int operator()(
-        cl_command_queue command_queue,
-        cl_kernel        kernel,
-        cl_uint          work_dim,
-        const size_t    *gwo,
-        const size_t    *gws,
-        const size_t    *lws,
-        cl_uint          num_events_in_wait_list,
-        const cl_event *event_wait_list,
-        cl_event        *event)
-    {
-        ARM_COMPUTE_ERROR_ON_MSG(event != nullptr, "Not supported");
-        ARM_COMPUTE_UNUSED(event);
-
-        OpenCLTimer::kernel_info info;
-        cl::Kernel               cpp_kernel(kernel, true);
-        std::stringstream        ss;
-        ss << cpp_kernel.getInfo<CL_KERNEL_FUNCTION_NAME>();
-        if(gws != nullptr)
-        {
-            ss << " GWS[" << gws[0] << "," << gws[1] << "," << gws[2] << "]";
-        }
-        if(lws != nullptr)
-        {
-            ss << " LWS[" << lws[0] << "," << lws[1] << "," << lws[2] << "]";
-        }
-        info.name = ss.str();
-        cl_event tmp;
-        cl_int   retval = _timer.real_function(command_queue, kernel, work_dim, gwo, gws, lws, num_events_in_wait_list, event_wait_list, &tmp);
-        info.event      = tmp;
-        _timer.kernels.push_back(std::move(info));
-        return retval;
-    }
-
-private:
-    OpenCLTimer &_timer;
-};
-
 OpenCLTimer::OpenCLTimer(ScaleFactor scale_factor)
-    : real_function(CLSymbols::get().clEnqueueNDRangeKernel_ptr)
+    : _kernels(), _real_function(nullptr), _real_graph_function(nullptr), _prefix(), _timer_enabled(false)
 {
     auto                        q     = CLScheduler::get().queue();
     cl_command_queue_properties props = q.getInfo<CL_QUEUE_PROPERTIES>();
@@ -123,24 +77,97 @@ OpenCLTimer::OpenCLTimer(ScaleFactor scale_factor)
     }
 }
 
-void OpenCLTimer::start()
+void OpenCLTimer::test_start()
 {
-    kernels.clear();
     // Start intercepting enqueues:
-    CLSymbols::get().clEnqueueNDRangeKernel_ptr = Interceptor(*this);
+    ARM_COMPUTE_ERROR_ON(_real_function != nullptr);
+    ARM_COMPUTE_ERROR_ON(_real_graph_function != nullptr);
+    _real_function       = CLSymbols::get().clEnqueueNDRangeKernel_ptr;
+    _real_graph_function = graph::TaskExecutor::get().execute_function;
+    auto interceptor     = [this](
+                               cl_command_queue command_queue,
+                               cl_kernel        kernel,
+                               cl_uint          work_dim,
+                               const size_t    *gwo,
+                               const size_t    *gws,
+                               const size_t    *lws,
+                               cl_uint          num_events_in_wait_list,
+                               const cl_event * event_wait_list,
+                               cl_event *       event)
+    {
+        if(this->_timer_enabled)
+        {
+            ARM_COMPUTE_ERROR_ON_MSG(event != nullptr, "Not supported");
+            ARM_COMPUTE_UNUSED(event);
+
+            OpenCLTimer::kernel_info info;
+            cl::Kernel               cpp_kernel(kernel, true);
+            std::stringstream        ss;
+            ss << this->_prefix << cpp_kernel.getInfo<CL_KERNEL_FUNCTION_NAME>();
+            if(gws != nullptr)
+            {
+                ss << " GWS[" << gws[0] << "," << gws[1] << "," << gws[2] << "]";
+            }
+            if(lws != nullptr)
+            {
+                ss << " LWS[" << lws[0] << "," << lws[1] << "," << lws[2] << "]";
+            }
+            info.name = ss.str();
+            cl_event tmp;
+            cl_int   retval = this->_real_function(command_queue, kernel, work_dim, gwo, gws, lws, num_events_in_wait_list, event_wait_list, &tmp);
+            info.event      = tmp;
+            this->_kernels.push_back(std::move(info));
+            return retval;
+        }
+        else
+        {
+            return this->_real_function(command_queue, kernel, work_dim, gwo, gws, lws, num_events_in_wait_list, event_wait_list, event);
+        }
+    };
+
+    // Start intercepting tasks:
+    auto task_interceptor = [this](graph::ExecutionTask & task)
+    {
+        if(task.node != nullptr && !task.node->name().empty())
+        {
+            this->_prefix = task.node->name() + "/";
+        }
+        else
+        {
+            this->_prefix = "";
+        }
+        this->_real_graph_function(task);
+        this->_prefix = "";
+    };
+
+    CLSymbols::get().clEnqueueNDRangeKernel_ptr = interceptor;
+    graph::TaskExecutor::get().execute_function = task_interceptor;
 }
 
+void OpenCLTimer::start()
+{
+    _kernels.clear();
+    _timer_enabled = true;
+}
 void OpenCLTimer::stop()
 {
+    _timer_enabled = false;
+}
+
+void OpenCLTimer::test_stop()
+{
     // Restore real function
-    CLSymbols::get().clEnqueueNDRangeKernel_ptr = real_function;
+    CLSymbols::get().clEnqueueNDRangeKernel_ptr = _real_function;
+    graph::TaskExecutor::get().execute_function = _real_graph_function;
+    _real_graph_function                        = nullptr;
+    _real_function                              = nullptr;
 }
 
 Instrument::MeasurementsMap OpenCLTimer::measurements() const
 {
     MeasurementsMap measurements;
     unsigned int    kernel_number = 0;
-    for(auto kernel : kernels)
+    for(auto kernel : _kernels)
     {
         cl_ulong start = kernel.event.getProfilingInfo<CL_PROFILING_COMMAND_START>();
         cl_ulong end   = kernel.event.getProfilingInfo<CL_PROFILING_COMMAND_END>();

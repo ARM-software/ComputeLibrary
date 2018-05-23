@@ -9,5 +9,8 @@ var dir_9b109a3838d873f4037ee21889a49db8 =
     ] ],
     [ "CPPSortEuclideanDistanceKernel.h", "_c_p_p_sort_euclidean_distance_kernel_8h.xhtml", [
       [ "CPPSortEuclideanDistanceKernel", "classarm__compute_1_1_c_p_p_sort_euclidean_distance_kernel.xhtml", "classarm__compute_1_1_c_p_p_sort_euclidean_distance_kernel" ]
+    ] ],
+    [ "CPPUpsampleKernel.h", "_c_p_p_upsample_kernel_8h.xhtml", [
+      [ "CPPUpsampleKernel", "classarm__compute_1_1_c_p_p_upsample_kernel.xhtml", "classarm__compute_1_1_c_p_p_upsample_kernel" ]
     ] ]
 ];

@@ -46,6 +46,10 @@ template <int otr, int otc, int kr, int kc>
 template <typename T>
 unsigned int WinogradGEMM<otr, otc, kr, kc>::WeightsTransform<T>::get_window() const
 {
+  // When the weights transform supports multithreading, return the number
+  // of output channels. For now we return 1 to indicate that the weights must
+  // be transformed as a single block.
+  // return n_output_channels;
   return 1;
 }
 
@@ -56,6 +60,8 @@ void WinogradGEMM<otr, otc, kr, kc>::WeightsTransform<T>::run(
   const unsigned int start, const unsigned int stop
 )
 {
+  // When the weights transform supports multithreading call execute for a
+  // portion of the output channels.
   (void) start;
   (void) stop;
 

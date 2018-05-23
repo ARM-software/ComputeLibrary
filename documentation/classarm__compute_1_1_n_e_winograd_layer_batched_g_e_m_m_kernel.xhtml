@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -118,13 +118,16 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_n_e_winograd_lay
   <div class="summary">
 <a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-static-attribs">Static Public Attributes</a>  </div>
+<a href="#pub-static-methods">Static Public Member Functions</a>  </div>
   <div class="headertitle">
 <div class="title">NEWinogradLayerBatchedGEMMKernel&lt; TIn, TOut, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt; Class Template Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p><code>#include &lt;<a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml">NEWinogradLayerKernel.h</a>&gt;</code></p>
+<p>NEON kernel to perform Winograd.  
+ <a href="classarm__compute_1_1_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>&gt;</code></p>
 <div class="dynheader">
 Collaboration diagram for NEWinogradLayerBatchedGEMMKernel&lt; TIn, TOut, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;:</div>
 <div class="dyncontent">
@@ -135,10 +138,13 @@ Collaboration diagram for NEWinogradLayerBatchedGEMMKernel&lt; TIn, TOut, Output
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
 <tr class="memitem:aa2895a99d9a1efae7844264931a0d348"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml#aa2895a99d9a1efae7844264931a0d348">WinogradBase</a> = winograd::WinogradGEMM&lt; OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;</td></tr>
+<tr class="memdesc:aa2895a99d9a1efae7844264931a0d348"><td class="mdescLeft">&#160;</td><td class="mdescRight">Winograd base kernel.  <a href="#aa2895a99d9a1efae7844264931a0d348">More...</a><br /></td></tr>
 <tr class="separator:aa2895a99d9a1efae7844264931a0d348"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acd8461f7d784d4c09b73447f357e6b1a"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml#acd8461f7d784d4c09b73447f357e6b1a">WinogradConv</a> = typename WinogradBase::template Convolution&lt; TIn, TOut &gt;</td></tr>
+<tr class="memdesc:acd8461f7d784d4c09b73447f357e6b1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Winograd convolution kernel.  <a href="#acd8461f7d784d4c09b73447f357e6b1a">More...</a><br /></td></tr>
 <tr class="separator:acd8461f7d784d4c09b73447f357e6b1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a14ba69200a7c35d6bc6f12734c26775c"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml#a14ba69200a7c35d6bc6f12734c26775c">MultiGEMM</a> = winograd::BatchedBlockedGemm&lt; WinogradConv::M_BLOCK, WinogradConv::N_BLOCK, TIn, TOut &gt;</td></tr>
+<tr class="memdesc:a14ba69200a7c35d6bc6f12734c26775c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Winograd batched blocked GEMM operator.  <a href="#a14ba69200a7c35d6bc6f12734c26775c">More...</a><br /></td></tr>
 <tr class="separator:a14ba69200a7c35d6bc6f12734c26775c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
@@ -162,6 +168,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:acc6e68224d8ca361c5ea8517ade35358"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allow instances of this class to be moved.  <a href="#acc6e68224d8ca361c5ea8517ade35358">More...</a><br /></td></tr>
 <tr class="separator:acc6e68224d8ca361c5ea8517ade35358"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a64dc2c862b018936c5e8ac34c8a6deef"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml#a64dc2c862b018936c5e8ac34c8a6deef">~NEWinogradLayerBatchedGEMMKernel</a> ()=default</td></tr>
+<tr class="memdesc:a64dc2c862b018936c5e8ac34c8a6deef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default destructor.  <a href="#a64dc2c862b018936c5e8ac34c8a6deef">More...</a><br /></td></tr>
 <tr class="separator:a64dc2c862b018936c5e8ac34c8a6deef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a30cc0c6310d217086f60f2c03bea912e"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml#a30cc0c6310d217086f60f2c03bea912e">get_number_gemms</a> () const override</td></tr>
 <tr class="memdesc:a30cc0c6310d217086f60f2c03bea912e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of GEMMs to compute.  <a href="#a30cc0c6310d217086f60f2c03bea912e">More...</a><br /></td></tr>
@@ -202,19 +209,19 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a3f5646133956f06348b310ccc3d36353 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">The maximum window the kernel can be executed on.  <a href="#a3f5646133956f06348b310ccc3d36353">More...</a><br /></td></tr>
 <tr class="separator:a3f5646133956f06348b310ccc3d36353 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
-Static Public Attributes</h2></td></tr>
-<tr class="memitem:a418b17d4e8cf867d837ce92b9919241a"><td class="memItemLeft" align="right" valign="top">static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml#a418b17d4e8cf867d837ce92b9919241a">_output_tile_rows</a> = OutputTileRows</td></tr>
-<tr class="separator:a418b17d4e8cf867d837ce92b9919241a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5915e138cff9372cd4438c0208181e77"><td class="memItemLeft" align="right" valign="top">static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml#a5915e138cff9372cd4438c0208181e77">_output_tile_cols</a> = OutputTileCols</td></tr>
-<tr class="separator:a5915e138cff9372cd4438c0208181e77"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:a050f1f0b40470ce9b4146bd671cd1798"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml#a050f1f0b40470ce9b4146bd671cd1798">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *a, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *b, const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *c, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output, const float alpha, const float beta, const <a class="el" href="classarm__compute_1_1_g_e_m_m_info.xhtml">GEMMInfo</a> &amp;gemm_info=<a class="el" href="classarm__compute_1_1_g_e_m_m_info.xhtml">GEMMInfo</a>())</td></tr>
+<tr class="memdesc:a050f1f0b40470ce9b4146bd671cd1798"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml">NEWinogradLayerBatchedGEMMKernel</a>.  <a href="#a050f1f0b40470ce9b4146bd671cd1798">More...</a><br /></td></tr>
+<tr class="separator:a050f1f0b40470ce9b4146bd671cd1798"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><h3>template&lt;typename TIn, typename TOut, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols&gt;<br />
 class arm_compute::NEWinogradLayerBatchedGEMMKernel&lt; TIn, TOut, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;</h3>
 
+<p>NEON kernel to perform Winograd. </p>
 
-<p>Definition at line <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml#l00410">410</a> of file <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml">NEWinogradLayerKernel.h</a>.</p>
+<p>Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00463">463</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
 </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a class="anchor" id="a14ba69200a7c35d6bc6f12734c26775c"></a>
 <div class="memitem">
@@ -226,7 +233,9 @@ class arm_compute::NEWinogradLayerBatchedGEMMKernel&lt; TIn, TOut, OutputTileRow
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml#l00415">415</a> of file <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml">NEWinogradLayerKernel.h</a>.</p>
+<p>Winograd batched blocked GEMM operator. </p>
+
+<p>Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00471">471</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
 
 </div>
 </div>
@@ -240,7 +249,9 @@ class arm_compute::NEWinogradLayerBatchedGEMMKernel&lt; TIn, TOut, OutputTileRow
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml#l00413">413</a> of file <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml">NEWinogradLayerKernel.h</a>.</p>
+<p>Winograd base kernel. </p>
+
+<p>Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00467">467</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
 
 </div>
 </div>
@@ -254,7 +265,9 @@ class arm_compute::NEWinogradLayerBatchedGEMMKernel&lt; TIn, TOut, OutputTileRow
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml#l00414">414</a> of file <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml">NEWinogradLayerKernel.h</a>.</p>
+<p>Winograd convolution kernel. </p>
+
+<p>Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00469">469</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
 
 </div>
 </div>
@@ -348,6 +361,8 @@ class arm_compute::NEWinogradLayerBatchedGEMMKernel&lt; TIn, TOut, OutputTileRow
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Default destructor. </p>
 
 </div>
 </div>
@@ -608,10 +623,10 @@ class arm_compute::NEWinogradLayerBatchedGEMMKernel&lt; TIn, TOut, OutputTileRow
 
 <p>Implements <a class="el" href="classarm__compute_1_1_i_c_p_p_kernel.xhtml#a1a30ad8f276a2310571c36239554831a">ICPPKernel</a>.</p>
 
-<p>Definition at line <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml#l00420">420</a> of file <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml">NEWinogradLayerKernel.h</a>.</p>
+<p>Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00473">473</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
 
-<p>References <a class="el" href="classarm__compute_1_1_i_n_e_winograd_layer_transform_input_kernel.xhtml#a2ac7c7acdb2d7dea85085c2dff52687f">INEWinogradLayerTransformInputKernel&lt; T &gt;::configure()</a>, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">arm_compute::test::validation::info()</a>, <a class="el" href="classarm__compute_1_1_i_c_p_p_kernel.xhtml#af814ff5e96f40f1cccf809b2b4ee19ef">ICPPKernel::run()</a>, and <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">IKernel::window()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;    {</div><div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;        <span class="keywordflow">return</span> <span class="stringliteral">&quot;NEWinogradLayerBatchedGEMMKernel&quot;</span>;</div><div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;    }</div></div><!-- fragment -->
+<p>References <a class="el" href="validation_2_c_l_2_g_e_m_m_8cpp_source.xhtml#l00121">arm_compute::test::validation::a</a>, <a class="el" href="validation_2_c_l_2_g_e_m_m_8cpp_source.xhtml#l00115">arm_compute::test::validation::alpha</a>, <a class="el" href="validation_2_c_l_2_g_e_m_m_8cpp_source.xhtml#l00122">arm_compute::test::validation::b</a>, <a class="el" href="validation_2_c_l_2_g_e_m_m_8cpp_source.xhtml#l00115">arm_compute::test::validation::beta</a>, <a class="el" href="validation_2_c_l_2_g_e_m_m_8cpp_source.xhtml#l00123">arm_compute::test::validation::c</a>, <a class="el" href="classarm__compute_1_1_i_n_e_winograd_layer_transform_input_kernel.xhtml#a2ac7c7acdb2d7dea85085c2dff52687f">INEWinogradLayerTransformInputKernel&lt; T &gt;::configure()</a>, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">arm_compute::test::validation::info()</a>, <a class="el" href="classarm__compute_1_1_i_c_p_p_kernel.xhtml#af814ff5e96f40f1cccf809b2b4ee19ef">ICPPKernel::run()</a>, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a6813132c943295888972727864ea5c2f">arm_compute::test::validation::validate()</a>, and <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">IKernel::window()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00474"></a><span class="lineno">  474</span>&#160;    {</div><div class="line"><a name="l00475"></a><span class="lineno">  475</span>&#160;        <span class="keywordflow">return</span> <span class="stringliteral">&quot;NEWinogradLayerBatchedGEMMKernel&quot;</span>;</div><div class="line"><a name="l00476"></a><span class="lineno">  476</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="a2e5a523123c90ac397ab2327a116d8f8"></a>
@@ -715,8 +730,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 
 </div>
 </div>
-<h2 class="groupheader">Field Documentation</h2>
-<a class="anchor" id="a5915e138cff9372cd4438c0208181e77"></a>
+<a class="anchor" id="a050f1f0b40470ce9b4146bd671cd1798"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -724,7 +738,51 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">const int _output_tile_cols = OutputTileCols</td>
+          <td class="memname">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a> validate </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *&#160;</td>
+          <td class="paramname"><em>c</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float&#160;</td>
+          <td class="paramname"><em>alpha</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float&#160;</td>
+          <td class="paramname"><em>beta</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_g_e_m_m_info.xhtml">GEMMInfo</a> &amp;&#160;</td>
+          <td class="paramname"><em>gemm_info</em> = <code><a class="el" href="classarm__compute_1_1_g_e_m_m_info.xhtml">GEMMInfo</a>()</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -734,34 +792,25 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml#l00418">418</a> of file <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml">NEWinogradLayerKernel.h</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="a418b17d4e8cf867d837ce92b9919241a"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const int _output_tile_rows = OutputTileRows</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Definition at line <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml#l00417">417</a> of file <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml">NEWinogradLayerKernel.h</a>.</p>
+<p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml">NEWinogradLayerBatchedGEMMKernel</a>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>First input tensor (Matrix or <a class="el" href="struct_vector.xhtml" title="Structure to hold Vector information. ">Vector</a> A). Data types supported: F32 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>Second input tensor (Matrix B). Data type supported: same as <code>a</code>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">c</td><td>Third input tensor (Matrix C). It can be a nullptr if just the multiplication between <code>a</code> and <code>b</code> is needed. Data type supported: same as <code>a</code>. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output tensor. Data type supported: same as <code>a</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>Weight of the matrix product </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>Weight of matrix C </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">gemm_info</td><td>(Optional) Specifies if the matrix A and/or matrix B have been reshaped and if the reshape of matrix B should happen only for the first run</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
 
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>arm_compute/core/NEON/kernels/<a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml">NEWinogradLayerKernel.h</a></li>
+<li>arm_compute/core/NEON/kernels/<a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -769,7 +818,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml">NEWinogradLayerBatchedGEMMKernel</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:59 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

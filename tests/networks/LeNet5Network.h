@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,6 +50,10 @@ template <typename TensorType,
 class LeNet5Network
 {
 public:
+    /** Initialize the network.
+     *
+     * @param[in] batches Number of batches.
+     */
     void init(int batches)
     {
         _batches = batches;
@@ -94,6 +98,7 @@ public:
         smx.configure(&fc2_out, &output);
     }
 
+    /** Allocate the network */
     void allocate()
     {
         // Allocate tensors

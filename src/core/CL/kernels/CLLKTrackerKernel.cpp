@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -249,8 +249,12 @@ void CLLKTrackerStage1Kernel::configure(const ICLTensor *new_input, ICLLKInterna
             static_cast<cl_float>(valid_region.start(0))
         }
     };
-    const int term_iteration = (termination == Termination::TERM_CRITERIA_ITERATIONS || termination == Termination::TERM_CRITERIA_BOTH) ? 1 : 0;
-    const int term_epsilon   = (termination == Termination::TERM_CRITERIA_EPSILON || termination == Termination::TERM_CRITERIA_BOTH) ? 1 : 0;
+
+    // Set maximum number of iterations used for convergence
+    const size_t max_iterations = 1000;
+    num_iterations              = (termination == Termination::TERM_CRITERIA_EPSILON) ? max_iterations : num_iterations;
+
+    const int term_epsilon = (termination == Termination::TERM_CRITERIA_EPSILON || termination == Termination::TERM_CRITERIA_BOTH) ? 1 : 0;
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("lktracker_stage1"));
@@ -268,7 +272,6 @@ void CLLKTrackerStage1Kernel::configure(const ICLTensor *new_input, ICLLKInterna
     _kernel.setArg<cl_float3>(idx++, border_limits);
     _kernel.setArg<cl_float>(idx++, eig_const);
     _kernel.setArg<cl_int>(idx++, level0);
-    _kernel.setArg<cl_int>(idx++, term_iteration);
     _kernel.setArg<cl_int>(idx++, term_epsilon);
 }
 

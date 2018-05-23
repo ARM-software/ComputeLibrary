@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,7 @@ public:
     virtual ~ILifetimeManager() = default;
     /** Registers a group to the lifetime manager and assigns a group id
      *
-     * @return The group id of the group
+     * @param[in] group The group id of the group
      */
     virtual void register_group(IMemoryGroup *group) = 0;
     /** Registers and starts lifetime of an object

@@ -1,7 +1,5 @@
 var dir_2c3c4cb85e732569e2614ad40a451d53 =
 [
-    [ "arm32", "dir_c26a7e526887430ce25a4d0cc5a3865b.xhtml", "dir_c26a7e526887430ce25a4d0cc5a3865b" ],
-    [ "arm64", "dir_03f3c81b7006d2ea95b3332b67d1fe9e.xhtml", "dir_03f3c81b7006d2ea95b3332b67d1fe9e" ],
     [ "detail", "dir_6b58bd0be07bddcf3022ab9b026cbf38.xhtml", "dir_6b58bd0be07bddcf3022ab9b026cbf38" ],
     [ "NEAbsoluteDifferenceKernel.h", "_n_e_absolute_difference_kernel_8h.xhtml", [
       [ "NEAbsoluteDifferenceKernel", "classarm__compute_1_1_n_e_absolute_difference_kernel.xhtml", "classarm__compute_1_1_n_e_absolute_difference_kernel" ]
@@ -44,6 +42,9 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     ] ],
     [ "NEColorConvertKernel.h", "_n_e_color_convert_kernel_8h.xhtml", [
       [ "NEColorConvertKernel", "classarm__compute_1_1_n_e_color_convert_kernel.xhtml", "classarm__compute_1_1_n_e_color_convert_kernel" ]
+    ] ],
+    [ "NEConvertFullyConnectedWeightsKernel.h", "_n_e_convert_fully_connected_weights_kernel_8h.xhtml", [
+      [ "NEConvertFullyConnectedWeightsKernel", "classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml", "classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel" ]
     ] ],
     [ "NEConvolutionKernel.h", "_n_e_convolution_kernel_8h.xhtml", "_n_e_convolution_kernel_8h" ],
     [ "NECumulativeDistributionKernel.h", "_n_e_cumulative_distribution_kernel_8h.xhtml", [
@@ -116,9 +117,6 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     ] ],
     [ "NEGEMMInterleave4x4Kernel.h", "_n_e_g_e_m_m_interleave4x4_kernel_8h.xhtml", [
       [ "NEGEMMInterleave4x4Kernel", "classarm__compute_1_1_n_e_g_e_m_m_interleave4x4_kernel.xhtml", "classarm__compute_1_1_n_e_g_e_m_m_interleave4x4_kernel" ]
-    ] ],
-    [ "NEGEMMInterleaveBlockedKernel.h", "_n_e_g_e_m_m_interleave_blocked_kernel_8h.xhtml", [
-      [ "NEGEMMInterleaveBlockedKernel", "classarm__compute_1_1_n_e_g_e_m_m_interleave_blocked_kernel.xhtml", "classarm__compute_1_1_n_e_g_e_m_m_interleave_blocked_kernel" ]
     ] ],
     [ "NEGEMMLowpMatrixMultiplyKernel.h", "_n_e_g_e_m_m_lowp_matrix_multiply_kernel_8h.xhtml", [
       [ "NEGEMMLowpMatrixMultiplyKernel", "classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_multiply_kernel.xhtml", "classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_multiply_kernel" ]
@@ -259,7 +257,7 @@ var dir_2c3c4cb85e732569e2614ad40a451d53 =
     [ "NEWeightsReshapeKernel.h", "_n_e_weights_reshape_kernel_8h.xhtml", [
       [ "NEWeightsReshapeKernel", "classarm__compute_1_1_n_e_weights_reshape_kernel.xhtml", "classarm__compute_1_1_n_e_weights_reshape_kernel" ]
     ] ],
-    [ "NEWinogradLayerKernel.h", "_n_e_winograd_layer_kernel_8h.xhtml", [
+    [ "NEWinogradConvolutionLayerKernel.h", "_n_e_winograd_convolution_layer_kernel_8h.xhtml", [
       [ "INEWinogradLayerTransformInputKernel", "classarm__compute_1_1_i_n_e_winograd_layer_transform_input_kernel.xhtml", "classarm__compute_1_1_i_n_e_winograd_layer_transform_input_kernel" ],
       [ "NEWinogradLayerTransformInputKernel", "classarm__compute_1_1_n_e_winograd_layer_transform_input_kernel.xhtml", "classarm__compute_1_1_n_e_winograd_layer_transform_input_kernel" ],
       [ "INEWinogradLayerTransformOutputKernel", "classarm__compute_1_1_i_n_e_winograd_layer_transform_output_kernel.xhtml", "classarm__compute_1_1_i_n_e_winograd_layer_transform_output_kernel" ],

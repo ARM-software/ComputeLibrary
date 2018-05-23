@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -134,10 +134,10 @@ $(document).ready(function(){initNavTree('_mobile_net_v1_8cpp.xhtml','');});
 <code>#include &quot;<a class="el" href="_c_l_reshape_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLReshapeLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_softmax_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLSoftmaxLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_accessor_8h_source.xhtml">tests/CL/CLAccessor.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_mobile_net_v1_fixture_8h_source.xhtml">tests/benchmark/fixtures/MobileNetV1Fixture.h</a>&quot;</code><br />
+<code>#include &quot;tests/benchmark/fixtures/MobileNetV1Fixture.h&quot;</code><br />
 <code>#include &quot;<a class="el" href="tests_2framework_2_macros_8h_source.xhtml">tests/framework/Macros.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_datasets_8h_source.xhtml">tests/framework/datasets/Datasets.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_type_printer_8h_source.xhtml">utils/TypePrinter.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="utils_2_type_printer_8h_source.xhtml">utils/TypePrinter.h</a>&quot;</code><br />
 </div>
 <p><a href="_mobile_net_v1_8cpp_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -148,20 +148,22 @@ Namespaces</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacearm__compute_1_1test"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml">arm_compute::test</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:namespacearm__compute_1_1test_1_1benchmark"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml">arm_compute::test::benchmark</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:a29a2dde86e6a0e8f295723be2331e4a5"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a29a2dde86e6a0e8f295723be2331e4a5">CLMobileNetV1_224_Fixture</a> = <a class="el" href="classarm__compute_1_1test_1_1_mobile_net_v1_fixture.xhtml">MobileNetV1Fixture</a>&lt; <a class="el" href="classarm__compute_1_1_c_l_tensor.xhtml">CLTensor</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml">CLAccessor</a>, <a class="el" href="classarm__compute_1_1_c_l_activation_layer.xhtml">CLActivationLayer</a>, <a class="el" href="classarm__compute_1_1_c_l_batch_normalization_layer.xhtml">CLBatchNormalizationLayer</a>, <a class="el" href="classarm__compute_1_1_c_l_convolution_layer.xhtml">CLConvolutionLayer</a>, <a class="el" href="classarm__compute_1_1_c_l_direct_convolution_layer.xhtml">CLDirectConvolutionLayer</a>, <a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer3x3.xhtml">CLDepthwiseConvolutionLayer3x3</a>, <a class="el" href="classarm__compute_1_1_c_l_reshape_layer.xhtml">CLReshapeLayer</a>, <a class="el" href="classarm__compute_1_1_c_l_pooling_layer.xhtml">CLPoolingLayer</a>, <a class="el" href="classarm__compute_1_1_c_l_softmax_layer.xhtml">CLSoftmaxLayer</a>, 224 &gt;</td></tr>
+<tr class="memitem:a29a2dde86e6a0e8f295723be2331e4a5"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a29a2dde86e6a0e8f295723be2331e4a5">CLMobileNetV1_224_Fixture</a> = MobileNetV1Fixture&lt; CLTensor, CLAccessor, CLActivationLayer, CLBatchNormalizationLayer, CLConvolutionLayer, CLDirectConvolutionLayer, CLDepthwiseConvolutionLayer3x3, CLReshapeLayer, CLPoolingLayer, CLSoftmaxLayer, 224 &gt;</td></tr>
 <tr class="separator:a29a2dde86e6a0e8f295723be2331e4a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aba121ef21ddc551591a696c156ea8cc5"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#aba121ef21ddc551591a696c156ea8cc5">CLMobileNetV1_128_Fixture</a> = <a class="el" href="classarm__compute_1_1test_1_1_mobile_net_v1_fixture.xhtml">MobileNetV1Fixture</a>&lt; <a class="el" href="classarm__compute_1_1_c_l_tensor.xhtml">CLTensor</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml">CLAccessor</a>, <a class="el" href="classarm__compute_1_1_c_l_activation_layer.xhtml">CLActivationLayer</a>, <a class="el" href="classarm__compute_1_1_c_l_batch_normalization_layer.xhtml">CLBatchNormalizationLayer</a>, <a class="el" href="classarm__compute_1_1_c_l_convolution_layer.xhtml">CLConvolutionLayer</a>, <a class="el" href="classarm__compute_1_1_c_l_direct_convolution_layer.xhtml">CLDirectConvolutionLayer</a>, <a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer3x3.xhtml">CLDepthwiseConvolutionLayer3x3</a>, <a class="el" href="classarm__compute_1_1_c_l_reshape_layer.xhtml">CLReshapeLayer</a>, <a class="el" href="classarm__compute_1_1_c_l_pooling_layer.xhtml">CLPoolingLayer</a>, <a class="el" href="classarm__compute_1_1_c_l_softmax_layer.xhtml">CLSoftmaxLayer</a>, 128 &gt;</td></tr>
+<tr class="memitem:aba121ef21ddc551591a696c156ea8cc5"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#aba121ef21ddc551591a696c156ea8cc5">CLMobileNetV1_128_Fixture</a> = MobileNetV1Fixture&lt; CLTensor, CLAccessor, CLActivationLayer, CLBatchNormalizationLayer, CLConvolutionLayer, CLDirectConvolutionLayer, CLDepthwiseConvolutionLayer3x3, CLReshapeLayer, CLPoolingLayer, CLSoftmaxLayer, 128 &gt;</td></tr>
 <tr class="separator:aba121ef21ddc551591a696c156ea8cc5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a1a355039fa43e6f304c229ee3f58dc81"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a1a355039fa43e6f304c229ee3f58dc81">REGISTER_FIXTURE_DATA_TEST_CASE</a> (MobileNetV1_224, <a class="el" href="namespacearm__compute_1_1test.xhtml#a29a2dde86e6a0e8f295723be2331e4a5">CLMobileNetV1_224_Fixture</a>, framework::DatasetMode::ALL, framework::dataset::make(&quot;Batches&quot;,{1, 4, 8}))</td></tr>
-<tr class="separator:a1a355039fa43e6f304c229ee3f58dc81"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a58a9076b25625de375843189630e1a05"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a58a9076b25625de375843189630e1a05">REGISTER_FIXTURE_DATA_TEST_CASE</a> (MobileNetV1_128, <a class="el" href="namespacearm__compute_1_1test.xhtml#aba121ef21ddc551591a696c156ea8cc5">CLMobileNetV1_128_Fixture</a>, framework::DatasetMode::ALL, framework::dataset::make(&quot;Batches&quot;,{1, 4, 8}))</td></tr>
-<tr class="separator:a58a9076b25625de375843189630e1a05"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6dcfaea995890bc263d9995f5b3e9b0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#af6dcfaea995890bc263d9995f5b3e9b0">REGISTER_FIXTURE_DATA_TEST_CASE</a> (MobileNetV1_224, CLMobileNetV1_224_Fixture, framework::DatasetMode::ALL, framework::dataset::make(&quot;Batches&quot;,{1, 4, 8}))</td></tr>
+<tr class="separator:af6dcfaea995890bc263d9995f5b3e9b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa4aa00056eff943a77f04a01df067e88"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#aa4aa00056eff943a77f04a01df067e88">REGISTER_FIXTURE_DATA_TEST_CASE</a> (MobileNetV1_128, CLMobileNetV1_128_Fixture, framework::DatasetMode::ALL, framework::dataset::make(&quot;Batches&quot;,{1, 4, 8}))</td></tr>
+<tr class="separator:aa4aa00056eff943a77f04a01df067e88"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -169,7 +171,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_4f2df8950dc650bf7cf9176fae02facc.xhtml">benchmark</a></li><li class="navelem"><a class="el" href="dir_4da487531dc5bdc76b523c9e82b781b1.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_2dfba1021aeb15d8e1228add590b046a.xhtml">SYSTEM</a></li><li class="navelem"><a class="el" href="_mobile_net_v1_8cpp.xhtml">MobileNetV1.cpp</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:56 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -24,8 +24,8 @@ import os.path
 import re
 import subprocess
 
-VERSION = "v18.03"
-SONAME_VERSION="10.0.0"
+VERSION = "v18.05"
+SONAME_VERSION="11.0.0"
 
 Import('env')
 Import('vars')
@@ -153,9 +153,6 @@ if env["build"] == "embed_only":
 arm_compute_env.Append(LINKFLAGS=['-Wl,--no-undefined'])
 arm_compute_env.Append(CPPPATH =[Dir("./src/core/").path] )
 
-if env["os"] not in ["android", "bare_metal"]:
-    arm_compute_env.Append(LIBS = ['pthread'])
-
 arm_compute_env.Append(LIBS = ['dl'])
 
 core_files = Glob('src/core/*.cpp')
@@ -170,6 +167,9 @@ runtime_files += Glob('src/runtime/CPP/functions/*.cpp')
 # CLHarrisCorners uses the Scheduler to run CPP kernels
 runtime_files += Glob('src/runtime/CPP/SingleThreadScheduler.cpp')
 
+graph_files = Glob('src/graph/*.cpp')
+graph_files += Glob('src/graph/*/*.cpp')
+
 if env['cppthreads']:
      runtime_files += Glob('src/runtime/CPP/CPPScheduler.cpp')
 
@@ -182,21 +182,30 @@ if env['opencl']:
 
     runtime_files += Glob('src/runtime/CL/*.cpp')
     runtime_files += Glob('src/runtime/CL/functions/*.cpp')
+    runtime_files += Glob('src/runtime/CL/tuners/*.cpp')
+
+    graph_files += Glob('src/graph/backends/CL/*.cpp')
+
 
 if env['neon']:
     core_files += Glob('src/core/NEON/*.cpp')
     core_files += Glob('src/core/NEON/kernels/*.cpp')
+
+    core_files += Glob('src/core/NEON/kernels/arm_gemm/*.cpp')
 
     # build winograd sources for either v7a / v8a
     core_files += Glob('src/core/NEON/kernels/convolution/*/*.cpp')
     core_files += Glob('src/core/NEON/kernels/convolution/winograd/*/*.cpp')
     arm_compute_env.Append(CPPPATH = ["arm_compute/core/NEON/kernels/winograd/", "arm_compute/core/NEON/kernels/assembly/"])
 
+    graph_files += Glob('src/graph/backends/NEON/*.cpp')
+
     if env['arch'] == "armv7a":
-        core_files += Glob('src/core/NEON/kernels/arm32/*.cpp')
+        core_files += Glob('src/core/NEON/kernels/arm_gemm/kernels/a32_*/*.cpp')
+
 
     if "arm64-v8" in env['arch']:
-        core_files += Glob('src/core/NEON/kernels/arm64/*.cpp')
+        core_files += Glob('src/core/NEON/kernels/arm_gemm/kernels/a64_*/*.cpp')
 
     runtime_files += Glob('src/runtime/NEON/*.cpp')
     runtime_files += Glob('src/runtime/NEON/functions/*.cpp')
@@ -210,6 +219,8 @@ if env['gles_compute']:
 
     runtime_files += Glob('src/runtime/GLES_COMPUTE/*.cpp')
     runtime_files += Glob('src/runtime/GLES_COMPUTE/functions/*.cpp')
+
+    graph_files += Glob('src/graph/backends/GLES/*.cpp')
 
 arm_compute_core_a = build_library('arm_compute_core-static', core_files, static=True)
 Export('arm_compute_core_a')
@@ -226,29 +237,13 @@ if env['os'] != 'bare_metal' and not env['standalone']:
     Depends(arm_compute_so, arm_compute_core_so)
     Export('arm_compute_so')
 
-if env['neon'] and env['opencl']:
-    Import('opencl')
-    graph_files = Glob('src/graph/*.cpp')
-    graph_files += Glob('src/graph/nodes/*.cpp')
-    graph_files += Glob('src/graph/operations/*.cpp')
+arm_compute_graph_a = build_library('arm_compute_graph-static', graph_files, static=True, libs = [ arm_compute_a])
+Export('arm_compute_graph_a')
 
-    graph_files += Glob('src/graph/CL/*.cpp')
-    graph_files += Glob('src/graph/NEON/*.cpp')
-
-    shared_graph_objects = [arm_compute_env.SharedObject(f) for f in graph_files]
-    static_graph_objects = [arm_compute_env.StaticObject(f) for f in graph_files]
-
-    arm_compute_graph_a = build_library('arm_compute_graph-static', static_graph_objects, static=True, libs = [ arm_compute_a ])
-    Export('arm_compute_graph_a')
-
-    arm_compute_env.Append(LIBPATH = ["#build/%s/opencl-1.2-stubs" % env['build_dir']])
-    arm_compute_graph_so = build_library('arm_compute_graph', shared_graph_objects, static=False, libs = [ "arm_compute", "arm_compute_core"])
+if env['os'] != 'bare_metal' and not env['standalone']:
+    arm_compute_graph_so = build_library('arm_compute_graph', graph_files, static=False, libs = [ "arm_compute" , "arm_compute_core"])
     Depends(arm_compute_graph_so, arm_compute_so)
-    Depends(arm_compute_graph_so, opencl)
     Export('arm_compute_graph_so')
-
-    graph_alias = arm_compute_env.Alias("arm_compute_graph", [arm_compute_graph_a, arm_compute_graph_so])
-    Default(graph_alias)
 
 if env['standalone']:
     alias = arm_compute_env.Alias("arm_compute", [arm_compute_a])

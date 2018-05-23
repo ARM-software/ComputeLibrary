@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -127,14 +127,14 @@ $(document).ready(function(){initNavTree('benchmark_2_c_l_2_g_e_m_m_lowp_8cpp.xh
 <code>#include &quot;<a class="el" href="_c_l_tensor_allocator_8h_source.xhtml">arm_compute/runtime/CL/CLTensorAllocator.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_g_e_m_m_lowp_matrix_multiply_core_8h_source.xhtml">arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_accessor_8h_source.xhtml">tests/CL/CLAccessor.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="benchmark_2fixtures_2_g_e_m_m_lowp_fixture_8h_source.xhtml">tests/benchmark/fixtures/GEMMLowpFixture.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_alex_net_g_e_m_m_dataset_8h_source.xhtml">tests/datasets/AlexNetGEMMDataset.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_google_net_g_e_m_m_dataset_8h_source.xhtml">tests/datasets/GoogleNetGEMMDataset.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_matrix_multiply_g_e_m_m_dataset_8h_source.xhtml">tests/datasets/MatrixMultiplyGEMMDataset.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_goog_le_net_inception_v1_g_e_m_m_dataset_8h_source.xhtml">tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1GEMMDataset.h</a>&quot;</code><br />
+<code>#include &quot;tests/benchmark/fixtures/GEMMLowpFixture.h&quot;</code><br />
+<code>#include &quot;tests/datasets/AlexNetGEMMDataset.h&quot;</code><br />
+<code>#include &quot;tests/datasets/GoogleNetGEMMDataset.h&quot;</code><br />
+<code>#include &quot;tests/datasets/MatrixMultiplyGEMMDataset.h&quot;</code><br />
+<code>#include &quot;tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1GEMMDataset.h&quot;</code><br />
 <code>#include &quot;<a class="el" href="tests_2framework_2_macros_8h_source.xhtml">tests/framework/Macros.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_datasets_8h_source.xhtml">tests/framework/datasets/Datasets.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_type_printer_8h_source.xhtml">utils/TypePrinter.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="utils_2_type_printer_8h_source.xhtml">utils/TypePrinter.h</a>&quot;</code><br />
 </div>
 <p><a href="benchmark_2_c_l_2_g_e_m_m_lowp_8cpp_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -145,22 +145,24 @@ Namespaces</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacearm__compute_1_1test"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml">arm_compute::test</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:namespacearm__compute_1_1test_1_1benchmark"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml">arm_compute::test::benchmark</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:aa2b528ffcc8ae3f017a4b0fefde56083"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#aa2b528ffcc8ae3f017a4b0fefde56083">CLGEMMLowpFixture</a> = GEMMLowpMatrixMultiplyCoreFixture&lt; CLTensor, CLGEMMLowpMatrixMultiplyCore, CLAccessor &gt;</td></tr>
+<tr class="memitem:aa2b528ffcc8ae3f017a4b0fefde56083"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#aa2b528ffcc8ae3f017a4b0fefde56083">CLGEMMLowpFixture</a> = GEMMLowpMatrixMultiplyCoreFixture&lt; CLTensor, CLGEMMLowpMatrixMultiplyCore, CLAccessor &gt;</td></tr>
 <tr class="separator:aa2b528ffcc8ae3f017a4b0fefde56083"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a93edbe7d55866665a687505cd5863cec"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a93edbe7d55866665a687505cd5863cec">REGISTER_FIXTURE_DATA_TEST_CASE</a> (GoogLeNetInceptionV1GEMMLowp, CLGEMMLowpFixture, framework::DatasetMode::ALL, datasets::GoogLeNetInceptionV1GEMMDataset())</td></tr>
-<tr class="separator:a93edbe7d55866665a687505cd5863cec"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4f689027a5150831876f5fadaa006d01"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a4f689027a5150831876f5fadaa006d01">REGISTER_FIXTURE_DATA_TEST_CASE</a> (MatrixMultiplyGEMMLowp, CLGEMMLowpFixture, framework::DatasetMode::ALL, datasets::MatrixMultiplyGEMMDataset())</td></tr>
-<tr class="separator:a4f689027a5150831876f5fadaa006d01"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a00a05a099b87aecb58697099e68c675d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a00a05a099b87aecb58697099e68c675d">REGISTER_FIXTURE_DATA_TEST_CASE</a> (GoogleNetGEMMLowp, CLGEMMLowpFixture, framework::DatasetMode::NIGHTLY, datasets::GoogleNetGEMMDataset())</td></tr>
-<tr class="separator:a00a05a099b87aecb58697099e68c675d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af455bb0192a53ff830cceeb26e47c8e5"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#af455bb0192a53ff830cceeb26e47c8e5">REGISTER_FIXTURE_DATA_TEST_CASE</a> (AlexNetGEMMLowp, CLGEMMLowpFixture, framework::DatasetMode::NIGHTLY, datasets::AlexNetGEMMDataset())</td></tr>
-<tr class="separator:af455bb0192a53ff830cceeb26e47c8e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af1d48e15c7be8a45c2b728b5c3f06941"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#af1d48e15c7be8a45c2b728b5c3f06941">REGISTER_FIXTURE_DATA_TEST_CASE</a> (GoogLeNetInceptionV1GEMMLowp, CLGEMMLowpFixture, framework::DatasetMode::ALL, datasets::GoogLeNetInceptionV1GEMMDataset())</td></tr>
+<tr class="separator:af1d48e15c7be8a45c2b728b5c3f06941"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8efa7963298d783c90a889a0641316a9"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a8efa7963298d783c90a889a0641316a9">REGISTER_FIXTURE_DATA_TEST_CASE</a> (MatrixMultiplyGEMMLowp, CLGEMMLowpFixture, framework::DatasetMode::ALL, datasets::MatrixMultiplyGEMMDataset())</td></tr>
+<tr class="separator:a8efa7963298d783c90a889a0641316a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a75cd4ecf15af3d69df876354170802a8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a75cd4ecf15af3d69df876354170802a8">REGISTER_FIXTURE_DATA_TEST_CASE</a> (GoogleNetGEMMLowp, CLGEMMLowpFixture, framework::DatasetMode::NIGHTLY, datasets::GoogleNetGEMMDataset())</td></tr>
+<tr class="separator:a75cd4ecf15af3d69df876354170802a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6487e1c6181335668af736618fd75175"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a6487e1c6181335668af736618fd75175">REGISTER_FIXTURE_DATA_TEST_CASE</a> (AlexNetGEMMLowp, CLGEMMLowpFixture, framework::DatasetMode::NIGHTLY, datasets::AlexNetGEMMDataset())</td></tr>
+<tr class="separator:a6487e1c6181335668af736618fd75175"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -168,7 +170,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_4f2df8950dc650bf7cf9176fae02facc.xhtml">benchmark</a></li><li class="navelem"><a class="el" href="dir_4da487531dc5bdc76b523c9e82b781b1.xhtml">CL</a></li><li class="navelem"><a class="el" href="benchmark_2_c_l_2_g_e_m_m_lowp_8cpp.xhtml">GEMMLowp.cpp</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:56 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

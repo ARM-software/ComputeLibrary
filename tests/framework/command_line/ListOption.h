@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,7 +53,12 @@ public:
     ListOption(std::string name, std::initializer_list<T> &&default_values);
 
     bool parse(std::string value) override;
-    std::string           help() const override;
+    std::string help() const override;
+
+    /** Get the list of option values.
+     *
+     * @return get the list of option values.
+     */
     const std::vector<T> &value() const;
 
 private:

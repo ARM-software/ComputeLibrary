@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -136,7 +136,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a54fb81956f9fb1c25b279e34e1e7d966"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml">CLKernelLibrary</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#a54fb81956f9fb1c25b279e34e1e7d966">operator=</a> (const <a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml">CLKernelLibrary</a> &amp;)=delete</td></tr>
 <tr class="memdesc:a54fb81956f9fb1c25b279e34e1e7d966"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prevent instances of this class from being copied.  <a href="#a54fb81956f9fb1c25b279e34e1e7d966">More...</a><br /></td></tr>
 <tr class="separator:a54fb81956f9fb1c25b279e34e1e7d966"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af353532ea782387df6bcb6d01894f4ae"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#af353532ea782387df6bcb6d01894f4ae">init</a> (std::string kernel_path=&quot;.&quot;, cl::Context context=cl::Context::getDefault(), cl::Device device=cl::Device::getDefault())</td></tr>
+<tr class="memitem:af353532ea782387df6bcb6d01894f4ae"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#af353532ea782387df6bcb6d01894f4ae">init</a> (std::string kernel_path=&quot;.&quot;, cl::Context <a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#a252f5440564c77d68459f2baa978f86a">context</a>=cl::Context::getDefault(), cl::Device device=cl::Device::getDefault())</td></tr>
 <tr class="memdesc:af353532ea782387df6bcb6d01894f4ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialises the kernel library.  <a href="#af353532ea782387df6bcb6d01894f4ae">More...</a><br /></td></tr>
 <tr class="separator:af353532ea782387df6bcb6d01894f4ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a66a558a56f5d0dcd6305c405ebc38cc2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#a66a558a56f5d0dcd6305c405ebc38cc2">set_kernel_path</a> (const std::string &amp;kernel_path)</td></tr>
@@ -148,21 +148,21 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a44e90c4fa1204a708499ece56d4c82f0"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#a44e90c4fa1204a708499ece56d4c82f0">get_program_source</a> (const std::string &amp;program_name)</td></tr>
 <tr class="memdesc:a44e90c4fa1204a708499ece56d4c82f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the source of the selected program.  <a href="#a44e90c4fa1204a708499ece56d4c82f0">More...</a><br /></td></tr>
 <tr class="separator:a44e90c4fa1204a708499ece56d4c82f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a293edc1bbcbddffb7228ac97917ed107"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#a293edc1bbcbddffb7228ac97917ed107">set_context</a> (cl::Context context)</td></tr>
+<tr class="memitem:a293edc1bbcbddffb7228ac97917ed107"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#a293edc1bbcbddffb7228ac97917ed107">set_context</a> (cl::Context <a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#a252f5440564c77d68459f2baa978f86a">context</a>)</td></tr>
 <tr class="memdesc:a293edc1bbcbddffb7228ac97917ed107"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the CL context used to create programs.  <a href="#a293edc1bbcbddffb7228ac97917ed107">More...</a><br /></td></tr>
 <tr class="separator:a293edc1bbcbddffb7228ac97917ed107"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a252f5440564c77d68459f2baa978f86a"><td class="memItemLeft" align="right" valign="top">cl::Context &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#a252f5440564c77d68459f2baa978f86a">context</a> ()</td></tr>
+<tr class="memdesc:a252f5440564c77d68459f2baa978f86a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accessor for the associated CL context.  <a href="#a252f5440564c77d68459f2baa978f86a">More...</a><br /></td></tr>
+<tr class="separator:a252f5440564c77d68459f2baa978f86a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5a6865d04c8d3348860f3cb8100fdb97"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#a5a6865d04c8d3348860f3cb8100fdb97">set_device</a> (cl::Device device)</td></tr>
 <tr class="memdesc:a5a6865d04c8d3348860f3cb8100fdb97"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the CL device for which the programs are created.  <a href="#a5a6865d04c8d3348860f3cb8100fdb97">More...</a><br /></td></tr>
 <tr class="separator:a5a6865d04c8d3348860f3cb8100fdb97"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef78b2e57b5203f8a184465e2da020ef"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#aef78b2e57b5203f8a184465e2da020ef">get_device_version</a> ()</td></tr>
+<tr class="memdesc:aef78b2e57b5203f8a184465e2da020ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the device version.  <a href="#aef78b2e57b5203f8a184465e2da020ef">More...</a><br /></td></tr>
+<tr class="separator:aef78b2e57b5203f8a184465e2da020ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a07b37240bd1f09e36cf119dced79f9c4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_kernel.xhtml">Kernel</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#a07b37240bd1f09e36cf119dced79f9c4">create_kernel</a> (const std::string &amp;kernel_name, const StringSet &amp;build_options_set={}) const </td></tr>
 <tr class="memdesc:a07b37240bd1f09e36cf119dced79f9c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a kernel from the kernel library.  <a href="#a07b37240bd1f09e36cf119dced79f9c4">More...</a><br /></td></tr>
 <tr class="separator:a07b37240bd1f09e36cf119dced79f9c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7c0b2aa80e920344936e8e7dbaa73e43"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#a7c0b2aa80e920344936e8e7dbaa73e43">save_binary</a> ()</td></tr>
-<tr class="memdesc:a7c0b2aa80e920344936e8e7dbaa73e43"><td class="mdescLeft">&#160;</td><td class="mdescRight">Serializes and saves programs to a binary.  <a href="#a7c0b2aa80e920344936e8e7dbaa73e43">More...</a><br /></td></tr>
-<tr class="separator:a7c0b2aa80e920344936e8e7dbaa73e43"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a389a543ae040ca6bf6b57fd6215f154b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#a389a543ae040ca6bf6b57fd6215f154b">load_binary</a> ()</td></tr>
-<tr class="memdesc:a389a543ae040ca6bf6b57fd6215f154b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load serialized binary with all the programs.  <a href="#a389a543ae040ca6bf6b57fd6215f154b">More...</a><br /></td></tr>
-<tr class="separator:a389a543ae040ca6bf6b57fd6215f154b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab04a95a810e685a1207c7f3443668261"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#ab04a95a810e685a1207c7f3443668261">max_local_workgroup_size</a> (const cl::Kernel &amp;kernel) const </td></tr>
 <tr class="memdesc:ab04a95a810e685a1207c7f3443668261"><td class="mdescLeft">&#160;</td><td class="mdescRight">Find the maximum number of local work items in a workgroup can be supported for the kernel.  <a href="#ab04a95a810e685a1207c7f3443668261">More...</a><br /></td></tr>
 <tr class="separator:ab04a95a810e685a1207c7f3443668261"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -172,6 +172,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a0ad613086cc79a2e32d5b87bcefc7488"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#a0ad613086cc79a2e32d5b87bcefc7488">clear_programs_cache</a> ()</td></tr>
 <tr class="memdesc:a0ad613086cc79a2e32d5b87bcefc7488"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clear the library's cache of binary programs.  <a href="#a0ad613086cc79a2e32d5b87bcefc7488">More...</a><br /></td></tr>
 <tr class="separator:a0ad613086cc79a2e32d5b87bcefc7488"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a06fff433db9536097242dd9ab2188007"><td class="memItemLeft" align="right" valign="top">const std::map&lt; std::string, cl::Program &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#a06fff433db9536097242dd9ab2188007">get_built_programs</a> () const </td></tr>
+<tr class="memdesc:a06fff433db9536097242dd9ab2188007"><td class="mdescLeft">&#160;</td><td class="mdescRight">Access the cache of built OpenCL programs.  <a href="#a06fff433db9536097242dd9ab2188007">More...</a><br /></td></tr>
+<tr class="separator:a06fff433db9536097242dd9ab2188007"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a76d1513abb2d86ece6044a4fe2a83f56"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#a76d1513abb2d86ece6044a4fe2a83f56">add_built_program</a> (const std::string &amp;built_program_name, cl::Program program)</td></tr>
+<tr class="memdesc:a76d1513abb2d86ece6044a4fe2a83f56"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a new built program to the cache.  <a href="#a76d1513abb2d86ece6044a4fe2a83f56">More...</a><br /></td></tr>
+<tr class="separator:a76d1513abb2d86ece6044a4fe2a83f56"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
@@ -182,7 +188,7 @@ Static Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml" title="CLKernelLibrary class. ">CLKernelLibrary</a> class. </p>
 
-<p>Definition at line <a class="el" href="_c_l_kernel_library_8h_source.xhtml#l00186">186</a> of file <a class="el" href="_c_l_kernel_library_8h_source.xhtml">CLKernelLibrary.h</a>.</p>
+<p>Definition at line <a class="el" href="_c_l_kernel_library_8h_source.xhtml#l00192">192</a> of file <a class="el" href="_c_l_kernel_library_8h_source.xhtml">CLKernelLibrary.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a670869004281695200784de4648a4e1b"></a>
 <div class="memitem">
@@ -211,6 +217,41 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a76d1513abb2d86ece6044a4fe2a83f56"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void add_built_program </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>built_program_name</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">cl::Program&#160;</td>
+          <td class="paramname"><em>program</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Add a new built program to the cache. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">built_program_name</td><td>Name of the program </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">program</td><td>Built program to add to the cache </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a class="anchor" id="a0ad613086cc79a2e32d5b87bcefc7488"></a>
 <div class="memitem">
 <div class="memproto">
@@ -234,8 +275,40 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Clear the library's cache of binary programs. </p>
 
-<p>Definition at line <a class="el" href="_c_l_kernel_library_8h_source.xhtml#l00291">291</a> of file <a class="el" href="_c_l_kernel_library_8h_source.xhtml">CLKernelLibrary.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;    {</div><div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;        _programs_map.clear();</div><div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;        _built_programs_map.clear();</div><div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;    }</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="_c_l_kernel_library_8h_source.xhtml#l00313">313</a> of file <a class="el" href="_c_l_kernel_library_8h_source.xhtml">CLKernelLibrary.h</a>.</p>
+
+<p>Referenced by <a class="el" href="_framework_8cpp_source.xhtml#l00508">Framework::run()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;    {</div><div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;        _programs_map.clear();</div><div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;        _built_programs_map.clear();</div><div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;    }</div></div><!-- fragment -->
+</div>
+</div>
+<a class="anchor" id="a252f5440564c77d68459f2baa978f86a"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">cl::Context&amp; context </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Accessor for the associated CL context. </p>
+<dl class="section return"><dt>Returns</dt><dd>A CL context. </dd></dl>
+
+<p>Definition at line <a class="el" href="_c_l_kernel_library_8h_source.xhtml#l00275">275</a> of file <a class="el" href="_c_l_kernel_library_8h_source.xhtml">CLKernelLibrary.h</a>.</p>
+
+<p>Referenced by <a class="el" href="_c_l_scheduler_8h_source.xhtml#l00137">CLScheduler::context()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;    {</div><div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;        <span class="keywordflow">return</span> _context;</div><div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="a07b37240bd1f09e36cf119dced79f9c4"></a>
@@ -315,7 +388,54 @@ Static Public Member Functions</h2></td></tr>
 <p>Access the KernelLibrary singleton. </p>
 <dl class="section return"><dt>Returns</dt><dd>The KernelLibrary instance. </dd></dl>
 
-<p>Referenced by <a class="el" href="_c_l_scheduler_8h_source.xhtml#l00071">CLScheduler::default_init()</a>, and <a class="el" href="_i_c_l_kernel_8h_source.xhtml#l00235">ICLKernel::get_target()</a>.</p>
+<p>Referenced by <a class="el" href="_c_l_scheduler_8h_source.xhtml#l00137">CLScheduler::context()</a>, <a class="el" href="_c_l_scheduler_8h_source.xhtml#l00071">CLScheduler::default_init()</a>, <a class="el" href="_i_c_l_kernel_8h_source.xhtml#l00245">ICLKernel::get_target()</a>, <a class="el" href="main_8cpp_source.xhtml#l00063">main()</a>, <a class="el" href="_framework_8cpp_source.xhtml#l00508">Framework::run()</a>, <a class="el" href="_c_l_scheduler_8h_source.xhtml#l00147">CLScheduler::set_context()</a>, and <a class="el" href="_open_c_l_memory_usage_8cpp_source.xhtml#l00185">OpenCLMemoryUsage::test_measurements()</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a06fff433db9536097242dd9ab2188007"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::map&lt;std::string, cl::Program&gt;&amp; get_built_programs </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Access the cache of built OpenCL programs. </p>
+
+<p>Definition at line <a class="el" href="_c_l_kernel_library_8h_source.xhtml#l00320">320</a> of file <a class="el" href="_c_l_kernel_library_8h_source.xhtml">CLKernelLibrary.h</a>.</p>
+
+<p>Referenced by <a class="el" href="_open_c_l_memory_usage_8cpp_source.xhtml#l00185">OpenCLMemoryUsage::test_measurements()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;    {</div><div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;        <span class="keywordflow">return</span> _built_programs_map;</div><div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;    }</div></div><!-- fragment -->
+</div>
+</div>
+<a class="anchor" id="aef78b2e57b5203f8a184465e2da020ef"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string get_device_version </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Return the device version. </p>
+<dl class="section return"><dt>Returns</dt><dd>The content of CL_DEVICE_VERSION </dd></dl>
 
 </div>
 </div>
@@ -342,8 +462,8 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Gets the path that the kernels reside in. </p>
 
-<p>Definition at line <a class="el" href="_c_l_kernel_library_8h_source.xhtml#l00225">225</a> of file <a class="el" href="_c_l_kernel_library_8h_source.xhtml">CLKernelLibrary.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;    {</div><div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;        <span class="keywordflow">return</span> _kernel_path;</div><div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;    };</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="_c_l_kernel_library_8h_source.xhtml#l00231">231</a> of file <a class="el" href="_c_l_kernel_library_8h_source.xhtml">CLKernelLibrary.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;    {</div><div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;        <span class="keywordflow">return</span> _kernel_path;</div><div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;    };</div></div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="a44e90c4fa1204a708499ece56d4c82f0"></a>
@@ -363,10 +483,11 @@ Static Public Member Functions</h2></td></tr>
 <p>Gets the source of the selected program. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">program_name</td><td><a class="el" href="classarm__compute_1_1_program.xhtml" title="Program class. ">Program</a> name. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">program_name</td><td><a class="el" href="classarm__compute_1_1_program.xhtml" title="Program class. ">Program</a> name.</td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Source of the selected program. </dd></dl>
 
 </div>
 </div>
@@ -418,27 +539,11 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_c_l_kernel_library_8h_source.xhtml#l00209">209</a> of file <a class="el" href="_c_l_kernel_library_8h_source.xhtml">CLKernelLibrary.h</a>.</p>
+<p>Definition at line <a class="el" href="_c_l_kernel_library_8h_source.xhtml#l00215">215</a> of file <a class="el" href="_c_l_kernel_library_8h_source.xhtml">CLKernelLibrary.h</a>.</p>
 
 <p>Referenced by <a class="el" href="_c_l_scheduler_8h_source.xhtml#l00071">CLScheduler::default_init()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;    {</div><div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;        _kernel_path = std::move(kernel_path);</div><div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;        _context     = std::move(context);</div><div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;        _device      = std::move(device);</div><div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;    }</div></div><!-- fragment -->
-</div>
-</div>
-<a class="anchor" id="a389a543ae040ca6bf6b57fd6215f154b"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void load_binary </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Load serialized binary with all the programs. </p>
-
+<div class="fragment"><div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;    {</div><div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;        _kernel_path = std::move(kernel_path);</div><div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;        _context     = std::move(<a class="code" href="classarm__compute_1_1_c_l_kernel_library.xhtml#a252f5440564c77d68459f2baa978f86a">context</a>);</div><div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;        _device      = std::move(device);</div><div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1_c_l_kernel_library_xhtml_a252f5440564c77d68459f2baa978f86a"><div class="ttname"><a href="classarm__compute_1_1_c_l_kernel_library.xhtml#a252f5440564c77d68459f2baa978f86a">arm_compute::CLKernelLibrary::context</a></div><div class="ttdeci">cl::Context &amp; context()</div><div class="ttdoc">Accessor for the associated CL context. </div><div class="ttdef"><b>Definition:</b> <a href="_c_l_kernel_library_8h_source.xhtml#l00275">CLKernelLibrary.h:275</a></div></div>
+</div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="ab04a95a810e685a1207c7f3443668261"></a>
@@ -485,23 +590,6 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a7c0b2aa80e920344936e8e7dbaa73e43"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void save_binary </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Serializes and saves programs to a binary. </p>
-
-</div>
-</div>
 <a class="anchor" id="a293edc1bbcbddffb7228ac97917ed107"></a>
 <div class="memitem">
 <div class="memproto">
@@ -533,8 +621,11 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_c_l_kernel_library_8h_source.xhtml#l00241">241</a> of file <a class="el" href="_c_l_kernel_library_8h_source.xhtml">CLKernelLibrary.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;    {</div><div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;        _context = std::move(context);</div><div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;</div><div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;        <span class="keyword">const</span> <span class="keyword">auto</span> cl_devices = _context.getInfo&lt;CL_CONTEXT_DEVICES&gt;();</div><div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;</div><div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;        <span class="keywordflow">if</span>(cl_devices.empty())</div><div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;        {</div><div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;            _device = cl::Device();</div><div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;        }</div><div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;        <span class="keywordflow">else</span></div><div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;        {</div><div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;            _device = cl_devices[0];</div><div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;        }</div><div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;    }</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="_c_l_kernel_library_8h_source.xhtml#l00249">249</a> of file <a class="el" href="_c_l_kernel_library_8h_source.xhtml">CLKernelLibrary.h</a>.</p>
+
+<p>Referenced by <a class="el" href="_c_l_scheduler_8h_source.xhtml#l00147">CLScheduler::set_context()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;    {</div><div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;        _context = std::move(<a class="code" href="classarm__compute_1_1_c_l_kernel_library.xhtml#a252f5440564c77d68459f2baa978f86a">context</a>);</div><div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;        <span class="keywordflow">if</span>(_context.get() == <span class="keyword">nullptr</span>)</div><div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;        {</div><div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;            _device = cl::Device();</div><div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;        }</div><div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;        <span class="keywordflow">else</span></div><div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;        {</div><div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;            <span class="keyword">const</span> <span class="keyword">auto</span> cl_devices = _context.getInfo&lt;CL_CONTEXT_DEVICES&gt;();</div><div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;</div><div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;            <span class="keywordflow">if</span>(cl_devices.empty())</div><div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;            {</div><div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;                _device = cl::Device();</div><div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;            }</div><div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;            <span class="keywordflow">else</span></div><div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;            {</div><div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;                _device = cl_devices[0];</div><div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;            }</div><div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;        }</div><div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1_c_l_kernel_library_xhtml_a252f5440564c77d68459f2baa978f86a"><div class="ttname"><a href="classarm__compute_1_1_c_l_kernel_library.xhtml#a252f5440564c77d68459f2baa978f86a">arm_compute::CLKernelLibrary::context</a></div><div class="ttdeci">cl::Context &amp; context()</div><div class="ttdoc">Accessor for the associated CL context. </div><div class="ttdef"><b>Definition:</b> <a href="_c_l_kernel_library_8h_source.xhtml#l00275">CLKernelLibrary.h:275</a></div></div>
+</div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="a5a6865d04c8d3348860f3cb8100fdb97"></a>
@@ -567,10 +658,10 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_c_l_kernel_library_8h_source.xhtml#l00260">260</a> of file <a class="el" href="_c_l_kernel_library_8h_source.xhtml">CLKernelLibrary.h</a>.</p>
+<p>Definition at line <a class="el" href="_c_l_kernel_library_8h_source.xhtml#l00284">284</a> of file <a class="el" href="_c_l_kernel_library_8h_source.xhtml">CLKernelLibrary.h</a>.</p>
 
-<p>References <a class="el" href="_c_l_helpers_8h_source.xhtml#l00100">arm_compute::create_kernel()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;    {</div><div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;        _device = std::move(device);</div><div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;    }</div></div><!-- fragment -->
+<p>References <a class="el" href="arm__compute_2core_2_helpers_8h_source.xhtml#l00086">arm_compute::create_kernel()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;    {</div><div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;        _device = std::move(device);</div><div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="a66a558a56f5d0dcd6305c405ebc38cc2"></a>
@@ -603,8 +694,8 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_c_l_kernel_library_8h_source.xhtml#l00219">219</a> of file <a class="el" href="_c_l_kernel_library_8h_source.xhtml">CLKernelLibrary.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;    {</div><div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;        _kernel_path = kernel_path;</div><div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;    };</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="_c_l_kernel_library_8h_source.xhtml#l00225">225</a> of file <a class="el" href="_c_l_kernel_library_8h_source.xhtml">CLKernelLibrary.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;    {</div><div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;        _kernel_path = kernel_path;</div><div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;    };</div></div><!-- fragment -->
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
@@ -616,7 +707,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml">CLKernelLibrary</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:57 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:41 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

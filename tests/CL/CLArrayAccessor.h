@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,9 +49,13 @@ public:
         _array.map();
     }
 
+    /** Prevent instances of this class from being copy constructed */
     CLArrayAccessor(const CLArrayAccessor &) = delete;
+    /** Prevent instances of this class from being copied */
     CLArrayAccessor &operator=(const CLArrayAccessor &) = delete;
-    CLArrayAccessor(CLArrayAccessor &&)                 = default;
+    /** Allow instances of this class to be move constructed */
+    CLArrayAccessor(CLArrayAccessor &&) = default;
+    /** Allow instances of this class to be moved */
     CLArrayAccessor &operator=(CLArrayAccessor &&) = default;
 
     /** Destructor that unmaps the CL memory. */

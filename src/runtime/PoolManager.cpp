@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -71,4 +71,11 @@ void PoolManager::register_pool(std::unique_ptr<IMemoryPool> pool)
 
     // Update semaphore
     _sem = arm_compute::support::cpp14::make_unique<arm_compute::Semaphore>(_free_pools.size());
+}
+
+size_t PoolManager::num_pools() const
+{
+    std::lock_guard<arm_compute::Mutex> lock(_mtx);
+
+    return _free_pools.size() + _occupied_pools.size();
 }

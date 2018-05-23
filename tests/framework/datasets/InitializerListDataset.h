@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,6 +59,7 @@ public:
     {
     }
 
+    /** Allow instances of this class to be move constructed */
     InitializerListDataset(InitializerListDataset &&) = default;
 
     /** Type of the dataset. */
@@ -67,22 +68,39 @@ public:
     /** Iterator for the dataset. */
     struct iterator
     {
+        /** Construct an iterator for the dataset
+         *
+         * @param[in] name     Name of the dataset.
+         * @param[in] iterator Iterator of the dataset values.
+         */
         iterator(std::string name, data_const_iterator iterator)
             : _name{ name }, _iterator{ iterator }
         {
         }
 
+        /** Get a description of the current value.
+         *
+         * @return a description.
+         */
         std::string description() const
         {
             using support::cpp11::to_string;
             return _name + "=" + to_string(*_iterator);
         }
 
+        /** Get the current value.
+         *
+         * @return the current value.
+         */
         InitializerListDataset::type operator*() const
         {
             return std::make_tuple(*_iterator);
         }
 
+        /** Increment the iterator.
+         *
+         * @return *this.
+         */
         iterator &operator++()
         {
             ++_iterator;

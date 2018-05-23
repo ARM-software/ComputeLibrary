@@ -57,27 +57,74 @@ public:
     template <typename T, ScaleFactor scale>
     static std::unique_ptr<Instrument> make_instrument();
 
+    /** Default constructor. */
     Instrument() = default;
 
+    /** Allow instances of this class to be copy constructed */
     Instrument(const Instrument &) = default;
-    Instrument(Instrument &&)      = default;
+    /** Allow instances of this class to be move constructed */
+    Instrument(Instrument &&) = default;
+    /** Allow instances of this class to be copied */
     Instrument &operator=(const Instrument &) = default;
+    /** Allow instances of this class to be moved */
     Instrument &operator=(Instrument &&) = default;
-    virtual ~Instrument()                = default;
+    /** Default destructor. */
+    virtual ~Instrument() = default;
 
     /** Identifier for the instrument */
     virtual std::string id() const = 0;
 
-    /** Start measuring. */
-    virtual void start() = 0;
+    /** Start of the test
+     *
+     * Called before the test set up starts
+     */
+    virtual void test_start()
+    {
+    }
 
-    /** Stop measuring. */
-    virtual void stop() = 0;
+    /** Start measuring.
+     *
+     * Called just before the run of the test starts
+     */
+    virtual void start()
+    {
+    }
 
+    /** Stop measuring.
+     *
+     * Called just after the run of the test ends
+    */
+    virtual void stop()
+    {
+    }
+
+    /** End of the test
+     *
+     * Called after the test teardown ended
+     */
+    virtual void test_stop()
+    {
+    }
+    /** Map of measurements */
     using MeasurementsMap = std::map<std::string, Measurement>;
 
-    /** Return the latest measurement. */
-    virtual MeasurementsMap measurements() const = 0;
+    /** Return the latest measurements.
+     *
+     * @return the latest measurements.
+     */
+    virtual MeasurementsMap measurements() const
+    {
+        return MeasurementsMap();
+    }
+
+    /** Return the latest test measurements.
+     *
+     * @return the latest test measurements.
+     */
+    virtual MeasurementsMap test_measurements() const
+    {
+        return MeasurementsMap();
+    }
 
 protected:
     std::string _unit{};

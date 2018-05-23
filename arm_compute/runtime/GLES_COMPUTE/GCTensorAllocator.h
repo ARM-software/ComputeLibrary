@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,22 +27,42 @@
 
 #include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
 #include "arm_compute/runtime/ITensorAllocator.h"
+#include "arm_compute/runtime/MemoryGroupBase.h"
 
 #include <memory>
 
 namespace arm_compute
 {
+class GCTensor;
+template <typename>
+class MemoryGroupBase;
+using GCMemoryGroup = MemoryGroupBase<GCTensor>;
+
+class GLBufferWrapper
+{
+public:
+    GLBufferWrapper()
+        : _ssbo_name(0)
+    {
+        ARM_COMPUTE_GL_CHECK(glGenBuffers(1, &_ssbo_name));
+    }
+    ~GLBufferWrapper()
+    {
+        ARM_COMPUTE_GL_CHECK(glDeleteBuffers(1, &_ssbo_name));
+    }
+    GLuint _ssbo_name;
+};
 /** Basic implementation of a GLES memory tensor allocator. */
 class GCTensorAllocator : public ITensorAllocator
 {
 public:
     /** Default constructor. */
-    GCTensorAllocator();
+    GCTensorAllocator(GCTensor *owner = nullptr);
 
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     GCTensorAllocator(const GCTensorAllocator &) = delete;
 
-    /** Prevent instances of this class from being copy assigned (As this class contains pointers). */
+    /** Prevent instances of this class from being copy assigned (As this class contains pointers) */
     GCTensorAllocator &operator=(const GCTensorAllocator &) = delete;
 
     /** Allow instances of this class to be moved */
@@ -52,9 +72,12 @@ public:
     GCTensorAllocator &operator=(GCTensorAllocator &&) = default;
 
     /** Default destructor */
-    ~GCTensorAllocator() = default;
+    ~GCTensorAllocator();
 
-    /** Interface to be implemented by the child class to return the pointer to the mapped data. */
+    /** Interface to be implemented by the child class to return the pointer to the mapped data.
+     *
+     * @return a pointer to the data.
+     */
     uint8_t *data();
 
     /** Get the OpenGL ES buffer object name
@@ -95,6 +118,12 @@ public:
      */
     void free() override;
 
+    /** Associates the tensor with a memory group
+     *
+     * @param[in] associated_memory_group Memory group to associate the tensor with
+     */
+    void set_associated_memory_group(GCMemoryGroup *associated_memory_group);
+
 protected:
     /** Call map() on the SSBO.
      *
@@ -106,22 +135,10 @@ protected:
     void unlock() override;
 
 private:
-    class GLBufferWrapper
-    {
-    public:
-        GLBufferWrapper()
-            : _ssbo_name(0)
-        {
-            ARM_COMPUTE_GL_CHECK(glGenBuffers(1, &_ssbo_name));
-        }
-        ~GLBufferWrapper()
-        {
-            ARM_COMPUTE_GL_CHECK(glDeleteBuffers(1, &_ssbo_name));
-        }
-        GLuint _ssbo_name;
-    };
-    std::unique_ptr<GLBufferWrapper> _gl_buffer;
-    uint8_t                         *_mapping;
+    GCMemoryGroup                   *_associated_memory_group; /**< Registered memory group */
+    std::unique_ptr<GLBufferWrapper> _gl_buffer;               /**< OpenGL ES object containing the tensor data. */
+    uint8_t                         *_mapping;                 /**< Pointer to the CPU mapping of the OpenGL ES buffer. */
+    GCTensor                        *_owner;                   /**< Owner of the allocator */
 };
 }
 

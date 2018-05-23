@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -153,9 +153,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:abd81a8f6c3c7905c4cd60b70f3b3080e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_n_e_depthwise_im2_col_kernel.xhtml">NEDepthwiseIm2ColKernel</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_depthwise_im2_col_kernel.xhtml#abd81a8f6c3c7905c4cd60b70f3b3080e">operator=</a> (<a class="el" href="classarm__compute_1_1_n_e_depthwise_im2_col_kernel.xhtml">NEDepthwiseIm2ColKernel</a> &amp;&amp;)=default</td></tr>
 <tr class="memdesc:abd81a8f6c3c7905c4cd60b70f3b3080e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allow instances of this class to be moved.  <a href="#abd81a8f6c3c7905c4cd60b70f3b3080e">More...</a><br /></td></tr>
 <tr class="separator:abd81a8f6c3c7905c4cd60b70f3b3080e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aba78dcb8f9d91651bdaf53d21bbee40d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_depthwise_im2_col_kernel.xhtml#aba78dcb8f9d91651bdaf53d21bbee40d">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;kernel_dims, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;conv_info, bool has_bias=false)</td></tr>
-<tr class="memdesc:aba78dcb8f9d91651bdaf53d21bbee40d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the input and output of the kernel.  <a href="#aba78dcb8f9d91651bdaf53d21bbee40d">More...</a><br /></td></tr>
-<tr class="separator:aba78dcb8f9d91651bdaf53d21bbee40d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abdb04567f7268ac53524f539ac95e6ab"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_depthwise_im2_col_kernel.xhtml#abdb04567f7268ac53524f539ac95e6ab">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, const <a class="el" href="classarm__compute_1_1_size2_d.xhtml">Size2D</a> &amp;kernel_dims, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;conv_info, bool has_bias=false, unsigned int depth_multiplier=1)</td></tr>
+<tr class="memdesc:abdb04567f7268ac53524f539ac95e6ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the input and output of the kernel.  <a href="#abdb04567f7268ac53524f539ac95e6ab">More...</a><br /></td></tr>
+<tr class="separator:abdb04567f7268ac53524f539ac95e6ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a112b35dd205c62ea6ed1447ef226da82"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_depthwise_im2_col_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">run</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;<a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>, const <a class="el" href="structarm__compute_1_1_thread_info.xhtml">ThreadInfo</a> &amp;info) override</td></tr>
 <tr class="memdesc:a112b35dd205c62ea6ed1447ef226da82"><td class="mdescLeft">&#160;</td><td class="mdescRight">Execute the kernel on the passed window.  <a href="#a112b35dd205c62ea6ed1447ef226da82">More...</a><br /></td></tr>
 <tr class="separator:a112b35dd205c62ea6ed1447ef226da82"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -258,7 +258,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="aba78dcb8f9d91651bdaf53d21bbee40d"></a>
+<a class="anchor" id="abdb04567f7268ac53524f539ac95e6ab"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -290,7 +290,13 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>has_bias</em> = <code>false</code>&#160;</td>
+          <td class="paramname"><em>has_bias</em> = <code>false</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>depth_multiplier</em> = <code>1</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -308,6 +314,7 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">kernel_dims</td><td>The kernel dimensions (width and height). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">conv_info</td><td>Contains padding and stride information described in <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">has_bias</td><td>Boolean that specifies if the depthwise convolution has bias. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">depth_multiplier</td><td>(Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1. </td></tr>
   </table>
   </dd>
 </dl>
@@ -344,7 +351,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_n_e_depthwise_im2_col_kernel_8h_source.xhtml#l00041">41</a> of file <a class="el" href="_n_e_depthwise_im2_col_kernel_8h_source.xhtml">NEDepthwiseIm2ColKernel.h</a>.</p>
 
-<p>References <a class="el" href="classarm__compute_1_1_n_e_depthwise_im2_col_kernel.xhtml#aba78dcb8f9d91651bdaf53d21bbee40d">NEDepthwiseIm2ColKernel::configure()</a>, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">arm_compute::test::validation::info()</a>, <a class="el" href="classarm__compute_1_1_n_e_depthwise_im2_col_kernel.xhtml#abedec4a789c5ce275d17d458810e9fac">NEDepthwiseIm2ColKernel::NEDepthwiseIm2ColKernel()</a>, <a class="el" href="classarm__compute_1_1_n_e_depthwise_im2_col_kernel.xhtml#a71bbff3ea2feca2cd0d70f9eb01ca90b">NEDepthwiseIm2ColKernel::operator=()</a>, <a class="el" href="classarm__compute_1_1_n_e_depthwise_im2_col_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEDepthwiseIm2ColKernel::run()</a>, and <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">IKernel::window()</a>.</p>
+<p>References <a class="el" href="classarm__compute_1_1_n_e_depthwise_im2_col_kernel.xhtml#abdb04567f7268ac53524f539ac95e6ab">NEDepthwiseIm2ColKernel::configure()</a>, <a class="el" href="_c_l_2_winograd_8cpp_source.xhtml#l00360">arm_compute::test::validation::conv_info</a>, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">arm_compute::test::validation::info()</a>, <a class="el" href="classarm__compute_1_1_n_e_depthwise_im2_col_kernel.xhtml#abedec4a789c5ce275d17d458810e9fac">NEDepthwiseIm2ColKernel::NEDepthwiseIm2ColKernel()</a>, <a class="el" href="classarm__compute_1_1_n_e_depthwise_im2_col_kernel.xhtml#a71bbff3ea2feca2cd0d70f9eb01ca90b">NEDepthwiseIm2ColKernel::operator=()</a>, <a class="el" href="classarm__compute_1_1_n_e_depthwise_im2_col_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEDepthwiseIm2ColKernel::run()</a>, and <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">IKernel::window()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    {</div><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        <span class="keywordflow">return</span> <span class="stringliteral">&quot;NEDepthwiseIm2ColKernel&quot;</span>;</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
@@ -462,7 +469,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_depthwise_im2_col_kernel.xhtml">NEDepthwiseIm2ColKernel</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:58 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:42 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,6 +25,7 @@
 #include "arm_compute/runtime/NEON/functions/NEDequantizationLayer.h"
 
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/Validate.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 using namespace arm_compute;
@@ -34,8 +35,18 @@ NEDequantizationLayer::NEDequantizationLayer()
 {
 }
 
+Status NEDequantizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *min_max)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output, min_max);
+    ARM_COMPUTE_RETURN_ON_ERROR(NEDequantizationLayerKernel::validate(input, output, min_max));
+
+    return Status{};
+}
+
 void NEDequantizationLayer::configure(const ITensor *input, ITensor *output, const ITensor *min_max)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, min_max);
+
     // Configure kernel
     _dequantize_kernel.configure(input, output, min_max);
 }

@@ -77,10 +77,13 @@ public:
      * @param[in] num_channels         (Optional) Number of channels (default = 1).
      * @param[in] fixed_point_position (Optional) Number of bits for the fractional part of the fixed point numbers (default = 0).
      * @param[in] quantization_info    (Optional) Quantization info for asymmetric quantization (default = empty).
+     * @param[in] data_layout          (Optional) Data layout of the tensor (default = NCHW).
      */
     SimpleTensor(TensorShape shape, DataType data_type,
-                 int num_channels         = 1,
-                 int fixed_point_position = 0, QuantizationInfo quantization_info = QuantizationInfo());
+                 int              num_channels         = 1,
+                 int              fixed_point_position = 0,
+                 QuantizationInfo quantization_info    = QuantizationInfo(),
+                 DataLayout       data_layout          = DataLayout::NCHW);
 
     /** Create a deep copy of the given @p tensor.
      *
@@ -91,62 +94,104 @@ public:
     /** Create a deep copy of the given @p tensor.
      *
      * @param[in] tensor To be copied tensor.
+     *
+     * @return a copy of the given tensor.
      */
-    SimpleTensor &operator        =(SimpleTensor tensor);
+    SimpleTensor &operator=(SimpleTensor tensor);
+    /** Allow instances of this class to be move constructed */
     SimpleTensor(SimpleTensor &&) = default;
-    ~SimpleTensor()               = default;
+    /** Default destructor. */
+    ~SimpleTensor() = default;
 
+    /** Tensor value type */
     using value_type = T;
-    using Buffer     = std::unique_ptr<value_type[]>;
+    /** Tensor buffer pointer type */
+    using Buffer = std::unique_ptr<value_type[]>;
 
     friend class RawTensor;
 
     /** Return value at @p offset in the buffer.
      *
      * @param[in] offset Offset within the buffer.
+     *
+     * @return value in the buffer.
      */
     T &operator[](size_t offset);
 
     /** Return constant value at @p offset in the buffer.
      *
      * @param[in] offset Offset within the buffer.
+     *
+     * @return constant value in the buffer.
      */
     const T &operator[](size_t offset) const;
 
-    /** Shape of the tensor. */
+    /** Shape of the tensor.
+     *
+     * @return the shape of the tensor.
+     */
     TensorShape shape() const override;
-
-    /** Size of each element in the tensor in bytes. */
+    /** Size of each element in the tensor in bytes.
+     *
+     * @return the size of each element in the tensor in bytes.
+     */
     size_t element_size() const override;
-
-    /** Total size of the tensor in bytes. */
+    /** Total size of the tensor in bytes.
+     *
+     * @return the total size of the tensor in bytes.
+     */
     size_t size() const override;
-
-    /** Image format of the tensor. */
+    /** Image format of the tensor.
+     *
+     * @return the format of the tensor.
+     */
     Format format() const override;
-
-    /** Data type of the tensor. */
+    /** Data layout of the tensor.
+     *
+     * @return the data layout of the tensor.
+     */
+    DataLayout data_layout() const override;
+    /** Data type of the tensor.
+     *
+     * @return the data type of the tensor.
+     */
     DataType data_type() const override;
-
-    /** Number of channels of the tensor. */
+    /** Number of channels of the tensor.
+     *
+     * @return the number of channels of the tensor.
+     */
     int num_channels() const override;
-
-    /** Number of elements of the tensor. */
+    /** Number of elements of the tensor.
+     *
+     * @return the number of elements of the tensor.
+     */
     int num_elements() const override;
-
-    /** Available padding around the tensor. */
+    /** Available padding around the tensor.
+     *
+     * @return the available padding around the tensor.
+     */
     PaddingSize padding() const override;
-
-    /** The number of bits for the fractional part of the fixed point numbers. */
+    /** Number of bits for the fractional part.
+     *
+     * @return the number of bits for the fractional part.
+     */
     int fixed_point_position() const override;
-
-    /** Quantization info in case of asymmetric quantized type */
+    /** Quantization info in case of asymmetric quantized type
+     *
+     * @return
+     */
     QuantizationInfo quantization_info() const override;
 
-    /** Constant pointer to the underlying buffer. */
+    /** Constant pointer to the underlying buffer.
+     *
+     * @return a constant pointer to the data.
+     */
     const T *data() const;
 
-    /** Pointer to the underlying buffer. */
+    /** Pointer to the underlying buffer.
+     *
+     * @return a pointer to the data.
+     */
     T *data();
 
     /** Read only access to the specified element.
@@ -181,6 +226,7 @@ protected:
     int              _num_channels{ 0 };
     int              _fixed_point_position{ 0 };
     QuantizationInfo _quantization_info{};
+    DataLayout       _data_layout{ DataLayout::UNKNOWN };
 };
 
 template <typename T>
@@ -189,20 +235,22 @@ SimpleTensor<T>::SimpleTensor(TensorShape shape, Format format, int fixed_point_
       _shape(shape),
       _format(format),
       _fixed_point_position(fixed_point_position),
-      _quantization_info()
+      _quantization_info(),
+      _data_layout(DataLayout::NCHW)
 {
     _num_channels = num_channels();
     _buffer       = support::cpp14::make_unique<T[]>(num_elements() * _num_channels);
 }
 
 template <typename T>
-SimpleTensor<T>::SimpleTensor(TensorShape shape, DataType data_type, int num_channels, int fixed_point_position, QuantizationInfo quantization_info)
+SimpleTensor<T>::SimpleTensor(TensorShape shape, DataType data_type, int num_channels, int fixed_point_position, QuantizationInfo quantization_info, DataLayout data_layout)
     : _buffer(nullptr),
       _shape(shape),
       _data_type(data_type),
       _num_channels(num_channels),
       _fixed_point_position(fixed_point_position),
-      _quantization_info(quantization_info)
+      _quantization_info(quantization_info),
+      _data_layout(data_layout)
 {
     _buffer = support::cpp14::make_unique<T[]>(num_elements() * this->num_channels());
 }
@@ -215,7 +263,8 @@ SimpleTensor<T>::SimpleTensor(const SimpleTensor &tensor)
       _data_type(tensor.data_type()),
       _num_channels(tensor.num_channels()),
       _fixed_point_position(tensor.fixed_point_position()),
-      _quantization_info(tensor.quantization_info())
+      _quantization_info(tensor.quantization_info()),
+      _data_layout(tensor.data_layout())
 {
     _buffer = support::cpp14::make_unique<T[]>(tensor.num_elements() * num_channels());
     std::copy_n(tensor.data(), num_elements() * num_channels(), _buffer.get());
@@ -276,6 +325,12 @@ template <typename T>
 Format SimpleTensor<T>::format() const
 {
     return _format;
+}
+
+template <typename T>
+DataLayout SimpleTensor<T>::data_layout() const
+{
+    return _data_layout;
 }
 
 template <typename T>
@@ -373,6 +428,8 @@ void swap(SimpleTensor<U> &tensor1, SimpleTensor<U> &tensor2)
     swap(tensor1._format, tensor2._format);
     swap(tensor1._data_type, tensor2._data_type);
     swap(tensor1._num_channels, tensor2._num_channels);
+    swap(tensor1._fixed_point_position, tensor2._fixed_point_position);
+    swap(tensor1._quantization_info, tensor2._quantization_info);
     swap(tensor1._buffer, tensor2._buffer);
 }
 } // namespace test

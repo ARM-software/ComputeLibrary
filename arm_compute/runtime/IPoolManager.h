@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,6 +53,11 @@ public:
      * @param[in] pool Pool to be managed
      */
     virtual void register_pool(std::unique_ptr<IMemoryPool> pool) = 0;
+    /** Returns the total number of pools managed by the pool manager
+     *
+     * @return Number of managed pools
+     */
+    virtual size_t num_pools() const = 0;
 };
 } // arm_compute
 #endif /*__ARM_COMPUTE_IPOOLMANAGER_H__ */

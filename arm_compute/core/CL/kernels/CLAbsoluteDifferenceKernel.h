@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,13 +40,13 @@ class CLAbsoluteDifferenceKernel : public ICLKernel
 public:
     /** Default constructor. */
     CLAbsoluteDifferenceKernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLAbsoluteDifferenceKernel(const CLAbsoluteDifferenceKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLAbsoluteDifferenceKernel &operator=(const CLAbsoluteDifferenceKernel &) = delete;
-    /** Allow instances of this class to be moved. */
+    /** Allow instances of this class to be moved */
     CLAbsoluteDifferenceKernel(CLAbsoluteDifferenceKernel &&) = default;
-    /** Allow instances of this class to be moved. */
+    /** Allow instances of this class to be moved */
     CLAbsoluteDifferenceKernel &operator=(CLAbsoluteDifferenceKernel &&) = default;
     /** Default destructor */
     ~CLAbsoluteDifferenceKernel() = default;

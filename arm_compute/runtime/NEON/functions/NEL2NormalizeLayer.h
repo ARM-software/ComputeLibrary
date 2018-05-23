@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_NEL2NORMALIZE_H__
-#define __ARM_COMPUTE_NEL2NORMALIZE_H__
+#ifndef __ARM_COMPUTE_NEL2NORMALIZELAYER_H__
+#define __ARM_COMPUTE_NEL2NORMALIZELAYER_H__
 
 #include "arm_compute/core/NEON/kernels/NEL2NormalizeLayerKernel.h"
 #include "arm_compute/runtime/IFunction.h"
@@ -50,12 +50,23 @@ public:
     NEL2NormalizeLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
-     * @param[in, out] input   Source tensor. Data types supported: F32. (Written to only for border_size != 0)
-     * @param[out]     output  Destination tensor. Data types supported: same as @p input.
+     * @param[in, out] input   Source tensor. Data types supported: F32. Data layouts supported: NCHW. (Written to only for border_size != 0)
+     * @param[out]     output  Destination tensor. Data types and data layouts supported: same as @p input.
      * @param[in]      axis    Dimension along which to reduce. Supported reduction axis : 0
-     * @param[in]      epsilon Lower bound value for the normalization.
+     * @param[in]      epsilon (Optional) Lower bound value for the normalization.
      */
     void configure(ITensor *input, ITensor *output, unsigned int axis, float epsilon = 1e-12);
+
+    /** Static function to check if given info will lead to a valid configuration of @ref NEL2NormalizeLayer.
+     *
+     * @param[in] input   Source tensor info. Data types supported: F32. Data layouts supported: NCHW. (Written to only for border_size != 0)
+     * @param[in] output  Destination tensor info. Data types and data layouts supported: same as @p input.
+     * @param[in] axis    Dimension along which to reduce. Supported reduction axis : 0
+     * @param[in] epsilon (Optional) Lower bound value for the normalization.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, float epsilon = 1e-12);
 
     // Inherited methods overridden:
     void run() override;
@@ -67,4 +78,4 @@ private:
     Tensor                   _sumsq;
 };
 }
-#endif /* __ARM_COMPUTE_NEL2NORMALIZE_H__ */
+#endif /* __ARM_COMPUTE_NEL2NORMALIZELAYER_H__ */

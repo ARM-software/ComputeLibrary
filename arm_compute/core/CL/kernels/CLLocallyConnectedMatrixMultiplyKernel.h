@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,6 +55,15 @@ public:
      * @param[out] output Output tensor to store the result. Data type supported: same as @p input0
      */
     void configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLLocallyConnectedMatrixMultiplyKernel
+     *
+     * @param[in] input0 First input tensor info. Data types supported: F32
+     * @param[in] input1 Second input tensor info. Data type supported: same as @p input0
+     * @param[in] output Output tensor info. Data type supported: same as @p input0
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

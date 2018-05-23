@@ -17,6 +17,7 @@ var namespacearm__compute_1_1test_1_1framework =
     [ "ListOption", "classarm__compute_1_1test_1_1framework_1_1_list_option.xhtml", "classarm__compute_1_1test_1_1framework_1_1_list_option" ],
     [ "MaliCounter", "classarm__compute_1_1test_1_1framework_1_1_mali_counter.xhtml", "classarm__compute_1_1test_1_1framework_1_1_mali_counter" ],
     [ "Measurement", "structarm__compute_1_1test_1_1framework_1_1_measurement.xhtml", "structarm__compute_1_1test_1_1framework_1_1_measurement" ],
+    [ "OpenCLMemoryUsage", "classarm__compute_1_1test_1_1framework_1_1_open_c_l_memory_usage.xhtml", "classarm__compute_1_1test_1_1framework_1_1_open_c_l_memory_usage" ],
     [ "OpenCLTimer", "classarm__compute_1_1test_1_1framework_1_1_open_c_l_timer.xhtml", "classarm__compute_1_1test_1_1framework_1_1_open_c_l_timer" ],
     [ "Option", "classarm__compute_1_1test_1_1framework_1_1_option.xhtml", "classarm__compute_1_1test_1_1framework_1_1_option" ],
     [ "PMU", "classarm__compute_1_1test_1_1framework_1_1_p_m_u.xhtml", "classarm__compute_1_1test_1_1framework_1_1_p_m_u" ],

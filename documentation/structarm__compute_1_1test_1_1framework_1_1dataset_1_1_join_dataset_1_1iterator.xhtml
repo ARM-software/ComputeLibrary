@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -130,12 +130,16 @@ $(document).ready(function(){initNavTree('structarm__compute_1_1test_1_1framewor
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a78cc7b5e65362760bcd99d070d163e94"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset_1_1iterator.xhtml#a78cc7b5e65362760bcd99d070d163e94">iterator</a> (const T_noref *dataset1, const U_noref *dataset2)</td></tr>
+<tr class="memdesc:a78cc7b5e65362760bcd99d070d163e94"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct an iterator.  <a href="#a78cc7b5e65362760bcd99d070d163e94">More...</a><br /></td></tr>
 <tr class="separator:a78cc7b5e65362760bcd99d070d163e94"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7b5000e45c1386c4e56ef650f6b0ef5b"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset_1_1iterator.xhtml#a7b5000e45c1386c4e56ef650f6b0ef5b">description</a> () const </td></tr>
+<tr class="memdesc:a7b5000e45c1386c4e56ef650f6b0ef5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the description of the current value.  <a href="#a7b5000e45c1386c4e56ef650f6b0ef5b">More...</a><br /></td></tr>
 <tr class="separator:a7b5000e45c1386c4e56ef650f6b0ef5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a200efd80336cb52a9bc030d24d46f491"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset.xhtml#ad4f1d01a0af9cf719345464b2c3821ca">JoinDataset::type</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset_1_1iterator.xhtml#a200efd80336cb52a9bc030d24d46f491">operator*</a> () const </td></tr>
+<tr class="memdesc:a200efd80336cb52a9bc030d24d46f491"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the value of the iterator.  <a href="#a200efd80336cb52a9bc030d24d46f491">More...</a><br /></td></tr>
 <tr class="separator:a200efd80336cb52a9bc030d24d46f491"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af1b1c7856a59f34c7d3570f946a2ff00"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset_1_1iterator.xhtml">iterator</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset_1_1iterator.xhtml#af1b1c7856a59f34c7d3570f946a2ff00">operator++</a> ()</td></tr>
+<tr class="memdesc:af1b1c7856a59f34c7d3570f946a2ff00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inrement the iterator.  <a href="#af1b1c7856a59f34c7d3570f946a2ff00">More...</a><br /></td></tr>
 <tr class="separator:af1b1c7856a59f34c7d3570f946a2ff00"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -144,7 +148,7 @@ struct arm_compute::test::framework::dataset::JoinDataset&lt; T, U &gt;::iterato
 
 <p><a class="el" href="classarm__compute_1_1_iterator.xhtml" title="Iterator updated by execute_window_loop for each window element. ">Iterator</a> for the dataset. </p>
 
-<p>Definition at line <a class="el" href="_join_dataset_8h_source.xhtml#l00073">73</a> of file <a class="el" href="_join_dataset_8h_source.xhtml">JoinDataset.h</a>.</p>
+<p>Definition at line <a class="el" href="_join_dataset_8h_source.xhtml#l00074">74</a> of file <a class="el" href="_join_dataset_8h_source.xhtml">JoinDataset.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a78cc7b5e65362760bcd99d070d163e94"></a>
 <div class="memitem">
@@ -178,10 +182,19 @@ struct arm_compute::test::framework::dataset::JoinDataset&lt; T, U &gt;::iterato
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_join_dataset_8h_source.xhtml#l00075">75</a> of file <a class="el" href="_join_dataset_8h_source.xhtml">JoinDataset.h</a>.</p>
+<p>Construct an iterator. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">dataset1</td><td><a class="el" href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_dataset.xhtml" title="Abstract dataset base class. ">Dataset</a> 1. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dataset2</td><td><a class="el" href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_dataset.xhtml" title="Abstract dataset base class. ">Dataset</a> 2. </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p>Referenced by <a class="el" href="_join_dataset_8h_source.xhtml#l00115">JoinDataset&lt; YOLOV2ActivationLayerRELUDataset, YOLOV2ActivationLayerLINEARDataset &gt;::begin()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;            : _iter1{ dataset1-&gt;begin() }, _iter2{ dataset2-&gt;begin() }, _first_size{ dataset1-&gt;size() }</div><div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;        {</div><div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;        }</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="_join_dataset_8h_source.xhtml#l00081">81</a> of file <a class="el" href="_join_dataset_8h_source.xhtml">JoinDataset.h</a>.</p>
+
+<p>Referenced by <a class="el" href="_join_dataset_8h_source.xhtml#l00133">JoinDataset&lt; T, U &gt;::begin()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;            : _iter1{ dataset1-&gt;begin() }, _iter2{ dataset2-&gt;begin() }, _first_size{ dataset1-&gt;size() }</div><div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;        {</div><div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;        }</div></div><!-- fragment -->
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -206,8 +219,11 @@ struct arm_compute::test::framework::dataset::JoinDataset&lt; T, U &gt;::iterato
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_join_dataset_8h_source.xhtml#l00080">80</a> of file <a class="el" href="_join_dataset_8h_source.xhtml">JoinDataset.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;        {</div><div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;            <span class="keywordflow">return</span> _first_size &gt; 0 ? _iter1.description() : _iter2.description();</div><div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;        }</div></div><!-- fragment -->
+<p>Get the description of the current value. </p>
+<dl class="section return"><dt>Returns</dt><dd>description of the current value. </dd></dl>
+
+<p>Definition at line <a class="el" href="_join_dataset_8h_source.xhtml#l00090">90</a> of file <a class="el" href="_join_dataset_8h_source.xhtml">JoinDataset.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;        {</div><div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;            <span class="keywordflow">return</span> _first_size &gt; 0 ? _iter1.description() : _iter2.description();</div><div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;        }</div></div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="a200efd80336cb52a9bc030d24d46f491"></a>
@@ -231,8 +247,11 @@ struct arm_compute::test::framework::dataset::JoinDataset&lt; T, U &gt;::iterato
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_join_dataset_8h_source.xhtml#l00085">85</a> of file <a class="el" href="_join_dataset_8h_source.xhtml">JoinDataset.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        {</div><div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;            <span class="keywordflow">return</span> _first_size &gt; 0 ? *_iter1 : *_iter2;</div><div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;        }</div></div><!-- fragment -->
+<p>Get the value of the iterator. </p>
+<dl class="section return"><dt>Returns</dt><dd>the value of the iterator. </dd></dl>
+
+<p>Definition at line <a class="el" href="_join_dataset_8h_source.xhtml#l00099">99</a> of file <a class="el" href="_join_dataset_8h_source.xhtml">JoinDataset.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;        {</div><div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;            <span class="keywordflow">return</span> _first_size &gt; 0 ? *_iter1 : *_iter2;</div><div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;        }</div></div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="af1b1c7856a59f34c7d3570f946a2ff00"></a>
@@ -256,8 +275,11 @@ struct arm_compute::test::framework::dataset::JoinDataset&lt; T, U &gt;::iterato
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_join_dataset_8h_source.xhtml#l00090">90</a> of file <a class="el" href="_join_dataset_8h_source.xhtml">JoinDataset.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;        {</div><div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;            <span class="keywordflow">if</span>(_first_size &gt; 0)</div><div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;            {</div><div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;                --_first_size;</div><div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;                ++_iter1;</div><div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;            }</div><div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;            <span class="keywordflow">else</span></div><div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;            {</div><div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;                ++_iter2;</div><div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;            }</div><div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;</div><div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;            <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div><div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;        }</div></div><!-- fragment -->
+<p>Inrement the iterator. </p>
+<dl class="section return"><dt>Returns</dt><dd>*this; </dd></dl>
+
+<p>Definition at line <a class="el" href="_join_dataset_8h_source.xhtml#l00108">108</a> of file <a class="el" href="_join_dataset_8h_source.xhtml">JoinDataset.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;        {</div><div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;            <span class="keywordflow">if</span>(_first_size &gt; 0)</div><div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;            {</div><div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;                --_first_size;</div><div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;                ++_iter1;</div><div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;            }</div><div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;            <span class="keywordflow">else</span></div><div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;            {</div><div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;                ++_iter2;</div><div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;            }</div><div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;</div><div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;            <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div><div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;        }</div></div><!-- fragment -->
 </div>
 </div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
@@ -269,7 +291,7 @@ struct arm_compute::test::framework::dataset::JoinDataset&lt; T, U &gt;::iterato
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test.xhtml">test</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test_1_1framework.xhtml">framework</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test_1_1framework_1_1dataset.xhtml">dataset</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset.xhtml">JoinDataset</a></li><li class="navelem"><a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset_1_1iterator.xhtml">iterator</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:38:00 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:44 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

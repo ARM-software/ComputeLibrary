@@ -36,6 +36,7 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
@@ -49,13 +50,12 @@ class ICLTensor;
 
 /** Function to reshape and transpose the weights. This function calls the following kernels:
  * -# @ref CLWeightsReshapeKernel
- * -# @ref CLGEMMTranspose1xWKernel
  */
 class CLConvolutionLayerReshapeWeights : public IFunction
 {
 public:
     /** Constructor */
-    CLConvolutionLayerReshapeWeights(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    CLConvolutionLayerReshapeWeights();
     /** Set the input and output tensors.
      *
      * @param[in]  weights Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
@@ -78,10 +78,7 @@ public:
     void run() override;
 
 private:
-    CLMemoryGroup            _memory_group;
-    CLWeightsReshapeKernel   _weights_reshape_kernel;
-    CLGEMMTranspose1xWKernel _weights_transposed_kernel;
-    CLTensor                 _weights_reshaped;
+    CLWeightsReshapeKernel _weights_reshape_kernel;
 };
 
 /** Basic function to compute the convolution layer. This function calls the following OpenCL kernels/functions:
@@ -90,7 +87,7 @@ private:
  *
  * -# @ref CLIm2ColKernel
  * -# @ref CLGEMMLowpMatrixMultiplyCore (if quantized asymmetric)
- * -# @ref CLGEMMLowpQuantizeDownInt32ToUint8Scale (if quantized asymmetric)
+ * -# @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint (if quantized asymmetric)
  * -# @ref CLCol2ImKernel
  *
  * if the weights are already reshaped:
@@ -102,8 +99,19 @@ private:
 class CLGEMMConvolutionLayer : public IFunction
 {
 public:
-    /** Default constructor */
+    /** Default constructor
+     *
+     * @param[in] memory_manager (Optional) Memory manager.
+     */
     CLGEMMConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLGEMMConvolutionLayer(const CLGEMMConvolutionLayer &) = delete;
+    /** Default move constructor */
+    CLGEMMConvolutionLayer(CLGEMMConvolutionLayer &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLGEMMConvolutionLayer &operator=(const CLGEMMConvolutionLayer &) = delete;
+    /** Default move assignment operator */
+    CLGEMMConvolutionLayer &operator=(CLGEMMConvolutionLayer &&) = default;
     /** Set the input and output tensors.
      *
      * @param[in]  input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -117,8 +125,11 @@ public:
      * @param[in]  conv_info    Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  weights_info Specifies if the weights tensor has been reshaped with CLWeightsReshapeKernel. If this is not part of the fully connected layer the weights
      *                          tensor has also been transposed with CLGEMMTranspose1xWKernel. Data type supported: Same as @p input.
+     * @param[in]  dilation     (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
+     * @param[in]  act_info     (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info = WeightsInfo());
+    void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info = WeightsInfo(),
+                   const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMConvolutionLayer.
      *
      * @param[in]  input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -132,12 +143,17 @@ public:
      * @param[in]  conv_info    Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  weights_info Specifies if the weights tensor has been reshaped with CLWeightsReshapeKernel. If this is not part of the fully connected layer the weights
      *                          tensor has also been transposed with CLGEMMTranspose1xWKernel. Data type supported: Same as @p input.
+     * @param[in]  dilation     (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
+     * @param[in]  act_info     (Optional) Activation layer information in case of a fused activation.
+     *
+     * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                           const WeightsInfo &weights_info = WeightsInfo());
+                           const WeightsInfo &weights_info = WeightsInfo(), const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run() override;
+    void prepare() override;
 
 private:
     /** Configures the appropriate matrix multiply routine
@@ -167,16 +183,18 @@ private:
     CLGEMMLowpMatrixMultiplyCore                        _mm_gemmlowp;
     CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint _gemmlowp_output_stage;
     CLCol2ImKernel                                      _col2im_kernel;
+    CLActivationLayer                                   _activationlayer_function;
+
+    const ICLTensor *_original_weights;
 
     CLTensor _im2col_output;
-    CLTensor _interleave_output;
     CLTensor _weights_reshaped;
-    CLTensor _weights_transposed;
     CLTensor _gemm_output;
     CLTensor _tmp_output;
 
     bool _is_quantized;
-    bool _is_first_run;
+    bool _is_activationlayer_enabled;
+    bool _is_prepared;
 };
 }
 #endif /* __ARM_COMPUTE_CLGEMMCONVOLUTIONLAYER_H__ */

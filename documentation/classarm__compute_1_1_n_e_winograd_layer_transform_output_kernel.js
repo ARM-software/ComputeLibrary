@@ -8,7 +8,6 @@ var classarm__compute_1_1_n_e_winograd_layer_transform_output_kernel =
     [ "get_matrix_stride", "classarm__compute_1_1_n_e_winograd_layer_transform_output_kernel.xhtml#ae18e3efe8200578009c1f7a15a4a2fa0", null ],
     [ "get_output_shape", "classarm__compute_1_1_n_e_winograd_layer_transform_output_kernel.xhtml#acb7b954c56d087e3d2451f92e62eea60", null ],
     [ "get_output_storage_size", "classarm__compute_1_1_n_e_winograd_layer_transform_output_kernel.xhtml#acbbdf018ab122fbd13fd655fa678dee3", null ],
-    [ "is_parallelisable", "classarm__compute_1_1_n_e_winograd_layer_transform_output_kernel.xhtml#a4370ae5fda7bd455a171fc8ed4d3f283", null ],
     [ "name", "classarm__compute_1_1_n_e_winograd_layer_transform_output_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828", null ],
     [ "operator=", "classarm__compute_1_1_n_e_winograd_layer_transform_output_kernel.xhtml#a751da38633e08a705df626b6146085b2", null ],
     [ "operator=", "classarm__compute_1_1_n_e_winograd_layer_transform_output_kernel.xhtml#a40b55a1414f014115c6aef7bc8656825", null ],

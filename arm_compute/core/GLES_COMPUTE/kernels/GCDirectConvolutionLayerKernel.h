@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,8 +58,10 @@ public:
      * @param[out] output    The output tensor. First 2 lower dimensions represent a transform of each 3D input,
      *                       while every dimension above represents a batch. Data types supported: Same as @p input
      * @param[in]  conv_info Contains padding and stride information described in @ref PadStrideInfo.
+     * @param[in]  act_info  (Optional) Activation layer information in case of a fused activation.
      */
-    void configure(const IGCTensor *input, const IGCTensor *weights, const IGCTensor *bias, IGCTensor *output, const PadStrideInfo &conv_info);
+    void configure(const IGCTensor *input, const IGCTensor *weights, const IGCTensor *bias, IGCTensor *output,
+                   const PadStrideInfo &conv_info, const ActivationLayerInfo &act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     BorderSize border_size() const override;
@@ -80,8 +82,11 @@ private:
     gles::NDRange    _lws;
 };
 
+/** Interface for the 1x1 direct convolution kernel */
 using GCDirectConvolutionLayer1x1Kernel = GCDirectConvolutionLayerKernel<1>;
+/** Interface for the 3x3 direct convolution kernel */
 using GCDirectConvolutionLayer3x3Kernel = GCDirectConvolutionLayerKernel<3>;
+/** Interface for the 5x5 direct convolution kernel */
 using GCDirectConvolutionLayer5x5Kernel = GCDirectConvolutionLayerKernel<5>;
 }
 #endif /*__ARM_COMPUTE_GCDIRECTCONVOLUTIONLAYERKERNEL_H__ */

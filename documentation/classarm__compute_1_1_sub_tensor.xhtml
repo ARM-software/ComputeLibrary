@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -125,7 +125,7 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_sub_tensor.xhtml
 <p>Basic implementation of the sub-tensor interface.  
  <a href="classarm__compute_1_1_sub_tensor.xhtml#details">More...</a></p>
 
-<p><code>#include &lt;<a class="el" href="runtime_2_sub_tensor_8h_source.xhtml">SubTensor.h</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="_sub_tensor_8h_source.xhtml">SubTensor.h</a>&gt;</code></p>
 <div class="dynheader">
 Collaboration diagram for SubTensor:</div>
 <div class="dyncontent">
@@ -135,6 +135,9 @@ Collaboration diagram for SubTensor:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:a29f0969775d17df94d8e87c40b7b7df1"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_sub_tensor.xhtml#a29f0969775d17df94d8e87c40b7b7df1">SubTensor</a> ()</td></tr>
+<tr class="memdesc:a29f0969775d17df94d8e87c40b7b7df1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default Constructor.  <a href="#a29f0969775d17df94d8e87c40b7b7df1">More...</a><br /></td></tr>
+<tr class="separator:a29f0969775d17df94d8e87c40b7b7df1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4d0af8325f260b3642402e3b05a6c0df"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_sub_tensor.xhtml#a4d0af8325f260b3642402e3b05a6c0df">SubTensor</a> (<a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *<a class="el" href="classarm__compute_1_1_sub_tensor.xhtml#a1097f24ffd02b0d642548baef8a8ce1f">parent</a>, const <a class="el" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a> &amp;tensor_shape, const <a class="el" href="classarm__compute_1_1_coordinates.xhtml">Coordinates</a> &amp;coords, bool extend_parent=false)</td></tr>
 <tr class="memdesc:a4d0af8325f260b3642402e3b05a6c0df"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#a4d0af8325f260b3642402e3b05a6c0df">More...</a><br /></td></tr>
 <tr class="separator:a4d0af8325f260b3642402e3b05a6c0df"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -169,7 +172,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a4aa2df36743089ac6814d83e7d4b7ffc inherit pub_methods_classarm__compute_1_1_i_tensor"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a4aa2df36743089ac6814d83e7d4b7ffc">~ITensor</a> ()=default</td></tr>
 <tr class="memdesc:a4aa2df36743089ac6814d83e7d4b7ffc inherit pub_methods_classarm__compute_1_1_i_tensor"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default virtual destructor.  <a href="#a4aa2df36743089ac6814d83e7d4b7ffc">More...</a><br /></td></tr>
 <tr class="separator:a4aa2df36743089ac6814d83e7d4b7ffc inherit pub_methods_classarm__compute_1_1_i_tensor"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a48c7a05cc63f541d732250e39339cee2 inherit pub_methods_classarm__compute_1_1_i_tensor"><td class="memItemLeft" align="right" valign="top">uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a48c7a05cc63f541d732250e39339cee2">ptr_to_element</a> (const <a class="el" href="classarm__compute_1_1_coordinates.xhtml">Coordinates</a> &amp;<a class="el" href="hwc_8hpp.xhtml#abaabdc509cdaba7df9f56c6c76f3ae19">id</a>) const </td></tr>
+<tr class="memitem:a48c7a05cc63f541d732250e39339cee2 inherit pub_methods_classarm__compute_1_1_i_tensor"><td class="memItemLeft" align="right" valign="top">uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a48c7a05cc63f541d732250e39339cee2">ptr_to_element</a> (const <a class="el" href="classarm__compute_1_1_coordinates.xhtml">Coordinates</a> &amp;id) const </td></tr>
 <tr class="memdesc:a48c7a05cc63f541d732250e39339cee2 inherit pub_methods_classarm__compute_1_1_i_tensor"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return a pointer to the element at the passed coordinates.  <a href="#a48c7a05cc63f541d732250e39339cee2">More...</a><br /></td></tr>
 <tr class="separator:a48c7a05cc63f541d732250e39339cee2 inherit pub_methods_classarm__compute_1_1_i_tensor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4a774ad8d5f4837f3d7de1876d367c5b inherit pub_methods_classarm__compute_1_1_i_tensor"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a4a774ad8d5f4837f3d7de1876d367c5b">copy_from</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> &amp;src)</td></tr>
@@ -178,12 +181,35 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a0b092c86d6e0fb8a114281565953a02a inherit pub_methods_classarm__compute_1_1_i_tensor"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a0b092c86d6e0fb8a114281565953a02a">print</a> (std::ostream &amp;s, <a class="el" href="structarm__compute_1_1_i_o_format_info.xhtml">IOFormatInfo</a> io_fmt=<a class="el" href="structarm__compute_1_1_i_o_format_info.xhtml">IOFormatInfo</a>()) const </td></tr>
 <tr class="memdesc:a0b092c86d6e0fb8a114281565953a02a inherit pub_methods_classarm__compute_1_1_i_tensor"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print a tensor to a given stream using user defined formatting information.  <a href="#a0b092c86d6e0fb8a114281565953a02a">More...</a><br /></td></tr>
 <tr class="separator:a0b092c86d6e0fb8a114281565953a02a inherit pub_methods_classarm__compute_1_1_i_tensor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a58d056d9b5ad2bb18a0e07f4a902f385 inherit pub_methods_classarm__compute_1_1_i_tensor"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a58d056d9b5ad2bb18a0e07f4a902f385">is_used</a> () const </td></tr>
+<tr class="memdesc:a58d056d9b5ad2bb18a0e07f4a902f385 inherit pub_methods_classarm__compute_1_1_i_tensor"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flags if the tensor is used or not.  <a href="#a58d056d9b5ad2bb18a0e07f4a902f385">More...</a><br /></td></tr>
+<tr class="separator:a58d056d9b5ad2bb18a0e07f4a902f385 inherit pub_methods_classarm__compute_1_1_i_tensor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe4e1d42d62608a941124f0d50c3e48a inherit pub_methods_classarm__compute_1_1_i_tensor"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_tensor.xhtml#afe4e1d42d62608a941124f0d50c3e48a">mark_as_unused</a> () const </td></tr>
+<tr class="memdesc:afe4e1d42d62608a941124f0d50c3e48a inherit pub_methods_classarm__compute_1_1_i_tensor"><td class="mdescLeft">&#160;</td><td class="mdescRight">Marks a tensor as unused.  <a href="#afe4e1d42d62608a941124f0d50c3e48a">More...</a><br /></td></tr>
+<tr class="separator:afe4e1d42d62608a941124f0d50c3e48a inherit pub_methods_classarm__compute_1_1_i_tensor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Basic implementation of the sub-tensor interface. </p>
 
-<p>Definition at line <a class="el" href="runtime_2_sub_tensor_8h_source.xhtml#l00037">37</a> of file <a class="el" href="runtime_2_sub_tensor_8h_source.xhtml">SubTensor.h</a>.</p>
+<p>Definition at line <a class="el" href="_sub_tensor_8h_source.xhtml#l00037">37</a> of file <a class="el" href="_sub_tensor_8h_source.xhtml">SubTensor.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a class="anchor" id="a29f0969775d17df94d8e87c40b7b7df1"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classarm__compute_1_1_sub_tensor.xhtml">SubTensor</a> </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Default Constructor. </p>
+
+</div>
+</div>
 <a class="anchor" id="a4d0af8325f260b3642402e3b05a6c0df"></a>
 <div class="memitem">
 <div class="memproto">
@@ -466,7 +492,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>arm_compute/runtime/<a class="el" href="runtime_2_sub_tensor_8h_source.xhtml">SubTensor.h</a></li>
+<li>arm_compute/runtime/<a class="el" href="_sub_tensor_8h_source.xhtml">SubTensor.h</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -474,7 +500,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_sub_tensor.xhtml">SubTensor</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:59 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

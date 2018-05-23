@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -122,7 +122,7 @@ $(document).ready(function(){initNavTree('_validation_8cpp.xhtml','');});
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="_validation_8h_source.xhtml">Validation.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_coordinates_8h_source.xhtml">arm_compute/core/Coordinates.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="core_2_error_8h_source.xhtml">arm_compute/core/Error.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_error_8h_source.xhtml">arm_compute/core/Error.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_tensor_shape_8h_source.xhtml">arm_compute/core/TensorShape.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">arm_compute/core/Types.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="runtime_2_tensor_8h_source.xhtml">arm_compute/runtime/Tensor.h</a>&quot;</code><br />
@@ -148,10 +148,10 @@ Functions</h2></td></tr>
 <tr class="memitem:a7730e17dc901bdffefcf45b08bab135f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7730e17dc901bdffefcf45b08bab135f">validate</a> (const <a class="el" href="structarm__compute_1_1_valid_region.xhtml">arm_compute::ValidRegion</a> &amp;region, const <a class="el" href="structarm__compute_1_1_valid_region.xhtml">arm_compute::ValidRegion</a> &amp;reference)</td></tr>
 <tr class="memdesc:a7730e17dc901bdffefcf45b08bab135f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validate valid regions.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#a7730e17dc901bdffefcf45b08bab135f">More...</a><br /></td></tr>
 <tr class="separator:a7730e17dc901bdffefcf45b08bab135f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adf9a1249c175fca84f5bd15907291305"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#adf9a1249c175fca84f5bd15907291305">validate</a> (const <a class="el" href="namespacearm__compute.xhtml#a4467b302fc9ec312c40580336ab783da">arm_compute::PaddingSize</a> &amp;<a class="el" href="hwc_8hpp.xhtml#ad487ce76e40f524a7f5e350763b91ae5">padding</a>, const <a class="el" href="namespacearm__compute.xhtml#a4467b302fc9ec312c40580336ab783da">arm_compute::PaddingSize</a> &amp;reference)</td></tr>
+<tr class="memitem:adf9a1249c175fca84f5bd15907291305"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#adf9a1249c175fca84f5bd15907291305">validate</a> (const <a class="el" href="namespacearm__compute.xhtml#a4467b302fc9ec312c40580336ab783da">arm_compute::PaddingSize</a> &amp;padding, const <a class="el" href="namespacearm__compute.xhtml#a4467b302fc9ec312c40580336ab783da">arm_compute::PaddingSize</a> &amp;reference)</td></tr>
 <tr class="memdesc:adf9a1249c175fca84f5bd15907291305"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validate padding.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#adf9a1249c175fca84f5bd15907291305">More...</a><br /></td></tr>
 <tr class="separator:adf9a1249c175fca84f5bd15907291305"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a988c4a67dfa987caea90f71a4ad3a8b5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a988c4a67dfa987caea90f71a4ad3a8b5">validate</a> (const <a class="el" href="namespacearm__compute.xhtml#a4467b302fc9ec312c40580336ab783da">arm_compute::PaddingSize</a> &amp;<a class="el" href="hwc_8hpp.xhtml#ad487ce76e40f524a7f5e350763b91ae5">padding</a>, const <a class="el" href="namespacearm__compute.xhtml#a4467b302fc9ec312c40580336ab783da">arm_compute::PaddingSize</a> &amp;width_reference, const <a class="el" href="namespacearm__compute.xhtml#a4467b302fc9ec312c40580336ab783da">arm_compute::PaddingSize</a> &amp;height_reference)</td></tr>
+<tr class="memitem:a988c4a67dfa987caea90f71a4ad3a8b5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a988c4a67dfa987caea90f71a4ad3a8b5">validate</a> (const <a class="el" href="namespacearm__compute.xhtml#a4467b302fc9ec312c40580336ab783da">arm_compute::PaddingSize</a> &amp;padding, const <a class="el" href="namespacearm__compute.xhtml#a4467b302fc9ec312c40580336ab783da">arm_compute::PaddingSize</a> &amp;width_reference, const <a class="el" href="namespacearm__compute.xhtml#a4467b302fc9ec312c40580336ab783da">arm_compute::PaddingSize</a> &amp;height_reference)</td></tr>
 <tr class="memdesc:a988c4a67dfa987caea90f71a4ad3a8b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Validate padding.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#a988c4a67dfa987caea90f71a4ad3a8b5">More...</a><br /></td></tr>
 <tr class="separator:a988c4a67dfa987caea90f71a4ad3a8b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1e8ca0b3d47827b9574e21e9d73cab6a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a1e8ca0b3d47827b9574e21e9d73cab6a">validate</a> (const IAccessor &amp;tensor, const void *reference_value)</td></tr>
@@ -170,7 +170,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="_validation_8cpp.xhtml">Validation.cpp</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:56 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -44,12 +44,21 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLChannelExtract.h", "_c_l_channel_extract_8h.xhtml", [
       [ "CLChannelExtract", "classarm__compute_1_1_c_l_channel_extract.xhtml", "classarm__compute_1_1_c_l_channel_extract" ]
     ] ],
+    [ "CLChannelShuffleLayer.h", "_c_l_channel_shuffle_layer_8h.xhtml", [
+      [ "CLChannelShuffleLayer", "classarm__compute_1_1_c_l_channel_shuffle_layer.xhtml", "classarm__compute_1_1_c_l_channel_shuffle_layer" ]
+    ] ],
     [ "CLColorConvert.h", "_c_l_color_convert_8h.xhtml", [
       [ "CLColorConvert", "classarm__compute_1_1_c_l_color_convert.xhtml", "classarm__compute_1_1_c_l_color_convert" ]
+    ] ],
+    [ "CLConvertFullyConnectedWeights.h", "_c_l_convert_fully_connected_weights_8h.xhtml", [
+      [ "CLConvertFullyConnectedWeights", "classarm__compute_1_1_c_l_convert_fully_connected_weights.xhtml", "classarm__compute_1_1_c_l_convert_fully_connected_weights" ]
     ] ],
     [ "CLConvolution.h", "_c_l_convolution_8h.xhtml", "_c_l_convolution_8h" ],
     [ "CLConvolutionLayer.h", "_c_l_convolution_layer_8h.xhtml", [
       [ "CLConvolutionLayer", "classarm__compute_1_1_c_l_convolution_layer.xhtml", "classarm__compute_1_1_c_l_convolution_layer" ]
+    ] ],
+    [ "CLCopy.h", "_c_l_copy_8h.xhtml", [
+      [ "CLCopy", "classarm__compute_1_1_c_l_copy.xhtml", "classarm__compute_1_1_c_l_copy" ]
     ] ],
     [ "CLDeconvolutionLayer.h", "_c_l_deconvolution_layer_8h.xhtml", [
       [ "CLDeconvolutionLayer", "classarm__compute_1_1_c_l_deconvolution_layer.xhtml", "classarm__compute_1_1_c_l_deconvolution_layer" ]
@@ -138,7 +147,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLHarrisCorners.h", "_c_l_harris_corners_8h.xhtml", [
       [ "CLHarrisCorners", "classarm__compute_1_1_c_l_harris_corners.xhtml", "classarm__compute_1_1_c_l_harris_corners" ]
     ] ],
-    [ "CLHistogram.h", "_c_l_histogram_8h.xhtml", "_c_l_histogram_8h" ],
+    [ "CLHistogram.h", "_c_l_histogram_8h.xhtml", [
+      [ "CLHistogram", "classarm__compute_1_1_c_l_histogram.xhtml", "classarm__compute_1_1_c_l_histogram" ]
+    ] ],
     [ "CLHOGDescriptor.h", "_c_l_h_o_g_descriptor_8h.xhtml", [
       [ "CLHOGDescriptor", "classarm__compute_1_1_c_l_h_o_g_descriptor.xhtml", "classarm__compute_1_1_c_l_h_o_g_descriptor" ]
     ] ],
@@ -165,6 +176,10 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     ] ],
     [ "CLLocallyConnectedLayer.h", "_c_l_locally_connected_layer_8h.xhtml", [
       [ "CLLocallyConnectedLayer", "classarm__compute_1_1_c_l_locally_connected_layer.xhtml", "classarm__compute_1_1_c_l_locally_connected_layer" ]
+    ] ],
+    [ "CLLSTMLayer.h", "_c_l_l_s_t_m_layer_8h.xhtml", [
+      [ "LSTMParams", "classarm__compute_1_1_l_s_t_m_params.xhtml", "classarm__compute_1_1_l_s_t_m_params" ],
+      [ "CLLSTMLayer", "classarm__compute_1_1_c_l_l_s_t_m_layer.xhtml", "classarm__compute_1_1_c_l_l_s_t_m_layer" ]
     ] ],
     [ "CLMagnitude.h", "_c_l_magnitude_8h.xhtml", [
       [ "CLMagnitude", "classarm__compute_1_1_c_l_magnitude.xhtml", "classarm__compute_1_1_c_l_magnitude" ]
@@ -212,6 +227,9 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     [ "CLReshapeLayer.h", "_c_l_reshape_layer_8h.xhtml", [
       [ "CLReshapeLayer", "classarm__compute_1_1_c_l_reshape_layer.xhtml", "classarm__compute_1_1_c_l_reshape_layer" ]
     ] ],
+    [ "CLRNNLayer.h", "_c_l_r_n_n_layer_8h.xhtml", [
+      [ "CLRNNLayer", "classarm__compute_1_1_c_l_r_n_n_layer.xhtml", "classarm__compute_1_1_c_l_r_n_n_layer" ]
+    ] ],
     [ "CLROIPoolingLayer.h", "_c_l_r_o_i_pooling_layer_8h.xhtml", [
       [ "CLROIPoolingLayer", "classarm__compute_1_1_c_l_r_o_i_pooling_layer.xhtml", "classarm__compute_1_1_c_l_r_o_i_pooling_layer" ]
     ] ],
@@ -247,5 +265,14 @@ var dir_251c63bc3f70b60acf43edd6d870a3ef =
     ] ],
     [ "CLWarpPerspective.h", "_c_l_warp_perspective_8h.xhtml", [
       [ "CLWarpPerspective", "classarm__compute_1_1_c_l_warp_perspective.xhtml", "classarm__compute_1_1_c_l_warp_perspective" ]
+    ] ],
+    [ "CLWidthConcatenateLayer.h", "_c_l_width_concatenate_layer_8h.xhtml", [
+      [ "CLWidthConcatenateLayer", "classarm__compute_1_1_c_l_width_concatenate_layer.xhtml", "classarm__compute_1_1_c_l_width_concatenate_layer" ]
+    ] ],
+    [ "CLWinogradConvolutionLayer.h", "_c_l_winograd_convolution_layer_8h.xhtml", [
+      [ "CLWinogradConvolutionLayer", "classarm__compute_1_1_c_l_winograd_convolution_layer.xhtml", "classarm__compute_1_1_c_l_winograd_convolution_layer" ]
+    ] ],
+    [ "CLWinogradInputTransform.h", "_c_l_winograd_input_transform_8h.xhtml", [
+      [ "CLWinogradInputTransform", "classarm__compute_1_1_c_l_winograd_input_transform.xhtml", "classarm__compute_1_1_c_l_winograd_input_transform" ]
     ] ]
 ];

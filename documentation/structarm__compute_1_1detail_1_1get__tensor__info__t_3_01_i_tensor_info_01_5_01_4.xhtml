@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -122,19 +122,24 @@ $(document).ready(function(){initNavTree('structarm__compute_1_1detail_1_1get__t
 </div><!--header-->
 <div class="contents">
 
+<p>Get the info for a tensor.  
+ <a href="structarm__compute_1_1detail_1_1get__tensor__info__t_3_01_i_tensor_info_01_5_01_4.xhtml#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="_validate_8h_source.xhtml">Validate.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a31da9070971bbf34ad5d84094b48c04f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1detail_1_1get__tensor__info__t_3_01_i_tensor_info_01_5_01_4.xhtml#a31da9070971bbf34ad5d84094b48c04f">operator()</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *tensor)</td></tr>
+<tr class="memdesc:a31da9070971bbf34ad5d84094b48c04f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the info for a tensor.  <a href="#a31da9070971bbf34ad5d84094b48c04f">More...</a><br /></td></tr>
 <tr class="separator:a31da9070971bbf34ad5d84094b48c04f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><h3>template&lt;&gt;<br />
 struct arm_compute::detail::get_tensor_info_t&lt; ITensorInfo * &gt;</h3>
 
+<p>Get the info for a tensor. </p>
 
-<p>Definition at line <a class="el" href="_validate_8h_source.xhtml#l00115">115</a> of file <a class="el" href="_validate_8h_source.xhtml">Validate.h</a>.</p>
+<p>Definition at line <a class="el" href="_validate_8h_source.xhtml#l00126">126</a> of file <a class="el" href="_validate_8h_source.xhtml">Validate.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a class="anchor" id="a31da9070971bbf34ad5d84094b48c04f"></a>
 <div class="memitem">
@@ -158,10 +163,19 @@ struct arm_compute::detail::get_tensor_info_t&lt; ITensorInfo * &gt;</h3>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_validate_8h_source.xhtml#l00117">117</a> of file <a class="el" href="_validate_8h_source.xhtml">Validate.h</a>.</p>
+<p>Get the info for a tensor. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">tensor</td><td><a class="el" href="classarm__compute_1_1_tensor.xhtml" title="Basic implementation of the tensor interface. ">Tensor</a>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>tensor info. </dd></dl>
+
+<p>Definition at line <a class="el" href="_validate_8h_source.xhtml#l00134">134</a> of file <a class="el" href="_validate_8h_source.xhtml">Validate.h</a>.</p>
 
 <p>References <a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a0e95dc1e53c361348314873b168ae237">ITensor::info()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;    {</div><div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;        <span class="keywordflow">return</span> tensor-&gt;info();</div><div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;    }</div></div><!-- fragment -->
+<div class="fragment"><div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;    {</div><div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;        <span class="keywordflow">return</span> tensor-&gt;info();</div><div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
@@ -173,7 +187,7 @@ struct arm_compute::detail::get_tensor_info_t&lt; ITensorInfo * &gt;</h3>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1detail.xhtml">detail</a></li><li class="navelem"><a class="el" href="structarm__compute_1_1detail_1_1get__tensor__info__t_3_01_i_tensor_info_01_5_01_4.xhtml">get_tensor_info_t&lt; ITensorInfo * &gt;</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:59 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

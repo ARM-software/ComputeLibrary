@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -127,11 +127,11 @@ $(document).ready(function(){initNavTree('benchmark_2_c_l_2_depthwise_separable_
 <code>#include &quot;<a class="el" href="_c_l_tensor_allocator_8h_source.xhtml">arm_compute/runtime/CL/CLTensorAllocator.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_depthwise_separable_convolution_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLDepthwiseSeparableConvolutionLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_accessor_8h_source.xhtml">tests/CL/CLAccessor.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="benchmark_2fixtures_2_depthwise_separable_convolution_layer_fixture_8h_source.xhtml">tests/benchmark/fixtures/DepthwiseSeparableConvolutionLayerFixture.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_mobile_net_depthwise_separable_convolution_layer_dataset_8h_source.xhtml">tests/datasets/system_tests/mobilenet/MobileNetDepthwiseSeparableConvolutionLayerDataset.h</a>&quot;</code><br />
+<code>#include &quot;tests/benchmark/fixtures/DepthwiseSeparableConvolutionLayerFixture.h&quot;</code><br />
+<code>#include &quot;tests/datasets/system_tests/mobilenet/MobileNetDepthwiseSeparableConvolutionLayerDataset.h&quot;</code><br />
 <code>#include &quot;<a class="el" href="tests_2framework_2_macros_8h_source.xhtml">tests/framework/Macros.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_datasets_8h_source.xhtml">tests/framework/datasets/Datasets.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_type_printer_8h_source.xhtml">utils/TypePrinter.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="utils_2_type_printer_8h_source.xhtml">utils/TypePrinter.h</a>&quot;</code><br />
 </div>
 <p><a href="benchmark_2_c_l_2_depthwise_separable_convolution_layer_8cpp_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -142,16 +142,18 @@ Namespaces</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacearm__compute_1_1test"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml">arm_compute::test</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:namespacearm__compute_1_1test_1_1benchmark"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml">arm_compute::test::benchmark</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:adc07e82b4049d653c965af2606a7d70f"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#adc07e82b4049d653c965af2606a7d70f">CLDepthwiseSeparableConvolutionLayerFixture</a> = DepthwiseSeparableConvolutionLayerFixture&lt; CLTensor, CLDepthwiseSeparableConvolutionLayer, CLAccessor &gt;</td></tr>
+<tr class="memitem:adc07e82b4049d653c965af2606a7d70f"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#adc07e82b4049d653c965af2606a7d70f">CLDepthwiseSeparableConvolutionLayerFixture</a> = DepthwiseSeparableConvolutionLayerFixture&lt; CLTensor, CLDepthwiseSeparableConvolutionLayer, CLAccessor &gt;</td></tr>
 <tr class="separator:adc07e82b4049d653c965af2606a7d70f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a1f4b9eae17da2aebc223b0fdeee74cea"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a1f4b9eae17da2aebc223b0fdeee74cea">REGISTER_FIXTURE_DATA_TEST_CASE</a> (MobileNetDepthwiseSeparableConvolutionLayer, CLDepthwiseSeparableConvolutionLayerFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(datasets::MobileNetDepthwiseSeparableConvolutionLayerDataset(), data_types), framework::dataset::make(&quot;Batches&quot;,{1})))</td></tr>
-<tr class="separator:a1f4b9eae17da2aebc223b0fdeee74cea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbf8f2b9106f7141f51b86910dcc52b6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#adbf8f2b9106f7141f51b86910dcc52b6">REGISTER_FIXTURE_DATA_TEST_CASE</a> (MobileNetDepthwiseSeparableConvolutionLayer, CLDepthwiseSeparableConvolutionLayerFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(datasets::MobileNetDepthwiseSeparableConvolutionLayerDataset(), data_types), framework::dataset::make(&quot;Batches&quot;,{1})))</td></tr>
+<tr class="separator:adbf8f2b9106f7141f51b86910dcc52b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -159,7 +161,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_4f2df8950dc650bf7cf9176fae02facc.xhtml">benchmark</a></li><li class="navelem"><a class="el" href="dir_4da487531dc5bdc76b523c9e82b781b1.xhtml">CL</a></li><li class="navelem"><a class="el" href="benchmark_2_c_l_2_depthwise_separable_convolution_layer_8cpp.xhtml">DepthwiseSeparableConvolutionLayer.cpp</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:56 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

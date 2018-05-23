@@ -10,10 +10,5 @@ var classarm__compute_1_1_access_window_static =
     [ "operator=", "classarm__compute_1_1_access_window_static.xhtml#af5312479f43d5fd6c46e4e8473049847", null ],
     [ "set_valid_region", "classarm__compute_1_1_access_window_static.xhtml#a729ab9364d77a28c009732b497c3b835", null ],
     [ "update_padding_if_needed", "classarm__compute_1_1_access_window_static.xhtml#a69cb887416c766f20cbec0677b3c8e88", null ],
-    [ "update_window_if_needed", "classarm__compute_1_1_access_window_static.xhtml#a7ad9fe991410dc3550f6c4fd6e87a708", null ],
-    [ "_end_x", "classarm__compute_1_1_access_window_static.xhtml#a1cd2ac1bcf5024756e4c48ac8d43ed97", null ],
-    [ "_end_y", "classarm__compute_1_1_access_window_static.xhtml#a85980789df8ce8a43eed2535663e5eca", null ],
-    [ "_info", "classarm__compute_1_1_access_window_static.xhtml#acea88797992fa16318f75073ff478f45", null ],
-    [ "_start_x", "classarm__compute_1_1_access_window_static.xhtml#a482da54e3056fdd14c12bd1490febd2a", null ],
-    [ "_start_y", "classarm__compute_1_1_access_window_static.xhtml#a52d465988c8ff914263b289792b0b15a", null ]
+    [ "update_window_if_needed", "classarm__compute_1_1_access_window_static.xhtml#a7ad9fe991410dc3550f6c4fd6e87a708", null ]
 ];

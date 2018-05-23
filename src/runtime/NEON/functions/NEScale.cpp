@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,6 @@ namespace
 void precompute_dx_dy_offsets(ITensor *dx, ITensor *dy, ITensor *offsets, float wr, float hr, size_t input_element_size, SamplingPolicy sampling_policy)
 {
     ARM_COMPUTE_ERROR_ON(nullptr == offsets);
-    ARM_COMPUTE_ERROR_ON(sampling_policy != SamplingPolicy::CENTER);
     ARM_COMPUTE_UNUSED(sampling_policy);
 
     Window win;
@@ -66,7 +65,7 @@ void precompute_dx_dy_offsets(ITensor *dx, ITensor *dy, ITensor *offsets, float 
             const int   in_xi = std::floor(in_x);
             const int   in_yi = std::floor(in_y);
 
-            *reinterpret_cast<int32_t *>(offsets_it.ptr()) = in_xi * input_element_size;
+            *reinterpret_cast<int32_t *>(offsets_it.ptr()) = in_xi * static_cast<int>(input_element_size);
             *reinterpret_cast<float *>(dx_it.ptr())        = in_x - in_xi;
             *reinterpret_cast<float *>(dy_it.ptr())        = in_y - in_yi;
         },
@@ -99,20 +98,20 @@ NEScale::NEScale() // NOLINT
 
 void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy policy, BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy)
 {
-    ARM_COMPUTE_ERROR_ON(nullptr == input);
-    ARM_COMPUTE_ERROR_ON(nullptr == output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_ERROR_THROW_ON(NEScale::validate(input->info(), output->info(), policy, border_mode, constant_border_value, sampling_policy));
 
-    for(size_t i = 2; i < Coordinates::num_max_dimensions; ++i)
-    {
-        ARM_COMPUTE_ERROR_ON(input->info()->dimension(i) != output->info()->dimension(i));
-    }
+    // Get data layout and width/height indices
+    const DataLayout data_layout = input->info()->data_layout();
+    const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
 
     // Get the tensor shape
-    const TensorShape shape(output->info()->dimension(0), output->info()->dimension(1));
+    const TensorShape shape(output->info()->dimension(idx_width), output->info()->dimension(idx_height));
 
     // Compute the ratio between source width/height and destination width/height
-    const auto wr = static_cast<float>(input->info()->dimension(0)) / static_cast<float>(output->info()->dimension(0));
-    const auto hr = static_cast<float>(input->info()->dimension(1)) / static_cast<float>(output->info()->dimension(1));
+    const auto wr = static_cast<float>(input->info()->dimension(idx_width)) / static_cast<float>(output->info()->dimension(idx_width));
+    const auto hr = static_cast<float>(input->info()->dimension(idx_height)) / static_cast<float>(output->info()->dimension(idx_height));
 
     // Get the element size of the input image
     const size_t input_element_size = input->info()->element_size();
@@ -123,9 +122,6 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
         policy = InterpolationPolicy::NEAREST_NEIGHBOR;
     }
 
-    // Check if the border mode is UNDEFINED
-    const bool border_undefined = border_mode == BorderMode::UNDEFINED;
-
     switch(policy)
     {
         case InterpolationPolicy::NEAREST_NEIGHBOR:
@@ -133,7 +129,7 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
             TensorInfo tensor_info_offsets(shape, Format::S32);
             _offsets.allocator()->init(tensor_info_offsets);
 
-            _scale_kernel.configure(input, nullptr, nullptr, &_offsets, output, policy, border_undefined, sampling_policy);
+            _scale_kernel.configure(input, nullptr, nullptr, &_offsets, output, policy, border_mode, sampling_policy);
 
             // Allocate once the configure methods have been called
             _offsets.allocator()->allocate();
@@ -151,7 +147,7 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
             _dx.allocator()->init(tensor_info_dxdy);
             _dy.allocator()->init(tensor_info_dxdy);
 
-            _scale_kernel.configure(input, &_dx, &_dy, &_offsets, output, policy, border_undefined, sampling_policy);
+            _scale_kernel.configure(input, &_dx, &_dy, &_offsets, output, policy, border_mode, sampling_policy);
 
             // Allocate once the configure methods have been called
             _offsets.allocator()->allocate();
@@ -164,7 +160,7 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
         }
         case InterpolationPolicy::AREA:
         {
-            _scale_kernel.configure(input, nullptr, nullptr, nullptr, output, policy, border_undefined);
+            _scale_kernel.configure(input, nullptr, nullptr, nullptr, output, policy, border_mode);
             break;
         }
         default:
@@ -172,6 +168,48 @@ void NEScale::configure(ITensor *input, ITensor *output, InterpolationPolicy pol
     }
 
     _border_handler.configure(input, _scale_kernel.border_size(), border_mode, PixelValue(constant_border_value));
+}
+
+Status NEScale::validate(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy,
+                         BorderMode border_mode, PixelValue constant_border_value, SamplingPolicy sampling_policy)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON(sampling_policy != SamplingPolicy::CENTER);
+    ARM_COMPUTE_UNUSED(border_mode, constant_border_value);
+
+    ITensorInfo *offsets = nullptr;
+    ITensorInfo *dx      = nullptr;
+    ITensorInfo *dy      = nullptr;
+
+    // Get data layout and width/height indices
+    const DataLayout data_layout = input->data_layout();
+    const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+
+    // Get the tensor shape of auxilary buffers
+    const TensorShape shape(output->dimension(idx_width), output->dimension(idx_height));
+
+    TensorInfo tensor_info_offsets(shape, Format::S32);
+    TensorInfo tensor_info_dx(shape, Format::F32);
+    TensorInfo tensor_info_dy(shape, Format::F32);
+
+    switch(policy)
+    {
+        case InterpolationPolicy::NEAREST_NEIGHBOR:
+            offsets = &tensor_info_offsets;
+            break;
+        case InterpolationPolicy::BILINEAR:
+            offsets = &tensor_info_offsets;
+            dx      = &tensor_info_dx;
+            dy      = &tensor_info_dy;
+            break;
+        default:
+            break;
+    }
+
+    ARM_COMPUTE_RETURN_ON_ERROR(NEScaleKernel::validate(input->clone().get(), dx, dy, offsets, output->clone().get(),
+                                                        policy, border_mode, sampling_policy));
+    return Status{};
 }
 
 void NEScale::run()

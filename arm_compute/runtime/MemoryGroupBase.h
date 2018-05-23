@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,9 +44,9 @@ public:
     MemoryGroupBase(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Default destructor */
     ~MemoryGroupBase() = default;
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     MemoryGroupBase(const MemoryGroupBase &) = delete;
-    /** Prevent instances of this class from being copy assigned (As this class contains pointers). */
+    /** Prevent instances of this class from being copy assigned (As this class contains pointers) */
     MemoryGroupBase &operator=(const MemoryGroupBase &) = delete;
     /** Allow instances of this class to be moved */
     MemoryGroupBase(MemoryGroupBase &&) = default;
@@ -96,7 +96,7 @@ inline MemoryGroupBase<TensorType>::MemoryGroupBase(std::shared_ptr<IMemoryManag
 template <typename TensorType>
 inline void MemoryGroupBase<TensorType>::manage(TensorType *obj)
 {
-    if(_memory_manager)
+    if(_memory_manager && _mappings.empty())
     {
         ARM_COMPUTE_ERROR_ON(!_memory_manager->lifetime_manager());
 
@@ -114,7 +114,10 @@ inline void MemoryGroupBase<TensorType>::manage(TensorType *obj)
 template <typename TensorType>
 inline void MemoryGroupBase<TensorType>::finalize_memory(TensorType *obj, void **handle, size_t size)
 {
-    if(_memory_manager)
+    // Check if existing mapping is valid
+    ARM_COMPUTE_ERROR_ON(!_mappings.empty() && (_mappings.find(handle) == std::end(_mappings)));
+
+    if(_memory_manager && _mappings.empty())
     {
         ARM_COMPUTE_ERROR_ON(!_memory_manager->lifetime_manager());
         _memory_manager->lifetime_manager()->end_lifetime(obj, handle, size);

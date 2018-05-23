@@ -5,12 +5,14 @@ var _n_e_o_n_2_pixel_wise_multiplication_8cpp =
     [ "PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#a715b00582b213476123ac1439e8e0c1a", null ],
     [ "VALIDATE", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#a8d69c709ef45fd63b622f283b0723eaf", null ],
     [ "WRAP_VALIDATE", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#a6c21e1e9072e5251356f8a97ffb7b98d", null ],
+    [ "NEPixelWiseMultiplicationBroadcastFixture", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#aa670d48d66ab33363db0a492e2453e81", null ],
     [ "NEPixelWiseMultiplicationToF16Fixture", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#a00633c0a03f1a6a5d04e25b365ca5750", null ],
     [ "NEPixelWiseMultiplicationToF32Fixture", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#a2de8d560e3aa77dcd9f7f6d9094d1174", null ],
     [ "NEPixelWiseMultiplicationToQS16Fixture", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#ae189f7e57647548db068b25486a6e86b", null ],
     [ "NEPixelWiseMultiplicationToQS8Fixture", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#aaa883c51738598a0bcb917e9144fdb28", null ],
     [ "NEPixelWiseMultiplicationToS16Fixture", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#aa89d74432688d58ba7731203876c55cb", null ],
     [ "NEPixelWiseMultiplicationToU8Fixture", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#afee06a3dc4c4d76774fd21379082899b", null ],
+    [ "combine", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#a274d2afc8082b3cdf926001c5969d317", null ],
     [ "combine", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#ad094e874a245764e0133c61a85e7d3a4", null ],
     [ "combine", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#a246ff6c535c53ebc0fed7a9a2ba8b3cf", null ],
     [ "combine", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#a40cf8fe3a3c43782b0347ae818e5c798", null ],
@@ -52,6 +54,7 @@ var _n_e_o_n_2_pixel_wise_multiplication_8cpp =
     [ "convert_policy", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#a5d58c32bff63e4c34b3234f884a4da58", null ],
     [ "dt1", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#a291ba30858ed1dc2a1154ddfcf28eac9", null ],
     [ "dt2", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#a80668d60af0d74d7e9f33bf4a233d695", null ],
+    [ "NEPixelWiseMultiplicationBroadcastFixture< float >", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#a2e7e44aefaae0abe0312a137133917c4", null ],
     [ "rounding_policy", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#a60ad1078faeaf3f59266d69ad937339f", null ],
     [ "scale", "_n_e_o_n_2_pixel_wise_multiplication_8cpp.xhtml#acec6d8ad52a28972fa74e071c1a63b6a", null ]
 ];

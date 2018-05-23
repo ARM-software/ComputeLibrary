@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,7 @@ void SingleThreadScheduler::schedule(ICPPKernel *kernel, unsigned int split_dime
 {
     ARM_COMPUTE_UNUSED(split_dimension);
     ThreadInfo info;
-    info.cpu_info = cpu_info();
+    info.cpu_info = &_cpu_info;
     kernel->run(kernel->window(), info);
 }
 

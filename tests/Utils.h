@@ -28,6 +28,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/HOGInfo.h"
+#include "arm_compute/core/PyramidInfo.h"
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/TensorShape.h"
@@ -105,17 +106,26 @@ namespace traits
 {
 // *INDENT-OFF*
 // clang-format off
+/** Promote a type */
 template <typename T> struct promote { };
-template <> struct promote<uint8_t> { using type = uint16_t; };
-template <> struct promote<int8_t> { using type = int16_t; };
-template <> struct promote<uint16_t> { using type = uint32_t; };
-template <> struct promote<int16_t> { using type = int32_t; };
-template <> struct promote<uint32_t> { using type = uint64_t; };
-template <> struct promote<int32_t> { using type = int64_t; };
-template <> struct promote<float> { using type = float; };
-template <> struct promote<half> { using type = half; };
+/** Promote uint8_t to uint16_t */
+template <> struct promote<uint8_t> { using type = uint16_t; /**< Promoted type */ };
+/** Promote int8_t to int16_t */
+template <> struct promote<int8_t> { using type = int16_t; /**< Promoted type */ };
+/** Promote uint16_t to uint32_t */
+template <> struct promote<uint16_t> { using type = uint32_t; /**< Promoted type */ };
+/** Promote int16_t to int32_t */
+template <> struct promote<int16_t> { using type = int32_t; /**< Promoted type */ };
+/** Promote uint32_t to uint64_t */
+template <> struct promote<uint32_t> { using type = uint64_t; /**< Promoted type */ };
+/** Promote int32_t to int64_t */
+template <> struct promote<int32_t> { using type = int64_t; /**< Promoted type */ };
+/** Promote float to float */
+template <> struct promote<float> { using type = float; /**< Promoted type */ };
+/** Promote half to half */
+template <> struct promote<half> { using type = half; /**< Promoted type */ };
 
-
+/** Get promoted type */
 template <typename T>
 using promote_t = typename promote<T>::type;
 
@@ -255,8 +265,8 @@ inline ValidRegion shape_to_valid_region_gaussian_pyramid_half(const TensorShape
     // Compute tensor shape for level "i" of Gaussian Pyramid Half
     // dst_width  = (src_width + 1) * 0.5f
     // dst_height = (src_height + 1) * 0.5f
-    shape.set(0, (shape[0] + 1) * 0.5f);
-    shape.set(1, (shape[1] + 1) * 0.5f);
+    shape.set(0, (a_shape[0] + 1) * 0.5f);
+    shape.set(1, (a_shape[1] + 1) * 0.5f);
 
     if(border_undefined)
     {
@@ -270,8 +280,8 @@ inline ValidRegion shape_to_valid_region_gaussian_pyramid_half(const TensorShape
         // 1) If the width/height of the tensor shape is odd, we have to take the ceil value of (a_valid_region.anchor.x() + border_size) / 2.0f or (a_valid_region.anchor.y() + border_size / 2.0f
         // 2) If the width/height of the tensor shape is even, we have to take the floor value of (a_valid_region.anchor.x() + border_size) / 2.0f or (a_valid_region.anchor.y() + border_size) / 2.0f
         // In this manner we should be able to propagate correctly the valid region along all levels of the pyramid
-        invalid_border_left = (shape[0] % 2) ? std::ceil(invalid_border_left) : std::floor(invalid_border_left);
-        invalid_border_top  = (shape[1] % 2) ? std::ceil(invalid_border_top) : std::floor(invalid_border_top);
+        invalid_border_left = (a_shape[0] % 2) ? std::ceil(invalid_border_left) : std::floor(invalid_border_left);
+        invalid_border_top  = (a_shape[1] % 2) ? std::ceil(invalid_border_top) : std::floor(invalid_border_top);
 
         // Set the anchor point
         anchor.set(0, static_cast<int>(invalid_border_left));
@@ -279,8 +289,8 @@ inline ValidRegion shape_to_valid_region_gaussian_pyramid_half(const TensorShape
 
         // Compute shape
         // Calculate the right and bottom invalid borders at the previous level of the pyramid
-        const float prev_invalid_border_right  = static_cast<float>(shape[0] - (a_valid_region.anchor.x() + a_valid_region.shape[0]));
-        const float prev_invalid_border_bottom = static_cast<float>(shape[1] - (a_valid_region.anchor.y() + a_valid_region.shape[1]));
+        const float prev_invalid_border_right  = static_cast<float>(a_shape[0] - (a_valid_region.anchor.x() + a_valid_region.shape[0]));
+        const float prev_invalid_border_bottom = static_cast<float>(a_shape[1] - (a_valid_region.anchor.y() + a_valid_region.shape[1]));
 
         // Calculate the right and bottom invalid borders at the current level of the pyramid
         const float invalid_border_right  = std::ceil((prev_invalid_border_right + static_cast<float>(border_size)) / 2.0f);
@@ -378,8 +388,11 @@ T saturate_cast(T val)
 template <typename... T>
 struct common_promoted_signed_type
 {
-    using common_type       = typename std::common_type<T...>::type;
-    using promoted_type     = traits::promote_t<common_type>;
+    /** Common type */
+    using common_type = typename std::common_type<T...>::type;
+    /** Promoted type */
+    using promoted_type = traits::promote_t<common_type>;
+    /** Intermediate type */
     using intermediate_type = typename traits::make_signed_conditional_t<promoted_type>::type;
 };
 
@@ -388,8 +401,11 @@ struct common_promoted_signed_type
 template <typename... T>
 struct common_promoted_unsigned_type
 {
-    using common_type       = typename std::common_type<T...>::type;
-    using promoted_type     = traits::promote_t<common_type>;
+    /** Common type */
+    using common_type = typename std::common_type<T...>::type;
+    /** Promoted type */
+    using promoted_type = traits::promote_t<common_type>;
+    /** Intermediate type */
     using intermediate_type = typename traits::make_unsigned_conditional_t<promoted_type>::type;
 };
 
@@ -467,16 +483,18 @@ inline bool is_in_valid_region(const ValidRegion &valid_region, Coordinates coor
  * @param[in] num_channels         (Optional) Number of channels.
  * @param[in] fixed_point_position (Optional) Number of fractional bits.
  * @param[in] quantization_info    (Optional) Quantization info for asymmetric quantized types.
+ * @param[in] data_layout          (Optional) Data layout. Default is NCHW.
  *
  * @return Initialized tensor of given type.
  */
 template <typename T>
 inline T create_tensor(const TensorShape &shape, DataType data_type, int num_channels = 1,
-                       int fixed_point_position = 0, QuantizationInfo quantization_info = QuantizationInfo())
+                       int fixed_point_position = 0, QuantizationInfo quantization_info = QuantizationInfo(), DataLayout data_layout = DataLayout::NCHW)
 {
     T          tensor;
     TensorInfo info(shape, num_channels, data_type, fixed_point_position);
     info.set_quantization_info(quantization_info);
+    info.set_data_layout(data_layout);
     tensor.allocator()->init(info);
 
     return tensor;
@@ -518,26 +536,32 @@ inline T create_multi_image(const TensorShape &shape, Format format)
 
 /** Create and initialize a HOG (Histogram of Oriented Gradients) of the given type.
  *
- * @param[in] cell_size             Cell size in pixels
- * @param[in] block_size            Block size in pixels. Must be a multiple of cell_size.
- * @param[in] detection_window_size Detection window size in pixels. Must be a multiple of block_size and block_stride.
- * @param[in] block_stride          Distance in pixels between 2 consecutive blocks along the x and y direction. Must be a multiple of cell size
- * @param[in] num_bins              Number of histogram bins for each cell
- * @param[in] normalization_type    (Optional) Normalization type to use for each block
- * @param[in] l2_hyst_threshold     (Optional) Threshold used for L2HYS_NORM normalization method
- * @param[in] phase_type            (Optional) Type of @ref PhaseType
+ * @param[in] hog_info HOGInfo object
  *
  * @return Initialized HOG of given type.
  */
 template <typename T>
-inline T create_HOG(const Size2D &cell_size, const Size2D &block_size, const Size2D &detection_window_size, const Size2D &block_stride, size_t num_bins,
-                    HOGNormType normalization_type = HOGNormType::L2HYS_NORM, float l2_hyst_threshold = 0.2f, PhaseType phase_type = PhaseType::UNSIGNED)
+inline T create_HOG(const HOGInfo &hog_info)
 {
-    T       hog;
-    HOGInfo hog_info(cell_size, block_size, block_size, block_stride, num_bins, normalization_type, l2_hyst_threshold, phase_type);
+    T hog;
     hog.init(hog_info);
 
     return hog;
+}
+
+/** Create and initialize a Pyramid of the given type.
+ *
+ * @param[in] pyramid_info The PyramidInfo object.
+ *
+ * @return Initialized Pyramid of given type.
+ */
+template <typename T>
+inline T create_pyramid(const PyramidInfo &pyramid_info)
+{
+    T pyramid;
+    pyramid.init_auto_padding(pyramid_info);
+
+    return pyramid;
 }
 
 /** Create a vector of random ROIs.
@@ -584,6 +608,68 @@ inline std::vector<ROI> generate_random_rois(const TensorShape &shape, const ROI
     }
 
     return rois;
+}
+
+/** Create a vector with a uniform distribution of floating point values across the specified range.
+ *
+ * @param[in] num_values The number of values to be created.
+ * @param[in] min        The minimum value in distribution (inclusive).
+ * @param[in] max        The maximum value in distribution (inclusive).
+ * @param[in] seed       The random seed to be used.
+ *
+ * @return A vector that contains the requested number of random floating point values
+ */
+template <typename T, typename = typename std::enable_if<std::is_floating_point<T>::value>::type>
+inline std::vector<T> generate_random_real(unsigned int num_values, T min, T max, std::random_device::result_type seed)
+{
+    std::vector<T>                    v(num_values);
+    std::mt19937                      gen(seed);
+    std::uniform_real_distribution<T> dist(min, max);
+
+    for(unsigned int i = 0; i < num_values; ++i)
+    {
+        v.at(i) = dist(gen);
+    }
+
+    return v;
+}
+
+/** Create a vector of random keypoints for pyramid representation.
+ *
+ * @param[in] shape         The shape of the input tensor.
+ * @param[in] num_keypoints The number of keypoints to be created.
+ * @param[in] seed          The random seed to be used.
+ * @param[in] num_levels    The number of pyramid levels.
+ *
+ * @return A vector that contains the requested number of random keypoints
+ */
+inline std::vector<KeyPoint> generate_random_keypoints(const TensorShape &shape, size_t num_keypoints, std::random_device::result_type seed, size_t num_levels = 1)
+{
+    std::vector<KeyPoint> keypoints;
+    std::mt19937          gen(seed);
+
+    // Calculate distribution bounds
+    const auto min        = static_cast<int>(std::pow(2, num_levels));
+    const auto max_width  = static_cast<int>(shape.x());
+    const auto max_height = static_cast<int>(shape.y());
+
+    ARM_COMPUTE_ERROR_ON(min > max_width || min > max_height);
+
+    // Create distributions
+    std::uniform_int_distribution<> dist_w(min, max_width);
+    std::uniform_int_distribution<> dist_h(min, max_height);
+
+    for(unsigned int i = 0; i < num_keypoints; i++)
+    {
+        KeyPoint keypoint;
+        keypoint.x               = dist_w(gen);
+        keypoint.y               = dist_h(gen);
+        keypoint.tracking_status = 1;
+
+        keypoints.push_back(keypoint);
+    }
+
+    return keypoints;
 }
 
 template <typename T, typename ArrayAccessor_T>

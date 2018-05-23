@@ -32,6 +32,7 @@
 #include "arm_compute/core/GLES_COMPUTE/OpenGLES.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Size2D.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
 #include "support/ToolchainSupport.h"
@@ -64,7 +65,7 @@ GCIm2ColKernel::GCIm2ColKernel()
 {
 }
 
-void GCIm2ColKernel::configure(const IGCTensor *input, IGCTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias)
+void GCIm2ColKernel::configure(const IGCTensor *input, IGCTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
@@ -97,7 +98,8 @@ void GCIm2ColKernel::configure(const IGCTensor *input, IGCTensor *output, const 
                                      && (std::equal(input->info()->tensor_shape().cbegin() + 3,
                                                     input->info()->tensor_shape().cend(),
                                                     output->info()->tensor_shape().cbegin() + 1))
-                                     && ((stride_x == 1) && (stride_y == 1) && !conv_info.has_padding());
+                                     && ((stride_x == 1) && (stride_y == 1) && !conv_info.has_padding())
+                                     && (dilation == Size2D(1U, 1U));
 
     std::string kernel_name = "im2col_generic";
     if(!run_img2col_reduced)
@@ -110,8 +112,8 @@ void GCIm2ColKernel::configure(const IGCTensor *input, IGCTensor *output, const 
         build_opts.emplace("#define IM2COL_GENERIC");
         _convolved_dims = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1),
                                             kernel_dims.width, kernel_dims.height,
-                                            conv_info);
-        _num_elems_processed_per_iteration = 2;
+                                            conv_info, dilation);
+        _num_elems_processed_per_iteration = (input->info()->data_type() == DataType::F32) ? 1 : 2;
 
         build_opts.emplace("#define KERNEL_WIDTH " + support::cpp11::to_string(kernel_dims.width));
         build_opts.emplace("#define KERNEL_HEIGHT " + support::cpp11::to_string(kernel_dims.height));
@@ -126,6 +128,8 @@ void GCIm2ColKernel::configure(const IGCTensor *input, IGCTensor *output, const 
         build_opts.emplace("#define PAD_BOTTOM " + support::cpp11::to_string(conv_info.pad_bottom()));
         build_opts.emplace("#define SRC_WIDTH " + support::cpp11::to_string(input->info()->dimension(0)));
         build_opts.emplace("#define SRC_HEIGHT " + support::cpp11::to_string(input->info()->dimension(1)));
+        build_opts.emplace("#define DILATION_X " + support::cpp11::to_string(dilation.x()));
+        build_opts.emplace("#define DILATION_Y " + support::cpp11::to_string(dilation.y()));
 
         _run_func = &GCIm2ColKernel::run_generic;
     }
@@ -205,11 +209,12 @@ void GCIm2ColKernel::configure(const IGCTensor *input, IGCTensor *output, const 
     IGCKernel::configure(win);
 }
 
-Status GCIm2ColKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias)
+Status GCIm2ColKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation)
 {
     ARM_COMPUTE_UNUSED(kernel_dims);
     ARM_COMPUTE_UNUSED(conv_info);
     ARM_COMPUTE_UNUSED(has_bias);
+    ARM_COMPUTE_UNUSED(dilation);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
     return Status{};
 }

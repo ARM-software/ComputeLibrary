@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -116,7 +116,8 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_n_e_scale_kernel
 
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a>  </div>
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a>  </div>
   <div class="headertitle">
 <div class="title">NEScaleKernel Class Reference</div>  </div>
 </div><!--header-->
@@ -156,9 +157,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a20422dd80d0c568f0c07730923a0d8d0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml#a20422dd80d0c568f0c07730923a0d8d0">~NEScaleKernel</a> ()=default</td></tr>
 <tr class="memdesc:a20422dd80d0c568f0c07730923a0d8d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default destructor.  <a href="#a20422dd80d0c568f0c07730923a0d8d0">More...</a><br /></td></tr>
 <tr class="separator:a20422dd80d0c568f0c07730923a0d8d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6e7e5eddd99a1068f9c071761d1ac2ac"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml#a6e7e5eddd99a1068f9c071761d1ac2ac">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *dx, const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *dy, const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *offsets, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, <a class="el" href="namespacearm__compute.xhtml#a966a9c417ce5e94dca08d9b5e745c0c9">InterpolationPolicy</a> policy, bool border_undefined, <a class="el" href="namespacearm__compute.xhtml#a16a59381d4d74d17d86d69eb4d286d7b">SamplingPolicy</a> sampling_policy=<a class="el" href="namespacearm__compute.xhtml#a16a59381d4d74d17d86d69eb4d286d7bac397289ee45877be0cd49811fe245b4e">SamplingPolicy::CENTER</a>)</td></tr>
-<tr class="memdesc:a6e7e5eddd99a1068f9c071761d1ac2ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialise the kernel's inputs, output and interpolation policy.  <a href="#a6e7e5eddd99a1068f9c071761d1ac2ac">More...</a><br /></td></tr>
-<tr class="separator:a6e7e5eddd99a1068f9c071761d1ac2ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa13b6f52790e5ec90e37a9834611c1c8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml#aa13b6f52790e5ec90e37a9834611c1c8">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *dx, const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *dy, const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *offsets, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, <a class="el" href="namespacearm__compute.xhtml#a966a9c417ce5e94dca08d9b5e745c0c9">InterpolationPolicy</a> policy, <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327">BorderMode</a> border_mode, <a class="el" href="namespacearm__compute.xhtml#a16a59381d4d74d17d86d69eb4d286d7b">SamplingPolicy</a> sampling_policy=<a class="el" href="namespacearm__compute.xhtml#a16a59381d4d74d17d86d69eb4d286d7bac397289ee45877be0cd49811fe245b4e">SamplingPolicy::CENTER</a>)</td></tr>
+<tr class="memdesc:aa13b6f52790e5ec90e37a9834611c1c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialise the kernel's inputs, output and interpolation policy.  <a href="#aa13b6f52790e5ec90e37a9834611c1c8">More...</a><br /></td></tr>
+<tr class="separator:aa13b6f52790e5ec90e37a9834611c1c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a112b35dd205c62ea6ed1447ef226da82"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">run</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;<a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>, const <a class="el" href="structarm__compute_1_1_thread_info.xhtml">ThreadInfo</a> &amp;info) override</td></tr>
 <tr class="memdesc:a112b35dd205c62ea6ed1447ef226da82"><td class="mdescLeft">&#160;</td><td class="mdescRight">Execute the kernel on the passed window.  <a href="#a112b35dd205c62ea6ed1447ef226da82">More...</a><br /></td></tr>
 <tr class="separator:a112b35dd205c62ea6ed1447ef226da82"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -182,6 +183,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3f5646133956f06348b310ccc3d36353 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a> () const </td></tr>
 <tr class="memdesc:a3f5646133956f06348b310ccc3d36353 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">The maximum window the kernel can be executed on.  <a href="#a3f5646133956f06348b310ccc3d36353">More...</a><br /></td></tr>
 <tr class="separator:a3f5646133956f06348b310ccc3d36353 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:ac72c4d0265b3df63e4a572d1b0f39902"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml#ac72c4d0265b3df63e4a572d1b0f39902">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *dx, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *dy, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *offsets, <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output, <a class="el" href="namespacearm__compute.xhtml#a966a9c417ce5e94dca08d9b5e745c0c9">InterpolationPolicy</a> policy, <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327">BorderMode</a> border_mode, <a class="el" href="namespacearm__compute.xhtml#a16a59381d4d74d17d86d69eb4d286d7b">SamplingPolicy</a> sampling_policy=<a class="el" href="namespacearm__compute.xhtml#a16a59381d4d74d17d86d69eb4d286d7bac397289ee45877be0cd49811fe245b4e">SamplingPolicy::CENTER</a>)</td></tr>
+<tr class="memdesc:ac72c4d0265b3df63e4a572d1b0f39902"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml">NEScaleKernel</a>.  <a href="#ac72c4d0265b3df63e4a572d1b0f39902">More...</a><br /></td></tr>
+<tr class="separator:ac72c4d0265b3df63e4a572d1b0f39902"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>NEON kernel to perform scaling on a tensor. </p>
@@ -317,7 +324,7 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a6e7e5eddd99a1068f9c071761d1ac2ac"></a>
+<a class="anchor" id="aa13b6f52790e5ec90e37a9834611c1c8"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -360,8 +367,8 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>border_undefined</em>, </td>
+          <td class="paramtype"><a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327">BorderMode</a>&#160;</td>
+          <td class="paramname"><em>border_mode</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -387,7 +394,7 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">offsets</td><td>Offset to access the pixel with NEAREST interpolation or the top-left pixel with BILINEAR interpolation in the input tensor. Data type supported: S32. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor. Data types supported: Same as <code>input</code>. All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">policy</td><td>Interpolation type to use </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">border_undefined</td><td>True if the border mode is undefined. False if it's replicate or constant. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">border_mode</td><td>Border mode policy </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">sampling_policy</td><td>(Optional) Sampling policy used by the interpolation. Defaults to <a class="el" href="namespacearm__compute.xhtml#a16a59381d4d74d17d86d69eb4d286d7bac397289ee45877be0cd49811fe245b4e">SamplingPolicy::CENTER</a> </td></tr>
   </table>
   </dd>
@@ -425,7 +432,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_n_e_scale_kernel_8h_source.xhtml#l00038">38</a> of file <a class="el" href="_n_e_scale_kernel_8h_source.xhtml">NEScaleKernel.h</a>.</p>
 
-<p>References <a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7">NEScaleKernel::border_size()</a>, <a class="el" href="namespacearm__compute.xhtml#a16a59381d4d74d17d86d69eb4d286d7bac397289ee45877be0cd49811fe245b4e">arm_compute::CENTER</a>, <a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml#a6e7e5eddd99a1068f9c071761d1ac2ac">NEScaleKernel::configure()</a>, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">arm_compute::test::validation::info()</a>, <a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml#a025ceb246f7b80a3cb765d33d6a5cfe4">NEScaleKernel::NEScaleKernel()</a>, <a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml#a9bc5c918a86ea34e0a7cc2559c010596">NEScaleKernel::operator=()</a>, <a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEScaleKernel::run()</a>, <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">IKernel::window()</a>, and <a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml#a20422dd80d0c568f0c07730923a0d8d0">NEScaleKernel::~NEScaleKernel()</a>.</p>
+<p>References <a class="el" href="_c_l_2_convolution_8cpp_source.xhtml#l00133">arm_compute::test::validation::border_mode</a>, <a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7">NEScaleKernel::border_size()</a>, <a class="el" href="namespacearm__compute.xhtml#a16a59381d4d74d17d86d69eb4d286d7bac397289ee45877be0cd49811fe245b4e">arm_compute::CENTER</a>, <a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml#aa13b6f52790e5ec90e37a9834611c1c8">NEScaleKernel::configure()</a>, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">arm_compute::test::validation::info()</a>, <a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml#a025ceb246f7b80a3cb765d33d6a5cfe4">NEScaleKernel::NEScaleKernel()</a>, <a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml#a9bc5c918a86ea34e0a7cc2559c010596">NEScaleKernel::operator=()</a>, <a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEScaleKernel::run()</a>, <a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml#ac72c4d0265b3df63e4a572d1b0f39902">NEScaleKernel::validate()</a>, <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">IKernel::window()</a>, and <a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml#a20422dd80d0c568f0c07730923a0d8d0">NEScaleKernel::~NEScaleKernel()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    {</div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        <span class="keywordflow">return</span> <span class="stringliteral">&quot;NEScaleKernel&quot;</span>;</div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
@@ -534,6 +541,94 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 
 </div>
 </div>
+<a class="anchor" id="ac72c4d0265b3df63e4a572d1b0f39902"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a> validate </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>dx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>dy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>offsets</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacearm__compute.xhtml#a966a9c417ce5e94dca08d9b5e745c0c9">InterpolationPolicy</a>&#160;</td>
+          <td class="paramname"><em>policy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327">BorderMode</a>&#160;</td>
+          <td class="paramname"><em>border_mode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacearm__compute.xhtml#a16a59381d4d74d17d86d69eb4d286d7b">SamplingPolicy</a>&#160;</td>
+          <td class="paramname"><em>sampling_policy</em> = <code><a class="el" href="namespacearm__compute.xhtml#a16a59381d4d74d17d86d69eb4d286d7bac397289ee45877be0cd49811fe245b4e">SamplingPolicy::CENTER</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml">NEScaleKernel</a>. </p>
+<dl class="section note"><dt>Note</dt><dd>dx, dy and offsets have the same dimensions (width and height) of the output tensor</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor. Data types supported: U8/S16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dx</td><td>Pixel's distance between the X real coordinate and the smallest X following integer. Data type supported: F32 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dy</td><td>Pixel's distance between the Y real coordinate and the smallest Y following integer. Data type supported: F32 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">offsets</td><td>Offset to access the pixel with NEAREST interpolation or the top-left pixel with BILINEAR interpolation in the input tensor. Data type supported: S32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Destination tensor. Data types supported: Same as <code>input</code>. All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">policy</td><td>Interpolation type to use </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">border_mode</td><td>Border mode policy </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">sampling_policy</td><td>(Optional) Sampling policy used by the interpolation. Defaults to <a class="el" href="namespacearm__compute.xhtml#a16a59381d4d74d17d86d69eb4d286d7bac397289ee45877be0cd49811fe245b4e">SamplingPolicy::CENTER</a> </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Referenced by <a class="el" href="_n_e_scale_kernel_8h_source.xhtml#l00038">NEScaleKernel::name()</a>.</p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>arm_compute/core/NEON/kernels/<a class="el" href="_n_e_scale_kernel_8h_source.xhtml">NEScaleKernel.h</a></li>
 </ul>
@@ -543,7 +638,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml">NEScaleKernel</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:59 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

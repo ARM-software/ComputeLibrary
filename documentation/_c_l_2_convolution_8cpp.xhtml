@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -128,13 +128,13 @@ $(document).ready(function(){initNavTree('_c_l_2_convolution_8cpp.xhtml','');});
 <code>#include &quot;<a class="el" href="_tensor_allocator_8h_source.xhtml">arm_compute/runtime/TensorAllocator.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_accessor_8h_source.xhtml">tests/CL/CLAccessor.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_padding_calculator_8h_source.xhtml">tests/PaddingCalculator.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_border_mode_dataset_8h_source.xhtml">tests/datasets/BorderModeDataset.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_shape_datasets_8h_source.xhtml">tests/datasets/ShapeDatasets.h</a>&quot;</code><br />
+<code>#include &quot;tests/datasets/BorderModeDataset.h&quot;</code><br />
+<code>#include &quot;tests/datasets/ShapeDatasets.h&quot;</code><br />
 <code>#include &quot;<a class="el" href="_asserts_8h_source.xhtml">tests/framework/Asserts.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="tests_2framework_2_macros_8h_source.xhtml">tests/framework/Macros.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_datasets_8h_source.xhtml">tests/framework/datasets/Datasets.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_validation_8h_source.xhtml">tests/validation/Validation.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_convolution_fixture_8h_source.xhtml">tests/validation/fixtures/ConvolutionFixture.h</a>&quot;</code><br />
+<code>#include &quot;tests/validation/fixtures/ConvolutionFixture.h&quot;</code><br />
 </div>
 <p><a href="_c_l_2_convolution_8cpp_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -186,9 +186,9 @@ Functions</h2></td></tr>
 <tr class="separator:ac613cfb8cf4e990c42e0e7ef57bf6fad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab306b4db66afa5d062617ebf70cb6c62"><td class="memItemLeft" align="right" valign="top">calculator&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ab306b4db66afa5d062617ebf70cb6c62">set_access_offset</a> (-2)</td></tr>
 <tr class="separator:ab306b4db66afa5d062617ebf70cb6c62"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a14d61c73a88e02b1911b967640f8b383"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a14d61c73a88e02b1911b967640f8b383">validate</a> (src.info() -&gt;<a class="el" href="hwc_8hpp.xhtml#ad487ce76e40f524a7f5e350763b91ae5">padding</a>(), src_padding)</td></tr>
+<tr class="memitem:a14d61c73a88e02b1911b967640f8b383"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a14d61c73a88e02b1911b967640f8b383">validate</a> (src.info() -&gt;padding(), src_padding)</td></tr>
 <tr class="separator:a14d61c73a88e02b1911b967640f8b383"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a06c8638559b9de713abe0badcb413259"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a06c8638559b9de713abe0badcb413259">validate</a> (dst.info() -&gt;<a class="el" href="hwc_8hpp.xhtml#ad487ce76e40f524a7f5e350763b91ae5">padding</a>(), dst_padding)</td></tr>
+<tr class="memitem:a06c8638559b9de713abe0badcb413259"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a06c8638559b9de713abe0badcb413259">validate</a> (dst.info() -&gt;padding(), dst_padding)</td></tr>
 <tr class="separator:a06c8638559b9de713abe0badcb413259"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab52786a4da64f89914dd92177efcf893"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ab52786a4da64f89914dd92177efcf893">FIXTURE_DATA_TEST_CASE</a> (RunSmall, CLConvolutionFixture&lt; uint8_t &gt;, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::U8)), datasets::BorderModes()), framework::dataset::make(&quot;filter_size&quot;,{5})))</td></tr>
 <tr class="separator:ab52786a4da64f89914dd92177efcf893"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -234,7 +234,7 @@ framework::dataset::make(&quot;filter_width&quot;,{3, 5, 7, 9})), framework::dat
 <tr class="separator:a32a18ff5b6cbd573dc608b1f56991cce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a114d451ec0195556af0997ba5d8bdb18"><td class="memItemLeft" align="right" valign="top">calculator&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a114d451ec0195556af0997ba5d8bdb18">set_access_offset</a> (-(filter_height/2))</td></tr>
 <tr class="separator:a114d451ec0195556af0997ba5d8bdb18"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5e4b6b68aa02e54d0cfa7925aacfeba0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a5e4b6b68aa02e54d0cfa7925aacfeba0">validate</a> (src.info() -&gt;<a class="el" href="hwc_8hpp.xhtml#ad487ce76e40f524a7f5e350763b91ae5">padding</a>(), width_padding, height_padding)</td></tr>
+<tr class="memitem:a5e4b6b68aa02e54d0cfa7925aacfeba0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a5e4b6b68aa02e54d0cfa7925aacfeba0">validate</a> (src.info() -&gt;padding(), width_padding, height_padding)</td></tr>
 <tr class="separator:a5e4b6b68aa02e54d0cfa7925aacfeba0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a80e8591ab0ce549e9f34d5f482674f7f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a80e8591ab0ce549e9f34d5f482674f7f">FIXTURE_DATA_TEST_CASE</a> (RunSmall, CLConvolutionFixture&lt; uint8_t &gt;, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make(&quot;DataType&quot;, DataType::U8)), datasets::BorderModes()), framework::dataset::make(&quot;filter_width&quot;,{3, 5, 7, 9})), framework::dataset::make(&quot;filter_height&quot;,{3, 5, 7, 9})))</td></tr>
 <tr class="separator:a80e8591ab0ce549e9f34d5f482674f7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -284,7 +284,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_f7024513cd67abef53e86ee9382ac5ce.xhtml">CL</a></li><li class="navelem"><a class="el" href="_c_l_2_convolution_8cpp.xhtml">Convolution.cpp</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:56 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

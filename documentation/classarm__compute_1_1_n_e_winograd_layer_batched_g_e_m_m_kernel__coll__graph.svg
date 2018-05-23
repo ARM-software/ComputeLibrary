@@ -19,7 +19,7 @@
 </g>
 <!-- Node2 -->
 <g id="node2" class="node"><title>Node2</title>
-<g id="a_node2"><a xlink:href="classarm__compute_1_1_i_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml" target="_top" xlink:title="INEWinogradLayerBatchedGEMMKernel\l\&lt; TIn, TOut \&gt;">
+<g id="a_node2"><a xlink:href="classarm__compute_1_1_i_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml" target="_top" xlink:title="Interface for the NEON kernel to perform Winograd. ">
 <polygon fill="white" stroke="black" points="0,-89.5 0,-119.5 202,-119.5 202,-89.5 0,-89.5"/>
 <text text-anchor="start" x="8" y="-107.5" font-family="Helvetica,sans-Serif" font-size="10.00">INEWinogradLayerBatchedGEMMKernel</text>
 <text text-anchor="middle" x="101" y="-96.5" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; TIn, TOut &gt;</text>

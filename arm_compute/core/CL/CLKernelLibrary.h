@@ -104,11 +104,11 @@ public:
     Program(const Program &) = default;
     /** Default Move Constructor. */
     Program(Program &&) = default;
-    /** Default copy assignment operator. */
+    /** Default copy assignment operator */
     Program &operator=(const Program &) = default;
-    /** Default move assignment operator. */
+    /** Default move assignment operator */
     Program &operator=(Program &&) = default;
-    /**Returns program name.
+    /** Returns program name.
      *
      * @return Program's name.
      */
@@ -121,7 +121,13 @@ public:
      * @return The CL program object.
      */
     explicit operator cl::Program() const;
-
+    /** Build the given CL program.
+     *
+     * @param[in] program       The CL program to build.
+     * @param[in] build_options Options to build the CL program.
+     *
+     * @return True if the CL program builds successfully.
+     */
     static bool build(const cl::Program &program, const std::string &build_options = "");
     /** Build the underlying CL program.
      *
@@ -150,9 +156,9 @@ public:
     Kernel(const Kernel &) = default;
     /** Default Move Constructor. */
     Kernel(Kernel &&) = default;
-    /** Default copy assignment operator. */
+    /** Default copy assignment operator */
     Kernel &operator=(const Kernel &) = default;
-    /** Default move assignment operator. */
+    /** Default move assignment operator */
     Kernel &operator=(Kernel &&) = default;
     /** Constructor.
      *
@@ -192,9 +198,9 @@ private:
     CLKernelLibrary();
 
 public:
-    /** Prevent instances of this class from being copied. */
+    /** Prevent instances of this class from being copied */
     CLKernelLibrary(const CLKernelLibrary &) = delete;
-    /** Prevent instances of this class from being copied. */
+    /** Prevent instances of this class from being copied */
     const CLKernelLibrary &operator=(const CLKernelLibrary &) = delete;
     /** Access the KernelLibrary singleton.
      * @return The KernelLibrary instance.
@@ -226,9 +232,11 @@ public:
     {
         return _kernel_path;
     };
-    /** Gets the source of the selected program
+    /** Gets the source of the selected program.
      *
      * @param[in] program_name Program name.
+     *
+     * @return Source of the selected program.
      */
     std::string get_program_source(const std::string &program_name);
     /** Sets the CL context used to create programs.
@@ -241,18 +249,34 @@ public:
     void set_context(cl::Context context)
     {
         _context = std::move(context);
-
-        const auto cl_devices = _context.getInfo<CL_CONTEXT_DEVICES>();
-
-        if(cl_devices.empty())
+        if(_context.get() == nullptr)
         {
             _device = cl::Device();
         }
         else
         {
-            _device = cl_devices[0];
+            const auto cl_devices = _context.getInfo<CL_CONTEXT_DEVICES>();
+
+            if(cl_devices.empty())
+            {
+                _device = cl::Device();
+            }
+            else
+            {
+                _device = cl_devices[0];
+            }
         }
     }
+
+    /** Accessor for the associated CL context.
+     *
+     * @return A CL context.
+     */
+    cl::Context &context()
+    {
+        return _context;
+    }
+
     /** Sets the CL device for which the programs are created.
      *
      * @param[in] device A CL device.
@@ -261,6 +285,12 @@ public:
     {
         _device = std::move(device);
     }
+
+    /** Return the device version
+     *
+     * @return The content of CL_DEVICE_VERSION
+     */
+    std::string get_device_version();
     /** Creates a kernel from the kernel library.
      *
      * @param[in] kernel_name       Kernel name.
@@ -269,14 +299,6 @@ public:
      * @return The created kernel.
      */
     Kernel create_kernel(const std::string &kernel_name, const StringSet &build_options_set = {}) const;
-    /** Serializes and saves programs to a binary.
-     *
-     */
-    void save_binary();
-    /** Load serialized binary with all the programs.
-     *
-     */
-    void load_binary();
     /** Find the maximum number of local work items in a workgroup can be supported for the kernel.
      *
      */
@@ -293,6 +315,19 @@ public:
         _programs_map.clear();
         _built_programs_map.clear();
     }
+
+    /** Access the cache of built OpenCL programs */
+    const std::map<std::string, cl::Program> &get_built_programs() const
+    {
+        return _built_programs_map;
+    }
+
+    /** Add a new built program to the cache
+     *
+     * @param[in] built_program_name Name of the program
+     * @param[in] program            Built program to add to the cache
+     */
+    void add_built_program(const std::string &built_program_name, cl::Program program);
 
 private:
     /** Load program and its dependencies.

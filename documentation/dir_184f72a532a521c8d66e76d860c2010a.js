@@ -1,5 +1,6 @@
 var dir_184f72a532a521c8d66e76d860c2010a =
 [
+    [ "ActivationLayer.cpp", "benchmark_2_g_l_e_s___c_o_m_p_u_t_e_2_activation_layer_8cpp.xhtml", "benchmark_2_g_l_e_s___c_o_m_p_u_t_e_2_activation_layer_8cpp" ],
     [ "BatchNormalizationLayer.cpp", "benchmark_2_g_l_e_s___c_o_m_p_u_t_e_2_batch_normalization_layer_8cpp.xhtml", "benchmark_2_g_l_e_s___c_o_m_p_u_t_e_2_batch_normalization_layer_8cpp" ],
     [ "ConvolutionLayer.cpp", "benchmark_2_g_l_e_s___c_o_m_p_u_t_e_2_convolution_layer_8cpp.xhtml", "benchmark_2_g_l_e_s___c_o_m_p_u_t_e_2_convolution_layer_8cpp" ],
     [ "DepthwiseConvolutionLayer.cpp", "benchmark_2_g_l_e_s___c_o_m_p_u_t_e_2_depthwise_convolution_layer_8cpp.xhtml", "benchmark_2_g_l_e_s___c_o_m_p_u_t_e_2_depthwise_convolution_layer_8cpp" ],

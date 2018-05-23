@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,11 +55,16 @@ public:
      */
     Printer(std::ostream &stream);
 
+    /** Prevent instances of this class from being copy constructed */
     Printer(const Printer &) = delete;
+    /** Prevent instances of this class from being copied */
     Printer &operator=(const Printer &) = delete;
-    Printer(Printer &&)                 = default;
+    /** Allow instances of this class to be move constructed */
+    Printer(Printer &&) = default;
+    /** Allow instances of this class to be moved */
     Printer &operator=(Printer &&) = default;
 
+    /** Default destructor. */
     virtual ~Printer() = default;
 
     /** Print given string.

@@ -40,15 +40,15 @@ enum class LogFormat;
 enum class LogLevel;
 
 /** Common command line options used to configure the framework
-     *
-     * The options in this object get populated when "parse()" is called on the parser used to construct it.
-     * The expected workflow is:
-     *
-     * CommandLineParser parser;
-     * CommonOptions options( parser );
-     * parser.parse(argc, argv);
-     * if(options.log_level->value() > LogLevel::NONE) --> Use the options values
-     */
+ *
+ * The options in this object get populated when "parse()" is called on the parser used to construct it.
+ * The expected workflow is:
+ *
+ * CommandLineParser parser;
+ * CommonOptions options( parser );
+ * parser.parse(argc, argv);
+ * if(options.log_level->value() > LogLevel::NONE) --> Use the options values
+ */
 class CommonOptions
 {
 public:
@@ -57,7 +57,9 @@ public:
      * @param[in,out] parser A parser on which "parse()" hasn't been called yet.
      */
     CommonOptions(CommandLineParser &parser);
+    /** Prevent instances of this class from being copy constructed */
     CommonOptions(const CommonOptions &) = delete;
+    /** Prevent instances of this class from being copied */
     CommonOptions &operator=(const CommonOptions &) = delete;
     /** Create the printers based on parsed command line options
      *
@@ -67,19 +69,19 @@ public:
      */
     std::vector<std::unique_ptr<Printer>> create_printers();
 
-    ToggleOption                               *help;
-    EnumListOption<InstrumentsDescription>     *instruments;
-    SimpleOption<int>                          *iterations;
-    SimpleOption<int>                          *threads;
-    EnumOption<LogFormat>                      *log_format;
-    SimpleOption<std::string>                  *log_file;
-    EnumOption<LogLevel>                       *log_level;
-    ToggleOption                               *throw_errors;
-    ToggleOption                               *color_output;
-    ToggleOption                               *pretty_console;
-    SimpleOption<std::string>                  *json_file;
-    SimpleOption<std::string>                  *pretty_file;
-    std::vector<std::shared_ptr<std::ofstream>> log_streams;
+    ToggleOption                               *help;           /**< Show help option */
+    EnumListOption<InstrumentsDescription>     *instruments;    /**< Instruments option */
+    SimpleOption<int>                          *iterations;     /**< Number of iterations option */
+    SimpleOption<int>                          *threads;        /**< Number of threads option */
+    EnumOption<LogFormat>                      *log_format;     /**< Log format option */
+    SimpleOption<std::string>                  *log_file;       /**< Log file option */
+    EnumOption<LogLevel>                       *log_level;      /**< Logging level option */
+    ToggleOption                               *throw_errors;   /**< Throw errors option */
+    ToggleOption                               *color_output;   /**< Color output option */
+    ToggleOption                               *pretty_console; /**< Pretty console option */
+    SimpleOption<std::string>                  *json_file;      /**< JSON output file option */
+    SimpleOption<std::string>                  *pretty_file;    /**< Pretty output file option */
+    std::vector<std::shared_ptr<std::ofstream>> log_streams;    /**< Log streams */
 };
 
 } // namespace framework

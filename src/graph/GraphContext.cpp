@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,45 +22,64 @@
  * SOFTWARE.
  */
 #include "arm_compute/graph/GraphContext.h"
+#include <arm_compute/graph.h>
 
-using namespace arm_compute::graph;
-
-GraphHints::GraphHints(TargetHint target_hint, ConvolutionMethodHint conv_method_hint)
-    : _target_hint(target_hint), _convolution_method_hint(conv_method_hint)
+namespace arm_compute
 {
-}
-
-void GraphHints::set_target_hint(TargetHint target_hint)
+namespace graph
 {
-    _target_hint = target_hint;
-}
-
-void GraphHints::set_convolution_method_hint(ConvolutionMethodHint convolution_method)
-{
-    _convolution_method_hint = convolution_method;
-}
-
-TargetHint GraphHints::target_hint() const
-{
-    return _target_hint;
-}
-
-ConvolutionMethodHint GraphHints::convolution_method_hint() const
-{
-    return _convolution_method_hint;
-}
-
 GraphContext::GraphContext()
-    : _hints()
+    : _config(), _memory_managers()
 {
 }
 
-GraphHints &GraphContext::hints()
+const GraphConfig &GraphContext::config() const
 {
-    return _hints;
+    return _config;
 }
 
-const GraphHints &GraphContext::hints() const
+void GraphContext::set_config(const GraphConfig &config)
 {
-    return _hints;
+    _config = config;
 }
+
+bool GraphContext::insert_memory_management_ctx(MemoryManagerContext &&memory_ctx)
+{
+    Target target = memory_ctx.target;
+    if(target == Target::UNSPECIFIED || _memory_managers.find(target) != std::end(_memory_managers))
+    {
+        return false;
+    }
+
+    _memory_managers[target] = std::move(memory_ctx);
+    return true;
+}
+
+MemoryManagerContext *GraphContext::memory_management_ctx(Target target)
+{
+    return (_memory_managers.find(target) != std::end(_memory_managers)) ? &_memory_managers[target] : nullptr;
+}
+
+std::map<Target, MemoryManagerContext> &GraphContext::memory_managers()
+{
+    return _memory_managers;
+}
+
+void GraphContext::finalize()
+{
+    for(auto &mm_obj : _memory_managers)
+    {
+        // Finalize intra layer memory manager
+        if(mm_obj.second.intra_mm != nullptr)
+        {
+            mm_obj.second.intra_mm->finalize();
+        }
+        // Finalize cross layer memory manager
+        if(mm_obj.second.cross_mm != nullptr)
+        {
+            mm_obj.second.cross_mm->finalize();
+        }
+    }
+}
+} // namespace graph
+} // namespace arm_compute

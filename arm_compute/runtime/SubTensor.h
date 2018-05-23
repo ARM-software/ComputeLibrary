@@ -37,6 +37,8 @@ class ITensorInfo;
 class SubTensor : public ITensor
 {
 public:
+    /** Default Constructor */
+    SubTensor();
     /** Constructor
      *
      * @param[in] parent        Parent tensor

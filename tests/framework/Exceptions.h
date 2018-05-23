@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -94,6 +94,10 @@ public:
      */
     LogLevel level() const;
 
+    /** Get the error message.
+     *
+     * @return error message.
+     */
     const char *what() const noexcept override;
 
 private:

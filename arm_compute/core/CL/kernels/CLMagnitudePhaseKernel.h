@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,9 +39,9 @@ class CLMagnitudePhaseKernel : public ICLKernel
 public:
     /** Default constructor. */
     CLMagnitudePhaseKernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLMagnitudePhaseKernel(const CLMagnitudePhaseKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLMagnitudePhaseKernel &operator=(const CLMagnitudePhaseKernel &) = delete;
     /** Allow instances of this class to be moved */
     CLMagnitudePhaseKernel(CLMagnitudePhaseKernel &&) = default;

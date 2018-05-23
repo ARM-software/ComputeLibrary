@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -133,6 +133,7 @@ $(document).ready(function(){initNavTree('_n_e_kernels_8h.xhtml','');});
 <code>#include &quot;<a class="el" href="_n_e_channel_extract_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/NEChannelExtractKernel.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_n_e_col2_im_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/NECol2ImKernel.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_n_e_color_convert_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/NEColorConvertKernel.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_n_e_convert_fully_connected_weights_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/NEConvertFullyConnectedWeightsKernel.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_n_e_convolution_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/NEConvolutionKernel.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_n_e_cumulative_distribution_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/NECumulativeDistributionKernel.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_n_e_depth_concatenate_layer_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/NEDepthConcatenateLayerKernel.h</a>&quot;</code><br />
@@ -154,7 +155,6 @@ $(document).ready(function(){initNavTree('_n_e_kernels_8h.xhtml','');});
 <code>#include &quot;<a class="el" href="_n_e_floor_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/NEFloorKernel.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_n_e_g_e_m_m_assembly_base_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/NEGEMMAssemblyBaseKernel.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_n_e_g_e_m_m_interleave4x4_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_n_e_g_e_m_m_interleave_blocked_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/NEGEMMInterleaveBlockedKernel.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_n_e_g_e_m_m_lowp_matrix_multiply_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/NEGEMMLowpMatrixMultiplyKernel.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_n_e_g_e_m_m_lowp_offset_contribution_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/NEGEMMLowpOffsetContributionKernel.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel.h</a>&quot;</code><br />
@@ -204,15 +204,7 @@ $(document).ready(function(){initNavTree('_n_e_kernels_8h.xhtml','');});
 <code>#include &quot;<a class="el" href="_n_e_transpose_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/NETransposeKernel.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_n_e_warp_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/NEWarpKernel.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_n_e_weights_reshape_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/NEWeightsReshapeKernel.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/NEWinogradLayerKernel.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_n_e_g_e_m_m_a_arch32_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/arm32/NEGEMMAArch32Kernel.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_n_e_g_e_m_m_a_arch64_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/arm64/NEGEMMAArch64Kernel.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_n_e_g_e_m_m_a_arch64_native_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/arm64/NEGEMMAArch64NativeKernel.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_n_e_g_e_m_m_lowp_a_arch64_a53_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/arm64/NEGEMMLowpAArch64A53Kernel.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_n_e_g_e_m_m_lowp_a_arch64_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/arm64/NEGEMMLowpAArch64Kernel.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_n_e_g_e_m_m_lowp_a_arch64_v8_p4_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/arm64/NEGEMMLowpAArch64V8P4Kernel.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_n_e_g_e_m_v_a_arch64_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/arm64/NEGEMVAArch64Kernel.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_n_e_h_g_e_m_m_a_arch64_f_p16_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/arm64/NEHGEMMAArch64FP16Kernel.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/NEWinogradConvolutionLayerKernel.h</a>&quot;</code><br />
 </div>
 <p><a href="_n_e_kernels_8h_source.xhtml">Go to the source code of this file.</a></p>
 </div><!-- contents -->
@@ -221,7 +213,7 @@ $(document).ready(function(){initNavTree('_n_e_kernels_8h.xhtml','');});
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_315f6cf1ec0b2df3ae747ff8286a19f5.xhtml">NEON</a></li><li class="navelem"><a class="el" href="_n_e_kernels_8h.xhtml">NEKernels.h</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:55 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:38 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

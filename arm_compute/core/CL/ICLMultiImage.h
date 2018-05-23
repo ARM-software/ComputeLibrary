@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 namespace arm_compute
 {
 class ICLTensor;
+/** Interface for OpenCL images */
 using ICLImage = ICLTensor;
 
 /** Interface for OpenCL multi-planar images */
@@ -39,14 +40,14 @@ public:
      *
      * @param[in] index The index of the wanted planed.
      *
-     *  @return A pointer pointed to the OpenCL plane
+     * @return A pointer pointed to the OpenCL plane
      */
     virtual ICLImage *cl_plane(unsigned int index) = 0;
     /** Return a constant pointer to the requested OpenCL plane of the image.
      *
      * @param[in] index The index of the wanted planed.
      *
-     *  @return A constant pointer pointed to the OpenCL plane
+     * @return A constant pointer pointed to the OpenCL plane
      */
     virtual const ICLImage *cl_plane(unsigned int index) const = 0;
 

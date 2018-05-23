@@ -11,9 +11,9 @@
 <polygon fill="white" stroke="none" points="-4,4 -4,-24 120,-24 120,4 -4,4"/>
 <!-- Node1 -->
 <g id="node1" class="node"><title>Node1</title>
-<g id="a_node1"><a xlink:href="structarm__compute_1_1test_1_1validation_1_1compare__base.xhtml" target="_top" xlink:title="compare_base\&lt; T \&gt;">
+<g id="a_node1"><a xlink:href="classarm__compute_1_1test_1_1framework_1_1_command_line_parser.xhtml" target="_top" xlink:title="Class to parse command line arguments. ">
 <polygon fill="white" stroke="black" points="-7.10543e-15,-0.5 -7.10543e-15,-19.5 116,-19.5 116,-0.5 -7.10543e-15,-0.5"/>
-<text text-anchor="middle" x="58" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">compare_base&lt; T &gt;</text>
+<text text-anchor="middle" x="58" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">CommandLineParser</text>
 </a>
 </g>
 </g>

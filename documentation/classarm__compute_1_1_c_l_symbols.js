@@ -10,8 +10,11 @@ var classarm__compute_1_1_c_l_symbols =
     [ "clCreateProgramWithBinary_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#a2263b6ca759bdfed0a0727d2b68db916", null ],
     [ "clCreateProgramWithSource_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#a62fb6450bf1c30cca66d6547348eee3c", null ],
     [ "clEnqueueMapBuffer_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#abd0ba6c593ff83cb0c3d0e1b746f068a", null ],
+    [ "clEnqueueMarker_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#a527fd99779c605a2203158219f18e95f", null ],
     [ "clEnqueueNDRangeKernel_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#ab5c1d962dbe252b8d6a9a3414557d194", null ],
     [ "clEnqueueReadBuffer_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#a114ecc5c7e99f380a84d33f32038dc27", null ],
+    [ "clEnqueueSVMMap_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#ae4a0c63c4f06c8d80788da461812bf4c", null ],
+    [ "clEnqueueSVMUnmap_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#ab30bda3641f8d1a73126884a9fd66a89", null ],
     [ "clEnqueueUnmapMemObject_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#aab857577e126a171222277703b724639", null ],
     [ "clEnqueueWriteBuffer_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#a3085f45d872eda6b1adf8557fd4915b9", null ],
     [ "clFinish_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#a31fd3504c695582b52ee2426dc71c1d7", null ],
@@ -38,5 +41,8 @@ var classarm__compute_1_1_c_l_symbols =
     [ "clRetainKernel_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#a70f0c6b172261cc89e5d90239a8b70d0", null ],
     [ "clRetainMemObject_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#ab7b31e7922544d4a6325320f08ad2474", null ],
     [ "clRetainProgram_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#aa9752599bfd3a28d9c34cfb59c8feaf3", null ],
-    [ "clSetKernelArg_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#a021f5850b98ba79d84067e762b84aa52", null ]
+    [ "clSetKernelArg_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#a021f5850b98ba79d84067e762b84aa52", null ],
+    [ "clSVMAlloc_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#abf58c6d99585520b40a396a890caa9ee", null ],
+    [ "clSVMFree_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#adbd557acca5bc0f92a1a7f8ebc26e9ed", null ],
+    [ "clWaitForEvents_ptr", "classarm__compute_1_1_c_l_symbols.xhtml#a8fd1b20db02f6fb96562ddff20134a53", null ]
 ];

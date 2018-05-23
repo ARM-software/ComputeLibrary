@@ -46,13 +46,22 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     [ "CLChannelExtractKernel.h", "_c_l_channel_extract_kernel_8h.xhtml", [
       [ "CLChannelExtractKernel", "classarm__compute_1_1_c_l_channel_extract_kernel.xhtml", "classarm__compute_1_1_c_l_channel_extract_kernel" ]
     ] ],
+    [ "CLChannelShuffleLayerKernel.h", "_c_l_channel_shuffle_layer_kernel_8h.xhtml", [
+      [ "CLChannelShuffleLayerKernel", "classarm__compute_1_1_c_l_channel_shuffle_layer_kernel.xhtml", "classarm__compute_1_1_c_l_channel_shuffle_layer_kernel" ]
+    ] ],
     [ "CLCol2ImKernel.h", "_c_l_col2_im_kernel_8h.xhtml", [
       [ "CLCol2ImKernel", "classarm__compute_1_1_c_l_col2_im_kernel.xhtml", "classarm__compute_1_1_c_l_col2_im_kernel" ]
     ] ],
     [ "CLColorConvertKernel.h", "_c_l_color_convert_kernel_8h.xhtml", [
       [ "CLColorConvertKernel", "classarm__compute_1_1_c_l_color_convert_kernel.xhtml", "classarm__compute_1_1_c_l_color_convert_kernel" ]
     ] ],
+    [ "CLConvertFullyConnectedWeightsKernel.h", "_c_l_convert_fully_connected_weights_kernel_8h.xhtml", [
+      [ "CLConvertFullyConnectedWeightsKernel", "classarm__compute_1_1_c_l_convert_fully_connected_weights_kernel.xhtml", "classarm__compute_1_1_c_l_convert_fully_connected_weights_kernel" ]
+    ] ],
     [ "CLConvolutionKernel.h", "_c_l_convolution_kernel_8h.xhtml", "_c_l_convolution_kernel_8h" ],
+    [ "CLCopyKernel.h", "_c_l_copy_kernel_8h.xhtml", [
+      [ "CLCopyKernel", "classarm__compute_1_1_c_l_copy_kernel.xhtml", "classarm__compute_1_1_c_l_copy_kernel" ]
+    ] ],
     [ "CLDeconvolutionLayerUpsampleKernel.h", "_c_l_deconvolution_layer_upsample_kernel_8h.xhtml", [
       [ "CLDeconvolutionLayerUpsampleKernel", "classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel.xhtml", "classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel" ]
     ] ],
@@ -62,8 +71,11 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     [ "CLDepthConvertLayerKernel.h", "_c_l_depth_convert_layer_kernel_8h.xhtml", [
       [ "CLDepthConvertLayerKernel", "classarm__compute_1_1_c_l_depth_convert_layer_kernel.xhtml", "classarm__compute_1_1_c_l_depth_convert_layer_kernel" ]
     ] ],
-    [ "CLDepthwiseConvolutionLayer3x3Kernel.h", "_c_l_depthwise_convolution_layer3x3_kernel_8h.xhtml", [
-      [ "CLDepthwiseConvolutionLayer3x3Kernel", "classarm__compute_1_1_c_l_depthwise_convolution_layer3x3_kernel.xhtml", "classarm__compute_1_1_c_l_depthwise_convolution_layer3x3_kernel" ]
+    [ "CLDepthwiseConvolutionLayer3x3NCHWKernel.h", "_c_l_depthwise_convolution_layer3x3_n_c_h_w_kernel_8h.xhtml", [
+      [ "CLDepthwiseConvolutionLayer3x3NCHWKernel", "classarm__compute_1_1_c_l_depthwise_convolution_layer3x3_n_c_h_w_kernel.xhtml", "classarm__compute_1_1_c_l_depthwise_convolution_layer3x3_n_c_h_w_kernel" ]
+    ] ],
+    [ "CLDepthwiseConvolutionLayer3x3NHWCKernel.h", "_c_l_depthwise_convolution_layer3x3_n_h_w_c_kernel_8h.xhtml", [
+      [ "CLDepthwiseConvolutionLayer3x3NHWCKernel", "classarm__compute_1_1_c_l_depthwise_convolution_layer3x3_n_h_w_c_kernel.xhtml", "classarm__compute_1_1_c_l_depthwise_convolution_layer3x3_n_h_w_c_kernel" ]
     ] ],
     [ "CLDepthwiseIm2ColKernel.h", "_c_l_depthwise_im2_col_kernel_8h.xhtml", [
       [ "CLDepthwiseIm2ColKernel", "classarm__compute_1_1_c_l_depthwise_im2_col_kernel.xhtml", "classarm__compute_1_1_c_l_depthwise_im2_col_kernel" ]
@@ -265,5 +277,20 @@ var dir_f906bbebc596bc606d589ccb705e6595 =
     ] ],
     [ "CLWeightsReshapeKernel.h", "_c_l_weights_reshape_kernel_8h.xhtml", [
       [ "CLWeightsReshapeKernel", "classarm__compute_1_1_c_l_weights_reshape_kernel.xhtml", "classarm__compute_1_1_c_l_weights_reshape_kernel" ]
+    ] ],
+    [ "CLWidthConcatenateLayerKernel.h", "_c_l_width_concatenate_layer_kernel_8h.xhtml", [
+      [ "CLWidthConcatenateLayerKernel", "classarm__compute_1_1_c_l_width_concatenate_layer_kernel.xhtml", "classarm__compute_1_1_c_l_width_concatenate_layer_kernel" ]
+    ] ],
+    [ "CLWinogradFilterTransformKernel.h", "_c_l_winograd_filter_transform_kernel_8h.xhtml", [
+      [ "CLWinogradFilterTransformKernel", "classarm__compute_1_1_c_l_winograd_filter_transform_kernel.xhtml", "classarm__compute_1_1_c_l_winograd_filter_transform_kernel" ]
+    ] ],
+    [ "CLWinogradInputTransformKernel.h", "_c_l_winograd_input_transform_kernel_8h.xhtml", [
+      [ "CLWinogradInputTransformKernel", "classarm__compute_1_1_c_l_winograd_input_transform_kernel.xhtml", "classarm__compute_1_1_c_l_winograd_input_transform_kernel" ]
+    ] ],
+    [ "CLWinogradOutputTransformKernel.h", "_c_l_winograd_output_transform_kernel_8h.xhtml", [
+      [ "CLWinogradOutputTransformKernel", "classarm__compute_1_1_c_l_winograd_output_transform_kernel.xhtml", "classarm__compute_1_1_c_l_winograd_output_transform_kernel" ]
+    ] ],
+    [ "ICLDepthwiseConvolutionLayer3x3Kernel.h", "_i_c_l_depthwise_convolution_layer3x3_kernel_8h.xhtml", [
+      [ "ICLDepthwiseConvolutionLayer3x3Kernel", "classarm__compute_1_1_i_c_l_depthwise_convolution_layer3x3_kernel.xhtml", "classarm__compute_1_1_i_c_l_depthwise_convolution_layer3x3_kernel" ]
     ] ]
 ];

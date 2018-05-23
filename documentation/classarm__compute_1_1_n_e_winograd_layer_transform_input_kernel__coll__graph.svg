@@ -19,7 +19,7 @@
 </g>
 <!-- Node2 -->
 <g id="node2" class="node"><title>Node2</title>
-<g id="a_node2"><a xlink:href="classarm__compute_1_1_i_n_e_winograd_layer_transform_input_kernel.xhtml" target="_top" xlink:title="INEWinogradLayerTransform\lInputKernel\&lt; T \&gt;">
+<g id="a_node2"><a xlink:href="classarm__compute_1_1_i_n_e_winograd_layer_transform_input_kernel.xhtml" target="_top" xlink:title="Interface for the NEON kernel to perform Winograd input transform. ">
 <polygon fill="white" stroke="black" points="8.5,-89.5 8.5,-119.5 158.5,-119.5 158.5,-89.5 8.5,-89.5"/>
 <text text-anchor="start" x="16.5" y="-107.5" font-family="Helvetica,sans-Serif" font-size="10.00">INEWinogradLayerTransform</text>
 <text text-anchor="middle" x="83.5" y="-96.5" font-family="Helvetica,sans-Serif" font-size="10.00">InputKernel&lt; T &gt;</text>

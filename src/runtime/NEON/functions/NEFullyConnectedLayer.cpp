@@ -132,7 +132,7 @@ void NEFullyConnectedLayerReshapeWeights::run()
 
 NEFullyConnectedLayer::NEFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _im2col_kernel(), _reshape_weights_kernel(), _interleave4x4_kernel(), _mm_kernel(), _accumulate_biases_kernel(), _im2col_output(), _interleave4x4_output(),
-      _reshape_weights_output(), _are_weights_reshaped(false), _is_batched_fc_layer(false), _linearize_input(false), _accumulate_biases(false)
+      _reshape_weights_output(), _are_weights_reshaped(false), _is_batched_fc_layer(false), _linearize_input(false), _accumulate_biases(false), _original_weights(nullptr)
 {
 }
 
@@ -163,6 +163,7 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
     const int    num_input_dimensions = input->info()->tensor_shape().num_dimensions() - num_batch_dimensions;
     const size_t linear_input_size    = input->info()->tensor_shape().total_size_lower(num_input_dimensions);
 
+    _original_weights     = weights;
     _linearize_input      = (input->info()->tensor_shape().x() != linear_input_size) || (num_input_dimensions > 1 && linear_input_size == 1);
     _are_weights_reshaped = are_weights_reshaped;
     _accumulate_biases    = biases != nullptr;
@@ -187,7 +188,7 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
 
     if(_linearize_input)
     {
-        _im2col_output.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_im2col_shape(input->info(), num_input_dimensions)));
+        _im2col_output.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_im2col_fc_shape(input->info(), num_input_dimensions)));
 
         // Configure im2col kernel
         _memory_group.manage(&_im2col_output);
@@ -287,7 +288,7 @@ Status NEFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
 
     if(linearize_input)
     {
-        im2col_output->set_tensor_shape(compute_im2col_shape(input, num_input_dimensions));
+        im2col_output->set_tensor_shape(compute_im2col_fc_shape(input, num_input_dimensions));
 
         ARM_COMPUTE_RETURN_ON_ERROR(NEIm2ColKernel::validate(input, im2col_output.get(), Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false, true));
 
@@ -324,8 +325,13 @@ void NEFullyConnectedLayer::run()
     // Reshape of the weights (happens only once)
     if(!_are_weights_reshaped)
     {
+        ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
+
         _are_weights_reshaped = true;
         _reshape_weights_kernel.run();
+
+        // Mark original weights tensor as unused
+        _original_weights->mark_as_unused();
     }
 
     _memory_group.acquire();

@@ -1,7 +1,6 @@
 var searchData=
 [
-  ['wall_5fclock_5ftimer',['WALL_CLOCK_TIMER',['../namespacearm__compute_1_1test_1_1framework.xhtml#aac6b258eb313f96447f4f0e273431005aabf534ee93a5bd6473d70f13a7414d92',1,'arm_compute::test::framework']]],
-  ['warn',['WARN',['../namespacearm__compute_1_1logging.xhtml#a7a38c7496c92835c0d835ecb2f8135c1a32bd8a1db2275458673903bdb84cb277',1,'arm_compute::logging']]],
-  ['winograd',['WINOGRAD',['../namespacearm__compute.xhtml#a683661ae75dcb7aef16b9c9bde31517da9d024a5762b3a992dec7eb3c49d17ae8',1,'arm_compute']]],
-  ['wrap',['WRAP',['../namespacearm__compute.xhtml#a82b8ac759c804bc1fb4e2d21e178fb6fae1c8555fcf0ea2bb648a6fd527d658c0',1,'arm_compute::WRAP()'],['../namespacearm__compute_1_1test_1_1fixed__point__arithmetic.xhtml#a0ada8f647402027261407be09bdf25ffae1c8555fcf0ea2bb648a6fd527d658c0',1,'arm_compute::test::fixed_point_arithmetic::WRAP()']]]
+  ['v',['V',['../namespacearm__compute.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aa5206560a306a2e085a437fd258eb57ce',1,'arm_compute']]],
+  ['validregion',['ValidRegion',['../structarm__compute_1_1_i_o_format_info.xhtml#ae283722f31a4c59039f9abd44f10dbd0a3131a0d8b04c3dbc9119dc93a14bdbb9',1,'arm_compute::IOFormatInfo']]],
+  ['verbose',['VERBOSE',['../namespacearm__compute_1_1logging.xhtml#aca1fd1d8935433e6ba2e3918214e07f9aec1f06e9fb39c4ef0729b3c7c9c8e8cc',1,'arm_compute::logging']]]
 ];

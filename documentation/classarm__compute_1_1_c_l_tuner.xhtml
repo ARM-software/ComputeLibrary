@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -166,9 +166,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a0d11cd5e57c2885764baa2c558c3a353"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_tuner.xhtml#a0d11cd5e57c2885764baa2c558c3a353">save_to_file</a> (const std::string &amp;filename) const </td></tr>
 <tr class="memdesc:a0d11cd5e57c2885764baa2c558c3a353"><td class="mdescLeft">&#160;</td><td class="mdescRight">Save the content of the LWS table to file.  <a href="#a0d11cd5e57c2885764baa2c558c3a353">More...</a><br /></td></tr>
 <tr class="separator:a0d11cd5e57c2885764baa2c558c3a353"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3542e1479b9049456d8256d1442df1ac"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_tuner.xhtml#a3542e1479b9049456d8256d1442df1ac">tune_kernel</a> (<a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml">ICLKernel</a> &amp;kernel) override</td></tr>
-<tr class="memdesc:a3542e1479b9049456d8256d1442df1ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tune OpenCL kernel.  <a href="#a3542e1479b9049456d8256d1442df1ac">More...</a><br /></td></tr>
-<tr class="separator:a3542e1479b9049456d8256d1442df1ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a52f755d664bbdcb9346cdf5cc4a7e958"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_tuner.xhtml#a52f755d664bbdcb9346cdf5cc4a7e958">tune_kernel_static</a> (<a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml">ICLKernel</a> &amp;kernel) override</td></tr>
+<tr class="memdesc:a52f755d664bbdcb9346cdf5cc4a7e958"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tune OpenCL kernel statically.  <a href="#a52f755d664bbdcb9346cdf5cc4a7e958">More...</a><br /></td></tr>
+<tr class="separator:a52f755d664bbdcb9346cdf5cc4a7e958"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af073b532560e2105dd22d381f5888ce7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_tuner.xhtml#af073b532560e2105dd22d381f5888ce7">tune_kernel_dynamic</a> (<a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml">ICLKernel</a> &amp;kernel) override</td></tr>
+<tr class="memdesc:af073b532560e2105dd22d381f5888ce7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tune OpenCL kernel dynamically.  <a href="#af073b532560e2105dd22d381f5888ce7">More...</a><br /></td></tr>
+<tr class="separator:af073b532560e2105dd22d381f5888ce7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abc3ad51b9369c15ee8507e700cfcd221"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_tuner.xhtml#abc3ad51b9369c15ee8507e700cfcd221">kernel_event_is_set</a> () const </td></tr>
 <tr class="memdesc:abc3ad51b9369c15ee8507e700cfcd221"><td class="mdescLeft">&#160;</td><td class="mdescRight">Is the kernel_event set ?  <a href="#abc3ad51b9369c15ee8507e700cfcd221">More...</a><br /></td></tr>
 <tr class="separator:abc3ad51b9369c15ee8507e700cfcd221"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -180,6 +183,7 @@ Public Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
 <tr class="memitem:a5baba955626e8da33ed5dd829a538974"><td class="memItemLeft" align="right" valign="top">std::function&lt; decltype(clEnqueueNDRangeKernel)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_tuner.xhtml#a5baba955626e8da33ed5dd829a538974">real_clEnqueueNDRangeKernel</a></td></tr>
+<tr class="memdesc:a5baba955626e8da33ed5dd829a538974"><td class="mdescLeft">&#160;</td><td class="mdescRight">clEnqueueNDRangeKernel symbol  <a href="#a5baba955626e8da33ed5dd829a538974">More...</a><br /></td></tr>
 <tr class="separator:a5baba955626e8da33ed5dd829a538974"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -352,7 +356,7 @@ Data Fields</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Give read access to the LWS table. </p>
-<p>return The lws table as unordered_map container </p>
+<dl class="section return"><dt>Returns</dt><dd>The lws table as unordered_map container </dd></dl>
 
 </div>
 </div>
@@ -429,7 +433,7 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a3542e1479b9049456d8256d1442df1ac"></a>
+<a class="anchor" id="af073b532560e2105dd22d381f5888ce7"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -437,7 +441,7 @@ Data Fields</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void tune_kernel </td>
+          <td class="memname">void tune_kernel_dynamic </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml">ICLKernel</a> &amp;&#160;</td>
           <td class="paramname"><em>kernel</em></td><td>)</td>
@@ -451,7 +455,8 @@ Data Fields</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Tune OpenCL kernel. </p>
+<p>Tune OpenCL kernel dynamically. </p>
+<dl class="section note"><dt>Note</dt><dd>Tuning requires memory to be available on all kernel tensors and objects in order to be performed</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">kernel</td><td><a class="el" href="classarm__compute_1_1_kernel.xhtml" title="Kernel class. ">Kernel</a> to tune </td></tr>
@@ -459,7 +464,42 @@ Data Fields</h2></td></tr>
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="classarm__compute_1_1_i_c_l_tuner.xhtml#aa3e463ed247bccd80278280791943d79">ICLTuner</a>.</p>
+<p>Implements <a class="el" href="classarm__compute_1_1_i_c_l_tuner.xhtml#ae12d76ff3471c1f73c62b7c65addc1ec">ICLTuner</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a52f755d664bbdcb9346cdf5cc4a7e958"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void tune_kernel_static </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml">ICLKernel</a> &amp;&#160;</td>
+          <td class="paramname"><em>kernel</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Tune OpenCL kernel statically. </p>
+<dl class="section note"><dt>Note</dt><dd>Tuning is performed using only kernel and tensor metadata, thus can be performed when memory is not available</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">kernel</td><td><a class="el" href="classarm__compute_1_1_kernel.xhtml" title="Kernel class. ">Kernel</a> to tune </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Implements <a class="el" href="classarm__compute_1_1_i_c_l_tuner.xhtml#a384fdc1bc38a4fc6e79af675cc4aa8e3">ICLTuner</a>.</p>
 
 </div>
 </div>
@@ -492,7 +532,9 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_c_l_tuner_8h_source.xhtml#l00086">86</a> of file <a class="el" href="_c_l_tuner_8h_source.xhtml">CLTuner.h</a>.</p>
+<p>clEnqueueNDRangeKernel symbol </p>
+
+<p>Definition at line <a class="el" href="_c_l_tuner_8h_source.xhtml#l00087">87</a> of file <a class="el" href="_c_l_tuner_8h_source.xhtml">CLTuner.h</a>.</p>
 
 </div>
 </div>
@@ -505,7 +547,7 @@ Data Fields</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_tuner.xhtml">CLTuner</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:58 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:41 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

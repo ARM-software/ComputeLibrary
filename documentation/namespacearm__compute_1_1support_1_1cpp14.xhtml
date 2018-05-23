@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -127,20 +127,25 @@ Data Structures</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">make_unique is missing in CPP11.  <a href="structarm__compute_1_1support_1_1cpp14_1_1___unique__if.xhtml#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1support_1_1cpp14_1_1___unique__if_3_01_t[]_4.xhtml">_Unique_if&lt; T[]&gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Template for array.  <a href="structarm__compute_1_1support_1_1cpp14_1_1___unique__if_3_01_t[]_4.xhtml#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structarm__compute_1_1support_1_1cpp14_1_1___unique__if_3_01_t[_n]_4.xhtml">_Unique_if&lt; T[N]&gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Template for array with known bounds (to throw an error).  <a href="structarm__compute_1_1support_1_1cpp14_1_1___unique__if_3_01_t[_n]_4.xhtml#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a94d8ad03db9ccb2005b06858856d0a4c"><td class="memTemplParams" colspan="2">template&lt;class T , class... Args&gt; </td></tr>
 <tr class="memitem:a94d8ad03db9ccb2005b06858856d0a4c"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structarm__compute_1_1support_1_1cpp14_1_1___unique__if.xhtml">_Unique_if</a>&lt; T &gt;::_Single_object&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1support_1_1cpp14.xhtml#a94d8ad03db9ccb2005b06858856d0a4c">make_unique</a> (Args &amp;&amp;...args)</td></tr>
+<tr class="memdesc:a94d8ad03db9ccb2005b06858856d0a4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a single object and return a unique pointer to it.  <a href="#a94d8ad03db9ccb2005b06858856d0a4c">More...</a><br /></td></tr>
 <tr class="separator:a94d8ad03db9ccb2005b06858856d0a4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9497f049c3bfd9fcebdec84397fff2b9"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
 <tr class="memitem:a9497f049c3bfd9fcebdec84397fff2b9"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structarm__compute_1_1support_1_1cpp14_1_1___unique__if.xhtml">_Unique_if</a>&lt; T &gt;::_Unknown_bound&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1support_1_1cpp14.xhtml#a9497f049c3bfd9fcebdec84397fff2b9">make_unique</a> (size_t n)</td></tr>
+<tr class="memdesc:a9497f049c3bfd9fcebdec84397fff2b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct an array of objects and return a unique pointer to it.  <a href="#a9497f049c3bfd9fcebdec84397fff2b9">More...</a><br /></td></tr>
 <tr class="separator:a9497f049c3bfd9fcebdec84397fff2b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2ccfba86a91625f5bc79156f2a598a6d"><td class="memTemplParams" colspan="2">template&lt;class T , class... Args&gt; </td></tr>
 <tr class="memitem:a2ccfba86a91625f5bc79156f2a598a6d"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structarm__compute_1_1support_1_1cpp14_1_1___unique__if.xhtml">_Unique_if</a>&lt; T &gt;::_Known_bound&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1support_1_1cpp14.xhtml#a2ccfba86a91625f5bc79156f2a598a6d">make_unique</a> (Args &amp;&amp;...)=delete</td></tr>
+<tr class="memdesc:a2ccfba86a91625f5bc79156f2a598a6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">It is invalid to attempt to make_unique an array with known bounds.  <a href="#a2ccfba86a91625f5bc79156f2a598a6d">More...</a><br /></td></tr>
 <tr class="separator:a2ccfba86a91625f5bc79156f2a598a6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
@@ -158,13 +163,19 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_toolchain_support_8h_source.xhtml#l00362">362</a> of file <a class="el" href="_toolchain_support_8h_source.xhtml">ToolchainSupport.h</a>.</p>
+<p>Construct a single object and return a unique pointer to it. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">args</td><td>Constructor arguments.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a unique pointer to the new object. </dd></dl>
 
-<p>References <a class="el" href="caffe__data__extractor_8py_source.xhtml#l00021">caffe_data_extractor::args</a>.</p>
+<p>Definition at line <a class="el" href="_toolchain_support_8h_source.xhtml#l00385">385</a> of file <a class="el" href="_toolchain_support_8h_source.xhtml">ToolchainSupport.h</a>.</p>
 
 <p>Referenced by <a class="el" href="_framework_8h_source.xhtml#l00342">Framework::add_test_case()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;{</div><div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;    <span class="keywordflow">return</span> std::unique_ptr&lt;T&gt;(<span class="keyword">new</span> T(std::forward&lt;Args&gt;(<a class="code" href="namespacecaffe__data__extractor.xhtml#a8187411843a6284ffb964ef3fb9fcab3">args</a>)...));</div><div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;}</div><div class="ttc" id="namespacecaffe__data__extractor_xhtml_a8187411843a6284ffb964ef3fb9fcab3"><div class="ttname"><a href="namespacecaffe__data__extractor.xhtml#a8187411843a6284ffb964ef3fb9fcab3">caffe_data_extractor.args</a></div><div class="ttdeci">args</div><div class="ttdef"><b>Definition:</b> <a href="caffe__data__extractor_8py_source.xhtml#l00021">caffe_data_extractor.py:21</a></div></div>
-</div><!-- fragment -->
+<div class="fragment"><div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;{</div><div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;    <span class="keywordflow">return</span> std::unique_ptr&lt;T&gt;(<span class="keyword">new</span> T(std::forward&lt;Args&gt;(args)...));</div><div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="a9497f049c3bfd9fcebdec84397fff2b9"></a>
@@ -181,11 +192,19 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_toolchain_support_8h_source.xhtml#l00369">369</a> of file <a class="el" href="_toolchain_support_8h_source.xhtml">ToolchainSupport.h</a>.</p>
+<p>Construct an array of objects and return a unique pointer to it. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">n</td><td><a class="el" href="classarm__compute_1_1_array.xhtml" title="Basic implementation of the IArray interface which allocates a static number of T values...">Array</a> size</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a unique pointer to the new array. </dd></dl>
 
-<p>References <a class="el" href="namespacearm__compute_1_1support_1_1cpp14.xhtml#a2ccfba86a91625f5bc79156f2a598a6d">make_unique()</a>, <a class="el" href="caffe__data__extractor_8py_source.xhtml#l00019">caffe_data_extractor::type</a>, and <a class="el" href="namespacearm__compute.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aa4c614360da93c0a041b22e537de151eb">arm_compute::U</a>.</p>
-<div class="fragment"><div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;{</div><div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;    <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="namespacecaffe__data__extractor.xhtml#a7aead736a07eaf25623ad7bfa1f0ee2d">std::remove_extent&lt;T&gt;::type</a> <a class="code" href="namespacearm__compute.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aa4c614360da93c0a041b22e537de151eb">U</a>;</div><div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;    <span class="keywordflow">return</span> std::unique_ptr&lt;T&gt;(<span class="keyword">new</span> U[n]());</div><div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;}</div><div class="ttc" id="namespacearm__compute_xhtml_a1ce9b523fd4f3b5bbcadcd796183455aa4c614360da93c0a041b22e537de151eb"><div class="ttname"><a href="namespacearm__compute.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aa4c614360da93c0a041b22e537de151eb">arm_compute::Channel::U</a></div><div class="ttdoc">Cb/U channel. </div></div>
-<div class="ttc" id="namespacecaffe__data__extractor_xhtml_a7aead736a07eaf25623ad7bfa1f0ee2d"><div class="ttname"><a href="namespacecaffe__data__extractor.xhtml#a7aead736a07eaf25623ad7bfa1f0ee2d">caffe_data_extractor.type</a></div><div class="ttdeci">type</div><div class="ttdef"><b>Definition:</b> <a href="caffe__data__extractor_8py_source.xhtml#l00019">caffe_data_extractor.py:19</a></div></div>
+<p>Definition at line <a class="el" href="_toolchain_support_8h_source.xhtml#l00398">398</a> of file <a class="el" href="_toolchain_support_8h_source.xhtml">ToolchainSupport.h</a>.</p>
+
+<p>References <a class="el" href="namespacearm__compute_1_1support_1_1cpp14.xhtml#a2ccfba86a91625f5bc79156f2a598a6d">make_unique()</a>, and <a class="el" href="namespacearm__compute.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aa4c614360da93c0a041b22e537de151eb">arm_compute::U</a>.</p>
+<div class="fragment"><div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;{</div><div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;    <span class="keyword">typedef</span> <span class="keyword">typename</span> std::remove_extent&lt;T&gt;::type <a class="code" href="namespacearm__compute.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aa4c614360da93c0a041b22e537de151eb">U</a>;</div><div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;    <span class="keywordflow">return</span> std::unique_ptr&lt;T&gt;(<span class="keyword">new</span> U[n]());</div><div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;}</div><div class="ttc" id="namespacearm__compute_xhtml_a1ce9b523fd4f3b5bbcadcd796183455aa4c614360da93c0a041b22e537de151eb"><div class="ttname"><a href="namespacearm__compute.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aa4c614360da93c0a041b22e537de151eb">arm_compute::Channel::U</a></div><div class="ttdoc">Cb/U channel. </div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -211,7 +230,9 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Referenced by <a class="el" href="_toolchain_support_8h_source.xhtml#l00369">make_unique()</a>.</p>
+<p>It is invalid to attempt to make_unique an array with known bounds. </p>
+
+<p>Referenced by <a class="el" href="_toolchain_support_8h_source.xhtml#l00398">make_unique()</a>.</p>
 
 </div>
 </div>
@@ -221,7 +242,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1support.xhtml">support</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1support_1_1cpp14.xhtml">cpp14</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:59 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,9 +45,13 @@ public:
     {
     }
 
+    /** Prevent instances of this class from being copy constructed */
     ArrayAccessor(const ArrayAccessor &) = delete;
+    /** Prevent instances of this class from being copied */
     ArrayAccessor &operator=(const ArrayAccessor &) = delete;
-    ArrayAccessor(ArrayAccessor &&)                 = default;
+    /** Allow instances of this class to be move constructed */
+    ArrayAccessor(ArrayAccessor &&) = default;
+    /** Allow instances of this class to be moved */
     ArrayAccessor &operator=(ArrayAccessor &&) = default;
 
     size_t num_values() const override

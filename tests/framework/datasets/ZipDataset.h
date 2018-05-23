@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,6 +62,7 @@ public:
     {
     }
 
+    /** Allow instances of this class to be move constructed */
     ZipDataset(ZipDataset &&) = default;
 
     /** Type of the dataset. */
@@ -70,21 +71,38 @@ public:
     /** Iterator for the dataset. */
     struct iterator
     {
+        /** Construct an iterator.
+         *
+         * @param[in] iter1 Iterator 1.
+         * @param[in] iter2 Iterator 2.
+         */
         iterator(iter1_type iter1, iter2_type iter2)
             : _iter1{ std::move(iter1) }, _iter2{ std::move(iter2) }
         {
         }
 
+        /** Get the description of the current value.
+         *
+         * @return description of the current value.
+         */
         std::string description() const
         {
             return _iter1.description() + ":" + _iter2.description();
         }
 
+        /** Get the value of the iterator.
+         *
+         * @return the value of the iterator.
+         */
         ZipDataset::type operator*() const
         {
             return std::tuple_cat(*_iter1, *_iter2);
         }
 
+        /** Inrement the iterator.
+         *
+         * @return *this;
+         */
         iterator &operator++()
         {
             ++_iter1;

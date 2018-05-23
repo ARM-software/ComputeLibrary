@@ -35,61 +35,6 @@
 
 using namespace arm_compute;
 
-namespace
-{
-/* Function to be used to intercept kernel enqueues and store their OpenCL Event */
-class Interceptor
-{
-public:
-    explicit Interceptor(CLTuner &tuner);
-
-    /** clEnqueueNDRangeKernel interface
-     *
-     * @param[in] command_queue           A valid command-queue. The kernel will be queued for execution on the device associated with command_queue.
-     * @param[in] kernel                  A valid kernel object. The OpenCL context associated with kernel and command_queue must be the same.
-     * @param[in] work_dim                The number of dimensions used to specify the global work-items and work-items in the work-group. work_dim must be greater than zero and less than or equal to CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS.
-     * @param[in] gwo                     Global-Workgroup-Offset. It can be used to specify an array of work_dim unsigned values that describe the offset used to calculate the global ID of a work-item. If global_work_offset is NULL, the global IDs start at offset (0, 0, ... 0).
-     * @param[in] gws                     Global-Workgroup-Size. Points to an array of work_dim unsigned values that describe the number of global work-items in work_dim dimensions that will execute the kernel function.
-     * @param[in] lws                     Local-Workgroup-Size. Points to an array of work_dim unsigned values that describe the number of work-items that make up a work-group
-     * @param[in] num_events_in_wait_list Number of events in the waiting list
-     * @param[in] event_wait_list         Event waiting list
-     * @param[in] event                   OpenCL kernel event
-     *
-     * @return the OpenCL status
-     */
-    cl_int operator()(cl_command_queue command_queue, cl_kernel kernel, cl_uint work_dim, const size_t *gwo, const size_t *gws, const size_t *lws, cl_uint num_events_in_wait_list,
-                      const cl_event *event_wait_list, cl_event *event);
-
-private:
-    CLTuner &_tuner;
-};
-
-Interceptor::Interceptor(CLTuner &tuner)
-    : _tuner(tuner)
-{
-}
-
-cl_int Interceptor::operator()(cl_command_queue command_queue, cl_kernel kernel, cl_uint work_dim, const size_t *gwo, const size_t *gws, const size_t *lws, cl_uint num_events_in_wait_list,
-                               const cl_event *event_wait_list, cl_event *event)
-{
-    ARM_COMPUTE_ERROR_ON_MSG(event != nullptr, "Not supported");
-    ARM_COMPUTE_UNUSED(event);
-    if(_tuner.kernel_event_is_set())
-    {
-        // If the event is already set it means the kernel enqueue is sliced: given that we only time the first slice we can save time by skipping the other enqueues.
-        return CL_SUCCESS;
-    }
-    cl_event tmp;
-    cl_int   retval = _tuner.real_clEnqueueNDRangeKernel(command_queue, kernel, work_dim, gwo, gws, lws, num_events_in_wait_list, event_wait_list, &tmp);
-
-    // Set OpenCL event
-    _tuner.set_cl_kernel_event(tmp);
-
-    return retval;
-}
-
-} // namespace
-
 CLTuner::CLTuner(bool tune_new_kernels)
     : real_clEnqueueNDRangeKernel(nullptr), _lws_table(), _queue(), _queue_profiler(), _kernel_event(), _tune_new_kernels(tune_new_kernels)
 {
@@ -113,7 +58,12 @@ bool CLTuner::tune_new_kernels() const
     return _tune_new_kernels;
 }
 
-void CLTuner::tune_kernel(ICLKernel &kernel)
+void CLTuner::tune_kernel_static(ICLKernel &kernel)
+{
+    ARM_COMPUTE_UNUSED(kernel);
+}
+
+void CLTuner::tune_kernel_dynamic(ICLKernel &kernel)
 {
     // Get the configuration ID from the kernel
     const std::string &config_id = kernel.config_id();
@@ -173,7 +123,25 @@ cl::NDRange CLTuner::find_optimal_lws(ICLKernel &kernel)
         }
     }
     // Start intercepting enqueues:
-    CLSymbols::get().clEnqueueNDRangeKernel_ptr = Interceptor(*this);
+    auto interceptor = [this](cl_command_queue command_queue, cl_kernel kernel, cl_uint work_dim, const size_t *gwo, const size_t *gws, const size_t *lws, cl_uint num_events_in_wait_list,
+                              const cl_event * event_wait_list, cl_event * event)
+    {
+        ARM_COMPUTE_ERROR_ON_MSG(event != nullptr, "Not supported");
+        ARM_COMPUTE_UNUSED(event);
+        if(this->kernel_event_is_set())
+        {
+            // If the event is already set it means the kernel enqueue is sliced: given that we only time the first slice we can save time by skipping the other enqueues.
+            return CL_SUCCESS;
+        }
+        cl_event tmp;
+        cl_int   retval = this->real_clEnqueueNDRangeKernel(command_queue, kernel, work_dim, gwo, gws, lws, num_events_in_wait_list, event_wait_list, &tmp);
+
+        // Set OpenCL event
+        this->set_cl_kernel_event(tmp);
+
+        return retval;
+    };
+    CLSymbols::get().clEnqueueNDRangeKernel_ptr = interceptor;
 
     cl_ulong min_exec_time = std::numeric_limits<cl_ulong>::max();
 

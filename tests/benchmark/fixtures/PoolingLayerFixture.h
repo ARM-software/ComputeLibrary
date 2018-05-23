@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "tests/Globals.h"
 #include "tests/Utils.h"
 #include "tests/framework/Fixture.h"
@@ -34,22 +35,38 @@ namespace arm_compute
 {
 namespace test
 {
+namespace benchmark
+{
+using namespace arm_compute::misc::shape_calculator;
+
 /** Fixture that can be used for NEON and CL */
 template <typename TensorType, typename Function, typename Accessor>
 class PoolingLayerFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape src_shape, TensorShape dst_shape, PoolingLayerInfo info, DataType data_type, int batches)
+    void setup(TensorShape src_shape, PoolingLayerInfo info, DataType data_type, DataLayout data_layout, int batches)
     {
         // Set batched in source and destination shapes
         const unsigned int fixed_point_position = 4;
+
+        // Permute shape if NHWC format
+        if(data_layout == DataLayout::NHWC)
+        {
+            permute(src_shape, PermutationVector(2U, 0U, 1U));
+        }
+
+        TensorInfo src_info(src_shape, 1, data_type, fixed_point_position);
+        src_info.set_data_layout(data_layout);
+
+        TensorShape dst_shape = compute_pool_shape(src_info, info);
+
         src_shape.set(src_shape.num_dimensions(), batches);
         dst_shape.set(dst_shape.num_dimensions(), batches);
 
         // Create tensors
-        src = create_tensor<TensorType>(src_shape, data_type, 1, fixed_point_position);
-        dst = create_tensor<TensorType>(dst_shape, data_type, 1, fixed_point_position);
+        src = create_tensor<TensorType>(src_shape, data_type, 1, fixed_point_position, QuantizationInfo(), data_layout);
+        dst = create_tensor<TensorType>(dst_shape, data_type, 1, fixed_point_position, QuantizationInfo(), data_layout);
 
         // Create and configure function
         pool_layer.configure(&src, &dst, info);
@@ -81,6 +98,7 @@ private:
     TensorType dst{};
     Function   pool_layer{};
 };
+} // namespace benchmark
 } // namespace test
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_TEST_POOLINGLAYERFIXTURE */

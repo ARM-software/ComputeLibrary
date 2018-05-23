@@ -27,6 +27,7 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/IKernel.h"
 
 #include <string>
@@ -193,9 +194,18 @@ public:
      *
      * @param[in] lws_hint Local-Workgroup-Size to use
      */
-    void set_lws_hint(cl::NDRange &lws_hint)
+    void set_lws_hint(const cl::NDRange &lws_hint)
     {
         _lws_hint = lws_hint;
+    }
+
+    /** Return the Local-Workgroup-Size hint
+     *
+     * @return Current lws hint
+     */
+    cl::NDRange lws_hint() const
+    {
+        return _lws_hint;
     }
 
     /** Get the configuration ID
@@ -287,12 +297,20 @@ protected:
  * @param[in,out] queue    OpenCL command queue.
  * @param[in]     kernel   Kernel to enqueue
  * @param[in]     window   Window the kernel has to process.
- * @param[in]     lws_hint Local workgroup size requested, by default (128,1).
+ * @param[in]     lws_hint Local workgroup size requested. Default is based on the device target.
  *
  * @note If any dimension of the lws is greater than the global workgroup size then no lws will be passed.
  */
 void enqueue(cl::CommandQueue &queue, ICLKernel &kernel, const Window &window, const cl::NDRange &lws_hint = CLKernelLibrary::get().default_ndrange());
 
+/** Add the passed array's parameters to the object's kernel's arguments starting from the index idx.
+ *
+ * @param[in,out] idx            Index at which to start adding the array's arguments. Will be incremented by the number of kernel arguments set.
+ * @param[in]     array          Array to set as an argument of the object's kernel.
+ * @param[in]     strides        @ref Strides object containing stride of each dimension in bytes.
+ * @param[in]     num_dimensions Number of dimensions of the @p array.
+ * @param[in]     window         Window the kernel will be executed on.
+ */
 template <typename T, unsigned int dimension_size>
 void ICLKernel::add_array_argument(unsigned &idx, const ICLArray<T> *array, const Strides &strides, unsigned int num_dimensions, const Window &window)
 {

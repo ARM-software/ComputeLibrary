@@ -71,20 +71,34 @@ You should have the following file organisation:
 	│   │   │   └── OpenGLES.h --> Wrapper to configure the Khronos EGL and OpenGL ES C header
 	│   │   ├── NEON
 	│   │   │   ├── kernels --> Folder containing all the NEON kernels
-	│   │   │   │   ├── arm64 --> Folder containing the interfaces for the assembly arm64 NEON kernels
-	│   │   │   │   ├── arm32 --> Folder containing the interfaces for the assembly arm32 NEON kernels
-	│   │   │   │   ├── assembly --> Folder containing the NEON assembly routines.
+	│   │   │   │   ├── assembly --> headers for assembly optimised NEON kernels.
+	│   │   │   │   ├── convolution --> headers for convolution assembly optimised NEON kernels.
+	│   │   │   │   │   ├── common --> headers for code which is common to several convolution implementations.
+	│   │   │   │   │   ├── depthwise --> headers for Depthwise convolultion assembly implementation
+	│   │   │   │   │   └── winograd --> headers for Winograd convolution assembly implementation
+	│   │   │   │   ├── detail --> Common code for several intrinsics implementations.
 	│   │   │   │   └── NE*Kernel.h
 	│   │   │   └── NEKernels.h --> Includes all the NEON kernels at once
 	│   │   ├── All common basic types (Types.h, Window, Coordinates, Iterator, etc.)
 	│   │   ├── All generic objects interfaces (ITensor, IImage, etc.)
 	│   │   └── Objects metadata classes (ImageInfo, TensorInfo, MultiImageInfo)
 	│   ├── graph
-	│   │   ├── CL --> OpenCL specific operations
-	│   │   │   └── CLMap.h / CLUnmap.h
+	│   │   ├── algorithms
+	│   │   │   └── Generic algorithms used by the graph backend (e.g Order of traversal)
+	│   │   ├── backends --> The backend specific code
+	│   │   │   ├── CL --> OpenCL specific operations
+	│   │   │   ├── GLES  --> OpenGLES Compute Shaders specific operations
+	│   │   │   └── NEON --> NEON specific operations
+	│   │   ├── detail
+	│   │   │   └── Collection of internal utilities.
+	│   │   ├── frontend
+	│   │   │   └── Code related to the stream frontend interface.
+	│   │   ├── mutators
+	│   │   │   └── Used to modify / optimise the Graph intermediate representation(Operator fusion, in place operations, etc.)
 	│   │   ├── nodes
 	│   │   │   └── The various nodes supported by the graph API
-	│   │   ├── Nodes.h --> Includes all the Graph nodes at once.
+	│   │   ├── printers
+	│   │   │   └── Debug printers
 	│   │   └── Graph objects ( INode, ITensorAccessor, Graph, etc.)
 	│   └── runtime
 	│       ├── CL
@@ -92,10 +106,14 @@ You should have the following file organisation:
 	│       │   ├── functions --> Folder containing all the OpenCL functions
 	│       │   │   └── CL*.h
 	│       │   ├── CLScheduler.h --> Interface to enqueue OpenCL kernels and get/set the OpenCL CommandQueue and ICLTuner.
-	│       │   └── CLFunctions.h --> Includes all the OpenCL functions at once
+	│       │   ├── CLFunctions.h --> Includes all the OpenCL functions at once
+	│       │   └── tuners
+	│       │       └── Local workgroup size tuners for specific architectures / GPUs
 	│       ├── CPP
 	│       │   ├── CPPKernels.h --> Includes all the CPP functions at once.
-	│       │   └── CPPScheduler.h --> Basic pool of threads to execute CPP/NEON code on several cores in parallel
+	│       │   ├── CPPScheduler.h --> Basic pool of threads to execute CPP/NEON code on several cores in parallel
+	│       │   └── functions --> Folder containing all the CPP functions
+	│       │       └── CPP*.h
 	│       ├── GLES_COMPUTE
 	│       │   ├── GLES objects & allocators (GCArray, GCImage, GCTensor, etc.)
 	│       │   ├── functions --> Folder containing all the GLES functions
@@ -122,6 +140,7 @@ You should have the following file organisation:
 	│   ├── graph_*.cpp --> Graph examples
 	│   ├── neoncl_*.cpp --> NEON / OpenCL interoperability examples
 	│   └── neon_*.cpp --> NEON examples
+	├── graph.h --> Includes all the Graph headers at once.
 	├── include
 	│   ├── CL
 	│   │   └── Khronos OpenCL C headers and C++ wrapper
@@ -152,31 +171,32 @@ You should have the following file organisation:
 	│   └── Various headers to work around toolchains / platform issues.
 	├── tests
 	│   ├── All test related files shared between validation and benchmark
+	│   ├── benchmark --> Sources for benchmarking
+	│   │   ├── Benchmark specific files
+	│   │   ├── fixtures
+	│   │   │   └── Backend agnostic fixtures to initialise and run the functions to test.
+	│   │   ├── CL --> OpenCL benchmarking tests
+	│   │   ├── GLES_COMPUTE --> GLES benchmarking tests
+	│   │   └── NEON --> NEON benchmarking tests
 	│   ├── CL --> OpenCL accessors
 	│   ├── GLES_COMPUTE --> GLES accessors
 	│   ├── NEON --> NEON accessors
-	│   ├── benchmark --> Sources for benchmarking
-	│   │   ├── Benchmark specific files
-	│   │   ├── CL --> OpenCL benchmarking tests
-	│   │   ├── GLES_COMPUTE --> GLES benchmarking tests
-	│   │   ├── fixtures
-	│   │   │   └── Fixtures to initialise and run the runtime Functions.
-	│   │   └── NEON --> NEON benchmarking tests
 	│   ├── datasets
 	│   │   └── Datasets for all the validation / benchmark tests, layer configurations for various networks, etc.
 	│   ├── framework
 	│   │   └── Boiler plate code for both validation and benchmark test suites (Command line parsers, instruments, output loggers, etc.)
 	│   ├── networks
 	│   │   └── Examples of how to instantiate networks.
-	│   ├── validation --> Sources for validation
-	│   │   ├── Validation specific files
-	│   │   ├── CL --> OpenCL validation tests
-	│   │   ├── GLES_COMPUTE --> GLES validation tests
-	│   │   ├── CPP --> C++ reference implementations
-	│   │   ├── fixtures
-	│   │   │   └── Fixtures to initialise and run the runtime Functions.
-	│   │   └── NEON --> NEON validation tests
-	│   └── dataset --> Datasets defining common sets of input parameters
+	│   └── validation --> Sources for validation
+	│       ├── Validation specific files
+	│       ├── fixtures
+	│       │   └── Backend agnostic fixtures to initialise and run the functions to test.
+	│       ├── reference
+	│       │   └── Reference implementation used to validate the results of the various backends.
+	│       ├── CL --> OpenCL validation tests
+	│       ├── GLES_COMPUTE --> GLES validation tests
+	│       ├── CPP --> C++ reference implementations
+	│       └── NEON --> NEON validation tests
 	└── utils --> Boiler plate code used by examples
 	    └── Various utilities to print types, load / store assets, etc.
 
@@ -195,6 +215,64 @@ If there is more than one release in a month then an extra sequential number is 
 
 @subsection S2_2_changelog Changelog
 
+v18.05 Public maintenance release
+ - Various bug fixes.
+ - Various optimisations.
+ - Major redesign in the interface for the neon kernels implemented in assembly.
+ - Removed arm_compute::NEGEMMLowpAArch64A53Kernel / arm_compute::NEGEMMLowpAArch64Kernel / arm_compute::NEGEMMLowpAArch64V8P4Kernel / arm_compute::NEGEMMInterleavedBlockedKernel / arm_compute::NEGEMMLowpAssemblyMatrixMultiplyCore / arm_compute::NEHGEMMAArch64FP16Kernel
+ - Added NEGEMMAssemblyWrapper and AssemblyKernelGlue which are used to execute assembly kernels in neon functions.
+ - Minor changes to the CPUInfo type to make it compatible with the new assembly gemm interface.
+ - Moved neon assembly kernels to the folder src/core/NEON/kernels/arm_gemm.
+ - Improved doxygen documentation.
+ - Improved memory management for layer's transitions.
+ - Added support for NHWC data layout in tensors.
+ - Added NHWC data layout support to:
+    - @ref NEGEMMConvolutionLayer
+    - @ref NEDirectConvolutionLayer
+    - @ref NEPoolingLayer / @ref CLPoolingLayer
+    - @ref NEBatchNormalizationLayer / @ref CLBatchNormalizationLayer
+    - @ref NEDepthwiseConvolutionLayer
+    - @ref NEScale
+    - @ref NEIm2Col
+ - Added support for dilated convolutions in @ref NEConvolutionLayer and @ref CLConvolutionLayer.
+ - New OpenCL kernels / functions:
+    - @ref CLChannelShuffleLayer / @ref CLChannelShuffleLayerKernel
+    - @ref CLConvertFullyConnectedWeightsKernel / @ref CLConvertFullyConnectedWeights
+    - @ref CLCopy / @ref CLCopyKernel
+    - @ref CLLSTMLayer
+    - @ref CLRNNLayer
+    - @ref CLWidthConcatenateLayer / @ref CLWidthConcatenateLayerKernel
+    - @ref CLWinogradFilterTransformKernel / @ref CLWinogradInputTransformKernel / @ref CLWinogradConvolutionLayer
+    - @ref CLWinogradInputTransformKernel / @ref CLWinogradInputTransform
+ - New Neon kernels / functions:
+    - @ref CLRNNLayer
+    - @ref NEConvertFullyConnectedWeightsKernel / @ref NEConvertFullyConnectedWeights.
+ - Created the validate method in @ref CLDepthwiseConvolutionLayer.
+ - Beta and gamma are no longer mandatory arguments in @ref NEBatchNormalizationLayer and @ref CLBatchNormalizationLayer.
+ - Added depth multiplier support in @ref NEDepthwiseConvolutionLayer and @ref CLDepthwiseConvolutionLayer.
+ - Added broadcast multiply support in @ref NEPixelWiseMultiplication / @ref NEPixelWiseMultiplicationKernel.
+ - Port mobilenet example to NHWC data layout.
+ - Enabled Winograd method in @ref CLConvolutionLayer.
+ - Renamed NEWinogradLayer to @ref NEWinogradConvolutionLayer.
+ - Updated @ref NEWinogradConvolutionLayer to use highly optimised assembly kernels in src/core/NEON/kernels/arm_gemm.
+ - Added memory manager support in GLES functions.
+ - Major refactoring of the graph API.
+ - Added GLES backend in the graph API.
+ - Added support for the memory manager in the graph API.
+ - Enabled Winograd Convolution method in the graph API.
+ - Added support for grouped convolutions in the graph API.
+ - Replaced NEDeconvolutionLayerUpsampleKernel with @ref NEScaleKernel in @ref NEDeconvolutionLayer.
+ - Added fast maths flag in @ref CLConvolutionLayer.
+ - Added new tests and benchmarks in validation and benchmark frameworks
+ - Merge Activation layer with Convolution Layer (NEON. CL, GLES)
+ - Added support to OpenCL 2.0 SVM
+ - Added support to import memory in OpenCL tensors.
+ - Added the prepare() method to perform any one off pre-processing before running the function.
+ - Added new examples:
+    - graph_inception_v4.cpp
+    - graph_resnext50.cpp
+ - Added memory measurement instrument for CL.
+
 v18.03 Public maintenance release
  - Various bug fixes.
  - Fixed bug in @ref NEActivationLayer
@@ -202,6 +280,7 @@ v18.03 Public maintenance release
  - Updated recommended NDK version to r16b (And fixed warnings).
  - Fixed bug in validation code.
  - Added Inception v4 graph example.
+ - Renamed NEWinogradLayer.cpp to @ref NEWinogradConvolutionLayer
 
 v18.02 Public major release
  - Various NEON / OpenCL / GLES optimisations.
@@ -233,9 +312,9 @@ v18.02 Public major release
     - Added name() method to all kernels.
     - Added support for Winograd 5x5.
     - @ref NEPermuteKernel / @ref NEPermute
-    - @ref NEWinogradLayerTransformInputKernel / @ref NEWinogradLayer
-    - @ref NEWinogradLayerTransformOutputKernel / @ref NEWinogradLayer
-    - @ref NEWinogradLayerTransformWeightsKernel / @ref NEWinogradLayer
+    - @ref NEWinogradLayerTransformInputKernel / NEWinogradLayer
+    - @ref NEWinogradLayerTransformOutputKernel / NEWinogradLayer
+    - @ref NEWinogradLayerTransformWeightsKernel / NEWinogradLayer
     - Renamed NEWinogradLayerKernel into @ref NEWinogradLayerBatchedGEMMKernel
  - New GLES kernels / functions:
     - @ref GCTensorShiftKernel / @ref GCTensorShift
@@ -301,13 +380,13 @@ v17.12 Public major release
     - @ref GCTransposeKernel / @ref GCTranspose
 
  - New NEON kernels / functions
-    - @ref NEGEMMLowpAArch64A53Kernel / @ref NEGEMMLowpAArch64Kernel / @ref NEGEMMLowpAArch64V8P4Kernel / NEGEMMInterleavedBlockedKernel / @ref NEGEMMLowpAssemblyMatrixMultiplyCore
-    - @ref NEHGEMMAArch64FP16Kernel
+    - arm_compute::NEGEMMLowpAArch64A53Kernel / arm_compute::NEGEMMLowpAArch64Kernel / arm_compute::NEGEMMLowpAArch64V8P4Kernel / arm_compute::NEGEMMInterleavedBlockedKernel / arm_compute::NEGEMMLowpAssemblyMatrixMultiplyCore
+    - arm_compute::NEHGEMMAArch64FP16Kernel
     - @ref NEDepthwiseConvolutionLayer3x3Kernel / @ref NEDepthwiseIm2ColKernel / @ref NEGEMMMatrixVectorMultiplyKernel / @ref NEDepthwiseVectorToTensorKernel / @ref NEDepthwiseConvolutionLayer
     - @ref NEGEMMLowpOffsetContributionKernel / @ref NEGEMMLowpMatrixAReductionKernel / @ref NEGEMMLowpMatrixBReductionKernel / @ref NEGEMMLowpMatrixMultiplyCore
     - @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel / @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint
     - @ref NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel / @ref NEGEMMLowpQuantizeDownInt32ToUint8Scale
-    - @ref NEWinogradLayer / NEWinogradLayerKernel
+    - NEWinogradLayer / NEWinogradLayerKernel
 
  - New OpenCL kernels / functions
     - @ref CLGEMMLowpOffsetContributionKernel / @ref CLGEMMLowpMatrixAReductionKernel / @ref CLGEMMLowpMatrixBReductionKernel / @ref CLGEMMLowpMatrixMultiplyCore
@@ -315,13 +394,13 @@ v17.12 Public major release
     - @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleKernel / @ref CLGEMMLowpQuantizeDownInt32ToUint8Scale
 
  - New graph nodes for NEON and OpenCL
-    - @ref graph::BranchLayer
-    - @ref graph::DepthConvertLayer
-    - @ref graph::DepthwiseConvolutionLayer
-    - @ref graph::DequantizationLayer
-    - @ref graph::FlattenLayer
-    - @ref graph::QuantizationLayer
-    - @ref graph::ReshapeLayer
+    - graph::BranchLayer
+    - graph::DepthConvertLayer
+    - graph::DepthwiseConvolutionLayer
+    - graph::DequantizationLayer
+    - graph::FlattenLayer
+    - graph::QuantizationLayer
+    - graph::ReshapeLayer
 
 v17.10 Public maintenance release
  - Bug fixes:
@@ -340,7 +419,7 @@ v17.09 Public major release
  - New validation and benchmark frameworks (Boost and Google frameworks replaced by homemade framework).
  - Most machine learning functions support both fixed point 8 and 16 bit (QS8, QS16) for both NEON and OpenCL.
  - New NEON kernels / functions:
-    - @ref NEGEMMAssemblyBaseKernel @ref NEGEMMAArch64Kernel
+    - arm_compute::NEGEMMAssemblyBaseKernel arm_compute::NEGEMMAArch64Kernel
     - @ref NEDequantizationLayerKernel / @ref NEDequantizationLayer
     - @ref NEFloorKernel / @ref NEFloor
     - @ref NEL2NormalizeLayerKernel / @ref NEL2NormalizeLayer
@@ -350,7 +429,7 @@ v17.09 Public major release
     - @ref NEReshapeLayerKernel / @ref NEReshapeLayer
 
  - New OpenCL kernels / functions:
-    - @ref CLDepthwiseConvolutionLayer3x3Kernel @ref CLDepthwiseIm2ColKernel @ref CLDepthwiseVectorToTensorKernel @ref CLDepthwiseWeightsReshapeKernel / @ref CLDepthwiseConvolutionLayer3x3 @ref CLDepthwiseConvolutionLayer @ref CLDepthwiseSeparableConvolutionLayer
+    - @ref CLDepthwiseConvolutionLayer3x3NCHWKernel @ref CLDepthwiseConvolutionLayer3x3NHWCKernel @ref CLDepthwiseIm2ColKernel @ref CLDepthwiseVectorToTensorKernel @ref CLDepthwiseWeightsReshapeKernel / @ref CLDepthwiseConvolutionLayer3x3 @ref CLDepthwiseConvolutionLayer @ref CLDepthwiseSeparableConvolutionLayer
     - @ref CLDequantizationLayerKernel / @ref CLDequantizationLayer
     - @ref CLDirectConvolutionLayerKernel / @ref CLDirectConvolutionLayer
     - @ref CLFlattenLayer
@@ -626,9 +705,6 @@ For Linux, the library was successfully built and tested using the following Lin
  - gcc-linaro-4.9-2016.02-x86_64_aarch64-linux-gnu
  - gcc-linaro-6.3.1-2017.02-i686_aarch64-linux-gnu
 
-@note If you are building with opencl=1 then scons will expect to find libOpenCL.so either in the current directory or in "build" (See the section below if you need a stub OpenCL library to link against)
-@note If you are building with gles_compute=1 then scons will expect to find libEGL.so / libGLESv1_CM.so / libGLESv2.so either in the current directory or in "build" (See the section below if you need a stub OpenCL library to link against)
-
 To cross-compile the library in debug mode, with NEON only support, for Linux 32bit:
 
 	scons Werror=1 -j8 debug=1 neon=1 opencl=0 os=linux arch=armv7a
@@ -666,7 +742,7 @@ or simply remove the build parameter as build=cross_compile is the default value
 
 The examples get automatically built by scons as part of the build process of the library described above. This section just describes how you can build and link your own application against our library.
 
-@note The following command lines assume the arm_compute and libOpenCL binaries are present in the current directory or in the system library path. If this is not the case you can specify the location of the pre-built library with the compiler option -L. When building the OpenCL example the commands below assume that the CL headers are located in the include folder where the command is executed.
+@note The following command lines assume the arm_compute binaries are present in the current directory or in the system library path. If this is not the case you can specify the location of the pre-built library with the compiler option -L. When building the OpenCL example the commands below assume that the CL headers are located in the include folder where the command is executed.
 
 To cross compile a NEON example for Linux 32bit:
 
@@ -680,11 +756,11 @@ To cross compile a NEON example for Linux 64bit:
 
 To cross compile an OpenCL example for Linux 32bit:
 
-	arm-linux-gnueabihf-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute -larm_compute_core -lOpenCL -o cl_convolution -DARM_COMPUTE_CL
+	arm-linux-gnueabihf-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -mfpu=neon -L. -larm_compute -larm_compute_core -o cl_convolution -DARM_COMPUTE_CL
 
 To cross compile an OpenCL example for Linux 64bit:
 
-	aarch64-linux-gnu-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -L. -larm_compute -larm_compute_core -lOpenCL -o cl_convolution -DARM_COMPUTE_CL
+	aarch64-linux-gnu-g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -L. -larm_compute -larm_compute_core -o cl_convolution -DARM_COMPUTE_CL
 
 To cross compile a GLES example for Linux 32bit:
 
@@ -724,7 +800,7 @@ To compile natively (i.e directly on an ARM device) for NEON for Linux 64bit:
 
 To compile natively (i.e directly on an ARM device) for OpenCL for Linux 32bit or Linux 64bit:
 
-	g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute -larm_compute_core -lOpenCL -o cl_convolution -DARM_COMPUTE_CL
+	g++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute -larm_compute_core -o cl_convolution -DARM_COMPUTE_CL
 
 To compile natively (i.e directly on an ARM device) for GLES for Linux 32bit or Linux 64bit:
 
@@ -758,6 +834,7 @@ or
 @note Examples accept different types of arguments, to find out what they are run the example without any argument and the help will be displayed at the beginning of the run.
 
 For example:
+
 	LD_LIBRARY_PATH=. ./graph_lenet
 
 	./graph_lenet
@@ -781,17 +858,20 @@ Here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_
 - Download the NDK r16b from here: https://developer.android.com/ndk/downloads/index.html
 - Make sure you have Python 2 installed on your machine.
 - Generate the 32 and/or 64 toolchains by running the following commands:
+<!-- Leave 2 blank lines here or the formatting of the commands below gets messed up --!>
 
+
+<!-- End of the 2 blank lines --!>
 	$NDK/build/tools/make_standalone_toolchain.py --arch arm64 --install-dir $MY_TOOLCHAINS/aarch64-linux-android-ndk-r16b --stl gnustl --api 21
 	$NDK/build/tools/make_standalone_toolchain.py --arch arm --install-dir $MY_TOOLCHAINS/arm-linux-android-ndk-r16b --stl gnustl --api 21
 
 @attention Due to some NDK issues make sure you use clang++ & gnustl
 
-@note Make sure to add the toolchains to your PATH: export PATH=$PATH:$MY_TOOLCHAINS/aarch64-linux-android-4.9/bin:$MY_TOOLCHAINS/arm-linux-androideabi-4.9/bin
+@note Make sure to add the toolchains to your PATH:
+
+	export PATH=$PATH:$MY_TOOLCHAINS/aarch64-linux-android-ndk-r16b/bin:$MY_TOOLCHAINS/arm-linux-android-ndk-r16b/bin
 
 @subsubsection S3_3_1_library How to build the library ?
-
-@note If you are building with opencl=1 then scons will expect to find libOpenCL.so either in the current directory or in "build" (See the section below if you need a stub OpenCL library to link against)
 
 To cross-compile the library in debug mode, with NEON only support, for Android 32bit:
 
@@ -809,7 +889,7 @@ To cross-compile the library in asserts mode, with GLES_COMPUTE only support, fo
 
 The examples get automatically built by scons as part of the build process of the library described above. This section just describes how you can build and link your own application against our library.
 
-@note The following command lines assume the arm_compute and libOpenCL binaries are present in the current directory or in the system library path. If this is not the case you can specify the location of the pre-built library with the compiler option -L. When building the OpenCL example the commands below assume that the CL headers are located in the include folder where the command is executed.
+@note The following command lines assume the arm_compute binaries are present in the current directory or in the system library path. If this is not the case you can specify the location of the pre-built library with the compiler option -L. When building the OpenCL example the commands below assume that the CL headers are located in the include folder where the command is executed.
 
 Once you've got your Android standalone toolchain built and added to your path you can do the following:
 
@@ -823,9 +903,9 @@ To cross compile a NEON example:
 To cross compile an OpenCL example:
 
 	#32 bit:
-	arm-linux-androideabi-clang++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o cl_convolution_arm -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
+	arm-linux-androideabi-clang++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o cl_convolution_arm -static-libstdc++ -pie -DARM_COMPUTE_CL
 	#64 bit:
-	aarch64-linux-android-clang++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o cl_convolution_aarch64 -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
+	aarch64-linux-android-clang++ examples/cl_convolution.cpp utils/Utils.cpp -I. -Iinclude -std=c++11 -larm_compute-static -larm_compute_core-static -L. -o cl_convolution_aarch64 -static-libstdc++ -pie -DARM_COMPUTE_CL
 
 To cross compile a GLES example:
 
@@ -838,9 +918,9 @@ To cross compile the examples with the Graph API, such as graph_lenet.cpp, you n
 (notice the compute library has to be built with both neon and opencl enabled - neon=1 and opencl=1)
 
 	#32 bit:
-	arm-linux-androideabi-clang++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 -Wl,--whole-archive -larm_compute_graph-static -Wl,--no-whole-archive -larm_compute-static -larm_compute_core-static -L. -o graph_lenet_arm -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
+	arm-linux-androideabi-clang++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 -Wl,--whole-archive -larm_compute_graph-static -Wl,--no-whole-archive -larm_compute-static -larm_compute_core-static -L. -o graph_lenet_arm -static-libstdc++ -pie -DARM_COMPUTE_CL
 	#64 bit:
-	aarch64-linux-android-clang++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 -Wl,--whole-archive -larm_compute_graph-static -Wl,--no-whole-archive -larm_compute-static -larm_compute_core-static -L. -o graph_lenet_aarch64 -static-libstdc++ -pie -lOpenCL -DARM_COMPUTE_CL
+	aarch64-linux-android-clang++ examples/graph_lenet.cpp utils/Utils.cpp utils/GraphUtils.cpp -I. -Iinclude -std=c++11 -Wl,--whole-archive -larm_compute_graph-static -Wl,--no-whole-archive -larm_compute-static -larm_compute_core-static -L. -o graph_lenet_aarch64 -static-libstdc++ -pie -DARM_COMPUTE_CL
 
 @note Due to some issues in older versions of the Mali OpenCL DDK (<= r13p0), we recommend to link arm_compute statically on Android.
 @note When linked statically the arm_compute_graph library currently needs the --whole-archive linker flag in order to work properly

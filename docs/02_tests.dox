@@ -304,7 +304,7 @@ provide a good overview how test cases are structured.
   different execution modes, e.g. precommit and nightly.
 
 @section tests_running_tests Running tests
-@subsection tests_running_tests_benchmarking Benchmarking
+@subsection tests_running_tests_benchmark_and_validation Benchmarking and validation suites
 @subsubsection tests_running_tests_benchmarking_filter Filter tests
 All tests can be run by invoking
 
@@ -377,6 +377,7 @@ To run the NEON precommit benchmark tests with PMU and Wall Clock timer in milis
 To run the OpenCL precommit benchmark tests with OpenCL kernel timers in miliseconds enabled:
 
 	LD_LIBRARY_PATH=. ./arm_compute_benchmark --mode=precommit --filter="^CL.*" --instruments="opencl_timer_ms" --iterations=10
+
 */
 } // namespace test
 } // namespace arm_compute

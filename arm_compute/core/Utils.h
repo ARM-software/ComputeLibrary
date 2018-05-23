@@ -40,14 +40,26 @@
 
 namespace arm_compute
 {
-/** Calculate the rounded up quotient of val / m. */
+/** Calculate the rounded up quotient of val / m.
+ *
+ * @param[in] val Value to divide and round up.
+ * @param[in] m   Value to divide by.
+ *
+ * @return the result.
+ */
 template <typename S, typename T>
 constexpr auto DIV_CEIL(S val, T m) -> decltype((val + m - 1) / m)
 {
     return (val + m - 1) / m;
 }
 
-/** Computes the smallest number larger or equal to value that is a multiple of divisor. */
+/** Computes the smallest number larger or equal to value that is a multiple of divisor.
+ *
+ * @param[in] value   Lower bound value
+ * @param[in] divisor Value to compute multiple of.
+ *
+ * @return the result.
+ */
 template <typename S, typename T>
 inline auto ceil_to_multiple(S value, T divisor) -> decltype(((value + divisor - 1) / divisor) * divisor)
 {
@@ -55,7 +67,13 @@ inline auto ceil_to_multiple(S value, T divisor) -> decltype(((value + divisor -
     return DIV_CEIL(value, divisor) * divisor;
 }
 
-/** Computes the largest number smaller or equal to value that is a multiple of divisor. */
+/** Computes the largest number smaller or equal to value that is a multiple of divisor.
+ *
+ * @param[in] value   Upper bound value
+ * @param[in] divisor Value to compute multiple of.
+ *
+ * @return the result.
+ */
 template <typename S, typename T>
 inline auto floor_to_multiple(S value, T divisor) -> decltype((value / divisor) * divisor)
 {
@@ -665,6 +683,7 @@ TensorShape calculate_depth_concatenate_shape(const std::vector<T *> &inputs_vec
  * @param[in, out] shape  Tensor shape of 2D size
  * @param[in]      format Format of the tensor
  *
+ * @return The adjusted tensor shape.
  */
 inline TensorShape adjust_odd_shape(const TensorShape &shape, Format format)
 {
@@ -874,12 +893,14 @@ const std::pair<unsigned int, unsigned int> deconvolution_output_dimensions(unsi
  * @param[in] kernel_width    Kernel width.
  * @param[in] kernel_height   Kernel height.
  * @param[in] pad_stride_info Pad and stride information.
+ * @param[in] dilation        (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
  *
  * @return A pair with the new width in the first position and the new height in the second.
  */
 const std::pair<unsigned int, unsigned int> scaled_dimensions(unsigned int width, unsigned int height,
                                                               unsigned int kernel_width, unsigned int kernel_height,
-                                                              const PadStrideInfo &pad_stride_info);
+                                                              const PadStrideInfo &pad_stride_info,
+                                                              const Size2D        &dilation = Size2D(1U, 1U));
 
 /** Convert a tensor format into a string.
  *
@@ -896,7 +917,13 @@ const std::string &string_from_format(Format format);
  * @return The string describing the channel.
  */
 const std::string &string_from_channel(Channel channel);
-
+/** Convert a data layout identity into a string.
+ *
+ * @param[in] dl @ref DataLayout to be translated to string.
+ *
+ * @return The string describing the data layout.
+ */
+const std::string &string_from_data_layout(DataLayout dl);
 /** Convert a data type identity into a string.
  *
  * @param[in] dt @ref DataType to be translated to string.

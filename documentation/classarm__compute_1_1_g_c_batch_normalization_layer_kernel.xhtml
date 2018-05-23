@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -116,7 +116,8 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_g_c_batch_normal
 
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a>  </div>
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a>  </div>
   <div class="headertitle">
 <div class="title">GCBatchNormalizationLayerKernel Class Reference</div>  </div>
 </div><!--header-->
@@ -153,9 +154,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a7577a99c57d8dfaa4e017592ff87fb64"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_batch_normalization_layer_kernel.xhtml#a7577a99c57d8dfaa4e017592ff87fb64">~GCBatchNormalizationLayerKernel</a> ()=default</td></tr>
 <tr class="memdesc:a7577a99c57d8dfaa4e017592ff87fb64"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default destructor.  <a href="#a7577a99c57d8dfaa4e017592ff87fb64">More...</a><br /></td></tr>
 <tr class="separator:a7577a99c57d8dfaa4e017592ff87fb64"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab66d55b5fca2d08c253e4e9a37f9c6bc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_batch_normalization_layer_kernel.xhtml#ab66d55b5fca2d08c253e4e9a37f9c6bc">configure</a> (const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *input, <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *output, const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *mean, const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *var, const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *beta, const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *gamma, float epsilon, <a class="el" href="classarm__compute_1_1_activation_layer_info.xhtml">ActivationLayerInfo</a> act_info=<a class="el" href="classarm__compute_1_1_activation_layer_info.xhtml">ActivationLayerInfo</a>())</td></tr>
-<tr class="memdesc:ab66d55b5fca2d08c253e4e9a37f9c6bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the input and output tensors.  <a href="#ab66d55b5fca2d08c253e4e9a37f9c6bc">More...</a><br /></td></tr>
-<tr class="separator:ab66d55b5fca2d08c253e4e9a37f9c6bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a532d29716a4ea6315294f4d892ce34ce"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_batch_normalization_layer_kernel.xhtml#a532d29716a4ea6315294f4d892ce34ce">configure</a> (const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *input, <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *output, const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *mean, const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *var, const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *beta=nullptr, const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *gamma=nullptr, float epsilon=0.001f, ActivationLayerInfo act_info=ActivationLayerInfo())</td></tr>
+<tr class="memdesc:a532d29716a4ea6315294f4d892ce34ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the input and output tensors.  <a href="#a532d29716a4ea6315294f4d892ce34ce">More...</a><br /></td></tr>
+<tr class="separator:a532d29716a4ea6315294f4d892ce34ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8fd12b95bdde3f93db96bc9b1598db69"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_batch_normalization_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">run</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;<a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>) override</td></tr>
 <tr class="memdesc:a8fd12b95bdde3f93db96bc9b1598db69"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enqueue the OpenGL ES shader to process the given window.  <a href="#a8fd12b95bdde3f93db96bc9b1598db69">More...</a><br /></td></tr>
 <tr class="separator:a8fd12b95bdde3f93db96bc9b1598db69"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -187,6 +188,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3c6173aecfebc9030bf8a0bee0c0ced8 inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_g_c_kernel.xhtml#a3c6173aecfebc9030bf8a0bee0c0ced8">set_lws_hint</a> (<a class="el" href="classarm__compute_1_1gles_1_1_n_d_range.xhtml">gles::NDRange</a> &amp;lws_hint)</td></tr>
 <tr class="memdesc:a3c6173aecfebc9030bf8a0bee0c0ced8 inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the Local-Workgroup-Size hint.  <a href="#a3c6173aecfebc9030bf8a0bee0c0ced8">More...</a><br /></td></tr>
 <tr class="separator:a3c6173aecfebc9030bf8a0bee0c0ced8 inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad5ba9d34a3a855bf1dd2e36316ff550a inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_g_c_kernel.xhtml#ad5ba9d34a3a855bf1dd2e36316ff550a">set_target</a> (<a class="el" href="namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3">GPUTarget</a> target)</td></tr>
+<tr class="memdesc:ad5ba9d34a3a855bf1dd2e36316ff550a inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the targeted GPU architecture.  <a href="#ad5ba9d34a3a855bf1dd2e36316ff550a">More...</a><br /></td></tr>
+<tr class="separator:ad5ba9d34a3a855bf1dd2e36316ff550a inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a646cd535a16835b246c3367a63d96250 inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3">GPUTarget</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_g_c_kernel.xhtml#a646cd535a16835b246c3367a63d96250">get_target</a> () const </td></tr>
+<tr class="memdesc:a646cd535a16835b246c3367a63d96250 inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the targeted GPU architecture.  <a href="#a646cd535a16835b246c3367a63d96250">More...</a><br /></td></tr>
+<tr class="separator:a646cd535a16835b246c3367a63d96250 inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classarm__compute_1_1_i_kernel"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1_i_kernel')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_kernel.xhtml">IKernel</a></td></tr>
 <tr class="memitem:a7250cb8cbaa4104a93a2d77155085507 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a7250cb8cbaa4104a93a2d77155085507">IKernel</a> ()</td></tr>
 <tr class="memdesc:a7250cb8cbaa4104a93a2d77155085507 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#a7250cb8cbaa4104a93a2d77155085507">More...</a><br /></td></tr>
@@ -203,6 +210,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3f5646133956f06348b310ccc3d36353 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a> () const </td></tr>
 <tr class="memdesc:a3f5646133956f06348b310ccc3d36353 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">The maximum window the kernel can be executed on.  <a href="#a3f5646133956f06348b310ccc3d36353">More...</a><br /></td></tr>
 <tr class="separator:a3f5646133956f06348b310ccc3d36353 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:af5f30ebbb928758897f5dcd17fc50181"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_batch_normalization_layer_kernel.xhtml#af5f30ebbb928758897f5dcd17fc50181">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *mean, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *var, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *beta=nullptr, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *gamma=nullptr, float epsilon=0.001f, ActivationLayerInfo act_info=ActivationLayerInfo())</td></tr>
+<tr class="memdesc:af5f30ebbb928758897f5dcd17fc50181"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_g_c_batch_normalization_layer_kernel.xhtml">GCBatchNormalizationLayerKernel</a>.  <a href="#af5f30ebbb928758897f5dcd17fc50181">More...</a><br /></td></tr>
+<tr class="separator:af5f30ebbb928758897f5dcd17fc50181"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface for the BatchNormalization layer kernel. </p>
@@ -304,7 +317,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="ab66d55b5fca2d08c253e4e9a37f9c6bc"></a>
+<a class="anchor" id="a532d29716a4ea6315294f4d892ce34ce"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -336,19 +349,19 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *&#160;</td>
-          <td class="paramname"><em>beta</em>, </td>
+          <td class="paramname"><em>beta</em> = <code>nullptr</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *&#160;</td>
-          <td class="paramname"><em>gamma</em>, </td>
+          <td class="paramname"><em>gamma</em> = <code>nullptr</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>epsilon</em>, </td>
+          <td class="paramname"><em>epsilon</em> = <code>0.001f</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -371,9 +384,9 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor. Output will have the same number of dimensions as input. Data type supported: same as <code>input</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">mean</td><td>Mean values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as <code>input</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">var</td><td>Variance values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as <code>input</code> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>Beta values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as <code>input</code> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">gamma</td><td>Gamma values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as <code>input</code> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">epsilon</td><td>Small value to avoid division with zero. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>(Optional) Beta values tensor info. 1 dimension with size equal to the feature maps [FM]. If not provided, default value for beta is 0. Data types supported: Same as <code>input</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">gamma</td><td>(Optional) Gamma values tensor info. 1 dimension with size equal to the feature maps [FM]. If not provided, default value for gamma is 1. Data types supported: Same as <code>input</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">epsilon</td><td>(optional) Small value to avoid division with zero. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">act_info</td><td>(Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported. </td></tr>
   </table>
   </dd>
@@ -467,6 +480,92 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="af5f30ebbb928758897f5dcd17fc50181"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a> validate </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>mean</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>var</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>beta</em> = <code>nullptr</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>gamma</em> = <code>nullptr</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>epsilon</em> = <code>0.001f</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classarm__compute_1_1_activation_layer_info.xhtml">ActivationLayerInfo</a>&#160;</td>
+          <td class="paramname"><em>act_info</em> = <code><a class="el" href="classarm__compute_1_1_activation_layer_info.xhtml">ActivationLayerInfo</a>()</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_g_c_batch_normalization_layer_kernel.xhtml">GCBatchNormalizationLayerKernel</a>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor info. In case of <code>output</code> tensor info = nullptr, this tensor will store the result. 3 lower dimensions represent a single input with dimensions [width, height, FM]. The rest are optional and used for representing batches. Data types supported: QS8/QS16/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Destination tensor info. Output will have the same number of dimensions as input. Data type supported: same as <code>input</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mean</td><td>Mean values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as <code>input</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">var</td><td>Variance values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as <code>input</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>(Optional) Beta values tensor info. 1 dimension with size equal to the feature maps [FM]. If not provided, default value for beta is 0. Data types supported: Same as <code>input</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">gamma</td><td>(Optional) Gamma values tensor info. 1 dimension with size equal to the feature maps [FM]. If not provided, default value for gamma is 1. Data types supported: Same as <code>input</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">epsilon</td><td>(Optional) Small value to avoid division with zero. Default value is 0.001f. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">act_info</td><td>(Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>arm_compute/core/GLES_COMPUTE/kernels/<a class="el" href="_g_c_batch_normalization_layer_kernel_8h_source.xhtml">GCBatchNormalizationLayerKernel.h</a></li>
 </ul>
@@ -476,7 +575,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_g_c_batch_normalization_layer_kernel.xhtml">GCBatchNormalizationLayerKernel</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:58 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:41 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

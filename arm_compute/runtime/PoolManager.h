@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,12 +56,13 @@ public:
     IMemoryPool *lock_pool() override;
     void unlock_pool(IMemoryPool *pool) override;
     void register_pool(std::unique_ptr<IMemoryPool> pool) override;
+    size_t num_pools() const override;
 
 private:
     std::list<std::unique_ptr<IMemoryPool>> _free_pools;     /**< List of free pools */
     std::list<std::unique_ptr<IMemoryPool>> _occupied_pools; /**< List of occupied pools */
     std::unique_ptr<arm_compute::Semaphore> _sem;            /**< Semaphore to control the queues */
-    arm_compute::Mutex                      _mtx;            /**< Mutex to control access to the queues */
+    mutable arm_compute::Mutex              _mtx;            /**< Mutex to control access to the queues */
 };
 } // arm_compute
 #endif /*__ARM_COMPUTE_POOLMANAGER_H__ */

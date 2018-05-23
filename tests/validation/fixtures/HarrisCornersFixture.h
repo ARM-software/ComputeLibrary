@@ -51,7 +51,7 @@ public:
     {
         HarrisCornersParameters params = harris_corners_parameters();
 
-        _target    = compute_target(image, gradient_size, block_size, border_mode, use_fp16, format, params);
+        _target = compute_target(image, gradient_size, block_size, border_mode, use_fp16, format, params);
         _reference = compute_reference(image, gradient_size, block_size, border_mode, format, params);
     }
 

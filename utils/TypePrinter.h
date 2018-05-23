@@ -27,6 +27,7 @@
 #include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/Dimensions.h"
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/HOGInfo.h"
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Strides.h"
@@ -41,7 +42,13 @@
 
 namespace arm_compute
 {
-/** Formatted output of the Dimensions type. */
+/** Formatted output of the Dimensions type.
+ *
+ * @param[out] os         Output stream.
+ * @param[in]  dimensions Type to output.
+ *
+ * @return Modified output stream.
+ */
 template <typename T>
 inline ::std::ostream &operator<<(::std::ostream &os, const Dimensions<T> &dimensions)
 {
@@ -58,7 +65,13 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Dimensions<T> &dimen
     return os;
 }
 
-/** Formatted output of the NonLinearFilterFunction type. */
+/** Formatted output of the NonLinearFilterFunction type.
+ *
+ * @param[out] os       Output stream.
+ * @param[in]  function Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const NonLinearFilterFunction &function)
 {
     switch(function)
@@ -79,6 +92,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NonLinearFilterFunct
     return os;
 }
 
+/** Formatted output of the NonLinearFilterFunction type.
+ *
+ * @param[in] function Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const NonLinearFilterFunction &function)
 {
     std::stringstream str;
@@ -86,7 +105,13 @@ inline std::string to_string(const NonLinearFilterFunction &function)
     return str.str();
 }
 
-/** Formatted output of the MatrixPattern type. */
+/** Formatted output of the MatrixPattern type.
+ *
+ * @param[out] os      Output stream.
+ * @param[in]  pattern Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const MatrixPattern &pattern)
 {
     switch(pattern)
@@ -110,6 +135,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const MatrixPattern &patte
     return os;
 }
 
+/** Formatted output of the MatrixPattern type.
+ *
+ * @param[in] pattern Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const MatrixPattern &pattern)
 {
     std::stringstream str;
@@ -117,7 +148,13 @@ inline std::string to_string(const MatrixPattern &pattern)
     return str.str();
 }
 
-/** Formatted output of the RoundingPolicy type. */
+/** Formatted output of the RoundingPolicy type.
+ *
+ * @param[out] os              Output stream.
+ * @param[in]  rounding_policy Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const RoundingPolicy &rounding_policy)
 {
     switch(rounding_policy)
@@ -138,7 +175,13 @@ inline ::std::ostream &operator<<(::std::ostream &os, const RoundingPolicy &roun
     return os;
 }
 
-/** Formatted output of the WeightsInfo type. */
+/** Formatted output of the WeightsInfo type.
+ *
+ * @param[out] os           Output stream.
+ * @param[in]  weights_info Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const WeightsInfo &weights_info)
 {
     os << weights_info.are_reshaped() << ";";
@@ -147,14 +190,26 @@ inline ::std::ostream &operator<<(::std::ostream &os, const WeightsInfo &weights
     return os;
 }
 
-/** Formatted output of the ROIPoolingInfo type. */
+/** Formatted output of the ROIPoolingInfo type.
+ *
+ * @param[out] os        Output stream.
+ * @param[in]  pool_info Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const ROIPoolingLayerInfo &pool_info)
 {
     os << pool_info.pooled_width() << "x" << pool_info.pooled_height() << "~" << pool_info.spatial_scale();
     return os;
 }
 
-/** Formatted output of the QuantizationInfo type. */
+/** Formatted output of the QuantizationInfo type.
+ *
+ * @param[out] os                Output stream.
+ * @param[in]  quantization_info Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const QuantizationInfo &quantization_info)
 {
     os << "Scale:" << quantization_info.scale << "~"
@@ -162,6 +217,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const QuantizationInfo &qu
     return os;
 }
 
+/** Formatted output of the QuantizationInfo type.
+ *
+ * @param[in] quantization_info Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const QuantizationInfo &quantization_info)
 {
     std::stringstream str;
@@ -169,6 +230,13 @@ inline std::string to_string(const QuantizationInfo &quantization_info)
     return str.str();
 }
 
+/** Formatted output of the FixedPointOp type.
+ *
+ * @param[out] os Output stream.
+ * @param[in]  op Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const FixedPointOp &op)
 {
     switch(op)
@@ -201,6 +269,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const FixedPointOp &op)
     return os;
 }
 
+/** Formatted output of the FixedPointOp type.
+ *
+ * @param[in] op Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const FixedPointOp &op)
 {
     std::stringstream str;
@@ -208,7 +282,13 @@ inline std::string to_string(const FixedPointOp &op)
     return str.str();
 }
 
-/** Formatted output of the activation function type. */
+/** Formatted output of the activation function type.
+ *
+ * @param[out] os           Output stream.
+ * @param[in]  act_function Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo::ActivationFunction &act_function)
 {
     switch(act_function)
@@ -253,13 +333,28 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo:
     return os;
 }
 
+/** Formatted output of the activation function info type.
+ *
+ * @param[in] info Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const arm_compute::ActivationLayerInfo &info)
 {
     std::stringstream str;
-    str << info.activation();
+    if(info.enabled())
+    {
+        str << info.activation();
+    }
     return str.str();
 }
 
+/** Formatted output of the activation function type.
+ *
+ * @param[in] function Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const arm_compute::ActivationLayerInfo::ActivationFunction &function)
 {
     std::stringstream str;
@@ -267,7 +362,13 @@ inline std::string to_string(const arm_compute::ActivationLayerInfo::ActivationF
     return str.str();
 }
 
-/** Formatted output of the NormType type. */
+/** Formatted output of the NormType type.
+ *
+ * @param[out] os        Output stream.
+ * @param[in]  norm_type Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const NormType &norm_type)
 {
     switch(norm_type)
@@ -288,6 +389,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NormType &norm_type)
     return os;
 }
 
+/** Formatted output of @ref NormalizationLayerInfo.
+ *
+ * @param[in] info Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const arm_compute::NormalizationLayerInfo &info)
 {
     std::stringstream str;
@@ -295,14 +402,26 @@ inline std::string to_string(const arm_compute::NormalizationLayerInfo &info)
     return str.str();
 }
 
-/** Formatted output of @ref NormalizationLayerInfo. */
+/** Formatted output of @ref NormalizationLayerInfo.
+ *
+ * @param[out] os   Output stream.
+ * @param[in]  info Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const NormalizationLayerInfo &info)
 {
     os << info.type() << ":NormSize=" << info.norm_size();
     return os;
 }
 
-/** Formatted output of the PoolingType type. */
+/** Formatted output of the PoolingType type.
+ *
+ * @param[out] os        Output stream.
+ * @param[in]  pool_type Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const PoolingType &pool_type)
 {
     switch(pool_type)
@@ -323,7 +442,13 @@ inline ::std::ostream &operator<<(::std::ostream &os, const PoolingType &pool_ty
     return os;
 }
 
-/** Formatted output of @ref PoolingLayerInfo. */
+/** Formatted output of @ref PoolingLayerInfo.
+ *
+ * @param[out] os   Output stream.
+ * @param[in]  info Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const PoolingLayerInfo &info)
 {
     os << info.pool_type();
@@ -331,6 +456,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const PoolingLayerInfo &in
     return os;
 }
 
+/** Formatted output of @ref RoundingPolicy.
+ *
+ * @param[in] rounding_policy Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const RoundingPolicy &rounding_policy)
 {
     std::stringstream str;
@@ -338,7 +469,53 @@ inline std::string to_string(const RoundingPolicy &rounding_policy)
     return str.str();
 }
 
-/** Formatted output of the DataType type. */
+/** Formatted output of the DataLayout type.
+ *
+ * @param[out] os          Output stream.
+ * @param[in]  data_layout Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const DataLayout &data_layout)
+{
+    switch(data_layout)
+    {
+        case DataLayout::UNKNOWN:
+            os << "UNKNOWN";
+            break;
+        case DataLayout::NHWC:
+            os << "NHWC";
+            break;
+        case DataLayout::NCHW:
+            os << "NCHW";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+/** Formatted output of the DataLayout type.
+ *
+ * @param[in] data_layout Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const arm_compute::DataLayout &data_layout)
+{
+    std::stringstream str;
+    str << data_layout;
+    return str.str();
+}
+
+/** Formatted output of the DataType type.
+ *
+ * @param[out] os        Output stream.
+ * @param[in]  data_type Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const DataType &data_type)
 {
     switch(data_type)
@@ -398,6 +575,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DataType &data_type)
     return os;
 }
 
+/** Formatted output of the DataType type.
+ *
+ * @param[in] data_type Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const arm_compute::DataType &data_type)
 {
     std::stringstream str;
@@ -405,7 +588,13 @@ inline std::string to_string(const arm_compute::DataType &data_type)
     return str.str();
 }
 
-/** Formatted output of the Format type. */
+/** Formatted output of the Format type.
+ *
+ * @param[out] os     Output stream.
+ * @param[in]  format Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const Format &format)
 {
     switch(format)
@@ -468,6 +657,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Format &format)
     return os;
 }
 
+/** Formatted output of the Format type.
+ *
+ * @param[in] format Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const Format &format)
 {
     std::stringstream str;
@@ -475,7 +670,13 @@ inline std::string to_string(const Format &format)
     return str.str();
 }
 
-/** Formatted output of the Channel type. */
+/** Formatted output of the Channel type.
+ *
+ * @param[out] os      Output stream.
+ * @param[in]  channel Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const Channel &channel)
 {
     switch(channel)
@@ -523,6 +724,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Channel &channel)
     return os;
 }
 
+/** Formatted output of the Channel type.
+ *
+ * @param[in] channel Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const Channel &channel)
 {
     std::stringstream str;
@@ -530,7 +737,13 @@ inline std::string to_string(const Channel &channel)
     return str.str();
 }
 
-/** Formatted output of the BorderMode type. */
+/** Formatted output of the BorderMode type.
+ *
+ * @param[out] os   Output stream.
+ * @param[in]  mode Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const BorderMode &mode)
 {
     switch(mode)
@@ -551,7 +764,13 @@ inline ::std::ostream &operator<<(::std::ostream &os, const BorderMode &mode)
     return os;
 }
 
-/** Formatted output of the BorderSize type. */
+/** Formatted output of the BorderSize type.
+ *
+ * @param[out] os     Output stream.
+ * @param[in]  border Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const BorderSize &border)
 {
     os << border.top << ","
@@ -562,7 +781,13 @@ inline ::std::ostream &operator<<(::std::ostream &os, const BorderSize &border)
     return os;
 }
 
-/** Formatted output of the InterpolationPolicy type. */
+/** Formatted output of the InterpolationPolicy type.
+ *
+ * @param[out] os     Output stream.
+ * @param[in]  policy Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const InterpolationPolicy &policy)
 {
     switch(policy)
@@ -583,7 +808,13 @@ inline ::std::ostream &operator<<(::std::ostream &os, const InterpolationPolicy 
     return os;
 }
 
-/** Formatted output of the SamplingPolicy type. */
+/** Formatted output of the SamplingPolicy type.
+ *
+ * @param[out] os     Output stream.
+ * @param[in]  policy Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const SamplingPolicy &policy)
 {
     switch(policy)
@@ -601,7 +832,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const SamplingPolicy &poli
     return os;
 }
 
-/** Formatted output of the TensorInfo type. */
+/** Formatted output of the TensorInfo type.
+ *
+ * @param[in] info Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const TensorInfo &info)
 {
     std::stringstream str;
@@ -612,6 +848,12 @@ inline std::string to_string(const TensorInfo &info)
     return str.str();
 }
 
+/** Formatted output of the Dimensions type.
+ *
+ * @param[in] dimensions Type to output.
+ *
+ * @return Formatted string.
+ */
 template <typename T>
 inline std::string to_string(const Dimensions<T> &dimensions)
 {
@@ -620,6 +862,12 @@ inline std::string to_string(const Dimensions<T> &dimensions)
     return str.str();
 }
 
+/** Formatted output of the Strides type.
+ *
+ * @param[in] stride Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const Strides &stride)
 {
     std::stringstream str;
@@ -627,7 +875,12 @@ inline std::string to_string(const Strides &stride)
     return str.str();
 }
 
-/** Formatted output of the TensorShape type. */
+/** Formatted output of the TensorShape type.
+ *
+ * @param[in] shape Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const TensorShape &shape)
 {
     std::stringstream str;
@@ -635,7 +888,12 @@ inline std::string to_string(const TensorShape &shape)
     return str.str();
 }
 
-/** Formatted output of the Coordinates type. */
+/** Formatted output of the Coordinates type.
+ *
+ * @param[in] coord Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const Coordinates &coord)
 {
     std::stringstream str;
@@ -643,7 +901,13 @@ inline std::string to_string(const Coordinates &coord)
     return str.str();
 }
 
-/** Formatted output of the Rectangle type. */
+/** Formatted output of the Rectangle type.
+ *
+ * @param[out] os   Output stream.
+ * @param[in]  rect Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const Rectangle &rect)
 {
     os << rect.width << "x" << rect.height;
@@ -652,7 +916,13 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Rectangle &rect)
     return os;
 }
 
-/** Formatted output of the PadStridInfo type. */
+/** Formatted output of the PadStrideInfo type.
+ *
+ * @param[out] os              Output stream.
+ * @param[in]  pad_stride_info Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const PadStrideInfo &pad_stride_info)
 {
     os << pad_stride_info.stride().first << "," << pad_stride_info.stride().second;
@@ -663,6 +933,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const PadStrideInfo &pad_s
     return os;
 }
 
+/** Formatted output of the PadStrideInfo type.
+ *
+ * @param[in] pad_stride_info Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const PadStrideInfo &pad_stride_info)
 {
     std::stringstream str;
@@ -670,6 +946,12 @@ inline std::string to_string(const PadStrideInfo &pad_stride_info)
     return str.str();
 }
 
+/** Formatted output of the BorderMode type.
+ *
+ * @param[in] mode Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const BorderMode &mode)
 {
     std::stringstream str;
@@ -677,6 +959,12 @@ inline std::string to_string(const BorderMode &mode)
     return str.str();
 }
 
+/** Formatted output of the BorderSize type.
+ *
+ * @param[in] border Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const BorderSize &border)
 {
     std::stringstream str;
@@ -684,6 +972,12 @@ inline std::string to_string(const BorderSize &border)
     return str.str();
 }
 
+/** Formatted output of the InterpolationPolicy type.
+ *
+ * @param[in] policy Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const InterpolationPolicy &policy)
 {
     std::stringstream str;
@@ -691,6 +985,12 @@ inline std::string to_string(const InterpolationPolicy &policy)
     return str.str();
 }
 
+/** Formatted output of the SamplingPolicy type.
+ *
+ * @param[in] policy Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const SamplingPolicy &policy)
 {
     std::stringstream str;
@@ -698,7 +998,13 @@ inline std::string to_string(const SamplingPolicy &policy)
     return str.str();
 }
 
-/** Formatted output of the ConversionPolicy type. */
+/** Formatted output of the ConvertPolicy type.
+ *
+ * @param[out] os     Output stream.
+ * @param[in]  policy Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const ConvertPolicy &policy)
 {
     switch(policy)
@@ -723,7 +1029,13 @@ inline std::string to_string(const ConvertPolicy &policy)
     return str.str();
 }
 
-/** Formatted output of the Reduction Operations. */
+/** Formatted output of the Reduction Operations.
+ *
+ * @param[out] os Output stream.
+ * @param[in]  op Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const ReductionOperation &op)
 {
     switch(op)
@@ -738,6 +1050,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ReductionOperation &
     return os;
 }
 
+/** Formatted output of the Reduction Operations.
+ *
+ * @param[in] op Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const ReductionOperation &op)
 {
     std::stringstream str;
@@ -745,6 +1063,12 @@ inline std::string to_string(const ReductionOperation &op)
     return str.str();
 }
 
+/** Formatted output of the Norm Type.
+ *
+ * @param[in] type Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const NormType &type)
 {
     std::stringstream str;
@@ -752,6 +1076,12 @@ inline std::string to_string(const NormType &type)
     return str.str();
 }
 
+/** Formatted output of the Pooling Type.
+ *
+ * @param[in] type Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const PoolingType &type)
 {
     std::stringstream str;
@@ -759,6 +1089,12 @@ inline std::string to_string(const PoolingType &type)
     return str.str();
 }
 
+/** Formatted output of the Pooling Layer Info.
+ *
+ * @param[in] info Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const PoolingLayerInfo &info)
 {
     std::stringstream str;
@@ -774,7 +1110,13 @@ inline std::string to_string(const PoolingLayerInfo &info)
     return str.str();
 }
 
-/** Formatted output of the KeyPoint type. */
+/** Formatted output of the KeyPoint type.
+ *
+ * @param[out] os    Output stream
+ * @param[in]  point Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const KeyPoint &point)
 {
     os << "{x=" << point.x << ","
@@ -788,7 +1130,13 @@ inline ::std::ostream &operator<<(::std::ostream &os, const KeyPoint &point)
     return os;
 }
 
-/** Formatted output of the PhaseType type. */
+/** Formatted output of the PhaseType type.
+ *
+ * @param[out] os         Output stream
+ * @param[in]  phase_type Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const PhaseType &phase_type)
 {
     switch(phase_type)
@@ -806,6 +1154,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const PhaseType &phase_typ
     return os;
 }
 
+/** Formatted output of the PhaseType type.
+ *
+ * @param[in] type Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const arm_compute::PhaseType &type)
 {
     std::stringstream str;
@@ -813,7 +1167,13 @@ inline std::string to_string(const arm_compute::PhaseType &type)
     return str.str();
 }
 
-/** Formatted output of the MagnitudeType type. */
+/** Formatted output of the MagnitudeType type.
+ *
+ * @param[out] os             Output stream
+ * @param[in]  magnitude_type Type to output.
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const MagnitudeType &magnitude_type)
 {
     switch(magnitude_type)
@@ -831,6 +1191,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const MagnitudeType &magni
     return os;
 }
 
+/** Formatted output of the MagnitudeType type.
+ *
+ * @param[in] type Type to output.
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const arm_compute::MagnitudeType &type)
 {
     std::stringstream str;
@@ -838,7 +1204,13 @@ inline std::string to_string(const arm_compute::MagnitudeType &type)
     return str.str();
 }
 
-/** Formatted output of the GradientDimension type. */
+/** Formatted output of the GradientDimension type.
+ *
+ * @param[out] os  Output stream
+ * @param[in]  dim Type to output
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const GradientDimension &dim)
 {
     switch(dim)
@@ -859,6 +1231,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GradientDimension &d
     return os;
 }
 
+/** Formatted output of the GradientDimension type.
+ *
+ * @param[in] type Type to output
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const arm_compute::GradientDimension &type)
 {
     std::stringstream str;
@@ -866,7 +1244,13 @@ inline std::string to_string(const arm_compute::GradientDimension &type)
     return str.str();
 }
 
-/** Formatted output of the HOGNormType type. */
+/** Formatted output of the HOGNormType type.
+ *
+ * @param[out] os        Output stream
+ * @param[in]  norm_type Type to output
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const HOGNormType &norm_type)
 {
     switch(norm_type)
@@ -887,6 +1271,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const HOGNormType &norm_ty
     return os;
 }
 
+/** Formatted output of the HOGNormType type.
+ *
+ * @param[in] type Type to output
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const HOGNormType &type)
 {
     std::stringstream str;
@@ -894,7 +1284,13 @@ inline std::string to_string(const HOGNormType &type)
     return str.str();
 }
 
-/** Formatted output of the Size2D type. */
+/** Formatted output of the Size2D type.
+ *
+ * @param[out] os   Output stream
+ * @param[in]  size Type to output
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const Size2D &size)
 {
     os << size.width << "x" << size.height;
@@ -902,6 +1298,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Size2D &size)
     return os;
 }
 
+/** Formatted output of the Size2D type.
+ *
+ * @param[in] type Type to output
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const Size2D &type)
 {
     std::stringstream str;
@@ -909,7 +1311,13 @@ inline std::string to_string(const Size2D &type)
     return str.str();
 }
 
-/** Formatted output of the Size2D type. */
+/** Formatted output of the HOGInfo type.
+ *
+ * @param[out] os       Output stream
+ * @param[in]  hog_info Type to output
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const HOGInfo &hog_info)
 {
     os << "{CellSize=" << hog_info.cell_size() << ","
@@ -924,7 +1332,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const HOGInfo &hog_info)
     return os;
 }
 
-/** Formatted output of the HOGInfo type. */
+/** Formatted output of the HOGInfo type.
+ *
+ * @param[in] type Type to output
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const HOGInfo &type)
 {
     std::stringstream str;
@@ -932,6 +1345,13 @@ inline std::string to_string(const HOGInfo &type)
     return str.str();
 }
 
+/** Formatted output of the ConvolutionMethod type.
+ *
+ * @param[out] os          Output stream
+ * @param[in]  conv_method Type to output
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const ConvolutionMethod &conv_method)
 {
     switch(conv_method)
@@ -952,6 +1372,12 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ConvolutionMethod &c
     return os;
 }
 
+/** Formatted output of the ConvolutionMethod type.
+ *
+ * @param[in] conv_method Type to output
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const ConvolutionMethod &conv_method)
 {
     std::stringstream str;
@@ -959,6 +1385,13 @@ inline std::string to_string(const ConvolutionMethod &conv_method)
     return str.str();
 }
 
+/** Formatted output of the GPUTarget type.
+ *
+ * @param[out] os         Output stream
+ * @param[in]  gpu_target Type to output
+ *
+ * @return Modified output stream.
+ */
 inline ::std::ostream &operator<<(::std::ostream &os, const GPUTarget &gpu_target)
 {
     switch(gpu_target)
@@ -981,8 +1414,29 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GPUTarget &gpu_targe
         case GPUTarget::T800:
             os << "T800";
             break;
-        case GPUTarget::G70:
-            os << "G70";
+        case GPUTarget::G71:
+            os << "G71";
+            break;
+        case GPUTarget::G72:
+            os << "G72";
+            break;
+        case GPUTarget::G51:
+            os << "G51";
+            break;
+        case GPUTarget::G51BIG:
+            os << "G51BIG";
+            break;
+        case GPUTarget::G51LIT:
+            os << "G51LIT";
+            break;
+        case GPUTarget::TNOX:
+            os << "TNOX";
+            break;
+        case GPUTarget::TTRX:
+            os << "TTRX";
+            break;
+        case GPUTarget::TBOX:
+            os << "TBOX";
             break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
@@ -991,10 +1445,106 @@ inline ::std::ostream &operator<<(::std::ostream &os, const GPUTarget &gpu_targe
     return os;
 }
 
+/** Formatted output of the GPUTarget type.
+ *
+ * @param[in] gpu_target Type to output
+ *
+ * @return Formatted string.
+ */
 inline std::string to_string(const GPUTarget &gpu_target)
 {
     std::stringstream str;
     str << gpu_target;
+    return str.str();
+}
+
+/** Formatted output of the DetectionWindow type.
+ *
+ * @param[out] os               Output stream
+ * @param[in]  detection_window Type to output
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const DetectionWindow &detection_window)
+{
+    os << "{x=" << detection_window.x << ","
+       << "y=" << detection_window.y << ","
+       << "width=" << detection_window.width << ","
+       << "height=" << detection_window.height << ","
+       << "idx_class=" << detection_window.idx_class << ","
+       << "score=" << detection_window.score << "}";
+
+    return os;
+}
+
+/** Formatted output of the DetectionWindow type.
+ *
+ * @param[in] detection_window Type to output
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const DetectionWindow &detection_window)
+{
+    std::stringstream str;
+    str << detection_window;
+    return str.str();
+}
+
+/** Formatted output of the Termination type.
+ *
+ * @param[out] os          Output stream
+ * @param[in]  termination Type to output
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const Termination &termination)
+{
+    switch(termination)
+    {
+        case Termination::TERM_CRITERIA_EPSILON:
+            os << "TERM_CRITERIA_EPSILON";
+            break;
+        case Termination::TERM_CRITERIA_ITERATIONS:
+            os << "TERM_CRITERIA_ITERATIONS";
+            break;
+        case Termination::TERM_CRITERIA_BOTH:
+            os << "TERM_CRITERIA_BOTH";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+/** Formatted output of the Termination type.
+ *
+ * @param[in] termination Type to output
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const Termination &termination)
+{
+    std::stringstream str;
+    str << termination;
+    return str.str();
+}
+
+/** Formatted output of the WinogradInfo type. */
+inline ::std::ostream &operator<<(::std::ostream &os, const WinogradInfo &info)
+{
+    os << "{OutputTileSize=" << info.output_tile_size << ","
+       << "KernelSize=" << info.kernel_size << ","
+       << "PadStride=" << info.convolution_info << ","
+       << "OutputDataLayout=" << info.output_data_layout << "}";
+
+    return os;
+}
+
+inline std::string to_string(const WinogradInfo &type)
+{
+    std::stringstream str;
+    str << type;
     return str.str();
 }
 } // namespace arm_compute

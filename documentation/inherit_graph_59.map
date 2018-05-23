@@ -1,11 +1,3 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classarm__compute_1_1test_1_1datasets_1_1_fully_connected_layer_dataset.xhtml" title="FullyConnectedLayerDataset" alt="" coords="5,242,209,269"/>
-<area shape="rect" id="node2" href="$classarm__compute_1_1test_1_1datasets_1_1_alex_net_fully_connected_layer_dataset.xhtml" title="AlexNetFullyConnectedLayer\lDataset" alt="" coords="271,5,473,47"/>
-<area shape="rect" id="node3" href="$classarm__compute_1_1test_1_1datasets_1_1_goog_le_net_inception_v1_fully_connected_layer_dataset.xhtml" title="GoogLeNetInceptionV1Fully\lConnectedLayerDataset" alt="" coords="274,71,470,112"/>
-<area shape="rect" id="node4" href="$classarm__compute_1_1test_1_1datasets_1_1_goog_le_net_inception_v4_fully_connected_layer_dataset.xhtml" title="GoogLeNetInceptionV4Fully\lConnectedLayerDataset" alt="" coords="274,136,470,177"/>
-<area shape="rect" id="node5" href="$classarm__compute_1_1test_1_1datasets_1_1_large_fully_connected_layer_dataset.xhtml" title="LargeFullyConnectedLayer\lDataset" alt="" coords="277,201,467,243"/>
-<area shape="rect" id="node6" href="$classarm__compute_1_1test_1_1datasets_1_1_le_net5_fully_connected_layer_dataset.xhtml" title="LeNet5FullyConnectedLayer\lDataset" alt="" coords="273,267,471,308"/>
-<area shape="rect" id="node7" href="$classarm__compute_1_1test_1_1datasets_1_1_small_fully_connected_layer_dataset.xhtml" title="SmallFullyConnectedLayer\lDataset" alt="" coords="277,332,467,373"/>
-<area shape="rect" id="node8" href="$classarm__compute_1_1test_1_1datasets_1_1_tiny_fully_connected_layer_dataset.xhtml" title="TinyFullyConnectedLayerDataset" alt="" coords="257,398,487,425"/>
-<area shape="rect" id="node9" href="$classarm__compute_1_1test_1_1datasets_1_1_v_g_g16_fully_connected_layer_dataset.xhtml" title="VGG16FullyConnectedLayer\lDataset" alt="" coords="273,449,471,491"/>
+<area shape="rect" id="node1" href="$structarm__compute_1_1graph_1_1_execution_workload.xhtml" title="Execution workload. " alt="" coords="5,5,147,32"/>
 </map>

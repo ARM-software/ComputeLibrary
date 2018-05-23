@@ -12,8 +12,9 @@ var classarm__compute_1_1_i_c_l_kernel =
     [ "get_max_workgroup_size", "classarm__compute_1_1_i_c_l_kernel.xhtml#abca336f832d730e8494049bd714df60a", null ],
     [ "get_target", "classarm__compute_1_1_i_c_l_kernel.xhtml#a646cd535a16835b246c3367a63d96250", null ],
     [ "kernel", "classarm__compute_1_1_i_c_l_kernel.xhtml#ae5121015ab09ece4d470f50c7ffe198e", null ],
+    [ "lws_hint", "classarm__compute_1_1_i_c_l_kernel.xhtml#a0737b867334392d5dc5c2e3291d67dbf", null ],
     [ "run", "classarm__compute_1_1_i_c_l_kernel.xhtml#af6a174d47571f51f199ffc27ecc10f51", null ],
-    [ "set_lws_hint", "classarm__compute_1_1_i_c_l_kernel.xhtml#a44c701b9dbd01a171de4928254d1ecbf", null ],
+    [ "set_lws_hint", "classarm__compute_1_1_i_c_l_kernel.xhtml#ad356b88c8f61267d593d9ed99835bde9", null ],
     [ "set_target", "classarm__compute_1_1_i_c_l_kernel.xhtml#ad5ba9d34a3a855bf1dd2e36316ff550a", null ],
     [ "set_target", "classarm__compute_1_1_i_c_l_kernel.xhtml#a57e5f498fcbfc25c28b8496dfa3fc33c", null ]
 ];

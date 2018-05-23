@@ -100,10 +100,6 @@ DATA_TEST_CASE(FixedPointQS8Inputs, framework::DatasetMode::ALL, combine(
     }
 }
 
-// The last input argument specifies the expected number of failures for a
-// given combination of (function name, number of fractional bits) as defined
-// by the first two arguments.
-
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(FixedPointQS8Outputs, framework::DatasetMode::ALL, zip(combine(

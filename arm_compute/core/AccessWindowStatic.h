@@ -56,11 +56,16 @@ public:
      */
     AccessWindowStatic(ITensorInfo *info, int start_x, int start_y, int end_x, int end_y);
 
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     AccessWindowStatic(const AccessWindowStatic &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     AccessWindowStatic &operator=(const AccessWindowStatic &) = delete;
-    AccessWindowStatic(AccessWindowStatic &&)                 = default;
+    /** Allow instances of this class to be move constructed */
+    AccessWindowStatic(AccessWindowStatic &&) = default;
+    /** Allow instances of this class to be moved */
     AccessWindowStatic &operator=(AccessWindowStatic &&) = default;
-    ~AccessWindowStatic()                                = default;
+    /** Default destructor */
+    ~AccessWindowStatic() = default;
 
     /** Set the valid region based on the static access pattern and valid
      *  region of the inputs.
@@ -74,6 +79,9 @@ public:
      *
      * @param[in] window             Execution window of the kernel.
      * @param[in] input_valid_region Combined valid region of all inputs.
+     *
+     * @return a valid region.
+     *
      */
     ValidRegion compute_valid_region(const Window &window, ValidRegion input_valid_region) const;
 
@@ -82,6 +90,7 @@ public:
     bool update_padding_if_needed(const Window &window) override;
     ValidRegion compute_valid_region(const Window &window, ValidRegion input_valid_region, bool border_undefined, BorderSize border_size) const override;
 
+private:
     ITensorInfo *_info;
     int          _start_x;
     int          _start_y;

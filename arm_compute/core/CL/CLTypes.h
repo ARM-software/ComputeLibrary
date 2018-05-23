@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,8 @@
 #ifndef __ARM_COMPUTE_CL_TYPES_H__
 #define __ARM_COMPUTE_CL_TYPES_H__
 
+#include "arm_compute/core/GPUTarget.h"
+
 #include <string>
 
 namespace arm_compute
@@ -31,19 +33,7 @@ namespace arm_compute
 /** Default string for the CLKernel configuration id */
 static const std::string default_config_id = "no_config_id";
 
-/** Available GPU Targets */
-enum class GPUTarget
-{
-    GPU_ARCH_MASK = 0xF00,
-    MIDGARD       = 0x100,
-    BIFROST       = 0x200,
-    T600          = 0x110,
-    T700          = 0x120,
-    T800          = 0x130,
-    G70           = 0x210
-};
-
-/* Available OpenCL Version */
+/** Available OpenCL Version */
 enum class CLVersion
 {
     CL10,   /* the OpenCL 1.0 */
@@ -52,5 +42,16 @@ enum class CLVersion
     CL20,   /* the OpenCL 2.0 and above */
     UNKNOWN /* unkown version */
 };
-}
+
+/** OpenCL device options */
+struct CLDeviceOptions
+{
+    std::string name;        /**< Device name */
+    std::string extensions;  /**< List of supported extensions */
+    std::string ddk_version; /**< DDK version */
+    GPUTarget   gpu_target;  /**< GPU target architecture/instance */
+    size_t      num_cores;   /**< Number of cores */
+    size_t      cache_size;  /**< Cache size */
+};
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_CL_TYPES_H__ */

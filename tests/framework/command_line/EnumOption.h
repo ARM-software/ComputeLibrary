@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,7 +59,12 @@ public:
 
     bool parse(std::string value) override;
     std::string help() const override;
-    const T    &value() const;
+
+    /** Get the selected value.
+     *
+     * @return get the selected enum value.
+     */
+    const T &value() const;
 
 private:
     std::set<T> _allowed_values{};

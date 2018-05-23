@@ -33,6 +33,8 @@ namespace arm_compute
 {
 namespace test
 {
+namespace benchmark
+{
 template <typename TensorType,
           typename Accessor,
           typename ActivationLayerFunction,
@@ -76,6 +78,7 @@ private:
              SoftmaxLayerFunction>
              network{};
 };
+} // namespace benchmark
 } // namespace test
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_TEST_LENET5FIXTURE */

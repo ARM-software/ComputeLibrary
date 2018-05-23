@@ -43,7 +43,7 @@ public:
     GCBatchNormalizationLayerKernel &operator=(const GCBatchNormalizationLayerKernel &) = delete;
     /** Default Move Constructor. */
     GCBatchNormalizationLayerKernel(GCBatchNormalizationLayerKernel &&) = default;
-    /** Default move assignment operator. */
+    /** Default move assignment operator */
     GCBatchNormalizationLayerKernel &operator=(GCBatchNormalizationLayerKernel &&) = default;
     /** Default destructor */
     ~GCBatchNormalizationLayerKernel() = default;
@@ -55,13 +55,32 @@ public:
      * @param[out] output   Destination tensor. Output will have the same number of dimensions as input. Data type supported: same as @p input
      * @param[in]  mean     Mean values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
      * @param[in]  var      Variance values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]  beta     Beta values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]  gamma    Gamma values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
-     * @param[in]  epsilon  Small value to avoid division with zero.
+     * @param[in]  beta     (Optional) Beta values tensor info. 1 dimension with size equal to the feature maps [FM]. If not provided, default value for beta is 0. Data types supported: Same as @p input
+     * @param[in]  gamma    (Optional) Gamma values tensor info. 1 dimension with size equal to the feature maps [FM]. If not provided, default value for gamma is 1. Data types supported: Same as @p input
+     * @param[in]  epsilon  (optional) Small value to avoid division with zero.
      * @param[in]  act_info (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
      */
-    void configure(const IGCTensor *input, IGCTensor *output, const IGCTensor *mean, const IGCTensor *var, const IGCTensor *beta, const IGCTensor *gamma, float epsilon,
+    void configure(const IGCTensor *input, IGCTensor *output, const IGCTensor *mean, const IGCTensor *var, const IGCTensor *beta = nullptr, const IGCTensor *gamma = nullptr, float epsilon = 0.001f,
                    ActivationLayerInfo act_info = ActivationLayerInfo());
+    /** Static function to check if given info will lead to a valid configuration of @ref GCBatchNormalizationLayerKernel
+     *
+     * @param[in] input    Source tensor info. In case of @p output tensor info = nullptr, this tensor will store the result.
+     *                     3 lower dimensions represent a single input with dimensions [width, height, FM].
+     *                     The rest are optional and used for representing batches. Data types supported: QS8/QS16/F16/F32.
+     * @param[in] output   Destination tensor info. Output will have the same number of dimensions as input. Data type supported: same as @p input
+     * @param[in] mean     Mean values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in] var      Variance values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as @p input
+     * @param[in] beta     (Optional) Beta values tensor info. 1 dimension with size equal to the feature maps [FM]. If not provided, default value for beta is 0. Data types supported: Same as @p input
+     * @param[in] gamma    (Optional) Gamma values tensor info. 1 dimension with size equal to the feature maps [FM]. If not provided, default value for gamma is 1. Data types supported: Same as @p input
+     * @param[in] epsilon  (Optional) Small value to avoid division with zero. Default value is 0.001f.
+     * @param[in] act_info (Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output,
+                           const ITensorInfo *mean, const ITensorInfo *var,
+                           const ITensorInfo *beta = nullptr, const ITensorInfo *gamma = nullptr,
+                           float epsilon = 0.001f, ActivationLayerInfo act_info = ActivationLayerInfo());
 
     // Inherited methods overridden:
     void run(const Window &window) override;

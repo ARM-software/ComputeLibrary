@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,9 +44,13 @@ public:
     {
     }
 
+    /** Prevent instances of this class from being copy constructed */
     LutAccessor(const LutAccessor &) = delete;
+    /** Prevent instances of this class from being copied */
     LutAccessor &operator=(const LutAccessor &) = delete;
-    LutAccessor(LutAccessor &&)                 = default;
+    /** Allow instances of this class to be move constructed */
+    LutAccessor(LutAccessor &&) = default;
+    /** Allow instances of this class to be moved */
     LutAccessor &operator=(LutAccessor &&) = default;
 
     int num_elements() const override

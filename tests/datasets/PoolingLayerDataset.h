@@ -37,15 +37,13 @@ namespace datasets
 class PoolingLayerDataset
 {
 public:
-    using type = std::tuple<TensorShape, TensorShape, PoolingLayerInfo>;
+    using type = std::tuple<TensorShape, PoolingLayerInfo>;
 
     struct iterator
     {
         iterator(std::vector<TensorShape>::const_iterator      src_it,
-                 std::vector<TensorShape>::const_iterator      dst_it,
                  std::vector<PoolingLayerInfo>::const_iterator infos_it)
             : _src_it{ std::move(src_it) },
-              _dst_it{ std::move(dst_it) },
               _infos_it{ std::move(infos_it) }
         {
         }
@@ -54,20 +52,18 @@ public:
         {
             std::stringstream description;
             description << "In=" << *_src_it << ":";
-            description << "Out=" << *_dst_it << ":";
-            description << "Info=" << *_infos_it;
+            description << "Info=" << *_infos_it << ":";
             return description.str();
         }
 
         PoolingLayerDataset::type operator*() const
         {
-            return std::make_tuple(*_src_it, *_dst_it, *_infos_it);
+            return std::make_tuple(*_src_it, *_infos_it);
         }
 
         iterator &operator++()
         {
             ++_src_it;
-            ++_dst_it;
             ++_infos_it;
 
             return *this;
@@ -75,24 +71,22 @@ public:
 
     private:
         std::vector<TensorShape>::const_iterator      _src_it;
-        std::vector<TensorShape>::const_iterator      _dst_it;
         std::vector<PoolingLayerInfo>::const_iterator _infos_it;
     };
 
     iterator begin() const
     {
-        return iterator(_src_shapes.begin(), _dst_shapes.begin(), _infos.begin());
+        return iterator(_src_shapes.begin(), _infos.begin());
     }
 
     int size() const
     {
-        return std::min(_src_shapes.size(), std::min(_dst_shapes.size(), _infos.size()));
+        return std::min(_src_shapes.size(), _infos.size());
     }
 
-    void add_config(TensorShape src, TensorShape dst, PoolingLayerInfo info)
+    void add_config(TensorShape src, PoolingLayerInfo info)
     {
         _src_shapes.emplace_back(std::move(src));
-        _dst_shapes.emplace_back(std::move(dst));
         _infos.emplace_back(std::move(info));
     }
 
@@ -102,7 +96,6 @@ protected:
 
 private:
     std::vector<TensorShape>      _src_shapes{};
-    std::vector<TensorShape>      _dst_shapes{};
     std::vector<PoolingLayerInfo> _infos{};
 };
 
@@ -113,9 +106,10 @@ public:
     PoolingLayerDatasetSpecial()
     {
         // Special cases
-        add_config(TensorShape(60U, 52U, 3U, 2U), TensorShape(13U, 11U, 32U), PoolingLayerInfo(PoolingType::AVG, Size2D(100, 100), PadStrideInfo(5, 5, 50, 50), true));
+        add_config(TensorShape(60U, 52U, 3U, 2U), PoolingLayerInfo(PoolingType::AVG, Size2D(100, 100), PadStrideInfo(5, 5, 50, 50), true));
         // Asymmetric padding
-        add_config(TensorShape(112U, 112U, 32U), TensorShape(56U, 56U, 32U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR)));
+        add_config(TensorShape(112U, 112U, 32U), PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR)));
+        add_config(TensorShape(14U, 14U, 832U), PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL)));
     }
 };
 } // namespace datasets

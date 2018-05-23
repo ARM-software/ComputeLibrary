@@ -13,5 +13,5 @@ var optical__flow__pyramid__lk_8cl =
     [ "init_level_max", "optical__flow__pyramid__lk_8cl.xhtml#a324194275a47768c0460d19b16b477db", null ],
     [ "init_level_max_initial_estimate", "optical__flow__pyramid__lk_8cl.xhtml#a4b777fd3d432419912e4dbc94fe9d3f5", null ],
     [ "lktracker_stage0", "optical__flow__pyramid__lk_8cl.xhtml#ae1961d0f636da631c35ffaf096187840", null ],
-    [ "lktracker_stage1", "optical__flow__pyramid__lk_8cl.xhtml#a97401877f0071dbe2443c697b29d80e0", null ]
+    [ "lktracker_stage1", "optical__flow__pyramid__lk_8cl.xhtml#a58a96623b3f2f8696e9ab6cf101d955c", null ]
 ];

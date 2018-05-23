@@ -80,6 +80,12 @@ public:
         _parent->set_data_type(data_type);
         return *this;
     };
+    ITensorInfo &set_data_layout(const DataLayout &data_layout) override
+    {
+        ARM_COMPUTE_ERROR_ON(_parent == nullptr);
+        _parent->set_data_layout(data_layout);
+        return *this;
+    };
     ITensorInfo &set_num_channels(int num_channels) override
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
@@ -120,6 +126,11 @@ public:
     size_t dimension(size_t index) const override
     {
         return _tensor_shape[index];
+    }
+    size_t dimension(DataLayoutDimension dimension) const override
+    {
+        ARM_COMPUTE_ERROR_ON(_parent == nullptr);
+        return get_data_layout_dimension_index(_parent->data_layout(), dimension);
     }
     const Strides &strides_in_bytes() const override
     {
@@ -210,6 +221,11 @@ public:
     {
         ARM_COMPUTE_ERROR_ON(_parent == nullptr);
         return _parent->quantization_info();
+    }
+    DataLayout data_layout() const override
+    {
+        ARM_COMPUTE_ERROR_ON(_parent == nullptr);
+        return _parent->data_layout();
     }
 
 private:

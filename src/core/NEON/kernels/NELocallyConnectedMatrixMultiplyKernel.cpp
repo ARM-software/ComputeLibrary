@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -186,7 +186,7 @@ void vector_matrix_multiply_f32(const ITensor *input0, const ITensor *input1, IT
     win_out.set(Window::DimX, Window::Dimension(window_start_x, window_end_x, window_step_x));
 
     Window win_a(window);
-    win_a.set(Window::DimX, Window::Dimension(0, 1, 1));
+    win_a.set(Window::DimX, Window::Dimension(0, 0, 0));
 
     Iterator ina(input0, win_a);
     Iterator out(output, win_out);
@@ -234,7 +234,7 @@ void vector_matrix_multiply_f32(const ITensor *input0, const ITensor *input1, IT
             asm volatile("PLD [%0, #128*1]" ::"r"(reinterpret_cast<const uint8_t *>(matrix_b + 2 * in_b_stride)));
             asm volatile("PLD [%0, #128*1]" ::"r"(reinterpret_cast<const uint8_t *>(matrix_b + 3 * in_b_stride)));
             asm volatile("PLD [%0, #128*1]" ::"r"(reinterpret_cast<const uint8_t *>(matrix_b + 4 * in_b_stride)));
-#endif /* __arm __ */
+#endif /* __arm__ */
 
             acc0 = vmlaq_lane_f32(acc0, b00, a0l, 0);
             acc1 = vmlaq_lane_f32(acc1, b01, a0l, 0);
@@ -302,6 +302,37 @@ void vector_matrix_multiply_f32(const ITensor *input0, const ITensor *input1, IT
     },
     ina, out);
 }
+
+Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input0, input1, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1, output);
+    ARM_COMPUTE_RETURN_ERROR_ON(input0->dimension(0) != input1->dimension(1));
+
+    return Status{};
+}
+
+std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITensorInfo *input1, ITensorInfo *output)
+{
+    const unsigned int num_elems_processed_per_iteration_x = 16;
+
+    Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x));
+
+    AccessWindowHorizontal input0_access(input0, 0, num_elems_processed_per_iteration_x);
+    AccessWindowHorizontal input1_access(input1, 0, num_elems_processed_per_iteration_x);
+    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration_x);
+
+    bool window_changed = update_window_and_padding(win, input0_access, input1_access, output_access);
+
+    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+
+    return std::make_tuple(err, win);
+}
 } // namespace
 
 NELocallyConnectedMatrixMultiplyKernel::NELocallyConnectedMatrixMultiplyKernel()
@@ -311,31 +342,27 @@ NELocallyConnectedMatrixMultiplyKernel::NELocallyConnectedMatrixMultiplyKernel()
 
 void NELocallyConnectedMatrixMultiplyKernel::configure(const ITensor *input0, const ITensor *input1, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON(input0->info()->dimension(0) != input1->info()->dimension(1));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input0, input1, output);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(), input1->info(), output->info()));
 
     _input0 = input0;
     _input1 = input1;
     _output = output;
 
-    const unsigned int num_elems_processed_per_iteration_x = 16;
-
     // Configure kernel window
-    Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration_x));
+    auto win_config = validate_and_configure_window(input0->info(), input1->info(), output->info());
 
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration_x);
+    ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
-    update_window_and_padding(win,
-                              AccessWindowHorizontal(input0->info(), 0, num_elems_processed_per_iteration_x),
-                              AccessWindowHorizontal(input1->info(), 0, num_elems_processed_per_iteration_x),
-                              output_access);
+    INEKernel::configure(std::get<1>(win_config));
+}
 
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
+Status NELocallyConnectedMatrixMultiplyKernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input0, input1, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(std::get<0>(validate_and_configure_window(input0->clone().get(), input1->clone().get(), output->clone().get())));
 
-    INEKernel::configure(win);
+    return Status{};
 }
 
 void NELocallyConnectedMatrixMultiplyKernel::run(const Window &window, const ThreadInfo &info)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,95 +24,149 @@
 #ifndef __ARM_COMPUTE_GRAPH_TYPES_H__
 #define __ARM_COMPUTE_GRAPH_TYPES_H__
 
-#include "arm_compute/core/ITensor.h"
-#include "arm_compute/core/SubTensorInfo.h"
-#include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/utils/logging/Macros.h"
+#include "arm_compute/core/Error.h"
+#include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/strong_type/StrongType.h"
+#include "arm_compute/core/utils/strong_type/StrongTypeAttributes.h"
 
-/** Create a default core logger
- *
- * @note It will eventually create all default loggers in don't exist
- */
-#define ARM_COMPUTE_CREATE_DEFAULT_GRAPH_LOGGER()                                  \
-    do                                                                             \
-    {                                                                              \
-        if(arm_compute::logging::LoggerRegistry::get().logger("GRAPH") == nullptr) \
-        {                                                                          \
-            arm_compute::logging::LoggerRegistry::get().create_reserved_loggers(); \
-        }                                                                          \
-    } while(false)
-
-#define ARM_COMPUTE_LOG_GRAPH(log_level, x)    \
-    ARM_COMPUTE_CREATE_DEFAULT_GRAPH_LOGGER(); \
-    ARM_COMPUTE_LOG_STREAM("GRAPH", log_level, x)
-
-#define ARM_COMPUTE_LOG_GRAPH_INFO(x)          \
-    ARM_COMPUTE_CREATE_DEFAULT_GRAPH_LOGGER(); \
-    ARM_COMPUTE_LOG_STREAM("GRAPH", arm_compute::logging::LogLevel::INFO, x)
+#include <limits>
+#include <string>
 
 namespace arm_compute
 {
 namespace graph
 {
-using arm_compute::ActivationLayerInfo;
+using arm_compute::Status;
+
 using arm_compute::Coordinates;
 using arm_compute::DataType;
-using arm_compute::DimensionRoundingType;
-using arm_compute::ITensorInfo;
+using arm_compute::DataLayout;
+using arm_compute::DataLayoutDimension;
+using arm_compute::TensorShape;
+using arm_compute::Size2D;
+
+using arm_compute::ActivationLayerInfo;
 using arm_compute::NormType;
 using arm_compute::NormalizationLayerInfo;
 using arm_compute::PadStrideInfo;
 using arm_compute::PoolingLayerInfo;
 using arm_compute::PoolingType;
-using arm_compute::SubTensorInfo;
-using arm_compute::TensorInfo;
-using arm_compute::TensorShape;
-using arm_compute::WeightsInfo;
+using arm_compute::DimensionRoundingType;
 
-using arm_compute::logging::LogLevel;
-using arm_compute::ConvertPolicy;
+using TensorID   = unsigned int;
+using NodeID     = unsigned int;
+using EdgeID     = unsigned int;
+using Activation = arm_compute::ActivationLayerInfo::ActivationFunction;
 
-/**< Execution hint to the graph executor */
-enum class TargetHint
+/**< GraphID strong type */
+using GraphID = strong_type::StrongType<unsigned int, struct graph_id_t, strong_type::Comparable>;
+
+/**< Constant TensorID specifying an equivalent of null tensor */
+constexpr TensorID NullTensorID = std::numeric_limits<TensorID>::max();
+/**< Constant NodeID specifying an equivalent of null node */
+constexpr NodeID EmptyNodeID = std::numeric_limits<NodeID>::max();
+/**< Constant EdgeID specifying an equivalent of null edge */
+constexpr EdgeID EmptyEdgeID = std::numeric_limits<EdgeID>::max();
+
+// Forward declarations
+class TensorDescriptor;
+
+/** Graph configuration structure */
+struct GraphConfig
 {
-    DONT_CARE, /**< Run node in any device */
-    OPENCL,    /**< Run node on an OpenCL capable device (GPU) */
-    NEON       /**< Run node on a NEON capable device */
+    bool use_function_memory_manager{ true };   /**< Use a memory manager to manage per-funcion auxilary memory */
+    bool use_transition_memory_manager{ true }; /**< Use a memory manager to manager transition buffer memory */
+    bool use_tuner{ false };                    /**< Use a tuner in tunable backends */
+    int  num_threads{ -1 };                     /**< Number of threads to use (thread capable backends), if 0 the backend will auto-initialize, if -1 the backend will stay as it is. */
 };
 
-/** Convolution method hint to the graph executor */
-enum class ConvolutionMethodHint
+/**< Device target types */
+enum class Target
 {
-    GEMM,  /**< Convolution using GEMM */
-    DIRECT /**< Direct convolution */
+    UNSPECIFIED, /**< Unspecified Target */
+    NEON,        /**< NEON capable target device */
+    CL,          /**< OpenCL capable target device */
+    GC,          /**< GLES compute capable target device */
 };
 
-/** Supported layer operations */
-enum class OperationType
+/** Supported Element-wise operations */
+enum class EltwiseOperation
+{
+    ADD, /**< Arithmetic addition */
+    SUB, /**< Arithmetic subtraction */
+    MUL  /**< Arithmetic multiplication */
+};
+
+/** Supported Convolution layer methods */
+enum class ConvolutionMethod
+{
+    DEFAULT, /**< Default approach using internal heuristics */
+    GEMM,    /**< GEMM based convolution */
+    DIRECT,  /**< Deep direct convolution */
+    WINOGRAD /**< Winograd based convolution */
+};
+
+/** Supported Depthwise Convolution layer methods */
+enum class DepthwiseConvolutionMethod
+{
+    DEFAULT,       /**< Default approach using internal heuristics */
+    GEMV,          /**< Generic GEMV based depthwise convolution */
+    OPTIMIZED_3x3, /**< Optimized 3x3 direct depthwise convolution */
+};
+
+/** Enable or disable fast math for Convolution layer */
+enum class FastMathHint
+{
+    ENABLED,  /**< Fast math enabled for Convolution layer */
+    DISABLED, /**< Fast math disabled for Convolution layer */
+};
+
+/** Supported nodes */
+enum class NodeType
 {
     ActivationLayer,
-    ArithmeticAddition,
     BatchNormalizationLayer,
     ConvolutionLayer,
-    DepthConvertLayer,
+    DepthConcatenateLayer,
     DepthwiseConvolutionLayer,
-    DequantizationLayer,
+    EltwiseLayer,
     FlattenLayer,
-    FloorLayer,
     FullyConnectedLayer,
-    L2NormalizeLayer,
     NormalizationLayer,
     PoolingLayer,
-    QuantizationLayer,
     ReshapeLayer,
-    SoftmaxLayer
+    ScaleLayer,
+    SoftmaxLayer,
+    SplitLayer,
+
+    Input,
+    Output,
+    Const,
 };
 
-/** Branch layer merging method */
-enum class BranchMergeMethod
+/** Backend Memory Manager affinity **/
+enum class MemoryManagerAffinity
 {
-    DEPTH_CONCATENATE /**< Concatenate across depth */
+    Buffer, /**< Affinity at buffer level */
+    Offset  /**< Affinity at offset level */
+};
+
+/** NodeID-index struct
+ *
+ * Used to describe connections
+ */
+struct NodeIdxPair
+{
+    NodeID node_id; /**< Node ID */
+    size_t index;   /**< Index */
+};
+
+/** Common node parameters */
+struct NodeParams
+{
+    std::string name;   /**< Node name */
+    Target      target; /**< Node target */
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_GRAPH_TYPES_H__*/
+#endif /* __ARM_COMPUTE_GRAPH_TYPES_H__ */

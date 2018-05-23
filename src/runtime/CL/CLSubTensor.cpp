@@ -29,6 +29,11 @@
 
 using namespace arm_compute;
 
+CLSubTensor::CLSubTensor()
+    : _parent(nullptr), _info()
+{
+}
+
 CLSubTensor::CLSubTensor(ICLTensor *parent, const TensorShape &tensor_shape, const Coordinates &coords, bool extend_parent)
     : _parent(nullptr), _info()
 {

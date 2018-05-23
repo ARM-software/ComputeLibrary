@@ -1,5 +1,6 @@
 var classarm__compute_1_1_c_l_sub_tensor =
 [
+    [ "CLSubTensor", "classarm__compute_1_1_c_l_sub_tensor.xhtml#a8eba94c1cb1d9ddf253b3d9594ac4355", null ],
     [ "CLSubTensor", "classarm__compute_1_1_c_l_sub_tensor.xhtml#a65fe9103d114c8677b9c62844f9d9b22", null ],
     [ "~CLSubTensor", "classarm__compute_1_1_c_l_sub_tensor.xhtml#a3f3d38e602db0a6af8ac5e932d798617", null ],
     [ "CLSubTensor", "classarm__compute_1_1_c_l_sub_tensor.xhtml#a3770cb2663115441657ca172d0df5bc5", null ],

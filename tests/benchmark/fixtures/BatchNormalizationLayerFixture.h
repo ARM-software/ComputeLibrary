@@ -34,28 +34,36 @@ namespace arm_compute
 {
 namespace test
 {
+namespace benchmark
+{
 /** Fixture that can be used for NEON and CL */
 template <typename TensorType, typename Function, typename Accessor>
 class BatchNormalizationLayerFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape tensor_shape, TensorShape param_shape, float epsilon, ActivationLayerInfo act_info, DataType data_type, int batches)
+    void setup(TensorShape tensor_shape, TensorShape param_shape, float epsilon, bool use_gamma, bool use_beta, ActivationLayerInfo act_info, DataType data_type, DataLayout data_layout, int batches)
     {
         // Set batched in source and destination shapes
         const unsigned int fixed_point_position = 4;
         tensor_shape.set(tensor_shape.num_dimensions(), batches);
+        if(data_layout == DataLayout::NHWC)
+        {
+            permute(tensor_shape, PermutationVector(2U, 0U, 1U));
+        }
 
         // Create tensors
-        src      = create_tensor<TensorType>(tensor_shape, data_type, 1, fixed_point_position);
-        dst      = create_tensor<TensorType>(tensor_shape, data_type, 1, fixed_point_position);
+        src      = create_tensor<TensorType>(tensor_shape, data_type, 1, fixed_point_position, QuantizationInfo(), data_layout);
+        dst      = create_tensor<TensorType>(tensor_shape, data_type, 1, fixed_point_position, QuantizationInfo(), data_layout);
         mean     = create_tensor<TensorType>(param_shape, data_type, 1, fixed_point_position);
         variance = create_tensor<TensorType>(param_shape, data_type, 1, fixed_point_position);
         beta     = create_tensor<TensorType>(param_shape, data_type, 1, fixed_point_position);
         gamma    = create_tensor<TensorType>(param_shape, data_type, 1, fixed_point_position);
 
         // Create and configure function
-        batch_norm_layer.configure(&src, &dst, &mean, &variance, &beta, &gamma, epsilon, act_info);
+        TensorType *beta_ptr  = use_beta ? &beta : nullptr;
+        TensorType *gamma_ptr = use_gamma ? &gamma : nullptr;
+        batch_norm_layer.configure(&src, &dst, &mean, &variance, beta_ptr, gamma_ptr, epsilon, act_info);
 
         // Allocate tensors
         src.allocator()->allocate();
@@ -96,6 +104,7 @@ private:
     TensorType gamma{};
     Function   batch_norm_layer{};
 };
+} // namespace benchmark
 } // namespace test
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_TEST_BATCHNORMALIZATIONLAYERFIXTURE */

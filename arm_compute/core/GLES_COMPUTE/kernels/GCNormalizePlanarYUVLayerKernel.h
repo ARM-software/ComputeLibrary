@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,7 @@ public:
     GCNormalizePlanarYUVLayerKernel &operator=(const GCNormalizePlanarYUVLayerKernel &) = delete;
     /** Default Move Constructor. */
     GCNormalizePlanarYUVLayerKernel(GCNormalizePlanarYUVLayerKernel &&) = default;
-    /** Default move assignment operator. */
+    /** Default move assignment operator */
     GCNormalizePlanarYUVLayerKernel &operator=(GCNormalizePlanarYUVLayerKernel &&) = default;
     /** Default destructor */
     ~GCNormalizePlanarYUVLayerKernel() = default;

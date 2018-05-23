@@ -29,6 +29,18 @@
 
 namespace arm_compute
 {
+/** Ignores unused arguments
+ *
+ * @tparam T Argument types
+ *
+ * @param[in] ... Ignored arguments
+ */
+template <typename... T>
+inline void ignore_unused(T &&...)
+{
+}
+
+/** Available error codes */
 enum class ErrorCode
 {
     OK,           /**< No error */
@@ -142,9 +154,9 @@ Status create_error(ErrorCode error_code, const char *function, const char *file
  * This is useful if for example a variable is only used
  * in debug builds and generates a warning in release builds.
  *
- * @param[in] var Variable which is unused.
+ * @param[in] ... Variables which are unused.
  */
-#define ARM_COMPUTE_UNUSED(var) (void)(var)
+#define ARM_COMPUTE_UNUSED(...) arm_compute::ignore_unused(__VA_ARGS__) // NOLINT
 
 /** Creates an error with a given message
  *
@@ -162,6 +174,16 @@ Status create_error(ErrorCode error_code, const char *function, const char *file
  * @param[in] ...        Message to display before aborting.
  */
 #define ARM_COMPUTE_CREATE_ERROR_LOC(error_code, func, file, line, ...) ::arm_compute::create_error(error_code, func, file, line, __VA_ARGS__) // NOLINT
+
+/** An error is returned with the given description.
+ *
+ * @param[in] ... Error description message.
+ */
+#define ARM_COMPUTE_RETURN_ERROR_MSG(...)                                                    \
+    do                                                                                       \
+    {                                                                                        \
+        return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, __VA_ARGS__); \
+    } while(false)
 
 /** Checks if a status contains an error and returns it
  *

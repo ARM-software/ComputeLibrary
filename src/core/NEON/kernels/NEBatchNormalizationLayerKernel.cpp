@@ -58,20 +58,39 @@ validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const IT
     if(nullptr != output)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, mean, var, beta, gamma);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, mean, var, beta, gamma);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mean, var, beta, gamma);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(2) != mean->dimension(0));
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, mean, var);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, mean, var);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mean, var);
+    if(beta != nullptr)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, beta);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, beta);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mean, beta);
+    }
+    if(gamma != nullptr)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, gamma);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, gamma);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mean, gamma);
+    }
+    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL)) != mean->dimension(0));
 
     return Status{};
 }
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output)
 {
+    if(output != nullptr)
+    {
+        // Output tensor auto initialization if not yet initialized
+        auto_init_if_empty(*output, *input->clone());
+    }
+
     unsigned int num_elems_processed_per_iteration = 16 / input->element_size();
 
     Window                 win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
@@ -99,13 +118,13 @@ void NEBatchNormalizationLayerKernel::batch_normalization_qs8(const Window &wind
     const int  fixed_point_position = _input->info()->fixed_point_position();
     const auto input_mean           = reinterpret_cast<const qint8_t *>(_mean->ptr_to_element(Coordinates(0, 0)));
     const auto input_var            = reinterpret_cast<const qint8_t *>(_var->ptr_to_element(Coordinates(0, 0)));
-    const auto input_gamma          = reinterpret_cast<const qint8_t *>(_gamma->ptr_to_element(Coordinates(0, 0)));
-    const auto input_beta           = reinterpret_cast<const qint8_t *>(_beta->ptr_to_element(Coordinates(0, 0)));
+    const auto input_gamma          = (_gamma != nullptr) ? reinterpret_cast<const qint8_t *>(_gamma->ptr_to_element(Coordinates(0, 0))) : nullptr;
+    const auto input_beta           = (_beta != nullptr) ? reinterpret_cast<const qint8_t *>(_beta->ptr_to_element(Coordinates(0, 0))) : nullptr;
 
     qint8x16_t       mean_vec    = vdupq_n_qs8(0);
     qint8x16_t       var_vec     = vdupq_n_qs8(0);
-    qint8x16_t       gamma_vec   = vdupq_n_qs8(0);
-    qint8x16_t       beta_vec    = vdupq_n_qs8(0);
+    qint8x16_t       gamma_vec   = vdupq_n_qs8(sqcvt_qs8_f32(1, fixed_point_position));
+    qint8x16_t       beta_vec    = vdupq_n_qs8(sqcvt_qs8_f32(0, fixed_point_position));
     qint8x16_t       denominator = vdupq_n_qs8(0);
     const qint8x16_t epsilon_vec = vdupq_n_qs8(sqcvt_qs8_f32(_epsilon, fixed_point_position));
     execute_window_loop(window, [&](const Coordinates & id)
@@ -113,10 +132,16 @@ void NEBatchNormalizationLayerKernel::batch_normalization_qs8(const Window &wind
         if(slice != id.z())
         {
             // Conctruct vectors
-            mean_vec  = vdupq_n_qs8(*(input_mean + id.z()));
-            var_vec   = vdupq_n_qs8(*(input_var + id.z()));
-            gamma_vec = vdupq_n_qs8(*(input_gamma + id.z()));
-            beta_vec  = vdupq_n_qs8(*(input_beta + id.z()));
+            mean_vec = vdupq_n_qs8(*(input_mean + id.z()));
+            var_vec  = vdupq_n_qs8(*(input_var + id.z()));
+            if(input_gamma != nullptr)
+            {
+                gamma_vec = vdupq_n_qs8(*(input_gamma + id.z()));
+            }
+            if(input_beta != nullptr)
+            {
+                beta_vec = vdupq_n_qs8(*(input_beta + id.z()));
+            }
 
             // Calculate denominator
             denominator = vqinvsqrtq_qs8(vqaddq_qs8(var_vec, epsilon_vec), fixed_point_position);
@@ -146,13 +171,13 @@ void NEBatchNormalizationLayerKernel::batch_normalization_qs16(const Window &win
     const int  fixed_point_position = _input->info()->fixed_point_position();
     const auto input_mean           = reinterpret_cast<const qint16_t *>(_mean->ptr_to_element(Coordinates(0, 0)));
     const auto input_var            = reinterpret_cast<const qint16_t *>(_var->ptr_to_element(Coordinates(0, 0)));
-    const auto input_gamma          = reinterpret_cast<const qint16_t *>(_gamma->ptr_to_element(Coordinates(0, 0)));
-    const auto input_beta           = reinterpret_cast<const qint16_t *>(_beta->ptr_to_element(Coordinates(0, 0)));
+    const auto input_gamma          = (_gamma != nullptr) ? reinterpret_cast<const qint16_t *>(_gamma->ptr_to_element(Coordinates(0, 0))) : nullptr;
+    const auto input_beta           = (_beta != nullptr) ? reinterpret_cast<const qint16_t *>(_beta->ptr_to_element(Coordinates(0, 0))) : nullptr;
 
     qint16x8_t       mean_vec    = vdupq_n_qs16(0);
     qint16x8_t       var_vec     = vdupq_n_qs16(0);
-    qint16x8_t       gamma_vec   = vdupq_n_qs16(0);
-    qint16x8_t       beta_vec    = vdupq_n_qs16(0);
+    qint16x8_t       gamma_vec   = vdupq_n_qs16(sqcvt_qs16_f32(1, fixed_point_position));
+    qint16x8_t       beta_vec    = vdupq_n_qs16(sqcvt_qs16_f32(0, fixed_point_position));
     qint16x8_t       denominator = vdupq_n_qs16(0);
     const qint16x8_t epsilon_vec = vdupq_n_qs16(sqcvt_qs16_f32(_epsilon, fixed_point_position));
     execute_window_loop(window, [&](const Coordinates & id)
@@ -160,10 +185,16 @@ void NEBatchNormalizationLayerKernel::batch_normalization_qs16(const Window &win
         if(slice != id.z())
         {
             // Conctruct vectors
-            mean_vec  = vdupq_n_qs16(*(input_mean + id.z()));
-            var_vec   = vdupq_n_qs16(*(input_var + id.z()));
-            gamma_vec = vdupq_n_qs16(*(input_gamma + id.z()));
-            beta_vec  = vdupq_n_qs16(*(input_beta + id.z()));
+            mean_vec = vdupq_n_qs16(*(input_mean + id.z()));
+            var_vec  = vdupq_n_qs16(*(input_var + id.z()));
+            if(input_gamma != nullptr)
+            {
+                gamma_vec = vdupq_n_qs16(*(input_gamma + id.z()));
+            }
+            if(input_beta != nullptr)
+            {
+                beta_vec = vdupq_n_qs16(*(input_beta + id.z()));
+            }
 
             // Calculate denominator
             denominator = vqinvsqrtq_qs16(vqaddq_qs16(var_vec, epsilon_vec), fixed_point_position);
@@ -179,9 +210,9 @@ void NEBatchNormalizationLayerKernel::batch_normalization_qs16(const Window &win
 }
 
 template <bool fused_activation>
-void NEBatchNormalizationLayerKernel::batch_normalization_fp16(const Window &window)
+void NEBatchNormalizationLayerKernel::batch_normalization_fp16_nchw(const Window &window)
 {
-    static_assert(!fused_activation, "Activation is not supported for QS8");
+    static_assert(!fused_activation, "Activation is not supported for FP16");
 
     ARM_COMPUTE_UNUSED(window);
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
@@ -194,12 +225,12 @@ void NEBatchNormalizationLayerKernel::batch_normalization_fp16(const Window &win
 
     const auto input_mean  = reinterpret_cast<const float16_t *>(_mean->ptr_to_element(Coordinates(0, 0)));
     const auto input_var   = reinterpret_cast<const float16_t *>(_var->ptr_to_element(Coordinates(0, 0)));
-    const auto input_gamma = reinterpret_cast<const float16_t *>(_gamma->ptr_to_element(Coordinates(0, 0)));
-    const auto input_beta  = reinterpret_cast<const float16_t *>(_beta->ptr_to_element(Coordinates(0, 0)));
+    const auto input_gamma = (_gamma != nullptr) ? reinterpret_cast<const float16_t *>(_gamma->ptr_to_element(Coordinates(0, 0))) : nullptr;
+    const auto input_beta  = (_beta != nullptr) ? reinterpret_cast<const float16_t *>(_beta->ptr_to_element(Coordinates(0, 0))) : nullptr;
 
     float16x8_t       mean_vec    = vdupq_n_f16(0.0);
     float16x8_t       var_vec     = vdupq_n_f16(0.0);
-    float16x8_t       gamma_vec   = vdupq_n_f16(0.0);
+    float16x8_t       gamma_vec   = vdupq_n_f16(1.0);
     float16x8_t       beta_vec    = vdupq_n_f16(0.0);
     float16x8_t       denominator = vdupq_n_f16(0.0);
     const float16x8_t epsilon_vec = vdupq_n_f16(_epsilon);
@@ -208,10 +239,16 @@ void NEBatchNormalizationLayerKernel::batch_normalization_fp16(const Window &win
         if(slice != id.z())
         {
             // Conctruct vectors
-            mean_vec  = vdupq_n_f16(*(input_mean + id.z()));
-            var_vec   = vdupq_n_f16(*(input_var + id.z()));
-            gamma_vec = vdupq_n_f16(*(input_gamma + id.z()));
-            beta_vec  = vdupq_n_f16(*(input_beta + id.z()));
+            mean_vec = vdupq_n_f16(*(input_mean + id.z()));
+            var_vec  = vdupq_n_f16(*(input_var + id.z()));
+            if(input_gamma != nullptr)
+            {
+                gamma_vec = vdupq_n_f16(*(input_gamma + id.z()));
+            }
+            if(input_beta != nullptr)
+            {
+                beta_vec = vdupq_n_f16(*(input_beta + id.z()));
+            }
 
             // Calculate denominator
             denominator = vinvsqrtq_f16(vaddq_f16(var_vec, epsilon_vec));
@@ -227,8 +264,43 @@ void NEBatchNormalizationLayerKernel::batch_normalization_fp16(const Window &win
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 }
 
+template <bool fused_activation>
+void NEBatchNormalizationLayerKernel::batch_normalization_fp16_nhwc(const Window &window)
+{
+    static_assert(!fused_activation, "Activation is not supported for FP16");
+
+    ARM_COMPUTE_UNUSED(window);
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+    Iterator input(_input, window);
+    Iterator output(_output, window);
+
+    const auto input_mean  = reinterpret_cast<const float16_t *>(_mean->ptr_to_element(Coordinates(0, 0)));
+    const auto input_var   = reinterpret_cast<const float16_t *>(_var->ptr_to_element(Coordinates(0, 0)));
+    const auto input_gamma = (_gamma != nullptr) ? reinterpret_cast<const float16_t *>(_gamma->ptr_to_element(Coordinates(0, 0))) : nullptr;
+    const auto input_beta  = (_beta != nullptr) ? reinterpret_cast<const float16_t *>(_beta->ptr_to_element(Coordinates(0, 0))) : nullptr;
+
+    const float16x8_t epsilon_vec = vdupq_n_f16(_epsilon);
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        // Conctruct vectors
+        const float16x8_t mean_vec  = vld1q_f16(input_mean + id.x());
+        const float16x8_t var_vec   = vld1q_f16(input_var + id.x());
+        const float16x8_t gamma_vec = (input_gamma != nullptr) ? vld1q_f16(input_gamma + id.x()) : vdupq_n_f16(1.0);
+        const float16x8_t beta_vec  = (input_beta != nullptr) ? vld1q_f16(input_beta + id.x()) : vdupq_n_f16(0.0);
+        // Calculate denominator
+        const float16x8_t denominator = vinvsqrtq_f16(vaddq_f16(var_vec, epsilon_vec));
+
+        // Calculate x bar and store results
+        const float16x8_t numerator = vsubq_f16(vld1q_f16(reinterpret_cast<const float16_t *>(input.ptr())), mean_vec);
+        const float16x8_t x_bar     = vmulq_f16(numerator, denominator);
+        vst1q_f16(reinterpret_cast<float16_t *>(output.ptr()), vaddq_f16(beta_vec, vmulq_f16(x_bar, gamma_vec)));
+    },
+    input, output);
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+}
+
 template <bool fused_activation, typename F>
-void NEBatchNormalizationLayerKernel::batch_normalization_fp32(const Window &window)
+void NEBatchNormalizationLayerKernel::batch_normalization_fp32_nchw(const Window &window)
 {
     Iterator input(_input, window);
     Iterator output(_output, window);
@@ -241,12 +313,12 @@ void NEBatchNormalizationLayerKernel::batch_normalization_fp32(const Window &win
 
     const auto input_mean  = reinterpret_cast<const float *>(_mean->ptr_to_element(Coordinates(0, 0)));
     const auto input_var   = reinterpret_cast<const float *>(_var->ptr_to_element(Coordinates(0, 0)));
-    const auto input_gamma = reinterpret_cast<const float *>(_gamma->ptr_to_element(Coordinates(0, 0)));
-    const auto input_beta  = reinterpret_cast<const float *>(_beta->ptr_to_element(Coordinates(0, 0)));
+    const auto input_gamma = (_gamma != nullptr) ? reinterpret_cast<const float *>(_gamma->ptr_to_element(Coordinates(0, 0))) : nullptr;
+    const auto input_beta  = (_beta != nullptr) ? reinterpret_cast<const float *>(_beta->ptr_to_element(Coordinates(0, 0))) : nullptr;
 
     float32x4_t       mean_vec    = vdupq_n_f32(0.0);
     float32x4_t       var_vec     = vdupq_n_f32(0.0);
-    float32x4_t       gamma_vec   = vdupq_n_f32(0.0);
+    float32x4_t       gamma_vec   = vdupq_n_f32(1.0);
     float32x4_t       beta_vec    = vdupq_n_f32(0.0);
     float32x4_t       denominator = vdupq_n_f32(0.0);
     const float32x4_t epsilon_vec = vdupq_n_f32(_epsilon);
@@ -255,10 +327,16 @@ void NEBatchNormalizationLayerKernel::batch_normalization_fp32(const Window &win
         if(slice != id.z())
         {
             // Conctruct vectors
-            mean_vec  = vdupq_n_f32(*(input_mean + id.z()));
-            var_vec   = vdupq_n_f32(*(input_var + id.z()));
-            gamma_vec = vdupq_n_f32(*(input_gamma + id.z()));
-            beta_vec  = vdupq_n_f32(*(input_beta + id.z()));
+            mean_vec = vdupq_n_f32(*(input_mean + id.z()));
+            var_vec  = vdupq_n_f32(*(input_var + id.z()));
+            if(input_gamma != nullptr)
+            {
+                gamma_vec = vdupq_n_f32(*(input_gamma + id.z()));
+            }
+            if(input_beta != nullptr)
+            {
+                beta_vec = vdupq_n_f32(*(input_beta + id.z()));
+            }
 
             // Calculate denominator
             denominator = vinvsqrtq_f32(vaddq_f32(var_vec, epsilon_vec));
@@ -282,8 +360,50 @@ void NEBatchNormalizationLayerKernel::batch_normalization_fp32(const Window &win
     input, output);
 }
 
+template <bool fused_activation, typename F>
+void NEBatchNormalizationLayerKernel::batch_normalization_fp32_nhwc(const Window &window)
+{
+    Iterator input(_input, window);
+    Iterator output(_output, window);
+
+    F activation_functor(_act_info);
+
+    const auto input_mean  = reinterpret_cast<const float *>(_mean->ptr_to_element(Coordinates(0, 0)));
+    const auto input_var   = reinterpret_cast<const float *>(_var->ptr_to_element(Coordinates(0, 0)));
+    const auto input_gamma = (_gamma != nullptr) ? reinterpret_cast<const float *>(_gamma->ptr_to_element(Coordinates(0, 0))) : nullptr;
+    const auto input_beta  = (_beta != nullptr) ? reinterpret_cast<const float *>(_beta->ptr_to_element(Coordinates(0, 0))) : nullptr;
+
+    const float32x4_t epsilon_vec = vdupq_n_f32(_epsilon);
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        // Conctruct vectors
+        const float32x4_t mean_vec  = vld1q_f32(input_mean + id.x());
+        const float32x4_t var_vec   = vld1q_f32(input_var + id.x());
+        const float32x4_t gamma_vec = (input_gamma != nullptr) ? vld1q_f32(input_gamma + id.x()) : vdupq_n_f32(1.0);
+        const float32x4_t beta_vec  = (input_beta != nullptr) ? vld1q_f32(input_beta + id.x()) : vdupq_n_f32(0.0);
+        // Calculate denominator
+        const float32x4_t denominator = vinvsqrtq_f32(vaddq_f32(var_vec, epsilon_vec));
+
+        // Calculate x bar
+        const float32x4_t numerator = vsubq_f32(vld1q_f32(reinterpret_cast<const float *>(input.ptr())), mean_vec);
+        const float32x4_t x_bar     = vmulq_f32(numerator, denominator);
+        float32x4_t       res       = vmlaq_f32(beta_vec, x_bar, gamma_vec);
+
+        // Perform fused activation
+        if(fused_activation)
+        {
+            activation_functor(res);
+        }
+
+        // Store results
+        vst1q_f32(reinterpret_cast<float *>(output.ptr()), res);
+    },
+    input, output);
+}
+
 void NEBatchNormalizationLayerKernel::configure_non_fused()
 {
+    const bool is_nhwc = _input->info()->data_layout() == DataLayout::NHWC;
     switch(_input->info()->data_type())
     {
         case DataType::QS8:
@@ -293,10 +413,11 @@ void NEBatchNormalizationLayerKernel::configure_non_fused()
             _func = &NEBatchNormalizationLayerKernel::batch_normalization_qs16<false>;
             break;
         case DataType::F16:
-            _func = &NEBatchNormalizationLayerKernel::batch_normalization_fp16<false>;
+            _func = (is_nhwc) ? &NEBatchNormalizationLayerKernel::batch_normalization_fp16_nhwc<false> : &NEBatchNormalizationLayerKernel::batch_normalization_fp16_nchw<false>;
             break;
         case DataType::F32:
-            _func = &NEBatchNormalizationLayerKernel::batch_normalization_fp32<false, ::detail::dummy<float, 4>>;
+            _func = (is_nhwc) ? &NEBatchNormalizationLayerKernel::batch_normalization_fp32_nhwc<false, ::detail::dummy<float, 4>> :
+                    &NEBatchNormalizationLayerKernel::batch_normalization_fp32_nchw<false, ::detail::dummy<float, 4>>;
             break;
         default:
             ARM_COMPUTE_ERROR("Element size not supported");
@@ -306,18 +427,25 @@ void NEBatchNormalizationLayerKernel::configure_non_fused()
 
 void NEBatchNormalizationLayerKernel::configure_fused()
 {
-    // Fused Batched Normalization with activation functions : FP32
-    static std::map<ActivationLayerInfo::ActivationFunction, BatchNormFunctionPtr> bn_fused_map_f32 =
+    // NCHW Fused Batched Normalization with activation functions : FP32
+    static std::map<ActivationLayerInfo::ActivationFunction, BatchNormFunctionPtr> bn_fused_map_f32_nchw =
     {
-        { ActivationLayerInfo::ActivationFunction::RELU, &NEBatchNormalizationLayerKernel::batch_normalization_fp32<true, ::detail::relu<float, 4>> },
-        { ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, &NEBatchNormalizationLayerKernel::batch_normalization_fp32<true, ::detail::brelu<float, 4>> },
-        { ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, &NEBatchNormalizationLayerKernel::batch_normalization_fp32<true, ::detail::lubrelu<float, 4>> }
+        { ActivationLayerInfo::ActivationFunction::RELU, &NEBatchNormalizationLayerKernel::batch_normalization_fp32_nchw<true, ::detail::relu<float, 4>> },
+        { ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, &NEBatchNormalizationLayerKernel::batch_normalization_fp32_nchw<true, ::detail::brelu<float, 4>> },
+        { ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, &NEBatchNormalizationLayerKernel::batch_normalization_fp32_nchw<true, ::detail::lubrelu<float, 4>> }
+    };
+    // NHWC Fused Batched Normalization with activation functions : FP32
+    static std::map<ActivationLayerInfo::ActivationFunction, BatchNormFunctionPtr> bn_fused_map_f32_nhwc =
+    {
+        { ActivationLayerInfo::ActivationFunction::RELU, &NEBatchNormalizationLayerKernel::batch_normalization_fp32_nhwc<true, ::detail::relu<float, 4>> },
+        { ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, &NEBatchNormalizationLayerKernel::batch_normalization_fp32_nhwc<true, ::detail::brelu<float, 4>> },
+        { ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, &NEBatchNormalizationLayerKernel::batch_normalization_fp32_nhwc<true, ::detail::lubrelu<float, 4>> }
     };
 
     switch(_input->info()->data_type())
     {
         case DataType::F32:
-            _func = bn_fused_map_f32[_act_info.activation()];
+            _func = (_input->info()->data_layout() == DataLayout::NHWC) ? bn_fused_map_f32_nhwc[_act_info.activation()] : bn_fused_map_f32_nchw[_act_info.activation()];
             break;
         default:
             ARM_COMPUTE_ERROR("Element size not supported");
@@ -335,21 +463,12 @@ void NEBatchNormalizationLayerKernel::configure(ITensor *input, ITensor *output,
                                                 const ITensor *beta, const ITensor *gamma,
                                                 float epsilon, ActivationLayerInfo act_info)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, mean, var, beta, gamma);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, mean, var);
 
-    ITensorInfo *output_info = nullptr;
-
-    if(nullptr != output)
-    {
-        // Output tensor auto initialization if not yet initialized
-        auto_init_if_empty(*output->info(), *input->info());
-
-        output_info = output->info();
-    }
-
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output_info,
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), (output != nullptr) ? output->info() : nullptr,
                                                   mean->info(), var->info(),
-                                                  beta->info(), gamma->info(),
+                                                  (beta != nullptr) ? beta->info() : nullptr,
+                                                  (gamma != nullptr) ? gamma->info() : nullptr,
                                                   epsilon, act_info));
 
     _input    = input;
@@ -361,7 +480,8 @@ void NEBatchNormalizationLayerKernel::configure(ITensor *input, ITensor *output,
     _epsilon  = epsilon;
     _act_info = act_info;
 
-    if(output != nullptr)
+    const bool run_in_place = (output == nullptr) || (output == input);
+    if(!run_in_place)
     {
         _output = output;
     }
@@ -377,7 +497,7 @@ void NEBatchNormalizationLayerKernel::configure(ITensor *input, ITensor *output,
     }
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output_info);
+    auto win_config = validate_and_configure_window(input->info(), (run_in_place) ? nullptr : output->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     INEKernel::configure(win_config.second);
 }

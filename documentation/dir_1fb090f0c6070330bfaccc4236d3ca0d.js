@@ -18,9 +18,10 @@ var dir_1fb090f0c6070330bfaccc4236d3ca0d =
       [ "Coordinates", "classarm__compute_1_1_coordinates.xhtml", "classarm__compute_1_1_coordinates" ]
     ] ],
     [ "Dimensions.h", "_dimensions_8h.xhtml", "_dimensions_8h" ],
-    [ "Error.h", "core_2_error_8h.xhtml", "core_2_error_8h" ],
+    [ "Error.h", "_error_8h.xhtml", "_error_8h" ],
     [ "FixedPoint.h", "arm__compute_2core_2_fixed_point_8h.xhtml", "arm__compute_2core_2_fixed_point_8h" ],
     [ "FixedPoint.inl", "_fixed_point_8inl.xhtml", "_fixed_point_8inl" ],
+    [ "GPUTarget.h", "_g_p_u_target_8h.xhtml", "_g_p_u_target_8h" ],
     [ "Helpers.h", "arm__compute_2core_2_helpers_8h.xhtml", "arm__compute_2core_2_helpers_8h" ],
     [ "Helpers.inl", "_helpers_8inl.xhtml", "_helpers_8inl" ],
     [ "HOGInfo.h", "_h_o_g_info_8h.xhtml", [
@@ -69,7 +70,7 @@ var dir_1fb090f0c6070330bfaccc4236d3ca0d =
       [ "PyramidInfo", "classarm__compute_1_1_pyramid_info.xhtml", "classarm__compute_1_1_pyramid_info" ]
     ] ],
     [ "QAsymm8.h", "_q_asymm8_8h.xhtml", "_q_asymm8_8h" ],
-    [ "QAsymm8.inl", "_q_asymm8_8inl.xhtml", "_q_asymm8_8inl" ],
+    [ "QAsymm8.inl", "_q_asymm8_8inl.xhtml", null ],
     [ "Rounding.h", "_rounding_8h.xhtml", "_rounding_8h" ],
     [ "Size2D.h", "_size2_d_8h.xhtml", [
       [ "Size2D", "classarm__compute_1_1_size2_d.xhtml", "classarm__compute_1_1_size2_d" ]

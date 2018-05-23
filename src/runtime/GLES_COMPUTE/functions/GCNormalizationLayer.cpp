@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -33,8 +33,8 @@
 
 using namespace arm_compute;
 
-GCNormalizationLayer::GCNormalizationLayer()
-    : _squared_input(), _norm_kernel(), _multiply_kernel(), _border_handler()
+GCNormalizationLayer::GCNormalizationLayer(std::shared_ptr<IMemoryManager> memory_manager)
+    : _memory_group(std::move(memory_manager)), _squared_input(), _norm_kernel(), _multiply_kernel(), _border_handler()
 {
 }
 
@@ -43,6 +43,7 @@ void GCNormalizationLayer::configure(const IGCTensor *input, IGCTensor *output, 
     ARM_COMPUTE_ERROR_ON(input == nullptr);
 
     _squared_input.allocator()->init(TensorInfo(input->info()->tensor_shape(), 1, input->info()->data_type()));
+    _memory_group.manage(&_squared_input);
 
     _norm_kernel.configure(input, &_squared_input, output, norm_info);
     _multiply_kernel.configure(input, input, &_squared_input, 1.0f);
@@ -55,9 +56,13 @@ void GCNormalizationLayer::configure(const IGCTensor *input, IGCTensor *output, 
 
 void GCNormalizationLayer::run()
 {
+    _memory_group.acquire();
+
     GCScheduler::get().dispatch(_multiply_kernel, false);
     GCScheduler::get().memory_barrier();
     GCScheduler::get().dispatch(_border_handler, false);
     GCScheduler::get().memory_barrier();
     GCScheduler::get().dispatch(_norm_kernel, true);
+
+    _memory_group.release();
 }

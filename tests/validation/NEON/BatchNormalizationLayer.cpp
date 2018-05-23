@@ -32,6 +32,7 @@
 #include "tests/framework/Asserts.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/datasets/Datasets.h"
+#include "tests/validation/Helpers.h"
 #include "tests/validation/Validation.h"
 #include "tests/validation/fixtures/BatchNormalizationLayerFixture.h"
 
@@ -63,15 +64,24 @@ TEST_SUITE(BatchNormalizationLayer)
 template <typename T>
 using NEBatchNormalizationLayerFixture = BatchNormalizationLayerValidationFixture<Tensor, Accessor, NEBatchNormalizationLayer, T>;
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::RandomBatchNormalizationLayerDataset(), framework::dataset::make("DataType", { DataType::QS8, DataType::QS16, DataType::F32 })),
-               shape0, shape1, epsilon, dt)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
+                                                                                   combine(framework::dataset::make("UseBeta", { false, true }), framework::dataset::make("UseGamma", { false, true }))),
+                                                                           framework::dataset::make("DataType", { DataType::QS8, DataType::QS16, DataType::F32 })),
+                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+               shape0, shape1, epsilon, use_beta, use_gamma, dt, data_layout)
 {
     // Set fixed point position data type allowed
     const int fixed_point_position = (arm_compute::is_data_type_fixed_point(dt)) ? 3 : 0;
 
+    TensorShape src_dst_shapes = shape0;
+    if(data_layout == DataLayout::NHWC)
+    {
+        permute(src_dst_shapes, PermutationVector(2U, 0U, 1U));
+    }
+
     // Create tensors
-    Tensor src   = create_tensor<Tensor>(shape0, dt, 1, fixed_point_position);
-    Tensor dst   = create_tensor<Tensor>(shape0, dt, 1, fixed_point_position);
+    Tensor src   = create_tensor<Tensor>(src_dst_shapes, dt, 1, fixed_point_position, QuantizationInfo(), data_layout);
+    Tensor dst   = create_tensor<Tensor>(src_dst_shapes, dt, 1, fixed_point_position, QuantizationInfo(), data_layout);
     Tensor mean  = create_tensor<Tensor>(shape1, dt, 1, fixed_point_position);
     Tensor var   = create_tensor<Tensor>(shape1, dt, 1, fixed_point_position);
     Tensor beta  = create_tensor<Tensor>(shape1, dt, 1, fixed_point_position);
@@ -79,10 +89,12 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(datasets::Ran
 
     // Create and Configure function
     NEBatchNormalizationLayer norm;
-    norm.configure(&src, &dst, &mean, &var, &beta, &gamma, epsilon);
+    Tensor                   *beta_ptr  = use_beta ? &beta : nullptr;
+    Tensor                   *gamma_ptr = use_gamma ? &gamma : nullptr;
+    norm.configure(&src, &dst, &mean, &var, beta_ptr, gamma_ptr, epsilon);
 
     // Validate valid region
-    const ValidRegion valid_region = shape_to_valid_region(shape0);
+    const ValidRegion valid_region = shape_to_valid_region(src_dst_shapes);
     validate(dst.info()->valid_region(), valid_region);
 }
 
@@ -150,9 +162,13 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(
 // *INDENT-ON*
 
 TEST_SUITE(Float)
-FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
+TEST_SUITE(FP32)
+FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
+                                                                                                                   combine(framework::dataset::make("UseBeta", { false, true }),
+                                                                                                                           framework::dataset::make("UseGamma", { false, true }))),
                                                                                                                    act_infos),
-                                                                                                                   framework::dataset::make("DataType", DataType::F32)))
+                                                                                                                   framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f32, 0);
@@ -160,26 +176,34 @@ FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixture<float>, framewor
 TEST_SUITE_END()
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-TEST_SUITE(Float16)
-FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
+                                                                                                                  combine(framework::dataset::make("UseBeta", { false, true }),
+                                                                                                                          framework::dataset::make("UseGamma", { false, true }))),
                                                                                                                   framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
-                                                                                                                  framework::dataset::make("DataType", DataType::F16)))
+                                                                                                                  framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                  framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_f16, 0);
 }
 TEST_SUITE_END()
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+TEST_SUITE_END()
 
 TEST_SUITE(Quantized)
 template <typename T>
 using NEBatchNormalizationLayerFixedPointFixture = BatchNormalizationLayerValidationFixedPointFixture<Tensor, Accessor, NEBatchNormalizationLayer, T>;
 
 TEST_SUITE(QS8)
-FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
-                       framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
-                       framework::dataset::make("DataType", DataType::QS8)),
-                       framework::dataset::make("FractionalBits", 1, 6)))
+FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
+                                                                       framework::dataset::make("UseBeta", false)),
+                                                               framework::dataset::make("UseGamma", false)),
+                                                       framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
+                                               framework::dataset::make("DataType", DataType::QS8)),
+                                       framework::dataset::make("DataLayout", DataLayout::NCHW)),
+                               framework::dataset::make("FractionalBits", 1, 6)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qs8, 0);
@@ -187,10 +211,14 @@ FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixedPointFixture<int8_t
 TEST_SUITE_END()
 
 TEST_SUITE(QS16)
-FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
-                       framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
-                       framework::dataset::make("DataType", DataType::QS16)),
-                       framework::dataset::make("FractionalBits", 1, 14)))
+FIXTURE_DATA_TEST_CASE(Random, NEBatchNormalizationLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(combine(combine(combine(datasets::RandomBatchNormalizationLayerDataset(),
+                                                                       framework::dataset::make("UseBeta", false)),
+                                                               framework::dataset::make("UseGamma", false)),
+                                                       framework::dataset::make("ActivationInfo", ActivationLayerInfo())),
+                                               framework::dataset::make("DataType", DataType::QS16)),
+                                       framework::dataset::make("DataLayout", DataLayout::NCHW)),
+                               framework::dataset::make("FractionalBits", 1, 14)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance_qs16, 0);

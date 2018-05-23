@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -74,7 +74,7 @@ void CLHOG::unmap()
 uint8_t *CLHOG::do_map(cl::CommandQueue &q, bool blocking)
 {
     ARM_COMPUTE_ERROR_ON(_buffer.get() == nullptr);
-    return static_cast<uint8_t *>(q.enqueueMapBuffer(_buffer, blocking ? CL_TRUE : CL_FALSE, CL_MAP_READ | CL_MAP_WRITE, 0, info()->descriptor_size()));
+    return static_cast<uint8_t *>(q.enqueueMapBuffer(_buffer, blocking ? CL_TRUE : CL_FALSE, CL_MAP_READ | CL_MAP_WRITE, 0, info()->descriptor_size() * sizeof(float)));
 }
 
 void CLHOG::do_unmap(cl::CommandQueue &q)

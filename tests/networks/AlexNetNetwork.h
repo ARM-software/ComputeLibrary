@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,6 +54,13 @@ template <typename ITensorType,
 class AlexNetNetwork
 {
 public:
+    /** Initialize the network.
+     *
+     * @param[in] data_type            Data type.
+     * @param[in] fixed_point_position Fixed point position (for quantized data types).
+     * @param[in] batches              Number of batches.
+     * @param[in] reshaped_weights     Whether the weights need reshaping or not. Default: false.
+     */
     void init(DataType data_type, int fixed_point_position, int batches, bool reshaped_weights = false)
     {
         _data_type            = data_type;
@@ -83,24 +90,24 @@ public:
 
             w11 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[1], TensorShape(5U, 5U, 48U, 128U), Coordinates()));
             w12 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[1], TensorShape(5U, 5U, 48U, 128U), Coordinates(0, 0, 0, 128)));
-            b11 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[1], TensorShape(128U), Coordinates()));
-            b12 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[1], TensorShape(128U), Coordinates(128)));
+            b11 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[1], TensorShape(128U), Coordinates(), true));
+            b12 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[1], TensorShape(128U), Coordinates(128), true));
 
             w31 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[3], TensorShape(3U, 3U, 192U, 192U), Coordinates()));
             w32 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[3], TensorShape(3U, 3U, 192U, 192U), Coordinates(0, 0, 0, 192)));
-            b31 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[3], TensorShape(192U), Coordinates()));
-            b32 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[3], TensorShape(192U), Coordinates(192)));
+            b31 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[3], TensorShape(192U), Coordinates(), true));
+            b32 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[3], TensorShape(192U), Coordinates(192), true));
 
             w41 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[4], TensorShape(3U, 3U, 192U, 128U), Coordinates()));
             w42 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[4], TensorShape(3U, 3U, 192U, 128U), Coordinates(0, 0, 0, 128)));
-            b41 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[4], TensorShape(128U), Coordinates()));
-            b42 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[4], TensorShape(128U), Coordinates(128)));
+            b41 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[4], TensorShape(128U), Coordinates(), true));
+            b42 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[4], TensorShape(128U), Coordinates(128), true));
         }
         else
         {
             auto reshape = [&](unsigned int width, unsigned int height, bool convolution_layer) -> TensorShape
             {
-                const bool is_optimised = std::is_same<ITensorType, ITensor>::value && NEScheduler::get().cpu_info().CPU >= CPUTarget::ARMV7 && data_type == DataType::F32;
+                const bool is_optimised = std::is_same<ITensorType, ITensor>::value && data_type == DataType::F32;
 
                 if(convolution_layer && is_optimised)
                 {
@@ -185,6 +192,7 @@ public:
         }
     }
 
+    /** Build the network */
     void build()
     {
         input.allocator()->init(TensorInfo(TensorShape(227U, 227U, 3U, _batches), 1, _data_type, _fixed_point_position));
@@ -270,6 +278,7 @@ public:
         smx.configure(&fc8_out, &output);
     }
 
+    /** Allocate the network */
     void allocate()
     {
         input.allocator()->allocate();

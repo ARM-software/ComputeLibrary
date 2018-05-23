@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -50,9 +50,25 @@ public:
      */
     SimpleOption(std::string name, T default_value);
 
+    /** Parses the given string.
+     *
+     * @param[in] value String representation as passed on the command line.
+     *
+     * @return True if the value could be parsed by the specific subclass.
+     */
     bool parse(std::string value) override;
+
+    /** Help message for the option.
+     *
+     * @return String representing the help message for the specific subclass.
+     */
     std::string help() const override;
-    const T    &value() const;
+
+    /** Get the option value.
+     *
+     * @return the option value.
+     */
+    const T &value() const;
 
 protected:
     T _value{};

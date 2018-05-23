@@ -26,6 +26,7 @@
 
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"
 
+#include "arm_compute/core/NEON/kernels/NEIm2ColKernel.h"
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Types.h"
 
@@ -34,9 +35,11 @@ namespace arm_compute
 class ITensor;
 
 /** Basic function to run @ref NEIm2ColKernel */
-class NEIm2Col : public INESimpleFunction
+class NEIm2Col : public IFunction
 {
 public:
+    /** Default constructor */
+    NEIm2Col();
     /** Configure the im2col NEON kernel
      *
      * @param[in]  input              The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
@@ -46,9 +49,10 @@ public:
      * @param[in]  kernel_dims        The kernel dimensions (width and height).
      * @param[in]  conv_info          Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  has_bias           In case biases are provided expands the matrix with 1.
-     * @param[in]  is_fully_connected Determines whether this kernel will be called by @ref NEFullyConnectedLayer in order to validate the arguments
+     * @param[in]  is_fully_connected (Optional) Determines whether this function will be called by @ref NEFullyConnectedLayer in order to validate the arguments
+     * @param[in]  is_flatten         (Optional) Determines whether this function will be called by @ref NEFlattenLayer in order to validate the arguments
      */
-    void configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, bool is_fully_connected = false);
+    void configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, bool is_fully_connected = false, bool is_flatten = false);
     /** Static function to check if given info will lead to a valid configuration of @ref NEIm2Col
      *
      * @param[in] input              The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
@@ -58,11 +62,19 @@ public:
      * @param[in] kernel_dims        The kernel dimensions (width and height).
      * @param[in] conv_info          Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in] has_bias           In case biases are provided expands the matrix with 1.
-     * @param[in] is_fully_connected Determines whether this kernel will be called by @ref NEFullyConnectedLayer in order to validate the arguments
+     * @param[in] is_fully_connected Determines whether this function will be called by @ref NEFullyConnectedLayer in order to validate the arguments
+     * @param[in] is_flatten         Determines whether this function will be called by @ref NEFlattenLayer in order to validate the arguments
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, bool is_fully_connected);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, bool is_fully_connected, bool is_flatten);
+
+    // Inherited methods overridden:
+    void run() override;
+
+private:
+    NEIm2ColKernel _kernel;
+    unsigned int   _y_dim;
 };
 }
 #endif /* __ARM_COMPUTE_NEIM2COL_H__ */

@@ -25,7 +25,6 @@
 #define __ARM_COMPUTE_NEGEMM_H__
 
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
-#include "arm_compute/core/NEON/kernels/NEGEMMAssemblyBaseKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMMatrixAdditionKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMMatrixMultiplyKernel.h"
@@ -34,6 +33,8 @@
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/Tensor.h"
+
+#include "arm_compute/runtime/NEON/AssemblyHelper.h"
 
 #include <memory>
 
@@ -73,19 +74,20 @@ public:
     void run() override;
 
 private:
-    MemoryGroup                               _memory_group;
-    NEGEMMInterleave4x4Kernel                 _interleave_kernel;
-    NEGEMMTranspose1xWKernel                  _transpose_kernel;
-    NEGEMMMatrixMultiplyKernel                _mm_kernel;
-    std::unique_ptr<NEGEMMAssemblyBaseKernel> _mm_optimised_kernel;
-    NEGEMMMatrixAdditionKernel                _ma_kernel;
-    Tensor                                    _tmp_a;
-    Tensor                                    _tmp_b;
-    Tensor                                    _workspace;
-    bool                                      _run_vector_matrix_multiplication;
-    bool                                      _run_addition;
-    bool                                      _is_first_run;
-    bool                                      _reshape_b_only_on_first_run;
+    MemoryGroup                _memory_group;
+    NEGEMMInterleave4x4Kernel  _interleave_kernel;
+    NEGEMMTranspose1xWKernel   _transpose_kernel;
+    NEGEMMMatrixMultiplyKernel _mm_kernel;
+    AssemblyKernelGlueF32      _asm_glue;
+    NEGEMMMatrixAdditionKernel _ma_kernel;
+    Tensor                     _tmp_a;
+    Tensor                     _tmp_b;
+    Tensor                     _workspace;
+    Tensor                     _B_pretransposed;
+    bool                       _run_vector_matrix_multiplication;
+    bool                       _run_addition;
+    bool                       _is_first_run;
+    bool                       _reshape_b_only_on_first_run;
 };
 }
 #endif /*__ARM_COMPUTE_NEGEMM_H__ */

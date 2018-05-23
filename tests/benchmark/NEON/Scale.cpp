@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,11 +49,13 @@ using NEScaleFixture = ScaleFixture<Tensor, NEScale, Accessor>;
 
 TEST_SUITE(NEON)
 TEST_SUITE(Scale)
-REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallImageShapes(), framework::dataset::make("DataType", { DataType::U8, DataType::S16, DataType::F32 })),
+REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, NEScaleFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(combine(datasets::SmallImageShapes(), framework::dataset::make("DataType", { DataType::U8, DataType::S16, DataType::F32 })),
+                                                                                                                     framework::dataset::make("DataLayout", { DataLayout::NCHW })),
                                                                                                                      interpolation_types),
                                                                                                              datasets::BorderModes()),
                                                                                                      framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER })));
-REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeImageShapes(), framework::dataset::make("DataType", { DataType::U8, DataType::S16, DataType::F32 })),
+REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, NEScaleFixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(combine(datasets::LargeImageShapes(), framework::dataset::make("DataType", { DataType::U8, DataType::S16, DataType::F32 })),
+                                                                                                                   framework::dataset::make("DataLayout", { DataLayout::NCHW })),
                                                                                                                    interpolation_types),
                                                                                                            datasets::BorderModes()),
                                                                                                    framework::dataset::make("SamplingPolicy", { SamplingPolicy::CENTER })));

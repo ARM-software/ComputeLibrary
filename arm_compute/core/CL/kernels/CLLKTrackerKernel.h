@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,9 +62,12 @@ struct CLOldValue
     int16_t dummy; /**< Dummy field, to make sure the data structure 128-bit align, so that GPU can use vload4 */
 };
 
+/** Interface for OpenCL Array of Internal Key Points. */
 using ICLLKInternalKeypointArray = ICLArray<CLLKInternalKeypoint>;
-using ICLCoefficientTableArray   = ICLArray<CLCoefficientTable>;
-using ICLOldValArray             = ICLArray<CLOldValue>;
+/** Interface for OpenCL Array of Coefficient Tables. */
+using ICLCoefficientTableArray = ICLArray<CLCoefficientTable>;
+/** Interface for OpenCL Array of Old Values. */
+using ICLOldValArray = ICLArray<CLOldValue>;
 
 /** Interface to run the initialization step of LKTracker */
 class CLLKTrackerInitKernel : public ICLKernel

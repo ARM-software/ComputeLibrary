@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,11 +27,11 @@
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixAccumulateBiasesKernel.h"
-#include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLIm2ColKernel.h"
 #include "arm_compute/core/CL/kernels/CLTransposeKernel.h"
 #include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
+#include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
 
@@ -67,7 +67,7 @@ public:
  *  -# @ref CLIm2ColKernel (called when the input comes from a convolutional layer)
  *  -# @ref CLFullyConnectedLayerReshapeWeights (if @p are_weights_reshaped is set to false and transpose_weights is set to true ) (called once)
  *  -# @ref CLGEMMMatrixMultiplyKernel or @ref CLGEMMLowpMatrixMultiplyCore (if quantized asymmetric)
- *  -# @ref CLGEMMMatrixAccumulateBiasesKernel or @ref CLGEMMLowpQuantizeDownInt32ToUint8Scale (if quantized asymmetric) (if @p biases is not equal to nullptr)
+ *  -# @ref CLGEMMMatrixAccumulateBiasesKernel or @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint (if quantized asymmetric) (if @p biases is not equal to nullptr)
  *
  * @note  The fully connected layer accepts "weights" tensors only with 2 dimensions.
  */
@@ -76,6 +76,14 @@ class CLFullyConnectedLayer : public IFunction
 public:
     /** Constructor */
     CLFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLFullyConnectedLayer(const CLFullyConnectedLayer &) = delete;
+    /** Default move constructor */
+    CLFullyConnectedLayer(CLFullyConnectedLayer &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLFullyConnectedLayer &operator=(const CLFullyConnectedLayer &) = delete;
+    /** Default move assignment operator */
+    CLFullyConnectedLayer &operator=(CLFullyConnectedLayer &&) = default;
     /** Set the input and output tensors.
      *
      * @param[in]  input                Source tensor. Data type supported: QS8/QASYMM8/QS16/F16/F32.
@@ -101,16 +109,17 @@ public:
 
     //Inherited methods override
     void run() override;
+    void prepare() override;
 
 private:
     void configure_fc_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);
     void configure_conv_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);
-    void configure_mm(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, bool is_interleaved_transposed = true);
+    void configure_mm(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);
 
     CLMemoryGroup                                       _memory_group;
     CLIm2ColKernel                                      _im2col_kernel;
     CLFullyConnectedLayerReshapeWeights                 _reshape_weights_kernel;
-    CLGEMMMatrixMultiplyKernel                          _mm_kernel;
+    CLGEMM                                              _mm_gemm;
     CLGEMMLowpMatrixMultiplyCore                        _mm_gemmlowp;
     CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint _gemmlowp_output_stage;
     CLGEMMMatrixAccumulateBiasesKernel                  _accumulate_biases_kernel;
@@ -121,6 +130,7 @@ private:
     bool                                                _is_fc_after_conv;
     bool                                                _accumulate_biases;
     bool                                                _is_quantized;
+    const ICLTensor                                    *_original_weights;
 };
 }
 #endif /* __ARM_COMPUTE_CLFULLYCONNECTEDLAYER_H__ */

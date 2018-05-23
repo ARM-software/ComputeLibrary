@@ -1,7 +1,9 @@
 var namespacemembers_type =
 [
-    [ "c", "namespacemembers_type.xhtml", null ],
+    [ "a", "namespacemembers_type.xhtml", null ],
+    [ "c", "namespacemembers_type_c.xhtml", null ],
     [ "d", "namespacemembers_type_d.xhtml", null ],
+    [ "e", "namespacemembers_type_e.xhtml", null ],
     [ "f", "namespacemembers_type_f.xhtml", null ],
     [ "g", "namespacemembers_type_g.xhtml", null ],
     [ "h", "namespacemembers_type_h.xhtml", null ],
@@ -12,6 +14,7 @@ var namespacemembers_type =
     [ "n", "namespacemembers_type_n.xhtml", null ],
     [ "p", "namespacemembers_type_p.xhtml", null ],
     [ "q", "namespacemembers_type_q.xhtml", null ],
+    [ "r", "namespacemembers_type_r.xhtml", null ],
     [ "s", "namespacemembers_type_s.xhtml", null ],
     [ "t", "namespacemembers_type_t.xhtml", null ],
     [ "u", "namespacemembers_type_u.xhtml", null ]

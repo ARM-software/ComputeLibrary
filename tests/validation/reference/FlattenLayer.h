@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,7 @@ namespace validation
 namespace reference
 {
 template <typename T>
-SimpleTensor<T> flatten_layer(const SimpleTensor<T> &src);
+SimpleTensor<T> flatten_layer(const SimpleTensor<T> &src, const TensorShape &shape_flatten);
 } // namespace reference
 } // namespace validation
 } // namespace test

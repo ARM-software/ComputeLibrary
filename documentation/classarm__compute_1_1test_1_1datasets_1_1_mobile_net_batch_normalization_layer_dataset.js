@@ -1,4 +1,0 @@
-var classarm__compute_1_1test_1_1datasets_1_1_mobile_net_batch_normalization_layer_dataset =
-[
-    [ "MobileNetBatchNormalizationLayerDataset", "classarm__compute_1_1test_1_1datasets_1_1_mobile_net_batch_normalization_layer_dataset.xhtml#a620e601b3fb4a9b1d72bc7a9c2602ef1", null ]
-];

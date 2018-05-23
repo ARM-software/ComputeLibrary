@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 
 #include "arm_compute/runtime/CL/functions/CLQuantizationLayer.h"
 
+#include "arm_compute/core/Error.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 
 using namespace arm_compute;
@@ -33,8 +34,21 @@ CLQuantizationLayer::CLQuantizationLayer()
 {
 }
 
+Status CLQuantizationLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+
+    TensorInfo min_max{ input->num_channels(), input->data_type() };
+    ARM_COMPUTE_RETURN_ON_ERROR(CLMinMaxLayerKernel::validate(input, &min_max));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLQuantizationLayerKernel::validate(input, output, &min_max));
+
+    return Status{};
+}
+
 void CLQuantizationLayer::configure(const ICLTensor *input, ICLTensor *output)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+
     // Configure min-max kernel. _min_max tensor will be auto-configured within the kernel.
     _min_max_kernel.configure(input, &_min_max);
 

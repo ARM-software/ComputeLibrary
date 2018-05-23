@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -126,9 +126,9 @@ $(document).ready(function(){initNavTree('softmax__layer__quantized_8cl.xhtml','
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:abaa48ad818c44e415fd3f9dd0f27bf01"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="softmax__layer__quantized_8cl.xhtml#abaa48ad818c44e415fd3f9dd0f27bf01">MAX_OP</a>(x,  y,  type,  <a class="el" href="hwc_8hpp.xhtml#ab2c6b258f02add8fdf4cfc7c371dd772">size</a>)&#160;&#160;&#160;max((x), (y))</td></tr>
+<tr class="memitem:abaa48ad818c44e415fd3f9dd0f27bf01"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="softmax__layer__quantized_8cl.xhtml#abaa48ad818c44e415fd3f9dd0f27bf01">MAX_OP</a>(x,  y,  type,  size)&#160;&#160;&#160;max((x), (y))</td></tr>
 <tr class="separator:abaa48ad818c44e415fd3f9dd0f27bf01"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a44206a4e5783c7aabacec88aad878c88"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="softmax__layer__quantized_8cl.xhtml#a44206a4e5783c7aabacec88aad878c88">ADD_OP</a>(x,  y,  type,  <a class="el" href="hwc_8hpp.xhtml#ab2c6b258f02add8fdf4cfc7c371dd772">size</a>)&#160;&#160;&#160;((x) + (y))</td></tr>
+<tr class="memitem:a44206a4e5783c7aabacec88aad878c88"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="softmax__layer__quantized_8cl.xhtml#a44206a4e5783c7aabacec88aad878c88">ADD_OP</a>(x,  y,  type,  size)&#160;&#160;&#160;((x) + (y))</td></tr>
 <tr class="separator:a44206a4e5783c7aabacec88aad878c88"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a08246606c233e7785a497c09672f366f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="softmax__layer__quantized_8cl.xhtml#a08246606c233e7785a497c09672f366f">GRID_SIZE</a>&#160;&#160;&#160;1</td></tr>
 <tr class="separator:a08246606c233e7785a497c09672f366f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -140,7 +140,7 @@ Macros</h2></td></tr>
 <tr class="separator:a525a42d38133b1051b8924b456add4a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a54aedfa17c5ac2567107d5f488b0f4af"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="softmax__layer__quantized_8cl.xhtml#a54aedfa17c5ac2567107d5f488b0f4af">asymm_exp_on_negative_values</a>(a,  k_integer_bits)&#160;&#160;&#160;<a class="el" href="helpers__asymm_8h.xhtml#a3a4f1b5d8f1cd67ac31bc62c9a6f4aa8">ASYMM_EXP_ON_NEGATIVE_VALUES</a>(a, k_integer_bits, 16)</td></tr>
 <tr class="separator:a54aedfa17c5ac2567107d5f488b0f4af"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad57ea340cdcfeb2e1375b70c3ae59bae"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="softmax__layer__quantized_8cl.xhtml#ad57ea340cdcfeb2e1375b70c3ae59bae">asymm_rescale</a>(<a class="el" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>,  src_integer_bits,  dst_integer_bits)&#160;&#160;&#160;<a class="el" href="helpers__asymm_8h.xhtml#a98585f1bb84dea90aecbf59785c46151">ASYMM_RESCALE</a>(<a class="el" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>, src_integer_bits, dst_integer_bits, 16)</td></tr>
+<tr class="memitem:ad57ea340cdcfeb2e1375b70c3ae59bae"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="softmax__layer__quantized_8cl.xhtml#ad57ea340cdcfeb2e1375b70c3ae59bae">asymm_rescale</a>(value,  src_integer_bits,  dst_integer_bits)&#160;&#160;&#160;<a class="el" href="helpers__asymm_8h.xhtml#a98585f1bb84dea90aecbf59785c46151">ASYMM_RESCALE</a>(value, src_integer_bits, dst_integer_bits, 16)</td></tr>
 <tr class="separator:ad57ea340cdcfeb2e1375b70c3ae59bae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af5987b09a234231612b2b1eded343025"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="softmax__layer__quantized_8cl.xhtml#af5987b09a234231612b2b1eded343025">VEC_UCHAR</a>&#160;&#160;&#160;<a class="el" href="helpers_8h.xhtml#a36f754c05b6fddf6df0d8d0a74f8159f">VEC_DATA_TYPE</a>(uchar, <a class="el" href="softmax__layer__quantized_8cl.xhtml#a7c78836761fa3b5b124efea237dac70f">VECTOR_SIZE</a>)</td></tr>
 <tr class="separator:af5987b09a234231612b2b1eded343025"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -181,7 +181,7 @@ Variables</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname"><a class="el" href="hwc_8hpp.xhtml#ab2c6b258f02add8fdf4cfc7c371dd772">size</a>&#160;</td>
+          <td class="paramname">size&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -259,7 +259,7 @@ Variables</h2></td></tr>
           <td class="memname">#define asymm_rescale</td>
           <td>(</td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname"><a class="el" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>, </td>
+          <td class="paramname">value, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -276,7 +276,7 @@ Variables</h2></td></tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td>&#160;&#160;&#160;<a class="el" href="helpers__asymm_8h.xhtml#a98585f1bb84dea90aecbf59785c46151">ASYMM_RESCALE</a>(<a class="el" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>, src_integer_bits, dst_integer_bits, 16)</td>
+          <td></td><td>&#160;&#160;&#160;<a class="el" href="helpers__asymm_8h.xhtml#a98585f1bb84dea90aecbf59785c46151">ASYMM_RESCALE</a>(value, src_integer_bits, dst_integer_bits, 16)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -339,7 +339,7 @@ Variables</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname"><a class="el" href="hwc_8hpp.xhtml#ab2c6b258f02add8fdf4cfc7c371dd772">size</a>&#160;</td>
+          <td class="paramname">size&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -430,7 +430,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.xhtml">src</a></li><li class="navelem"><a class="el" href="dir_aebb8dcc11953d78e620bbef0b9e2183.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_8c278f79c760e5c5fbd911f9870614c1.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_25885286e9dad4fa105b7b25a8031bbf.xhtml">cl_kernels</a></li><li class="navelem"><a class="el" href="softmax__layer__quantized_8cl.xhtml">softmax_layer_quantized.cl</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:56 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

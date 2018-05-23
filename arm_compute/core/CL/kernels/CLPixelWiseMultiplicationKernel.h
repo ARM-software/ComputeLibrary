@@ -39,9 +39,9 @@ class CLPixelWiseMultiplicationKernel : public ICLKernel
 public:
     /** Default constructor.*/
     CLPixelWiseMultiplicationKernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLPixelWiseMultiplicationKernel(const CLPixelWiseMultiplicationKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLPixelWiseMultiplicationKernel &operator=(const CLPixelWiseMultiplicationKernel &) = delete;
     /** Allow instances of this class to be moved */
     CLPixelWiseMultiplicationKernel(CLPixelWiseMultiplicationKernel &&) = default;

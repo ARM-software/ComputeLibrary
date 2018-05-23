@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -142,6 +142,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a2dcf87458fcfdfb5e9fdd369e0320d78"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_scheduler.xhtml#a2dcf87458fcfdfb5e9fdd369e0320d78">memory_barrier</a> ()</td></tr>
 <tr class="memdesc:a2dcf87458fcfdfb5e9fdd369e0320d78"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defines a barrier ordering memory transactions.  <a href="#a2dcf87458fcfdfb5e9fdd369e0320d78">More...</a><br /></td></tr>
 <tr class="separator:a2dcf87458fcfdfb5e9fdd369e0320d78"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a646cd535a16835b246c3367a63d96250"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3">GPUTarget</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_scheduler.xhtml#a646cd535a16835b246c3367a63d96250">get_target</a> () const </td></tr>
+<tr class="memdesc:a646cd535a16835b246c3367a63d96250"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the target GPU.  <a href="#a646cd535a16835b246c3367a63d96250">More...</a><br /></td></tr>
+<tr class="separator:a646cd535a16835b246c3367a63d96250"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad5ba9d34a3a855bf1dd2e36316ff550a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_scheduler.xhtml#ad5ba9d34a3a855bf1dd2e36316ff550a">set_target</a> (<a class="el" href="namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3">GPUTarget</a> target)</td></tr>
+<tr class="memdesc:ad5ba9d34a3a855bf1dd2e36316ff550a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accessor to set target GPU to be used by the scheduler.  <a href="#ad5ba9d34a3a855bf1dd2e36316ff550a">More...</a><br /></td></tr>
+<tr class="separator:ad5ba9d34a3a855bf1dd2e36316ff550a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
@@ -232,8 +238,36 @@ Static Public Member Functions</h2></td></tr>
 <p>Access the scheduler singleton. </p>
 <dl class="section return"><dt>Returns</dt><dd>The scheduler </dd></dl>
 
-<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00063">main()</a>, and <a class="el" href="_direct_convolution_layer_tensor_shift_fixture_8h_source.xhtml#l00070">DirectConvolutionValidationGenericTensorShiftFixture&lt; TensorType, AccessorType, FunctionType, T &gt;::setup()</a>.</p>
+<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00063">main()</a>.</p>
 
+</div>
+</div>
+<a class="anchor" id="a646cd535a16835b246c3367a63d96250"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3">GPUTarget</a> get_target </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the target GPU. </p>
+<dl class="section return"><dt>Returns</dt><dd>The target GPU. </dd></dl>
+
+<p>Definition at line <a class="el" href="_g_c_scheduler_8h_source.xhtml#l00071">71</a> of file <a class="el" href="_g_c_scheduler_8h_source.xhtml">GCScheduler.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    {</div><div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        <span class="keywordflow">return</span> _target;</div><div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="a9120bd38578ddee701b5526dfe2369db"></a>
@@ -286,8 +320,40 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Defines a barrier ordering memory transactions. </p>
 
-<p>Referenced by <a class="el" href="_direct_convolution_layer_tensor_shift_fixture_8h_source.xhtml#l00070">DirectConvolutionValidationGenericTensorShiftFixture&lt; TensorType, AccessorType, FunctionType, T &gt;::setup()</a>.</p>
+</div>
+</div>
+<a class="anchor" id="ad5ba9d34a3a855bf1dd2e36316ff550a"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void set_target </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3">GPUTarget</a>&#160;</td>
+          <td class="paramname"><em>target</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
+<p>Accessor to set target GPU to be used by the scheduler. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">target</td><td>The target GPU. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Definition at line <a class="el" href="_g_c_scheduler_8h_source.xhtml#l00080">80</a> of file <a class="el" href="_g_c_scheduler_8h_source.xhtml">GCScheduler.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    {</div><div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;        _target = target;</div><div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
@@ -299,7 +365,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_g_c_scheduler.xhtml">GCScheduler</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:58 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:41 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

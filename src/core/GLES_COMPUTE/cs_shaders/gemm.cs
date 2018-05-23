@@ -132,7 +132,7 @@ void main(void)
 /** This OpenGL ES kernel is optimised for Midgard. It computes the matrix multiplication between matrix A (src0) and matrix B (src1)
  *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_32bit and @ref gemm_transpose1x4 before running the matrix multiplication
  *
- * @attention The width of matrix B and the alpha's value need to be passed at compile time using WIDTH_MATRIX_B and ALPHA
+ * @note The optional value of scalar alpha is passed at compile time using -DALPHA=alpha
  *
  * @param[in]  src0_ptr   Pointer to the source matrix. Supported data types: F32
  * @param[in]  src0_attrs The attributes of the source matrix
@@ -220,7 +220,9 @@ void main()
 /** This OpenGL ES kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1)
  *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_32bit and @ref gemm_transpose1x4 before running the matrix multiplication
  *
- * @attention The width of matrix B and the alpha's value need to be passed at compile time using WIDTH_MATRIX_B and ALPHA
+ * @note The number of elements processed along the x and y directions must be passed at compile time using -DNUM_ELEMS_PROCESSED_PER_THREAD_X and -DNUM_ELEMS_PROCESSED_PER_THREAD_Y.
+ * @note The number of matrix A columns must be passed at compile time using -DCOLS_A.
+ * @note The optional value of scalar alpha is passed at compile time using -DALPHA=alpha
  *
  * @param[in]  src0_ptr   Pointer to the source matrix. Supported data types: F32
  * @param[in]  src0_attrs The attributes of the source matrix
@@ -344,6 +346,184 @@ void main()
 }
 #endif /* GEMM_MM_FLOATING_POINT */
 
+#ifdef GEMM_MM_FLOATING_POINT_BIFROST
+/** This OpenGL ES kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1)
+ *  Matrix A and matrix B in case both matrices have not been reshaped
+ *
+ * @note The number of elements processed along the x and y directions must be passed at compile time using -DNUM_ELEMS_PROCESSED_PER_THREAD_X and -DNUM_ELEMS_PROCESSED_PER_THREAD_Y.
+ * @note The number of matrix A columns must be passed at compile time using -DCOLS_A.
+ * @note The optional value of scalar alpha is passed at compile time using -DALPHA=alpha
+ *
+ * @param[in]  src0_ptr   Pointer to the source matrix. Supported data types: F32
+ * @param[in]  src0_attrs The attributes of the source matrix
+ * @param[in]  src1_ptr   Pointer to the source matrix. Supported data types: same as @p src0_ptr
+ * @param[in]  src1_attrs The attributes of the source matrix
+ * @param[out] dst_ptr    Pointer to the destination matrix Supported data types: same as @p src0_ptr
+ * @param[in]  dst_attrs  The attributes of the destination matrix
+ */
+SHADER_PARAMS_DECLARATION
+{
+    ImageAttributes src0_attrs;
+    ImageAttributes src1_attrs;
+    ImageAttributes dst_attrs;
+};
+TENSOR_DECLARATION(1, src0Buffer, float, src0_ptr, src0_shift, 2, readonly);
+TENSOR_DECLARATION(2, src1Buffer, float, src1_ptr, src1_shift, 2, readonly);
+TENSOR_DECLARATION(3, dstBuffer, float, dst_ptr, dst_shift, 2, writeonly);
+
+void main()
+{
+    ImageIterator src0_iter = CONVERT_TO_IMAGE_ITERATOR_NO_STEP(src0_attrs, src0_shift);
+    ImageIterator src1_iter = CONVERT_TO_IMAGE_ITERATOR_NO_STEP(src1_attrs, src1_shift);
+    ImageIterator dst_iter  = CONVERT_TO_IMAGE_ITERATOR(dst_attrs, dst_shift);
+
+    int idx = int(gl_GlobalInvocationID.x) * int(NUM_ELEMS_PROCESSED_PER_THREAD_X);
+    /* Compute the address for the vector A and matrix B */
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(src0_iter, uint(gl_GlobalInvocationID.y) * (src0_attrs.stride_y) * uint(NUM_ELEMS_PROCESSED_PER_THREAD_Y));
+    TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, idx * 4);
+
+    /* Reset accumulators */
+    vec4 acc0 = vec4(0.0f);
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+    vec4 acc1 = vec4(0.0f);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+    vec4 acc2 = vec4(0.0f);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+    vec4 acc3 = vec4(0.0f);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+
+    // A and B src indices get incremented at the same time.
+    int i = 0;
+    for(; i <= (COLS_A - 4); i += 4)
+    {
+        // Load values from matrix A and matrix B
+        vec4 a0 = VLOAD4_CURRENT_ITEM(vec4, src0_ptr, src0_iter);
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+        vec4 a1 = VLOAD4(vec4, src0_ptr, IMAGE_OFFSET(src0_iter, 0, 1));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+        vec4 a2 = VLOAD4(vec4, src0_ptr, IMAGE_OFFSET(src0_iter, 0, 2));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        vec4 a3 = VLOAD4(vec4, src0_ptr, IMAGE_OFFSET(src0_iter, 0, 3));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        vec4 b0 = VLOAD4_CURRENT_ITEM(vec4, src1_ptr, src1_iter);
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, src1_attrs.stride_y);
+
+        // Multiply and accumulate
+        acc0 += b0 * vec4(a0.x);
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+        acc1 += b0 * vec4(a1.x);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+        acc2 += b0 * vec4(a2.x);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        acc3 += b0 * vec4(a3.x);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+
+        // Load values from matrix B
+        b0 = VLOAD4_CURRENT_ITEM(vec4, src1_ptr, src1_iter);
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, src1_attrs.stride_y);
+
+        // Multiply and accumulate
+        acc0 += b0 * vec4(a0.y);
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+        acc1 += b0 * vec4(a1.y);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+        acc2 += b0 * vec4(a2.y);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        acc3 += b0 * vec4(a3.y);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+
+        // Load values from matrix B
+        b0 = VLOAD4_CURRENT_ITEM(vec4, src1_ptr, src1_iter);
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, src1_attrs.stride_y);
+
+        // Multiply and accumulate
+        acc0 += b0 * vec4(a0.z);
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+        acc1 += b0 * vec4(a1.z);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+        acc2 += b0 * vec4(a2.z);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        acc3 += b0 * vec4(a3.z);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+
+        // Load values from matrix B
+        b0 = VLOAD4_CURRENT_ITEM(vec4, src1_ptr, src1_iter);
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, src1_attrs.stride_y);
+
+        // Multiply and accumulate
+        acc0 += b0 * vec4(a0.w);
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+        acc1 += b0 * vec4(a1.w);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+        acc2 += b0 * vec4(a2.w);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        acc3 += b0 * vec4(a3.w);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+
+        TENSOR_ITERATOR_ADVANCE(src0_iter, 4);
+    }
+
+    for(; i < COLS_A; ++i)
+    {
+        // Load values from matrix A
+        float a0 = LOAD_CURRENT_ITEM(src0_ptr, src0_iter);
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+        float a1 = LOAD(src0_ptr, IMAGE_OFFSET(src0_iter, 0, 1));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+        float a2 = LOAD(src0_ptr, IMAGE_OFFSET(src0_iter, 0, 2));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        float a3 = LOAD(src0_ptr, IMAGE_OFFSET(src0_iter, 0, 3));
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        vec4 b0 = VLOAD4_CURRENT_ITEM(vec4, src1_ptr, src1_iter);
+
+        // Multiply and accumulate
+        acc0 += b0 * vec4(a0);
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+        acc1 += b0 * vec4(a1);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+        acc2 += b0 * vec4(a2);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+        acc3 += b0 * vec4(a3);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+
+        TENSOR_ITERATOR_ADVANCE_IN_BYTES(src1_iter, src1_attrs.stride_y);
+        TENSOR_ITERATOR_ADVANCE(src0_iter, 1);
+    }
+
+    /* Multiply by the weight of vector-matrix product */
+    acc0 = acc0 * vec4(ALPHA);
+    VSTORE4_CURRENT_ITEM(dst_ptr, dst_iter, acc0);
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+    acc1 = acc1 * vec4(ALPHA);
+    VSTORE4(dst_ptr, IMAGE_OFFSET(dst_iter, 0, 1), acc1);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 1
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+    acc2 = acc2 * vec4(ALPHA);
+    VSTORE4(dst_ptr, IMAGE_OFFSET(dst_iter, 0, 2), acc2);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 2
+#if NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+    acc3 = acc3 * vec4(ALPHA);
+    VSTORE4(dst_ptr, IMAGE_OFFSET(dst_iter, 0, 3), acc3);
+#endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 3
+}
+#endif /* GEMM_MM_FLOATING_POINT_BIFROST */
+
 #ifdef GEMM_MATRIXADDITION
 /** This OpenGL ES kernel performs the in-place matrix addition between 2 matrices taking into account that the second matrix might be weighted by a scalar value beta:
  *
@@ -461,7 +641,7 @@ void main(void)
 /** This OpenGL ES kernel computes the matrix multiplication between matrix A(src0) and matrix B(src1)
  * Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_16bit and @ref gemm_transpose1x4 before running the matrix multiplication
  *
- * @attention The width of matrix B and the alpha's value need to be passed at compile time using WIDTH_MATRIX_B and ALPHA
+ * @note The optional value of scalar alpha is passed at compile time using -DALPHA=alpha
  *
  * @param[in]  src0_ptr   Pointer to the source matrix.Supported data types: F16
  * @param[in]  src0_attrs The attributes of the source matrix
@@ -836,7 +1016,7 @@ void main(void)
 /** This OpenGL ES kernel is optimised for Midgard. It computes the matrix multiplication between matrix A (src0) and matrix B (src1)
  *  Matrix A and matrix B must be reshaped respectively with @ref gemm_interleave4x4_32bit and @ref gemm_transpose1x4 before running the matrix multiplication
  *
- * @attention The width of matrix B and the alpha's value need to be passed at compile time using WIDTH_MATRIX_B and ALPHA
+ * @note The optional value of scalar alpha is passed at compile time using -DALPHA=alpha
  *
  * @param[in]  src0_ptr   Pointer to the source matrix. Supported data types: F16
  * @param[in]  src0_attrs The attributes of the source matrix

@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -98,6 +98,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow4" class="tabs3">
     <ul class="tablist">
       <li><a href="#index__"><span>_</span></a></li>
+      <li><a href="#index_a"><span>a</span></a></li>
       <li><a href="#index_b"><span>b</span></a></li>
       <li><a href="#index_c"><span>c</span></a></li>
       <li><a href="#index_e"><span>e</span></a></li>
@@ -154,6 +155,13 @@ $(document).ready(function(){initNavTree('functions_type.xhtml','');});
 </ul>
 
 
+<h3><a class="anchor" id="index_a"></a>- a -</h3><ul>
+<li>AssemblyGemm
+: <a class="el" href="classarm__compute_1_1_assembly_kernel_glue.xhtml#a2b7261bda3dc469e02365df7719358b7">AssemblyKernelGlue&lt; TypeInput, TypeOutput &gt;</a>
+</li>
+</ul>
+
+
 <h3><a class="anchor" id="index_b"></a>- b -</h3><ul>
 <li>Buffer
 : <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#acf18a24d1f21176e811e88cee2a70f1f">SimpleTensor&lt; T &gt;</a>
@@ -162,6 +170,9 @@ $(document).ready(function(){initNavTree('functions_type.xhtml','');});
 
 
 <h3><a class="anchor" id="index_c"></a>- c -</h3><ul>
+<li>Callback
+: <a class="el" href="classarm__compute_1_1utils_1_1signal_1_1detail_1_1_signal_impl_3_01_return_type_07_args_8_8_8_08_4.xhtml#a428e0534fefac5fe560235bb5f6e52e2">SignalImpl&lt; ReturnType(Args...)&gt;</a>
+</li>
 <li>common_type
 : <a class="el" href="structarm__compute_1_1test_1_1common__promoted__signed__type.xhtml#a5dc4a681965ff1118a0491b07867c032">common_promoted_signed_type&lt; T &gt;</a>
 , <a class="el" href="structarm__compute_1_1test_1_1common__promoted__unsigned__type.xhtml#a5dc4a681965ff1118a0491b07867c032">common_promoted_unsigned_type&lt; T &gt;</a>
@@ -180,6 +191,8 @@ $(document).ready(function(){initNavTree('functions_type.xhtml','');});
 , <a class="el" href="structarm__compute_1_1detail_1_1dummy.xhtml#a0492e57b9f86c67a4aa57998e260720f">dummy&lt; T, S &gt;</a>
 , <a class="el" href="structarm__compute_1_1detail_1_1lubrelu.xhtml#a0492e57b9f86c67a4aa57998e260720f">lubrelu&lt; T, S &gt;</a>
 , <a class="el" href="structarm__compute_1_1detail_1_1relu.xhtml#a0492e57b9f86c67a4aa57998e260720f">relu&lt; T, S &gt;</a>
+, <a class="el" href="structarm__compute_1_1misc_1_1_c_r_t_p.xhtml#a338528dd60e909145fcb3bbd65e50df6">CRTP&lt; T, Type &gt;</a>
+, <a class="el" href="classarm__compute_1_1strong__type_1_1_strong_type.xhtml#a338528dd60e909145fcb3bbd65e50df6">StrongType&lt; T, Tag, Attributes &gt;</a>
 </li>
 </ul>
 
@@ -215,58 +228,14 @@ $(document).ready(function(){initNavTree('functions_type.xhtml','');});
 
 
 <h3><a class="anchor" id="index_t"></a>- t -</h3><ul>
-<li>tag_type
-: <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01float__t_00_012_01_4.xhtml#a3a028f9ff24453b3e679afd2f194489a">neon_vector&lt; float_t, 2 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01float__t_00_014_01_4.xhtml#aa91b62298919f9b657fc83358dfe29b4">neon_vector&lt; float_t, 4 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01int16__t_00_014_01_4.xhtml#a3a028f9ff24453b3e679afd2f194489a">neon_vector&lt; int16_t, 4 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01int16__t_00_018_01_4.xhtml#aa91b62298919f9b657fc83358dfe29b4">neon_vector&lt; int16_t, 8 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01int32__t_00_012_01_4.xhtml#a3a028f9ff24453b3e679afd2f194489a">neon_vector&lt; int32_t, 2 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01int32__t_00_014_01_4.xhtml#aa91b62298919f9b657fc83358dfe29b4">neon_vector&lt; int32_t, 4 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01int64__t_00_011_01_4.xhtml#a3a028f9ff24453b3e679afd2f194489a">neon_vector&lt; int64_t, 1 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01int64__t_00_012_01_4.xhtml#aa91b62298919f9b657fc83358dfe29b4">neon_vector&lt; int64_t, 2 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01int8__t_00_0116_01_4.xhtml#aa91b62298919f9b657fc83358dfe29b4">neon_vector&lt; int8_t, 16 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01int8__t_00_018_01_4.xhtml#a3a028f9ff24453b3e679afd2f194489a">neon_vector&lt; int8_t, 8 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01uint16__t_00_014_01_4.xhtml#a3a028f9ff24453b3e679afd2f194489a">neon_vector&lt; uint16_t, 4 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01uint16__t_00_018_01_4.xhtml#aa91b62298919f9b657fc83358dfe29b4">neon_vector&lt; uint16_t, 8 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01uint32__t_00_012_01_4.xhtml#a3a028f9ff24453b3e679afd2f194489a">neon_vector&lt; uint32_t, 2 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01uint32__t_00_014_01_4.xhtml#aa91b62298919f9b657fc83358dfe29b4">neon_vector&lt; uint32_t, 4 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01uint64__t_00_011_01_4.xhtml#a3a028f9ff24453b3e679afd2f194489a">neon_vector&lt; uint64_t, 1 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01uint64__t_00_012_01_4.xhtml#aa91b62298919f9b657fc83358dfe29b4">neon_vector&lt; uint64_t, 2 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01uint8__t_00_0116_01_4.xhtml#aa91b62298919f9b657fc83358dfe29b4">neon_vector&lt; uint8_t, 16 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01uint8__t_00_018_01_4.xhtml#a3a028f9ff24453b3e679afd2f194489a">neon_vector&lt; uint8_t, 8 &gt;</a>
-</li>
-<li>target_type
-: <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_min_max_location_validation_fixture.xhtml#aa60bf78863d623ab60280c587e64961b">MinMaxLocationValidationFixture&lt; TensorType, AccessorType, ArrayType, ArrayAccessorType, FunctionType, T &gt;</a>
-</li>
-<li>TBias
-: <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_convolution_validation_generic_fixture.xhtml#ad6dc80aa0e6af9b0ab649540c58995a8">ConvolutionValidationGenericFixture&lt; TensorType, AccessorType, FunctionType, T &gt;</a>
-, <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_depthwise_convolution_layer_validation_generic_fixture.xhtml#ad6dc80aa0e6af9b0ab649540c58995a8">DepthwiseConvolutionLayerValidationGenericFixture&lt; TensorType, AccessorType, FunctionType, T &gt;</a>
-, <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_direct_convolution_validation_generic_fixture.xhtml#ad6dc80aa0e6af9b0ab649540c58995a8">DirectConvolutionValidationGenericFixture&lt; TensorType, AccessorType, FunctionType, T &gt;</a>
-, <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_direct_convolution_validation_generic_tensor_shift_fixture.xhtml#ad6dc80aa0e6af9b0ab649540c58995a8">DirectConvolutionValidationGenericTensorShiftFixture&lt; TensorType, AccessorType, FunctionType, T &gt;</a>
-, <a class="el" href="classarm__compute_1_1test_1_1validation_1_1_fully_connected_layer_validation_generic_fixture.xhtml#ad6dc80aa0e6af9b0ab649540c58995a8">FullyConnectedLayerValidationGenericFixture&lt; TensorType, AccessorType, FunctionType, T, run_interleave &gt;</a>
-</li>
 <li>type
-: <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_batch_normalization_layer_dataset.xhtml#a3c0271eec649ceb1058ce3765eb847c2">BatchNormalizationLayerDataset</a>
-, <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_convolution_layer_dataset.xhtml#aa29c9ab44036acf654b39611cee4b024">ConvolutionLayerDataset</a>
-, <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_depthwise_convolution_layer_dataset.xhtml#a1859f3602576181726c22fca31571bfc">DepthwiseConvolutionLayerDataset</a>
-, <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_depthwise_separable_convolution_layer_dataset.xhtml#ad253dff6e929f5245a19a91bd81ddfa6">DepthwiseSeparableConvolutionLayerDataset</a>
-, <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_fully_connected_layer_dataset.xhtml#a2d7bea34a08c9353b13ee79e303024b1">FullyConnectedLayerDataset</a>
-, <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_g_e_m_m_dataset.xhtml#a0ef0d4746167237f43004c207d64d601">GEMMDataset</a>
-, <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_g_e_m_m_lowp_dataset.xhtml#a767e2f093846c7a21decb977cf4f6565">GEMMLowpDataset</a>
-, <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_h_o_g_descriptor_dataset.xhtml#ac8bbd25d58c3ba76605e869cd9f0edda">HOGDescriptorDataset</a>
-, <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_normalize_planar_y_u_v_layer_dataset.xhtml#a07945b88fcb23720042fb717e4c44766">NormalizePlanarYUVLayerDataset</a>
-, <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_pooling_layer_dataset.xhtml#a8069c6eabcf150084f21353256a829f4">PoolingLayerDataset</a>
-, <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_reshape_layer_dataset.xhtml#a07945b88fcb23720042fb717e4c44766">ReshapeLayerDataset</a>
-, <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_r_o_i_pooling_layer_dataset.xhtml#ae5dadc472f4dff4ff057633b1b42921f">ROIPoolingLayerDataset</a>
-, <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_scale_layer_dataset.xhtml#a1cd04a9541f996fd58ad19dc435b8a90">ScaleLayerDataset</a>
-, <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_threshold_dataset.xhtml#a458c0ac09d41cfb3f0a55a99ef24446c">ThresholdDataset</a>
+: <a class="el" href="structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote_3_01float_01_4.xhtml#a05cacf975133703fccd67d8b60ed9ae0">promote&lt; float &gt;</a>
+, <a class="el" href="structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote_3_01half_01_4.xhtml#a871173f31fa2a65afb444d262bc1aadb">promote&lt; half &gt;</a>
 , <a class="el" href="structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote_3_01int16__t_01_4.xhtml#a4f14ffc6d6f6ca92afb1baf996fc9305">promote&lt; int16_t &gt;</a>
 , <a class="el" href="structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote_3_01int32__t_01_4.xhtml#a70ca3d636283d6713220cd8af5fc07b3">promote&lt; int32_t &gt;</a>
-, <a class="el" href="structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote_3_01int64__t_01_4.xhtml#a70ca3d636283d6713220cd8af5fc07b3">promote&lt; int64_t &gt;</a>
 , <a class="el" href="structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote_3_01int8__t_01_4.xhtml#a8812bf779dca54354aa6ad00cef14a73">promote&lt; int8_t &gt;</a>
 , <a class="el" href="structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote_3_01uint16__t_01_4.xhtml#a43022da9f622deba3284b748a6885e23">promote&lt; uint16_t &gt;</a>
 , <a class="el" href="structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote_3_01uint32__t_01_4.xhtml#a9659bbcc7fc016eda242219021c7980b">promote&lt; uint32_t &gt;</a>
-, <a class="el" href="structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote_3_01uint64__t_01_4.xhtml#a9659bbcc7fc016eda242219021c7980b">promote&lt; uint64_t &gt;</a>
 , <a class="el" href="structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1traits_1_1promote_3_01uint8__t_01_4.xhtml#a3085ed9ad7c9b1c88dcec24108730e54">promote&lt; uint8_t &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_cartesian_product_dataset.xhtml#a9c9aae4b5f426f99087f48b40bc114fc">CartesianProductDataset&lt; T, U &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1framework_1_1dataset_1_1_container_dataset.xhtml#a6fdded42fc2978d6f9f60564b5b4190a">ContainerDataset&lt; T &gt;</a>
@@ -283,24 +252,12 @@ $(document).ready(function(){initNavTree('functions_type.xhtml','');});
 , <a class="el" href="structarm__compute_1_1test_1_1traits_1_1promote_3_01uint16__t_01_4.xhtml#a43022da9f622deba3284b748a6885e23">promote&lt; uint16_t &gt;</a>
 , <a class="el" href="structarm__compute_1_1test_1_1traits_1_1promote_3_01uint32__t_01_4.xhtml#a9659bbcc7fc016eda242219021c7980b">promote&lt; uint32_t &gt;</a>
 , <a class="el" href="structarm__compute_1_1test_1_1traits_1_1promote_3_01uint8__t_01_4.xhtml#a3085ed9ad7c9b1c88dcec24108730e54">promote&lt; uint8_t &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01float__t_00_012_01_4.xhtml#aad6afede5ed30a42755ae8130a367197">neon_vector&lt; float_t, 2 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01float__t_00_014_01_4.xhtml#aee059b4da2d129932a8f012a29175f50">neon_vector&lt; float_t, 4 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01int16__t_00_014_01_4.xhtml#a43d6100bc428920a6f8b9303ffba5fb8">neon_vector&lt; int16_t, 4 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01int16__t_00_018_01_4.xhtml#abcf84790266b942329565d79303cae56">neon_vector&lt; int16_t, 8 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01int32__t_00_012_01_4.xhtml#ae7d4c6a3abb8b366d32dee7bd0730399">neon_vector&lt; int32_t, 2 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01int32__t_00_014_01_4.xhtml#a8853d1ce089e8848d1824f995bb71ca5">neon_vector&lt; int32_t, 4 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01int64__t_00_011_01_4.xhtml#a8add39ad7dab83c26b02504855285276">neon_vector&lt; int64_t, 1 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01int64__t_00_012_01_4.xhtml#a45864cdf2ff914ebbc8af13fb0d4ac9b">neon_vector&lt; int64_t, 2 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01int8__t_00_0116_01_4.xhtml#a4c013079cfaa6ef6ce9b4ff09f6d0c95">neon_vector&lt; int8_t, 16 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01int8__t_00_018_01_4.xhtml#a76f5c3ac1725a4b14afd8aae441af68e">neon_vector&lt; int8_t, 8 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01uint16__t_00_014_01_4.xhtml#abe70405e8f313506a84412b01ee15a00">neon_vector&lt; uint16_t, 4 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01uint16__t_00_018_01_4.xhtml#a1e72b0de29f3eed76c938224d599b7c7">neon_vector&lt; uint16_t, 8 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01uint32__t_00_012_01_4.xhtml#a3a873ab43277a5ef4ac39d6dbea90faf">neon_vector&lt; uint32_t, 2 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01uint32__t_00_014_01_4.xhtml#a03250d62d05c6a5bffbb2130159ab120">neon_vector&lt; uint32_t, 4 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01uint64__t_00_011_01_4.xhtml#aea2e5304312f461006ed4e2fe619a2a2">neon_vector&lt; uint64_t, 1 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01uint64__t_00_012_01_4.xhtml#a9baf6b56926beaa682566d90545ee00a">neon_vector&lt; uint64_t, 2 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01uint8__t_00_0116_01_4.xhtml#a771d4942ff2183ed787721d68cb3db92">neon_vector&lt; uint8_t, 16 &gt;</a>
-, <a class="el" href="structarm__compute_1_1wrapper_1_1traits_1_1neon__vector_3_01uint8__t_00_018_01_4.xhtml#a3e74ab5803272bb06fcff46991111309">neon_vector&lt; uint8_t, 8 &gt;</a>
+</li>
+<li>TypeOperator
+: <a class="el" href="classarm__compute_1_1_assembly_kernel_glue.xhtml#a3174543728e6f78b211d600475b8ab9e">AssemblyKernelGlue&lt; TypeInput, TypeOutput &gt;</a>
+</li>
+<li>TypeResult
+: <a class="el" href="classarm__compute_1_1_assembly_kernel_glue.xhtml#ac9f23d550c3fdf519d84948fc9e015c1">AssemblyKernelGlue&lt; TypeInput, TypeOutput &gt;</a>
 </li>
 </ul>
 
@@ -331,7 +288,7 @@ $(document).ready(function(){initNavTree('functions_type.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Fri Mar 2 2018 12:38:02 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:46 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

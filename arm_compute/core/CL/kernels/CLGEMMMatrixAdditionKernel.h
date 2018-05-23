@@ -65,7 +65,7 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const float beta);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, float beta);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

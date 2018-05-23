@@ -62,8 +62,15 @@ namespace utils
 class Example
 {
 public:
+    /** Setup the example.
+     *
+     * @param[in] argc Argument count.
+     * @param[in] argv Argument values.
+     */
     virtual void do_setup(int argc, char **argv) {};
+    /** Run the example. */
     virtual void do_run() {};
+    /** Teardown the example. */
     virtual void do_teardown() {};
 
     /** Default destructor. */
@@ -76,13 +83,12 @@ public:
  * @param[in] argv    Command line arguments
  * @param[in] example Example to run
  */
-int run_example(int argc, char **argv, Example &example);
+int run_example(int argc, char **argv, std::unique_ptr<Example> example);
 
 template <typename T>
 int run_example(int argc, char **argv)
 {
-    T example;
-    return run_example(argc, argv, example);
+    return run_example(argc, argv, support::cpp14::make_unique<T>());
 }
 
 /** Draw a RGB rectangular window for the detected object
@@ -400,7 +406,14 @@ public:
     {
         ARM_COMPUTE_ERROR_ON(!is_open());
         ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::U8, DataType::F32);
-        ARM_COMPUTE_ERROR_ON(tensor.info()->dimension(0) != _width || tensor.info()->dimension(1) != _height || tensor.info()->dimension(2) != 3);
+
+        const DataLayout  data_layout  = tensor.info()->data_layout();
+        const TensorShape tensor_shape = tensor.info()->tensor_shape();
+
+        ARM_COMPUTE_UNUSED(tensor_shape);
+        ARM_COMPUTE_ERROR_ON(tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH)] != _width);
+        ARM_COMPUTE_ERROR_ON(tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT)] != _height);
+        ARM_COMPUTE_ERROR_ON(tensor_shape[get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL)] != 3);
 
         try
         {
@@ -417,19 +430,31 @@ public:
                                      "Not enough data in file");
             ARM_COMPUTE_UNUSED(end_position);
 
+            // Stride across channels
+            size_t stride_z = 0;
+
             // Iterate through every pixel of the image
             arm_compute::Window window;
-            window.set(arm_compute::Window::DimX, arm_compute::Window::Dimension(0, _width, 1));
-            window.set(arm_compute::Window::DimY, arm_compute::Window::Dimension(0, _height, 1));
-            window.set(arm_compute::Window::DimZ, arm_compute::Window::Dimension(0, 1, 1));
+            if(data_layout == DataLayout::NCHW)
+            {
+                window.set(arm_compute::Window::DimX, arm_compute::Window::Dimension(0, _width, 1));
+                window.set(arm_compute::Window::DimY, arm_compute::Window::Dimension(0, _height, 1));
+                window.set(arm_compute::Window::DimZ, arm_compute::Window::Dimension(0, 1, 1));
+                stride_z = tensor.info()->strides_in_bytes()[2];
+            }
+            else
+            {
+                window.set(arm_compute::Window::DimX, arm_compute::Window::Dimension(0, 1, 1));
+                window.set(arm_compute::Window::DimY, arm_compute::Window::Dimension(0, _width, 1));
+                window.set(arm_compute::Window::DimZ, arm_compute::Window::Dimension(0, _height, 1));
+                stride_z = tensor.info()->strides_in_bytes()[0];
+            }
 
             arm_compute::Iterator out(&tensor, window);
 
             unsigned char red   = 0;
             unsigned char green = 0;
             unsigned char blue  = 0;
-
-            size_t stride_z = tensor.info()->strides_in_bytes()[2];
 
             arm_compute::execute_window_loop(window, [&](const arm_compute::Coordinates & id)
             {
@@ -489,9 +514,11 @@ private:
     unsigned int  _width, _height;
 };
 
+/** Numpy data loader */
 class NPYLoader
 {
 public:
+    /** Default constructor */
     NPYLoader()
         : _fs(), _shape(), _fortran_order(false), _typestring()
     {
@@ -857,11 +884,8 @@ void fill_random_tensor(T &tensor, float lower_bound, float upper_bound)
     std::random_device rd;
     std::mt19937       gen(rd());
 
-    TensorShape shape(tensor.info()->dimension(0), tensor.info()->dimension(1));
-
     Window window;
-    window.set(Window::DimX, Window::Dimension(0, shape.x(), 1));
-    window.set(Window::DimY, Window::Dimension(0, shape.y(), 1));
+    window.use_tensor_dimensions(tensor.info()->tensor_shape());
 
     map(tensor, true);
 
@@ -900,6 +924,43 @@ void init_sgemm_output(T &dst, T &src0, T &src1, arm_compute::DataType dt)
  * @return The free memory in kB
  */
 uint64_t get_mem_free_from_meminfo();
+
+/** Compare to tensor
+ *
+ * @param[in] tensor1 First tensor to be compared.
+ * @param[in] tensor2 Second tensor to be compared.
+ *
+ * @return The number of mismatches
+ */
+template <typename T>
+int compare_tensor(ITensor &tensor1, ITensor &tensor2)
+{
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(&tensor1, &tensor2);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(&tensor1, &tensor2);
+
+    int    num_mismatches = 0;
+    Window window;
+    window.use_tensor_dimensions(tensor1.info()->tensor_shape());
+
+    map(tensor1, true);
+    map(tensor2, true);
+    Iterator itensor1(&tensor1, window);
+    Iterator itensor2(&tensor2, window);
+
+    execute_window_loop(window, [&](const Coordinates & id)
+    {
+        if(std::abs(*reinterpret_cast<T *>(itensor1.ptr()) - *reinterpret_cast<T *>(itensor2.ptr())) > 0.00001)
+        {
+            ++num_mismatches;
+        }
+    },
+    itensor1, itensor2);
+
+    unmap(itensor1);
+    unmap(itensor2);
+
+    return num_mismatches;
+}
 } // namespace utils
 } // namespace arm_compute
 #endif /* __UTILS_UTILS_H__*/

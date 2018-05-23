@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -142,6 +142,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a20b426e4b9bb65d7a0b9316022d0adef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Severity of the error.  <a href="#a20b426e4b9bb65d7a0b9316022d0adef">More...</a><br /></td></tr>
 <tr class="separator:a20b426e4b9bb65d7a0b9316022d0adef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3a8b158ebc8a296bf8e3b40379c2a711"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1test_1_1framework_1_1_test_error.xhtml#a3a8b158ebc8a296bf8e3b40379c2a711">what</a> () const noexceptoverride</td></tr>
+<tr class="memdesc:a3a8b158ebc8a296bf8e3b40379c2a711"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the error message.  <a href="#a3a8b158ebc8a296bf8e3b40379c2a711">More...</a><br /></td></tr>
 <tr class="separator:a3a8b158ebc8a296bf8e3b40379c2a711"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -215,7 +216,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_exceptions_8cpp_source.xhtml#l00121">121</a> of file <a class="el" href="_exceptions_8cpp_source.xhtml">Exceptions.cpp</a>.</p>
 
-<p>Referenced by <a class="el" href="_framework_8cpp_source.xhtml#l00253">Framework::error_on_missing_assets()</a>, <a class="el" href="_framework_8cpp_source.xhtml#l00189">Framework::log_failed_expectation()</a>, and <a class="el" href="_exceptions_8cpp_source.xhtml#l00112">TestError::TestError()</a>.</p>
+<p>Referenced by <a class="el" href="_framework_8cpp_source.xhtml#l00261">Framework::error_on_missing_assets()</a>, <a class="el" href="_framework_8cpp_source.xhtml#l00197">Framework::log_failed_expectation()</a>, and <a class="el" href="_exceptions_8cpp_source.xhtml#l00112">TestError::TestError()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;{</div><div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;    <span class="keywordflow">return</span> _level;</div><div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
@@ -240,6 +241,9 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Get the error message. </p>
+<dl class="section return"><dt>Returns</dt><dd>error message. </dd></dl>
+
 <p>Definition at line <a class="el" href="_exceptions_8cpp_source.xhtml#l00126">126</a> of file <a class="el" href="_exceptions_8cpp_source.xhtml">Exceptions.cpp</a>.</p>
 <div class="fragment"><div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;{</div><div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;    <span class="keywordflow">return</span> _combined.c_str();</div><div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;}</div></div><!-- fragment -->
 </div>
@@ -254,7 +258,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test.xhtml">test</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test_1_1framework.xhtml">framework</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1test_1_1framework_1_1_test_error.xhtml">TestError</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:38:00 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:44 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

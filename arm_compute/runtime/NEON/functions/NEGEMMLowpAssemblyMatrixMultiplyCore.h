@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/NEON/AssemblyHelper.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <memory>
@@ -58,12 +59,15 @@ public:
 
 private:
     MemoryGroup                _memory_group;
+    AssemblyKernelGlueU8U32    _asm_glue_unsigned;
+    AssemblyKernelGlueS8S32    _asm_glue_signed;
     std::unique_ptr<INEKernel> _mm_kernel;
     std::unique_ptr<INEKernel> _mtx_a_reshape_kernel;
     std::unique_ptr<INEKernel> _mtx_b_reshape_kernel;
     Tensor                     _tmp_a;
     Tensor                     _tmp_b;
     Tensor                     _workspace;
+    Tensor                     _B_pretransposed;
 };
 }
 #endif /*__ARM_COMPUTE_NEGEMMLOWPASSEMBLYMATRIXMULTIPLYCORE_H__ */

@@ -82,112 +82,133 @@ private:
      * @param[in] window       Output region on which to execute the kernel.
      */
     template <PoolingType pooling_type, bool exclude_padding = false>
-    void pooling2_f32(const Window &window_input, const Window &window);
+    void pooling2_f32_nchw(const Window &window_input, const Window &window);
     /** Function to perform 2x2 pooling for float16_t.
      *
      * @param[in] window_input Input region on which to execute the kernel.
      * @param[in] window       Output region on which to execute the kernel.
      */
     template <PoolingType pooling_type, bool exclude_padding = false>
-    void pooling2_f16(const Window &window_input, const Window &window);
+    void pooling2_f16_nchw(const Window &window_input, const Window &window);
     /** Function to perform 2x2 pooling for 8bit fixed point.
      *
      * @param[in] window_input Input region on which to execute the kernel.
      * @param[in] window       Output region on which to execute the kernel.
      */
     template <PoolingType pooling_type>
-    void pooling2_q8(const Window &window_input, const Window &window);
+    void pooling2_q8_nchw(const Window &window_input, const Window &window);
     /** Function to perform 2x2 pooling for 8bit asymmetric fixed point.
      *
      * @param[in] window_input Input region on which to execute the kernel.
      * @param[in] window       Output region on which to execute the kernel.
      */
     template <PoolingType pooling_type, bool exclude_padding = false>
-    void pooling2_qasymm8(const Window &window_input, const Window &window);
+    void pooling2_qasymm8_nchw(const Window &window_input, const Window &window);
     /** Function to perform 2x2 pooling for 16bit fixed point.
      *
      * @param[in] window_input Input region on which to execute the kernel.
      * @param[in] window       Output region on which to execute the kernel.
      */
     template <PoolingType pooling_type>
-    void pooling2_q16(const Window &window_input, const Window &window);
+    void pooling2_q16_nchw(const Window &window_input, const Window &window);
     /** Function to perform 3x3 pooling.
      *
      * @param[in] window_input Input region on which to execute the kernel.
      * @param[in] window       Output region on which to execute the kernel.
      */
     template <PoolingType pooling_type, bool exclude_padding = false>
-    void pooling3_f32(const Window &window_input, const Window &window);
+    void pooling3_f32_nchw(const Window &window_input, const Window &window);
     /** Function to perform 3x3 pooling.
      *
      * @param[in] window_input Input region on which to execute the kernel.
      * @param[in] window       Output region on which to execute the kernel.
      */
     template <PoolingType pooling_type, bool exclude_padding = false>
-    void pooling3_f16(const Window &window_input, const Window &window);
+    void pooling3_f16_nchw(const Window &window_input, const Window &window);
     /** Function to perform 3x3 pooling for 8bit fixed point.
      *
      * @param[in] window_input Input region on which to execute the kernel.
      * @param[in] window       Output region on which to execute the kernel.
      */
     template <PoolingType pooling_type>
-    void pooling3_q8(const Window &window_input, const Window &window);
+    void pooling3_q8_nchw(const Window &window_input, const Window &window);
     /** Function to perform 3x3 pooling for 8bit quantized fixed point.
      *
      * @param[in] window_input Input region on which to execute the kernel.
      * @param[in] window       Output region on which to execute the kernel.
      */
     template <PoolingType pooling_type, bool exclude_padding = false>
-    void pooling3_qasymm8(const Window &window_input, const Window &window);
+    void pooling3_qasymm8_nchw(const Window &window_input, const Window &window);
     /** Function to perform 3x3 pooling for 16bit fixed point.
      *
      * @param[in] window_input Input region on which to execute the kernel.
      * @param[in] window       Output region on which to execute the kernel.
      */
     template <PoolingType pooling_type>
-    void pooling3_q16(const Window &window_input, const Window &window);
+    void pooling3_q16_nchw(const Window &window_input, const Window &window);
     /** Function to perform 7x7 pooling.
      *
      * @param[in] window_input Input region on which to execute the kernel.
      * @param[in] window       Output region on which to execute the kernel.
      */
     template <PoolingType pooling_type, bool exclude_padding = false>
-    void pooling7_f32(const Window &window_input, const Window &window);
+    void pooling7_f32_nchw(const Window &window_input, const Window &window);
     /** Function to perform MxN pooling for 8bit fixed point.
      *
      * @param[in] window_input Input region on which to execute the kernel.
      * @param[in] window       Output region on which to execute the kernel.
      */
     template <PoolingType pooling_type>
-    void poolingMxN_q8(const Window &window_input, const Window &window);
+    void poolingMxN_q8_nchw(const Window &window_input, const Window &window);
     /** Function to perform MxN pooling for 8-bit quantized.
      *
      * @param[in] window_input Input region on which to execute the kernel.
      * @param[in] window       Output region on which to execute the kernel.
      */
     template <PoolingType pooling_type, bool exclude_padding = false>
-    void poolingMxN_qasymm8(const Window &window_input, const Window &window);
+    void poolingMxN_qasymm8_nchw(const Window &window_input, const Window &window);
+    /** Function to perform MxN pooling for 8-bit quantized. (NHWC)
+     *
+     * @param[in] window_input Input region on which to execute the kernel.
+     * @param[in] window       Output region on which to execute the kernel.
+     */
+    template <PoolingType pooling_type, bool exclude_padding = false>
+    void poolingMxN_qasymm8_nhwc(const Window &window_input, const Window &window);
     /** Function to perform MxN pooling for 16bit fixed point.
      *
      * @param[in] window_input Input region on which to execute the kernel.
      * @param[in] window       Output region on which to execute the kernel.
      */
     template <PoolingType pooling_type>
-    void poolingMxN_q16(const Window &window_input, const Window &window);
+    void poolingMxN_q16_nchw(const Window &window_input, const Window &window);
     /** Function to perform MxN pooling for 16-bit floating point values.
      *
      * @param[in] window_input Input region on which to execute the kernel.
      * @param[in] window       Output region on which to execute the kernel.
      */
     template <PoolingType pooling_type, bool exclude_padding = false>
-    void poolingMxN_f16(const Window &window_input, const Window &window);
+    void poolingMxN_f16_nchw(const Window &window_input, const Window &window);
+    /** Function to perform MxN pooling for 16-bit floating point values. (NHWC)
+     *
+     * @param[in] window_input Input region on which to execute the kernel.
+     * @param[in] window       Output region on which to execute the kernel.
+     */
+    template <PoolingType pooling_type, bool exclude_padding = false>
+    void poolingMxN_f16_nhwc(const Window &window_input, const Window &window);
     /** Function to perform MxN pooling for 32-bit floating point values.
      *
      * @param[in] window_input Input region on which to execute the kernel.
      * @param[in] window       Output region on which to execute the kernel.
      */
     template <PoolingType pooling_type, bool exclude_padding = false>
-    void poolingMxN_f32(const Window &window_input, const Window &window);
+    void poolingMxN_f32_nchw(const Window &window_input, const Window &window);
+    /** Function to perform MxN pooling for 32-bit floating point values (NHWC).
+     *
+     * @param[in] window_input Input region on which to execute the kernel.
+     * @param[in] window       Output region on which to execute the kernel.
+     */
+    template <PoolingType pooling_type, bool exclude_padding = false>
+    void poolingMxN_f32_nhwc(const Window &window_input, const Window &window);
     /** Common signature for all the specialised Pooling functions
      *
      * @param[in] window_input Input region on which to execute the kernel.

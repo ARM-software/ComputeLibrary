@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,10 +39,13 @@ namespace dataset
 class Dataset
 {
 protected:
-    Dataset()  = default;
+    /** Default constructor. */
+    Dataset() = default;
+    /** Default destructor. */
     ~Dataset() = default;
 
 public:
+    /** Allow instances of this class to be move constructed */
     Dataset(Dataset &&) = default;
 };
 
@@ -62,9 +65,11 @@ protected:
     {
     }
 
+    /** Default destructor. */
     ~NamedDataset() = default;
 
 public:
+    /** Allow instances of this class to be move constructed */
     NamedDataset(NamedDataset &&) = default;
 
     /** Return name of the dataset.

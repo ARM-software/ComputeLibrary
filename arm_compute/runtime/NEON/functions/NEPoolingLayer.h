@@ -72,6 +72,7 @@ private:
     NEPoolingLayerKernel _pooling_layer_kernel;
     NEFillBorderKernel   _border_handler;
     bool                 _is_global_pooling_layer;
+    DataLayout           _data_layout;
 };
 }
 #endif /* __ARM_COMPUTE_NEPOOLINGLAYER_H__ */

@@ -4,6 +4,7 @@ var classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel =
     [ "NEPixelWiseMultiplicationKernel", "classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#ac23503429643fa0415fd64b1fc17e40c", null ],
     [ "NEPixelWiseMultiplicationKernel", "classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#a032fb6504d12ca1244b2d7d82609f062", null ],
     [ "~NEPixelWiseMultiplicationKernel", "classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#ab299ab73ca304f9e10359a54a763f4d3", null ],
+    [ "border_size", "classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7", null ],
     [ "configure", "classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#ab214c0eb5acd40bde3f8a3fb6c0a6613", null ],
     [ "name", "classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#ab5656bb5b6334bdbe6e606c715872828", null ],
     [ "operator=", "classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#a6685c2ffbda12dbf1e4706b85c688e19", null ],

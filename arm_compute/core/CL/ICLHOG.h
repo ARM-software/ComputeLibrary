@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,9 +42,9 @@ class ICLHOG : public IHOG
 public:
     /** Default constructor */
     ICLHOG();
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     ICLHOG(const ICLHOG &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     ICLHOG &operator=(const ICLHOG &) = delete;
     /** Allow instances of this class to be moved */
     ICLHOG(ICLHOG &&) = default;

@@ -1,54 +1,53 @@
 var dir_b30607d43e07fadf88f4c95a88a6c88e =
 [
-    [ "ActivationLayer.h", "arm__compute_2graph_2nodes_2_activation_layer_8h.xhtml", [
-      [ "ActivationLayer", "classarm__compute_1_1graph_1_1_activation_layer.xhtml", "classarm__compute_1_1graph_1_1_activation_layer" ]
+    [ "ActivationLayerNode.h", "_activation_layer_node_8h.xhtml", [
+      [ "ActivationLayerNode", "classarm__compute_1_1graph_1_1_activation_layer_node.xhtml", "classarm__compute_1_1graph_1_1_activation_layer_node" ]
     ] ],
-    [ "BatchNormalizationLayer.h", "arm__compute_2graph_2nodes_2_batch_normalization_layer_8h.xhtml", [
-      [ "BatchNormalizationLayer", "classarm__compute_1_1graph_1_1_batch_normalization_layer.xhtml", "classarm__compute_1_1graph_1_1_batch_normalization_layer" ]
+    [ "BatchNormalizationLayerNode.h", "_batch_normalization_layer_node_8h.xhtml", [
+      [ "BatchNormalizationLayerNode", "classarm__compute_1_1graph_1_1_batch_normalization_layer_node.xhtml", "classarm__compute_1_1graph_1_1_batch_normalization_layer_node" ]
     ] ],
-    [ "BranchLayer.h", "_branch_layer_8h.xhtml", [
-      [ "BranchLayer", "classarm__compute_1_1graph_1_1_branch_layer.xhtml", "classarm__compute_1_1graph_1_1_branch_layer" ]
+    [ "ConstNode.h", "_const_node_8h.xhtml", [
+      [ "ConstNode", "classarm__compute_1_1graph_1_1_const_node.xhtml", "classarm__compute_1_1graph_1_1_const_node" ]
     ] ],
-    [ "ConvolutionLayer.h", "arm__compute_2graph_2nodes_2_convolution_layer_8h.xhtml", [
-      [ "ConvolutionLayer", "classarm__compute_1_1graph_1_1_convolution_layer.xhtml", "classarm__compute_1_1graph_1_1_convolution_layer" ]
+    [ "ConvolutionLayerNode.h", "_convolution_layer_node_8h.xhtml", [
+      [ "ConvolutionLayerNode", "classarm__compute_1_1graph_1_1_convolution_layer_node.xhtml", "classarm__compute_1_1graph_1_1_convolution_layer_node" ]
     ] ],
-    [ "DepthConvertLayer.h", "arm__compute_2graph_2nodes_2_depth_convert_layer_8h.xhtml", [
-      [ "DepthConvertLayer", "classarm__compute_1_1graph_1_1_depth_convert_layer.xhtml", "classarm__compute_1_1graph_1_1_depth_convert_layer" ]
+    [ "DepthConcatenateLayerNode.h", "_depth_concatenate_layer_node_8h.xhtml", [
+      [ "DepthConcatenateLayerNode", "classarm__compute_1_1graph_1_1_depth_concatenate_layer_node.xhtml", "classarm__compute_1_1graph_1_1_depth_concatenate_layer_node" ]
     ] ],
-    [ "DepthwiseConvolutionLayer.h", "arm__compute_2graph_2nodes_2_depthwise_convolution_layer_8h.xhtml", [
-      [ "DepthwiseConvolutionLayer", "classarm__compute_1_1graph_1_1_depthwise_convolution_layer.xhtml", "classarm__compute_1_1graph_1_1_depthwise_convolution_layer" ]
+    [ "DepthwiseConvolutionLayerNode.h", "_depthwise_convolution_layer_node_8h.xhtml", [
+      [ "DepthwiseConvolutionLayerNode", "classarm__compute_1_1graph_1_1_depthwise_convolution_layer_node.xhtml", "classarm__compute_1_1graph_1_1_depthwise_convolution_layer_node" ]
     ] ],
-    [ "DequantizationLayer.h", "arm__compute_2graph_2nodes_2_dequantization_layer_8h.xhtml", [
-      [ "DequantizationLayer", "classarm__compute_1_1graph_1_1_dequantization_layer.xhtml", "classarm__compute_1_1graph_1_1_dequantization_layer" ]
+    [ "EltwiseLayerNode.h", "_eltwise_layer_node_8h.xhtml", [
+      [ "EltwiseLayerNode", "classarm__compute_1_1graph_1_1_eltwise_layer_node.xhtml", "classarm__compute_1_1graph_1_1_eltwise_layer_node" ]
     ] ],
-    [ "FlattenLayer.h", "arm__compute_2graph_2nodes_2_flatten_layer_8h.xhtml", [
-      [ "FlattenLayer", "classarm__compute_1_1graph_1_1_flatten_layer.xhtml", "classarm__compute_1_1graph_1_1_flatten_layer" ]
+    [ "FlattenLayerNode.h", "_flatten_layer_node_8h.xhtml", [
+      [ "FlattenLayerNode", "classarm__compute_1_1graph_1_1_flatten_layer_node.xhtml", "classarm__compute_1_1graph_1_1_flatten_layer_node" ]
     ] ],
-    [ "FloorLayer.h", "_floor_layer_8h.xhtml", [
-      [ "FloorLayer", "classarm__compute_1_1graph_1_1_floor_layer.xhtml", "classarm__compute_1_1graph_1_1_floor_layer" ]
+    [ "FullyConnectedLayerNode.h", "_fully_connected_layer_node_8h.xhtml", [
+      [ "FullyConnectedLayerNode", "classarm__compute_1_1graph_1_1_fully_connected_layer_node.xhtml", "classarm__compute_1_1graph_1_1_fully_connected_layer_node" ]
     ] ],
-    [ "FullyConnectedLayer.h", "arm__compute_2graph_2nodes_2_fully_connected_layer_8h.xhtml", [
-      [ "FullyConnectedLayer", "classarm__compute_1_1graph_1_1_fully_connected_layer.xhtml", "classarm__compute_1_1graph_1_1_fully_connected_layer" ]
+    [ "InputNode.h", "_input_node_8h.xhtml", [
+      [ "InputNode", "classarm__compute_1_1graph_1_1_input_node.xhtml", "classarm__compute_1_1graph_1_1_input_node" ]
     ] ],
-    [ "L2NormalizeLayer.h", "arm__compute_2graph_2nodes_2_l2_normalize_layer_8h.xhtml", [
-      [ "L2NormalizeLayer", "classarm__compute_1_1graph_1_1_l2_normalize_layer.xhtml", "classarm__compute_1_1graph_1_1_l2_normalize_layer" ]
+    [ "Nodes.h", "_nodes_8h.xhtml", null ],
+    [ "NodesFwd.h", "_nodes_fwd_8h.xhtml", null ],
+    [ "NormalizationLayerNode.h", "_normalization_layer_node_8h.xhtml", [
+      [ "NormalizationLayerNode", "classarm__compute_1_1graph_1_1_normalization_layer_node.xhtml", "classarm__compute_1_1graph_1_1_normalization_layer_node" ]
     ] ],
-    [ "NormalizationLayer.h", "arm__compute_2graph_2nodes_2_normalization_layer_8h.xhtml", [
-      [ "NormalizationLayer", "classarm__compute_1_1graph_1_1_normalization_layer.xhtml", "classarm__compute_1_1graph_1_1_normalization_layer" ]
+    [ "OutputNode.h", "_output_node_8h.xhtml", [
+      [ "OutputNode", "classarm__compute_1_1graph_1_1_output_node.xhtml", "classarm__compute_1_1graph_1_1_output_node" ]
     ] ],
-    [ "PoolingLayer.h", "arm__compute_2graph_2nodes_2_pooling_layer_8h.xhtml", [
-      [ "PoolingLayer", "classarm__compute_1_1graph_1_1_pooling_layer.xhtml", "classarm__compute_1_1graph_1_1_pooling_layer" ]
+    [ "PoolingLayerNode.h", "_pooling_layer_node_8h.xhtml", [
+      [ "PoolingLayerNode", "classarm__compute_1_1graph_1_1_pooling_layer_node.xhtml", "classarm__compute_1_1graph_1_1_pooling_layer_node" ]
     ] ],
-    [ "QuantizationLayer.h", "arm__compute_2graph_2nodes_2_quantization_layer_8h.xhtml", [
-      [ "QuantizationLayer", "classarm__compute_1_1graph_1_1_quantization_layer.xhtml", "classarm__compute_1_1graph_1_1_quantization_layer" ]
+    [ "ReshapeLayerNode.h", "_reshape_layer_node_8h.xhtml", [
+      [ "ReshapeLayerNode", "classarm__compute_1_1graph_1_1_reshape_layer_node.xhtml", "classarm__compute_1_1graph_1_1_reshape_layer_node" ]
     ] ],
-    [ "ReshapeLayer.h", "arm__compute_2graph_2nodes_2_reshape_layer_8h.xhtml", [
-      [ "ReshapeLayer", "classarm__compute_1_1graph_1_1_reshape_layer.xhtml", "classarm__compute_1_1graph_1_1_reshape_layer" ]
+    [ "SoftmaxLayerNode.h", "_softmax_layer_node_8h.xhtml", [
+      [ "SoftmaxLayerNode", "classarm__compute_1_1graph_1_1_softmax_layer_node.xhtml", "classarm__compute_1_1graph_1_1_softmax_layer_node" ]
     ] ],
-    [ "ResidualLayer.h", "_residual_layer_8h.xhtml", [
-      [ "ResidualLayer", "classarm__compute_1_1graph_1_1_residual_layer.xhtml", "classarm__compute_1_1graph_1_1_residual_layer" ]
-    ] ],
-    [ "SoftmaxLayer.h", "arm__compute_2graph_2nodes_2_softmax_layer_8h.xhtml", [
-      [ "SoftmaxLayer", "classarm__compute_1_1graph_1_1_softmax_layer.xhtml", "classarm__compute_1_1graph_1_1_softmax_layer" ]
+    [ "SplitLayerNode.h", "_split_layer_node_8h.xhtml", [
+      [ "SplitLayerNode", "classarm__compute_1_1graph_1_1_split_layer_node.xhtml", "classarm__compute_1_1graph_1_1_split_layer_node" ]
     ] ]
 ];

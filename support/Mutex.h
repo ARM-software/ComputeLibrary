@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,6 +29,7 @@
 namespace arm_compute
 {
 #ifndef NO_MULTI_THREADING
+/** Wrapper of Mutex data-object */
 using Mutex = std::mutex;
 #else  /* NO_MULTI_THREADING */
 /** Wrapper implementation of Mutex data-object */
@@ -36,13 +37,20 @@ class Mutex
 {
 public:
     /** Default constructor */
-    Mutex()  = default;
+    Mutex() = default;
+    /** Default destructor */
     ~Mutex() = default;
 
+    /** Lock */
     void lock() {};
 
+    /** Unlock */
     void unlock() {};
 
+    /** Try the lock.
+     *
+     * @return true.
+     */
     bool try_lock()
     {
         return true;

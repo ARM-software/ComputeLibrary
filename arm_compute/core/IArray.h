@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -136,16 +136,27 @@ private:
     size_t _num_values;
     size_t _max_size;
 };
-using IKeyPointArray        = IArray<KeyPoint>;
-using ICoordinates2DArray   = IArray<Coordinates2D>;
-using IROIArray             = IArray<ROI>;
+/** Interface for Array of Key Points. */
+using IKeyPointArray = IArray<KeyPoint>;
+/** Interface for Array of 2D Coordinates. */
+using ICoordinates2DArray = IArray<Coordinates2D>;
+/** Interface for Array of Detection Windows. */
 using IDetectionWindowArray = IArray<DetectionWindow>;
-using ISize2DArray          = IArray<Size2D>;
-using IUInt8Array           = IArray<uint8_t>;
-using IUInt16Array          = IArray<uint16_t>;
-using IUInt32Array          = IArray<uint32_t>;
-using IInt16Array           = IArray<int16_t>;
-using IInt32Array           = IArray<int32_t>;
-using IFloatArray           = IArray<float>;
+/** Interface for Array of ROIs. */
+using IROIArray = IArray<ROI>;
+/** Interface for Array of 2D Sizes. */
+using ISize2DArray = IArray<Size2D>;
+/** Interface for Array of uint8s. */
+using IUInt8Array = IArray<uint8_t>;
+/** Interface for Array of uint16s. */
+using IUInt16Array = IArray<uint16_t>;
+/** Interface for Array of uint32s. */
+using IUInt32Array = IArray<uint32_t>;
+/** Interface for Array of int16s. */
+using IInt16Array = IArray<int16_t>;
+/** Interface for Array of int32s. */
+using IInt32Array = IArray<int32_t>;
+/** Interface for Array of floats. */
+using IFloatArray = IArray<float>;
 }
 #endif /* __ARM_COMPUTE_IARRAY_H__ */

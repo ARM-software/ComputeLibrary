@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -351,7 +351,7 @@ __kernel void hog_block_normalization(IMAGE_DECLARATION(src),
 }
 #endif /* NUM_CELLS_PER_BLOCK_HEIGHT and NUM_BINS_PER_BLOCK_X and NUM_BINS_PER_BLOCK and HOG_NORM_TYPE and L2_HYST_THRESHOLD */
 
-#if defined(NUM_BLOCKS_PER_DESCRIPTOR_Y) && defined(NUM_BINS_PER_DESCRIPTOR_X) && defined(THRESHOLD) && defined(MAX_NUM_DETECTION_WINDOWS) && defined(IDX_CLASS) && defined(BLOCK_STRIDE_WIDTH) && defined(BLOCK_STRIDE_HEIGHT) && defined(DETECTION_WINDOW_WIDTH) && defined(DETECTION_WINDOW_HEIGHT)
+#if defined(NUM_BLOCKS_PER_DESCRIPTOR_Y) && defined(NUM_BINS_PER_DESCRIPTOR_X) && defined(THRESHOLD) && defined(MAX_NUM_DETECTION_WINDOWS) && defined(IDX_CLASS) && defined(DETECTION_WINDOW_STRIDE_WIDTH) && defined(DETECTION_WINDOW_STRIDE_HEIGHT) && defined(DETECTION_WINDOW_WIDTH) && defined(DETECTION_WINDOW_HEIGHT)
 
 /** This OpenCL kernel computes the HOG detector using linear SVM
  *
@@ -362,8 +362,8 @@ __kernel void hog_block_normalization(IMAGE_DECLARATION(src),
  * -# -DTHRESHOLD = Threshold for the distance between features and SVM classifying plane
  * -# -DMAX_NUM_DETECTION_WINDOWS = Maximum number of possible detection windows. It is equal to the size of the DetectioWindow array
  * -# -DIDX_CLASS = Index of the class to detect
- * -# -DBLOCK_STRIDE_WIDTH = Block stride for the X direction
- * -# -DBLOCK_STRIDE_HEIGHT = Block stride for the Y direction
+ * -# -DDETECTION_WINDOW_STRIDE_WIDTH = Detection window stride for the X direction
+ * -# -DDETECTION_WINDOW_STRIDE_HEIGHT = Detection window stride for the Y direction
  * -# -DDETECTION_WINDOW_WIDTH = Width of the detection window
  * -# -DDETECTION_WINDOW_HEIGHT = Height of the detection window
  *
@@ -443,8 +443,8 @@ __kernel void hog_detector(IMAGE_DECLARATION(src),
         int id = atomic_inc(num_detection_windows);
         if(id < MAX_NUM_DETECTION_WINDOWS)
         {
-            dst[id].x         = get_global_id(0) * BLOCK_STRIDE_WIDTH;
-            dst[id].y         = get_global_id(1) * BLOCK_STRIDE_HEIGHT;
+            dst[id].x         = get_global_id(0) * DETECTION_WINDOW_STRIDE_WIDTH;
+            dst[id].y         = get_global_id(1) * DETECTION_WINDOW_STRIDE_HEIGHT;
             dst[id].width     = DETECTION_WINDOW_WIDTH;
             dst[id].height    = DETECTION_WINDOW_HEIGHT;
             dst[id].idx_class = IDX_CLASS;
@@ -453,4 +453,4 @@ __kernel void hog_detector(IMAGE_DECLARATION(src),
     }
 }
 #endif /* NUM_BLOCKS_PER_DESCRIPTOR_Y && NUM_BINS_PER_DESCRIPTOR_X && THRESHOLD && MAX_NUM_DETECTION_WINDOWS && IDX_CLASS &&
-        * BLOCK_STRIDE_WIDTH && BLOCK_STRIDE_HEIGHT && DETECTION_WINDOW_WIDTH && DETECTION_WINDOW_HEIGHT */
+        * DETECTION_WINDOW_STRIDE_WIDTH && DETECTION_WINDOW_STRIDE_HEIGHT && DETECTION_WINDOW_WIDTH && DETECTION_WINDOW_HEIGHT */

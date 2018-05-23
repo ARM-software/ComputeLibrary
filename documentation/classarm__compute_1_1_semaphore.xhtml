@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -129,7 +129,7 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_semaphore.xhtml'
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a5d450aa70997a73d56a0400cee4e539d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_semaphore.xhtml#a5d450aa70997a73d56a0400cee4e539d">Semaphore</a> (int <a class="el" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>=0)</td></tr>
+<tr class="memitem:a5d450aa70997a73d56a0400cee4e539d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_semaphore.xhtml#a5d450aa70997a73d56a0400cee4e539d">Semaphore</a> (int value=0)</td></tr>
 <tr class="memdesc:a5d450aa70997a73d56a0400cee4e539d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default Constuctor.  <a href="#a5d450aa70997a73d56a0400cee4e539d">More...</a><br /></td></tr>
 <tr class="separator:a5d450aa70997a73d56a0400cee4e539d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2a0f4bfac2f24aa0a07de86141381aec"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_semaphore.xhtml#a2a0f4bfac2f24aa0a07de86141381aec">signal</a> ()</td></tr>
@@ -177,8 +177,7 @@ Public Member Functions</h2></td></tr>
 <p>Definition at line <a class="el" href="_semaphore_8h_source.xhtml#l00042">42</a> of file <a class="el" href="_semaphore_8h_source.xhtml">Semaphore.h</a>.</p>
 
 <p>Referenced by <a class="el" href="_semaphore_8h_source.xhtml#l00054">Semaphore::wait()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        : _value(<a class="code" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>), _m(), _cv()</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    {</div><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    }</div><div class="ttc" id="hwc_8hpp_xhtml_a0f61d63b009d0880a89c843bd50d8d76"><div class="ttname"><a href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a></div><div class="ttdeci">void * value</div><div class="ttdef"><b>Definition:</b> <a href="hwc_8hpp_source.xhtml#l00278">hwc.hpp:278</a></div></div>
-</div><!-- fragment -->
+<div class="fragment"><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        : _value(value), _m(), _cv()</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    {</div><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -236,7 +235,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_semaphore_8h_source.xhtml#l00054">54</a> of file <a class="el" href="_semaphore_8h_source.xhtml">Semaphore.h</a>.</p>
 
-<p>References <a class="el" href="_semaphore_8h_source.xhtml#l00042">Semaphore::Semaphore()</a>, <a class="el" href="_semaphore_8h_source.xhtml#l00047">Semaphore::signal()</a>, and <a class="el" href="hwc_8hpp_source.xhtml#l00278">value</a>.</p>
+<p>References <a class="el" href="_semaphore_8h_source.xhtml#l00042">Semaphore::Semaphore()</a>, and <a class="el" href="_semaphore_8h_source.xhtml#l00047">Semaphore::signal()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    {</div><div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        std::unique_lock&lt;std::mutex&gt; lock(_m);</div><div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        _cv.wait(lock, [<span class="keyword">this</span>]()</div><div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        {</div><div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;            <span class="keywordflow">return</span> _value &gt; 0;</div><div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        });</div><div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        --_value;</div><div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
@@ -249,7 +248,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_semaphore.xhtml">Semaphore</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:59 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

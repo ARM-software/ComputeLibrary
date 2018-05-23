@@ -52,16 +52,25 @@ public:
      * @param[in,out] info Tensor info of the accessed kernel.
      */
     AccessWindowAutoPadding(ITensorInfo *info);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     AccessWindowAutoPadding(const AccessWindowAutoPadding &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     AccessWindowAutoPadding &operator=(const AccessWindowAutoPadding &) = delete;
-    AccessWindowAutoPadding(AccessWindowAutoPadding &&)                 = default;
+    /** Allow instances of this class to be move constructed */
+    AccessWindowAutoPadding(AccessWindowAutoPadding &&) = default;
+    /** Allow instances of this class to be moved */
     AccessWindowAutoPadding &operator=(AccessWindowAutoPadding &&) = default;
-    ~AccessWindowAutoPadding()                                     = default;
+    /** Default destructor */
+    ~AccessWindowAutoPadding() = default;
 
     /** Set the valid region to match the entire tensor. */
     void set_valid_region();
 
-    /** Return a valid region that spans across the entire tensor. */
+    /** Return a valid region that spans across the entire tensor.
+     *
+     * @return a valid region.
+     *
+     */
     ValidRegion compute_valid_region() const;
 
     // Inherited methods overridden:

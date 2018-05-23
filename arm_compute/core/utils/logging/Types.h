@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,27 +31,37 @@ namespace arm_compute
 namespace logging
 {
 /** Logging level enumeration */
-enum class LogLevel : unsigned int
+enum class LogLevel
 {
     VERBOSE, /**< All logging messages */
     INFO,    /**< Information log level */
     WARN,    /**< Warning log level */
+    ERROR,   /**< Error log level */
     OFF      /**< No logging */
 };
 
+/** Log message */
 struct LogMsg
 {
+    /** Default constructor */
     LogMsg()
         : raw_(), log_level_(LogLevel::OFF)
     {
     }
+    /** Construct a log message
+     *
+     * @param[in] msg       Message to log.
+     * @param[in] log_level Logging level. Default: OFF
+     */
     LogMsg(std::string msg, LogLevel log_level = LogLevel::OFF)
         : raw_(msg), log_level_(log_level)
     {
     }
 
+    /** Log message */
     std::string raw_;
-    LogLevel    log_level_;
+    /** Logging level */
+    LogLevel log_level_;
 };
 } // namespace logging
 } // namespace arm_compute

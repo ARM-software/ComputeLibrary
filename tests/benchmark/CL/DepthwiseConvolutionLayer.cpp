@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,7 +37,9 @@ namespace arm_compute
 {
 namespace test
 {
-const auto data_types                    = framework::dataset::make("DataType", { DataType::F32, DataType::QASYMM8 });
+namespace benchmark
+{
+const auto data_types                    = framework::dataset::make("DataType", { DataType::F16, DataType::F32, DataType::QASYMM8 });
 using CLDepthwiseConvolutionLayerFixture = DepthwiseConvolutionLayerFixture<CLTensor, CLDepthwiseConvolutionLayer3x3, CLAccessor>;
 
 TEST_SUITE(CL)
@@ -47,5 +49,6 @@ REGISTER_FIXTURE_DATA_TEST_CASE(MobileNetDepthwiseConvLayer, CLDepthwiseConvolut
                                                             framework::dataset::make("Batches", { 1 })));
 
 TEST_SUITE_END()
+} // namespace benchmark
 } // namespace test
 } // namespace arm_compute

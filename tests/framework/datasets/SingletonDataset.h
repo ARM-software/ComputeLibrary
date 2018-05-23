@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,6 +56,7 @@ public:
     {
     }
 
+    /** Allow instances of this class to be move constructed */
     SingletonDataset(SingletonDataset &&) = default;
 
     /** Type of the dataset. */
@@ -64,29 +65,51 @@ public:
     /** Iterator for the dataset. */
     struct iterator
     {
+        /** Construct an iterator.
+         *
+         * @param[in] name  Name of the dataset.
+         * @param[in] value The singleton value.
+         */
         iterator(std::string name, const T *value)
             : _name{ name }, _value{ value }
         {
         }
 
+        /** Default destructor. */
         ~iterator() = default;
 
+        /** Allow instances of this class to be copy constructed */
         iterator(const iterator &) = default;
+        /** Allow instances of this class to be copied */
         iterator &operator=(const iterator &) = default;
-        iterator(iterator &&)                 = default;
+        /** Allow instances of this class to be move constructed */
+        iterator(iterator &&) = default;
+        /** Allow instances of this class to be moved */
         iterator &operator=(iterator &&) = default;
 
+        /** Get the description of the current value.
+         *
+         * @return description of the current value.
+         */
         std::string description() const
         {
             using support::cpp11::to_string;
             return _name + "=" + to_string(*_value);
         }
 
+        /** Get the value of the iterator.
+         *
+         * @return the value of the iterator.
+         */
         SingletonDataset::type operator*() const
         {
             return std::make_tuple(*_value);
         }
 
+        /** Inrement the iterator.
+         *
+         * @return *this;
+         */
         iterator &operator++()
         {
             return *this;

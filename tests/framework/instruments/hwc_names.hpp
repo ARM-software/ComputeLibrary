@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,6 +23,8 @@
  */
 #ifndef ARM_COMPUTE_TEST_HWC_NAMES
 #define ARM_COMPUTE_TEST_HWC_NAMES
+
+#ifndef DOXYGEN_SKIP_THIS
 
 namespace mali_userspace
 {
@@ -3056,4 +3058,7 @@ enum
     NUM_PRODUCTS = sizeof(products) / sizeof(products[0])
 };
 } // namespace mali_userspace
+
+#endif /* DOXYGEN_SKIP_THIS */
+
 #endif /* ARM_COMPUTE_TEST_HWC_NAMES */

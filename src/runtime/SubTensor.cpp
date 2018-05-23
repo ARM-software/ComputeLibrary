@@ -27,6 +27,11 @@
 
 using namespace arm_compute;
 
+SubTensor::SubTensor()
+    : _parent(nullptr), _info()
+{
+}
+
 SubTensor::SubTensor(ITensor *parent, const TensorShape &tensor_shape, const Coordinates &coords, bool extend_parent)
     : _parent(nullptr), _info()
 {

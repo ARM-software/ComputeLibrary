@@ -15,6 +15,7 @@ var dir_8bc26130589aa16388b5a02f17abf2c2 =
     [ "BlobMemoryPool.h", "_blob_memory_pool_8h.xhtml", [
       [ "BlobMemoryPool", "classarm__compute_1_1_blob_memory_pool.xhtml", "classarm__compute_1_1_blob_memory_pool" ]
     ] ],
+    [ "CPUUtils.h", "_c_p_u_utils_8h.xhtml", "_c_p_u_utils_8h" ],
     [ "Distribution1D.h", "_distribution1_d_8h.xhtml", [
       [ "Distribution1D", "classarm__compute_1_1_distribution1_d.xhtml", "classarm__compute_1_1_distribution1_d" ]
     ] ],
@@ -41,6 +42,9 @@ var dir_8bc26130589aa16388b5a02f17abf2c2 =
     ] ],
     [ "IMemoryPool.h", "_i_memory_pool_8h.xhtml", [
       [ "IMemoryPool", "classarm__compute_1_1_i_memory_pool.xhtml", "classarm__compute_1_1_i_memory_pool" ]
+    ] ],
+    [ "IMemoryRegion.h", "_i_memory_region_8h.xhtml", [
+      [ "IMemoryRegion", "classarm__compute_1_1_i_memory_region.xhtml", "classarm__compute_1_1_i_memory_region" ]
     ] ],
     [ "IPoolManager.h", "_i_pool_manager_8h.xhtml", [
       [ "IPoolManager", "classarm__compute_1_1_i_pool_manager.xhtml", "classarm__compute_1_1_i_pool_manager" ]
@@ -70,6 +74,9 @@ var dir_8bc26130589aa16388b5a02f17abf2c2 =
     [ "MemoryManagerOnDemand.h", "_memory_manager_on_demand_8h.xhtml", [
       [ "MemoryManagerOnDemand", "classarm__compute_1_1_memory_manager_on_demand.xhtml", "classarm__compute_1_1_memory_manager_on_demand" ]
     ] ],
+    [ "MemoryRegion.h", "_memory_region_8h.xhtml", [
+      [ "MemoryRegion", "classarm__compute_1_1_memory_region.xhtml", "classarm__compute_1_1_memory_region" ]
+    ] ],
     [ "MultiHOG.h", "_multi_h_o_g_8h.xhtml", [
       [ "MultiHOG", "classarm__compute_1_1_multi_h_o_g.xhtml", "classarm__compute_1_1_multi_h_o_g" ]
     ] ],
@@ -94,7 +101,7 @@ var dir_8bc26130589aa16388b5a02f17abf2c2 =
     [ "SingleThreadScheduler.h", "_single_thread_scheduler_8h.xhtml", [
       [ "SingleThreadScheduler", "classarm__compute_1_1_single_thread_scheduler.xhtml", "classarm__compute_1_1_single_thread_scheduler" ]
     ] ],
-    [ "SubTensor.h", "runtime_2_sub_tensor_8h.xhtml", [
+    [ "SubTensor.h", "_sub_tensor_8h.xhtml", [
       [ "SubTensor", "classarm__compute_1_1_sub_tensor.xhtml", "classarm__compute_1_1_sub_tensor" ]
     ] ],
     [ "Tensor.h", "runtime_2_tensor_8h.xhtml", "runtime_2_tensor_8h" ],

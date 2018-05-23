@@ -1,12 +1,13 @@
 var searchData=
 [
-  ['tablelookupvalidationfixture',['TableLookupValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_table_lookup_validation_fixture.xhtml',1,'arm_compute::test::validation']]],
+  ['taskexecutor',['TaskExecutor',['../classarm__compute_1_1graph_1_1_task_executor.xhtml',1,'arm_compute::graph']]],
   ['tensor',['Tensor',['../classarm__compute_1_1graph_1_1_tensor.xhtml',1,'arm_compute::graph']]],
   ['tensor',['Tensor',['../classarm__compute_1_1_tensor.xhtml',1,'arm_compute']]],
   ['tensor3d',['Tensor3D',['../struct_tensor3_d.xhtml',1,'']]],
   ['tensor4d',['Tensor4D',['../struct_tensor4_d.xhtml',1,'']]],
   ['tensorallocator',['TensorAllocator',['../classarm__compute_1_1_tensor_allocator.xhtml',1,'arm_compute']]],
   ['tensorcache',['TensorCache',['../classarm__compute_1_1test_1_1_tensor_cache.xhtml',1,'arm_compute::test']]],
+  ['tensordescriptor',['TensorDescriptor',['../structarm__compute_1_1graph_1_1_tensor_descriptor.xhtml',1,'arm_compute::graph']]],
   ['tensorinfo',['TensorInfo',['../classarm__compute_1_1_tensor_info.xhtml',1,'arm_compute']]],
   ['tensorshape',['TensorShape',['../classarm__compute_1_1_tensor_shape.xhtml',1,'arm_compute']]],
   ['testcase',['TestCase',['../classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml',1,'arm_compute::test::framework']]],
@@ -20,18 +21,6 @@ var searchData=
   ['tfpreproccessor',['TFPreproccessor',['../classarm__compute_1_1graph__utils_1_1_t_f_preproccessor.xhtml',1,'arm_compute::graph_utils']]],
   ['threadiddecorator',['ThreadIdDecorator',['../classarm__compute_1_1logging_1_1_thread_id_decorator.xhtml',1,'arm_compute::logging']]],
   ['threadinfo',['ThreadInfo',['../structarm__compute_1_1_thread_info.xhtml',1,'arm_compute']]],
-  ['thresholddataset',['ThresholdDataset',['../classarm__compute_1_1test_1_1datasets_1_1_threshold_dataset.xhtml',1,'arm_compute::test::datasets']]],
-  ['thresholdvalidationfixture',['ThresholdValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_threshold_validation_fixture.xhtml',1,'arm_compute::test::validation']]],
-  ['tiny2dshapes',['Tiny2DShapes',['../classarm__compute_1_1test_1_1datasets_1_1_tiny2_d_shapes.xhtml',1,'arm_compute::test::datasets']]],
-  ['tiny3dshapes',['Tiny3DShapes',['../classarm__compute_1_1test_1_1datasets_1_1_tiny3_d_shapes.xhtml',1,'arm_compute::test::datasets']]],
-  ['tiny4dshapes',['Tiny4DShapes',['../classarm__compute_1_1test_1_1datasets_1_1_tiny4_d_shapes.xhtml',1,'arm_compute::test::datasets']]],
-  ['tinyconvolutionlayerdataset',['TinyConvolutionLayerDataset',['../classarm__compute_1_1test_1_1datasets_1_1_tiny_convolution_layer_dataset.xhtml',1,'arm_compute::test::datasets']]],
-  ['tinydirectconvolutionshapes',['TinyDirectConvolutionShapes',['../classarm__compute_1_1test_1_1datasets_1_1_tiny_direct_convolution_shapes.xhtml',1,'arm_compute::test::datasets']]],
-  ['tinyfullyconnectedlayerdataset',['TinyFullyConnectedLayerDataset',['../classarm__compute_1_1test_1_1datasets_1_1_tiny_fully_connected_layer_dataset.xhtml',1,'arm_compute::test::datasets']]],
-  ['tinygemmdataset',['TinyGEMMDataset',['../classarm__compute_1_1test_1_1datasets_1_1_tiny_g_e_m_m_dataset.xhtml',1,'arm_compute::test::datasets']]],
-  ['tinyshapes',['TinyShapes',['../classarm__compute_1_1test_1_1datasets_1_1_tiny_shapes.xhtml',1,'arm_compute::test::datasets']]],
   ['toggleoption',['ToggleOption',['../classarm__compute_1_1test_1_1framework_1_1_toggle_option.xhtml',1,'arm_compute::test::framework']]],
-  ['topnpredictionsaccessor',['TopNPredictionsAccessor',['../classarm__compute_1_1graph__utils_1_1_top_n_predictions_accessor.xhtml',1,'arm_compute::graph_utils']]],
-  ['transposefixture',['TransposeFixture',['../classarm__compute_1_1test_1_1benchmark_1_1_transpose_fixture.xhtml',1,'arm_compute::test::benchmark']]],
-  ['transposevalidationfixture',['TransposeValidationFixture',['../classarm__compute_1_1test_1_1validation_1_1_transpose_validation_fixture.xhtml',1,'arm_compute::test::validation']]]
+  ['topnpredictionsaccessor',['TopNPredictionsAccessor',['../classarm__compute_1_1graph__utils_1_1_top_n_predictions_accessor.xhtml',1,'arm_compute::graph_utils']]]
 ];

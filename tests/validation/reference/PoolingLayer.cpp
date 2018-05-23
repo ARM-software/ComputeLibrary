@@ -24,6 +24,7 @@
 #include "PoolingLayer.h"
 
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "tests/validation/FixedPoint.h"
 #include "tests/validation/Helpers.h"
 
@@ -35,29 +36,15 @@ namespace validation
 {
 namespace reference
 {
-namespace
-{
-TensorShape calculate_output_shape(TensorShape shape, const PoolingLayerInfo &info)
-{
-    TensorShape dst_shape   = shape;
-    const int   pool_size_x = info.is_global_pooling() ? shape.x() : info.pool_size().width;
-    const int   pool_size_y = info.is_global_pooling() ? shape.y() : info.pool_size().height;
-    const std::pair<unsigned int, unsigned int> scaled_dims = arm_compute::scaled_dimensions(shape.x(),
-                                                                                             shape.y(),
-                                                                                             pool_size_x,
-                                                                                             pool_size_y,
-                                                                                             info.pad_stride_info());
-    dst_shape.set(0, scaled_dims.first);
-    dst_shape.set(1, scaled_dims.second);
-
-    return dst_shape;
-}
-} // namespace
+using namespace arm_compute::misc::shape_calculator;
 
 template <typename T, typename std::enable_if<is_floating_point<T>::value, int>::type>
 SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, const PoolingLayerInfo &info)
 {
     ARM_COMPUTE_ERROR_ON(info.is_global_pooling() && (src.shape().x() != src.shape().y()));
+
+    // Create reference
+    SimpleTensor<T> dst{ compute_pool_shape(TensorInfo(src.shape(), 1, src.data_type(), src.fixed_point_position()), info), src.data_type(), 1, src.fixed_point_position() };
 
     const int   pool_size_x     = info.is_global_pooling() ? src.shape().x() : info.pool_size().width;
     const int   pool_size_y     = info.is_global_pooling() ? src.shape().y() : info.pool_size().height;
@@ -73,9 +60,6 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, const PoolingLayerInfo
     const auto w_src      = static_cast<int>(src.shape()[0]);
     const auto h_src      = static_cast<int>(src.shape()[1]);
     const int  upper_dims = src.shape().total_size() / (w_src * h_src);
-
-    // Create reference
-    SimpleTensor<T> dst{ calculate_output_shape(src.shape(), info), src.data_type(), 1, src.fixed_point_position() };
 
     const auto w_dst = static_cast<int>(dst.shape()[0]);
     const auto h_dst = static_cast<int>(dst.shape()[1]);
@@ -173,6 +157,10 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, const PoolingLayerInfo
 {
     ARM_COMPUTE_ERROR_ON(info.is_global_pooling() && (src.shape().x() != src.shape().y()));
 
+    const auto w_src      = static_cast<int>(src.shape()[0]);
+    const auto h_src      = static_cast<int>(src.shape()[1]);
+    const int  upper_dims = src.shape().total_size() / (w_src * h_src);
+
     const int   pool_size_x     = info.is_global_pooling() ? src.shape().x() : info.pool_size().width;
     const int   pool_size_y     = info.is_global_pooling() ? src.shape().y() : info.pool_size().height;
     PoolingType type            = info.pool_type();
@@ -184,12 +172,8 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, const PoolingLayerInfo
     int         pad_bottom      = info.pad_stride_info().pad_bottom();
     bool        exclude_padding = info.exclude_padding();
 
-    const auto w_src      = static_cast<int>(src.shape()[0]);
-    const auto h_src      = static_cast<int>(src.shape()[1]);
-    const int  upper_dims = src.shape().total_size() / (w_src * h_src);
-
     // Create reference
-    SimpleTensor<T> dst{ calculate_output_shape(src.shape(), info), src.data_type(), 1, src.fixed_point_position() };
+    SimpleTensor<T> dst{ compute_pool_shape(TensorInfo(src.shape(), 1, src.data_type(), src.fixed_point_position()), info), src.data_type(), 1, src.fixed_point_position() };
 
     const auto w_dst = static_cast<int>(dst.shape()[0]);
     const auto h_dst = static_cast<int>(dst.shape()[1]);

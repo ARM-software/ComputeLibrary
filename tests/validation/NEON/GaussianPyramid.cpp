@@ -44,13 +44,11 @@ namespace validation
 {
 namespace
 {
-constexpr AbsoluteTolerance<float> tolerance_fp32(1.0f); /**< Tolerance value for comparing reference's output against implementation's output */
-
-const auto small_gaussian_pyramid_levels = combine(datasets::Medium2DShapes(), datasets::BorderModes()) * framework::dataset::make("numlevels", 2, 3);
+const auto small_gaussian_pyramid_levels = combine(datasets::Medium2DShapes(), datasets::BorderModes()) * framework::dataset::make("numlevels", 2, 4);
 const auto large_gaussian_pyramid_levels = combine(datasets::Large2DShapes(), datasets::BorderModes()) * framework::dataset::make("numlevels", 2, 5);
 
-template <typename T, typename U>
-inline void validate_gaussian_pyramid(const Pyramid &target, const std::vector<SimpleTensor<T>> &reference, BorderMode border_mode, U tolerance, float tolerance_number = 0.0f)
+template <typename T>
+inline void validate_gaussian_pyramid(const Pyramid &target, const std::vector<SimpleTensor<T>> &reference, BorderMode border_mode)
 {
     ValidRegion prev_valid_region = shape_to_valid_region(reference[0].shape());
 
@@ -59,7 +57,7 @@ inline void validate_gaussian_pyramid(const Pyramid &target, const std::vector<S
         const ValidRegion valid_region = shape_to_valid_region_gaussian_pyramid_half(reference[i - 1].shape(), prev_valid_region, (border_mode == BorderMode::UNDEFINED));
 
         // Validate outputs
-        validate(Accessor(*(target.get_pyramid_level(i))), reference[i], valid_region, tolerance, tolerance_number);
+        validate(Accessor(*(target.get_pyramid_level(i))), reference[i], valid_region);
 
         // Keep the valid region for the next level
         prev_valid_region = valid_region;
@@ -97,12 +95,12 @@ using NEGaussianPyramidHalfFixture = GaussianPyramidHalfValidationFixture<Tensor
 
 FIXTURE_DATA_TEST_CASE(RunSmallGaussianPyramidHalf, NEGaussianPyramidHalfFixture<uint8_t>, framework::DatasetMode::ALL, small_gaussian_pyramid_levels)
 {
-    validate_gaussian_pyramid(_target, _reference, _border_mode, tolerance_fp32);
+    validate_gaussian_pyramid(_target, _reference, _border_mode);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLargeGaussianPyramidHalf, NEGaussianPyramidHalfFixture<uint8_t>, framework::DatasetMode::NIGHTLY, large_gaussian_pyramid_levels)
 {
-    validate_gaussian_pyramid(_target, _reference, _border_mode, tolerance_fp32, 0.01f);
+    validate_gaussian_pyramid(_target, _reference, _border_mode);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()

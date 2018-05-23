@@ -12,7 +12,7 @@ var _c_l_2_pixel_wise_multiplication_8cpp =
     [ "combine", "_c_l_2_pixel_wise_multiplication_8cpp.xhtml#a8cc070dbbb4e0732bf34e744e5c6e5ec", null ],
     [ "combine", "_c_l_2_pixel_wise_multiplication_8cpp.xhtml#ad79acecf688cf60afa5e9c4e493960ce", null ],
     [ "combine", "_c_l_2_pixel_wise_multiplication_8cpp.xhtml#ad9496faa7fed7abce992ad806cfa948e", null ],
-    [ "combine", "_c_l_2_pixel_wise_multiplication_8cpp.xhtml#a39b72c4e42ce567d61bbd0985f8c9646", null ],
+    [ "combine", "_c_l_2_pixel_wise_multiplication_8cpp.xhtml#a274d2afc8082b3cdf926001c5969d317", null ],
     [ "DATA_TEST_CASE", "_c_l_2_pixel_wise_multiplication_8cpp.xhtml#a1b6fe9d1f1a157a4208b976d197d4f04", null ],
     [ "FIXTURE_DATA_TEST_CASE", "_c_l_2_pixel_wise_multiplication_8cpp.xhtml#a51106824477557cde3c3693d611722ea", null ],
     [ "TEST_SUITE_END", "_c_l_2_pixel_wise_multiplication_8cpp.xhtml#a38fe4b20a05bbaa1c844f3d7a19791ae", null ],

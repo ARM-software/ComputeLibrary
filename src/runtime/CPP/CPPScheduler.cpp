@@ -27,6 +27,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Utils.h"
+#include "arm_compute/runtime/CPUUtils.h"
 
 #include <condition_variable>
 #include <iostream>
@@ -159,6 +160,7 @@ CPPScheduler::CPPScheduler()
     : _num_threads(num_threads_hint()),
       _threads(_num_threads - 1)
 {
+    get_cpu_configuration(_cpu_info);
 }
 
 void CPPScheduler::set_num_threads(unsigned int num_threads)
@@ -178,7 +180,7 @@ void CPPScheduler::schedule(ICPPKernel *kernel, unsigned int split_dimension)
 
     /** [Scheduler example] */
     ThreadInfo info;
-    info.cpu_info = _info;
+    info.cpu_info = &_cpu_info;
 
     const Window      &max_window     = kernel->window();
     const unsigned int num_iterations = max_window.num_iterations(split_dimension);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,7 +66,8 @@ using glMapBufferRange_func          = void *GL_APIENTRY (*)(GLenum target, GLin
 using glMemoryBarrier_func           = void GL_APIENTRY (*)(GLbitfield barriers);
 using glUniform1ui_func              = void GL_APIENTRY (*)(GLint location, GLuint v0);
 using glUnmapBuffer_func             = GLboolean GL_APIENTRY (*)(GLenum target);
-using glGetError_func                = GLenum              GL_APIENTRY (*)();
+using glGetError_func                = GLenum          GL_APIENTRY (*)();
+using glGetString_func               = const GLubyte * GL_APIENTRY (*)(GLenum name);
 using glGetActiveUniformBlockiv_func = void GL_APIENTRY (*)(GLuint program, GLuint uniformBlockIndex, GLenum pname, GLint *params);
 using glUniformBlockBinding_func     = void GL_APIENTRY (*)(GLuint program, GLuint uniformBlockIndex, GLuint uniformBlockBinding);
 using glGetUniformBlockIndex_func    = GLuint GL_APIENTRY (*)(GLuint program, const GLchar *uniformBlockName);
@@ -665,6 +666,19 @@ GLenum GL_APIENTRY glGetError(void)
     else
     {
         return GL_NO_ERROR;
+    }
+}
+
+const GLubyte *GL_APIENTRY glGetString(GLenum name)
+{
+    auto func = GLESSymbols::get().glGetString;
+    if(func != nullptr)
+    {
+        return func(name);
+    }
+    else
+    {
+        return nullptr;
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,8 @@
 #ifndef __ARM_COMPUTE_MEMORY_H__
 #define __ARM_COMPUTE_MEMORY_H__
 
+#include "arm_compute/runtime/IMemoryRegion.h"
+
 #include <cstddef>
 #include <memory>
 
@@ -37,11 +39,9 @@ public:
     Memory();
     /** Default Constructor
      *
-     * @note Ownership of the memory is transferred to this object
-     *
      * @param[in] memory Memory to be imported
      */
-    Memory(std::shared_ptr<uint8_t> memory);
+    Memory(std::shared_ptr<IMemoryRegion> memory);
     /** Default Constructor
      *
      * @note Ownership of the memory is not transferred to this object.
@@ -49,7 +49,7 @@ public:
      *
      * @param[in] memory Memory to be imported
      */
-    Memory(uint8_t *memory);
+    Memory(IMemoryRegion *memory);
     /** Allow instances of this class to be copied */
     Memory(const Memory &) = default;
     /** Allow instances of this class to be copy assigned */
@@ -58,26 +58,24 @@ public:
     Memory(Memory &&) noexcept = default;
     /** Allow instances of this class to be move assigned */
     Memory &operator=(Memory &&) noexcept = default;
-
-    /** Returns the pointer to the allocated data.
+    /** Region accessor
      *
-     * @return Pointer to the allocated data
+     * @return Memory region
      */
-    uint8_t *buffer();
-    /** Returns the pointer to the allocated data.
+    IMemoryRegion *region();
+    /** Region accessor
      *
-     * @return Pointer to the allocated data
+     * @return Memory region
      */
-    uint8_t *buffer() const;
-    /** Handle of internal memory
-     *
-     * @return Handle of memory
-     */
-    uint8_t **handle();
+    IMemoryRegion *region() const;
 
 private:
-    uint8_t                 *_memory;
-    std::shared_ptr<uint8_t> _memory_owned;
+    /** Creates empty region */
+    void create_empty_region();
+
+private:
+    IMemoryRegion                 *_region;
+    std::shared_ptr<IMemoryRegion> _region_owned;
 };
 }
 #endif /* __ARM_COMPUTE_MEMORY_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLL2NORMALIZE_H__
-#define __ARM_COMPUTE_CLL2NORMALIZE_H__
+#ifndef __ARM_COMPUTE_CLL2NORMALIZELAYER_H__
+#define __ARM_COMPUTE_CLL2NORMALIZELAYER_H__
 
 #include "arm_compute/core/CL/kernels/CLL2NormalizeLayerKernel.h"
 #include "arm_compute/core/Types.h"
@@ -39,7 +39,11 @@ namespace arm_compute
 {
 class ICLTensor;
 
-/** Perform reduction operation.
+/** Basic function to perform a L2 normalization on a given axis.
+ *
+ * This function runs the following kernels:
+ * -# @ref CLReductionOperation
+ * -# @ref CLL2NormalizeLayerKernel
  */
 class CLL2NormalizeLayer : public IFunction
 {
@@ -49,12 +53,23 @@ public:
 
     /** Set the input and output tensors.
      *
-     * @param[in]  input   Source tensor. Data types supported: QS8, QS16, F32.
-     * @param[out] output  Destination tensor. Data types supported: Same as @p input.
+     * @param[in]  input   Source tensor. Data types supported: F32. Data layouts supported: NCHW.
+     * @param[out] output  Destination tensor. Data types and data layouts supported: Same as @p input.
      * @param[in]  axis    Axis along which to reduce. Supported reduction axis : 0
-     * @param[in]  epsilon Lower bound value for the normalization.
+     * @param[in]  epsilon (Optional) Lower bound value for the normalization.
      */
     void configure(ICLTensor *input, ICLTensor *output, unsigned int axis, float epsilon = 1e-12);
+
+    /** Static function to check if given info will lead to a valid configuration of @ref CLL2NormalizeLayer.
+     *
+     * @param[in] input   Source tensor info. Data types supported: F32. Data layouts supported: NCHW.
+     * @param[in] output  Destination tensor info. Data types and data layouts supported: Same as @p input.
+     * @param[in] axis    Axis along which to reduce. Supported reduction axis : 0
+     * @param[in] epsilon (Optional) Lower bound value for the normalization.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, float epsilon = 1e-12);
 
     // Inherited methods overridden:
     void run() override;
@@ -66,4 +81,4 @@ private:
     CLTensor                 _sumsq;
 };
 }
-#endif /*__ARM_COMPUTE_CLL2NORMALIZE_H__ */
+#endif /*__ARM_COMPUTE_CLL2NORMALIZELAYER_H__ */

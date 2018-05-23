@@ -101,6 +101,7 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 };
 #else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+/** Interface for the accumulate weighted kernel using F16 */
 using NEAccumulateWeightedFP16Kernel = NEAccumulateWeightedKernel;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 

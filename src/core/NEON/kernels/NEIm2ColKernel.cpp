@@ -45,33 +45,33 @@ using namespace arm_compute;
 namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
-                          bool has_bias, bool is_fully_connected, bool is_flatten)
+                          bool has_bias, bool is_fully_connected, bool is_flatten, const Size2D &dilation)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::QASYMM8 && has_bias);
+    ARM_COMPUTE_RETURN_ERROR_ON((dilation.x() < 1) || (dilation.y() < 1));
 
+    TensorShape expected_output_shape;
     if(is_flatten) /* Called by FlattenLayer */
     {
-        size_t flatten_shape = input->tensor_shape().x() * input->tensor_shape().y() * input->tensor_shape().z();
-        ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(0) != flatten_shape);
+        expected_output_shape = misc::shape_calculator::compute_im2col_flatten_shape(input);
     }
     else if(!is_fully_connected) /* Called by ConvolutionLayer */
     {
-        std::pair<unsigned int, unsigned int> out_dims = scaled_dimensions(input->dimension(0), input->dimension(1), kernel_dims.width, kernel_dims.height, conv_info);
-        ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(0) != (input->dimension(2) * kernel_dims.area() + (has_bias ? 1 : 0)));
-        ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(1) != (out_dims.first * out_dims.second));
-        ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(2) != 1);
+        expected_output_shape = misc::shape_calculator::compute_im2col_conv_shape(input, kernel_dims, conv_info, has_bias, dilation);
     }
     else /* Called by FullyConnectedLayer */
     {
         const int num_batch_dimensions = std::max(0, static_cast<int>(output->tensor_shape().num_dimensions()) - 1);
         const int num_input_dimensions = input->tensor_shape().num_dimensions() - num_batch_dimensions;
 
-        TensorInfo expected_output = output->clone()->set_tensor_shape(misc::shape_calculator::compute_im2col_shape(input, num_input_dimensions));
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&expected_output, output);
+        expected_output_shape = misc::shape_calculator::compute_im2col_fc_shape(input, num_input_dimensions);
     }
+
+    TensorInfo expected_output = output->clone()->set_tensor_shape(expected_output_shape);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&expected_output, output);
 
     return Status{};
 }
@@ -91,11 +91,13 @@ inline void linearize_volume(const uint8_t *const in_ptr,
                              int                  input_stride_y,
                              int                  input_stride_z,
                              int                  fixed_point_position,
-                             int                  pad_value)
+                             int                  pad_value,
+                             int                  dilation_x,
+                             int                  dilation_y)
 {
     const int kernel_size2 = kernel_width * kernel_height;
-    const int x_e          = top_left_x + kernel_width;
-    const int y_e          = top_left_y + kernel_height;
+    const int x_e          = top_left_x + kernel_width * dilation_x;
+    const int y_e          = top_left_y + kernel_height * dilation_y;
 
     // Linearize volume
     int d = 0;
@@ -104,12 +106,12 @@ inline void linearize_volume(const uint8_t *const in_ptr,
     // 2) to have an optimized im2col for the first convolution layer where usually we have 3 IFMs
     for(; d <= (kernel_depth - 3); d += 3)
     {
-        for(int y = top_left_y; y < y_e; ++y)
+        for(int y = top_left_y; y < y_e; y += dilation_y)
         {
             if((y < 0 || y >= input_h) && has_pads)
             {
                 // All the values will be the offset (will be zeros when not quantized)
-                for(int x = top_left_x; x < x_e; ++x, ++out_ptr)
+                for(int x = top_left_x; x < x_e; x += dilation_x, ++out_ptr)
                 {
                     *(out_ptr + 0 * kernel_size2) = pad_value;
                     *(out_ptr + 1 * kernel_size2) = pad_value;
@@ -118,7 +120,7 @@ inline void linearize_volume(const uint8_t *const in_ptr,
             }
             else
             {
-                for(int x = top_left_x; x < x_e; ++x, ++out_ptr)
+                for(int x = top_left_x; x < x_e; x += dilation_x, ++out_ptr)
                 {
                     if((x < 0 || x >= input_w) && has_pads)
                     {
@@ -141,7 +143,7 @@ inline void linearize_volume(const uint8_t *const in_ptr,
     // Left over
     for(; d < kernel_depth; d++)
     {
-        for(int y = top_left_y; y < y_e; ++y)
+        for(int y = top_left_y; y < y_e; y += dilation_y)
         {
             if((y < 0 || y >= input_h) && has_pads)
             {
@@ -151,7 +153,7 @@ inline void linearize_volume(const uint8_t *const in_ptr,
             }
             else
             {
-                for(int x = top_left_x; x < x_e; ++x, ++out_ptr)
+                for(int x = top_left_x; x < x_e; x += dilation_x, ++out_ptr)
                 {
                     if((x < 0 || x >= input_w) && has_pads)
                     {
@@ -191,12 +193,17 @@ void NEIm2ColKernel::run_generic(const Window &window)
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(INEKernel::window(), window);
 
-    const int kernel_depth   = _input->info()->dimension(2);
-    const int input_w        = _input->info()->dimension(0);
-    const int input_h        = _input->info()->dimension(1);
-    const int input_stride_x = _input->info()->strides_in_bytes().x();
-    const int input_stride_y = _input->info()->strides_in_bytes().y();
-    const int input_stride_z = _input->info()->strides_in_bytes().z();
+    const DataLayout   data_layout = _input->info()->data_layout();
+    const unsigned int width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const unsigned int height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const unsigned int channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
+
+    const int kernel_depth   = _input->info()->dimension(channel_idx);
+    const int input_w        = _input->info()->dimension(width_idx);
+    const int input_h        = _input->info()->dimension(height_idx);
+    const int input_stride_x = _input->info()->strides_in_bytes()[width_idx];
+    const int input_stride_y = _input->info()->strides_in_bytes()[height_idx];
+    const int input_stride_z = _input->info()->strides_in_bytes()[channel_idx];
     const int offset         = is_data_type_quantized(_input->info()->data_type()) ? _input->info()->quantization_info().offset : 0;
 
     int pad_left = 0;
@@ -211,30 +218,24 @@ void NEIm2ColKernel::run_generic(const Window &window)
     const int start_x = -pad_left;
     const int start_y = -pad_top;
 
-    Window window_in(window);
-    // The first three dimensions of the input are increased by the inner loops
-    window_in.set(Window::DimX, Window::Dimension(0, 0, 0));
-    window_in.set(Window::DimY, Window::Dimension(0, 0, 0));
-    window_in.set(Window::DimZ, Window::Dimension(0, 0, 0));
-
-    // Setup output window
-    Window window_out(window);
-    window_out.set(Window::DimX, Window::Dimension(0, _output->info()->dimension(0), _output->info()->strides_in_bytes().y() / _output->info()->element_size()));
-    window_out.set(Window::DimY, Window::Dimension(window.y().start() * _convolved_dims.first, window.y().end() * _convolved_dims.first, _convolved_dims.first));
-    window_out.set(Window::DimZ, Window::Dimension(0, 1, 1));
+    Window window_in_out(window);
+    // The first three dimensions of the input and output are increased by the inner loops
+    window_in_out.set(Window::DimX, Window::Dimension(0, 0, 0));
+    window_in_out.set(Window::DimY, Window::Dimension(0, 0, 0));
+    window_in_out.set(Window::DimZ, Window::Dimension(0, 0, 0));
 
     // Create iterators
-    Iterator in(_input, window_in);
-    Iterator out(_output, window_out);
+    Iterator in(_input, window_in_out);
+    Iterator out(_output, window_in_out);
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
-        const int top_left_x = id.x() * stride_x + start_x;
-        const int top_left_y = id.y() * stride_y + start_y;
+        const int top_left_x = id[width_idx] * stride_x + start_x;
+        const int top_left_y = id[height_idx] * stride_y + start_y;
 
         // Get pointers
         const uint8_t *const input_ptr  = in.ptr();
-        auto                 output_ptr = reinterpret_cast<T *>(out.ptr());
+        auto                 output_ptr = reinterpret_cast<T *>(out.ptr() + (id[width_idx] + id[height_idx] * _convolved_dims.first) * _output->info()->strides_in_bytes().y());
 
         // Linearize volume
         linearize_volume<T, has_pads>(input_ptr,
@@ -251,7 +252,9 @@ void NEIm2ColKernel::run_generic(const Window &window)
                                       input_stride_y,
                                       input_stride_z,
                                       _input->info()->fixed_point_position(),
-                                      offset);
+                                      offset,
+                                      _dilation.x(),
+                                      _dilation.y());
     },
     in, out);
 }
@@ -309,28 +312,33 @@ void NEIm2ColKernel::run_reduced(const Window &window)
 }
 
 NEIm2ColKernel::NEIm2ColKernel()
-    : _func(), _input(nullptr), _output(nullptr), _convolved_dims(), _conv_info(), _kernel_width(0), _kernel_height(0), _has_bias(false)
+    : _func(), _input(nullptr), _output(nullptr), _convolved_dims(), _conv_info(), _kernel_width(0), _kernel_height(0), _has_bias(false), _dilation(1U, 1U)
 {
 }
 
 void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
-                               bool has_bias, bool is_fully_connected, bool is_flatten)
+                               bool has_bias, bool is_fully_connected, bool is_flatten, const Size2D &dilation)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Perform validation step
-    ARM_COMPUTE_UNUSED(is_fully_connected);
-    ARM_COMPUTE_UNUSED(is_flatten);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), kernel_dims, conv_info, has_bias, is_fully_connected, is_flatten));
+    ARM_COMPUTE_UNUSED(is_fully_connected, is_flatten);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), kernel_dims, conv_info, has_bias, is_fully_connected, is_flatten, dilation));
+
+    const DataLayout   data_layout = input->info()->data_layout();
+    const unsigned int width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const unsigned int height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const unsigned int channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
 
     _input          = input;
     _output         = output;
     _conv_info      = conv_info;
     _kernel_width   = kernel_dims.width;
-    _kernel_height  = kernel_dims.height,
-    _convolved_dims = scaled_dimensions(input->info()->dimension(0), input->info()->dimension(1),
+    _kernel_height  = kernel_dims.height;
+    _dilation       = dilation;
+    _convolved_dims = scaled_dimensions(input->info()->dimension(width_idx), input->info()->dimension(height_idx),
                                         _kernel_width, _kernel_height,
-                                        _conv_info);
+                                        _conv_info, _dilation);
     _has_bias = has_bias;
 
     unsigned int stride_x = 0;
@@ -341,7 +349,8 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
                                && (std::equal(input->info()->tensor_shape().cbegin() + 3,
                                               input->info()->tensor_shape().cend(),
                                               output->info()->tensor_shape().cbegin() + 1))
-                               && ((stride_x == 1) && (stride_y == 1) && !conv_info.has_padding());
+                               && ((stride_x == 1) && (stride_y == 1) && !conv_info.has_padding())
+                               && ((dilation.x() == 1) && (dilation.y() == 1));
 
     Window window = calculate_max_window(*input->info(), Steps());
 
@@ -396,9 +405,9 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
                 ARM_COMPUTE_ERROR("Data type not supported");
                 break;
         }
-        window.set(Window::DimX, Window::Dimension(0, _convolved_dims.first, 1));
-        window.set(Window::DimY, Window::Dimension(0, _convolved_dims.second, 1));
-        window.set(Window::DimZ, Window::Dimension(0, 1, 1));
+        window.set(width_idx, Window::Dimension(0, _convolved_dims.first, 1));
+        window.set(height_idx, Window::Dimension(0, _convolved_dims.second, 1));
+        window.set(channel_idx, Window::Dimension(0, 1, 1));
     }
 
     // The NEIm2ColKernel doesn't need padding so update_window_and_padding() can be skipped
@@ -408,9 +417,9 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
 }
 
 Status NEIm2ColKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
-                                bool has_bias, bool is_fully_connected, bool is_flatten)
+                                bool has_bias, bool is_fully_connected, bool is_flatten, const Size2D &dilation)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, kernel_dims, conv_info, has_bias, is_fully_connected, is_flatten));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, kernel_dims, conv_info, has_bias, is_fully_connected, is_flatten, dilation));
     return Status{};
 }
 

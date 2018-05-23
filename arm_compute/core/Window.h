@@ -320,7 +320,7 @@ public:
         return slide_window_slice<4>(slice);
     }
 
-    /* Collapse the dimensions between @p first and @p last if possible.
+    /** Collapse the dimensions between @p first and @p last if possible.
      *
      * A dimension is collapsable if it starts from 0 and matches the corresponding dimension in the full_window
      *
@@ -333,7 +333,7 @@ public:
      */
     Window collapse_if_possible(const Window &full_window, size_t first, size_t last, bool *has_collapsed = nullptr) const;
 
-    /* Collapse the dimensions higher than @p first if possible.
+    /** Collapse the dimensions higher than @p first if possible.
      *
      * A dimension is collapsable if it starts from 0 and matches the corresponding dimension in the full_window
      *
@@ -348,7 +348,7 @@ public:
         return collapse_if_possible(full_window, first, Coordinates::num_max_dimensions, has_collapsed);
     }
 
-    /* Collapse the dimensions between @p first and @p last.
+    /** Collapse the dimensions between @p first and @p last.
      *
      * A dimension is collapsable if it starts from 0 and matches the corresponding dimension in the full_window
      *
@@ -360,7 +360,7 @@ public:
      */
     Window collapse(const Window &full_window, size_t first, size_t last = Coordinates::num_max_dimensions) const;
 
-    /* Don't advance in the dimension where @p shape is less equal to 1.
+    /** Don't advance in the dimension where @p shape is less equal to 1.
      *
      * @param[in] shape A TensorShape.
      *
@@ -368,7 +368,7 @@ public:
      */
     Window broadcast_if_dimension_le_one(const TensorShape &shape) const;
 
-    /* Don't advance in the dimension where shape of @p info is less equal to 1.
+    /** Don't advance in the dimension where shape of @p info is less equal to 1.
      *
      * @param[in] info An ITensorInfo.
      *

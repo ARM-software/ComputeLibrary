@@ -50,6 +50,9 @@ var dir_345bd7154d1542d1e03fd2836959a19d =
     [ "NEColorConvert.h", "_n_e_color_convert_8h.xhtml", [
       [ "NEColorConvert", "classarm__compute_1_1_n_e_color_convert.xhtml", "classarm__compute_1_1_n_e_color_convert" ]
     ] ],
+    [ "NEConvertFullyConnectedWeights.h", "_n_e_convert_fully_connected_weights_8h.xhtml", [
+      [ "NEConvertFullyConnectedWeights", "classarm__compute_1_1_n_e_convert_fully_connected_weights.xhtml", "classarm__compute_1_1_n_e_convert_fully_connected_weights" ]
+    ] ],
     [ "NEConvolution.h", "_n_e_convolution_8h.xhtml", "_n_e_convolution_8h" ],
     [ "NEConvolutionLayer.h", "_n_e_convolution_layer_8h.xhtml", [
       [ "NEConvolutionLayer", "classarm__compute_1_1_n_e_convolution_layer.xhtml", "classarm__compute_1_1_n_e_convolution_layer" ]
@@ -256,7 +259,7 @@ var dir_345bd7154d1542d1e03fd2836959a19d =
     [ "NEWarpPerspective.h", "_n_e_warp_perspective_8h.xhtml", [
       [ "NEWarpPerspective", "classarm__compute_1_1_n_e_warp_perspective.xhtml", "classarm__compute_1_1_n_e_warp_perspective" ]
     ] ],
-    [ "NEWinogradLayer.h", "_n_e_winograd_layer_8h.xhtml", [
-      [ "NEWinogradLayer", "classarm__compute_1_1_n_e_winograd_layer.xhtml", "classarm__compute_1_1_n_e_winograd_layer" ]
+    [ "NEWinogradConvolutionLayer.h", "_n_e_winograd_convolution_layer_8h.xhtml", [
+      [ "NEWinogradConvolutionLayer", "classarm__compute_1_1_n_e_winograd_convolution_layer.xhtml", "classarm__compute_1_1_n_e_winograd_convolution_layer" ]
     ] ]
 ];

@@ -12,5 +12,5 @@ var structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value =
     [ "floating_point", "structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#ab32110eb040749e72f53d1a7ee30c25b", null ],
     [ "integer", "structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a5283f2dae5da803262f8deb3c71525f0", null ],
     [ "is_floating_point", "structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#aea625d488d9eafbc023001f74f15f7af", null ],
-    [ "v", "structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a63d8879fa76962b7d0e6cb0364be2e34", null ]
+    [ "v", "structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#aa1bee75ce77e93989e011aae01955b03", null ]
 ];

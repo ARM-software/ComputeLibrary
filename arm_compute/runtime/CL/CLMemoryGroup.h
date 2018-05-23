@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,6 +31,7 @@
 
 namespace arm_compute
 {
+/** Memory Group in OpenCL */
 using CLMemoryGroup = MemoryGroupBase<CLTensor>;
 
 template <>

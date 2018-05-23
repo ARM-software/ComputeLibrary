@@ -45,7 +45,7 @@ public:
     CLQuantizationLayerKernel &operator=(const CLQuantizationLayerKernel &) = delete;
     /** Default Move Constructor. */
     CLQuantizationLayerKernel(CLQuantizationLayerKernel &&) = default;
-    /** Default move assignment operator. */
+    /** Default move assignment operator */
     CLQuantizationLayerKernel &operator=(CLQuantizationLayerKernel &&) = default;
     /** Default destructor */
     ~CLQuantizationLayerKernel() = default;
@@ -57,6 +57,16 @@ public:
      *                     The dimensions over the second must match the batched dimensions of the input tensor. Data type supported: F32.
      */
     void configure(const ICLTensor *input, ICLTensor *output, ICLTensor *min_max);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLQuantizationLayerKernel
+     *
+     * @param[in] input   Input tensor info. Data types supported: F32.
+     * @param[in] output  Output tensor info. Output data type must be U8.
+     * @param[in] min_max Info for the tensor with shape [2, batches] which stores the minimum and maximum value for each 3D input tensor.
+     *                    The dimensions over the second must match the batched dimensions of the input tensor. Data type supported: F32.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *min_max);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

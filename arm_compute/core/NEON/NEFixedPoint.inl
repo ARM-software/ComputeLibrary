@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -130,6 +130,7 @@ static const std::array<qint16x8_t, 4> log_tabq_qs16 =
     }
 };
 
+#ifndef DOXYGEN_SKIP_THIS
 inline qint8x8_t vget_low_qs8(qint8x16_t a)
 {
     return vget_low_s8(a);
@@ -1996,4 +1997,5 @@ inline float32x4x2_t vmax2q_f32(float32x4x2_t a, float32x4x2_t b)
     };
     return res;
 }
+#endif /* DOXYGEN_SKIP_THIS */
 } // namespace arm_compute

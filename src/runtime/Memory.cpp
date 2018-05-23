@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,40 +23,45 @@
  */
 #include "arm_compute/runtime/Memory.h"
 
-#include "arm_compute/core/Error.h"
+#include "arm_compute/runtime/MemoryRegion.h"
 
-using namespace arm_compute;
-
+namespace arm_compute
+{
 Memory::Memory()
-    : _memory(nullptr), _memory_owned(nullptr)
+    : _region(nullptr), _region_owned(nullptr)
 {
+    create_empty_region();
 }
 
-Memory::Memory(std::shared_ptr<uint8_t> memory)
-    : _memory(nullptr), _memory_owned(std::move(memory))
+Memory::Memory(std::shared_ptr<IMemoryRegion> memory)
+    : _region(nullptr), _region_owned(std::move(memory))
 {
-    ARM_COMPUTE_ERROR_ON(_memory_owned.get() == nullptr);
-    _memory = _memory_owned.get();
+    if(_region_owned == nullptr)
+    {
+        create_empty_region();
+    }
+    _region = _region_owned.get();
 }
 
-Memory::Memory(uint8_t *memory)
-    : _memory(memory), _memory_owned(nullptr)
+Memory::Memory(IMemoryRegion *memory)
+    : _region(memory), _region_owned(nullptr)
 {
-    ARM_COMPUTE_ERROR_ON(memory == nullptr);
+    _region = memory;
 }
 
-uint8_t *Memory::buffer()
+IMemoryRegion *Memory::region()
 {
-    return _memory;
+    return _region;
 }
 
-uint8_t *Memory::buffer() const
+IMemoryRegion *Memory::region() const
 {
-    return _memory;
+    return _region;
 }
 
-uint8_t **Memory::handle()
+void Memory::create_empty_region()
 {
-    ARM_COMPUTE_ERROR_ON(_memory_owned.get() != nullptr);
-    return &_memory;
+    _region_owned = std::make_shared<MemoryRegion>(0);
+    _region       = _region_owned.get();
 }
+} // namespace arm_compute

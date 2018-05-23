@@ -28,6 +28,7 @@
 
 #include "ITensorInfo.h"
 #include "arm_compute/core/Coordinates.h"
+#include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
@@ -209,6 +210,8 @@ public:
      * @param[in] hog_info HOG's metadata used to allocate normalized HOG space
      * @param[in] width    Width of the 2D tensor where the HOG descriptor will be computed on
      * @param[in] height   Height of the 2D tensor where the HOG descriptor will be computed on
+     *
+     * @return Total allocation size including padding in bytes.
      */
     size_t init_auto_padding(const HOGInfo &hog_info, unsigned int width, unsigned int height);
 
@@ -220,12 +223,17 @@ public:
     ITensorInfo &set_tensor_shape(const TensorShape &shape) override;
     ITensorInfo &set_fixed_point_position(int fixed_point_position) override;
     ITensorInfo &set_quantization_info(const QuantizationInfo &quantization_info) override;
+    ITensorInfo &set_data_layout(const DataLayout &data_layout) override;
     ITensorInfo &reset_padding() override;
     bool         auto_padding() override;
     bool extend_padding(const PaddingSize &padding) override;
     size_t dimension(size_t index) const override
     {
         return _tensor_shape[index];
+    }
+    size_t dimension(DataLayoutDimension dimension) const override
+    {
+        return get_data_layout_dimension_index(_data_layout, dimension);
     }
     const Strides &strides_in_bytes() const override
     {
@@ -297,6 +305,10 @@ public:
     {
         return _quantization_info;
     }
+    DataLayout data_layout() const override
+    {
+        return _data_layout;
+    }
 
 private:
     /** Calculates strides, offset and total size resulting from the specified padding around the XY plane.
@@ -317,6 +329,7 @@ private:
     ValidRegion      _valid_region;
     PaddingSize      _padding;
     QuantizationInfo _quantization_info;
+    DataLayout       _data_layout;
 };
 }
 #endif /*__ARM_COMPUTE_TENSORINFO_H__ */

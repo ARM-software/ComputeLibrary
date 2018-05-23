@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -110,6 +110,7 @@ public:
     std::unique_ptr<TestCase> make() const override;
 };
 
+/** Implementation of a test case factory to create data test cases. */
 template <typename T, typename D>
 class DataTestCaseFactory final : public TestCaseFactory
 {

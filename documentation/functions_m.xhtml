@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -163,10 +163,6 @@ $(document).ready(function(){initNavTree('functions_m.xhtml','');});
 <li>m()
 : <a class="el" href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#a38bef5b3852701d3b1958a8ca4f96683">GEMMReshapeInfo</a>
 </li>
-<li>major_revision
-: <a class="el" href="structmali__userspace_1_1gpu__props.xhtml#ad5ad682dac9f218bad31dad74e03c21e">gpu_props</a>
-, <a class="el" href="structmali__userspace_1_1mali__base__gpu__core__props.xhtml#ad5ad682dac9f218bad31dad74e03c21e">mali_base_gpu_core_props</a>
-</li>
 <li>make()
 : <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_data_test_case_factory.xhtml#a48d02d3cc8555c4439748dfa76e5c8ea">DataTestCaseFactory&lt; T, D &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_simple_test_case_factory.xhtml#a48d02d3cc8555c4439748dfa76e5c8ea">SimpleTestCaseFactory&lt; T &gt;</a>
@@ -175,15 +171,30 @@ $(document).ready(function(){initNavTree('functions_m.xhtml','');});
 <li>make_instrument()
 : <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml#ab6ac86ac15a8211221f1721d6a4ee889">Instrument</a>
 </li>
+<li>make_region()
+: <a class="el" href="classarm__compute_1_1_allocator.xhtml#a648cdc4602e8c7ec89180da37892db31">Allocator</a>
+, <a class="el" href="classarm__compute_1_1_c_l_buffer_allocator.xhtml#a648cdc4602e8c7ec89180da37892db31">CLBufferAllocator</a>
+, <a class="el" href="classarm__compute_1_1_g_c_buffer_allocator.xhtml#a648cdc4602e8c7ec89180da37892db31">GCBufferAllocator</a>
+, <a class="el" href="classarm__compute_1_1_i_allocator.xhtml#a9cff197f588f77bba9055f0baa690370">IAllocator</a>
+</li>
 <li>MaliCounter()
 : <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_mali_counter.xhtml#a50a2c38289f6d3d6fb2e813c55f3f01a">MaliCounter</a>
 </li>
 <li>manage()
-: <a class="el" href="classarm__compute_1_1_memory_group_base.xhtml#ac1f67376afb7822f262a0174ef4a3104">MemoryGroupBase&lt; TensorType &gt;</a>
+: <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_c_l_sub_tensor_handle.xhtml#a3e897744121bd6636c451767aeef2cdb">CLSubTensorHandle</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_c_l_tensor_handle.xhtml#a3e897744121bd6636c451767aeef2cdb">CLTensorHandle</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_g_c_tensor_handle.xhtml#a3e897744121bd6636c451767aeef2cdb">GCTensorHandle</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml#a3e897744121bd6636c451767aeef2cdb">NESubTensorHandle</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_n_e_tensor_handle.xhtml#a3e897744121bd6636c451767aeef2cdb">NETensorHandle</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_handle.xhtml#af17dc1b0465b99d816e5eb3e099cc2f2">ITensorHandle</a>
+, <a class="el" href="classarm__compute_1_1_memory_group_base.xhtml#ac1f67376afb7822f262a0174ef4a3104">MemoryGroupBase&lt; TensorType &gt;</a>
 </li>
 <li>map()
 : <a class="el" href="classarm__compute_1_1_c_l_array.xhtml#a14c53d2d17be6fa8a2c9861527c7b002">CLArray&lt; T &gt;</a>
+, <a class="el" href="classarm__compute_1_1_c_l_buffer_memory_region.xhtml#af540d8670cb2ccdec5a30fd2471c2e85">CLBufferMemoryRegion</a>
+, <a class="el" href="classarm__compute_1_1_c_l_coarse_s_v_m_memory_region.xhtml#af540d8670cb2ccdec5a30fd2471c2e85">CLCoarseSVMMemoryRegion</a>
 , <a class="el" href="classarm__compute_1_1_c_l_distribution1_d.xhtml#a14c53d2d17be6fa8a2c9861527c7b002">CLDistribution1D</a>
+, <a class="el" href="classarm__compute_1_1_c_l_fine_s_v_m_memory_region.xhtml#af540d8670cb2ccdec5a30fd2471c2e85">CLFineSVMMemoryRegion</a>
 , <a class="el" href="classarm__compute_1_1_c_l_h_o_g.xhtml#a14c53d2d17be6fa8a2c9861527c7b002">CLHOG</a>
 , <a class="el" href="classarm__compute_1_1_c_l_lut.xhtml#a14c53d2d17be6fa8a2c9861527c7b002">CLLut</a>
 , <a class="el" href="classarm__compute_1_1_c_l_lut_allocator.xhtml#a460f371bafd64854b2332d96697939b3">CLLutAllocator</a>
@@ -192,10 +203,17 @@ $(document).ready(function(){initNavTree('functions_m.xhtml','');});
 , <a class="el" href="classarm__compute_1_1_c_l_tensor_allocator.xhtml#a460f371bafd64854b2332d96697939b3">CLTensorAllocator</a>
 , <a class="el" href="classarm__compute_1_1_g_c_tensor.xhtml#a14c53d2d17be6fa8a2c9861527c7b002">GCTensor</a>
 , <a class="el" href="classarm__compute_1_1_g_c_tensor_allocator.xhtml#a30fa70db7e8a0891a6e57c2036758c18">GCTensorAllocator</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_c_l_sub_tensor_handle.xhtml#a632fc6b53adbe0e2ecde859085241cdc">CLSubTensorHandle</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_c_l_tensor_handle.xhtml#a632fc6b53adbe0e2ecde859085241cdc">CLTensorHandle</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_g_c_tensor_handle.xhtml#a632fc6b53adbe0e2ecde859085241cdc">GCTensorHandle</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml#a632fc6b53adbe0e2ecde859085241cdc">NESubTensorHandle</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_n_e_tensor_handle.xhtml#a632fc6b53adbe0e2ecde859085241cdc">NETensorHandle</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_handle.xhtml#a9b4f692472539da81670d157ac35257c">ITensorHandle</a>
 , <a class="el" href="classarm__compute_1_1_i_c_l_array.xhtml#ac0abc7a5c0d172947f0e6a0c0dde3df0">ICLArray&lt; T &gt;</a>
 , <a class="el" href="classarm__compute_1_1_i_c_l_distribution1_d.xhtml#ac0abc7a5c0d172947f0e6a0c0dde3df0">ICLDistribution1D</a>
 , <a class="el" href="classarm__compute_1_1_i_c_l_h_o_g.xhtml#ac0abc7a5c0d172947f0e6a0c0dde3df0">ICLHOG</a>
 , <a class="el" href="classarm__compute_1_1_i_c_l_lut.xhtml#ac0abc7a5c0d172947f0e6a0c0dde3df0">ICLLut</a>
+, <a class="el" href="classarm__compute_1_1_i_c_l_memory_region.xhtml#a929af627a6a0430539998d12024d6c69">ICLMemoryRegion</a>
 , <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml#ac0abc7a5c0d172947f0e6a0c0dde3df0">ICLTensor</a>
 , <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml#a14c53d2d17be6fa8a2c9861527c7b002">IGCTensor</a>
 </li>
@@ -211,21 +229,12 @@ $(document).ready(function(){initNavTree('functions_m.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_i_memory_group.xhtml#aa4f0ba2c065527f486249f37350a235c">IMemoryGroup</a>
 , <a class="el" href="classarm__compute_1_1_memory_group_base.xhtml#a0a9171fb9c729a0a08b1d0ff3a5e3309">MemoryGroupBase&lt; TensorType &gt;</a>
 </li>
-<li>MatrixMultiplyGEMMDataset()
-: <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_matrix_multiply_g_e_m_m_dataset.xhtml#ac08736a5e8074bbf507516b6a5c5155b">MatrixMultiplyGEMMDataset</a>
-</li>
-<li>MatrixPatterns()
-: <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_matrix_patterns.xhtml#a9048f7434d1a08db9b93e542da865c44">MatrixPatterns</a>
+<li>mark_as_unused()
+: <a class="el" href="classarm__compute_1_1_i_tensor.xhtml#afe4e1d42d62608a941124f0d50c3e48a">ITensor</a>
 </li>
 <li>max
 : <a class="el" href="structarm__compute_1_1_min_max_location_values.xhtml#a4b7ee8a31f634f28eb1d4d97f6159ccd">MinMaxLocationValues&lt; MinMaxType &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_instruments_stats.xhtml#a5378e6e486090c47ac55da43a654e93d">InstrumentsStats</a>
-</li>
-<li>max_active_levels
-: <a class="el" href="structmali__userspace_1_1mali__base__gpu__tiler__props.xhtml#acb6f62930fa56e6a35dcc5f496081a1d">mali_base_gpu_tiler_props</a>
-</li>
-<li>max_barrier_size
-: <a class="el" href="structmali__userspace_1_1mali__base__gpu__thread__props.xhtml#af9b5b9d7d6b48dbc1dd783eecadad289">mali_base_gpu_thread_props</a>
 </li>
 <li>max_loc
 : <a class="el" href="structarm__compute_1_1_min_max_location_values.xhtml#a8b94c8b6d3de3d741f81429f0565af49">MinMaxLocationValues&lt; MinMaxType &gt;</a>
@@ -236,21 +245,6 @@ $(document).ready(function(){initNavTree('functions_m.xhtml','');});
 <li>max_num_values()
 : <a class="el" href="classarm__compute_1_1_i_array.xhtml#a2ff0fb106d58091d2b4363e808f200a3">IArray&lt; T &gt;</a>
 </li>
-<li>max_registers
-: <a class="el" href="structmali__userspace_1_1mali__base__gpu__thread__props.xhtml#aacebc9e0fe4c07a81433881336165407">mali_base_gpu_thread_props</a>
-</li>
-<li>max_task_queue
-: <a class="el" href="structmali__userspace_1_1mali__base__gpu__thread__props.xhtml#af733fb0693c94e55f2dfa43305ac9b20">mali_base_gpu_thread_props</a>
-</li>
-<li>max_thread_group_split
-: <a class="el" href="structmali__userspace_1_1mali__base__gpu__thread__props.xhtml#a828689db84137183c4de480f57545dda">mali_base_gpu_thread_props</a>
-</li>
-<li>max_threads
-: <a class="el" href="structmali__userspace_1_1mali__base__gpu__thread__props.xhtml#a74a3cfba2d330c3dd81a66dd96319b40">mali_base_gpu_thread_props</a>
-</li>
-<li>max_workgroup_size
-: <a class="el" href="structmali__userspace_1_1mali__base__gpu__thread__props.xhtml#a1007b008fc65c152a21e0da8741dd369">mali_base_gpu_thread_props</a>
-</li>
 <li>mean()
 : <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_instruments_stats.xhtml#a3281a4429af640fd91dbcfea65350fee">InstrumentsStats</a>
 </li>
@@ -258,8 +252,9 @@ $(document).ready(function(){initNavTree('functions_m.xhtml','');});
 : <a class="el" href="structarm__compute_1_1test_1_1framework_1_1_measurement.xhtml#a2ccc04c46bf09fcd434dc103f8ca9b2b">Measurement</a>
 </li>
 <li>measurements()
-: <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml#a4cf9eb56e129a841a24bd67bb548603b">Instrument</a>
+: <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml#a758f209536f516383be66b60b40142df">Instrument</a>
 , <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_mali_counter.xhtml#a73cabccc9d4406bf48f1db033dc35005">MaliCounter</a>
+, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_open_c_l_memory_usage.xhtml#a73cabccc9d4406bf48f1db033dc35005">OpenCLMemoryUsage</a>
 , <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_open_c_l_timer.xhtml#a73cabccc9d4406bf48f1db033dc35005">OpenCLTimer</a>
 , <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_p_m_u_counter.xhtml#a73cabccc9d4406bf48f1db033dc35005">PMUCounter</a>
 , <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_profiler.xhtml#a89d7c3c7bab828a9e87e23b269935ee4">Profiler</a>
@@ -275,26 +270,26 @@ $(document).ready(function(){initNavTree('functions_m.xhtml','');});
 <li>median()
 : <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_instruments_stats.xhtml#ad67cc28ec6eb667ca284f1933322e43e">InstrumentsStats</a>
 </li>
-<li>Medium2DShapes()
-: <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_medium2_d_shapes.xhtml#a300721f77cb672f063411b357a23355f">Medium2DShapes</a>
-</li>
-<li>MediumShapes()
-: <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_medium_shapes.xhtml#aa259527d4665a07f78d7512a32fa1bd0">MediumShapes</a>
-</li>
-<li>mem_features
-: <a class="el" href="structmali__userspace_1_1gpu__raw__gpu__props.xhtml#a7645072a122013ef5bb935199fc2d2f3">gpu_raw_gpu_props</a>
-</li>
 <li>Memory()
-: <a class="el" href="classarm__compute_1_1_memory.xhtml#a1f3d413f358b1996d56d79979308f463">Memory</a>
+: <a class="el" href="classarm__compute_1_1_memory.xhtml#a935135d85e324e3ce38e8f7d6dfcdecb">Memory</a>
 </li>
 <li>memory_barrier()
 : <a class="el" href="classarm__compute_1_1_g_c_scheduler.xhtml#a2dcf87458fcfdfb5e9fdd369e0320d78">GCScheduler</a>
+</li>
+<li>memory_management_ctx()
+: <a class="el" href="classarm__compute_1_1graph_1_1_graph_context.xhtml#ad0486d584630c80c6cc3c79f1d6067bc">GraphContext</a>
+</li>
+<li>memory_managers()
+: <a class="el" href="classarm__compute_1_1graph_1_1_graph_context.xhtml#af8fd8a2458beb49170cfefec59bdb099">GraphContext</a>
 </li>
 <li>MemoryGroupBase()
 : <a class="el" href="classarm__compute_1_1_memory_group_base.xhtml#adae764eb11b49e048bbd57b023caf402">MemoryGroupBase&lt; TensorType &gt;</a>
 </li>
 <li>MemoryManagerOnDemand()
 : <a class="el" href="classarm__compute_1_1_memory_manager_on_demand.xhtml#aba71fc8e689732c37684436aec7bf763">MemoryManagerOnDemand</a>
+</li>
+<li>MemoryRegion()
+: <a class="el" href="classarm__compute_1_1_memory_region.xhtml#a2506bd112d8f696eb7e2a8fb203b3952">MemoryRegion</a>
 </li>
 <li>min
 : <a class="el" href="structarm__compute_1_1_min_max_location_values.xhtml#a21e09e76b74538cd95089523f48468b0">MinMaxLocationValues&lt; MinMaxType &gt;</a>
@@ -309,36 +304,14 @@ $(document).ready(function(){initNavTree('functions_m.xhtml','');});
 <li>min_loc
 : <a class="el" href="structarm__compute_1_1_min_max_location_values.xhtml#ab589f4342adb62f0b4605785e4812750">MinMaxLocationValues&lt; MinMaxType &gt;</a>
 </li>
-<li>minor_revision
-: <a class="el" href="structmali__userspace_1_1gpu__props.xhtml#ab3819fc5a6a172f1e19b8b2ad3ea8ce9">gpu_props</a>
-, <a class="el" href="structmali__userspace_1_1mali__base__gpu__core__props.xhtml#ab3819fc5a6a172f1e19b8b2ad3ea8ce9">mali_base_gpu_core_props</a>
-</li>
-<li>MixedThresholdDataset()
-: <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_mixed_threshold_dataset.xhtml#a4eb84a49e38ab3666c058eff915df12e">MixedThresholdDataset</a>
-</li>
-<li>mmu_features
-: <a class="el" href="structmali__userspace_1_1gpu__raw__gpu__props.xhtml#a8f36520d7975913451f70356574b4068">gpu_raw_gpu_props</a>
-</li>
-<li>MobileNetActivationLayerDataset()
-: <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_mobile_net_activation_layer_dataset.xhtml#a3deb7a86a5fd71f2ee37c5ec27a2d65f">MobileNetActivationLayerDataset</a>
-</li>
-<li>MobileNetBatchNormalizationLayerDataset()
-: <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_mobile_net_batch_normalization_layer_dataset.xhtml#a620e601b3fb4a9b1d72bc7a9c2602ef1">MobileNetBatchNormalizationLayerDataset</a>
-</li>
-<li>MobileNetDepthwiseConvolutionLayerDataset()
-: <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_mobile_net_depthwise_convolution_layer_dataset.xhtml#ae8c033b34d64e9d863be933ac26da7dd">MobileNetDepthwiseConvolutionLayerDataset</a>
-</li>
-<li>MobileNetDepthwiseSeparableConvolutionLayerDataset()
-: <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_mobile_net_depthwise_separable_convolution_layer_dataset.xhtml#aad316853d6b4f929aa104107dde5059c">MobileNetDepthwiseSeparableConvolutionLayerDataset</a>
-</li>
 <li>mode()
 : <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a9be3f6632542d3381d0d646236579fc4">TestCaseFactory</a>
 , <a class="el" href="structarm__compute_1_1test_1_1framework_1_1_test_info.xhtml#aadbc5003f5cc399930b16ddb89b16cdc">TestInfo</a>
 </li>
 <li>model()
-: <a class="el" href="classarm__compute_1_1_i_c_l_multi_h_o_g.xhtml#a3fdc663dd36acddc50a879d9b2f84d2a">ICLMultiHOG</a>
-, <a class="el" href="classarm__compute_1_1_i_multi_h_o_g.xhtml#a71394cddbab548690b314af51be472f0">IMultiHOG</a>
-, <a class="el" href="classarm__compute_1_1_multi_h_o_g.xhtml#aa9d93a19f9961a4ee8b06527cd8842b4">MultiHOG</a>
+: <a class="el" href="classarm__compute_1_1_i_c_l_multi_h_o_g.xhtml#aa9d93a19f9961a4ee8b06527cd8842b4">ICLMultiHOG</a>
+, <a class="el" href="classarm__compute_1_1_i_multi_h_o_g.xhtml#a75e828c2dc5a300d224761a410c0925f">IMultiHOG</a>
+, <a class="el" href="classarm__compute_1_1_multi_h_o_g.xhtml#a3fdc663dd36acddc50a879d9b2f84d2a">MultiHOG</a>
 </li>
 <li>mul()
 : <a class="el" href="structarm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail_1_1functions.xhtml#ad02ce21c48a8f9e419a2ec5f762f3221">functions</a>
@@ -361,13 +334,20 @@ $(document).ready(function(){initNavTree('functions_m.xhtml','');});
 <li>MultiImageInfo()
 : <a class="el" href="classarm__compute_1_1_multi_image_info.xhtml#a335d0038f37278ee9adc798b2efa7775">MultiImageInfo</a>
 </li>
+<li>mutate()
+: <a class="el" href="classarm__compute_1_1graph_1_1_depth_concat_sub_tensor_mutator.xhtml#a49be0a51815db1ab6b17e543eeb5f2c6">DepthConcatSubTensorMutator</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_i_graph_mutator.xhtml#a5cbaa2df97059f21e84c1d4f3fef4694">IGraphMutator</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_in_place_operation_mutator.xhtml#a49be0a51815db1ab6b17e543eeb5f2c6">InPlaceOperationMutator</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_node_fusion_mutator.xhtml#a49be0a51815db1ab6b17e543eeb5f2c6">NodeFusionMutator</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_split_layer_sub_tensor_mutator.xhtml#a49be0a51815db1ab6b17e543eeb5f2c6">SplitLayerSubTensorMutator</a>
+</li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Fri Mar 2 2018 12:38:02 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:46 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

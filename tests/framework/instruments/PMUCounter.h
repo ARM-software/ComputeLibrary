@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,6 +37,10 @@ namespace framework
 class PMUCounter : public Instrument
 {
 public:
+    /** Construct a PMU counter.
+     *
+     * @param[in] scale_factor Measurement scale factor.
+     */
     PMUCounter(ScaleFactor scale_factor)
     {
         switch(scale_factor)

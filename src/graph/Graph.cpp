@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,292 +23,205 @@
  */
 #include "arm_compute/graph/Graph.h"
 
-#include "arm_compute/graph/CL/CLMap.h"
-#include "arm_compute/graph/CL/CLUnmap.h"
-#include "arm_compute/graph/INode.h"
-#include "arm_compute/graph/ITensorObject.h"
-#include "arm_compute/graph/Tensor.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
-#include "arm_compute/runtime/CL/CLTensor.h"
-#include "arm_compute/runtime/Tensor.h"
-#include "support/ToolchainSupport.h"
-
-#include <sys/stat.h>
-
-using namespace arm_compute::graph;
-
-namespace
+namespace arm_compute
 {
-bool file_exists(const std::string &filename)
+namespace graph
 {
-    std::ifstream file(filename);
-    return file.good();
+Graph::Graph(GraphID id, std::string name)
+    : _id(id), _name(std::move(name)), _nodes(), _edges(), _tensors(), _tagged_nodes(), _mtx()
+{
 }
 
-} // namespace
-struct Stage
+bool Graph::remove_node(NodeID nid)
 {
-    ITensorObject                          *_input;
-    ITensorObject                          *_output;
-    std::unique_ptr<arm_compute::IFunction> _function;
-};
-
-struct Graph::Private
-{
-public:
-    /** Finalizes the current node's configuration
-     *
-     * @param _next_hint Device execution hint
-     */
-    void configure(GraphHints _next_hints);
-
-    GraphContext                                _ctx{};
-    std::vector<Stage>                          _pipeline{};
-    std::vector<std::unique_ptr<ITensorObject>> _tensors{};
-    std::vector<std::unique_ptr<INode>>         _nodes{};
-    GraphHints                                  _current_hints{};
-    GraphHints                                  _next_hints{};
-    std::unique_ptr<ITensorObject>              _graph_input{ nullptr };
-    std::unique_ptr<ITensorObject>              _graph_output{ nullptr };
-    std::unique_ptr<INode>                      _current_node{ nullptr };
-    ITensorObject                              *_current_output{ nullptr };
-    bool                                        _info_enabled{ false };
-    CLTuner                                     _tuner{};
-
-private:
-    ITensorObject *_current_input{ nullptr };
-    GraphHints     _previous_hints{};
-};
-
-static const std::string tuner_data_filename = "acl_tuner.csv";
-Graph::~Graph() //NOLINT
-{
-    if(_pimpl->_tuner.tune_new_kernels() && !_pimpl->_tuner.lws_table().empty())
+    if(nid >= _nodes.size())
     {
-        _pimpl->_tuner.save_to_file(tuner_data_filename);
+        return false;
     }
-}
 
-Graph::Graph()
-    : _pimpl{ new Private() }
-{
-    graph_init();
-}
+    std::unique_ptr<INode> &node = _nodes[nid];
 
-void Graph::graph_init(const bool use_cl_tuner)
-{
-    // Check if OpenCL is available and initialize the scheduler
-    if(opencl_is_available())
+    // Remove node connections
+    if(node)
     {
-        if(_pimpl->_tuner.lws_table().empty() && file_exists(tuner_data_filename))
+        for(auto &input_eid : node->_input_edges)
         {
-            _pimpl->_tuner.load_from_file(tuner_data_filename);
+            remove_connection(input_eid);
         }
-        _pimpl->_tuner.set_tune_new_kernels(use_cl_tuner);
-        arm_compute::CLScheduler::get().default_init(&_pimpl->_tuner);
-    }
-}
-void Graph::run()
-{
-    while(true)
-    {
-        if(_pimpl->_graph_input->has_accessor() && !_pimpl->_graph_input->call_accessor())
+        for(auto &outpud_eid : node->_output_edges)
         {
-            return;
-        }
-
-        for(auto &stage : _pimpl->_pipeline)
-        {
-            stage._function->run();
-        }
-
-        if((_pimpl->_graph_output->has_accessor() && !_pimpl->_graph_output->call_accessor())
-           || (!_pimpl->_graph_output->has_accessor()))
-        {
-            return;
-        }
-    }
-}
-
-//Finalize current node's configuration
-void Graph::Private::configure(GraphHints _next_hints)
-{
-    ARM_COMPUTE_ERROR_ON(_current_node == nullptr);
-    ARM_COMPUTE_ERROR_ON(_graph_input == nullptr);
-
-    // Is it the first node of the graph ?
-    if(_current_input == nullptr)
-    {
-        _graph_input->set_target(_current_hints.target_hint());
-        _current_input  = _graph_input.get();
-        _previous_hints = _current_hints; // For the first node just assume the previous node was of the same type as this one
-    }
-
-    if(_current_node->supports_in_place())
-    {
-        _current_output = _current_input;
-    }
-
-    //Automatic output configuration ?
-    if(_current_output == nullptr)
-    {
-        _tensors.push_back(arm_compute::support::cpp14::make_unique<Tensor>(TensorInfo()));
-        _current_output = _tensors.back().get();
-    }
-
-    // If either the writer or reader node needs OpenCL then use OpenCL memory:
-    if((_next_hints.target_hint() == TargetHint::OPENCL || _current_hints.target_hint() == TargetHint::OPENCL))
-    {
-        _current_output->set_target(TargetHint::OPENCL);
-    }
-    else
-    {
-        _current_output->set_target(TargetHint::NEON);
-    }
-
-    // Instantiate Node
-    _ctx.hints()                                 = _current_hints;
-    std::unique_ptr<arm_compute::IFunction> func = _current_node->instantiate_node(_ctx, _current_input, _current_output);
-
-    // If the operation is done in-place, do not allocate or it will prevent following layers from performing the configuration
-    if(!_current_node->supports_in_place())
-    {
-        // Allocate current input
-        _current_input->allocate();
-    }
-
-    // Map input if needed
-    if(_current_input->target() == TargetHint::OPENCL)
-    {
-        if(_previous_hints.target_hint() == TargetHint::NEON)
-        {
-            ARM_COMPUTE_ERROR_ON(_current_hints.target_hint() == TargetHint::NEON);
-            _pipeline.push_back({ _current_input, _current_input, arm_compute::support::cpp14::make_unique<CLUnmap>(_current_input) });
-        }
-        if(_current_hints.target_hint() == TargetHint::NEON)
-        {
-            ARM_COMPUTE_ERROR_ON(_previous_hints.target_hint() == TargetHint::NEON);
-            _pipeline.push_back({ _current_input, _current_input, arm_compute::support::cpp14::make_unique<CLMap>(_current_input, true) });
+            remove_connection(outpud_eid);
         }
     }
 
-    _pipeline.push_back({ _current_input, _current_output, std::move(func) });
+    node = nullptr;
 
-    _current_input  = _current_output;
-    _current_output = nullptr;
-    std::swap(_previous_hints, _current_hints);
-    std::swap(_current_hints, _next_hints);
+    return true;
 }
 
-void Graph::add_node(std::unique_ptr<INode> node)
+EdgeID Graph::add_connection(NodeID source, size_t source_idx, NodeID sink, size_t sink_idx)
 {
-    ARM_COMPUTE_ERROR_ON_MSG(_pimpl->_graph_input == nullptr, "The graph's input must be set before the first node is added");
-    ARM_COMPUTE_ERROR_ON_MSG(_pimpl->_graph_output != nullptr, "Nothing can be added after the output tensor");
-    //Trigger the creation of the current Node:
+    std::lock_guard<arm_compute::Mutex> lock(_mtx);
 
-    GraphHints _next_hints = _pimpl->_next_hints;
-    _next_hints.set_target_hint(node->override_target_hint(_pimpl->_next_hints.target_hint()));
-    ARM_COMPUTE_ERROR_ON(_next_hints.target_hint() == TargetHint::DONT_CARE);
-    if(_pimpl->_current_node)
+    // Check if node index is valid, if node exists and finally if the connection index is valid
+    ARM_COMPUTE_ERROR_ON((source >= _nodes.size()) || (_nodes[source] == nullptr) || (source_idx >= _nodes[source]->num_outputs()));
+    ARM_COMPUTE_ERROR_ON((sink >= _nodes.size()) || (_nodes[sink] == nullptr) || (sink_idx >= _nodes[sink]->num_inputs()));
+
+    // Get nodes
+    std::unique_ptr<INode> &source_node = _nodes[source];
+    std::unique_ptr<INode> &sink_node   = _nodes[sink];
+
+    // Check for duplicate connections (Check only sink node)
+    Edge *sink_node_edge = sink_node->input_edge(sink_idx);
+    if((sink_node_edge != nullptr) && (sink_node_edge->producer_id() == source) && (sink_node_edge->producer_idx() == source_idx)
+       && (sink_node_edge->consumer_id() == sink) && (sink_node_edge->consumer_idx() == sink_idx))
     {
-        //Finalize the previous Node:
-        _pimpl->configure(_pimpl->_next_hints);
+        return sink_node_edge->id();
     }
-    else
+
+    // Check if there is already a tensor associated with output if not create one
+    TensorID tid = source_node->output_id(source_idx);
+    if(tid == NullTensorID)
     {
-        // If that's the first node then use the same TargetHint before and after the node.
-        _pimpl->_current_hints = _next_hints;
+        tid = create_tensor();
     }
-    if(_pimpl->_current_node)
+    std::unique_ptr<Tensor> &tensor = _tensors[tid];
+
+    // Create connections
+    EdgeID eid        = _edges.size();
+    auto   connection = arm_compute::support::cpp14::make_unique<Edge>(eid, source_node.get(), source_idx, sink_node.get(), sink_idx, tensor.get());
+    _edges.push_back(std::move(connection));
+
+    // Add connections to source and sink nodes
+    source_node->_output_edges.insert(eid);
+    sink_node->_input_edges[sink_idx] = eid;
+
+    // Set tensor output node
+    source_node->_outputs[source_idx] = tid;
+
+    // Bind tensor to the edge
+    tensor->bind_edge(eid);
+
+    // Try and propagate shapes in sink node
+    sink_node->forward_descriptors();
+
+    return eid;
+}
+
+bool Graph::remove_connection(EdgeID eid)
+{
+    if(eid >= _edges.size())
     {
-        _pimpl->_nodes.push_back(std::move(_pimpl->_current_node));
+        return false;
     }
-    _pimpl->_current_node = std::move(node);
-}
 
-//Add a tensor with an Accessor (i.e either the input or output of the graph)
-void Graph::add_tensor_object(std::unique_ptr<ITensorObject> tensor)
-{
-    // If it's the first Tensor added then it will be the input of the Graph.
-    if(_pimpl->_graph_input == nullptr)
+    std::unique_ptr<Edge> &edge = _edges[eid];
+
+    // Remove node connections
+    if(edge != nullptr)
     {
-        ARM_COMPUTE_ERROR_ON(_pimpl->_graph_output != nullptr);
-        ARM_COMPUTE_ERROR_ON(_pimpl->_current_node != nullptr);
-        _pimpl->_graph_input = std::move(tensor);
+        // Get tensor bound to the edge
+        if(edge->tensor() != nullptr)
+        {
+            edge->tensor()->unbind_edge(eid);
+        }
+
+        // Remove edges from source node
+        if(edge->producer() != nullptr)
+        {
+            edge->producer()->_output_edges.erase(eid);
+        }
+
+        // Remove edges from sink node
+        if((edge->consumer() != nullptr) && (edge->consumer_idx() < edge->consumer()->_input_edges.size()))
+        {
+            edge->consumer()->_input_edges[edge->consumer_idx()] = EmptyEdgeID;
+        }
     }
-    else
-    {
-        // Else it will be the output of the Graph
-        ARM_COMPUTE_ERROR_ON(_pimpl->_graph_output != nullptr);
-        ARM_COMPUTE_ERROR_ON(_pimpl->_current_node == nullptr);
-        _pimpl->_graph_output   = std::move(tensor);
-        _pimpl->_current_output = _pimpl->_graph_output.get();
 
-        // Finalize the graph by configuring the last Node of the graph:
-        _pimpl->configure(_pimpl->_current_hints); // Ignore _next_hint as this is the last node, and just use the same hint as before this node.
-        _pimpl->_graph_output->allocate();
-    }
+    // Clear edge
+    edge = nullptr;
+
+    return true;
 }
 
-bool Graph::opencl_is_available()
+TensorID Graph::create_tensor(TensorDescriptor desc)
 {
-    return arm_compute::opencl_is_available();
+    TensorID tid    = _tensors.size();
+    auto     tensor = support::cpp14::make_unique<Tensor>(tid, desc);
+    _tensors.push_back(std::move(tensor));
+
+    return tid;
 }
 
-arm_compute::GPUTarget Graph::gpu_target()
+std::string Graph::name() const
 {
-    // Check if OpenCL is available before returning the GPU target
-    if(opencl_is_available())
-    {
-        return arm_compute::CLScheduler::get().target();
-    }
-    else
-    {
-        return GPUTarget::MIDGARD;
-    }
+    return _name;
 }
 
-void Graph::set_temp(TensorInfo &&tmp)
+GraphID Graph::id() const
 {
-    ARM_COMPUTE_ERROR_ON(_pimpl->_graph_input == nullptr);
-    ARM_COMPUTE_ERROR_ON(_pimpl->_graph_output != nullptr);
-    ARM_COMPUTE_ERROR_ON_MSG(_pimpl->_current_output != nullptr, "TensorInfo for temporary tensor already set");
-
-    _pimpl->_tensors.push_back(arm_compute::support::cpp14::make_unique<Tensor>(std::move(tmp)));
-    _pimpl->_current_output = _pimpl->_tensors.back().get();
+    return _id;
 }
 
-GraphHints &Graph::hints()
+const std::vector<NodeID> &Graph::inputs()
 {
-    return _pimpl->_next_hints;
+    return _tagged_nodes[NodeType::Input];
 }
 
-Graph &arm_compute::graph::operator<<(Graph &graph, TensorInfo &&info)
+std::vector<std::unique_ptr<INode>> &Graph::nodes()
 {
-    graph.set_temp(std::move(info));
-    return graph;
+    return _nodes;
 }
 
-Graph &arm_compute::graph::operator<<(Graph &graph, Tensor &&tensor)
+const std::vector<std::unique_ptr<INode>> &Graph::nodes() const
 {
-    graph.add_tensor_object(arm_compute::support::cpp14::make_unique<Tensor>(std::move(tensor)));
-    return graph;
+    return _nodes;
 }
 
-Graph &arm_compute::graph::operator<<(Graph &graph, SubTensor &&sub_tensor)
+const std::vector<std::unique_ptr<Edge>> &Graph::edges() const
 {
-    graph.add_tensor_object(arm_compute::support::cpp14::make_unique<SubTensor>(std::move(sub_tensor)));
-    return graph;
+    return _edges;
 }
 
-Graph &arm_compute::graph::operator<<(Graph &graph, TargetHint target_hint)
+std::vector<std::unique_ptr<Tensor>> &Graph::tensors()
 {
-    graph.hints().set_target_hint(target_hint);
-    return graph;
+    return _tensors;
 }
 
-Graph &arm_compute::graph::operator<<(Graph &graph, ConvolutionMethodHint conv_method_hint)
+const std::vector<std::unique_ptr<Tensor>> &Graph::tensors() const
 {
-    graph.hints().set_convolution_method_hint(conv_method_hint);
-    return graph;
+    return _tensors;
 }
+
+const INode *Graph::node(NodeID id) const
+{
+    return (id >= _nodes.size()) ? nullptr : _nodes[id].get();
+}
+
+INode *Graph::node(NodeID id)
+{
+    return (id >= _nodes.size()) ? nullptr : _nodes[id].get();
+}
+
+const Edge *Graph::edge(EdgeID id) const
+{
+    return (id >= _edges.size()) ? nullptr : _edges[id].get();
+}
+
+Edge *Graph::edge(EdgeID id)
+{
+    return (id >= _edges.size()) ? nullptr : _edges[id].get();
+}
+
+const Tensor *Graph::tensor(TensorID id) const
+{
+    return (id >= _tensors.size()) ? nullptr : _tensors[id].get();
+}
+
+Tensor *Graph::tensor(TensorID id)
+{
+    return (id >= _tensors.size()) ? nullptr : _tensors[id].get();
+}
+} // namespace graph
+} // namespace arm_compute

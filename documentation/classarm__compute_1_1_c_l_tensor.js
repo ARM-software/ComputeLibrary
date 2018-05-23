@@ -1,7 +1,7 @@
 var classarm__compute_1_1_c_l_tensor =
 [
     [ "CLTensor", "classarm__compute_1_1_c_l_tensor.xhtml#a7fa2f475bb0d2ad03746bc814fea580e", null ],
-    [ "allocator", "classarm__compute_1_1_c_l_tensor.xhtml#ad6dc6b773780dd6b1ad17fc82368d9f3", null ],
+    [ "allocator", "classarm__compute_1_1_c_l_tensor.xhtml#a256b18d4e6fdbbff14937b4b9089bdd3", null ],
     [ "cl_buffer", "classarm__compute_1_1_c_l_tensor.xhtml#afd44a3d7dad6d984b1b87bc9f1b4fa02", null ],
     [ "info", "classarm__compute_1_1_c_l_tensor.xhtml#a97de03c31e0ca04be6960e2e3ffdca95", null ],
     [ "info", "classarm__compute_1_1_c_l_tensor.xhtml#aa5b3539cef9e42dee1882e909ba34e4f", null ],

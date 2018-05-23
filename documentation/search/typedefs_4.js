@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['exacttagtype',['ExactTagType',['../structarm__compute_1_1detail_1_1relu.xhtml#a2eb8ae9edbcaa2ffa10e954e92d298d1',1,'arm_compute::detail::relu::ExactTagType()'],['../structarm__compute_1_1detail_1_1brelu.xhtml#a2eb8ae9edbcaa2ffa10e954e92d298d1',1,'arm_compute::detail::brelu::ExactTagType()'],['../structarm__compute_1_1detail_1_1lubrelu.xhtml#a2eb8ae9edbcaa2ffa10e954e92d298d1',1,'arm_compute::detail::lubrelu::ExactTagType()']]],
-  ['exacttype',['ExactType',['../structarm__compute_1_1detail_1_1dummy.xhtml#a0492e57b9f86c67a4aa57998e260720f',1,'arm_compute::detail::dummy::ExactType()'],['../structarm__compute_1_1detail_1_1relu.xhtml#a0492e57b9f86c67a4aa57998e260720f',1,'arm_compute::detail::relu::ExactType()'],['../structarm__compute_1_1detail_1_1brelu.xhtml#a0492e57b9f86c67a4aa57998e260720f',1,'arm_compute::detail::brelu::ExactType()'],['../structarm__compute_1_1detail_1_1lubrelu.xhtml#a0492e57b9f86c67a4aa57998e260720f',1,'arm_compute::detail::lubrelu::ExactType()']]]
+  ['detectionwindow',['DetectionWindow',['../types_8h.xhtml#a978d6d1943577669ebbb535f9e4f284f',1,'types.h']]],
+  ['detectionwindowarray',['DetectionWindowArray',['../namespacearm__compute.xhtml#a5fe01ab895629edd84a511b56657d79e',1,'arm_compute']]]
 ];

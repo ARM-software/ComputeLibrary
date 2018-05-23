@@ -71,7 +71,7 @@ public:
 
     /** Give read access to the LWS table
      *
-     * return The lws table as unordered_map container
+     * @return The lws table as unordered_map container
      */
     const std::unordered_map<std::string, cl::NDRange> &lws_table() const;
 
@@ -83,6 +83,7 @@ public:
      */
     void set_cl_kernel_event(cl_event kernel_event);
 
+    /** clEnqueueNDRangeKernel symbol */
     std::function<decltype(clEnqueueNDRangeKernel)> real_clEnqueueNDRangeKernel;
 
     /** Load the LWS table from file
@@ -98,7 +99,8 @@ public:
     void save_to_file(const std::string &filename) const;
 
     // Inherited methods overridden:
-    void tune_kernel(ICLKernel &kernel) override;
+    void tune_kernel_static(ICLKernel &kernel) override;
+    void tune_kernel_dynamic(ICLKernel &kernel) override;
 
     /** Is the kernel_event set ?
      *

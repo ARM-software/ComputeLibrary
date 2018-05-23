@@ -1,14 +1,14 @@
 var benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp =
 [
-    [ "NEConvolutionLayerFixture", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#a4a53a6134331fcb3ced6240186a91597", null ],
-    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#abe7167f9af260495f067dd8f36251a3b", null ],
-    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#adc3f7b3f1d06144af1980e8705253583", null ],
-    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#a9cc3e01ede750344f389191184d4682d", null ],
-    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#a9c7a41c764eb85334c2d75df71d40cc4", null ],
-    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#ad8c07298bae2d7cd7ace3ad869371b0b", null ],
-    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#a981537b01124fe1025ab51dfe0dde1ee", null ],
-    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#a27446bd5b343d26d6028cd2ab34065a6", null ],
-    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#a13170587db62e123a041d2b8cab82ef8", null ],
-    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#afae7c1fa456ae3e126f9a5329b28dca4", null ],
-    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#af3310a6693b1d28b4d474e2a025b8777", null ]
+    [ "NEDirectConvolutionLayerFixture", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#a116453711046ea5a00c6124e5609d593", null ],
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#a35b38e85b1472199517852b2a08f3de5", null ],
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#a8df5d9aaa2811d4f3e08406689ff34d8", null ],
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#a7093f92dbaff59384b610ddf5190e194", null ],
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#a17ffb70ec6a66463634d219e4683da95", null ],
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#a54ad4f2068438e1cc5679490b6e34f05", null ],
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#a622aacd4468dc9477ec57ec4338557c5", null ],
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#a88de089c19c06a39c5891e4f9da2daf6", null ],
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#ae7cb8264fa5ae042bdce639714b73c6b", null ],
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#ad950dcae8aa7e00b0fea96f05bf7314a", null ],
+    [ "REGISTER_FIXTURE_DATA_TEST_CASE", "benchmark_2_n_e_o_n_2_direct_convolution_layer_8cpp.xhtml#a50c3d19c27ca07e286148e7772558697", null ]
 ];

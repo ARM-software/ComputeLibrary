@@ -30,7 +30,7 @@
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/CLTuner.h"
+#include "arm_compute/runtime/CL/ICLTuner.h"
 
 #if defined(ARM_COMPUTE_DEBUG_ENABLED)
 namespace
@@ -73,18 +73,28 @@ public:
         if(!_is_initialised)
         {
 #if defined(ARM_COMPUTE_DEBUG_ENABLED)
-            // Create a cl_context with a printf_callback and user specified buffer size.
-            cl_context_properties properties[] =
+            bool is_cl_arm_printf_supported = false;
+
+            //query devices in the context for cl_arm_printf support
+            std::vector<cl::Device> def_platform_devices;
+            cl::Platform::getDefault().getDevices(CL_DEVICE_TYPE_DEFAULT, &def_platform_devices);
+            is_cl_arm_printf_supported = device_supports_extension(def_platform_devices[0], "cl_arm_printf");
+
+            if(is_cl_arm_printf_supported)
             {
-                // Enable a printf callback function for this context.
-                CL_PRINTF_CALLBACK_ARM, reinterpret_cast<cl_context_properties>(printf_callback),
-                // Request a minimum printf buffer size of 4MB for devices in the
-                // context that support this extension.
-                CL_PRINTF_BUFFERSIZE_ARM, static_cast<cl_context_properties>(0x100000),
-                CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>(cl::Platform::get()()),
-                0
-            };
-            cl::Context::setDefault(cl::Context(CL_DEVICE_TYPE_DEFAULT, properties));
+                // Create a cl_context with a printf_callback and user specified buffer size.
+                cl_context_properties properties[] =
+                {
+                    // Enable a printf callback function for this context.
+                    CL_PRINTF_CALLBACK_ARM, reinterpret_cast<cl_context_properties>(printf_callback),
+                    // Request a minimum printf buffer size of 4MB for devices in the
+                    // context that support this extension.
+                    CL_PRINTF_BUFFERSIZE_ARM, static_cast<cl_context_properties>(0x100000),
+                    CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>(cl::Platform::get()()),
+                    0
+                };
+                cl::Context::setDefault(cl::Context(CL_DEVICE_TYPE_DEFAULT, properties));
+            }
 #endif // defined(ARM_COMPUTE_DEBUG_ENABLED)
 
             CLKernelLibrary::get().init("./cl_kernels/", cl::Context::getDefault(), cl::Device::getDefault());
@@ -113,7 +123,7 @@ public:
     void init(cl::Context context = cl::Context::getDefault(), cl::CommandQueue queue = cl::CommandQueue::getDefault(),
               cl::Device device = cl::Device::getDefault(), ICLTuner *cl_tuner = nullptr)
     {
-        _context        = std::move(context);
+        set_context(context);
         _queue          = std::move(queue);
         _target         = get_target_from_device(device);
         _is_initialised = true;
@@ -127,7 +137,7 @@ public:
     cl::Context &context()
     {
         ARM_COMPUTE_ERROR_ON(!_is_initialised);
-        return _context;
+        return CLKernelLibrary::get().context();
     }
 
     /** Accessor to set the CL context to be used by the scheduler.
@@ -136,7 +146,7 @@ public:
      */
     void set_context(cl::Context context)
     {
-        _context = std::move(context);
+        CLKernelLibrary::get().set_context(context);
     }
 
     /** Accessor for the associated CL command queue.
@@ -194,21 +204,27 @@ public:
         return event;
     }
 
-private:
-    /** Tune OpenCL kernel
-     *
-     * @note This method uses a brute force approach to find the optimal LWS
+    /** Tunes OpenCL kernel
      *
      * @param[in] kernel Kernel to tune
-     *
-     * @return The optimal LWS for the specified kernel
      */
-    cl::NDRange tune_kernel(ICLKernel &kernel);
+    void tune_kernel_static(ICLKernel &kernel)
+    {
+        if(_cl_tuner != nullptr)
+        {
+            _cl_tuner->tune_kernel_static(kernel);
+        }
+    }
 
+    bool is_initialised() const
+    {
+        return _is_initialised;
+    }
+
+private:
     /** Flag to ensure symbols initialisation is happening before Scheduler creation */
     static std::once_flag _initialize_symbols;
 
-    cl::Context      _context;
     cl::CommandQueue _queue;
     GPUTarget        _target;
     bool             _is_initialised;

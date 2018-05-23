@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,7 +38,7 @@ namespace datasets
 class ConvolutionLayerDataset
 {
 public:
-    using type = std::tuple<TensorShape, TensorShape, TensorShape, TensorShape, PadStrideInfo>;
+    using type = std::tuple<TensorShape, TensorShape, TensorShape, TensorShape, PadStrideInfo, Size2D>;
 
     struct iterator
     {
@@ -46,12 +46,14 @@ public:
                  std::vector<TensorShape>::const_iterator   weights_it,
                  std::vector<TensorShape>::const_iterator   biases_it,
                  std::vector<TensorShape>::const_iterator   dst_it,
-                 std::vector<PadStrideInfo>::const_iterator infos_it)
+                 std::vector<PadStrideInfo>::const_iterator infos_it,
+                 std::vector<Size2D>::const_iterator        dilation_it)
             : _src_it{ std::move(src_it) },
               _weights_it{ std::move(weights_it) },
               _biases_it{ std::move(biases_it) },
               _dst_it{ std::move(dst_it) },
-              _infos_it{ std::move(infos_it) }
+              _infos_it{ std::move(infos_it) },
+              _dilation_it{ std::move(dilation_it) }
         {
         }
 
@@ -62,13 +64,14 @@ public:
             description << "Weights=" << *_weights_it << ":";
             description << "Biases=" << *_biases_it << ":";
             description << "Out=" << *_dst_it << ":";
-            description << "Info=" << *_infos_it;
+            description << "Info=" << *_infos_it << ":";
+            description << "Dilation=" << *_dilation_it;
             return description.str();
         }
 
         ConvolutionLayerDataset::type operator*() const
         {
-            return std::make_tuple(*_src_it, *_weights_it, *_biases_it, *_dst_it, *_infos_it);
+            return std::make_tuple(*_src_it, *_weights_it, *_biases_it, *_dst_it, *_infos_it, *_dilation_it);
         }
 
         iterator &operator++()
@@ -78,6 +81,7 @@ public:
             ++_biases_it;
             ++_dst_it;
             ++_infos_it;
+            ++_dilation_it;
 
             return *this;
         }
@@ -88,25 +92,27 @@ public:
         std::vector<TensorShape>::const_iterator   _biases_it;
         std::vector<TensorShape>::const_iterator   _dst_it;
         std::vector<PadStrideInfo>::const_iterator _infos_it;
+        std::vector<Size2D>::const_iterator        _dilation_it;
     };
 
     iterator begin() const
     {
-        return iterator(_src_shapes.begin(), _weight_shapes.begin(), _bias_shapes.begin(), _dst_shapes.begin(), _infos.begin());
+        return iterator(_src_shapes.begin(), _weight_shapes.begin(), _bias_shapes.begin(), _dst_shapes.begin(), _infos.begin(), _dilations.begin());
     }
 
     int size() const
     {
-        return std::min(_src_shapes.size(), std::min(_weight_shapes.size(), std::min(_bias_shapes.size(), std::min(_dst_shapes.size(), _infos.size()))));
+        return std::min(_src_shapes.size(), std::min(_weight_shapes.size(), std::min(_bias_shapes.size(), std::min(_dst_shapes.size(), std::min(_infos.size(), _dilations.size())))));
     }
 
-    void add_config(TensorShape src, TensorShape weights, TensorShape biases, TensorShape dst, PadStrideInfo info)
+    void add_config(TensorShape src, TensorShape weights, TensorShape biases, TensorShape dst, PadStrideInfo info, Size2D dilation = Size2D(1U, 1U))
     {
         _src_shapes.emplace_back(std::move(src));
         _weight_shapes.emplace_back(std::move(weights));
         _bias_shapes.emplace_back(std::move(biases));
         _dst_shapes.emplace_back(std::move(dst));
         _infos.emplace_back(std::move(info));
+        _dilations.emplace_back(std::move(dilation));
     }
 
 protected:
@@ -119,6 +125,7 @@ private:
     std::vector<TensorShape>   _bias_shapes{};
     std::vector<TensorShape>   _dst_shapes{};
     std::vector<PadStrideInfo> _infos{};
+    std::vector<Size2D>        _dilations{};
 };
 } // namespace datasets
 } // namespace test

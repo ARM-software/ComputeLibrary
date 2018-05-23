@@ -33,7 +33,7 @@
 
 namespace arm_compute
 {
-/* Constant value used to indicate maximum dimensions of a Window, TensorShape and Coordinates */
+/** Constant value used to indicate maximum dimensions of a Window, TensorShape and Coordinates */
 constexpr size_t MAX_DIMS = 6;
 
 /** Dimensions with dimensionality */
@@ -166,32 +166,50 @@ public:
         collapse(num_dimensions() - start, start);
     }
 
-    /** Returns a read/write iterator that points to the first element in the dimension array. */
+    /** Returns a read/write iterator that points to the first element in the dimension array.
+     *
+     * @return an iterator.
+     */
     typename std::array<T, num_max_dimensions>::iterator begin()
     {
         return _id.begin();
     }
-    /** Returns a read-only (constant) iterator that points to the first element in the dimension array. */
+    /** Returns a read-only (constant) iterator that points to the first element in the dimension array.
+     *
+     * @return an iterator.
+     */
     typename std::array<T, num_max_dimensions>::const_iterator begin() const
     {
         return _id.begin();
     }
-    /** Returns a read-only (constant) iterator that points to the first element in the dimension array. */
+    /** Returns a read-only (constant) iterator that points to the first element in the dimension array.
+     *
+     * @return an iterator.
+     */
     typename std::array<T, num_max_dimensions>::const_iterator cbegin() const
     {
         return begin();
     }
-    /** Returns a read/write iterator that points one past the last element in the dimension array. */
+    /** Returns a read/write iterator that points one past the last element in the dimension array.
+     *
+     * @return an iterator.
+     */
     typename std::array<T, num_max_dimensions>::iterator end()
     {
         return _id.end();
     }
-    /** Returns a read-only (constant) iterator that points one past the last element in the dimension array. */
+    /** Returns a read-only (constant) iterator that points one past the last element in the dimension array.
+     *
+     * @return an iterator.
+     */
     typename std::array<T, num_max_dimensions>::const_iterator end() const
     {
         return _id.end();
     }
-    /** Returns a read-only (constant) iterator that points one past the last element in the dimension array. */
+    /** Returns a read-only (constant) iterator that points one past the last element in the dimension array.
+     *
+     * @return an iterator.
+     */
     typename std::array<T, num_max_dimensions>::const_iterator cend() const
     {
         return end();
@@ -205,11 +223,25 @@ protected:
     size_t _num_dimensions{ 0 };
 };
 
+/** Check that given dimensions are equal.
+ *
+ * @param[in] lhs Left-hand side Dimensions.
+ * @param[in] rhs Right-hand side Dimensions.
+ *
+ * @return True if the given dimensions are equal.
+ */
 template <typename T>
 inline bool operator==(const Dimensions<T> &lhs, const Dimensions<T> &rhs)
 {
     return ((lhs.num_dimensions() == rhs.num_dimensions()) && std::equal(lhs.cbegin(), lhs.cend(), rhs.cbegin()));
 }
+/** Check that given dimensions are not equal.
+ *
+ * @param[in] lhs Left-hand side Dimensions.
+ * @param[in] rhs Right-hand side Dimensions.
+ *
+ * @return True if the given dimensions are not equal.
+ */
 template <typename T>
 inline bool operator!=(const Dimensions<T> &lhs, const Dimensions<T> &rhs)
 {

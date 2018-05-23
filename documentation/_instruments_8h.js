@@ -10,7 +10,8 @@ var _instruments_8h =
       [ "PMU_INSTRUCTION_COUNTER", "_instruments_8h.xhtml#aac6b258eb313f96447f4f0e273431005ae6848a94f594156fc477885835034257", null ],
       [ "MALI", "_instruments_8h.xhtml#aac6b258eb313f96447f4f0e273431005a53bc5501e639292688fa56780570a1c1", null ],
       [ "OPENCL_TIMER", "_instruments_8h.xhtml#aac6b258eb313f96447f4f0e273431005a873865e4a94b7ec656c000502a719b90", null ],
-      [ "SCHEDULER_TIMER", "_instruments_8h.xhtml#aac6b258eb313f96447f4f0e273431005ab714cb9b955131aefa9d36f9898e5b9a", null ]
+      [ "SCHEDULER_TIMER", "_instruments_8h.xhtml#aac6b258eb313f96447f4f0e273431005ab714cb9b955131aefa9d36f9898e5b9a", null ],
+      [ "OPENCL_MEMORY_USAGE", "_instruments_8h.xhtml#aac6b258eb313f96447f4f0e273431005a52540fb0ac94f63ce54d23c4d462581b", null ]
     ] ],
     [ "instrument_type_from_name", "_instruments_8h.xhtml#afd83c7910de214ea12bc25e7482892a0", null ],
     [ "operator<<", "_instruments_8h.xhtml#ab74cc570397d9855e79eb6cade93b3e6", null ],

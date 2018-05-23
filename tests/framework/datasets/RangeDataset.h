@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,6 +60,7 @@ public:
     {
     }
 
+    /** Allow instances of this class to be move constructed */
     RangeDataset(RangeDataset &&) = default;
 
     /** Type of the dataset. */
@@ -68,22 +69,40 @@ public:
     /** Iterator for the dataset. */
     struct iterator
     {
+        /** Construct an iterator.
+         *
+         * @param[in] name  Dataset name.
+         * @param[in] start Dataset start value.
+         * @param[in] step  Dataset step size.
+         */
         iterator(std::string name, T start, T step)
             : _name{ name }, _value{ start }, _step{ step }
         {
         }
 
+        /** Get the description of the current value.
+         *
+         * @return description of the current value.
+         */
         std::string description() const
         {
             using support::cpp11::to_string;
             return _name + "=" + to_string(_value);
         }
 
+        /** Get the value of the iterator.
+         *
+         * @return the value of the iterator.
+         */
         RangeDataset::type operator*() const
         {
             return std::make_tuple(_value);
         }
 
+        /** Inrement the iterator.
+         *
+         * @return *this;
+         */
         iterator &operator++()
         {
             _value += _step;

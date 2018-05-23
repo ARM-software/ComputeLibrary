@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 
 #include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
 
+#include "arm_compute/core/GLES_COMPUTE/GCHelpers.h"
 #include "arm_compute/core/GLES_COMPUTE/GCKernelLibrary.h"
 
 using namespace arm_compute;
@@ -31,7 +32,7 @@ using namespace arm_compute;
 std::once_flag GCScheduler::_initialize_symbols;
 
 GCScheduler::GCScheduler()
-    : _display(EGL_NO_DISPLAY), _context(EGL_NO_CONTEXT)
+    : _display(EGL_NO_DISPLAY), _context(EGL_NO_CONTEXT), _target(GPUTarget::MIDGARD)
 {
 }
 
@@ -48,11 +49,13 @@ void GCScheduler::default_init()
 {
     setup_context();
 
-    GCKernelLibrary::get().init("./cs_shaders/", _display, _context);
+    init(_display, _context);
 }
 
 void GCScheduler::init(EGLDisplay dpy, EGLContext ctx)
 {
+    _target = get_target_from_device();
+
     GCKernelLibrary::get().init("./cs_shaders/", dpy, ctx);
 }
 

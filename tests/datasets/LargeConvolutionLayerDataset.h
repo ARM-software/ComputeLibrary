@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,6 +37,47 @@ namespace test
 {
 namespace datasets
 {
+class LargeWinogradConvolutionLayer3x3Dataset final : public ConvolutionLayerDataset
+{
+public:
+    LargeWinogradConvolutionLayer3x3Dataset()
+    {
+        // Kernel size 3
+        // Batch size 1
+        add_config(TensorShape(224U, 222U, 64U), TensorShape(3U, 3U, 64U, 64U), TensorShape(64U), TensorShape(224U, 222U, 64U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(112U, 113U, 64U), TensorShape(3U, 3U, 64U, 128U), TensorShape(128U), TensorShape(112U, 113U, 128U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(112U, 112U, 128U), TensorShape(3U, 3U, 128U, 129U), TensorShape(129U), TensorShape(112U, 110U, 129U), PadStrideInfo(1, 1, 1, 0));
+        add_config(TensorShape(53U, 56U, 125U), TensorShape(3U, 3U, 125U, 256U), TensorShape(256U), TensorShape(51U, 56U, 256U), PadStrideInfo(1, 1, 0, 1));
+        add_config(TensorShape(56U, 56U, 256U), TensorShape(3U, 3U, 256U, 256U), TensorShape(256U), TensorShape(56U, 54U, 256U), PadStrideInfo(1, 1, 1, 0));
+        add_config(TensorShape(28U, 28U, 257U), TensorShape(3U, 3U, 257U, 512U), TensorShape(512U), TensorShape(26U, 28U, 512U), PadStrideInfo(1, 1, 0, 1));
+        add_config(TensorShape(28U, 28U, 512U), TensorShape(3U, 3U, 512U, 512U), TensorShape(512U), TensorShape(28U, 28U, 512U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(14U, 14U, 512U), TensorShape(3U, 3U, 512U, 512U), TensorShape(512U), TensorShape(12U, 12U, 512U), PadStrideInfo(1, 1, 0, 0));
+        // Batch size 3, 2 and 4
+        add_config(TensorShape(224U, 222U, 64U, 3U), TensorShape(3U, 3U, 64U, 64U), TensorShape(64U), TensorShape(224U, 222U, 64U, 3U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(112U, 113U, 64U, 2U), TensorShape(3U, 3U, 64U, 128U), TensorShape(128U), TensorShape(110U, 113U, 128U, 2U), PadStrideInfo(1, 1, 0, 1));
+        add_config(TensorShape(111U, 112U, 127U, 4U), TensorShape(3U, 3U, 127U, 128U), TensorShape(128U), TensorShape(111U, 112U, 128U, 4U), PadStrideInfo(1, 1, 1, 1));
+    }
+};
+
+class LargeWinogradConvolutionLayer5x5Dataset final : public ConvolutionLayerDataset
+{
+public:
+    LargeWinogradConvolutionLayer5x5Dataset()
+    {
+        // Kernel size 5
+        // Batch size 1
+        add_config(TensorShape(224U, 224U, 3U), TensorShape(5U, 5U, 3U, 64U), TensorShape(64U), TensorShape(222U, 222U, 64U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(123U, 134U, 16U), TensorShape(5U, 5U, 16U, 7U), TensorShape(7U), TensorShape(121U, 130U, 7U), PadStrideInfo(1, 1, 1, 0));
+        add_config(TensorShape(181U, 152U, 42U), TensorShape(5U, 5U, 42U, 100U), TensorShape(100U), TensorShape(177U, 148U, 100U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(200U, 201U, 24U), TensorShape(5U, 5U, 24U, 61), TensorShape(61U), TensorShape(200U, 201U, 61), PadStrideInfo(1, 1, 2, 2));
+
+        // Batch size 2, 3 and 4
+        add_config(TensorShape(224U, 224U, 3U, 2U), TensorShape(5U, 5U, 3U, 64U), TensorShape(64U), TensorShape(222U, 222U, 64U, 2U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(123U, 134U, 16U, 3U), TensorShape(5U, 5U, 16U, 7U), TensorShape(7U), TensorShape(121U, 130U, 7U, 3U), PadStrideInfo(1, 1, 1, 0));
+        add_config(TensorShape(181U, 152U, 42U, 4U), TensorShape(5U, 5U, 42U, 100U), TensorShape(100U), TensorShape(177U, 148U, 100U, 4U), PadStrideInfo(1, 1, 0, 0));
+    }
+};
+
 class LargeConvolutionLayerDataset final : public ConvolutionLayerDataset
 {
 public:

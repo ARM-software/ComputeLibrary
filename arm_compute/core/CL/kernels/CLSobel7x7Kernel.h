@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,9 +36,9 @@ class CLSobel7x7HorKernel : public ICLKernel
 public:
     /** Default constructor: initialize all the pointers to nullptr and parameters to zero. */
     CLSobel7x7HorKernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLSobel7x7HorKernel(const CLSobel7x7HorKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLSobel7x7HorKernel &operator=(const CLSobel7x7HorKernel &) = delete;
     /** Allow instances of this class to be moved */
     CLSobel7x7HorKernel(CLSobel7x7HorKernel &&) = default;
@@ -77,9 +77,9 @@ class CLSobel7x7VertKernel : public ICLKernel
 public:
     /** Default constructor: initialize all the pointers to nullptr and parameters to zero. */
     CLSobel7x7VertKernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLSobel7x7VertKernel(const CLSobel7x7VertKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLSobel7x7VertKernel &operator=(const CLSobel7x7VertKernel &) = delete;
     /** Allow instances of this class to be moved */
     CLSobel7x7VertKernel(CLSobel7x7VertKernel &&) = default;

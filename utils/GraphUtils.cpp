@@ -24,17 +24,35 @@
 
 #include "utils/GraphUtils.h"
 
+#include "arm_compute/core/Helpers.h"
+#include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/SubTensor.h"
 #include "utils/Utils.h"
-
-#ifdef ARM_COMPUTE_CL
-#include "arm_compute/core/CL/OpenCL.h"
-#include "arm_compute/runtime/CL/CLTensor.h"
-#endif /* ARM_COMPUTE_CL */
 
 #include <iomanip>
 
 using namespace arm_compute::graph_utils;
+
+namespace
+{
+std::pair<arm_compute::TensorShape, arm_compute::PermutationVector> compute_permutation_paramaters(const arm_compute::TensorShape &shape,
+                                                                                                   arm_compute::DataLayout data_layout)
+{
+    // Set permutation parameters if needed
+    arm_compute::TensorShape       permuted_shape = shape;
+    arm_compute::PermutationVector perm;
+    // Permute only if num_dimensions greater than 2
+    if(shape.num_dimensions() > 2)
+    {
+        perm = (data_layout == arm_compute::DataLayout::NHWC) ? arm_compute::PermutationVector(2U, 0U, 1U) : arm_compute::PermutationVector(1U, 2U, 0U);
+
+        arm_compute::PermutationVector perm_shape = (data_layout == arm_compute::DataLayout::NCHW) ? arm_compute::PermutationVector(2U, 0U, 1U) : arm_compute::PermutationVector(1U, 2U, 0U);
+        arm_compute::permute(permuted_shape, perm_shape);
+    }
+
+    return std::make_pair(permuted_shape, perm);
+}
+} // namespace
 
 void TFPreproccessor::preprocess(ITensor &tensor)
 {
@@ -111,6 +129,45 @@ bool DummyAccessor::access_tensor(ITensor &tensor)
     return ret;
 }
 
+NumPyAccessor::NumPyAccessor(std::string npy_path, TensorShape shape, DataType data_type, std::ostream &output_stream)
+    : _npy_tensor(), _filename(std::move(npy_path)), _output_stream(output_stream)
+{
+    NumPyBinLoader loader(_filename);
+
+    TensorInfo info(shape, 1, data_type);
+    _npy_tensor.allocator()->init(info);
+    _npy_tensor.allocator()->allocate();
+
+    loader.access_tensor(_npy_tensor);
+}
+
+template <typename T>
+void NumPyAccessor::access_numpy_tensor(ITensor &tensor)
+{
+    const int num_elements          = tensor.info()->total_size();
+    int       num_mismatches        = utils::compare_tensor<T>(tensor, _npy_tensor);
+    float     percentage_mismatches = static_cast<float>(num_mismatches) / num_elements;
+
+    _output_stream << "Results: " << 100.f - (percentage_mismatches * 100) << " % matches with the provided output[" << _filename << "]." << std::endl;
+}
+
+bool NumPyAccessor::access_tensor(ITensor &tensor)
+{
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&tensor, 1, DataType::F32);
+    ARM_COMPUTE_ERROR_ON(_npy_tensor.info()->dimension(0) != tensor.info()->dimension(0));
+
+    switch(tensor.info()->data_type())
+    {
+        case DataType::F32:
+            access_numpy_tensor<float>(tensor);
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT SUPPORTED!");
+    }
+
+    return false;
+}
+
 PPMAccessor::PPMAccessor(std::string ppm_path, bool bgr, std::unique_ptr<IPreprocessor> preprocessor)
     : _ppm_path(std::move(ppm_path)), _bgr(bgr), _preprocessor(std::move(preprocessor))
 {
@@ -123,8 +180,15 @@ bool PPMAccessor::access_tensor(ITensor &tensor)
     // Open PPM file
     ppm.open(_ppm_path);
 
-    ARM_COMPUTE_ERROR_ON_MSG(ppm.width() != tensor.info()->dimension(0) || ppm.height() != tensor.info()->dimension(1),
-                             "Failed to load image file: dimensions [%d,%d] not correct, expected [%d,%d].", ppm.width(), ppm.height(), tensor.info()->dimension(0), tensor.info()->dimension(1));
+    // Get permutated shape and permutation parameters
+    TensorShape                    permuted_shape = tensor.info()->tensor_shape();
+    arm_compute::PermutationVector perm;
+    if(tensor.info()->data_layout() != DataLayout::NCHW)
+    {
+        std::tie(permuted_shape, perm) = compute_permutation_paramaters(tensor.info()->tensor_shape(), tensor.info()->data_layout());
+    }
+    ARM_COMPUTE_ERROR_ON_MSG(ppm.width() != permuted_shape.x() || ppm.height() != permuted_shape.y(),
+                             "Failed to load image file: dimensions [%d,%d] not correct, expected [%d,%d].", ppm.width(), ppm.height(), permuted_shape.x(), permuted_shape.y());
 
     // Fill the tensor with the PPM content (BGR)
     ppm.fill_planar_tensor(tensor, _bgr);
@@ -325,8 +389,8 @@ bool RandomAccessor::access_tensor(ITensor &tensor)
     return true;
 }
 
-NumPyBinLoader::NumPyBinLoader(std::string filename)
-    : _filename(std::move(filename))
+NumPyBinLoader::NumPyBinLoader(std::string filename, DataLayout file_layout)
+    : _filename(std::move(filename)), _file_layout(file_layout)
 {
 }
 
@@ -371,30 +435,57 @@ bool NumPyBinLoader::access_tensor(ITensor &tensor)
         }
     }
 
+    bool are_layouts_different = (_file_layout != tensor.info()->data_layout());
+
     // Validate tensor ranks
     ARM_COMPUTE_ERROR_ON_MSG(shape.size() != tensor_shape.num_dimensions(), "Tensor ranks mismatch");
+
+    // Set permutation parameters if needed
+    TensorShape                    permuted_shape = tensor_shape;
+    arm_compute::PermutationVector perm;
+    if(are_layouts_different)
+    {
+        std::tie(permuted_shape, perm) = compute_permutation_paramaters(tensor_shape, tensor.info()->data_layout());
+    }
 
     // Validate shapes
     for(size_t i = 0; i < shape.size(); ++i)
     {
-        ARM_COMPUTE_ERROR_ON_MSG(tensor_shape[i] != shape[i], "Tensor dimensions mismatch");
+        ARM_COMPUTE_ERROR_ON_MSG(permuted_shape[i] != shape[i], "Tensor dimensions mismatch");
     }
 
-    // Read data
-    if(tensor.info()->padding().empty() && (dynamic_cast<SubTensor *>(&tensor) == nullptr))
+    // Validate shapes and copy tensor
+    if(!are_layouts_different || perm.num_dimensions() <= 2)
     {
-        // If tensor has no padding read directly from stream.
-        stream.read(reinterpret_cast<char *>(tensor.buffer()), tensor.info()->total_size());
+        // Read data
+        if(tensor.info()->padding().empty() && (dynamic_cast<SubTensor *>(&tensor) == nullptr))
+        {
+            // If tensor has no padding read directly from stream.
+            stream.read(reinterpret_cast<char *>(tensor.buffer()), tensor.info()->total_size());
+        }
+        else
+        {
+            // If tensor has padding accessing tensor elements through execution window.
+            Window window;
+            window.use_tensor_dimensions(tensor_shape);
+
+            execute_window_loop(window, [&](const Coordinates & id)
+            {
+                stream.read(reinterpret_cast<char *>(tensor.ptr_to_element(id)), tensor.info()->element_size());
+            });
+        }
     }
     else
     {
         // If tensor has padding accessing tensor elements through execution window.
         Window window;
-        window.use_tensor_dimensions(tensor_shape);
+        window.use_tensor_dimensions(permuted_shape);
 
         execute_window_loop(window, [&](const Coordinates & id)
         {
-            stream.read(reinterpret_cast<char *>(tensor.ptr_to_element(id)), tensor.info()->element_size());
+            Coordinates coords(id);
+            arm_compute::permute(coords, perm);
+            stream.read(reinterpret_cast<char *>(tensor.ptr_to_element(coords)), tensor.info()->element_size());
         });
     }
     return true;

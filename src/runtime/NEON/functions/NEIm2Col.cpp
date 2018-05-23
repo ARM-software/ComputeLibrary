@@ -23,19 +23,30 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEIm2Col.h"
 
-#include "arm_compute/core/NEON/kernels/NEIm2ColKernel.h"
+#include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
 
-void NEIm2Col::configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, bool is_fully_connected)
+NEIm2Col::NEIm2Col()
+    : _kernel(), _y_dim(1)
 {
-    auto k = arm_compute::support::cpp14::make_unique<NEIm2ColKernel>();
-    k->configure(input, output, kernel_dims, conv_info, has_bias, is_fully_connected);
-    _kernel = std::move(k);
 }
 
-Status NEIm2Col::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, bool is_fully_connected)
+void NEIm2Col::configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, bool is_fully_connected, bool is_flatten)
 {
-    return NEIm2ColKernel::validate(input, output, kernel_dims, conv_info, has_bias, is_fully_connected);
+    _y_dim = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
+
+    _kernel.configure(input, output, kernel_dims, conv_info, has_bias, is_fully_connected, is_flatten);
+}
+
+Status NEIm2Col::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, bool is_fully_connected, bool is_flatten)
+{
+    return NEIm2ColKernel::validate(input, output, kernel_dims, conv_info, has_bias, is_fully_connected, is_flatten);
+}
+
+void NEIm2Col::run()
+{
+    NEScheduler::get().schedule(&_kernel, _y_dim);
 }

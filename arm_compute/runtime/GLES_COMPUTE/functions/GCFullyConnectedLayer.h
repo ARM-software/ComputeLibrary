@@ -28,6 +28,7 @@
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCIm2ColKernel.h"
 #include "arm_compute/core/GLES_COMPUTE/kernels/GCTransposeKernel.h"
+#include "arm_compute/runtime/GLES_COMPUTE/GCMemoryGroup.h"
 #include "arm_compute/runtime/GLES_COMPUTE/GCTensor.h"
 #include "arm_compute/runtime/GLES_COMPUTE/IGCSimpleFunction.h"
 
@@ -63,17 +64,20 @@ class GCFullyConnectedLayer : public IFunction
 {
 public:
     /** Constructor */
-    GCFullyConnectedLayer();
+    GCFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
-     * @param[in]  input                Source tensor. Data type supported: F16/F32.
-     * @param[in]  weights              Weights tensor. The weights must be 2 dimensional. Data type supported: Same as @p input
-     * @param[in]  biases               Bias tensor. It can be nullptr. Data type supported:Same as @p input.
-     * @param[out] output               Destination tensor. Data type supported: Same as @p input.
-     * @param[in]  transpose_weights    (Optional) Transpose weights if true. Defaults to true.
-     * @param[in]  are_weights_reshaped (Optional) Reshape the weights tensor if false. Defaults to false.
+     * @param[in]  input                   Source tensor. Data type supported: F16/F32.
+     * @param[in]  weights                 Weights tensor. The weights must be 2 dimensional. Data type supported: Same as @p input
+     * @param[in]  biases                  Bias tensor. It can be nullptr. Data type supported:Same as @p input.
+     * @param[out] output                  Destination tensor. Data type supported: Same as @p input.
+     * @param[in]  transpose_weights       (Optional) Transpose weights if true. Defaults to true.
+     * @param[in]  are_weights_reshaped    (Optional) Reshape the weights tensor if false. Defaults to false.
+     * @param[in]  retain_internal_weights (Optional) Retain internal reshaped weights. Defaults to false.
+     *                                     Used for reconfiguration purposes.
      */
-    void configure(const IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, bool transpose_weights = true, bool are_weights_reshaped = false);
+    void configure(const IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output,
+                   bool transpose_weights = true, bool are_weights_reshaped = false, bool retain_internal_weights = false);
 
     //Inherited methods override
     void run() override;
@@ -82,6 +86,7 @@ private:
     void configure_fc_fc(const IGCTensor *input, const IGCTensor *weights, IGCTensor *output);
     void configure_conv_fc(const IGCTensor *input, const IGCTensor *weights, IGCTensor *output);
 
+    GCMemoryGroup                       _memory_group;
     GCIm2ColKernel                      _im2col_kernel;
     GCFullyConnectedLayerReshapeWeights _reshape_weights_kernel;
     GCGEMMMatrixMultiplyKernel          _mm_kernel;

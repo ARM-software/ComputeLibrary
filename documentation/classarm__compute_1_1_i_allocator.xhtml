@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -132,17 +132,20 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a961a3c35d2c2652499f722ea14775122"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_allocator.xhtml#a961a3c35d2c2652499f722ea14775122">~IAllocator</a> ()=default</td></tr>
 <tr class="memdesc:a961a3c35d2c2652499f722ea14775122"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default virtual destructor.  <a href="#a961a3c35d2c2652499f722ea14775122">More...</a><br /></td></tr>
 <tr class="separator:a961a3c35d2c2652499f722ea14775122"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6ce9dda753afa9abb498f3d6b673e595"><td class="memItemLeft" align="right" valign="top">virtual void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_allocator.xhtml#a6ce9dda753afa9abb498f3d6b673e595">allocate</a> (size_t <a class="el" href="hwc_8hpp.xhtml#ab2c6b258f02add8fdf4cfc7c371dd772">size</a>, size_t alignment)=0</td></tr>
+<tr class="memitem:a6ce9dda753afa9abb498f3d6b673e595"><td class="memItemLeft" align="right" valign="top">virtual void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_allocator.xhtml#a6ce9dda753afa9abb498f3d6b673e595">allocate</a> (size_t size, size_t alignment)=0</td></tr>
 <tr class="memdesc:a6ce9dda753afa9abb498f3d6b673e595"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface to be implemented by the child class to allocate bytes.  <a href="#a6ce9dda753afa9abb498f3d6b673e595">More...</a><br /></td></tr>
 <tr class="separator:a6ce9dda753afa9abb498f3d6b673e595"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7dbeba9295a3f52ea54698c31e555dff"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_allocator.xhtml#a7dbeba9295a3f52ea54698c31e555dff">free</a> (void *ptr)=0</td></tr>
 <tr class="memdesc:a7dbeba9295a3f52ea54698c31e555dff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface to be implemented by the child class to free the allocated tensor.  <a href="#a7dbeba9295a3f52ea54698c31e555dff">More...</a><br /></td></tr>
 <tr class="separator:a7dbeba9295a3f52ea54698c31e555dff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9cff197f588f77bba9055f0baa690370"><td class="memItemLeft" align="right" valign="top">virtual std::unique_ptr&lt; <a class="el" href="classarm__compute_1_1_i_memory_region.xhtml">IMemoryRegion</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_allocator.xhtml#a9cff197f588f77bba9055f0baa690370">make_region</a> (size_t size, size_t alignment)=0</td></tr>
+<tr class="memdesc:a9cff197f588f77bba9055f0baa690370"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create self-managed memory region.  <a href="#a9cff197f588f77bba9055f0baa690370">More...</a><br /></td></tr>
+<tr class="separator:a9cff197f588f77bba9055f0baa690370"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="classarm__compute_1_1_allocator.xhtml" title="Default malloc allocator implementation. ">Allocator</a> interface. </p>
 
-<p>Definition at line <a class="el" href="_i_allocator_8h_source.xhtml#l00032">32</a> of file <a class="el" href="_i_allocator_8h_source.xhtml">IAllocator.h</a>.</p>
+<p>Definition at line <a class="el" href="_i_allocator_8h_source.xhtml#l00035">35</a> of file <a class="el" href="_i_allocator_8h_source.xhtml">IAllocator.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a961a3c35d2c2652499f722ea14775122"></a>
 <div class="memitem">
@@ -212,7 +215,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A pointer to the allocated memory </dd></dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1_c_l_buffer_allocator.xhtml#aae0c9f2cf99b1724ec4a6d4e292327d2">CLBufferAllocator</a>, and <a class="el" href="classarm__compute_1_1_allocator.xhtml#aae0c9f2cf99b1724ec4a6d4e292327d2">Allocator</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1_c_l_buffer_allocator.xhtml#aae0c9f2cf99b1724ec4a6d4e292327d2">CLBufferAllocator</a>, <a class="el" href="classarm__compute_1_1_g_c_buffer_allocator.xhtml#aae0c9f2cf99b1724ec4a6d4e292327d2">GCBufferAllocator</a>, and <a class="el" href="classarm__compute_1_1_allocator.xhtml#aae0c9f2cf99b1724ec4a6d4e292327d2">Allocator</a>.</p>
 
 </div>
 </div>
@@ -240,7 +243,53 @@ Public Member Functions</h2></td></tr>
 
 <p>Interface to be implemented by the child class to free the allocated tensor. </p>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1_c_l_buffer_allocator.xhtml#abbd17af5b3fbeff226e4051433c1b929">CLBufferAllocator</a>, and <a class="el" href="classarm__compute_1_1_allocator.xhtml#abbd17af5b3fbeff226e4051433c1b929">Allocator</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1_c_l_buffer_allocator.xhtml#abbd17af5b3fbeff226e4051433c1b929">CLBufferAllocator</a>, <a class="el" href="classarm__compute_1_1_g_c_buffer_allocator.xhtml#abbd17af5b3fbeff226e4051433c1b929">GCBufferAllocator</a>, and <a class="el" href="classarm__compute_1_1_allocator.xhtml#abbd17af5b3fbeff226e4051433c1b929">Allocator</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a9cff197f588f77bba9055f0baa690370"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual std::unique_ptr&lt;<a class="el" href="classarm__compute_1_1_i_memory_region.xhtml">IMemoryRegion</a>&gt; make_region </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>alignment</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create self-managed memory region. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>Size of the memory region </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">alignment</td><td>Alignment of the memory region</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The memory region object </dd></dl>
+
+<p>Implemented in <a class="el" href="classarm__compute_1_1_c_l_buffer_allocator.xhtml#a648cdc4602e8c7ec89180da37892db31">CLBufferAllocator</a>, <a class="el" href="classarm__compute_1_1_g_c_buffer_allocator.xhtml#a648cdc4602e8c7ec89180da37892db31">GCBufferAllocator</a>, and <a class="el" href="classarm__compute_1_1_allocator.xhtml#a648cdc4602e8c7ec89180da37892db31">Allocator</a>.</p>
 
 </div>
 </div>
@@ -253,7 +302,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_i_allocator.xhtml">IAllocator</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:58 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:41 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

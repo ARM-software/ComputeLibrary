@@ -165,6 +165,7 @@ private:
     ITensor                  *_phase;     /**< Output - Phase */
 };
 #else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+/** Template interface for the kernel to compute magnitude and phase */
 template <MagnitudeType mag_type, PhaseType phase_type>
 using NEMagnitudePhaseFP16Kernel = NEMagnitudePhaseKernel<mag_type, phase_type>;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */

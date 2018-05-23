@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,6 +37,14 @@ void Profiler::add(std::unique_ptr<Instrument> instrument)
     _instruments.emplace_back(std::move(instrument));
 }
 
+void Profiler::test_start()
+{
+    for(auto &instrument : _instruments)
+    {
+        instrument->test_start();
+    }
+}
+
 void Profiler::start()
 {
     for(auto &instrument : _instruments)
@@ -47,14 +55,29 @@ void Profiler::start()
 
 void Profiler::stop()
 {
-    for(auto &instrument : _instruments)
+    for(auto instrument = _instruments.rbegin(); instrument != _instruments.rend(); instrument++)
     {
-        instrument->stop();
+        (*instrument)->stop();
+    }
+    for(const auto &instrument : _instruments)
+    {
+        for(const auto &measurement : instrument->measurements())
+        {
+            _measurements[instrument->id() + "/" + measurement.first].push_back(measurement.second);
+        }
+    }
+}
+
+void Profiler::test_stop()
+{
+    for(auto instrument = _instruments.rbegin(); instrument != _instruments.rend(); instrument++)
+    {
+        (*instrument)->test_stop();
     }
 
     for(const auto &instrument : _instruments)
     {
-        for(const auto &measurement : instrument->measurements())
+        for(const auto &measurement : instrument->test_measurements())
         {
             _measurements[instrument->id() + "/" + measurement.first].push_back(measurement.second);
         }

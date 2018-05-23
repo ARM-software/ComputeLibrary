@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -134,7 +134,8 @@ Public Types</h2></td></tr>
 <a class="el" href="classarm__compute_1_1_scheduler.xhtml#a1d1cfd8ffb84e947f82999c682b666a7a4c162442ef22c58f6f1e330e6b692c7e">CPP</a>, 
 <a class="el" href="classarm__compute_1_1_scheduler.xhtml#a1d1cfd8ffb84e947f82999c682b666a7a6a1f3212967c1a0ff6774f09de77330f">OMP</a>, 
 <a class="el" href="classarm__compute_1_1_scheduler.xhtml#a1d1cfd8ffb84e947f82999c682b666a7a72baef04098f035e8a320b03ad197818">CUSTOM</a>
- }</td></tr>
+ }<tr class="memdesc:a1d1cfd8ffb84e947f82999c682b666a7"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classarm__compute_1_1_scheduler.xhtml" title="Configurable scheduler which supports multiple multithreading APIs and choosing between different sch...">Scheduler</a> type.  <a href="classarm__compute_1_1_scheduler.xhtml#a1d1cfd8ffb84e947f82999c682b666a7">More...</a><br /></td></tr>
+</td></tr>
 <tr class="separator:a1d1cfd8ffb84e947f82999c682b666a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
@@ -177,19 +178,25 @@ Static Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p><a class="el" href="classarm__compute_1_1_scheduler.xhtml" title="Configurable scheduler which supports multiple multithreading APIs and choosing between different sch...">Scheduler</a> type. </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a class="anchor" id="a1d1cfd8ffb84e947f82999c682b666a7aec8e57d71f07e31203035548b79d03c8"></a>ST&#160;</td><td class="fielddoc">
+<p>Single thread. </p>
 </td></tr>
 <tr><td class="fieldname"><a class="anchor" id="a1d1cfd8ffb84e947f82999c682b666a7a4c162442ef22c58f6f1e330e6b692c7e"></a>CPP&#160;</td><td class="fielddoc">
+<p>C++11 threads. </p>
 </td></tr>
 <tr><td class="fieldname"><a class="anchor" id="a1d1cfd8ffb84e947f82999c682b666a7a6a1f3212967c1a0ff6774f09de77330f"></a>OMP&#160;</td><td class="fielddoc">
+<p>OpenMP. </p>
 </td></tr>
 <tr><td class="fieldname"><a class="anchor" id="a1d1cfd8ffb84e947f82999c682b666a7a72baef04098f035e8a320b03ad197818"></a>CUSTOM&#160;</td><td class="fielddoc">
+<p>Provided by the user. </p>
 </td></tr>
 </table>
 
-<p>Definition at line <a class="el" href="_scheduler_8h_source.xhtml#l00036">36</a> of file <a class="el" href="_scheduler_8h_source.xhtml">Scheduler.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    {</div><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;        ST,    <span class="comment">// Single thread.</span></div><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;        CPP,   <span class="comment">// C++11 threads.</span></div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        OMP,   <span class="comment">// OpenMP.</span></div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        CUSTOM <span class="comment">// Provided by the user.</span></div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    };</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="_scheduler_8h_source.xhtml#l00037">37</a> of file <a class="el" href="_scheduler_8h_source.xhtml">Scheduler.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    {</div><div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;        ST,    </div><div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        CPP,   </div><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        OMP,   </div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        CUSTOM </div><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    };</div></div><!-- fragment -->
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -217,7 +224,7 @@ Static Public Member Functions</h2></td></tr>
 <p>Access the scheduler singleton. </p>
 <dl class="section return"><dt>Returns</dt><dd>A reference to the scheduler object. </dd></dl>
 
-<p>Referenced by <a class="el" href="_alex_net_network_8h_source.xhtml#l00057">AlexNetNetwork&lt; ITensorType, TensorType, SubTensorType, arm_compute::test::Accessor, ActivationLayerFunction, ConvolutionLayerFunction, DirectConvolutionLayerFunction, FullyConnectedLayerFunction, NormalizationLayerFunction, PoolingLayerFunction, SoftmaxLayerFunction &gt;::init()</a>, <a class="el" href="main_8cpp_source.xhtml#l00063">main()</a>, <a class="el" href="validation_2fixtures_2_convolution_layer_fixture_8h_source.xhtml#l00057">ConvolutionValidationGenericFixture&lt; TensorType, AccessorType, FunctionType, T &gt;::setup()</a>, and <a class="el" href="_scheduler_timer_8cpp_source.xhtml#l00082">SchedulerTimer::start()</a>.</p>
+<p>Referenced by <a class="el" href="main_8cpp_source.xhtml#l00063">main()</a>, <a class="el" href="_assembly_helper_8h_source.xhtml#l00081">AssemblyKernelGlue&lt; int8_t, int32_t &gt;::run()</a>, <a class="el" href="_assembly_helper_8h_source.xhtml#l00159">arm_compute::setup_assembly_kernel()</a>, and <a class="el" href="_scheduler_timer_8cpp_source.xhtml#l00091">SchedulerTimer::test_start()</a>.</p>
 
 </div>
 </div>
@@ -245,7 +252,7 @@ Static Public Member Functions</h2></td></tr>
 <p>Returns the type of the active scheduler. </p>
 <dl class="section return"><dt>Returns</dt><dd>The current scheduler's type. </dd></dl>
 
-<p>Referenced by <a class="el" href="_scheduler_timer_8cpp_source.xhtml#l00082">SchedulerTimer::start()</a>.</p>
+<p>Referenced by <a class="el" href="_scheduler_timer_8cpp_source.xhtml#l00091">SchedulerTimer::test_start()</a>.</p>
 
 </div>
 </div>
@@ -273,6 +280,12 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Returns true if the given scheduler type is supported. </p>
 <p>False otherwise.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">t</td><td>the type of the scheduler to check.</td></tr>
+  </table>
+  </dd>
+</dl>
 <dl class="section return"><dt>Returns</dt><dd>true if the given scheduler type is supported. False otherwise. </dd></dl>
 
 </div>
@@ -307,7 +320,7 @@ Static Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Referenced by <a class="el" href="_scheduler_timer_8cpp_source.xhtml#l00082">SchedulerTimer::start()</a>, and <a class="el" href="_scheduler_timer_8cpp_source.xhtml#l00096">SchedulerTimer::stop()</a>.</p>
+<p>Referenced by <a class="el" href="_scheduler_timer_8cpp_source.xhtml#l00091">SchedulerTimer::test_start()</a>, and <a class="el" href="_scheduler_timer_8cpp_source.xhtml#l00137">SchedulerTimer::test_stop()</a>.</p>
 
 </div>
 </div>
@@ -353,7 +366,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_scheduler.xhtml">Scheduler</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:59 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

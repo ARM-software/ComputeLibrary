@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -165,6 +165,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3c6173aecfebc9030bf8a0bee0c0ced8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_g_c_kernel.xhtml#a3c6173aecfebc9030bf8a0bee0c0ced8">set_lws_hint</a> (<a class="el" href="classarm__compute_1_1gles_1_1_n_d_range.xhtml">gles::NDRange</a> &amp;lws_hint)</td></tr>
 <tr class="memdesc:a3c6173aecfebc9030bf8a0bee0c0ced8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the Local-Workgroup-Size hint.  <a href="#a3c6173aecfebc9030bf8a0bee0c0ced8">More...</a><br /></td></tr>
 <tr class="separator:a3c6173aecfebc9030bf8a0bee0c0ced8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad5ba9d34a3a855bf1dd2e36316ff550a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_g_c_kernel.xhtml#ad5ba9d34a3a855bf1dd2e36316ff550a">set_target</a> (<a class="el" href="namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3">GPUTarget</a> target)</td></tr>
+<tr class="memdesc:ad5ba9d34a3a855bf1dd2e36316ff550a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the targeted GPU architecture.  <a href="#ad5ba9d34a3a855bf1dd2e36316ff550a">More...</a><br /></td></tr>
+<tr class="separator:ad5ba9d34a3a855bf1dd2e36316ff550a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a646cd535a16835b246c3367a63d96250"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3">GPUTarget</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_g_c_kernel.xhtml#a646cd535a16835b246c3367a63d96250">get_target</a> () const </td></tr>
+<tr class="memdesc:a646cd535a16835b246c3367a63d96250"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the targeted GPU architecture.  <a href="#a646cd535a16835b246c3367a63d96250">More...</a><br /></td></tr>
+<tr class="separator:a646cd535a16835b246c3367a63d96250"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classarm__compute_1_1_i_kernel"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1_i_kernel')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_kernel.xhtml">IKernel</a></td></tr>
 <tr class="memitem:a7250cb8cbaa4104a93a2d77155085507 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a7250cb8cbaa4104a93a2d77155085507">IKernel</a> ()</td></tr>
 <tr class="memdesc:a7250cb8cbaa4104a93a2d77155085507 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#a7250cb8cbaa4104a93a2d77155085507">More...</a><br /></td></tr>
@@ -185,7 +191,7 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Common interface for all the GLES kernels. </p>
 
-<p>Definition at line <a class="el" href="_i_g_c_kernel_8h_source.xhtml#l00038">38</a> of file <a class="el" href="_i_g_c_kernel_8h_source.xhtml">IGCKernel.h</a>.</p>
+<p>Definition at line <a class="el" href="_i_g_c_kernel_8h_source.xhtml#l00039">39</a> of file <a class="el" href="_i_g_c_kernel_8h_source.xhtml">IGCKernel.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="abd51b7f007e5846ae05efdaca32e876c"></a>
 <div class="memitem">
@@ -352,6 +358,36 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a646cd535a16835b246c3367a63d96250"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3">GPUTarget</a> get_target </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the targeted GPU architecture. </p>
+<dl class="section return"><dt>Returns</dt><dd>The targeted GPU architecture. </dd></dl>
+
+<p>Definition at line <a class="el" href="_i_g_c_kernel_8h_source.xhtml#l00122">122</a> of file <a class="el" href="_i_g_c_kernel_8h_source.xhtml">IGCKernel.h</a>.</p>
+
+<p>References <a class="el" href="namespacearm__compute.xhtml#a0f68015f649819f1102aa73d7b88b29e">arm_compute::enqueue()</a>, <a class="el" href="classarm__compute_1_1_i_g_c_kernel.xhtml#abca9f85e09acd3e4de49711b62dc8549">IGCKernel::kernel()</a>, <a class="el" href="namespacearm__compute.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aa4c614360da93c0a041b22e537de151eb">arm_compute::U</a>, and <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">IKernel::window()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;    {</div><div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;        <span class="keywordflow">return</span> _target;</div><div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;    }</div></div><!-- fragment -->
+</div>
+</div>
 <a class="anchor" id="abca9f85e09acd3e4de49711b62dc8549"></a>
 <div class="memitem">
 <div class="memproto">
@@ -368,7 +404,7 @@ Public Member Functions</h2></td></tr>
 <p>Returns a reference to the GLES kernel of this object. </p>
 <dl class="section return"><dt>Returns</dt><dd>A reference to the GLES kernel of this object. </dd></dl>
 
-<p>Referenced by <a class="el" href="_i_g_c_kernel_8h_source.xhtml#l00103">IGCKernel::set_lws_hint()</a>.</p>
+<p>Referenced by <a class="el" href="_i_g_c_kernel_8h_source.xhtml#l00122">IGCKernel::get_target()</a>.</p>
 
 </div>
 </div>
@@ -456,7 +492,7 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1_g_c_logits1_d_norm_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCLogits1DNormKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_col2_im_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCCol2ImKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_im2_col_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCIm2ColKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_tensor_shift_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCTensorShiftKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_arithmetic_addition_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCArithmeticAdditionKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_interleave4x4_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCGEMMInterleave4x4Kernel</a>, <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_multiply_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCGEMMMatrixMultiplyKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_pooling_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCPoolingLayerKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_fill_border_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCFillBorderKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_dropout_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCDropoutLayerKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_logits1_d_shift_exp_sum_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCLogits1DShiftExpSumKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_direct_convolution_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCDirectConvolutionLayerKernel&lt; kernel_size &gt;</a>, <a class="el" href="classarm__compute_1_1_g_c_batch_normalization_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCBatchNormalizationLayerKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_depth_concatenate_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCDepthConcatenateLayerKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_transpose1x_w_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCGEMMTranspose1xWKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_absolute_difference_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCAbsoluteDifferenceKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_normalize_planar_y_u_v_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCNormalizePlanarYUVLayerKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_addition_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCGEMMMatrixAdditionKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_normalization_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCNormalizationLayerKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_activation_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCActivationLayerKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_pixel_wise_multiplication_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCPixelWiseMultiplicationKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_depthwise_convolution_layer3x3_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCDepthwiseConvolutionLayer3x3Kernel</a>, <a class="el" href="classarm__compute_1_1_g_c_weights_reshape_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCWeightsReshapeKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_accumulate_biases_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCGEMMMatrixAccumulateBiasesKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_scale_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCScaleKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_transpose_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCTransposeKernel</a>, <a class="el" href="classarm__compute_1_1_i_g_c_simple3_d_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">IGCSimple3DKernel</a>, and <a class="el" href="classarm__compute_1_1_i_g_c_simple2_d_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">IGCSimple2DKernel</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1_g_c_logits1_d_norm_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCLogits1DNormKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_batch_normalization_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCBatchNormalizationLayerKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_multiply_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCGEMMMatrixMultiplyKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_im2_col_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCIm2ColKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_col2_im_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCCol2ImKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_weights_reshape_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCWeightsReshapeKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_tensor_shift_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCTensorShiftKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_arithmetic_addition_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCArithmeticAdditionKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_interleave4x4_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCGEMMInterleave4x4Kernel</a>, <a class="el" href="classarm__compute_1_1_g_c_pooling_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCPoolingLayerKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_direct_convolution_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCDirectConvolutionLayerKernel&lt; kernel_size &gt;</a>, <a class="el" href="classarm__compute_1_1_g_c_fill_border_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCFillBorderKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_dropout_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCDropoutLayerKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_logits1_d_shift_exp_sum_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCLogits1DShiftExpSumKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_depth_concatenate_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCDepthConcatenateLayerKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_transpose1x_w_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCGEMMTranspose1xWKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_absolute_difference_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCAbsoluteDifferenceKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_normalize_planar_y_u_v_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCNormalizePlanarYUVLayerKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_addition_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCGEMMMatrixAdditionKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_normalization_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCNormalizationLayerKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_activation_layer_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCActivationLayerKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_depthwise_convolution_layer3x3_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCDepthwiseConvolutionLayer3x3Kernel</a>, <a class="el" href="classarm__compute_1_1_g_c_pixel_wise_multiplication_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCPixelWiseMultiplicationKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_accumulate_biases_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCGEMMMatrixAccumulateBiasesKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_scale_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCScaleKernel</a>, <a class="el" href="classarm__compute_1_1_g_c_transpose_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">GCTransposeKernel</a>, <a class="el" href="classarm__compute_1_1_i_g_c_simple3_d_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">IGCSimple3DKernel</a>, and <a class="el" href="classarm__compute_1_1_i_g_c_simple2_d_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">IGCSimple2DKernel</a>.</p>
 
 </div>
 </div>
@@ -491,10 +527,42 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_i_g_c_kernel_8h_source.xhtml#l00103">103</a> of file <a class="el" href="_i_g_c_kernel_8h_source.xhtml">IGCKernel.h</a>.</p>
+<p>Definition at line <a class="el" href="_i_g_c_kernel_8h_source.xhtml#l00104">104</a> of file <a class="el" href="_i_g_c_kernel_8h_source.xhtml">IGCKernel.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;    {</div><div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;        _lws_hint = lws_hint;</div><div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;    }</div></div><!-- fragment -->
+</div>
+</div>
+<a class="anchor" id="ad5ba9d34a3a855bf1dd2e36316ff550a"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void set_target </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3">GPUTarget</a>&#160;</td>
+          <td class="paramname"><em>target</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
-<p>References <a class="el" href="namespacearm__compute.xhtml#a0f68015f649819f1102aa73d7b88b29e">arm_compute::enqueue()</a>, <a class="el" href="classarm__compute_1_1_i_g_c_kernel.xhtml#abca9f85e09acd3e4de49711b62dc8549">IGCKernel::kernel()</a>, <a class="el" href="namespacearm__compute.xhtml#a1ce9b523fd4f3b5bbcadcd796183455aa4c614360da93c0a041b22e537de151eb">arm_compute::U</a>, and <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">IKernel::window()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    {</div><div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;        _lws_hint = lws_hint;</div><div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;    }</div></div><!-- fragment -->
+<p>Set the targeted GPU architecture. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">target</td><td>The targeted GPU architecture </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Definition at line <a class="el" href="_i_g_c_kernel_8h_source.xhtml#l00113">113</a> of file <a class="el" href="_i_g_c_kernel_8h_source.xhtml">IGCKernel.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;    {</div><div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;        _target = target;</div><div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
@@ -506,7 +574,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_i_g_c_kernel.xhtml">IGCKernel</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:58 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:42 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

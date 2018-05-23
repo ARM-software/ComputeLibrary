@@ -35,10 +35,10 @@ GCDepthwiseConvolutionLayer3x3::GCDepthwiseConvolutionLayer3x3()
 {
 }
 
-void GCDepthwiseConvolutionLayer3x3::configure(IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, const PadStrideInfo &conv_info)
+void GCDepthwiseConvolutionLayer3x3::configure(IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier)
 {
     auto k = arm_compute::support::cpp14::make_unique<GCDepthwiseConvolutionLayer3x3Kernel>();
-    k->configure(input, weights, biases, output, conv_info);
+    k->configure(input, weights, biases, output, conv_info, depth_multiplier);
     _kernel = std::move(k);
 
     // Configure border handler

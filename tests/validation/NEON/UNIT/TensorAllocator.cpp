@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,6 +24,7 @@
 #include "arm_compute/runtime/TensorAllocator.h"
 
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/MemoryRegion.h"
 #include "support/ToolchainSupport.h"
 #include "tests/Utils.h"
 #include "tests/framework/Asserts.h"
@@ -45,10 +46,7 @@ TEST_CASE(ImportMemory, framework::DatasetMode::ALL)
     TensorInfo info(TensorShape(24U, 16U, 3U), 1, DataType::F32);
 
     // Allocate memory buffer
-    std::shared_ptr<uint8_t> buf(new uint8_t[info.total_size()](), [](uint8_t *ptr)
-    {
-        delete[] ptr;
-    });
+    auto buf = std::make_shared<MemoryRegion>(info.total_size());
 
     // Negative case : Import empty memory
     Tensor t1;
@@ -68,7 +66,7 @@ TEST_CASE(ImportMemory, framework::DatasetMode::ALL)
     t3.allocator()->init(info);
     ARM_COMPUTE_EXPECT(bool(t3.allocator()->import_memory(Memory(buf.get()))), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(!t3.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(t3.buffer() == buf.get(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(t3.buffer() == reinterpret_cast<uint8_t *>(buf->buffer()), framework::LogLevel::ERRORS);
     t3.allocator()->free();
     ARM_COMPUTE_EXPECT(t3.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(t3.buffer() == nullptr, framework::LogLevel::ERRORS);
@@ -78,7 +76,7 @@ TEST_CASE(ImportMemory, framework::DatasetMode::ALL)
     t4.allocator()->init(info);
     ARM_COMPUTE_EXPECT(bool(t4.allocator()->import_memory(Memory(buf))), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(!t4.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(t4.buffer() == buf.get(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(t4.buffer() == reinterpret_cast<uint8_t *>(buf->buffer()), framework::LogLevel::ERRORS);
     t4.allocator()->free();
     ARM_COMPUTE_EXPECT(t4.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(t4.buffer() == nullptr, framework::LogLevel::ERRORS);

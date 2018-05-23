@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,19 +35,64 @@
 
 using namespace arm_compute;
 
+namespace
+{
+unsigned int calculate_number_of_stages(const ITensorInfo *input)
+{
+    // Calculate number of WGs. 16 elements per thread, 8 threads per WG
+    const unsigned int num_of_wg = ceil(input->dimension(0) / 128.f);
+
+    // Calculate number of stages. First stage performs op and the rest reduction sum
+    // depending on the size of the input. Last stage should have only 1 WG.
+    const unsigned int num_of_stages = num_of_wg / 128 + 2;
+
+    return num_of_stages;
+}
+} // namespace
+
 CLReductionOperation::CLReductionOperation(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _sums_vector(), _reduction_kernels_vector(), _border_handlers_vector(), _num_of_stages()
 {
 }
 
+Status CLReductionOperation::validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op)
+{
+    const unsigned int num_of_stages = calculate_number_of_stages(input);
+
+    // Create temporary tensor infos
+    auto sums_vector = arm_compute::support::cpp14::make_unique<TensorInfo[]>(num_of_stages - 1);
+
+    // Create intermediate tensor info
+    TensorShape shape{ input->tensor_shape() };
+
+    for(unsigned int i = 0; i < num_of_stages - 1; i++)
+    {
+        shape.set(0, ceil(shape.x() / 128.f));
+        sums_vector[i].set_data_type(input->data_type());
+        sums_vector[i].set_tensor_shape(shape);
+        sums_vector[i].set_num_channels(input->num_channels());
+        sums_vector[i].set_fixed_point_position(input->fixed_point_position());
+    }
+
+    // Validate ReductionOperation only on first kernel
+    ARM_COMPUTE_RETURN_ON_ERROR(CLReductionOperationKernel::validate(input, sums_vector.get(), axis, op));
+
+    // Validate ReductionOperation on intermediate stages
+    for(unsigned int i = 1; i < num_of_stages - 1; ++i)
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR(CLReductionOperationKernel::validate(sums_vector.get() + i - 1, sums_vector.get() + i, axis, op));
+    }
+
+    // Validate ReductionOperation on the last stage
+    const unsigned int last_stage = num_of_stages - 1;
+    ARM_COMPUTE_RETURN_ON_ERROR(CLReductionOperationKernel::validate(sums_vector.get() + last_stage - 1, output, axis, op));
+
+    return Status{};
+}
+
 void CLReductionOperation::configure(ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op)
 {
-    // Calculate number of WGs. 16 elements per thread, 8 threads per WG
-    unsigned int num_of_wg = ceil(input->info()->dimension(0) / 128.f);
-
-    // Calculate number of stages. First stage performs op and the rest reduction sum
-    // depending on the size of the input. Last stage should have only 1 WG.
-    _num_of_stages = num_of_wg / 128 + 2;
+    _num_of_stages = calculate_number_of_stages(input->info());
 
     // Create temporary tensors
     _sums_vector = arm_compute::support::cpp14::make_unique<CLTensor[]>(_num_of_stages - 1);

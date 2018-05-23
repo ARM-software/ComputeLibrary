@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -57,15 +57,15 @@ void BlobLifetimeManager::update_blobs_and_mappings()
     ARM_COMPUTE_ERROR_ON(!are_all_finalized());
     ARM_COMPUTE_ERROR_ON(_active_group == nullptr);
 
-    // Sort active group requirements in descending order.
-    std::sort(std::begin(_active_elements), std::end(_active_elements), [](const Element & a, const Element & b)
+    // Sort free blobs requirements in descending order.
+    _free_blobs.sort([](const Blob & ba, const Blob & bb)
     {
-        return a.size > b.size;
+        return ba.max_size > bb.max_size;
     });
     std::vector<size_t> group_sizes;
-    std::transform(std::begin(_active_elements), std::end(_active_elements), std::back_inserter(group_sizes), [](const Element & e)
+    std::transform(std::begin(_free_blobs), std::end(_free_blobs), std::back_inserter(group_sizes), [](const Blob & b)
     {
-        return e.size;
+        return b.max_size;
     });
 
     // Update blob sizes
@@ -80,8 +80,14 @@ void BlobLifetimeManager::update_blobs_and_mappings()
     // Calculate group mappings
     auto &group_mappings = _active_group->mappings();
     int   blob_idx       = 0;
-    for(auto &e : _active_elements)
+    for(auto &free_blob : _free_blobs)
     {
-        group_mappings[e.handle] = blob_idx++;
+        for(auto &bound_element_id : free_blob.bound_elements)
+        {
+            ARM_COMPUTE_ERROR_ON(_active_elements.find(bound_element_id) == std::end(_active_elements));
+            Element &bound_element               = _active_elements[bound_element_id];
+            group_mappings[bound_element.handle] = blob_idx;
+        }
+        ++blob_idx;
     }
 }

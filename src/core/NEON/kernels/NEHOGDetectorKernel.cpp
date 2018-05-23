@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,8 +81,8 @@ void NEHOGDetectorKernel::configure(const ITensor *input, const IHOG *hog, IDete
 
     // Configure kernel window
     Window win;
-    win.set(Window::DimX, Window::Dimension(0, floor_to_multiple(num_blocks_x - num_blocks_per_detection_window_x, window_step_x), window_step_x));
-    win.set(Window::DimY, Window::Dimension(0, floor_to_multiple(num_blocks_y - num_blocks_per_detection_window_y, window_step_y), window_step_y));
+    win.set(Window::DimX, Window::Dimension(0, floor_to_multiple(num_blocks_x - num_blocks_per_detection_window_x, window_step_x) + window_step_x, window_step_x));
+    win.set(Window::DimY, Window::Dimension(0, floor_to_multiple(num_blocks_y - num_blocks_per_detection_window_y, window_step_y) + window_step_y, window_step_y));
 
     constexpr unsigned int num_elems_read_per_iteration = 1;
     const unsigned int     num_rows_read_per_iteration  = _num_blocks_per_descriptor_y;

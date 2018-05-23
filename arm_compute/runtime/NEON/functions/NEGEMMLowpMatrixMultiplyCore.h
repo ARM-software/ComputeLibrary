@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/NEON/AssemblyHelper.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <memory>
@@ -47,8 +48,6 @@ class ITensor;
  *
  * otherwise if the DOT product instruction is available:
  *
- *  -# @ref NEGEMMInterleaveBlockedKernel
- *  -# @ref NEGEMMLowpAArch64V8P4Kernel
  *  -# @ref NEGEMMLowpOffsetContributionKernel
  *
 */
@@ -85,11 +84,13 @@ public:
      */
     static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *output, const GEMMInfo &gemm_info = GEMMInfo());
 
-    // Inherited methods overridden:
+    // Inherited methods overridden
     void run() override;
 
 private:
     MemoryGroup                        _memory_group;
+    AssemblyKernelGlueU8U32            _asm_glue_unsigned;
+    AssemblyKernelGlueS8S32            _asm_glue_signed;
     std::unique_ptr<INEKernel>         _mm_kernel;
     std::unique_ptr<INEKernel>         _mtx_a_reshape_kernel;
     std::unique_ptr<INEKernel>         _mtx_b_reshape_kernel;
@@ -101,10 +102,13 @@ private:
     Tensor                             _tmp_a;
     Tensor                             _tmp_b;
     Tensor                             _workspace;
+    Tensor                             _B_pretranspose;
     int32_t                            _a_offset;
     int32_t                            _b_offset;
     bool                               _run_vector_matrix_multiplication;
     bool                               _dot_product_path;
+    bool                               _is_first_run;
+    bool                               _reshape_b_only_on_first_run;
 };
 }
 #endif /*__ARM_COMPUTE_NEGEMMLOWPMATRIXMULTIPLYCORE_H__ */

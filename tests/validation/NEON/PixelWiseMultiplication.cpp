@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -117,6 +117,8 @@ template <typename T>
 using NEPixelWiseMultiplicationToQS8Fixture = PixelWiseMultiplicationValidationFixture<Tensor, Accessor, NEPixelWiseMultiplication, T, qint8_t>;
 template <typename T>
 using NEPixelWiseMultiplicationToQS16Fixture = PixelWiseMultiplicationValidationFixture<Tensor, Accessor, NEPixelWiseMultiplication, T, qint16_t>;
+template <typename T>
+using NEPixelWiseMultiplicationBroadcastFixture = PixelWiseMultiplicationBroadcastValidationFixture<Tensor, Accessor, NEPixelWiseMultiplication, T, float>;
 
 TEST_SUITE(NEON)
 TEST_SUITE(PixelWiseMultiplication)
@@ -261,6 +263,10 @@ PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunLarge, ToF32Fixture<float>, 
 TEST_SUITE_END() // ScaleOther
 
 TEST_SUITE_END() // F32toF32
+
+TEST_SUITE(Broadcast)
+PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(RunSmall, BroadcastFixture<float>, PRECOMMIT, SmallShapesBroadcast(), F32, F32, scale_255, TO_NEAREST_UP, VALIDATE(float, 1.f))
+TEST_SUITE_END() // Broadcast
 
 TEST_SUITE_END()
 TEST_SUITE_END()

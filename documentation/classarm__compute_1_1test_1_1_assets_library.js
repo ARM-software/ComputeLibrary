@@ -14,6 +14,7 @@ var classarm__compute_1_1test_1_1_assets_library =
     [ "fill_layer_data", "classarm__compute_1_1test_1_1_assets_library.xhtml#ad85dc4c57a27c44d114c573b9a80bad6", null ],
     [ "fill_tensor_uniform", "classarm__compute_1_1test_1_1_assets_library.xhtml#abb6f25295592e886976520216187eed7", null ],
     [ "fill_tensor_uniform", "classarm__compute_1_1test_1_1_assets_library.xhtml#a150d2023c197e197f09f350ede795085", null ],
+    [ "fill_tensor_value", "classarm__compute_1_1test_1_1_assets_library.xhtml#a0457532b61fe412895684d12d08f5d0f", null ],
     [ "get", "classarm__compute_1_1test_1_1_assets_library.xhtml#a024fbe836c85d10afefc81cd2e51658e", null ],
     [ "get", "classarm__compute_1_1test_1_1_assets_library.xhtml#aa0cf1a79542c521b9f16d117b085c4d5", null ],
     [ "get", "classarm__compute_1_1test_1_1_assets_library.xhtml#a3675bd0074fa527b42c6516a37f8f232", null ],

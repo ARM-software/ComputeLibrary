@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,9 +37,9 @@ class CLRemapKernel : public ICLKernel
 public:
     /** Default constructor */
     CLRemapKernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLRemapKernel(const CLRemapKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CLRemapKernel &operator=(const CLRemapKernel &) = delete;
     /** Allow instances of this class to be moved */
     CLRemapKernel(CLRemapKernel &&) = default;

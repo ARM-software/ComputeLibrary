@@ -44,6 +44,26 @@ inline TYPE lu_brelu_op(TYPE x)
 #define ACTIVATION_OP2(op, x) op##_op(x)
 #define ACTIVATION_OP(op, x) ACTIVATION_OP2(op, x)
 
+#if defined(O1_VAL) && defined(O2_VAL) && defined(S1_VAL) && defined(S2_VAL)
+#define PERFORM_ACTIVATION_QA8(act, data)                                                         \
+    ({                                                                                            \
+        data = ACTIVATION_OP(act, data);                                                          \
+        \
+        VEC_DATA_TYPE(float, VEC_SIZE)                                                            \
+        fdata = CONVERT(data, VEC_DATA_TYPE(float, VEC_SIZE));                                    \
+        \
+        fdata = round((fdata - (float)O1_VAL) * ((float)S1_VAL / (float)S2_VAL) + (float)O2_VAL); \
+        data  = CONVERT_SAT(fdata, VEC_DATA_TYPE(uchar, VEC_SIZE));                               \
+    })
+#else /* defined(O1_VAL) && defined(O2_VAL) && defined(S1_VAL) && defined(S2_VAL) */
+#define PERFORM_ACTIVATION_QA8(act, data) \
+    ({                                    \
+        data = ACTIVATION_OP(act, data);  \
+    })
+#endif /* defined(O1_VAL) && defined(O2_VAL) && defined(S1_VAL) && defined(S2_VAL) */
+
+#if defined(ACT)
+
 /** This performs an activation function on QASYMM8 inputs.
  *
  * @note In order to perform the activation function "in-place", the pre-processor -DIN_PLACE must be passed at compile time
@@ -92,19 +112,11 @@ __kernel void activation_layer_qa8(
     // Load data
     TYPE data = VLOAD(VEC_SIZE)(0, (__global DATA_TYPE *)input.ptr);
 
-    // Perform activation
-    data = ACTIVATION_OP(ACT, data);
-
-#if defined(O1_VAL) && defined(O2_VAL) && defined(S1_VAL) && defined(S2_VAL)
-    // requantize to output space
-    VEC_DATA_TYPE(float, VEC_SIZE)
-    fdata = CONVERT(data, VEC_DATA_TYPE(float, VEC_SIZE));
-
-    fdata = round((fdata - (float)O1_VAL) * ((float)S1_VAL / (float)S2_VAL) + (float)O2_VAL);
-    data  = CONVERT_SAT(fdata, VEC_DATA_TYPE(uchar, VEC_SIZE));
-#endif // defined(O1_VAL) && defined(O2_VAL) && defined(S1_VAL) && defined(S2_VAL)
+    data = PERFORM_ACTIVATION_QA8(ACT, data);
 
     // Store result
     VSTORE(VEC_SIZE)
     (data, 0, (__global DATA_TYPE *)output.ptr);
 }
+
+#endif /* defined(ACT) */

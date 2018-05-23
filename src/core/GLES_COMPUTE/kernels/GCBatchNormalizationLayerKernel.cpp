@@ -36,6 +36,105 @@
 
 using namespace arm_compute;
 
+namespace
+{
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output,
+                          const ITensorInfo *mean, const ITensorInfo *var,
+                          const ITensorInfo *beta, const ITensorInfo *gamma,
+                          float epsilon, ActivationLayerInfo act_info)
+{
+    ARM_COMPUTE_UNUSED(epsilon);
+    ARM_COMPUTE_UNUSED(var);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, mean, var);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, mean, var);
+    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(mean, var);
+
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
+    }
+
+    if(beta != nullptr)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mean, beta);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, beta);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, beta);
+    }
+    if(gamma != nullptr)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mean, gamma);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, gamma);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, gamma);
+    }
+    if(act_info.enabled())
+    {
+        ARM_COMPUTE_ERROR_ON(input->data_type() != DataType::F32 && input->data_type() != DataType::F16);
+        ARM_COMPUTE_ERROR_ON(act_info.activation() != ActivationLayerInfo::ActivationLayerInfo::ActivationFunction::RELU
+                             && act_info.activation() != ActivationLayerInfo::ActivationLayerInfo::ActivationFunction::BOUNDED_RELU
+                             && act_info.activation() != ActivationLayerInfo::ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU);
+        ARM_COMPUTE_ERROR_ON(act_info.b() > act_info.a());
+    }
+    return Status{};
+}
+
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output,
+                                                        ITensorInfo *mean, ITensorInfo *var,
+                                                        ITensorInfo *beta, ITensorInfo *gamma)
+{
+    // Output tensor auto initialization if not yet initialized
+    auto_init_if_empty(*output, input->tensor_shape(), 1, input->data_type(), input->fixed_point_position());
+
+    unsigned int num_elems_processed_per_iteration = 1;
+    if(input->data_type() == DataType::F16)
+    {
+        num_elems_processed_per_iteration = 4;
+    }
+
+    // Configure kernel window
+    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+
+    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+    AccessWindowStatic     mean_access(mean, 0, 0, mean->dimension(0) + 3, mean->dimension(1));
+    AccessWindowStatic     var_access(var, 0, 0, var->dimension(0) + 3, var->dimension(1));
+
+    bool window_changed = false;
+    if(beta != nullptr)
+    {
+        AccessWindowStatic beta_access(beta, 0, 0, beta->dimension(0) + 3, beta->dimension(1));
+        if(gamma != nullptr)
+        {
+            AccessWindowStatic gamma_access(gamma, 0, 0, gamma->dimension(0) + 3, gamma->dimension(1));
+            window_changed = update_window_and_padding(win, input_access, output_access, mean_access, var_access, beta_access, gamma_access);
+        }
+        else
+        {
+            window_changed = update_window_and_padding(win, input_access, output_access, mean_access, var_access, beta_access);
+        }
+    }
+    else
+    {
+        if(gamma != nullptr)
+        {
+            AccessWindowStatic gamma_access(gamma, 0, 0, gamma->dimension(0) + 3, gamma->dimension(1));
+            window_changed = update_window_and_padding(win, input_access, output_access, mean_access, var_access, gamma_access);
+        }
+        else
+        {
+            window_changed = update_window_and_padding(win, input_access, output_access, mean_access, var_access);
+        }
+    }
+    output_access.set_valid_region(win, input->valid_region());
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+} // namespace
+
 GCBatchNormalizationLayerKernel::GCBatchNormalizationLayerKernel()
     : _input(nullptr), _output(nullptr), _mean(nullptr), _var(nullptr), _beta(nullptr), _gamma(nullptr), _epsilon(0.0f)
 {
@@ -44,24 +143,11 @@ GCBatchNormalizationLayerKernel::GCBatchNormalizationLayerKernel()
 void GCBatchNormalizationLayerKernel::configure(const IGCTensor *input, IGCTensor *output, const IGCTensor *mean, const IGCTensor *var, const IGCTensor *beta, const IGCTensor *gamma,
                                                 float epsilon, ActivationLayerInfo act_info)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output, mean, var);
 
-    // Output tensor auto initialization if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
-
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output, mean, var, beta, gamma);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output, mean, var, beta, gamma);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(mean, var, beta, gamma);
-    if(act_info.enabled())
-    {
-        ARM_COMPUTE_ERROR_ON(input->info()->data_type() != DataType::F32 && input->info()->data_type() != DataType::F16);
-        ARM_COMPUTE_ERROR_ON(act_info.activation() != ActivationLayerInfo::ActivationLayerInfo::ActivationFunction::RELU
-                             && act_info.activation() != ActivationLayerInfo::ActivationLayerInfo::ActivationFunction::BOUNDED_RELU
-                             && act_info.activation() != ActivationLayerInfo::ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU);
-        ARM_COMPUTE_ERROR_ON(act_info.b() > act_info.a());
-    }
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), mean->info(), var->info(),
+                                                  (beta != nullptr) ? beta->info() : nullptr, (gamma != nullptr) ? gamma->info() : nullptr,
+                                                  epsilon, act_info));
 
     _input   = input;
     _output  = output;
@@ -71,12 +157,6 @@ void GCBatchNormalizationLayerKernel::configure(const IGCTensor *input, IGCTenso
     _gamma   = gamma;
     _epsilon = epsilon;
 
-    unsigned int num_elems_processed_per_iteration = 1;
-    if(input->info()->data_type() == DataType::F16)
-    {
-        num_elems_processed_per_iteration = 4;
-    }
-
     // Set build options
     std::set<std::string> build_opts;
     std::string           dt_name = (input->info()->data_type() == DataType::F32) ? "DATA_TYPE_FP32" : "DATA_TYPE_FP16";
@@ -85,6 +165,14 @@ void GCBatchNormalizationLayerKernel::configure(const IGCTensor *input, IGCTenso
     build_opts.emplace(("#define LOCAL_SIZE_X " + support::cpp11::to_string(1)));
     build_opts.emplace(("#define LOCAL_SIZE_Y " + support::cpp11::to_string(1)));
     build_opts.emplace(("#define LOCAL_SIZE_Z " + support::cpp11::to_string(1)));
+    if(beta == nullptr)
+    {
+        build_opts.emplace("#define USE_DEFAULT_BETA");
+    }
+    if(gamma == nullptr)
+    {
+        build_opts.emplace("#define USE_DEFAULT_GAMMA");
+    }
 
     if(act_info.enabled())
     {
@@ -97,19 +185,25 @@ void GCBatchNormalizationLayerKernel::configure(const IGCTensor *input, IGCTenso
     _kernel = static_cast<GCKernel>(GCKernelLibrary::get().create_kernel("batchnormalization_layer", build_opts));
 
     // Configure kernel window
-    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+    auto win_config = validate_and_configure_window(input->info(), output->info(), mean->info(), var->info(),
+                                                    (beta != nullptr) ? beta->info() : nullptr, (gamma != nullptr) ? gamma->info() : nullptr);
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
 
-    AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowStatic     mean_access(mean->info(), 0, 0, mean->info()->dimension(0) + 3, mean->info()->dimension(1));
-    AccessWindowStatic     var_access(var->info(), 0, 0, var->info()->dimension(0) + 3, var->info()->dimension(1));
-    AccessWindowStatic     beta_access(beta->info(), 0, 0, beta->info()->dimension(0) + 3, beta->info()->dimension(1));
-    AccessWindowStatic     gamma_access(gamma->info(), 0, 0, gamma->info()->dimension(0) + 3, gamma->info()->dimension(1));
+    IGCKernel::configure(win_config.second);
+}
 
-    update_window_and_padding(win, input_access, output_access, mean_access, var_access, beta_access, gamma_access);
-    output_access.set_valid_region(win, input->info()->valid_region());
+Status GCBatchNormalizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output,
+                                                 const ITensorInfo *mean, const ITensorInfo *var,
+                                                 const ITensorInfo *beta, const ITensorInfo *gamma,
+                                                 float epsilon, ActivationLayerInfo act_info)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, mean, var, beta, gamma, epsilon, act_info));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(),
+                                                              mean->clone().get(), var->clone().get(),
+                                                              beta->clone().get(), gamma->clone().get())
+                                .first);
 
-    IGCKernel::configure(win);
+    return Status{};
 }
 
 void GCBatchNormalizationLayerKernel::run(const Window &window)
@@ -127,11 +221,18 @@ void GCBatchNormalizationLayerKernel::run(const Window &window)
     Window vector_slice = window.first_slice_window_1D();
     vector_slice.set(Window::DimX, Window::Dimension(0, 0, 0));
 
-    unsigned int idx = 2 * num_arguments_per_3D_tensor();
-    add_1D_tensor_argument(idx, _mean, 3, vector_slice);
-    add_1D_tensor_argument(idx, _var, 4, vector_slice);
-    add_1D_tensor_argument(idx, _beta, 5, vector_slice);
-    add_1D_tensor_argument(idx, _gamma, 6, vector_slice);
+    unsigned int idx           = 2 * num_arguments_per_3D_tensor();
+    unsigned int binding_point = 3;
+    add_1D_tensor_argument(idx, _mean, binding_point, vector_slice);
+    add_1D_tensor_argument(idx, _var, ++binding_point, vector_slice);
+    if(_beta != nullptr)
+    {
+        add_1D_tensor_argument(idx, _beta, ++binding_point, vector_slice);
+    }
+    if(_gamma != nullptr)
+    {
+        add_1D_tensor_argument(idx, _gamma, ++binding_point, vector_slice);
+    }
 
     slice.shift(Window::DimX, -(_output->info()->padding()).left);
 

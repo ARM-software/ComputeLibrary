@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,6 +30,7 @@
 
 namespace
 {
+#ifndef DOXYGEN_SKIP_THIS
 constexpr float red_coef_bt709    = 1.5748F;
 constexpr float green_coef_bt709  = -0.1873f;
 constexpr float green_coef2_bt709 = -0.4681f;
@@ -296,10 +297,18 @@ inline void store_rgb_to_yuv4(const uint8x16_t &rvec, const uint8x16_t &gvec, co
     vst1q_u8(out_u, uvec);
     vst1q_u8(out_v, vvec);
 }
+#endif /* DOXYGEN_SKIP_THIS */
 }
 
 namespace arm_compute
 {
+/** Convert RGB to RGBX.
+ *
+ * @param[in]  input  Input RGB data buffer.
+ * @param[out] output Output RGBX buffer.
+ * @param[in]  win    Window for iterating the buffers.
+ *
+ */
 void colorconvert_rgb_to_rgbx(const void *__restrict input, void *__restrict output, const Window &win)
 {
     ARM_COMPUTE_ERROR_ON(nullptr == input);
@@ -324,6 +333,13 @@ void colorconvert_rgb_to_rgbx(const void *__restrict input, void *__restrict out
     in, out);
 }
 
+/** Convert RGBX to RGB.
+ *
+ * @param[in]  input  Input RGBX data buffer.
+ * @param[out] output Output RGB buffer.
+ * @param[in]  win    Window for iterating the buffers.
+ *
+ */
 void colorconvert_rgbx_to_rgb(const void *input, void *output, const Window &win)
 {
     ARM_COMPUTE_ERROR_ON(nullptr == input);
@@ -347,6 +363,13 @@ void colorconvert_rgbx_to_rgb(const void *input, void *output, const Window &win
     in, out);
 }
 
+/** Convert YUYV to RGB.
+ *
+ * @param[in]  input  Input YUYV data buffer.
+ * @param[out] output Output RGB buffer.
+ * @param[in]  win    Window for iterating the buffers.
+ *
+ */
 template <bool yuyv, bool alpha>
 void colorconvert_yuyv_to_rgb(const void *__restrict input, void *__restrict output, const Window &win)
 {
@@ -385,6 +408,13 @@ void colorconvert_yuyv_to_rgb(const void *__restrict input, void *__restrict out
     in, out);
 }
 
+/** Convert NV12 to RGB.
+ *
+ * @param[in]  input  Input NV12 data buffer.
+ * @param[out] output Output RGB buffer.
+ * @param[in]  win    Window for iterating the buffers.
+ *
+ */
 template <bool uv, bool alpha>
 void colorconvert_nv12_to_rgb(const void *__restrict input, void *__restrict output, const Window &win)
 {
@@ -441,6 +471,13 @@ void colorconvert_nv12_to_rgb(const void *__restrict input, void *__restrict out
     in_y, in_uv, out);
 }
 
+/** Convert IYUV to RGB.
+ *
+ * @param[in]  input  Input IYUV data buffer.
+ * @param[out] output Output RGB buffer.
+ * @param[in]  win    Window for iterating the buffers.
+ *
+ */
 template <bool alpha>
 void colorconvert_iyuv_to_rgb(const void *__restrict input, void *__restrict output, const Window &win)
 {
@@ -498,6 +535,13 @@ void colorconvert_iyuv_to_rgb(const void *__restrict input, void *__restrict out
     in_y, in_u, in_v, out);
 }
 
+/** Convert YUYV to NV12.
+ *
+ * @param[in]  input  Input YUYV data buffer.
+ * @param[out] output Output NV12 buffer.
+ * @param[in]  win    Window for iterating the buffers.
+ *
+ */
 template <bool yuyv>
 void colorconvert_yuyv_to_nv12(const void *__restrict input, void *__restrict output, const Window &win)
 {
@@ -547,6 +591,13 @@ void colorconvert_yuyv_to_nv12(const void *__restrict input, void *__restrict ou
     in, out_y, out_uv);
 }
 
+/** Convert IYUV to NV12.
+ *
+ * @param[in]  input  Input IYUV data buffer.
+ * @param[out] output Output NV12 buffer.
+ * @param[in]  win    Window for iterating the buffers.
+ *
+ */
 void colorconvert_iyuv_to_nv12(const void *__restrict input, void *__restrict output, const Window &win)
 {
     ARM_COMPUTE_ERROR_ON(nullptr == input);
@@ -587,6 +638,13 @@ void colorconvert_iyuv_to_nv12(const void *__restrict input, void *__restrict ou
     in_y, in_u, in_v, out_y, out_uv);
 }
 
+/** Convert NV12 to IYUV.
+ *
+ * @param[in]  input  Input NV12 data buffer.
+ * @param[out] output Output IYUV buffer.
+ * @param[in]  win    Window for iterating the buffers.
+ *
+ */
 template <bool uv>
 void colorconvert_nv12_to_iyuv(const void *__restrict input, void *__restrict output, const Window &win)
 {
@@ -629,6 +687,13 @@ void colorconvert_nv12_to_iyuv(const void *__restrict input, void *__restrict ou
     in_y, in_uv, out_y, out_u, out_v);
 }
 
+/** Convert YUYV to IYUV.
+ *
+ * @param[in]  input  Input YUYV data buffer.
+ * @param[out] output Output IYUV buffer.
+ * @param[in]  win    Window for iterating the buffers.
+ *
+ */
 template <bool yuyv>
 void colorconvert_yuyv_to_iyuv(const void *__restrict input, void *__restrict output, const Window &win)
 {
@@ -682,6 +747,13 @@ void colorconvert_yuyv_to_iyuv(const void *__restrict input, void *__restrict ou
     in, out_y, out_u, out_v);
 }
 
+/** Convert NV12 to YUV4.
+ *
+ * @param[in]  input  Input NV12 data buffer.
+ * @param[out] output Output YUV4 buffer.
+ * @param[in]  win    Window for iterating the buffers.
+ *
+ */
 template <bool uv>
 void colorconvert_nv12_to_yuv4(const void *__restrict input, void *__restrict output, const Window &win)
 {
@@ -734,6 +806,13 @@ void colorconvert_nv12_to_yuv4(const void *__restrict input, void *__restrict ou
     in_y, in_uv, out_y, out_u, out_v);
 }
 
+/** Convert IYUV to YUV4.
+ *
+ * @param[in]  input  Input IYUV data buffer.
+ * @param[out] output Output YUV4 buffer.
+ * @param[in]  win    Window for iterating the buffers.
+ *
+ */
 void colorconvert_iyuv_to_yuv4(const void *__restrict input, void *__restrict output, const Window &win)
 {
     ARM_COMPUTE_ERROR_ON(nullptr == input);
@@ -785,6 +864,13 @@ void colorconvert_iyuv_to_yuv4(const void *__restrict input, void *__restrict ou
     in_y, in_u, in_v, out_y, out_u, out_v);
 }
 
+/** Convert RGB to NV12.
+ *
+ * @param[in]  input  Input RGB data buffer.
+ * @param[out] output Output NV12 buffer.
+ * @param[in]  win    Window for iterating the buffers.
+ *
+ */
 template <bool alpha>
 void colorconvert_rgb_to_nv12(const void *__restrict input, void *__restrict output, const Window &win)
 {
@@ -821,6 +907,13 @@ void colorconvert_rgb_to_nv12(const void *__restrict input, void *__restrict out
     in, out_y, out_uv);
 }
 
+/** Convert RGB to IYUV.
+ *
+ * @param[in]  input  Input RGB data buffer.
+ * @param[out] output Output IYUV buffer.
+ * @param[in]  win    Window for iterating the buffers.
+ *
+ */
 template <bool alpha>
 void colorconvert_rgb_to_iyuv(const void *__restrict input, void *__restrict output, const Window &win)
 {
@@ -858,6 +951,13 @@ void colorconvert_rgb_to_iyuv(const void *__restrict input, void *__restrict out
     in, out_y, out_u, out_v);
 }
 
+/** Convert RGB to YUV4.
+ *
+ * @param[in]  input  Input RGB data buffer.
+ * @param[out] output Output YUV4 buffer.
+ * @param[in]  win    Window for iterating the buffers.
+ *
+ */
 template <bool alpha>
 void colorconvert_rgb_to_yuv4(const void *__restrict input, void *__restrict output, const Window &win)
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -71,8 +71,8 @@ struct TestResult
     {
     }
 
-    Status                    status{ Status::NOT_RUN }; //< Execution status
-    Profiler::MeasurementsMap measurements{};            //< Profiling information
+    Status                    status{ Status::NOT_RUN }; /**< Execution status */
+    Profiler::MeasurementsMap measurements{};            /**< Profiling information */
 };
 } // namespace framework
 } // namespace test

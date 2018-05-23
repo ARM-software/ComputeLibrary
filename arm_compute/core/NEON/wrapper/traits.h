@@ -42,7 +42,8 @@ struct vector_128_tag {};
 
 /** Create the appropriate NEON vector given its type and size */
 template <typename T, int S> struct neon_vector;
-/** Specializations */
+// Specializations
+#ifndef DOXYGEN_SKIP_THIS
 template <> struct neon_vector<uint8_t, 8>{ using type = uint8x8_t; using tag_type = vector_64_tag; };
 template <> struct neon_vector<int8_t, 8>{ using type = int8x8_t; using tag_type = vector_64_tag; };
 template <> struct neon_vector<uint8_t, 16>{ using type = uint8x16_t; using tag_type = vector_128_tag; };
@@ -61,6 +62,7 @@ template <> struct neon_vector<uint64_t, 2>{ using type = uint64x2_t; using tag_
 template <> struct neon_vector<int64_t, 2>{ using type = int64x2_t; using tag_type = vector_128_tag; };
 template <> struct neon_vector<float_t, 2>{ using type = float32x2_t; using tag_type = vector_64_tag; };
 template <> struct neon_vector<float_t, 4>{ using type = float32x4_t; using tag_type = vector_128_tag; };
+#endif /* DOXYGEN_SKIP_THIS */
 
 /**  Helper type template to get the type of a neon vector */
 template <typename T, int S> using neon_vector_t = typename neon_vector<T, S>::type;

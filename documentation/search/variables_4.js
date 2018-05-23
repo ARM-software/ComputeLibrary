@@ -1,9 +1,10 @@
 var searchData=
 [
   ['data_5ftranspose',['data_transpose',['../namespacearm__compute_1_1test_1_1validation.xhtml#a21c746108f9b5d95496012a42de374cd',1,'arm_compute::test::validation']]],
-  ['data_5ftype',['data_type',['../namespacearm__compute_1_1test_1_1validation.xhtml#ac2ad7f431e3446fddcd9b6b9f93c4c14',1,'arm_compute::test::validation']]],
-  ['data_5ftypes',['data_types',['../namespacearm__compute_1_1test.xhtml#aab9a2ff74a27ae837d32a79a38952228',1,'arm_compute::test']]],
-  ['dest',['dest',['../namespacecaffe__data__extractor.xhtml#ab0bede79c5f4cbed9c2cd932a0ace201',1,'caffe_data_extractor.dest()'],['../namespacetensorflow__data__extractor.xhtml#ab0bede79c5f4cbed9c2cd932a0ace201',1,'tensorflow_data_extractor.dest()']]],
+  ['data_5ftype',['data_type',['../structarm__compute_1_1graph_1_1_tensor_descriptor.xhtml#a6118865e7371b107bd5fb4dd4a9e99a3',1,'arm_compute::graph::TensorDescriptor::data_type()'],['../namespacearm__compute_1_1test_1_1validation.xhtml#ac2ad7f431e3446fddcd9b6b9f93c4c14',1,'arm_compute::test::validation::data_type()']]],
+  ['data_5ftypes',['data_types',['../namespacearm__compute_1_1test_1_1benchmark.xhtml#aab9a2ff74a27ae837d32a79a38952228',1,'arm_compute::test::benchmark']]],
+  ['ddk_5fversion',['ddk_version',['../structarm__compute_1_1_c_l_device_options.xhtml#ae19afa6eae26622a0068daa092b25f6a',1,'arm_compute::CLDeviceOptions']]],
+  ['depthwise_5fconvolution_5fmethod_5fhint',['depthwise_convolution_method_hint',['../structarm__compute_1_1graph_1_1frontend_1_1_stream_hints.xhtml#a67ede056be3dfba6dfbb934a1b96661e',1,'arm_compute::graph::frontend::StreamHints']]],
   ['dimx',['DimX',['../classarm__compute_1_1_window.xhtml#aa96e81276ee4f87ab386cd05a5539a7d',1,'arm_compute::Window']]],
   ['dimy',['DimY',['../classarm__compute_1_1_window.xhtml#ad2d402364fa822b0b7775081291eeca9',1,'arm_compute::Window']]],
   ['dimz',['DimZ',['../classarm__compute_1_1_window.xhtml#a893d17b56b9abc4423ce26e9a24ac5dc',1,'arm_compute::Window']]],

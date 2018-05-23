@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 #ifndef __ARM_COMPUTE_ITENSOR_H__
 #define __ARM_COMPUTE_ITENSOR_H__
 
-#include "arm_compute/core/TensorInfo.h"
+#include "arm_compute/core/ITensorInfo.h"
 
 #include <cstdint>
 
@@ -83,6 +83,16 @@ public:
      * @param io_fmt Format information
      */
     void print(std::ostream &s, IOFormatInfo io_fmt = IOFormatInfo()) const;
+    /** Flags if the tensor is used or not
+     *
+     * @return True if it is used else false
+     */
+    bool is_used() const;
+    /** Marks a tensor as unused */
+    void mark_as_unused() const;
+
+private:
+    mutable bool _is_used = { true }; /**< Flag that marks if the tensor is used or not */
 };
 
 using IImage = ITensor;

@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -120,7 +120,7 @@ $(document).ready(function(){initNavTree('_n_e_color_convert_helper_8inl.xhtml',
 <div class="title">NEColorConvertHelper.inl File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="core_2_error_8h_source.xhtml">arm_compute/core/Error.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="_error_8h_source.xhtml">arm_compute/core/Error.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="arm__compute_2core_2_helpers_8h_source.xhtml">arm_compute/core/Helpers.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_i_multi_image_8h_source.xhtml">arm_compute/core/IMultiImage.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="arm__compute_2core_2_utils_8h_source.xhtml">arm_compute/core/Utils.h</a>&quot;</code><br />
@@ -137,42 +137,56 @@ Namespaces</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a93cc303c8ae098d264f07d37890412de"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a93cc303c8ae098d264f07d37890412de">colorconvert_rgb_to_rgbx</a> (const void *__restrict input, void *__restrict output, const Window &amp;win)</td></tr>
+<tr class="memdesc:a93cc303c8ae098d264f07d37890412de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert RGB to RGBX.  <a href="namespacearm__compute.xhtml#a93cc303c8ae098d264f07d37890412de">More...</a><br /></td></tr>
 <tr class="separator:a93cc303c8ae098d264f07d37890412de"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acf7451c0d0f8a4b1cfbb60d7531a43aa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#acf7451c0d0f8a4b1cfbb60d7531a43aa">colorconvert_rgbx_to_rgb</a> (const void *input, void *output, const Window &amp;win)</td></tr>
+<tr class="memdesc:acf7451c0d0f8a4b1cfbb60d7531a43aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert RGBX to RGB.  <a href="namespacearm__compute.xhtml#acf7451c0d0f8a4b1cfbb60d7531a43aa">More...</a><br /></td></tr>
 <tr class="separator:acf7451c0d0f8a4b1cfbb60d7531a43aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3c22c0d3494660b72b4fc04fec76f92d"><td class="memTemplParams" colspan="2">template&lt;bool yuyv, bool alpha&gt; </td></tr>
 <tr class="memitem:a3c22c0d3494660b72b4fc04fec76f92d"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a3c22c0d3494660b72b4fc04fec76f92d">colorconvert_yuyv_to_rgb</a> (const void *__restrict input, void *__restrict output, const Window &amp;win)</td></tr>
+<tr class="memdesc:a3c22c0d3494660b72b4fc04fec76f92d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert YUYV to RGB.  <a href="namespacearm__compute.xhtml#a3c22c0d3494660b72b4fc04fec76f92d">More...</a><br /></td></tr>
 <tr class="separator:a3c22c0d3494660b72b4fc04fec76f92d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae6a44e412bccc0705a720708b0692218"><td class="memTemplParams" colspan="2">template&lt;bool uv, bool alpha&gt; </td></tr>
 <tr class="memitem:ae6a44e412bccc0705a720708b0692218"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ae6a44e412bccc0705a720708b0692218">colorconvert_nv12_to_rgb</a> (const void *__restrict input, void *__restrict output, const Window &amp;win)</td></tr>
+<tr class="memdesc:ae6a44e412bccc0705a720708b0692218"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert NV12 to RGB.  <a href="namespacearm__compute.xhtml#ae6a44e412bccc0705a720708b0692218">More...</a><br /></td></tr>
 <tr class="separator:ae6a44e412bccc0705a720708b0692218"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6e42fac1baa264b033ac430b63ebd145"><td class="memTemplParams" colspan="2">template&lt;bool alpha&gt; </td></tr>
 <tr class="memitem:a6e42fac1baa264b033ac430b63ebd145"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a6e42fac1baa264b033ac430b63ebd145">colorconvert_iyuv_to_rgb</a> (const void *__restrict input, void *__restrict output, const Window &amp;win)</td></tr>
+<tr class="memdesc:a6e42fac1baa264b033ac430b63ebd145"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert IYUV to RGB.  <a href="namespacearm__compute.xhtml#a6e42fac1baa264b033ac430b63ebd145">More...</a><br /></td></tr>
 <tr class="separator:a6e42fac1baa264b033ac430b63ebd145"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ee13904a3f5ba84b28cb53d956021d7"><td class="memTemplParams" colspan="2">template&lt;bool yuyv&gt; </td></tr>
 <tr class="memitem:a8ee13904a3f5ba84b28cb53d956021d7"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a8ee13904a3f5ba84b28cb53d956021d7">colorconvert_yuyv_to_nv12</a> (const void *__restrict input, void *__restrict output, const Window &amp;win)</td></tr>
+<tr class="memdesc:a8ee13904a3f5ba84b28cb53d956021d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert YUYV to NV12.  <a href="namespacearm__compute.xhtml#a8ee13904a3f5ba84b28cb53d956021d7">More...</a><br /></td></tr>
 <tr class="separator:a8ee13904a3f5ba84b28cb53d956021d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af2be1325decaa34a8a1199af177148c6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#af2be1325decaa34a8a1199af177148c6">colorconvert_iyuv_to_nv12</a> (const void *__restrict input, void *__restrict output, const Window &amp;win)</td></tr>
+<tr class="memdesc:af2be1325decaa34a8a1199af177148c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert IYUV to NV12.  <a href="namespacearm__compute.xhtml#af2be1325decaa34a8a1199af177148c6">More...</a><br /></td></tr>
 <tr class="separator:af2be1325decaa34a8a1199af177148c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a199d36780fbb4a70168f290480673650"><td class="memTemplParams" colspan="2">template&lt;bool uv&gt; </td></tr>
 <tr class="memitem:a199d36780fbb4a70168f290480673650"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a199d36780fbb4a70168f290480673650">colorconvert_nv12_to_iyuv</a> (const void *__restrict input, void *__restrict output, const Window &amp;win)</td></tr>
+<tr class="memdesc:a199d36780fbb4a70168f290480673650"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert NV12 to IYUV.  <a href="namespacearm__compute.xhtml#a199d36780fbb4a70168f290480673650">More...</a><br /></td></tr>
 <tr class="separator:a199d36780fbb4a70168f290480673650"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae43e8f0463c0289169025c3041688d36"><td class="memTemplParams" colspan="2">template&lt;bool yuyv&gt; </td></tr>
 <tr class="memitem:ae43e8f0463c0289169025c3041688d36"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ae43e8f0463c0289169025c3041688d36">colorconvert_yuyv_to_iyuv</a> (const void *__restrict input, void *__restrict output, const Window &amp;win)</td></tr>
+<tr class="memdesc:ae43e8f0463c0289169025c3041688d36"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert YUYV to IYUV.  <a href="namespacearm__compute.xhtml#ae43e8f0463c0289169025c3041688d36">More...</a><br /></td></tr>
 <tr class="separator:ae43e8f0463c0289169025c3041688d36"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a587a54c85dcc72838b8f4b5575ebafe4"><td class="memTemplParams" colspan="2">template&lt;bool uv&gt; </td></tr>
 <tr class="memitem:a587a54c85dcc72838b8f4b5575ebafe4"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a587a54c85dcc72838b8f4b5575ebafe4">colorconvert_nv12_to_yuv4</a> (const void *__restrict input, void *__restrict output, const Window &amp;win)</td></tr>
+<tr class="memdesc:a587a54c85dcc72838b8f4b5575ebafe4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert NV12 to YUV4.  <a href="namespacearm__compute.xhtml#a587a54c85dcc72838b8f4b5575ebafe4">More...</a><br /></td></tr>
 <tr class="separator:a587a54c85dcc72838b8f4b5575ebafe4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a08e9d88293a5cef787bb324c2dc0a6bf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a08e9d88293a5cef787bb324c2dc0a6bf">colorconvert_iyuv_to_yuv4</a> (const void *__restrict input, void *__restrict output, const Window &amp;win)</td></tr>
+<tr class="memdesc:a08e9d88293a5cef787bb324c2dc0a6bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert IYUV to YUV4.  <a href="namespacearm__compute.xhtml#a08e9d88293a5cef787bb324c2dc0a6bf">More...</a><br /></td></tr>
 <tr class="separator:a08e9d88293a5cef787bb324c2dc0a6bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a14fd899b732509e245976b9967b8931d"><td class="memTemplParams" colspan="2">template&lt;bool alpha&gt; </td></tr>
 <tr class="memitem:a14fd899b732509e245976b9967b8931d"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a14fd899b732509e245976b9967b8931d">colorconvert_rgb_to_nv12</a> (const void *__restrict input, void *__restrict output, const Window &amp;win)</td></tr>
+<tr class="memdesc:a14fd899b732509e245976b9967b8931d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert RGB to NV12.  <a href="namespacearm__compute.xhtml#a14fd899b732509e245976b9967b8931d">More...</a><br /></td></tr>
 <tr class="separator:a14fd899b732509e245976b9967b8931d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a49b7a8e217ba7aad821fdeaab86bad53"><td class="memTemplParams" colspan="2">template&lt;bool alpha&gt; </td></tr>
 <tr class="memitem:a49b7a8e217ba7aad821fdeaab86bad53"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#a49b7a8e217ba7aad821fdeaab86bad53">colorconvert_rgb_to_iyuv</a> (const void *__restrict input, void *__restrict output, const Window &amp;win)</td></tr>
+<tr class="memdesc:a49b7a8e217ba7aad821fdeaab86bad53"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert RGB to IYUV.  <a href="namespacearm__compute.xhtml#a49b7a8e217ba7aad821fdeaab86bad53">More...</a><br /></td></tr>
 <tr class="separator:a49b7a8e217ba7aad821fdeaab86bad53"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad304c0b0a72ed3f65c24fa69ab3cd53e"><td class="memTemplParams" colspan="2">template&lt;bool alpha&gt; </td></tr>
 <tr class="memitem:ad304c0b0a72ed3f65c24fa69ab3cd53e"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute.xhtml#ad304c0b0a72ed3f65c24fa69ab3cd53e">colorconvert_rgb_to_yuv4</a> (const void *__restrict input, void *__restrict output, const Window &amp;win)</td></tr>
+<tr class="memdesc:ad304c0b0a72ed3f65c24fa69ab3cd53e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert RGB to YUV4.  <a href="namespacearm__compute.xhtml#ad304c0b0a72ed3f65c24fa69ab3cd53e">More...</a><br /></td></tr>
 <tr class="separator:ad304c0b0a72ed3f65c24fa69ab3cd53e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
@@ -181,7 +195,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_214608ef36d61442cb2b0c1c4e9a7def.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="dir_1fb090f0c6070330bfaccc4236d3ca0d.xhtml">core</a></li><li class="navelem"><a class="el" href="dir_315f6cf1ec0b2df3ae747ff8286a19f5.xhtml">NEON</a></li><li class="navelem"><a class="el" href="_n_e_color_convert_helper_8inl.xhtml">NEColorConvertHelper.inl</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:55 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:38 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

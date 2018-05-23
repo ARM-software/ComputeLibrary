@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -120,9 +120,11 @@ $(document).ready(function(){initNavTree('validation_2reference_2_convolution_la
 <div class="title">ConvolutionLayer.cpp File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="tests_2validation_2reference_2_convolution_layer_8h_source.xhtml">ConvolutionLayer.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="_convolution_layer_8h_source.xhtml">ConvolutionLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="tests_2validation_2_fixed_point_8h_source.xhtml">tests/validation/FixedPoint.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="tests_2validation_2_helpers_8h_source.xhtml">tests/validation/Helpers.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_convolution3d_8h_source.xhtml">tests/validation/reference/Convolution3d.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_permute_8h_source.xhtml">tests/validation/reference/Permute.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="tests_2validation_2reference_2_utils_8h_source.xhtml">tests/validation/reference/Utils.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_utils_quantized_asymm_8h_source.xhtml">tests/validation/reference/UtilsQuantizedAsymm.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_asserts_8h_source.xhtml">tests/framework/Asserts.h</a>&quot;</code><br />
@@ -144,19 +146,22 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a1a2cbbccbeeb6ab13f259947e8e1323a"><td class="memTemplParams" colspan="2">template&lt;typename T , typename TB &gt; </td></tr>
-<tr class="memitem:a1a2cbbccbeeb6ab13f259947e8e1323a"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a1a2cbbccbeeb6ab13f259947e8e1323a">convolution_layer</a> (const SimpleTensor&lt; T &gt; &amp;src, const SimpleTensor&lt; T &gt; &amp;weights, const SimpleTensor&lt; TB &gt; &amp;bias, const TensorShape &amp;output_shape, const PadStrideInfo &amp;info)</td></tr>
-<tr class="separator:a1a2cbbccbeeb6ab13f259947e8e1323a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac0a0d3a8a94f2f011d2969ff6b6c591f"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; float &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#ac0a0d3a8a94f2f011d2969ff6b6c591f">convolution_layer</a> (const SimpleTensor&lt; float &gt; &amp;src, const SimpleTensor&lt; float &gt; &amp;weights, const SimpleTensor&lt; float &gt; &amp;bias, const TensorShape &amp;output_shape, const PadStrideInfo &amp;info)</td></tr>
-<tr class="separator:ac0a0d3a8a94f2f011d2969ff6b6c591f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acb8d139aa02479d9c5c0d2fcbda92383"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; half &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#acb8d139aa02479d9c5c0d2fcbda92383">convolution_layer</a> (const SimpleTensor&lt; half &gt; &amp;src, const SimpleTensor&lt; half &gt; &amp;weights, const SimpleTensor&lt; half &gt; &amp;bias, const TensorShape &amp;output_shape, const PadStrideInfo &amp;info)</td></tr>
-<tr class="separator:acb8d139aa02479d9c5c0d2fcbda92383"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1196fd13dfe164c3b3ac509c2f577b98"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; qint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a1196fd13dfe164c3b3ac509c2f577b98">convolution_layer</a> (const SimpleTensor&lt; qint8_t &gt; &amp;src, const SimpleTensor&lt; qint8_t &gt; &amp;weights, const SimpleTensor&lt; qint8_t &gt; &amp;bias, const TensorShape &amp;output_shape, const PadStrideInfo &amp;info)</td></tr>
-<tr class="separator:a1196fd13dfe164c3b3ac509c2f577b98"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a043cd6bdf09803218b2e5366ffc9439d"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; qint16_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a043cd6bdf09803218b2e5366ffc9439d">convolution_layer</a> (const SimpleTensor&lt; qint16_t &gt; &amp;src, const SimpleTensor&lt; qint16_t &gt; &amp;weights, const SimpleTensor&lt; qint16_t &gt; &amp;bias, const TensorShape &amp;output_shape, const PadStrideInfo &amp;info)</td></tr>
-<tr class="separator:a043cd6bdf09803218b2e5366ffc9439d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a108607fa40833c4c851e43ed7ee8bb30"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a108607fa40833c4c851e43ed7ee8bb30">convolution_layer</a> (const SimpleTensor&lt; uint8_t &gt; &amp;src, const SimpleTensor&lt; uint8_t &gt; &amp;weights, const SimpleTensor&lt; int32_t &gt; &amp;bias, const TensorShape &amp;output_shape, const PadStrideInfo &amp;info)</td></tr>
-<tr class="separator:a108607fa40833c4c851e43ed7ee8bb30"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9cac6d3c9b81f1067ea28187efab0a42"><td class="memTemplParams" colspan="2">template&lt;typename T , typename TB &gt; </td></tr>
+<tr class="memitem:a9cac6d3c9b81f1067ea28187efab0a42"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a9cac6d3c9b81f1067ea28187efab0a42">convolution_layer_nchw</a> (const SimpleTensor&lt; T &gt; &amp;src, const SimpleTensor&lt; T &gt; &amp;weights, const SimpleTensor&lt; TB &gt; &amp;bias, SimpleTensor&lt; T &gt; &amp;dst, const PadStrideInfo &amp;info, const Size2D &amp;dilation)</td></tr>
+<tr class="separator:a9cac6d3c9b81f1067ea28187efab0a42"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a63bcb00fe517d73c30cc97ededc07f5e"><td class="memTemplParams" colspan="2">template&lt;typename T , typename TB &gt; </td></tr>
+<tr class="memitem:a63bcb00fe517d73c30cc97ededc07f5e"><td class="memTemplItemLeft" align="right" valign="top">SimpleTensor&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a63bcb00fe517d73c30cc97ededc07f5e">convolution_layer</a> (const SimpleTensor&lt; T &gt; &amp;src, const SimpleTensor&lt; T &gt; &amp;weights, const SimpleTensor&lt; TB &gt; &amp;bias, const TensorShape &amp;output_shape, const PadStrideInfo &amp;info, const Size2D &amp;dilation)</td></tr>
+<tr class="separator:a63bcb00fe517d73c30cc97ededc07f5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0590b2c66d70335cec38bdfcc82e4a08"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; float &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a0590b2c66d70335cec38bdfcc82e4a08">convolution_layer</a> (const SimpleTensor&lt; float &gt; &amp;src, const SimpleTensor&lt; float &gt; &amp;weights, const SimpleTensor&lt; float &gt; &amp;bias, const TensorShape &amp;output_shape, const PadStrideInfo &amp;info, const Size2D &amp;dilation)</td></tr>
+<tr class="separator:a0590b2c66d70335cec38bdfcc82e4a08"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abbdf0867c88d647bb8c14940787b669d"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; half &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#abbdf0867c88d647bb8c14940787b669d">convolution_layer</a> (const SimpleTensor&lt; half &gt; &amp;src, const SimpleTensor&lt; half &gt; &amp;weights, const SimpleTensor&lt; half &gt; &amp;bias, const TensorShape &amp;output_shape, const PadStrideInfo &amp;info, const Size2D &amp;dilation)</td></tr>
+<tr class="separator:abbdf0867c88d647bb8c14940787b669d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a33c05514d91a4c983bbde97c34bcc2a2"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; qint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a33c05514d91a4c983bbde97c34bcc2a2">convolution_layer</a> (const SimpleTensor&lt; qint8_t &gt; &amp;src, const SimpleTensor&lt; qint8_t &gt; &amp;weights, const SimpleTensor&lt; qint8_t &gt; &amp;bias, const TensorShape &amp;output_shape, const PadStrideInfo &amp;info, const Size2D &amp;dilation)</td></tr>
+<tr class="separator:a33c05514d91a4c983bbde97c34bcc2a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe6dd47f2d6e8938b569f6584aa65780"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; qint16_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#afe6dd47f2d6e8938b569f6584aa65780">convolution_layer</a> (const SimpleTensor&lt; qint16_t &gt; &amp;src, const SimpleTensor&lt; qint16_t &gt; &amp;weights, const SimpleTensor&lt; qint16_t &gt; &amp;bias, const TensorShape &amp;output_shape, const PadStrideInfo &amp;info, const Size2D &amp;dilation)</td></tr>
+<tr class="separator:afe6dd47f2d6e8938b569f6584aa65780"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af86bf13188c0ec405058c86230bd03cb"><td class="memItemLeft" align="right" valign="top">template SimpleTensor&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#af86bf13188c0ec405058c86230bd03cb">convolution_layer</a> (const SimpleTensor&lt; uint8_t &gt; &amp;src, const SimpleTensor&lt; uint8_t &gt; &amp;weights, const SimpleTensor&lt; int32_t &gt; &amp;bias, const TensorShape &amp;output_shape, const PadStrideInfo &amp;info, const Size2D &amp;dilation)</td></tr>
+<tr class="separator:af86bf13188c0ec405058c86230bd03cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -164,7 +169,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_46fdb196cebdbffe77dac340cde62f29.xhtml">reference</a></li><li class="navelem"><a class="el" href="validation_2reference_2_convolution_layer_8cpp.xhtml">ConvolutionLayer.cpp</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:56 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

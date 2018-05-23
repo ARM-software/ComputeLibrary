@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,7 +35,26 @@ namespace
 {
 bool compare_detection_window(const DetectionWindow &lhs, const DetectionWindow &rhs)
 {
-    return lhs.score > rhs.score;
+    if(lhs.idx_class < rhs.idx_class)
+    {
+        return true;
+    }
+    if(rhs.idx_class < lhs.idx_class)
+    {
+        return false;
+    }
+
+    // idx_classes are equal so compare by score
+    if(lhs.score > rhs.score)
+    {
+        return true;
+    }
+    if(rhs.score > lhs.score)
+    {
+        return false;
+    }
+
+    return false;
 }
 } // namespace
 
@@ -70,7 +89,7 @@ void CPPDetectionWindowNonMaximaSuppressionKernel::run(const Window &window, con
     const size_t num_candidates = _input_output->num_values();
     size_t       num_detections = 0;
 
-    // Sort list of candidates
+    // Sort list of candidates by idx_class and then score
     std::sort(_input_output->buffer(), _input_output->buffer() + num_candidates, compare_detection_window);
 
     const float min_distance_pow2 = _min_distance * _min_distance;
@@ -96,7 +115,7 @@ void CPPDetectionWindowNonMaximaSuppressionKernel::run(const Window &window, con
             const float xc = cur.x + cur.width * 0.5f;
             const float yc = cur.y + cur.height * 0.5f;
 
-            for(size_t k = i + 1; k < num_candidates; ++k)
+            for(size_t k = i + 1; k < (num_candidates) && (cur.idx_class == _input_output->at(k).idx_class); ++k)
             {
                 const float xn = _input_output->at(k).x + _input_output->at(k).width * 0.5f;
                 const float yn = _input_output->at(k).y + _input_output->at(k).height * 0.5f;
@@ -110,7 +129,7 @@ void CPPDetectionWindowNonMaximaSuppressionKernel::run(const Window &window, con
 
                     if(d < min_distance_pow2)
                     {
-                        // Invalidate keypoint
+                        // Invalidate detection window
                         _input_output->at(k).score = 0.0f;
                     }
                 }

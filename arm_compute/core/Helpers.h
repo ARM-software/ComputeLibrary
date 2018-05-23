@@ -24,7 +24,6 @@
 #ifndef __ARM_COMPUTE_HELPERS_H__
 #define __ARM_COMPUTE_HELPERS_H__
 
-#include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/IAccessWindow.h"
@@ -33,7 +32,6 @@
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
-#include "arm_compute/core/utils/misc/utility.h"
 
 #include <array>
 #include <cstddef>
@@ -49,17 +47,46 @@ class IKernel;
 class ITensor;
 class ITensorInfo;
 
+/** Disable bitwise operations by default */
 template <typename T>
 struct enable_bitwise_ops
 {
-    static constexpr bool value = false;
+    static constexpr bool value = false; /**< Disabled */
 };
 
+#ifndef DOXYGEN_SKIP_THIS
 template <typename T>
 typename std::enable_if<enable_bitwise_ops<T>::value, T>::type operator&(T lhs, T rhs)
 {
     using underlying_type = typename std::underlying_type<T>::type;
     return static_cast<T>(static_cast<underlying_type>(lhs) & static_cast<underlying_type>(rhs));
+}
+#endif /* DOXYGEN_SKIP_THIS */
+
+/** Helper function to create and return a unique_ptr pointed to a CL/GLES kernel object
+ *  It also calls the kernel's configuration.
+ *
+ * @param[in] args All the arguments that need pass to kernel's configuration.
+ *
+ * @return A unique pointer pointed to a CL/GLES kernel object
+ */
+template <typename Kernel, typename... T>
+std::unique_ptr<Kernel> create_configure_kernel(T &&... args)
+{
+    std::unique_ptr<Kernel> k = arm_compute::support::cpp14::make_unique<Kernel>();
+    k->configure(std::forward<T>(args)...);
+    return k;
+}
+
+/** Helper function to create and return a unique_ptr pointed to a CL/GLES kernel object
+ *
+ * @return A unique pointer pointed to a Kernel kernel object
+ */
+template <typename Kernel>
+std::unique_ptr<Kernel> create_kernel()
+{
+    std::unique_ptr<Kernel> k = arm_compute::support::cpp14::make_unique<Kernel>();
+    return k;
 }
 
 namespace traits
@@ -525,15 +552,15 @@ inline void permute(Dimensions<T> &dimensions, const PermutationVector &perm)
  */
 inline void permute(TensorShape &shape, const PermutationVector &perm)
 {
-    auto shape_copy = utility::make_array<TensorShape::num_max_dimensions>(shape.begin(), shape.end());
+    TensorShape shape_copy = shape;
     for(unsigned int i = 0; i < perm.num_dimensions(); ++i)
     {
         size_t dimension_val = (perm[i] < shape.num_dimensions()) ? shape_copy[perm[i]] : 1;
-        shape.set(i, dimension_val);
+        shape.set(i, dimension_val, false); // Avoid changes in _num_dimension
     }
 }
 
-/* Auto initialize the tensor info (shape, number of channels, data type and fixed point position) if the current assignment is empty.
+/** Auto initialize the tensor info (shape, number of channels, data type and fixed point position) if the current assignment is empty.
  *
  * @param[in,out] info                 Tensor info used to check and assign.
  * @param[in]     shape                New shape.
@@ -559,7 +586,7 @@ bool auto_init_if_empty(ITensorInfo       &info,
  */
 bool auto_init_if_empty(ITensorInfo &info_sink, const ITensorInfo &info_source);
 
-/* Set the shape to the specified value if the current assignment is empty.
+/** Set the shape to the specified value if the current assignment is empty.
  *
  * @param[in,out] info  Tensor info used to check and assign.
  * @param[in]     shape New shape.
@@ -568,7 +595,7 @@ bool auto_init_if_empty(ITensorInfo &info_sink, const ITensorInfo &info_source);
  */
 bool set_shape_if_empty(ITensorInfo &info, const TensorShape &shape);
 
-/* Set the format, data type and number of channels to the specified value if
+/** Set the format, data type and number of channels to the specified value if
  * the current data type is unknown.
  *
  * @param[in,out] info   Tensor info used to check and assign.
@@ -578,7 +605,7 @@ bool set_shape_if_empty(ITensorInfo &info, const TensorShape &shape);
  */
 bool set_format_if_unknown(ITensorInfo &info, Format format);
 
-/* Set the data type and number of channels to the specified value if
+/** Set the data type and number of channels to the specified value if
  * the current data type is unknown.
  *
  * @param[in,out] info      Tensor info used to check and assign.
@@ -588,7 +615,17 @@ bool set_format_if_unknown(ITensorInfo &info, Format format);
  */
 bool set_data_type_if_unknown(ITensorInfo &info, DataType data_type);
 
-/* Set the fixed point position to the specified value if
+/** Set the data layout to the specified value if
+ * the current data layout is unknown.
+ *
+ * @param[in,out] info        Tensor info used to check and assign.
+ * @param[in]     data_layout New data layout.
+ *
+ * @return True if the data type has been changed.
+ */
+bool set_data_layout_if_unknown(ITensorInfo &info, DataLayout data_layout);
+
+/** Set the fixed point position to the specified value if
  * the current fixed point position is 0 and the data type is QS8 or QS16
  *
  * @param[in,out] info                 Tensor info used to check and assign.
@@ -598,7 +635,7 @@ bool set_data_type_if_unknown(ITensorInfo &info, DataType data_type);
  */
 bool set_fixed_point_position_if_zero(ITensorInfo &info, int fixed_point_position);
 
-/* Set the quantization info to the specified value if
+/** Set the quantization info to the specified value if
  * the current quantization info is empty and the data type of asymmetric quantized type
  *
  * @param[in,out] info              Tensor info used to check and assign.
@@ -610,15 +647,16 @@ bool set_quantization_info_if_empty(ITensorInfo &info, QuantizationInfo quantiza
 
 /** Helper function to calculate the Valid Region for Scale.
  *
- * @param[in] src_info         Input tensor info used to check.
- * @param[in] dst_shape        Shape of the output.
- * @param[in] policy           Interpolation policy.
- * @param[in] border_size      Size of the border.
- * @param[in] border_undefined True if the border is undefined.
+ * @param[in] src_info           Input tensor info used to check.
+ * @param[in] dst_shape          Shape of the output.
+ * @param[in] interpolate_policy Interpolation policy.
+ * @param[in] sampling_policy    Sampling policy.
+ * @param[in] border_undefined   True if the border is undefined.
  *
- * @return The corrispondent valid region
+ * @return The corresponding valid region
  */
-ValidRegion calculate_valid_region_scale(const ITensorInfo &src_info, const TensorShape &dst_shape, InterpolationPolicy policy, BorderSize border_size, bool border_undefined);
+ValidRegion calculate_valid_region_scale(const ITensorInfo &src_info, const TensorShape &dst_shape,
+                                         InterpolationPolicy interpolate_policy, SamplingPolicy sampling_policy, bool border_undefined);
 
 /** Convert a linear index into n-dimensional coordinates.
  *
@@ -637,6 +675,15 @@ inline Coordinates index2coords(const TensorShape &shape, int index);
  * @return linead index
  */
 inline int coords2index(const TensorShape &shape, const Coordinates &coord);
+
+/** Get the index of the given dimension.
+ *
+ * @param[in] data_layout           The data layout.
+ * @param[in] data_layout_dimension The dimension which this index is requested for.
+ *
+ * @return The int conversion of the requested data layout index.
+ */
+inline size_t get_data_layout_dimension_index(const DataLayout data_layout, const DataLayoutDimension data_layout_dimension);
 } // namespace arm_compute
 
 #include "arm_compute/core/Helpers.inl"

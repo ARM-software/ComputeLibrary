@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,8 +22,10 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/Allocator.h"
+#include "arm_compute/runtime/MemoryRegion.h"
 
 #include "arm_compute/core/Error.h"
+#include "support/ToolchainSupport.h"
 
 #include <cstddef>
 
@@ -38,4 +40,10 @@ void *Allocator::allocate(size_t size, size_t alignment)
 void Allocator::free(void *ptr)
 {
     ::operator delete(ptr);
+}
+
+std::unique_ptr<IMemoryRegion> Allocator::make_region(size_t size, size_t alignment)
+{
+    ARM_COMPUTE_UNUSED(alignment);
+    return arm_compute::support::cpp14::make_unique<MemoryRegion>(size);
 }

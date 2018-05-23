@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -163,7 +163,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:ae02bc07b18ddc44c29318c100a063d3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unuse current program.  <a href="#ae02bc07b18ddc44c29318c100a063d3a">More...</a><br /></td></tr>
 <tr class="separator:ae02bc07b18ddc44c29318c100a063d3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad5cfd50c152f0aa984f53bb034d1461b"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
-<tr class="memitem:ad5cfd50c152f0aa984f53bb034d1461b"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_kernel.xhtml#ad5cfd50c152f0aa984f53bb034d1461b">set_argument</a> (unsigned int idx, T <a class="el" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>)</td></tr>
+<tr class="memitem:ad5cfd50c152f0aa984f53bb034d1461b"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_kernel.xhtml#ad5cfd50c152f0aa984f53bb034d1461b">set_argument</a> (unsigned int idx, T value)</td></tr>
 <tr class="memdesc:ad5cfd50c152f0aa984f53bb034d1461b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set argument value at index of shader params.  <a href="#ad5cfd50c152f0aa984f53bb034d1461b">More...</a><br /></td></tr>
 <tr class="separator:ad5cfd50c152f0aa984f53bb034d1461b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2ff24cc62df8324f57dcc2f3c9e533a9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_kernel.xhtml#a2ff24cc62df8324f57dcc2f3c9e533a9">clear_arguments</a> ()</td></tr>
@@ -500,10 +500,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 
 <p>Definition at line <a class="el" href="_g_c_kernel_library_8h_source.xhtml#l00141">141</a> of file <a class="el" href="_g_c_kernel_library_8h_source.xhtml">GCKernelLibrary.h</a>.</p>
-
-<p>References <a class="el" href="hwc_8hpp_source.xhtml#l00278">value</a>.</p>
-<div class="fragment"><div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;    {</div><div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;        <span class="keywordflow">if</span>(idx &gt;= _shader_arguments.size())</div><div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;        {</div><div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;            _shader_arguments.resize(idx + 1, 0);</div><div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;        }</div><div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;</div><div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;        <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *p        = <span class="keyword">reinterpret_cast&lt;</span><span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *<span class="keyword">&gt;</span>(&amp;<a class="code" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>);</div><div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;        _shader_arguments[idx] = *p;</div><div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;    }</div><div class="ttc" id="hwc_8hpp_xhtml_a0f61d63b009d0880a89c843bd50d8d76"><div class="ttname"><a href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a></div><div class="ttdeci">void * value</div><div class="ttdef"><b>Definition:</b> <a href="hwc_8hpp_source.xhtml#l00278">hwc.hpp:278</a></div></div>
-</div><!-- fragment -->
+<div class="fragment"><div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;    {</div><div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;        <span class="keywordflow">if</span>(idx &gt;= _shader_arguments.size())</div><div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;        {</div><div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;            _shader_arguments.resize(idx + 1, 0);</div><div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;        }</div><div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;</div><div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;        <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *p        = <span class="keyword">reinterpret_cast&lt;</span><span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *<span class="keyword">&gt;</span>(&amp;value);</div><div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;        _shader_arguments[idx] = *p;</div><div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="ae722344eb4eb8a404d600561914859ab"></a>
@@ -602,7 +599,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_g_c_kernel.xhtml">GCKernel</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:58 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:41 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

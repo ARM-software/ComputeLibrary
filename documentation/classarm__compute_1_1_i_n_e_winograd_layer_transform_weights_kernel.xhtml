@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -122,7 +122,10 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_i_n_e_winograd_l
 </div><!--header-->
 <div class="contents">
 
-<p><code>#include &lt;<a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml">NEWinogradLayerKernel.h</a>&gt;</code></p>
+<p>Interface for the NEON kernel to perform Winograd weights transform.  
+ <a href="classarm__compute_1_1_i_n_e_winograd_layer_transform_weights_kernel.xhtml#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>&gt;</code></p>
 <div class="dynheader">
 Collaboration diagram for INEWinogradLayerTransformWeightsKernel&lt; T &gt;:</div>
 <div class="dyncontent">
@@ -174,8 +177,9 @@ Public Member Functions</h2></td></tr>
 <div class="textblock"><h3>template&lt;typename T&gt;<br />
 class arm_compute::INEWinogradLayerTransformWeightsKernel&lt; T &gt;</h3>
 
+<p>Interface for the NEON kernel to perform Winograd weights transform. </p>
 
-<p>Definition at line <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml#l00305">305</a> of file <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml">NEWinogradLayerKernel.h</a>.</p>
+<p>Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00341">341</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a668729f636910fd5f425cee965efee6d"></a>
 <div class="memitem">
@@ -198,8 +202,8 @@ class arm_compute::INEWinogradLayerTransformWeightsKernel&lt; T &gt;</h3>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml#l00333">333</a> of file <a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml">NEWinogradLayerKernel.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;    {</div><div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;    }</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml#l00371">371</a> of file <a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;    {</div><div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -340,17 +344,18 @@ class arm_compute::INEWinogradLayerTransformWeightsKernel&lt; T &gt;</h3>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">n_output_channels</td><td>Number of output feature maps. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">n_input_channels</td><td>Number of input feature maps. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">n_input_channels</td><td>Number of input feature maps.</td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Storage size (in units of T) required. </dd></dl>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_weights_kernel.xhtml#abfe717774e572988b63fdd5a69364eb9">NEWinogradLayerTransformWeightsKernel&lt; T, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;</a>.</p>
 
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>arm_compute/core/NEON/kernels/<a class="el" href="_n_e_winograd_layer_kernel_8h_source.xhtml">NEWinogradLayerKernel.h</a></li>
+<li>arm_compute/core/NEON/kernels/<a class="el" href="_n_e_winograd_convolution_layer_kernel_8h_source.xhtml">NEWinogradConvolutionLayerKernel.h</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -358,7 +363,7 @@ class arm_compute::INEWinogradLayerTransformWeightsKernel&lt; T &gt;</h3>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_i_n_e_winograd_layer_transform_weights_kernel.xhtml">INEWinogradLayerTransformWeightsKernel</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:58 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:42 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

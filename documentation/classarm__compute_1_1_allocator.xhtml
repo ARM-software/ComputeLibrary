@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -118,7 +118,7 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_allocator.xhtml'
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a>  </div>
   <div class="headertitle">
-<div class="title">Allocator Class Reference</div>  </div>
+<div class="title">Allocator Class Reference<span class="mlabels"><span class="mlabel">final</span></span></div>  </div>
 </div><!--header-->
 <div class="contents">
 
@@ -138,12 +138,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a20ec13b471d9434e1c3dd9d93c004e07"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_allocator.xhtml#a20ec13b471d9434e1c3dd9d93c004e07">Allocator</a> ()=default</td></tr>
 <tr class="memdesc:a20ec13b471d9434e1c3dd9d93c004e07"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default constructor.  <a href="#a20ec13b471d9434e1c3dd9d93c004e07">More...</a><br /></td></tr>
 <tr class="separator:a20ec13b471d9434e1c3dd9d93c004e07"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aae0c9f2cf99b1724ec4a6d4e292327d2"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_allocator.xhtml#aae0c9f2cf99b1724ec4a6d4e292327d2">allocate</a> (size_t <a class="el" href="hwc_8hpp.xhtml#ab2c6b258f02add8fdf4cfc7c371dd772">size</a>, size_t alignment) override</td></tr>
+<tr class="memitem:aae0c9f2cf99b1724ec4a6d4e292327d2"><td class="memItemLeft" align="right" valign="top">void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_allocator.xhtml#aae0c9f2cf99b1724ec4a6d4e292327d2">allocate</a> (size_t size, size_t alignment) override</td></tr>
 <tr class="memdesc:aae0c9f2cf99b1724ec4a6d4e292327d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface to be implemented by the child class to allocate bytes.  <a href="#aae0c9f2cf99b1724ec4a6d4e292327d2">More...</a><br /></td></tr>
 <tr class="separator:aae0c9f2cf99b1724ec4a6d4e292327d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abbd17af5b3fbeff226e4051433c1b929"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_allocator.xhtml#abbd17af5b3fbeff226e4051433c1b929">free</a> (void *ptr) override</td></tr>
 <tr class="memdesc:abbd17af5b3fbeff226e4051433c1b929"><td class="mdescLeft">&#160;</td><td class="mdescRight">Interface to be implemented by the child class to free the allocated tensor.  <a href="#abbd17af5b3fbeff226e4051433c1b929">More...</a><br /></td></tr>
 <tr class="separator:abbd17af5b3fbeff226e4051433c1b929"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a648cdc4602e8c7ec89180da37892db31"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classarm__compute_1_1_i_memory_region.xhtml">IMemoryRegion</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_allocator.xhtml#a648cdc4602e8c7ec89180da37892db31">make_region</a> (size_t size, size_t alignment) override</td></tr>
+<tr class="memdesc:a648cdc4602e8c7ec89180da37892db31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create self-managed memory region.  <a href="#a648cdc4602e8c7ec89180da37892db31">More...</a><br /></td></tr>
+<tr class="separator:a648cdc4602e8c7ec89180da37892db31"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classarm__compute_1_1_i_allocator"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1_i_allocator')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_allocator.xhtml">IAllocator</a></td></tr>
 <tr class="memitem:a961a3c35d2c2652499f722ea14775122 inherit pub_methods_classarm__compute_1_1_i_allocator"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_allocator.xhtml#a961a3c35d2c2652499f722ea14775122">~IAllocator</a> ()=default</td></tr>
 <tr class="memdesc:a961a3c35d2c2652499f722ea14775122 inherit pub_methods_classarm__compute_1_1_i_allocator"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default virtual destructor.  <a href="#a961a3c35d2c2652499f722ea14775122">More...</a><br /></td></tr>
@@ -152,7 +155,7 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Default malloc allocator implementation. </p>
 
-<p>Definition at line <a class="el" href="_allocator_8h_source.xhtml#l00034">34</a> of file <a class="el" href="_allocator_8h_source.xhtml">Allocator.h</a>.</p>
+<p>Definition at line <a class="el" href="_allocator_8h_source.xhtml#l00036">36</a> of file <a class="el" href="_allocator_8h_source.xhtml">Allocator.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a20ec13b471d9434e1c3dd9d93c004e07"></a>
 <div class="memitem">
@@ -254,6 +257,52 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a648cdc4602e8c7ec89180da37892db31"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::unique_ptr&lt;<a class="el" href="classarm__compute_1_1_i_memory_region.xhtml">IMemoryRegion</a>&gt; make_region </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>alignment</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Create self-managed memory region. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>Size of the memory region </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">alignment</td><td>Alignment of the memory region</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The memory region object </dd></dl>
+
+<p>Implements <a class="el" href="classarm__compute_1_1_i_allocator.xhtml#a9cff197f588f77bba9055f0baa690370">IAllocator</a>.</p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>arm_compute/runtime/<a class="el" href="_allocator_8h_source.xhtml">Allocator.h</a></li>
 </ul>
@@ -263,7 +312,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_allocator.xhtml">Allocator</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:57 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:40 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

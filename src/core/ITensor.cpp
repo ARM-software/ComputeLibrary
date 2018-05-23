@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -150,4 +150,14 @@ void ITensor::print(std::ostream &s, IOFormatInfo io_fmt) const
             s << io_fmt.row_delim;
         }
     }
+}
+
+bool ITensor::is_used() const
+{
+    return _is_used;
+}
+
+void ITensor::mark_as_unused() const
+{
+    _is_used = false;
 }

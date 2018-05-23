@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -191,17 +191,11 @@ $(document).ready(function(){initNavTree('functions_o.xhtml','');});
 , <a class="el" href="classarm__compute_1_1utils_1_1_n_p_y_loader.xhtml#a5988c0b8edbcd872e79d72cd47a8c18b">NPYLoader</a>
 , <a class="el" href="classarm__compute_1_1utils_1_1_p_p_m_loader.xhtml#a36e58f3e64f3851ebac7a9556b4704ed">PPMLoader</a>
 </li>
-<li>opencl_is_available()
-: <a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#aa8e898112793d13b363806c4332f1832">Graph</a>
+<li>OpenCLMemoryUsage()
+: <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_open_c_l_memory_usage.xhtml#a2645ccd83bc30f0c6cc7aedd2fa51806">OpenCLMemoryUsage</a>
 </li>
 <li>OpenCLTimer()
 : <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_open_c_l_timer.xhtml#a91860bc09f5e1a5864d5c8747af22b17">OpenCLTimer</a>
-</li>
-<li>operation()
-: <a class="el" href="classarm__compute_1_1graph_1_1_node_context.xhtml#aede501005c91e527731f91d7b1093922">NodeContext</a>
-</li>
-<li>OperationRegistrar()
-: <a class="el" href="classarm__compute_1_1graph_1_1detail_1_1_operation_registrar.xhtml#ab9e2f29907d4f567f67f1bd3bafe8ed2">OperationRegistrar&lt; T &gt;</a>
 </li>
 <li>operator bool()
 : <a class="el" href="classarm__compute_1_1_status.xhtml#a420e60e9788bfa3b52aa3aab72ea3a5e">Status</a>
@@ -237,6 +231,7 @@ $(document).ready(function(){initNavTree('functions_o.xhtml','');});
 </li>
 <li>operator!=()
 : <a class="el" href="structarm__compute_1_1_quantization_info.xhtml#af63bc167068077a5945672776b472268">QuantizationInfo</a>
+, <a class="el" href="classarm__compute_1_1_size2_d.xhtml#af28e652d29531d268e2ed5c82ecf7138">Size2D</a>
 </li>
 <li>operator()()
 : <a class="el" href="structarm__compute_1_1detail_1_1brelu.xhtml#a866d1f31a29495f573ed758878f9028a">brelu&lt; T, S &gt;</a>
@@ -245,30 +240,17 @@ $(document).ready(function(){initNavTree('functions_o.xhtml','');});
 , <a class="el" href="structarm__compute_1_1detail_1_1get__tensor__info__t_3_01_i_tensor_info_01_5_01_4.xhtml#a31da9070971bbf34ad5d84094b48c04f">get_tensor_info_t&lt; ITensorInfo * &gt;</a>
 , <a class="el" href="structarm__compute_1_1detail_1_1lubrelu.xhtml#a866d1f31a29495f573ed758878f9028a">lubrelu&lt; T, S &gt;</a>
 , <a class="el" href="structarm__compute_1_1detail_1_1relu.xhtml#a866d1f31a29495f573ed758878f9028a">relu&lt; T, S &gt;</a>
+, <a class="el" href="structarm__compute_1_1graph_1_1_execution_task.xhtml#a5ccbdeb5350ba8528eab7e4cc49fc68b">ExecutionTask</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#a39537b09ccc3ce3d17922f4ef49a123f">Accessor</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#a39537b09ccc3ce3d17922f4ef49a123f">CLAccessor</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a39537b09ccc3ce3d17922f4ef49a123f">GCAccessor</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_i_accessor.xhtml#a583a35e4fd72f072a6b76ce58c2e3998">IAccessor</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_raw_tensor.xhtml#a39537b09ccc3ce3d17922f4ef49a123f">RawTensor</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a39537b09ccc3ce3d17922f4ef49a123f">SimpleTensor&lt; T &gt;</a>
+, <a class="el" href="classarm__compute_1_1utils_1_1signal_1_1detail_1_1_signal_impl_3_01_return_type_07_args_8_8_8_08_4.xhtml#a87956ec3bc9f325ad545a3b265b492f7">SignalImpl&lt; ReturnType(Args...)&gt;</a>
 </li>
 <li>operator*()
 : <a class="el" href="structarm__compute_1_1_border_size.xhtml#a19da960d23eca69f8e65d52c741147e2">BorderSize</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_batch_normalization_layer_dataset_1_1iterator.xhtml#a33b7b0c859a5b7a81d0fbb09aa6f5f98">BatchNormalizationLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_convolution_layer_dataset_1_1iterator.xhtml#ab82dfa8c5f60658fc9fc6450cdfff3ae">ConvolutionLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_depthwise_convolution_layer_dataset_1_1iterator.xhtml#a22ccb593fe205d4edb800cb8e7801d05">DepthwiseConvolutionLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_depthwise_separable_convolution_layer_dataset_1_1iterator.xhtml#ad4eb3159b463762068e7f8d8be4e6277">DepthwiseSeparableConvolutionLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_fully_connected_layer_dataset_1_1iterator.xhtml#a016f449e76ebef55fbd3472cc53bda9b">FullyConnectedLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_g_e_m_m_dataset_1_1iterator.xhtml#ab70c0bd637d50fcf5b3eae7f45d7b9cf">GEMMDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_g_e_m_m_lowp_dataset_1_1iterator.xhtml#ad55035b28062eae253c44ccbbcfe37ea">GEMMLowpDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_h_o_g_descriptor_dataset_1_1iterator.xhtml#a5763a61b19e0a38f41db6314fe7dd1d3">HOGDescriptorDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_image_file_dataset_1_1iterator.xhtml#a0ee29c66df17556e913edd49ff36ed32">ImageFileDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_normalize_planar_y_u_v_layer_dataset_1_1iterator.xhtml#ada71b259f0ee2f526a122c7581504d5a">NormalizePlanarYUVLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_pooling_layer_dataset_1_1iterator.xhtml#ada45e1a64ef558a6ec9aff6587dc4517">PoolingLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_reshape_layer_dataset_1_1iterator.xhtml#a41c2ebeb0940dfe9fe3a229ff2ca759d">ReshapeLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_r_o_i_pooling_layer_dataset_1_1iterator.xhtml#a7ceeddb83c933aee547f675eb9913837">ROIPoolingLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_scale_layer_dataset_1_1iterator.xhtml#a26cbd850992ab07547bfc975a7da28b4">ScaleLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_threshold_dataset_1_1iterator.xhtml#a0033ebdd3da1f028260174584c686d52">ThresholdDataset::iterator</a>
 , <a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_cartesian_product_dataset_1_1iterator.xhtml#a36f8d8b62b9cdbad34307305bbe9feab">CartesianProductDataset&lt; T, U &gt;::iterator</a>
 , <a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_container_dataset_1_1iterator.xhtml#adfcaf8d18895a19617e5c5df7bc07f70">ContainerDataset&lt; T &gt;::iterator</a>
 , <a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_initializer_list_dataset_1_1iterator.xhtml#af85de6015a44d7ff25198be6265ea56b">InitializerListDataset&lt; T &gt;::iterator</a>
@@ -285,22 +267,7 @@ $(document).ready(function(){initNavTree('functions_o.xhtml','');});
 : <a class="el" href="structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a2903dc3c6e35d8a56a6e68793977a07c">Measurement::Value</a>
 </li>
 <li>operator++()
-: <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_batch_normalization_layer_dataset_1_1iterator.xhtml#af1b1c7856a59f34c7d3570f946a2ff00">BatchNormalizationLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_convolution_layer_dataset_1_1iterator.xhtml#af1b1c7856a59f34c7d3570f946a2ff00">ConvolutionLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_depthwise_convolution_layer_dataset_1_1iterator.xhtml#af1b1c7856a59f34c7d3570f946a2ff00">DepthwiseConvolutionLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_depthwise_separable_convolution_layer_dataset_1_1iterator.xhtml#af1b1c7856a59f34c7d3570f946a2ff00">DepthwiseSeparableConvolutionLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_fully_connected_layer_dataset_1_1iterator.xhtml#af1b1c7856a59f34c7d3570f946a2ff00">FullyConnectedLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_g_e_m_m_dataset_1_1iterator.xhtml#af1b1c7856a59f34c7d3570f946a2ff00">GEMMDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_g_e_m_m_lowp_dataset_1_1iterator.xhtml#af1b1c7856a59f34c7d3570f946a2ff00">GEMMLowpDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_h_o_g_descriptor_dataset_1_1iterator.xhtml#af1b1c7856a59f34c7d3570f946a2ff00">HOGDescriptorDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_image_file_dataset_1_1iterator.xhtml#af1b1c7856a59f34c7d3570f946a2ff00">ImageFileDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_normalize_planar_y_u_v_layer_dataset_1_1iterator.xhtml#af1b1c7856a59f34c7d3570f946a2ff00">NormalizePlanarYUVLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_pooling_layer_dataset_1_1iterator.xhtml#af1b1c7856a59f34c7d3570f946a2ff00">PoolingLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_reshape_layer_dataset_1_1iterator.xhtml#af1b1c7856a59f34c7d3570f946a2ff00">ReshapeLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_r_o_i_pooling_layer_dataset_1_1iterator.xhtml#af1b1c7856a59f34c7d3570f946a2ff00">ROIPoolingLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_scale_layer_dataset_1_1iterator.xhtml#af1b1c7856a59f34c7d3570f946a2ff00">ScaleLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_threshold_dataset_1_1iterator.xhtml#af1b1c7856a59f34c7d3570f946a2ff00">ThresholdDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_cartesian_product_dataset_1_1iterator.xhtml#af1b1c7856a59f34c7d3570f946a2ff00">CartesianProductDataset&lt; T, U &gt;::iterator</a>
+: <a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_cartesian_product_dataset_1_1iterator.xhtml#af1b1c7856a59f34c7d3570f946a2ff00">CartesianProductDataset&lt; T, U &gt;::iterator</a>
 , <a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_container_dataset_1_1iterator.xhtml#af1b1c7856a59f34c7d3570f946a2ff00">ContainerDataset&lt; T &gt;::iterator</a>
 , <a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_initializer_list_dataset_1_1iterator.xhtml#af1b1c7856a59f34c7d3570f946a2ff00">InitializerListDataset&lt; T &gt;::iterator</a>
 , <a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset_1_1iterator.xhtml#af1b1c7856a59f34c7d3570f946a2ff00">JoinDataset&lt; T, U &gt;::iterator</a>
@@ -333,6 +300,7 @@ $(document).ready(function(){initNavTree('functions_o.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_access_window_auto_padding.xhtml#ad38db221ef94b6cd0e73f5dfd743414a">AccessWindowAutoPadding</a>
 , <a class="el" href="classarm__compute_1_1_access_window_rectangle.xhtml#abdf21e65ee4cc7cf79a43e3de64dcc7e">AccessWindowRectangle</a>
 , <a class="el" href="classarm__compute_1_1_access_window_static.xhtml#a5c6934ef061e9aeaa31fa952c05e2730">AccessWindowStatic</a>
+, <a class="el" href="classarm__compute_1_1_assembly_kernel_glue.xhtml#a325adbd7f57154b4dc19cc84284b474b">AssemblyKernelGlue&lt; TypeInput, TypeOutput &gt;</a>
 , <a class="el" href="classarm__compute_1_1_blob_lifetime_manager.xhtml#ab8635dfa3dda23bdf12511b1580b4e3f">BlobLifetimeManager</a>
 , <a class="el" href="classarm__compute_1_1_blob_memory_pool.xhtml#a48ffa311cc6842633aff367dd6f0d601">BlobMemoryPool</a>
 , <a class="el" href="classarm__compute_1_1_c_l_absolute_difference_kernel.xhtml#a71db1bd13fefa2e7fda34b8fffa4a863">CLAbsoluteDifferenceKernel</a>
@@ -346,14 +314,17 @@ $(document).ready(function(){initNavTree('functions_o.xhtml','');});
 , <a class="el" href="classarm__compute_1_1_c_l_bitwise_xor_kernel.xhtml#ab169d4a7c722602e5952cc2a06bf38b1">CLBitwiseXorKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_channel_combine_kernel.xhtml#acbed32f07c42524f3ba442584961662a">CLChannelCombineKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_channel_extract_kernel.xhtml#a9b79b58e02befadc03a8efa21453cc6d">CLChannelExtractKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_channel_shuffle_layer_kernel.xhtml#a91eed753a7a5519fae24b0a5c521de68">CLChannelShuffleLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_col2_im_kernel.xhtml#ac0fc2aadef37fa6f20657e42b209ca62">CLCol2ImKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_color_convert_kernel.xhtml#a9896faa16e3d99ed942eb845dfe41f2e">CLColorConvertKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_convert_fully_connected_weights_kernel.xhtml#a15e6fb3b62f2b84abb66d48c9157eabf">CLConvertFullyConnectedWeightsKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_convolution_rectangle_kernel.xhtml#afce1f7a8135ce82d5e12342bb05f8448">CLConvolutionRectangleKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_copy_kernel.xhtml#a00d2baeddfb23da246992686b4fec2d8">CLCopyKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_copy_to_array_kernel.xhtml#a8c3e5f7865d66adaa39c33a83211f261">CLCopyToArrayKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer_upsample.xhtml#a8d005b2a08fa38af8837e78acdc96267">CLDeconvolutionLayerUpsample</a>
 , <a class="el" href="classarm__compute_1_1_c_l_deconvolution_layer_upsample_kernel.xhtml#aa537afa3c8d990b39f5faa108ae7d981">CLDeconvolutionLayerUpsampleKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_depth_concatenate_layer_kernel.xhtml#a9a9999a79bdc4e5a8fdf8192b08aeb9b">CLDepthConcatenateLayerKernel</a>
-, <a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer3x3_kernel.xhtml#a149ac3a489f6db700e4d33e493789e2e">CLDepthwiseConvolutionLayer3x3Kernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_depthwise_convolution_layer.xhtml#acf1baa6f148b8ac41e5a766f599784de">CLDepthwiseConvolutionLayer</a>
 , <a class="el" href="classarm__compute_1_1_c_l_depthwise_im2_col_kernel.xhtml#a0a10e55699b26afdf2fbf336dc9cad09">CLDepthwiseIm2ColKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_depthwise_vector_to_tensor_kernel.xhtml#a992e1f35a42f71981ee6e0846246a292">CLDepthwiseVectorToTensorKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_depthwise_weights_reshape_kernel.xhtml#a34060a1360d8a24bfa2404161406191e">CLDepthwiseWeightsReshapeKernel</a>
@@ -369,9 +340,12 @@ $(document).ready(function(){initNavTree('functions_o.xhtml','');});
 , <a class="el" href="classarm__compute_1_1_c_l_fast_corners_kernel.xhtml#ac5e031f7c81be9bbac3372bb6edbd344">CLFastCornersKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_fill_border_kernel.xhtml#a569042df5e874046fe622b6723289a86">CLFillBorderKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_floor_kernel.xhtml#af3d454b9904ea4bfa1effa73f766f41e">CLFloorKernel</a>
-, <a class="el" href="classarm__compute_1_1_c_l_gaussian_pyramid.xhtml#afc0bb21e48fb78591b51913eba818410">CLGaussianPyramid</a>
+, <a class="el" href="classarm__compute_1_1_c_l_fully_connected_layer.xhtml#a1bee19103166ceb1eedef2e6a4fe6515">CLFullyConnectedLayer</a>
+, <a class="el" href="classarm__compute_1_1_c_l_gaussian_pyramid.xhtml#aa3f47917f1cb44a55c93363eaaf39c6e">CLGaussianPyramid</a>
 , <a class="el" href="classarm__compute_1_1_c_l_gaussian_pyramid_hor_kernel.xhtml#aab322f707d331394f70405702b43378a">CLGaussianPyramidHorKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_gaussian_pyramid_vert_kernel.xhtml#abd272921b9c15f9200c94898879f156a">CLGaussianPyramidVertKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m.xhtml#a83a121357a2121ef7f0670b3f81e4645">CLGEMM</a>
+, <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_convolution_layer.xhtml#a025e6bce0640a6cb5ecdab8a3e57f9a0">CLGEMMConvolutionLayer</a>
 , <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel.xhtml#a56008f3777b30dc6b002815c904a9c34">CLGEMMInterleave4x4Kernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_matrix_multiply_kernel.xhtml#af520778a23d6716080043321d07e9999">CLGEMMLowpMatrixMultiplyKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_lowp_offset_contribution_kernel.xhtml#a390552e0764d82400a910a18f3125299">CLGEMMLowpOffsetContributionKernel</a>
@@ -388,7 +362,7 @@ $(document).ready(function(){initNavTree('functions_o.xhtml','');});
 , <a class="el" href="classarm__compute_1_1_c_l_histogram_border_kernel.xhtml#a2ca23ba242845400753a7a7e16dfd679">CLHistogramBorderKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_histogram_kernel.xhtml#aa829a82c818f626213fd9bc071609261">CLHistogramKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_h_o_g_block_normalization_kernel.xhtml#a2ca01c73542762846c37676789d69b5a">CLHOGBlockNormalizationKernel</a>
-, <a class="el" href="classarm__compute_1_1_c_l_h_o_g_detector.xhtml#abec8de5d26dba14703efc9f1e49e1053">CLHOGDetector</a>
+, <a class="el" href="classarm__compute_1_1_c_l_h_o_g_detector.xhtml#aa2d5fe72d2db4b034a829c0a92c80783">CLHOGDetector</a>
 , <a class="el" href="classarm__compute_1_1_c_l_h_o_g_detector_kernel.xhtml#a60f2e39807c636c8a787ae84ffadab38">CLHOGDetectorKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_h_o_g_multi_detection.xhtml#a4dc60a1da8bf41adb6c4d3c428a17415">CLHOGMultiDetection</a>
 , <a class="el" href="classarm__compute_1_1_c_l_h_o_g_orientation_binning_kernel.xhtml#ab44e37937fd28a195ac52610b928b30e">CLHOGOrientationBinningKernel</a>
@@ -398,13 +372,15 @@ $(document).ready(function(){initNavTree('functions_o.xhtml','');});
 , <a class="el" href="classarm__compute_1_1_c_l_l2_normalize_layer_kernel.xhtml#a652669238486d0d24c8bb110128dd09f">CLL2NormalizeLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_l_k_tracker_stage0_kernel.xhtml#ac1a27a3a3f960b210716d8103c0b8d91">CLLKTrackerStage0Kernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_l_k_tracker_stage1_kernel.xhtml#a0226443ff006bea34e6bbcb1fbff2422">CLLKTrackerStage1Kernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_locally_connected_layer.xhtml#a24d00f8384ab6f705aa3fe84f05c142b">CLLocallyConnectedLayer</a>
 , <a class="el" href="classarm__compute_1_1_c_l_locally_connected_matrix_multiply_kernel.xhtml#a0cc875c804d3f82bd6eba503ede72a86">CLLocallyConnectedMatrixMultiplyKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_logits1_d_max_shift_exp_sum_kernel.xhtml#afd28bfde2ba6f90c161eb1f2678cb6f9">CLLogits1DMaxShiftExpSumKernel</a>
-, <a class="el" href="classarm__compute_1_1_c_l_logits1_d_norm_kernel.xhtml#a31f1716a5e72003da8fcdbc0a2dec73a">CLLogits1DNormKernel</a>
-, <a class="el" href="classarm__compute_1_1_c_l_logits1_d_shift_exp_sum_kernel.xhtml#aa21cdfff7db54a9881b8220949436309">CLLogits1DShiftExpSumKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_logits1_d_norm_kernel.xhtml#a6ca0b2c3d501bc8062121facf4443980">CLLogits1DNormKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_logits1_d_shift_exp_sum_kernel.xhtml#a6768c8d3a565c30cd874d894b218317c">CLLogits1DShiftExpSumKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_lut_allocator.xhtml#a2de13c6fbd9dd5506f12627b87415a51">CLLutAllocator</a>
 , <a class="el" href="classarm__compute_1_1_c_l_magnitude_phase_kernel.xhtml#a11f21edc185eb160e844aa0c4ca9c29a">CLMagnitudePhaseKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_mean_std_dev_kernel.xhtml#ae9fa6f33d1193d47d77210d69ef74c7d">CLMeanStdDevKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_memory.xhtml#a74574cd4936f64bf0486bae1000a42c9">CLMemory</a>
 , <a class="el" href="classarm__compute_1_1_c_l_min_max_kernel.xhtml#a9e34fe76534c1b75dfcb2f92acb16ec6">CLMinMaxKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_min_max_layer_kernel.xhtml#a2111986a65074c1c464fe004b34d303c">CLMinMaxLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_min_max_location.xhtml#a5ec34a951324ad9bd8bf06d8620369ed">CLMinMaxLocation</a>
@@ -412,7 +388,7 @@ $(document).ready(function(){initNavTree('functions_o.xhtml','');});
 , <a class="el" href="classarm__compute_1_1_c_l_normalization_layer_kernel.xhtml#afde39cdaeb3b4e6d1569ef49f70ccd5f">CLNormalizationLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_optical_flow.xhtml#a24252fc100901855c82e8703834f9634">CLOpticalFlow</a>
 , <a class="el" href="classarm__compute_1_1_c_l_permute_kernel.xhtml#a8137811e0b9ccdf37b28d9498b336d89">CLPermuteKernel</a>
-, <a class="el" href="classarm__compute_1_1_c_l_pixel_wise_multiplication_kernel.xhtml#a18767cd831fa27f6c0d28e847509b4cf">CLPixelWiseMultiplicationKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_pixel_wise_multiplication_kernel.xhtml#a68ae410a0d979d2c897d840c6749e50c">CLPixelWiseMultiplicationKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_pooling_layer_kernel.xhtml#a1c744387eb6e27f11fed9e0383ff55b2">CLPoolingLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_quantization_layer_kernel.xhtml#a8f28dbe7a21f5ae5c54776d1953f3d39">CLQuantizationLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_reduction_operation_kernel.xhtml#a95cef45f3f6052814aeb093568822559">CLReductionOperationKernel</a>
@@ -425,20 +401,28 @@ $(document).ready(function(){initNavTree('functions_o.xhtml','');});
 , <a class="el" href="classarm__compute_1_1_c_l_sobel5x5_vert_kernel.xhtml#abc8c95a4a6d95911a79340b6015fa70c">CLSobel5x5VertKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_sobel7x7_hor_kernel.xhtml#ae61ba8aa03f08b69195f20c2c1c4d4ef">CLSobel7x7HorKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_l_sobel7x7_vert_kernel.xhtml#afa6becd7a5a59d6853e0f447ba231ac4">CLSobel7x7VertKernel</a>
-, <a class="el" href="classarm__compute_1_1_c_l_sub_tensor.xhtml#aee53085b838758adfce05657de25f5c5">CLSubTensor</a>
+, <a class="el" href="classarm__compute_1_1_c_l_sub_tensor.xhtml#a9e7404a38329c9f1fcce42b8098dc6f9">CLSubTensor</a>
 , <a class="el" href="classarm__compute_1_1_c_l_tensor_allocator.xhtml#a74c9c61e0615334fdeb176f21828a98f">CLTensorAllocator</a>
-, <a class="el" href="classarm__compute_1_1_c_l_weights_reshape_kernel.xhtml#afd2802b8c9343ee51ac62d3e6bab3963">CLWeightsReshapeKernel</a>
-, <a class="el" href="classarm__compute_1_1_coordinates.xhtml#a9083bc0216aad5dc437d5e42d80b1061">Coordinates</a>
+, <a class="el" href="classarm__compute_1_1_c_l_weights_reshape_kernel.xhtml#ad012198a049187b766ca44b356821918">CLWeightsReshapeKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_width_concatenate_layer_kernel.xhtml#a1fb3614a59bd2812e4e44947306051a2">CLWidthConcatenateLayerKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_winograd_convolution_layer.xhtml#a750abd85a10f58e3af2d82c62d21a730">CLWinogradConvolutionLayer</a>
+, <a class="el" href="classarm__compute_1_1_c_l_winograd_filter_transform_kernel.xhtml#af12f1ad3a511ea77d45654597e7a6b0b">CLWinogradFilterTransformKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_winograd_input_transform_kernel.xhtml#a7ba7ccf488268bb2ba45a37165253e41">CLWinogradInputTransformKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_l_winograd_output_transform_kernel.xhtml#ac81bc0447feaef35a4b1283d74f50b0d">CLWinogradOutputTransformKernel</a>
+, <a class="el" href="classarm__compute_1_1_coordinates.xhtml#a5b213c889050bc3844bdf110f34f602d">Coordinates</a>
 , <a class="el" href="classarm__compute_1_1_c_p_p_corner_candidates_kernel.xhtml#a8a61183b7dece994182972d9fede3207">CPPCornerCandidatesKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_p_p_detection_window_non_maxima_suppression_kernel.xhtml#aa5182561cc171d1c74872e91fdb2d7fb">CPPDetectionWindowNonMaximaSuppressionKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_p_p_permute_kernel.xhtml#a2c787fefc7ee52b787ffd59a50960e2c">CPPPermuteKernel</a>
 , <a class="el" href="classarm__compute_1_1_c_p_p_sort_euclidean_distance_kernel.xhtml#aef5933e70f775b33c06ddc6c3d0cf8b6">CPPSortEuclideanDistanceKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_p_p_upsample_kernel.xhtml#a9ef61e2406041809b7b47b894e95c281">CPPUpsampleKernel</a>
+, <a class="el" href="classarm__compute_1_1_c_p_u_info.xhtml#a5c8dff64ce1ad7bdae70879024bde002">CPUInfo</a>
 , <a class="el" href="classarm__compute_1_1_dimensions.xhtml#a2c96e96e2d005b4a8b66c2acd1688903">Dimensions&lt; T &gt;</a>
 , <a class="el" href="classarm__compute_1_1_g_c_absolute_difference_kernel.xhtml#a341fc3300b747bccccae264218383ce8">GCAbsoluteDifferenceKernel</a>
 , <a class="el" href="classarm__compute_1_1_g_c_activation_layer_kernel.xhtml#af9659679b5b61ba3238c0b8ab685d469">GCActivationLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_g_c_arithmetic_addition_kernel.xhtml#a9193b176607dbe93c0f60c975d8c2b84">GCArithmeticAdditionKernel</a>
 , <a class="el" href="classarm__compute_1_1_g_c_batch_normalization_layer_kernel.xhtml#a83290f6748e18cbaa52313b345fcacd5">GCBatchNormalizationLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_g_c_col2_im_kernel.xhtml#a5c234c52d6c2f50c3a0f83a79071d7da">GCCol2ImKernel</a>
+, <a class="el" href="classarm__compute_1_1_g_c_convolution_layer.xhtml#a87ed9138ded739663871c103fc77b36a">GCConvolutionLayer</a>
 , <a class="el" href="classarm__compute_1_1_g_c_depth_concatenate_layer_kernel.xhtml#ab9afd62b3b6a2b37c662e93d276c6f76">GCDepthConcatenateLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_g_c_depthwise_convolution_layer3x3_kernel.xhtml#a169af81ccfe8f51bf4376f72e74fa23a">GCDepthwiseConvolutionLayer3x3Kernel</a>
 , <a class="el" href="classarm__compute_1_1_g_c_direct_convolution_layer_kernel.xhtml#accde1890da46aed35c37db0e03b2a011">GCDirectConvolutionLayerKernel&lt; kernel_size &gt;</a>
@@ -448,109 +432,127 @@ $(document).ready(function(){initNavTree('functions_o.xhtml','');});
 , <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_accumulate_biases_kernel.xhtml#a9513ed3df777b10a19441a5d59f82eed">GCGEMMMatrixAccumulateBiasesKernel</a>
 , <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_addition_kernel.xhtml#a84753584506a324bcd5c40cdfd6fe521">GCGEMMMatrixAdditionKernel</a>
 , <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_multiply_kernel.xhtml#a0b0ecc60be6600a55aa46dffaa803ed9">GCGEMMMatrixMultiplyKernel</a>
-, <a class="el" href="classarm__compute_1_1_g_c_im2_col_kernel.xhtml#ab34fe16c3f4d185089ed17c0ca3d6409">GCIm2ColKernel</a>
-, <a class="el" href="classarm__compute_1_1_g_c_kernel.xhtml#af29ae815590ed07fc2ce2dc3f77a23a7">GCKernel</a>
+, <a class="el" href="classarm__compute_1_1_g_c_im2_col_kernel.xhtml#a430228b1b1392252b298974038b69abd">GCIm2ColKernel</a>
+, <a class="el" href="classarm__compute_1_1_g_c_kernel.xhtml#ab3eebd489d16da5b5f3378781df02052">GCKernel</a>
 , <a class="el" href="classarm__compute_1_1_g_c_kernel_library.xhtml#a10dbce17f04221f2d1fcd3c0a91b4d69">GCKernelLibrary</a>
 , <a class="el" href="classarm__compute_1_1_g_c_logits1_d_norm_kernel.xhtml#a9c8fd9d3157b389f42b6e44bad2d6ff9">GCLogits1DNormKernel</a>
 , <a class="el" href="classarm__compute_1_1_g_c_logits1_d_shift_exp_sum_kernel.xhtml#a54c5d88e282d0d6a6220319bb109e83a">GCLogits1DShiftExpSumKernel</a>
 , <a class="el" href="classarm__compute_1_1_g_c_normalization_layer_kernel.xhtml#a654e750446716bbc3cfdda541a95a5e2">GCNormalizationLayerKernel</a>
-, <a class="el" href="classarm__compute_1_1_g_c_normalize_planar_y_u_v_layer_kernel.xhtml#ab1305e3818a2cd8b900a09acde54b4d0">GCNormalizePlanarYUVLayerKernel</a>
+, <a class="el" href="classarm__compute_1_1_g_c_normalize_planar_y_u_v_layer_kernel.xhtml#ae6c636adc42a8a07519df0e5e3896d03">GCNormalizePlanarYUVLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_g_c_pixel_wise_multiplication_kernel.xhtml#ab6756c0089b63f226e1a1ee5a072b07c">GCPixelWiseMultiplicationKernel</a>
-, <a class="el" href="classarm__compute_1_1_g_c_pooling_layer_kernel.xhtml#a4526a56a55cab0233391eca62d7735b2">GCPoolingLayerKernel</a>
-, <a class="el" href="classarm__compute_1_1_g_c_program.xhtml#a4212dc2dbdd340faeba056d37cb912de">GCProgram</a>
+, <a class="el" href="classarm__compute_1_1_g_c_pooling_layer_kernel.xhtml#a17195b1300a741bd454e3ff93781a0be">GCPoolingLayerKernel</a>
+, <a class="el" href="classarm__compute_1_1_g_c_program.xhtml#a7792915d53fb314715e22f350a174072">GCProgram</a>
 , <a class="el" href="classarm__compute_1_1_g_c_tensor.xhtml#aa4f270493cf446b73c02f830e92be848">GCTensor</a>
-, <a class="el" href="classarm__compute_1_1_g_c_tensor_allocator.xhtml#a70d4c3ea42d68d50cc207d343173696a">GCTensorAllocator</a>
+, <a class="el" href="classarm__compute_1_1_g_c_tensor_allocator.xhtml#a56164dac01e367ad6b509517cd94464a">GCTensorAllocator</a>
 , <a class="el" href="classarm__compute_1_1_g_c_tensor_shift_kernel.xhtml#a1c1b2c1a3c18aac3c783714eb4f4bf2b">GCTensorShiftKernel</a>
-, <a class="el" href="classarm__compute_1_1_g_c_weights_reshape_kernel.xhtml#a99c47a7a9d764cf2d58241df2a24bbea">GCWeightsReshapeKernel</a>
-, <a class="el" href="classarm__compute_1_1graph_1_1_c_l_map.xhtml#a87276efc8b2d6d63fff586ac2929fc97">CLMap</a>
-, <a class="el" href="classarm__compute_1_1graph_1_1_c_l_unmap.xhtml#a5a2c2bd9dd1908ce97c371c02aa9a771">CLUnmap</a>
-, <a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#a5555577e36369d44917b04534e1740e7">Graph</a>
-, <a class="el" href="classarm__compute_1_1graph_1_1_sub_tensor.xhtml#ab77dfdfcd9be21524025d71a9650fba5">SubTensor</a>
+, <a class="el" href="classarm__compute_1_1_g_c_weights_reshape_kernel.xhtml#acb4ba5202d64ea2750e8322ec662b1c6">GCWeightsReshapeKernel</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_c_l_sub_tensor_handle.xhtml#adfcd04c831f29841dd197ffe95dd091b">CLSubTensorHandle</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_c_l_tensor_handle.xhtml#ae6fbac5bb10b8f2bb45c86757823fd4c">CLTensorHandle</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_g_c_tensor_handle.xhtml#ace31806f68dba1602155ce7ac97eaabb">GCTensorHandle</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml#a74bed133a977865cdde5a939e0f98910">NESubTensorHandle</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_n_e_tensor_handle.xhtml#ad9b26271249b5922e416b762ca69c8d1">NETensorHandle</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_stream.xhtml#a4be4b83054829b12ec645bb454e6b9cc">Stream</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_sub_stream.xhtml#a53b45f8acd9b4ef1dad46e0827f3212e">SubStream</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#acbe0278ebf263a33f3d0b9b4be834961">Graph</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_graph_context.xhtml#a486c42cfea65bf964404f77404dba8da">GraphContext</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_graph_manager.xhtml#a5d30e27e2d3ceaa4f575d84881c099aa">GraphManager</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#ac2f34bc6eaa698b25680f2091dc29170">INode</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_pass_manager.xhtml#a09bdb150e721834eab846495da9275f9">PassManager</a>
+, <a class="el" href="classarm__compute_1_1graph__utils_1_1_num_py_accessor.xhtml#aeeb120f5eddd6460ae7681a8d018ce15">NumPyAccessor</a>
 , <a class="el" href="classarm__compute_1_1graph__utils_1_1_top_n_predictions_accessor.xhtml#a29067af1bc346b969ff667fa490e692c">TopNPredictionsAccessor</a>
 , <a class="el" href="classarm__compute_1_1_h_o_g_info.xhtml#a64f60c469394d4f5f621546fc3108590">HOGInfo</a>
 , <a class="el" href="classarm__compute_1_1_i_c_l_array.xhtml#aefdb6cfe839aa0835406d5adcd37de5b">ICLArray&lt; T &gt;</a>
+, <a class="el" href="classarm__compute_1_1_i_c_l_depthwise_convolution_layer3x3_kernel.xhtml#ac05f0cf4a83538e71417dc03ec328632">ICLDepthwiseConvolutionLayer3x3Kernel</a>
 , <a class="el" href="classarm__compute_1_1_i_c_l_distribution1_d.xhtml#a0182f7f14809fcf8e7d1b9c8afebeafd">ICLDistribution1D</a>
 , <a class="el" href="classarm__compute_1_1_i_c_l_g_e_m_m_lowp_reduction_kernel.xhtml#a6ca497447b2d21dc65ea3601acbff855">ICLGEMMLowpReductionKernel</a>
 , <a class="el" href="classarm__compute_1_1_i_c_l_h_o_g.xhtml#a580c5fa0472ca0d70b463da27803a264">ICLHOG</a>
 , <a class="el" href="classarm__compute_1_1_i_c_l_lut.xhtml#a8740c6498dafc80428e500a056135bf1">ICLLut</a>
+, <a class="el" href="classarm__compute_1_1_i_c_l_memory_region.xhtml#aba791ecf7c921e9a1c8d84baa7dd270e">ICLMemoryRegion</a>
 , <a class="el" href="classarm__compute_1_1_i_c_l_simple_kernel.xhtml#a8bc8fdf1a67fbaaa3270fd5eeecfc6cf">ICLSimpleKernel</a>
 , <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml#af72219f9b5e8803950eb8863a23c076e">ICLTensor</a>
-, <a class="el" href="classarm__compute_1_1_i_c_p_p_simple_kernel.xhtml#ac0f362034a917ae5fdb8506ab0f1e036">ICPPSimpleKernel</a>
-, <a class="el" href="classarm__compute_1_1_i_g_c_simple_kernel.xhtml#a10d2c80e7afcb7ae1ad42ff9a649a915">IGCSimpleKernel</a>
+, <a class="el" href="classarm__compute_1_1_i_c_p_p_simple_kernel.xhtml#a4a631f6a74572e47d958c4c314406000">ICPPSimpleKernel</a>
+, <a class="el" href="classarm__compute_1_1_i_g_c_simple_kernel.xhtml#a90f6f44d1fbbe0d2261d81f4e9f1ff7e">IGCSimpleKernel</a>
 , <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml#a53ba7801ed7dbf945a0413addd6dc990">IGCTensor</a>
 , <a class="el" href="classarm__compute_1_1_i_lut_allocator.xhtml#afc1c53ed4dcc1a723b9b9dcf67c578a1">ILutAllocator</a>
 , <a class="el" href="classarm__compute_1_1_i_n_e_g_e_m_m_lowp_reduction_kernel.xhtml#aaf80d9eb45e49a22571fa0129a7e9d20">INEGEMMLowpReductionKernel</a>
 , <a class="el" href="classarm__compute_1_1_i_n_e_harris_score_kernel.xhtml#a232af38fd41caa594d7bc0571f56f50c">INEHarrisScoreKernel</a>
-, <a class="el" href="classarm__compute_1_1_i_n_e_warp_kernel.xhtml#a724673b78b929bbbd03f746c75ad2ec7">INEWarpKernel</a>
+, <a class="el" href="classarm__compute_1_1_i_n_e_warp_kernel.xhtml#a7fec20804044646d6a855713fe6573ae">INEWarpKernel</a>
 , <a class="el" href="classarm__compute_1_1io_1_1_file_handler.xhtml#a54f342231c056055100190a5429e4689">FileHandler</a>
 , <a class="el" href="classarm__compute_1_1_i_simple_lifetime_manager.xhtml#a0f0200cb55880b234ad6b5957bcf4f1a">ISimpleLifetimeManager</a>
-, <a class="el" href="classarm__compute_1_1_i_tensor_allocator.xhtml#a12e5f2915e2461321b130dcf84f3e268">ITensorAllocator</a>
+, <a class="el" href="classarm__compute_1_1_i_tensor_allocator.xhtml#a46277b6e964a66a9936e06f9989f0ff6">ITensorAllocator</a>
 , <a class="el" href="classarm__compute_1_1_kernel.xhtml#a9729d318da4230e664a923d7419ddf10">Kernel</a>
-, <a class="el" href="classarm__compute_1_1logging_1_1_logger.xhtml#a3f823d85882db15d1dd140a21ca391e2">Logger</a>
-, <a class="el" href="classarm__compute_1_1logging_1_1_printer.xhtml#a656c066d5514e0cb94ddbfadab0f0d62">Printer</a>
+, <a class="el" href="classarm__compute_1_1logging_1_1_logger.xhtml#ab18882a3175cd53305509643329a400a">Logger</a>
+, <a class="el" href="classarm__compute_1_1logging_1_1_printer.xhtml#ab85933c994519feb7bc7e12ea3db127f">Printer</a>
+, <a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml#af9f07d002a2338c5bc137b012fe546c2">LSTMParams&lt; T &gt;</a>
 , <a class="el" href="classarm__compute_1_1_memory.xhtml#a5e46e80e8811b4deb258cd55124e55a8">Memory</a>
-, <a class="el" href="classarm__compute_1_1_memory_group_base.xhtml#a597892bd64122315e3329751f634c20e">MemoryGroupBase&lt; TensorType &gt;</a>
-, <a class="el" href="classarm__compute_1_1_memory_manager_on_demand.xhtml#a1bd945bc8d435108eb44610985af22c2">MemoryManagerOnDemand</a>
-, <a class="el" href="classarm__compute_1_1_n_e_absolute_difference_kernel.xhtml#aa288278807596db819a0bb3336f6b87c">NEAbsoluteDifferenceKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_activation_layer_kernel.xhtml#a0a42b3e7cc978aad3281a4a38e277907">NEActivationLayerKernel</a>
+, <a class="el" href="classarm__compute_1_1_memory_group_base.xhtml#acdceaca325dbcee01e9abebd2e4586dc">MemoryGroupBase&lt; TensorType &gt;</a>
+, <a class="el" href="classarm__compute_1_1_memory_manager_on_demand.xhtml#ae1fea3bf72cb300aab21e99cb8b278b9">MemoryManagerOnDemand</a>
+, <a class="el" href="classarm__compute_1_1_memory_region.xhtml#a56244352ef17c3750434e3fd479859cb">MemoryRegion</a>
+, <a class="el" href="classarm__compute_1_1_n_e_absolute_difference_kernel.xhtml#a5d6e77370a140f10010d3cb9e2a11857">NEAbsoluteDifferenceKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_activation_layer_kernel.xhtml#a87da26ad3d611150ba40ff38f4085cb5">NEActivationLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_arithmetic_addition_kernel.xhtml#a1a359a25f8e2d5b781df6fe2ccfc09a2">NEArithmeticAdditionKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_arithmetic_subtraction_kernel.xhtml#aa67dba4afaf72f6df5662cb6d7df76d3">NEArithmeticSubtractionKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_arithmetic_subtraction_kernel.xhtml#abaf3795e8b23cb20a57d6fbc2250b4f2">NEArithmeticSubtractionKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_batch_normalization_layer_kernel.xhtml#a894acf4da15b0487db66df7d393df5e6">NEBatchNormalizationLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_bitwise_and_kernel.xhtml#afb66e99bd8740b60d7bfd59a95af23d4">NEBitwiseAndKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_bitwise_not_kernel.xhtml#a237559c92d41048f88e3eb997e05294f">NEBitwiseNotKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_bitwise_not_kernel.xhtml#a28f175e22ab8ad069112ccdaef01f50d">NEBitwiseNotKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_bitwise_or_kernel.xhtml#a5d760acdcf6781fb383167594dc296eb">NEBitwiseOrKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_bitwise_xor_kernel.xhtml#a7fd5d2db21a7b6f3d04b99eff7a65652">NEBitwiseXorKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_canny_edge.xhtml#a325fac2836aecb2da2f86b7699e2b359">NECannyEdge</a>
 , <a class="el" href="classarm__compute_1_1_n_e_channel_combine_kernel.xhtml#af7fa6b6b40f275e2f6f0afdf42aa6130">NEChannelCombineKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_channel_extract_kernel.xhtml#acf451199b29e2a9a737419455bd55757">NEChannelExtractKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_channel_extract_kernel.xhtml#aa8e7c7a49ee3042eba01b2b7c0284f8c">NEChannelExtractKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_col2_im_kernel.xhtml#aaf4d8c425a336a01399b68cd46ef3467">NECol2ImKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_color_convert_kernel.xhtml#ad45cf44ba984cab65018746c5dd0220c">NEColorConvertKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_color_convert_kernel.xhtml#abcba384fd1d11e611380b5751fd1b112">NEColorConvertKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_convert_fully_connected_weights_kernel.xhtml#a5d2dd5cf486c0e0093d70cf71bb1c6f5">NEConvertFullyConnectedWeightsKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_convolution_rectangle_kernel.xhtml#a346f0286bbc7dc19e4aa25ae6acd57e8">NEConvolutionRectangleKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_cumulative_distribution_kernel.xhtml#a7c095c1b8d17cdebc2135d8d5f9d17a9">NECumulativeDistributionKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_deconvolution_layer.xhtml#af81e2210787e1864c8bc6458b3072f6e">NEDeconvolutionLayer</a>
+, <a class="el" href="classarm__compute_1_1_n_e_cumulative_distribution_kernel.xhtml#ad1f6a0449f8106bc3c4a46b784455f2b">NECumulativeDistributionKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_deconvolution_layer.xhtml#ad441ee7d0846b6acc9d515383525ba52">NEDeconvolutionLayer</a>
 , <a class="el" href="classarm__compute_1_1_n_e_depth_concatenate_layer_kernel.xhtml#a62f3ade94d8143b81d7b803d46ff791e">NEDepthConcatenateLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_depth_convert_layer.xhtml#a883ebadadd34cf5dfead2ba71777df5c">NEDepthConvertLayer</a>
-, <a class="el" href="classarm__compute_1_1_n_e_depth_convert_layer_kernel.xhtml#a3807b43a5684d5d911e6b3b90e91f34b">NEDepthConvertLayerKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_depth_convert_layer_kernel.xhtml#aa46940ddca6a4c314bda8da9e30c86e8">NEDepthConvertLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml#a4f080336e12b8a0a378f008780eeff5a">NEDepthwiseConvolutionLayer3x3Kernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_depthwise_im2_col_kernel.xhtml#abd81a8f6c3c7905c4cd60b70f3b3080e">NEDepthwiseIm2ColKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer.xhtml#aa450bb01e6984892ca2a04078b9c653d">NEDepthwiseConvolutionLayer</a>
+, <a class="el" href="classarm__compute_1_1_n_e_depthwise_im2_col_kernel.xhtml#a71bbff3ea2feca2cd0d70f9eb01ca90b">NEDepthwiseIm2ColKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_depthwise_vector_to_tensor_kernel.xhtml#ae65a3faf404ade3e8c3baedbbdc1b3e2">NEDepthwiseVectorToTensorKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_depthwise_weights_reshape_kernel.xhtml#a23f3339d7c703d798f3b4e3de4f9b7d3">NEDepthwiseWeightsReshapeKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_depthwise_weights_reshape_kernel.xhtml#aa1d4701f887f2d047e5b7d20b954765d">NEDepthwiseWeightsReshapeKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_dequantization_layer_kernel.xhtml#a406393d4b1f6f5c6ce79c20df507a31c">NEDequantizationLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_derivative_kernel.xhtml#a11f5eb3a93c035acdd9fd93f3bed50bd">NEDerivativeKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_direct_convolution_layer_kernel.xhtml#ac299dc8386e25ebcf104989623cf6000">NEDirectConvolutionLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_direct_convolution_layer_output_stage_kernel.xhtml#ab02c33a0e6c13a21c8b8ceed03fd8b6d">NEDirectConvolutionLayerOutputStageKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_edge_non_max_suppression_kernel.xhtml#a5f1f723a41130cb9ff98478cd958ac28">NEEdgeNonMaxSuppressionKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_edge_trace_kernel.xhtml#a2ef3350848cbf1f21b6eaba6dca4ec1b">NEEdgeTraceKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_fast_corners_kernel.xhtml#a8197fdf1bcf46e73d178e8e9e53ff7aa">NEFastCornersKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_edge_trace_kernel.xhtml#a4c827d25ce4451de792fa939a61402b5">NEEdgeTraceKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_fast_corners_kernel.xhtml#a3b21b6f8bfa867ac4095d07b3c24dc21">NEFastCornersKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_fill_array_kernel.xhtml#a13b2df49f2f949a2bb58f712265848bf">NEFillArrayKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_fill_border_kernel.xhtml#aa4f538607cbe231add821baaed273d89">NEFillBorderKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_fill_inner_border_kernel.xhtml#ad1005cd5f8e117e601e605fe95eb2c43">NEFillInnerBorderKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_fully_connected_layer.xhtml#ab6dae67a00e8a7cb4809608be13d2e61">NEFullyConnectedLayer</a>
 , <a class="el" href="classarm__compute_1_1_n_e_gaussian_pyramid.xhtml#a30c3a425c100798c86932c0ff6d12bb3">NEGaussianPyramid</a>
-, <a class="el" href="classarm__compute_1_1_n_e_gaussian_pyramid_hor_kernel.xhtml#a524b075e28c8335b5fcd97e2d0654429">NEGaussianPyramidHorKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_gaussian_pyramid_hor_kernel.xhtml#a57b8231a27fbf3bd1867c384f20f0ee7">NEGaussianPyramidHorKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_gaussian_pyramid_vert_kernel.xhtml#a06af55b2547ef858438a07ee2283cb7e">NEGaussianPyramidVertKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_assembly_base_kernel.xhtml#ae9136625e4f8d015a03eb45c3b57147f">NEGEMMAssemblyBaseKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_multiply_kernel.xhtml#a881d64d29e841c5177b7a443e21d4160">NEGEMMLowpMatrixMultiplyKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_offset_contribution_kernel.xhtml#a29cc574f2f167b0472aad01be662d35c">NEGEMMLowpOffsetContributionKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_kernel.xhtml#afd56f1f0c54f327fcfb4ca91d7d91566">NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_convolution_layer.xhtml#ac13c7e80f7e9e6f1e2912ef50678c5c9">NEGEMMConvolutionLayer</a>
+, <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_matrix_multiply_kernel.xhtml#a525a39534b1eb64631f04062d8ea992e">NEGEMMLowpMatrixMultiplyKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_offset_contribution_kernel.xhtml#a88b3f84ef7b1572db87c30c5ec62d3ad">NEGEMMLowpOffsetContributionKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_by_fixed_point_kernel.xhtml#a2709f3f3c7480d4f0e5fb8de1dc4544b">NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPointKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_lowp_quantize_down_int32_to_uint8_scale_kernel.xhtml#acaa1e82e83b4152c28bd01c9422898df">NEGEMMLowpQuantizeDownInt32ToUint8ScaleKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_accumulate_biases_kernel.xhtml#a94d9d77f258a9f6f392f391086e93db1">NEGEMMMatrixAccumulateBiasesKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_accumulate_biases_kernel.xhtml#a409dfc45a8604ff384712328a6c31e90">NEGEMMMatrixAccumulateBiasesKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_addition_kernel.xhtml#a7bf4194c21adc060991ddb88ed4c8b60">NEGEMMMatrixAdditionKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_multiply_kernel.xhtml#a7374bb3f1d0e7e9cd4ba2c33f03fe24d">NEGEMMMatrixMultiplyKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_vector_multiply_kernel.xhtml#ae4d0d8ff6021bdee6922e6993042e7ae">NEGEMMMatrixVectorMultiplyKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_gradient_kernel.xhtml#a77d401f1799eff9f50baca598c912801">NEGradientKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_histogram_kernel.xhtml#a141d3236a2c874c5ea0ac78776b4433b">NEHistogramKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_h_o_g_block_normalization_kernel.xhtml#ab4a44853a753d8217b53760a605ad81f">NEHOGBlockNormalizationKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_matrix_vector_multiply_kernel.xhtml#aa31c613d796b81e7ea7abdf0bfe68291">NEGEMMMatrixVectorMultiplyKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_gradient_kernel.xhtml#ac9fb1a343e29082ecd7ffaa0216dcd35">NEGradientKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_histogram_kernel.xhtml#a4d612efbb9c534d6d89d397e65d816dd">NEHistogramKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_h_o_g_block_normalization_kernel.xhtml#a82a657d81256fe50dadf69b32daeff7f">NEHOGBlockNormalizationKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_h_o_g_detector_kernel.xhtml#a1950ead36156919ea0345e72bfe91e4f">NEHOGDetectorKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_h_o_g_multi_detection.xhtml#a700706067ae7a82357f78ab2513cac99">NEHOGMultiDetection</a>
-, <a class="el" href="classarm__compute_1_1_n_e_h_o_g_orientation_binning_kernel.xhtml#aba51399633359154d6d92ac157ec2d79">NEHOGOrientationBinningKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_h_o_g_orientation_binning_kernel.xhtml#a777b74a7fe06dca3142df7575cfdb8d1">NEHOGOrientationBinningKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_im2_col_kernel.xhtml#a8f6d6c13a896535a381329b6145aeae8">NEIm2ColKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_l2_normalize_layer_kernel.xhtml#a4cc3301a251cb2c41fba0752ea047781">NEL2NormalizeLayerKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_l_k_tracker_kernel.xhtml#a4fca340cdf3937fc9d34364c0c63b87f">NELKTrackerKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_l_k_tracker_kernel.xhtml#ab71320bdcd0dfbee682dd61b8c1c0b0c">NELKTrackerKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_locally_connected_layer.xhtml#aae34e0091ee3636e2e9f80d7c69aa3a9">NELocallyConnectedLayer</a>
 , <a class="el" href="classarm__compute_1_1_n_e_locally_connected_matrix_multiply_kernel.xhtml#aa05b3e5b37ad26879891dfcbe27a3202">NELocallyConnectedMatrixMultiplyKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_logits1_d_softmax_kernel.xhtml#a521b1174aeab742708cee344f456991f">NELogits1DSoftmaxKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_magnitude_phase_kernel.xhtml#a792f1b5315b3678896a2dd5eab8b692b">NEMagnitudePhaseKernel&lt; mag_type, phase_type &gt;</a>
-, <a class="el" href="classarm__compute_1_1_n_e_mean_std_dev_kernel.xhtml#a8658dfa985e2cd5805d4756eed25638d">NEMeanStdDevKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_min_max_kernel.xhtml#a9b6ac356956d5d7dfb97871dfa8daa8e">NEMinMaxKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_mean_std_dev_kernel.xhtml#addfd7a52f0ae7ff3ff637834f4cb977c">NEMeanStdDevKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_min_max_kernel.xhtml#a8b315188bf6d2dc453acbf411c477971">NEMinMaxKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_min_max_layer_kernel.xhtml#a830cb672edfb4d805d7b6142971cfc05">NEMinMaxLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_min_max_location_kernel.xhtml#ab9a7c76bf701e9dbed2fd52ae73e7774">NEMinMaxLocationKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_non_linear_filter_kernel.xhtml#a3951d5222dbce29fef63aa1c972bd5db">NENonLinearFilterKernel</a>
@@ -558,56 +560,58 @@ $(document).ready(function(){initNavTree('functions_o.xhtml','');});
 , <a class="el" href="classarm__compute_1_1_n_e_normalization_layer_kernel.xhtml#a37d9ddfcfeee1a4993746c2d3ab51290">NENormalizationLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_optical_flow.xhtml#a21df3a34e101b1a8f689aa6326b90441">NEOpticalFlow</a>
 , <a class="el" href="classarm__compute_1_1_n_e_permute_kernel.xhtml#a62da7f629d96facdeaf3e712c1a4f5af">NEPermuteKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#aaa5c44de29693435660b5c849c62e991">NEPixelWiseMultiplicationKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_pooling_layer_kernel.xhtml#a0e9871f265535f65226b65ae64ab2cfb">NEPoolingLayerKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_quantization_layer_kernel.xhtml#aefff097fc5214bd2e8cecfbaa90cad3d">NEQuantizationLayerKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_pixel_wise_multiplication_kernel.xhtml#a6685c2ffbda12dbf1e4706b85c688e19">NEPixelWiseMultiplicationKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_pooling_layer_kernel.xhtml#a1729479f9686c64edfd1a4af834d634b">NEPoolingLayerKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_quantization_layer_kernel.xhtml#a56c4b1f3df503c5f6308c318e305d7f8">NEQuantizationLayerKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_reduction_operation_kernel.xhtml#a826800dc56e2295a28291f51c631c5ba">NEReductionOperationKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_remap_kernel.xhtml#ac19511f65e6bad8424d4dd8933e0b673">NERemapKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_r_o_i_pooling_layer_kernel.xhtml#a5224515065ba1467fd0cf092b08cc614">NEROIPoolingLayerKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml#aa2d0e6d7ced452bc623cd3020e3026c7">NEScaleKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_scharr3x3_kernel.xhtml#aa4a99a8888c2b726eb11026235e1df4b">NEScharr3x3Kernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_remap_kernel.xhtml#aa9096c3897bd0dbda632613a243fa835">NERemapKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_r_o_i_pooling_layer_kernel.xhtml#ac5110dfc692959c2e852b827976e138b">NEROIPoolingLayerKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_scale_kernel.xhtml#a9bc5c918a86ea34e0a7cc2559c010596">NEScaleKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_scharr3x3_kernel.xhtml#a9e56daa4acb0848264206cbcabd71fb6">NEScharr3x3Kernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_sobel3x3_kernel.xhtml#a9e9f9a009b184aa9b7a95c08c5312c40">NESobel3x3Kernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_sobel5x5_hor_kernel.xhtml#a3e6b2451b91f83ba01eaa137cd43ad92">NESobel5x5HorKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_sobel5x5_vert_kernel.xhtml#a8954c998e67758f56891caf8da30c953">NESobel5x5VertKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_sobel5x5_hor_kernel.xhtml#a9e6242e9d05e2d354358200b6b0c9bce">NESobel5x5HorKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_sobel5x5_vert_kernel.xhtml#a59d1a2b1ef3d2b7e3bc5e942714d102a">NESobel5x5VertKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_sobel7x7_hor_kernel.xhtml#aa565986054157308084976722c25cb40">NESobel7x7HorKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_sobel7x7_vert_kernel.xhtml#a175a100761bb3f0643d8a53cc50347c9">NESobel7x7VertKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_table_lookup_kernel.xhtml#a07bb7672d1a33bacdb6d6c03329be8bc">NETableLookupKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_threshold_kernel.xhtml#ade42f76ebc9cf95d29f8642069d1c0c2">NEThresholdKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_transpose_kernel.xhtml#aef05df94b7db653754d21e0b341cb911">NETransposeKernel</a>
+, <a class="el" href="classarm__compute_1_1_n_e_transpose_kernel.xhtml#a6feb51cd492d39a63e9455dac72bc030">NETransposeKernel</a>
 , <a class="el" href="classarm__compute_1_1_n_e_weights_reshape_kernel.xhtml#a412907d43b6f7ce6cce48207e8af83cd">NEWeightsReshapeKernel</a>
-, <a class="el" href="classarm__compute_1_1_n_e_winograd_layer.xhtml#a60376626c58b42331db1baf8edb798b7">NEWinogradLayer</a>
+, <a class="el" href="classarm__compute_1_1_n_e_winograd_convolution_layer.xhtml#af00f525fea55946a514cfec3e4b95cf2">NEWinogradConvolutionLayer</a>
 , <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_batched_g_e_m_m_kernel.xhtml#acc6e68224d8ca361c5ea8517ade35358">NEWinogradLayerBatchedGEMMKernel&lt; TIn, TOut, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;</a>
 , <a class="el" href="classarm__compute_1_1_n_e_winograd_layer_transform_output_kernel.xhtml#a40b55a1414f014115c6aef7bc8656825">NEWinogradLayerTransformOutputKernel&lt; T, OutputTileRows, OutputTileCols, KernelRows, KernelCols &gt;</a>
-, <a class="el" href="classarm__compute_1_1_offset_lifetime_manager.xhtml#ac0f085875ec28fc74854dde66e516d40">OffsetLifetimeManager</a>
-, <a class="el" href="classarm__compute_1_1_offset_memory_pool.xhtml#a7c0cd0404fd5482c2229abf8b93d1f59">OffsetMemoryPool</a>
+, <a class="el" href="classarm__compute_1_1_offset_lifetime_manager.xhtml#af80823abd6f1c0958ace5e7c1bb7833e">OffsetLifetimeManager</a>
+, <a class="el" href="classarm__compute_1_1_offset_memory_pool.xhtml#a99daecc3ea244297f40ff2d8bbed79e5">OffsetMemoryPool</a>
 , <a class="el" href="classarm__compute_1_1_pool_manager.xhtml#a1989d6763b5a90b6cc2a4d8313001424">PoolManager</a>
-, <a class="el" href="classarm__compute_1_1_program.xhtml#aa960ae62f188ce6593855ea9d90f3140">Program</a>
-, <a class="el" href="classarm__compute_1_1_pyramid_info.xhtml#a09f1ed0da3ccc973d44d1156aff150f9">PyramidInfo</a>
-, <a class="el" href="classarm__compute_1_1_status.xhtml#a78472b791f38ec7cdd75ee9de6e1e349">Status</a>
-, <a class="el" href="classarm__compute_1_1_steps.xhtml#a19a1cb67274c32a121bda25311368aa5">Steps</a>
+, <a class="el" href="classarm__compute_1_1_program.xhtml#ac068143ead400561b25102c60ccd817d">Program</a>
+, <a class="el" href="classarm__compute_1_1_pyramid_info.xhtml#a21310a3eef49fc4f04b98897fc785b34">PyramidInfo</a>
+, <a class="el" href="classarm__compute_1_1_status.xhtml#a0e94f86f3b38636473259a2156673d0d">Status</a>
+, <a class="el" href="classarm__compute_1_1_steps.xhtml#a3fbb5c5f85131d56480ce42a77e6f8e1">Steps</a>
 , <a class="el" href="classarm__compute_1_1_strides.xhtml#a0b6f9231ca0331d1a3194a3c921b3007">Strides</a>
-, <a class="el" href="classarm__compute_1_1_sub_tensor.xhtml#ab77dfdfcd9be21524025d71a9650fba5">SubTensor</a>
-, <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#ac9cb71b17117e1185de0ae5f11066f09">SubTensorInfo</a>
+, <a class="el" href="classarm__compute_1_1_sub_tensor.xhtml#a90a31c7d9dde928db10b23bccd64b87d">SubTensor</a>
+, <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#a96c95f8cb79e02b44aa016e7842a4b68">SubTensorInfo</a>
 , <a class="el" href="classarm__compute_1_1_tensor.xhtml#a008f5e2a1c019e9b401753210a99ddfe">Tensor</a>
 , <a class="el" href="classarm__compute_1_1_tensor_allocator.xhtml#a943854ce6f3aafac2714340e0915de75">TensorAllocator</a>
 , <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#a532c27f6bf3cd9275cb7fc9a0d0bbf6e">TensorInfo</a>
 , <a class="el" href="classarm__compute_1_1_tensor_shape.xhtml#afbfae7c97606fb71d556a9f4e46dda00">TensorShape</a>
-, <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#a2abf258677dd2dbe5821945c961584bc">Accessor</a>
-, <a class="el" href="classarm__compute_1_1test_1_1_array_accessor.xhtml#a2cac2e7a5f7f729bd612f69fb0e21b19">ArrayAccessor&lt; T &gt;</a>
-, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#a527695a3d56533619c6cd0761ea06f61">CLAccessor</a>
-, <a class="el" href="classarm__compute_1_1test_1_1_c_l_array_accessor.xhtml#a56b520c98dd5187fb13b7ee4f0356e93">CLArrayAccessor&lt; T &gt;</a>
-, <a class="el" href="classarm__compute_1_1test_1_1_c_l_lut_accessor.xhtml#a4fb1029695f6ad5dcb495b61bf01ff12">CLLutAccessor&lt; T &gt;</a>
-, <a class="el" href="classarm__compute_1_1test_1_1fixed__point__arithmetic_1_1fixed__point.xhtml#aac73fe4dd453222d7858e879f5a2871c">fixed_point&lt; T &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#a75dae34a374af1dc690c73cda2605586">Accessor</a>
+, <a class="el" href="classarm__compute_1_1test_1_1_array_accessor.xhtml#ab8e135abcf1fafedfcf9ee0577af6fa1">ArrayAccessor&lt; T &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#afbf0737f9bb10f445830a603552ee7ca">CLAccessor</a>
+, <a class="el" href="classarm__compute_1_1test_1_1_c_l_array_accessor.xhtml#ad0aeb1c3b2795a2008703a500d05f7f1">CLArrayAccessor&lt; T &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1_c_l_h_o_g_accessor.xhtml#aad095a31506317d73c3a890efed1a77e">CLHOGAccessor</a>
+, <a class="el" href="classarm__compute_1_1test_1_1_c_l_lut_accessor.xhtml#ad3048c2580c341fd76b3647f8f71662a">CLLutAccessor&lt; T &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1fixed__point__arithmetic_1_1fixed__point.xhtml#a88fd8172c8f0683b0d1876631427b4f5">fixed_point&lt; T &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_common_options.xhtml#a969cbf086a9939be47ea26a557ebf440">CommonOptions</a>
 , <a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_cartesian_product_dataset_1_1iterator.xhtml#aa6cd89e0315db8afdac35e06522e5511">CartesianProductDataset&lt; T, U &gt;::iterator</a>
 , <a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_singleton_dataset_1_1iterator.xhtml#aa6cd89e0315db8afdac35e06522e5511">SingletonDataset&lt; T &gt;::iterator</a>
-, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml#ae4a6c66ea355204cca47490247b91f5f">Instrument</a>
+, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_instrument.xhtml#a550047da2682a06765be837ae570e542">Instrument</a>
 , <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_mali_counter.xhtml#a6a1582aa0e3a2791a9e3a00d3001d66e">MaliCounter</a>
-, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_printer.xhtml#ab9efee145dd3e600454d5790050051ab">Printer</a>
+, <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_printer.xhtml#ab85933c994519feb7bc7e12ea3db127f">Printer</a>
 , <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_scheduler_timer.xhtml#a6f65f4cabbf698d28ab82bb4fc2a43f0">SchedulerTimer</a>
-, <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a0d69d9b5b77ad212fbc3c30717653256">GCAccessor</a>
+, <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a47f2ee4769e9519ed011fcc8b4c25b80">GCAccessor</a>
+, <a class="el" href="classarm__compute_1_1test_1_1_h_o_g_accessor.xhtml#a4f8ad4080e43b8c3ac84ac8027e0dc69">HOGAccessor</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_lut_accessor.xhtml#aab55c8a099bd3c9c705c22154375a1a2">LutAccessor&lt; T &gt;</a>
-, <a class="el" href="classarm__compute_1_1test_1_1_raw_lut_accessor.xhtml#ac18e8430f571890da3a094188ddec4f8">RawLutAccessor&lt; T &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1_raw_lut_accessor.xhtml#a5fbc8143d612bfca981fa8639649fd60">RawLutAccessor&lt; T &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_raw_tensor.xhtml#abf951228abf3337929f26f7c0feedcac">RawTensor</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ad4622eda610d53fb6852209f0213aeed">SimpleTensor&lt; T &gt;</a>
 , <a class="el" href="structarm__compute_1_1_valid_region.xhtml#aa2c515476ae6f0e68d097df16d1fcc6b">ValidRegion</a>
@@ -615,21 +619,22 @@ $(document).ready(function(){initNavTree('functions_o.xhtml','');});
 </li>
 <li>operator==()
 : <a class="el" href="structarm__compute_1_1_quantization_info.xhtml#a28c9ca2cba95f7a1d38a0ad2afd11916">QuantizationInfo</a>
+, <a class="el" href="classarm__compute_1_1_size2_d.xhtml#a46aabf269771bf50a9d0f5a2cee30885">Size2D</a>
 </li>
 <li>operator[]()
 : <a class="el" href="classarm__compute_1_1_dimensions.xhtml#ac88390e0a6503d5d09c65d204980beb1">Dimensions&lt; T &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_c_l_lut_accessor.xhtml#a5a60949b33f25c788cdbe21c9fab046a">CLLutAccessor&lt; T &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_i_lut_accessor.xhtml#a579b149d2df097ab5fecba3c6dedebd8">ILutAccessor&lt; T &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_lut_accessor.xhtml#a5a60949b33f25c788cdbe21c9fab046a">LutAccessor&lt; T &gt;</a>
-, <a class="el" href="classarm__compute_1_1test_1_1_raw_lut_accessor.xhtml#a5a60949b33f25c788cdbe21c9fab046a">RawLutAccessor&lt; T &gt;</a>
+, <a class="el" href="classarm__compute_1_1test_1_1_raw_lut_accessor.xhtml#a168d14b0e18a50b50ff1770f8868ef1c">RawLutAccessor&lt; T &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#af6124c81d1e81f182d64ae76caa3fa52">SimpleTensor&lt; T &gt;</a>
 , <a class="el" href="classarm__compute_1_1_window.xhtml#a677b385d536f4f81706f729e9b1c91da">Window</a>
 </li>
-<li>OptimizedDepthwiseConvolutionLayerDataset3x3()
-: <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_optimized_depthwise_convolution_layer_dataset3x3.xhtml#a1a49769e224786240199be07b5003e61">OptimizedDepthwiseConvolutionLayerDataset3x3</a>
+<li>OpticalFlowParameters()
+: <a class="el" href="structarm__compute_1_1_optical_flow_parameters.xhtml#a37ab546234bbad7964e468cc714e529d">OpticalFlowParameters</a>
 </li>
 <li>Option()
-: <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_option.xhtml#a8432d7cd1d4ea8732a64e9df51147cbf">Option</a>
+: <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_option.xhtml#a6340a62771cbbb113fccaf3425f2ae48">Option</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_padding_calculator.xhtml#a0e65ad13124ea2cb5e255b640464e35f">PaddingCalculator</a>
 </li>
 <li>options()
@@ -640,13 +645,32 @@ $(document).ready(function(){initNavTree('functions_o.xhtml','');});
 , <a class="el" href="struct_keypoint.xhtml#a0e3266fc15309697502533db62b682af">Keypoint</a>
 </li>
 <li>output()
-: <a class="el" href="classarm__compute_1_1graph_1_1_node_context.xhtml#a5c38ca4345b9c6364eac526d54d3ad44">NodeContext</a>
+: <a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#a427ac30d0f5274436afbf5c78bc4f644">INode</a>
+</li>
+<li>output_data_layout
+: <a class="el" href="structarm__compute_1_1_winograd_info.xhtml#a0bc60aaf23b2d3ed3b344576a708e84e">WinogradInfo</a>
+</li>
+<li>output_edges()
+: <a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#a416772314f2c1aa4cd48fbcb0f6025c5">INode</a>
+</li>
+<li>output_id()
+: <a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#a8ae0ada78ab1e36619d0e761b0f56520">INode</a>
+</li>
+<li>output_tile_size
+: <a class="el" href="structarm__compute_1_1_winograd_info.xhtml#a5cd6561e9acc0cf9ba11bc2f51ec7a33">WinogradInfo</a>
+</li>
+<li>OutputLayer()
+: <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_output_layer.xhtml#a4c8546f74af36a2c5575bf4141269645">OutputLayer</a>
+</li>
+<li>OutputNode()
+: <a class="el" href="classarm__compute_1_1graph_1_1_output_node.xhtml#ae48844a2bfd8bdf7001306e23a19a2b2">OutputNode</a>
+</li>
+<li>outputs
+: <a class="el" href="structarm__compute_1_1graph_1_1_execution_workload.xhtml#af19f4e3beb0cb0a38b9b213d47c813c7">ExecutionWorkload</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#a44a277f416cba6b9519cea6c0d7b04a4">INode</a>
 </li>
 <li>overflow()
 : <a class="el" href="classarm__compute_1_1_i_array.xhtml#afd912c5902331232c8a806fcb2d6eaad">IArray&lt; T &gt;</a>
-</li>
-<li>override_target_hint()
-: <a class="el" href="classarm__compute_1_1graph_1_1_i_node.xhtml#a4f94409d100ac0a28961a82a5cc31d30">INode</a>
 </li>
 </ul>
 </div><!-- contents -->
@@ -654,7 +678,7 @@ $(document).ready(function(){initNavTree('functions_o.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Fri Mar 2 2018 12:38:02 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:46 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

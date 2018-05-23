@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,17 +45,31 @@ class ICLTensor;
 class CLReductionOperation : public IFunction
 {
 public:
-    /* Constructor */
+    /** Default Constructor.
+     *
+     * @param[in] memory_manager (Optional) Memory manager.
+     */
     CLReductionOperation(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
 
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Source tensor. Data types supported: QS8, QS16, F16, F32.
-     * @param[out] output Destination tensor. Data types supported: Same as @p input.
+     * @param[in]  input  Source tensor. Data types supported: F32. Data layouts supported: NCHW.
+     * @param[out] output Destination tensor. Data types and data layouts supported: Same as @p input.
      * @param[in]  axis   Axis along which to reduce. Supported reduction axis : 0
      * @param[in]  op     Reduction operation to perform.
      */
     void configure(ICLTensor *input, ICLTensor *output, unsigned int axis, ReductionOperation op);
+
+    /** Static function to check if given info will lead to a valid configuration of @ref CLReductionOperation.
+     *
+     * @param[in] input  Source tensor info. Data types supported: F32. Data layouts supported: NCHW.
+     * @param[in] output Destination tensor info. Data types and data layouts supported: Same as @p input.
+     * @param[in] axis   Axis along which to reduce. Supported reduction axis : 0
+     * @param[in] op     Reduction operation to perform.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op);
 
     // Inherited methods overridden:
     void run() override;
@@ -68,4 +82,4 @@ private:
     unsigned int                                  _num_of_stages;
 };
 }
-#endif /*__ARM_COMPUTE_CLL2NORMALIZE_H__ */
+#endif /*__ARM_COMPUTE_CLREDUCTIONOPERATION_H__ */

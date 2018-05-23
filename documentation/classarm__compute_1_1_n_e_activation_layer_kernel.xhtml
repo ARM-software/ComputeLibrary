@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -298,7 +298,7 @@ Static Public Member Functions</h2></td></tr>
 <dl class="section note"><dt>Note</dt><dd>If the output tensor is a nullptr, the activation function will be performed in-place</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">input</td><td>Source tensor. In case of <code>output</code> tensor = nullptr, this tensor will store the result of the activation function. Data types supported: QS8/QS16/F32. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">input</td><td>Source tensor. In case of <code>output</code> tensor = nullptr, this tensor will store the result of the activation function. Data types supported: QS8/QASYMM8/QS16/F16/F32. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor. Data type supported: same as <code>input</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">activation_info</td><td>Activation layer information. </td></tr>
   </table>
@@ -337,7 +337,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_n_e_activation_layer_kernel_8h_source.xhtml#l00043">43</a> of file <a class="el" href="_n_e_activation_layer_kernel_8h_source.xhtml">NEActivationLayerKernel.h</a>.</p>
 
-<p>References <a class="el" href="classarm__compute_1_1_n_e_activation_layer_kernel.xhtml#adfb5ef37594fc9371c4a2b95e3d5e31b">NEActivationLayerKernel::configure()</a>, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">arm_compute::test::validation::info()</a>, <a class="el" href="classarm__compute_1_1_n_e_activation_layer_kernel.xhtml#af5c940969e40e1ae12411bb025a117f2">NEActivationLayerKernel::NEActivationLayerKernel()</a>, <a class="el" href="classarm__compute_1_1_n_e_activation_layer_kernel.xhtml#a87da26ad3d611150ba40ff38f4085cb5">NEActivationLayerKernel::operator=()</a>, <a class="el" href="classarm__compute_1_1_n_e_activation_layer_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEActivationLayerKernel::run()</a>, <a class="el" href="caffe__data__extractor_8py_source.xhtml#l00019">caffe_data_extractor::type</a>, <a class="el" href="classarm__compute_1_1_n_e_activation_layer_kernel.xhtml#a57d9146156706cf90842d5ad0b40661a">NEActivationLayerKernel::validate()</a>, <a class="el" href="hwc_8hpp_source.xhtml#l00278">value</a>, and <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">IKernel::window()</a>.</p>
+<p>References <a class="el" href="classarm__compute_1_1_n_e_activation_layer_kernel.xhtml#adfb5ef37594fc9371c4a2b95e3d5e31b">NEActivationLayerKernel::configure()</a>, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">arm_compute::test::validation::info()</a>, <a class="el" href="classarm__compute_1_1_n_e_activation_layer_kernel.xhtml#af5c940969e40e1ae12411bb025a117f2">NEActivationLayerKernel::NEActivationLayerKernel()</a>, <a class="el" href="classarm__compute_1_1_n_e_activation_layer_kernel.xhtml#a87da26ad3d611150ba40ff38f4085cb5">NEActivationLayerKernel::operator=()</a>, <a class="el" href="classarm__compute_1_1_n_e_activation_layer_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEActivationLayerKernel::run()</a>, <a class="el" href="classarm__compute_1_1_n_e_activation_layer_kernel.xhtml#a57d9146156706cf90842d5ad0b40661a">NEActivationLayerKernel::validate()</a>, and <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">IKernel::window()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    {</div><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        <span class="keywordflow">return</span> <span class="stringliteral">&quot;NEActivationLayerKernel&quot;</span>;</div><div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
@@ -487,7 +487,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_n_e_activation_layer_kernel.xhtml">NEActivationLayerKernel</a>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor info. In case of <code>output</code> tensor info = nullptr, this tensor will store the result of the activation function. Data types supported: QS8/QS16/F16/F32. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>Source tensor info. In case of <code>output</code> tensor info = nullptr, this tensor will store the result of the activation function. Data types supported: QS8/QASYMM8/QS16/F16/F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Destination tensor info. Data type supported: same as <code>input</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">act_info</td><td>Activation layer information.</td></tr>
   </table>
@@ -508,7 +508,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_activation_layer_kernel.xhtml">NEActivationLayerKernel</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:58 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:42 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

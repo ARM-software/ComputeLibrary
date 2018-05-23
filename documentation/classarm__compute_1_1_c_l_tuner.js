@@ -10,7 +10,8 @@ var classarm__compute_1_1_c_l_tuner =
     [ "save_to_file", "classarm__compute_1_1_c_l_tuner.xhtml#a0d11cd5e57c2885764baa2c558c3a353", null ],
     [ "set_cl_kernel_event", "classarm__compute_1_1_c_l_tuner.xhtml#a7937dca7876064401bb14b4443bf5d8d", null ],
     [ "set_tune_new_kernels", "classarm__compute_1_1_c_l_tuner.xhtml#aba10acdb2d58e3e0a96364c487a71d40", null ],
-    [ "tune_kernel", "classarm__compute_1_1_c_l_tuner.xhtml#a3542e1479b9049456d8256d1442df1ac", null ],
+    [ "tune_kernel_dynamic", "classarm__compute_1_1_c_l_tuner.xhtml#af073b532560e2105dd22d381f5888ce7", null ],
+    [ "tune_kernel_static", "classarm__compute_1_1_c_l_tuner.xhtml#a52f755d664bbdcb9346cdf5cc4a7e958", null ],
     [ "tune_new_kernels", "classarm__compute_1_1_c_l_tuner.xhtml#a0ec76a5771b9521b947754d582635638", null ],
     [ "real_clEnqueueNDRangeKernel", "classarm__compute_1_1_c_l_tuner.xhtml#a5baba955626e8da33ed5dd829a538974", null ]
 ];

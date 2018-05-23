@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -39,6 +39,8 @@ namespace arm_compute
 {
 namespace test
 {
+namespace benchmark
+{
 using CLROIPoolingLayerFixture = ROIPoolingLayerFixture<CLTensor, CLROIPoolingLayer, CLAccessor, CLArray<ROI>, CLArrayAccessor<ROI>>;
 
 TEST_SUITE(CL)
@@ -49,5 +51,6 @@ REGISTER_FIXTURE_DATA_TEST_CASE(SmallROIPoolingLayer, CLROIPoolingLayerFixture, 
                                                             framework::dataset::make("Batches", { 1, 4, 8 })));
 
 TEST_SUITE_END()
+} // namespace benchmark
 } // namespace test
 } // namespace arm_compute

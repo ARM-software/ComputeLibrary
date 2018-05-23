@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,6 +53,10 @@ template <typename TensorType,
 class MobileNetNetwork
 {
 public:
+    /** Initialize the network.
+     *
+     * @param[in] batches Number of batches.
+     */
     void init(int batches)
     {
         _batches = batches;
@@ -105,6 +109,7 @@ public:
         reshape.configure(&conv_out[14], &output);
     }
 
+    /** Allocate the network. */
     void allocate()
     {
         input.allocator()->allocate();

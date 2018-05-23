@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -159,6 +159,10 @@ $(document).ready(function(){initNavTree('globals_c.xhtml','');});
 : <a class="el" href="pooling__layer_8cl.xhtml#ac8f27d6ce33043a58fc6bd17b41f8153">pooling_layer.cl</a>
 , <a class="el" href="pooling__layer__quantized_8cl.xhtml#a4057c01dd49145c5e463f1cea52542df">pooling_layer_quantized.cl</a>
 </li>
+<li>calculate_avg_scale_nhwc()
+: <a class="el" href="pooling__layer__quantized_8cl.xhtml#a235920cb0f8577da6e104ccb03fbda25">pooling_layer_quantized.cl</a>
+, <a class="el" href="pooling__layer_8cl.xhtml#a93173b51e52924504320e874affcf881">pooling_layer.cl</a>
+</li>
 <li>channel_combine_NV()
 : <a class="el" href="channel__combine_8cl.xhtml#a6eb00cba13d0cb12229e5ac18a1ef3c3">channel_combine.cl</a>
 </li>
@@ -231,22 +235,22 @@ $(document).ready(function(){initNavTree('globals_c.xhtml','');});
 <li>combine_gradients_L2()
 : <a class="el" href="canny_8cl.xhtml#a7046357526e2f95a34e3ffa217752d9f">canny.cl</a>
 </li>
-<li>compat_value
-: <a class="el" href="hwc_8hpp.xhtml#a85a433bf6d7a52ebd2553300d628aa39">hwc.hpp</a>
-</li>
 <li>compute_strength()
 : <a class="el" href="fast__corners_8cl.xhtml#aea4e2a64dfdec6a9ecf62f8cd518fc17">fast_corners.cl</a>
 </li>
 <li>COMPUTE_TYPE
-: <a class="el" href="convolution5x5_8cl.xhtml#a26babb0c719990ecbdf3abc6de920875">convolution5x5.cl</a>
+: <a class="el" href="convolution9x9_8cl.xhtml#a26babb0c719990ecbdf3abc6de920875">convolution9x9.cl</a>
+, <a class="el" href="convolution5x5_8cl.xhtml#a26babb0c719990ecbdf3abc6de920875">convolution5x5.cl</a>
 , <a class="el" href="convolution7x7_8cl.xhtml#a26babb0c719990ecbdf3abc6de920875">convolution7x7.cl</a>
-, <a class="el" href="convolution9x9_8cl.xhtml#a26babb0c719990ecbdf3abc6de920875">convolution9x9.cl</a>
 </li>
 <li>CONCAT
 : <a class="el" href="tests_2framework_2_macros_8h.xhtml#a6c274ed8a1a31eb195191c849ae4ff6f">Macros.h</a>
 </li>
 <li>concatenate_depth()
 : <a class="el" href="concatenate_8cl.xhtml#a790788f3dd634f6ca93e2f9ffeaa0ed5">concatenate.cl</a>
+</li>
+<li>concatenate_width()
+: <a class="el" href="concatenate_8cl.xhtml#ae99c297ac202e9a2fc1c622925dea12e">concatenate.cl</a>
 </li>
 <li>CONST_ONE
 : <a class="el" href="activation__layer_8cl.xhtml#a3a04e05afb970ee504363afb46c7fa32">activation_layer.cl</a>
@@ -307,8 +311,8 @@ $(document).ready(function(){initNavTree('globals_c.xhtml','');});
 : <a class="el" href="helpers_8h.xhtml#a341a0c28698c3f6bd171df1771c5a512">helpers.h</a>
 </li>
 <li>CONVERT_SAT_STR
-: <a class="el" href="fixed__point_8h.xhtml#a4e0fc93c9a69863dcdf7672ab547026c">fixed_point.h</a>
-, <a class="el" href="helpers_8h.xhtml#a4e0fc93c9a69863dcdf7672ab547026c">helpers.h</a>
+: <a class="el" href="helpers_8h.xhtml#a4e0fc93c9a69863dcdf7672ab547026c">helpers.h</a>
+, <a class="el" href="fixed__point_8h.xhtml#a4e0fc93c9a69863dcdf7672ab547026c">fixed_point.h</a>
 </li>
 <li>CONVERT_SAT_STR2
 : <a class="el" href="fixed__point_8h.xhtml#a8aa11a06d0685e1cc6dfac964f9c3cee">fixed_point.h</a>
@@ -317,8 +321,8 @@ $(document).ready(function(){initNavTree('globals_c.xhtml','');});
 : <a class="el" href="fixed__point_8h.xhtml#ae5bd7ebff4bb9df1b26f2b71b31e928a">fixed_point.h</a>
 </li>
 <li>CONVERT_STR
-: <a class="el" href="fixed__point_8h.xhtml#a4090567b3adb034c7cc1af308cb45670">fixed_point.h</a>
-, <a class="el" href="helpers_8h.xhtml#a4090567b3adb034c7cc1af308cb45670">helpers.h</a>
+: <a class="el" href="helpers_8h.xhtml#a4090567b3adb034c7cc1af308cb45670">helpers.h</a>
+, <a class="el" href="fixed__point_8h.xhtml#a4090567b3adb034c7cc1af308cb45670">fixed_point.h</a>
 </li>
 <li>CONVERT_STR2
 : <a class="el" href="fixed__point_8h.xhtml#a424c5edfa264fb94d0eb44d59d103e29">fixed_point.h</a>
@@ -370,12 +374,6 @@ $(document).ready(function(){initNavTree('globals_c.xhtml','');});
 </li>
 <li>convolution1x3()
 : <a class="el" href="convolution3x3_8cl.xhtml#a92702074338198e81a46c3e309d9b04f">convolution3x3.cl</a>
-</li>
-<li>CONVOLUTION1x3_BIFROST2X1_STRIDE1
-: <a class="el" href="depthwise__convolution_8cl.xhtml#aa5ab4cf85fe56de3821727cfcef327d9">depthwise_convolution.cl</a>
-</li>
-<li>CONVOLUTION1x3_BIFROST2X1_STRIDE2
-: <a class="el" href="depthwise__convolution_8cl.xhtml#a31cbdd6b28ee6331839432f69d87fdcb">depthwise_convolution.cl</a>
 </li>
 <li>convolution1x5()
 : <a class="el" href="convolution5x5_8cl.xhtml#abd315efadde56274531a8b2bdb43f688">convolution5x5.cl</a>
@@ -449,14 +447,14 @@ $(document).ready(function(){initNavTree('globals_c.xhtml','');});
 <li>copy_planes_3p()
 : <a class="el" href="channel__combine_8cl.xhtml#a2ecdd5708954da1196aa12856e78a462">channel_combine.cl</a>
 </li>
+<li>copy_tensor()
+: <a class="el" href="copy__tensor_8cl.xhtml#a0386b0d38958a59b663a7237a672d514">copy_tensor.cl</a>
+</li>
 <li>copy_to_keypoint()
 : <a class="el" href="fast__corners_8cl.xhtml#ad1e2ee5ba250337a4e1889423e11aa81">fast_corners.cl</a>
 </li>
 <li>core_mask
 : <a class="el" href="_mali_counter_8cpp.xhtml#a250eb089b2094c09544ea64b3910bd33">MaliCounter.cpp</a>
-</li>
-<li>create_flags
-: <a class="el" href="hwc_8hpp.xhtml#a4007e90ce8079e01ec172a778552f5e2">hwc.hpp</a>
 </li>
 </ul>
 </div><!-- contents -->
@@ -464,7 +462,7 @@ $(document).ready(function(){initNavTree('globals_c.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Fri Mar 2 2018 12:38:02 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:46 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

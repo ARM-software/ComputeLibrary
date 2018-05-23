@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -55,6 +55,14 @@ public:
      * @param[out] output Destination tensor with the same dimensions of input. Data types supported: U8
      */
     void configure(const ITensor *input, ITensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEQuantizationLayer
+     *
+     * @param[in] input  Input tensor info. The dimensions over the third will be interpreted as batches. Data types supported: F32.
+     * @param[in] output Output tensor info. Data types supported: U8
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run() override;

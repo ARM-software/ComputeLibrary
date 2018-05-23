@@ -33,7 +33,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
-#include "arm_compute/core/utils/misc/utility.h"
+#include "arm_compute/core/utils/misc/Utility.h"
 
 #include <algorithm>
 #include <arm_neon.h>

@@ -54,7 +54,8 @@ vars.AddVariables(
     BoolVariable("openmp", "Enable OpenMP backend", False),
     BoolVariable("cppthreads", "Enable C++11 threads backend", True),
     PathVariable("build_dir", "Specify sub-folder for the build", ".", PathVariable.PathAccept),
-    ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", "")
+    ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", ""),
+    ("compiler_cache", "Command to prefix to the C and C++ compiler (e.g ccache)", "")
 )
 
 env = Environment(platform="posix", variables=vars, ENV = os.environ)
@@ -97,10 +98,10 @@ default_c_compiler = 'gcc' if env['os'] != 'android' else 'clang'
 cpp_compiler = os.environ.get('CXX', default_cpp_compiler)
 c_compiler = os.environ.get('CC', default_c_compiler)
 
-if env['os'] == 'android' and ( cpp_compiler != 'clang++' or c_compiler != 'clang'):
+if env['os'] == 'android' and ( 'clang++' not in cpp_compiler or 'clang' not in c_compiler ):
     print "WARNING: Only clang is officially supported to build the Compute Library for Android"
 
-if cpp_compiler == 'clang++':
+if 'clang++' in cpp_compiler:
     env.Append(CXXFLAGS = ['-Wno-format-nonliteral','-Wno-deprecated-increment-bool','-Wno-vla-extension','-Wno-mismatched-tags'])
 else:
     env.Append(CXXFLAGS = ['-Wlogical-op','-Wnoexcept','-Wstrict-null-sentinel'])
@@ -109,7 +110,7 @@ if env['cppthreads']:
     env.Append(CPPDEFINES = [('ARM_COMPUTE_CPP_SCHEDULER', 1)])
 
 if env['openmp']:
-    if cpp_compiler == 'clang++':
+    if 'clang++' in cpp_compiler:
         print "Clang does not support OpenMP. Use scheduler=cpp."
         Exit(1)
 
@@ -132,19 +133,20 @@ if env['arch'] == 'armv7a':
         env.Append(CXXFLAGS = ['-mfloat-abi=softfp'])
 elif env['arch'] == 'arm64-v8a':
     env.Append(CXXFLAGS = ['-march=armv8-a'])
-    env.Append(CPPDEFINES = ['ARM_COMPUTE_AARCH64_V8A'])
+    env.Append(CPPDEFINES = ['ARM_COMPUTE_AARCH64_V8A','NO_DOT_IN_TOOLCHAIN'])
     if env['os'] == 'linux':
         prefix = "aarch64-linux-gnu-"
     elif env['os'] == 'bare_metal':
         prefix = "aarch64-elf-"
     elif env['os'] == 'android':
         prefix = "aarch64-linux-android-"
+    if 'clang++' in cpp_compiler:
+        env.Append(CXXFLAGS = ['-no-integrated-as'])
 elif env['arch'] == 'arm64-v8.2-a':
     env.Append(CXXFLAGS = ['-march=armv8.2-a+fp16']) # explicitly enable fp16 extension otherwise __ARM_FEATURE_FP16_VECTOR_ARITHMETIC is undefined
-    env.Append(CPPDEFINES = ['ARM_COMPUTE_AARCH64_V8_2'])
-    if cpp_compiler == 'clang++':
-        env.Append(CXXFLAGS = ['-fno-integrated-as'])
-
+    env.Append(CPPDEFINES = ['ARM_COMPUTE_AARCH64_V8_2','NO_DOT_IN_TOOLCHAIN'])
+    if 'clang++' in cpp_compiler:
+        env.Append(CXXFLAGS = ['-no-integrated-as'])
     if env['os'] == 'linux':
         prefix = "aarch64-linux-gnu-"
     elif env['os'] == 'bare_metal':
@@ -161,8 +163,8 @@ elif env['arch'] == 'x86_64':
 if env['build'] == 'native':
     prefix = ""
 
-env['CC'] = prefix + c_compiler
-env['CXX'] = prefix + cpp_compiler
+env['CC'] = env['compiler_cache']+" "+prefix + c_compiler
+env['CXX'] = env['compiler_cache']+" "+prefix + cpp_compiler
 env['LD'] = prefix + "ld"
 env['AS'] = prefix + "as"
 env['AR'] = prefix + "ar"
@@ -175,7 +177,7 @@ if not GetOption("help"):
         print("ERROR: Compiler '%s' not found" % env['CXX'])
         Exit(1)
 
-    if cpp_compiler == 'g++':
+    if 'clang++' not in cpp_compiler:
         if env['arch'] == 'arm64-v8.2-a' and not version_at_least(compiler_ver, '6.2.1'):
             print "GCC 6.2.1 or newer is required to compile armv8.2-a code"
             Exit(1)
@@ -192,8 +194,6 @@ if not GetOption("help"):
 if env['standalone']:
     env.Append(CXXFLAGS = ['-fPIC'])
     env.Append(LINKFLAGS = ['-static-libgcc','-static-libstdc++'])
-    if env['cppthreads']:
-        env.Append(LINKFLAGS = ['-lpthread'])
 
 if env['Werror']:
     env.Append(CXXFLAGS = ['-Werror'])
@@ -210,8 +210,16 @@ elif env['os'] == 'bare_metal':
 
 if env['opencl']:
     if env['os'] in ['bare_metal'] or env['standalone']:
-        print("Cannot link OpenCL statically, which is required on bare metal")
+        print("Cannot link OpenCL statically, which is required for bare metal / standalone builds")
         Exit(1)
+
+if env['gles_compute']:
+    if env['os'] in ['bare_metal'] or env['standalone']:
+        print("Cannot link OpenGLES statically, which is required for bare metal / standalone builds")
+        Exit(1)
+
+if env["os"] not in ["android", "bare_metal"] and (env['opencl'] or env['cppthreads']):
+    env.Append(LIBS = ['pthread'])
 
 if env['opencl'] or env['gles_compute']:
     if env['embed_kernels']:
@@ -242,7 +250,6 @@ if env['opencl']:
 
 if env['gles_compute'] and env['os'] != 'android':
     env.Append(CPPPATH = ['#/include/linux'])
-    env.Append(LIBPATH = ["#build/%s/opengles-3.1-stubs" % env['build_dir']])
     SConscript("./opengles-3.1-stubs/SConscript", variant_dir="build/%s/opengles-3.1-stubs" % env['build_dir'], duplicate=0)
 
 SConscript('./SConscript', variant_dir='#build/%s' % env['build_dir'], duplicate=0)

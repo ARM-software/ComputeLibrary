@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -142,10 +142,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a27f8b115e4571d52d83419aaea4eeee1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default destructor.  <a href="#a27f8b115e4571d52d83419aaea4eeee1">More...</a><br /></td></tr>
 <tr class="separator:a27f8b115e4571d52d83419aaea4eeee1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1f7d6251f7bd7834128664d851986e6a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_tensor_allocator.xhtml#a1f7d6251f7bd7834128664d851986e6a">TensorAllocator</a> (const <a class="el" href="classarm__compute_1_1_tensor_allocator.xhtml">TensorAllocator</a> &amp;)=delete</td></tr>
-<tr class="memdesc:a1f7d6251f7bd7834128664d851986e6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prevent instances of this class from being copied (As this class contains pointers).  <a href="#a1f7d6251f7bd7834128664d851986e6a">More...</a><br /></td></tr>
+<tr class="memdesc:a1f7d6251f7bd7834128664d851986e6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prevent instances of this class from being copied (As this class contains pointers)  <a href="#a1f7d6251f7bd7834128664d851986e6a">More...</a><br /></td></tr>
 <tr class="separator:a1f7d6251f7bd7834128664d851986e6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a943854ce6f3aafac2714340e0915de75"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_tensor_allocator.xhtml">TensorAllocator</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_tensor_allocator.xhtml#a943854ce6f3aafac2714340e0915de75">operator=</a> (const <a class="el" href="classarm__compute_1_1_tensor_allocator.xhtml">TensorAllocator</a> &amp;)=delete</td></tr>
-<tr class="memdesc:a943854ce6f3aafac2714340e0915de75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prevent instances of this class from being copy assigned (As this class contains pointers).  <a href="#a943854ce6f3aafac2714340e0915de75">More...</a><br /></td></tr>
+<tr class="memdesc:a943854ce6f3aafac2714340e0915de75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prevent instances of this class from being copy assigned (As this class contains pointers)  <a href="#a943854ce6f3aafac2714340e0915de75">More...</a><br /></td></tr>
 <tr class="separator:a943854ce6f3aafac2714340e0915de75"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa5d534fb1ab7a62ef81d80f47af1679b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_tensor_allocator.xhtml#aa5d534fb1ab7a62ef81d80f47af1679b">TensorAllocator</a> (<a class="el" href="classarm__compute_1_1_tensor_allocator.xhtml">TensorAllocator</a> &amp;&amp;) noexcept</td></tr>
 <tr class="memdesc:aa5d534fb1ab7a62ef81d80f47af1679b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allow instances of this class to be moved.  <a href="#aa5d534fb1ab7a62ef81d80f47af1679b">More...</a><br /></td></tr>
@@ -220,6 +220,12 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Default constructor. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">owner</td><td>Owner of the tensor allocator. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -262,7 +268,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Prevent instances of this class from being copied (As this class contains pointers). </p>
+<p>Prevent instances of this class from being copied (As this class contains pointers) </p>
 
 </div>
 </div>
@@ -319,6 +325,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Implements <a class="el" href="classarm__compute_1_1_i_tensor_allocator.xhtml#aa8a4946cd749d482dd996874d295af85">ITensorAllocator</a>.</p>
 
+<p>Referenced by <a class="el" href="_assembly_helper_8h_source.xhtml#l00135">arm_compute::allocate_workspace()</a>, and <a class="el" href="_graph_utils_8cpp_source.xhtml#l00132">NumPyAccessor::NumPyAccessor()</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a738d0f4e90cfddb07316f368a855e50b"></a>
@@ -335,6 +343,7 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Returns the pointer to the allocated data. </p>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to the allocated data. </dd></dl>
 
 </div>
 </div>
@@ -437,7 +446,7 @@ Ownership of memory depends on the way the <a class="el" href="classarm__compute
   </dd>
 </dl>
 
-<p>Referenced by <a class="el" href="_tensor_allocator_8cpp_source.xhtml#l00042">arm_compute::test::validation::TEST_CASE()</a>.</p>
+<p>Referenced by <a class="el" href="_assembly_helper_8h_source.xhtml#l00135">arm_compute::allocate_workspace()</a>, and <a class="el" href="_graph_utils_8cpp_source.xhtml#l00132">NumPyAccessor::NumPyAccessor()</a>.</p>
 
 </div>
 </div>
@@ -463,7 +472,7 @@ Ownership of memory depends on the way the <a class="el" href="classarm__compute
 </table>
 </div><div class="memdoc">
 
-<p>Prevent instances of this class from being copy assigned (As this class contains pointers). </p>
+<p>Prevent instances of this class from being copy assigned (As this class contains pointers) </p>
 
 </div>
 </div>
@@ -526,7 +535,7 @@ Ownership of memory depends on the way the <a class="el" href="classarm__compute
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_tensor_allocator.xhtml">TensorAllocator</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:59 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

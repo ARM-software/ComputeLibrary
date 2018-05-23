@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -90,7 +90,8 @@ public:
     void run() override;
 
 private:
-    std::unique_ptr<CLFillBorderKernel[]>          _border_handler;
+    std::unique_ptr<CLFillBorderKernel[]>          _horizontal_border_handler;
+    std::unique_ptr<CLFillBorderKernel[]>          _vertical_border_handler;
     std::unique_ptr<CLGaussianPyramidHorKernel[]>  _horizontal_reduction;
     std::unique_ptr<CLGaussianPyramidVertKernel[]> _vertical_reduction;
 };

@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -164,6 +164,9 @@ Functions</h2></td></tr>
 <tr class="memitem:adb95f9d6a10468f65e49ee944ce727d7"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#adb95f9d6a10468f65e49ee944ce727d7">calculate_depth_concatenate_shape</a> (const std::vector&lt; TensorShape &gt; &amp;input_shapes)</td></tr>
 <tr class="memdesc:adb95f9d6a10468f65e49ee944ce727d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate output tensor shape give a vector of input tensor to concatenate.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#adb95f9d6a10468f65e49ee944ce727d7">More...</a><br /></td></tr>
 <tr class="separator:adb95f9d6a10468f65e49ee944ce727d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8699515548dd02392dce1e359767408c"><td class="memItemLeft" align="right" valign="top">TensorShape&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8699515548dd02392dce1e359767408c">calculate_width_concatenate_shape</a> (const std::vector&lt; TensorShape &gt; &amp;input_shapes)</td></tr>
+<tr class="memdesc:a8699515548dd02392dce1e359767408c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate output tensor shape give a vector of input tensor to concatenate.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#a8699515548dd02392dce1e359767408c">More...</a><br /></td></tr>
+<tr class="separator:a8699515548dd02392dce1e359767408c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad03c1c39d75226aecd5acd8e3959b02a"><td class="memItemLeft" align="right" valign="top">HarrisCornersParameters&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad03c1c39d75226aecd5acd8e3959b02a">harris_corners_parameters</a> ()</td></tr>
 <tr class="memdesc:ad03c1c39d75226aecd5acd8e3959b02a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate parameters for Harris Corners algorithm.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#ad03c1c39d75226aecd5acd8e3959b02a">More...</a><br /></td></tr>
 <tr class="separator:ad03c1c39d75226aecd5acd8e3959b02a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -185,6 +188,16 @@ Functions</h2></td></tr>
 <tr class="memitem:a291a16e64b05bdf4d08e1240d5bb286a"><td class="memItemLeft" align="right" valign="top">SimpleTensor&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a291a16e64b05bdf4d08e1240d5bb286a">convert_to_asymmetric</a> (const SimpleTensor&lt; float &gt; &amp;src, const QuantizationInfo &amp;quantization_info)</td></tr>
 <tr class="memdesc:a291a16e64b05bdf4d08e1240d5bb286a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert float simple tensor into quantized using specified quantization information.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#a291a16e64b05bdf4d08e1240d5bb286a">More...</a><br /></td></tr>
 <tr class="separator:a291a16e64b05bdf4d08e1240d5bb286a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f431b100088915a77ede3e283d1bdf6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a8f431b100088915a77ede3e283d1bdf6">matrix_multiply</a> (const SimpleTensor&lt; float &gt; &amp;a, const SimpleTensor&lt; float &gt; &amp;b, SimpleTensor&lt; float &gt; &amp;out)</td></tr>
+<tr class="memdesc:a8f431b100088915a77ede3e283d1bdf6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Matrix multiply between 2 float simple tensors.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#a8f431b100088915a77ede3e283d1bdf6">More...</a><br /></td></tr>
+<tr class="separator:a8f431b100088915a77ede3e283d1bdf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af07d79246ecf85a072b0d948e7142464"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#af07d79246ecf85a072b0d948e7142464">transpose_matrix</a> (const SimpleTensor&lt; float &gt; &amp;in, SimpleTensor&lt; float &gt; &amp;out)</td></tr>
+<tr class="memdesc:af07d79246ecf85a072b0d948e7142464"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transpose matrix.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#af07d79246ecf85a072b0d948e7142464">More...</a><br /></td></tr>
+<tr class="separator:af07d79246ecf85a072b0d948e7142464"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9399f3f1910e0f236cd6f4613bd4397"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ab9399f3f1910e0f236cd6f4613bd4397"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ab9399f3f1910e0f236cd6f4613bd4397">get_tile</a> (const SimpleTensor&lt; T &gt; &amp;in, SimpleTensor&lt; T &gt; &amp;tile, const Coordinates &amp;coord)</td></tr>
+<tr class="memdesc:ab9399f3f1910e0f236cd6f4613bd4397"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a 2D tile from a tensor.  <a href="namespacearm__compute_1_1test_1_1validation.xhtml#ab9399f3f1910e0f236cd6f4613bd4397">More...</a><br /></td></tr>
+<tr class="separator:ab9399f3f1910e0f236cd6f4613bd4397"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -192,7 +205,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="tests_2validation_2_helpers_8h.xhtml">Helpers.h</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:55 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:38 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

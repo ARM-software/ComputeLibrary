@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -125,22 +125,22 @@ $(document).ready(function(){initNavTree('data_import.xhtml','');});
 <div class="textblock"><h1><a class="anchor" id="caffe_data_extractor"></a>
 Extract data from pre-trained caffe model</h1>
 <p>One can find caffe <a href="https://github.com/BVLC/caffe/wiki/Model-Zoo">pre-trained models</a> on caffe's official github repository.</p>
-<p>The <a class="el" href="caffe__data__extractor_8py.xhtml">caffe_data_extractor.py</a> provided in the <a class="el" href="dir_53e6fa9553ac22a5646d2a2b2d7b97a1.xhtml">scripts</a> folder is an example script that shows how to extract the parameter values from a trained model.</p>
+<p>The caffe_data_extractor.py provided in the scripts folder is an example script that shows how to extract the parameter values from a trained model.</p>
 <dl class="section note"><dt>Note</dt><dd>complex networks might require altering the script to properly work.</dd></dl>
 <h2><a class="anchor" id="caffe_how_to"></a>
 How to use the script</h2>
 <p>Install caffe following <a href="http://caffe.berkeleyvision.org/installation.html">caffe's document</a>. Make sure the pycaffe has been added into the PYTHONPATH.</p>
 <p>Download the pre-trained caffe model.</p>
-<p>Run the <a class="el" href="caffe__data__extractor_8py.xhtml">caffe_data_extractor.py</a> script by </p><pre class="fragment">    python caffe_data_extractor.py -m &lt;caffe model&gt; -n &lt;caffe netlist&gt;
+<p>Run the caffe_data_extractor.py script by </p><pre class="fragment">    python caffe_data_extractor.py -m &lt;caffe model&gt; -n &lt;caffe netlist&gt;
 </pre><p>For example, to extract the data from pre-trained caffe Alex model to binary file: </p><pre class="fragment">    python caffe_data_extractor.py -m /path/to/bvlc_alexnet.caffemodel -n /path/to/caffe/models/bvlc_alexnet/deploy.prototxt
 </pre><p>The script has been tested under Python2.7.</p>
 <h2><a class="anchor" id="caffe_result"></a>
 What is the expected output from the script</h2>
 <p>If the script runs successfully, it prints the names and shapes of each layer onto the standard output and generates *.npy files containing the weights and biases of each layer.</p>
-<p>The <a class="el" href="namespacearm__compute_1_1utils.xhtml#af214346f90d640ac468dd90fa2a275cc">arm_compute::utils::load_trained_data</a> shows how one could load the weights and biases into tensor from the .npy file by the help of Accessor.</p>
+<p>The <a class="el" href="namespacearm__compute_1_1utils.xhtml#af214346f90d640ac468dd90fa2a275cc" title="Load the tensor with pre-trained data from a binary file. ">arm_compute::utils::load_trained_data</a> shows how one could load the weights and biases into tensor from the .npy file by the help of Accessor.</p>
 <h1><a class="anchor" id="tensorflow_data_extractor"></a>
 Extract data from pre-trained tensorflow model</h1>
-<p>The script <a class="el" href="tensorflow__data__extractor_8py.xhtml">tensorflow_data_extractor.py</a> extracts trainable parameters (e.g. values of weights and biases) from a trained tensorflow model. A tensorflow model consists of the following two files:</p>
+<p>The script tensorflow_data_extractor.py extracts trainable parameters (e.g. values of weights and biases) from a trained tensorflow model. A tensorflow model consists of the following two files:</p>
 <p>{model_name}.data-{step}-{global_step}: A binary file containing values of each variable.</p>
 <p>{model_name}.meta: A binary file containing a MetaGraph struct which defines the graph structure of the neural network.</p>
 <dl class="section note"><dt>Note</dt><dd>Since Tensorflow version 0.11 the binary checkpoint file which contains the values for each parameter has the format of: {model_name}.data-{step}-of-{max_step} instead of: {model_name}.ckpt When dealing with binary files with version &gt;= 0.11, only pass {model_name} to -m option; when dealing with binary files with version &lt; 0.11, pass the whole file name {model_name}.ckpt to -m option.</dd>
@@ -150,7 +150,7 @@ This script relies on the parameters to be extracted being in the 'trainable_var
 How to use the script</h2>
 <p>Install tensorflow and numpy.</p>
 <p>Download the pre-trained tensorflow model.</p>
-<p>Run <a class="el" href="tensorflow__data__extractor_8py.xhtml">tensorflow_data_extractor.py</a> with </p><pre class="fragment">    python tensorflow_data_extractor -m &lt;path_to_binary_checkpoint_file&gt; -n &lt;path_to_metagraph_file&gt;
+<p>Run tensorflow_data_extractor.py with </p><pre class="fragment">    python tensorflow_data_extractor -m &lt;path_to_binary_checkpoint_file&gt; -n &lt;path_to_metagraph_file&gt;
 </pre><p>For example, to extract the data from pre-trained tensorflow Alex model to binary files: </p><pre class="fragment">    python tensorflow_data_extractor -m /path/to/bvlc_alexnet -n /path/to/bvlc_alexnet.meta
 </pre><p>Or for binary checkpoint files before Tensorflow 0.11: </p><pre class="fragment">    python tensorflow_data_extractor -m /path/to/bvlc_alexnet.ckpt -n /path/to/bvlc_alexnet.meta
 </pre><dl class="section note"><dt>Note</dt><dd>with versions &gt;= Tensorflow 0.11 only model name is passed to the -m option</dd></dl>
@@ -158,13 +158,13 @@ How to use the script</h2>
 <h2><a class="anchor" id="tensorflow_result"></a>
 What is the expected output from the script</h2>
 <p>If the script runs successfully, it prints the names and shapes of each parameter onto the standard output and generates .npy files containing the weights and biases of each layer.</p>
-<p>The <a class="el" href="namespacearm__compute_1_1utils.xhtml#af214346f90d640ac468dd90fa2a275cc">arm_compute::utils::load_trained_data</a> shows how one could load the weights and biases into tensor from the .npy file by the help of Accessor. </p>
+<p>The <a class="el" href="namespacearm__compute_1_1utils.xhtml#af214346f90d640ac468dd90fa2a275cc" title="Load the tensor with pre-trained data from a binary file. ">arm_compute::utils::load_trained_data</a> shows how one could load the weights and biases into tensor from the .npy file by the help of Accessor. </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:56 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

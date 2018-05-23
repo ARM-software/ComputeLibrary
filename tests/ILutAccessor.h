@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,12 +38,16 @@ template <typename T>
 class ILutAccessor
 {
 public:
+    /** Lut value type */
     using value_type = T;
 
     /** Pure virtual destructor. */
     virtual ~ILutAccessor() = default;
 
-    /** Number of elements of the Lut. */
+    /** Number of elements of the Lut.
+     *
+     * @return the number of elements.
+     */
     virtual int num_elements() const = 0;
 
     /** Read access to the specified element.

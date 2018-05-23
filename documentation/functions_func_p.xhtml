@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -196,12 +196,17 @@ $(document).ready(function(){initNavTree('functions_func_p.xhtml','');});
 <li>PadStrideInfo()
 : <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml#aebf88ce57c0ad3d796ca66edb8a43e1a">PadStrideInfo</a>
 </li>
-<li>parameter()
-: <a class="el" href="classarm__compute_1_1graph_1_1_node_context.xhtml#a72eef7664b86c927e02ec5e67b8e8230">NodeContext</a>
-</li>
 <li>parent()
 : <a class="el" href="classarm__compute_1_1_c_l_sub_tensor.xhtml#a47e6fa052a1d4a5db6dbf14126faa7ab">CLSubTensor</a>
 , <a class="el" href="classarm__compute_1_1_sub_tensor.xhtml#a1097f24ffd02b0d642548baef8a8ce1f">SubTensor</a>
+</li>
+<li>parent_handle()
+: <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_c_l_sub_tensor_handle.xhtml#ab1ccebeefe334241a596080286aa06b4">CLSubTensorHandle</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_c_l_tensor_handle.xhtml#ab1ccebeefe334241a596080286aa06b4">CLTensorHandle</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_g_c_tensor_handle.xhtml#ab1ccebeefe334241a596080286aa06b4">GCTensorHandle</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_n_e_sub_tensor_handle.xhtml#ab1ccebeefe334241a596080286aa06b4">NESubTensorHandle</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1backends_1_1_n_e_tensor_handle.xhtml#ab1ccebeefe334241a596080286aa06b4">NETensorHandle</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_handle.xhtml#a561a751539d572ac9e3c3eea75f35fa5">ITensorHandle</a>
 </li>
 <li>parse()
 : <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_command_line_parser.xhtml#a66fa8f960eac1bf561ba2cb8be0cc58a">CommandLineParser</a>
@@ -211,6 +216,15 @@ $(document).ready(function(){initNavTree('functions_func_p.xhtml','');});
 , <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_option.xhtml#a1adbcecf58804b109b928dd852bc29ef">Option</a>
 , <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_simple_option.xhtml#aba9622f1f4bc66fcba246f30d4175a4f">SimpleOption&lt; T &gt;</a>
 , <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_toggle_option.xhtml#aba9622f1f4bc66fcba246f30d4175a4f">ToggleOption</a>
+</li>
+<li>pass()
+: <a class="el" href="classarm__compute_1_1graph_1_1_pass_manager.xhtml#a44a465f23e4c7e6d21582e753ebb709c">PassManager</a>
+</li>
+<li>passes()
+: <a class="el" href="classarm__compute_1_1graph_1_1_pass_manager.xhtml#a3e12f9dfdeb4871a54d638f6a6e37efe">PassManager</a>
+</li>
+<li>PassManager()
+: <a class="el" href="classarm__compute_1_1graph_1_1_pass_manager.xhtml#a07cb4a71e921a17830c7d09fd816f644">PassManager</a>
 </li>
 <li>path()
 : <a class="el" href="classarm__compute_1_1test_1_1_assets_library.xhtml#a9b67b266207227062c7a2961ef85293a">AssetsLibrary</a>
@@ -248,17 +262,17 @@ $(document).ready(function(){initNavTree('functions_func_p.xhtml','');});
 <li>pooled_width()
 : <a class="el" href="classarm__compute_1_1_r_o_i_pooling_layer_info.xhtml#ae889c3657ba9390ac5ecd268e8a19720">ROIPoolingLayerInfo</a>
 </li>
-<li>PoolingLayer()
-: <a class="el" href="classarm__compute_1_1graph_1_1_pooling_layer.xhtml#a02315c73ac4da37139151d565c86e217">PoolingLayer</a>
+<li>pooling_info()
+: <a class="el" href="classarm__compute_1_1graph_1_1_pooling_layer_node.xhtml#abeb0aaa48d7d49111bd670a00cf61b0e">PoolingLayerNode</a>
 </li>
-<li>PoolingLayerDatasetSpecial()
-: <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_pooling_layer_dataset_special.xhtml#ad6f3591b78fa4f588ff0c60059dc78f5">PoolingLayerDatasetSpecial</a>
+<li>PoolingLayer()
+: <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_pooling_layer.xhtml#a9ad7e9ede84392dee892357377aa1806">PoolingLayer</a>
 </li>
 <li>PoolingLayerInfo()
 : <a class="el" href="classarm__compute_1_1_pooling_layer_info.xhtml#a21d59f266df349880afd6143469c8f29">PoolingLayerInfo</a>
 </li>
-<li>PoolingTypes()
-: <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_pooling_types.xhtml#aacde0bc25627a89760c9da6e7a9e9ebb">PoolingTypes</a>
+<li>PoolingLayerNode()
+: <a class="el" href="classarm__compute_1_1graph_1_1_pooling_layer_node.xhtml#aa4438a02603ed287fc15c0680dc33003">PoolingLayerNode</a>
 </li>
 <li>PoolManager()
 : <a class="el" href="classarm__compute_1_1_pool_manager.xhtml#a7e937d0097fa10265e28278ce435d0c7">PoolManager</a>
@@ -281,13 +295,24 @@ $(document).ready(function(){initNavTree('functions_func_p.xhtml','');});
 <li>precision()
 : <a class="el" href="classarm__compute_1_1test_1_1fixed__point__arithmetic_1_1fixed__point.xhtml#a89deb954a617641af987e59a483ca5e9">fixed_point&lt; T &gt;</a>
 </li>
+<li>prepare()
+: <a class="el" href="classarm__compute_1_1_c_l_convolution_layer.xhtml#aa9b93ef660fc3c5b4b19d3fc7b891b77">CLConvolutionLayer</a>
+, <a class="el" href="classarm__compute_1_1_c_l_fully_connected_layer.xhtml#aa9b93ef660fc3c5b4b19d3fc7b891b77">CLFullyConnectedLayer</a>
+, <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m.xhtml#aa9b93ef660fc3c5b4b19d3fc7b891b77">CLGEMM</a>
+, <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_convolution_layer.xhtml#aa9b93ef660fc3c5b4b19d3fc7b891b77">CLGEMMConvolutionLayer</a>
+, <a class="el" href="classarm__compute_1_1_c_l_winograd_convolution_layer.xhtml#aa9b93ef660fc3c5b4b19d3fc7b891b77">CLWinogradConvolutionLayer</a>
+, <a class="el" href="structarm__compute_1_1graph_1_1_execution_task.xhtml#a1825b40ca3bc3a1ba67fdb58fac5015c">ExecutionTask</a>
+, <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c24155a2980512fae45aac26">IFunction</a>
+</li>
 <li>preprocess()
 : <a class="el" href="classarm__compute_1_1graph__utils_1_1_caffe_preproccessor.xhtml#a1545d087d050b8e9733e7e212df73666">CaffePreproccessor</a>
 , <a class="el" href="classarm__compute_1_1graph__utils_1_1_i_preprocessor.xhtml#ae699b63165de5182fda5a2337009641f">IPreprocessor</a>
 , <a class="el" href="classarm__compute_1_1graph__utils_1_1_t_f_preproccessor.xhtml#a1545d087d050b8e9733e7e212df73666">TFPreproccessor</a>
 </li>
 <li>print()
-: <a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a0b092c86d6e0fb8a114281565953a02a">ITensor</a>
+: <a class="el" href="classarm__compute_1_1graph_1_1_dot_graph_printer.xhtml#a6360aacec485371990a2691002a45fe4">DotGraphPrinter</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_i_graph_printer.xhtml#acdf3485abb7e3743c0a3b941bc301e55">IGraphPrinter</a>
+, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a0b092c86d6e0fb8a114281565953a02a">ITensor</a>
 , <a class="el" href="classarm__compute_1_1logging_1_1_printer.xhtml#a7a7f5cb630082eeb4cd46cb6d67a2577">Printer</a>
 </li>
 <li>print_entry()
@@ -365,13 +390,30 @@ $(document).ready(function(){initNavTree('functions_func_p.xhtml','');});
 : <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_framework.xhtml#adbec548e723c57f5f88e2dd241d1e791">Framework</a>
 </li>
 <li>Printer()
-: <a class="el" href="classarm__compute_1_1logging_1_1_printer.xhtml#af1eb8ac5e81b67bdb4dad929c58f4d00">Printer</a>
+: <a class="el" href="classarm__compute_1_1logging_1_1_printer.xhtml#ab1c9bd7e4bc60107ac6035125cf76024">Printer</a>
+</li>
+<li>producer()
+: <a class="el" href="classarm__compute_1_1graph_1_1_edge.xhtml#a6d7e4dd9d058b6e486b6b2c56153fb2a">Edge</a>
+</li>
+<li>producer_id()
+: <a class="el" href="classarm__compute_1_1graph_1_1_edge.xhtml#a1406bd3d2033837af2a47831a5304328">Edge</a>
+</li>
+<li>producer_idx()
+: <a class="el" href="classarm__compute_1_1graph_1_1_edge.xhtml#aa3017d0ec14d1b47c6b3656ccbcee99d">Edge</a>
 </li>
 <li>Program()
-: <a class="el" href="classarm__compute_1_1_program.xhtml#a466ef007aa3d82a7b5910fac373a3a11">Program</a>
+: <a class="el" href="classarm__compute_1_1_program.xhtml#ab761eeac6f1072ad0c2920feeb0a8076">Program</a>
+</li>
+<li>projection_bias()
+: <a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml#ac531b5180cfe3ad8e5e6a7a399618a1b">LSTMParams&lt; T &gt;</a>
+</li>
+<li>projection_weights()
+: <a class="el" href="classarm__compute_1_1_l_s_t_m_params.xhtml#abd553d9f4eb47989b0f9e43183251c0a">LSTMParams&lt; T &gt;</a>
 </li>
 <li>ptr()
-: <a class="el" href="classarm__compute_1_1_iterator.xhtml#aeabcf37a281d780c90ebe812149a7a84">Iterator</a>
+: <a class="el" href="classarm__compute_1_1_c_l_buffer_memory_region.xhtml#a0d957ce12ecbf85d9ecff5c372cfdd26">CLBufferMemoryRegion</a>
+, <a class="el" href="classarm__compute_1_1_i_c_l_memory_region.xhtml#ab8777d03065e8c7146157148a5355dd1">ICLMemoryRegion</a>
+, <a class="el" href="classarm__compute_1_1_iterator.xhtml#aeabcf37a281d780c90ebe812149a7a84">Iterator</a>
 </li>
 <li>ptr_to_element()
 : <a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a48c7a05cc63f541d732250e39339cee2">ITensor</a>
@@ -391,7 +433,7 @@ $(document).ready(function(){initNavTree('functions_func_p.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Fri Mar 2 2018 12:38:02 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:46 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -124,18 +124,24 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_c_l_symbols.xhtm
 </div><!--header-->
 <div class="contents">
 
+<p>Class for loading OpenCL symbols.  
+ <a href="classarm__compute_1_1_c_l_symbols.xhtml#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a32db0706b9c174ef7238a15760e232fe"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml#a32db0706b9c174ef7238a15760e232fe">load</a> (const std::string &amp;library)</td></tr>
+<tr class="memdesc:a32db0706b9c174ef7238a15760e232fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load symbols from the given OpenCL library path.  <a href="#a32db0706b9c174ef7238a15760e232fe">More...</a><br /></td></tr>
 <tr class="separator:a32db0706b9c174ef7238a15760e232fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7d9b5b93ad5e6018700fa36de6e1e279"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml#a7d9b5b93ad5e6018700fa36de6e1e279">load_default</a> ()</td></tr>
+<tr class="memdesc:a7d9b5b93ad5e6018700fa36de6e1e279"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load symbols from any of the default OpenCL library names.  <a href="#a7d9b5b93ad5e6018700fa36de6e1e279">More...</a><br /></td></tr>
 <tr class="separator:a7d9b5b93ad5e6018700fa36de6e1e279"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a98782c8297f3985321c5fa98576327b8"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml">CLSymbols</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml#a98782c8297f3985321c5fa98576327b8">get</a> ()</td></tr>
+<tr class="memdesc:a98782c8297f3985321c5fa98576327b8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the static instance of <a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml" title="Class for loading OpenCL symbols. ">CLSymbols</a>.  <a href="#a98782c8297f3985321c5fa98576327b8">More...</a><br /></td></tr>
 <tr class="separator:a98782c8297f3985321c5fa98576327b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
@@ -214,10 +220,23 @@ Data Fields</h2></td></tr>
 <tr class="separator:a7b9fe21a9872e746fa811b916e4dd9bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aad5f68729eb6cc674fce0fd950c5b765"><td class="memItemLeft" align="right" valign="top">std::function&lt; decltype(clGetEventProfilingInfo)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml#aad5f68729eb6cc674fce0fd950c5b765">clGetEventProfilingInfo_ptr</a> = nullptr</td></tr>
 <tr class="separator:aad5f68729eb6cc674fce0fd950c5b765"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abf58c6d99585520b40a396a890caa9ee"><td class="memItemLeft" align="right" valign="top">std::function&lt; decltype(clSVMAlloc)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml#abf58c6d99585520b40a396a890caa9ee">clSVMAlloc_ptr</a> = nullptr</td></tr>
+<tr class="separator:abf58c6d99585520b40a396a890caa9ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbd557acca5bc0f92a1a7f8ebc26e9ed"><td class="memItemLeft" align="right" valign="top">std::function&lt; decltype(clSVMFree)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml#adbd557acca5bc0f92a1a7f8ebc26e9ed">clSVMFree_ptr</a> = nullptr</td></tr>
+<tr class="separator:adbd557acca5bc0f92a1a7f8ebc26e9ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae4a0c63c4f06c8d80788da461812bf4c"><td class="memItemLeft" align="right" valign="top">std::function&lt; decltype(clEnqueueSVMMap)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml#ae4a0c63c4f06c8d80788da461812bf4c">clEnqueueSVMMap_ptr</a> = nullptr</td></tr>
+<tr class="separator:ae4a0c63c4f06c8d80788da461812bf4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab30bda3641f8d1a73126884a9fd66a89"><td class="memItemLeft" align="right" valign="top">std::function&lt; decltype(clEnqueueSVMUnmap)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml#ab30bda3641f8d1a73126884a9fd66a89">clEnqueueSVMUnmap_ptr</a> = nullptr</td></tr>
+<tr class="separator:ab30bda3641f8d1a73126884a9fd66a89"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a527fd99779c605a2203158219f18e95f"><td class="memItemLeft" align="right" valign="top">std::function&lt; decltype(clEnqueueMarker)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml#a527fd99779c605a2203158219f18e95f">clEnqueueMarker_ptr</a> = nullptr</td></tr>
+<tr class="separator:a527fd99779c605a2203158219f18e95f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8fd1b20db02f6fb96562ddff20134a53"><td class="memItemLeft" align="right" valign="top">std::function&lt; decltype(clWaitForEvents)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml#a8fd1b20db02f6fb96562ddff20134a53">clWaitForEvents_ptr</a> = nullptr</td></tr>
+<tr class="separator:a8fd1b20db02f6fb96562ddff20134a53"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock">
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00048">48</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<div class="textblock"><p>Class for loading OpenCL symbols. </p>
+
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00053">53</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a class="anchor" id="a98782c8297f3985321c5fa98576327b8"></a>
 <div class="memitem">
@@ -240,7 +259,10 @@ Data Fields</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Referenced by <a class="el" href="_open_c_l_timer_8cpp_source.xhtml#l00126">OpenCLTimer::start()</a>, and <a class="el" href="_open_c_l_timer_8cpp_source.xhtml#l00133">OpenCLTimer::stop()</a>.</p>
+<p>Get the static instance of <a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml" title="Class for loading OpenCL symbols. ">CLSymbols</a>. </p>
+<dl class="section return"><dt>Returns</dt><dd>The static instance of <a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml" title="Class for loading OpenCL symbols. ">CLSymbols</a>. </dd></dl>
+
+<p>Referenced by <a class="el" href="_open_c_l_memory_usage_8cpp_source.xhtml#l00069">OpenCLMemoryUsage::test_start()</a>, <a class="el" href="_open_c_l_timer_8cpp_source.xhtml#l00080">OpenCLTimer::test_start()</a>, <a class="el" href="_open_c_l_memory_usage_8cpp_source.xhtml#l00166">OpenCLMemoryUsage::test_stop()</a>, and <a class="el" href="_open_c_l_timer_8cpp_source.xhtml#l00157">OpenCLTimer::test_stop()</a>.</p>
 
 </div>
 </div>
@@ -258,6 +280,15 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Load symbols from the given OpenCL library path. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">library</td><td>Path to the OpenCL library.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if loading the library is successful. </dd></dl>
+
 </div>
 </div>
 <a class="anchor" id="a7d9b5b93ad5e6018700fa36de6e1e279"></a>
@@ -273,6 +304,9 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Load symbols from any of the default OpenCL library names. </p>
+<dl class="section return"><dt>Returns</dt><dd>True if loading any library is successful. </dd></dl>
+
 </div>
 </div>
 <h2 class="groupheader">Field Documentation</h2>
@@ -286,7 +320,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00065">65</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00084">84</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -300,7 +334,9 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00070">70</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00089">89</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+
+<p>Referenced by <a class="el" href="_open_c_l_memory_usage_8cpp_source.xhtml#l00069">OpenCLMemoryUsage::test_start()</a>, and <a class="el" href="_open_c_l_memory_usage_8cpp_source.xhtml#l00166">OpenCLMemoryUsage::test_stop()</a>.</p>
 
 </div>
 </div>
@@ -314,7 +350,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00063">63</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00082">82</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -328,7 +364,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00062">62</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00081">81</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -342,7 +378,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00072">72</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00091">91</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -356,7 +392,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00078">78</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00097">97</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -370,7 +406,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00069">69</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00088">88</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -384,7 +420,21 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00080">80</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00099">99</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a527fd99779c605a2203158219f18e95f"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::function&lt;decltype( clEnqueueMarker )&gt; clEnqueueMarker_ptr = nullptr</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00122">122</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -398,9 +448,9 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00066">66</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00085">85</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
-<p>Referenced by <a class="el" href="_open_c_l_timer_8cpp_source.xhtml#l00126">OpenCLTimer::start()</a>, and <a class="el" href="_open_c_l_timer_8cpp_source.xhtml#l00133">OpenCLTimer::stop()</a>.</p>
+<p>Referenced by <a class="el" href="_open_c_l_timer_8cpp_source.xhtml#l00080">OpenCLTimer::test_start()</a>, and <a class="el" href="_open_c_l_timer_8cpp_source.xhtml#l00157">OpenCLTimer::test_stop()</a>.</p>
 
 </div>
 </div>
@@ -414,7 +464,35 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00083">83</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00102">102</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ae4a0c63c4f06c8d80788da461812bf4c"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::function&lt;decltype( clEnqueueSVMMap )&gt; clEnqueueSVMMap_ptr = nullptr</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00120">120</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="ab30bda3641f8d1a73126884a9fd66a89"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::function&lt;decltype( clEnqueueSVMUnmap )&gt; clEnqueueSVMUnmap_ptr = nullptr</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00121">121</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -428,7 +506,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00088">88</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00107">107</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -442,7 +520,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00084">84</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00103">103</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -456,7 +534,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00075">75</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00094">94</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -470,7 +548,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00074">74</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00093">93</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -484,7 +562,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00096">96</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00115">115</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -498,7 +576,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00064">64</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00083">83</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -512,7 +590,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00092">92</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00111">111</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -526,7 +604,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00091">91</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00110">110</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -540,7 +618,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00098">98</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00117">117</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -554,7 +632,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00097">97</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00116">116</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -568,7 +646,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00095">95</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00114">114</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -582,7 +660,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00094">94</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00113">113</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -596,7 +674,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00082">82</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00101">101</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -610,7 +688,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00073">73</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00092">92</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -624,7 +702,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00079">79</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00098">98</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -638,7 +716,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00086">86</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00105">105</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -652,7 +730,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00085">85</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00104">104</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -666,7 +744,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00068">68</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00087">87</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -680,7 +758,9 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00090">90</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00109">109</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+
+<p>Referenced by <a class="el" href="_open_c_l_memory_usage_8cpp_source.xhtml#l00069">OpenCLMemoryUsage::test_start()</a>, and <a class="el" href="_open_c_l_memory_usage_8cpp_source.xhtml#l00166">OpenCLMemoryUsage::test_stop()</a>.</p>
 
 </div>
 </div>
@@ -694,7 +774,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00076">76</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00095">95</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -708,7 +788,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00087">87</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00106">106</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -722,7 +802,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00077">77</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00096">96</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -736,7 +816,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00093">93</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00112">112</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -750,7 +830,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00071">71</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00090">90</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -764,7 +844,9 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00089">89</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00108">108</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+
+<p>Referenced by <a class="el" href="_open_c_l_memory_usage_8cpp_source.xhtml#l00069">OpenCLMemoryUsage::test_start()</a>, and <a class="el" href="_open_c_l_memory_usage_8cpp_source.xhtml#l00166">OpenCLMemoryUsage::test_stop()</a>.</p>
 
 </div>
 </div>
@@ -778,7 +860,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00081">81</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00100">100</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -792,7 +874,53 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00067">67</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00086">86</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="abf58c6d99585520b40a396a890caa9ee"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::function&lt;decltype( clSVMAlloc )&gt; clSVMAlloc_ptr = nullptr</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00118">118</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+
+<p>Referenced by <a class="el" href="_open_c_l_memory_usage_8cpp_source.xhtml#l00069">OpenCLMemoryUsage::test_start()</a>, and <a class="el" href="_open_c_l_memory_usage_8cpp_source.xhtml#l00166">OpenCLMemoryUsage::test_stop()</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="adbd557acca5bc0f92a1a7f8ebc26e9ed"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::function&lt;decltype( clSVMFree )&gt; clSVMFree_ptr = nullptr</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00119">119</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
+
+<p>Referenced by <a class="el" href="_open_c_l_memory_usage_8cpp_source.xhtml#l00069">OpenCLMemoryUsage::test_start()</a>, and <a class="el" href="_open_c_l_memory_usage_8cpp_source.xhtml#l00166">OpenCLMemoryUsage::test_stop()</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a8fd1b20db02f6fb96562ddff20134a53"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::function&lt;decltype( clWaitForEvents )&gt; clWaitForEvents_ptr = nullptr</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Definition at line <a class="el" href="_open_c_l_8h_source.xhtml#l00123">123</a> of file <a class="el" href="_open_c_l_8h_source.xhtml">OpenCL.h</a>.</p>
 
 </div>
 </div>
@@ -805,7 +933,7 @@ Data Fields</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml">CLSymbols</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:58 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:41 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -67,6 +67,55 @@ void l2_normalize_X(const ITensor *in, const ITensor *sum, ITensor *out, float e
     }
     while(window.slide_window_slice_1D(in_slice) && window.slide_window_slice_1D(sum_slice));
 }
+
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, unsigned int axis, float epsilon)
+{
+    ARM_COMPUTE_UNUSED(epsilon);
+
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, sum, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, sum);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() != DataLayout::NCHW);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis > 0, "Unsupported normalization axis, Supported axis is 0");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis >= TensorShape::num_max_dimensions, "Normalization axis greater than max number of dimensions");
+
+    // Reduce shape on axis
+    TensorShape sum_shape = input->tensor_shape();
+    sum_shape.set(axis, 1);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(sum->tensor_shape(), sum_shape);
+
+    if(output->total_size() != 0)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(input->tensor_shape(), output->tensor_shape());
+        ARM_COMPUTE_RETURN_ERROR_ON(output->data_layout() != DataLayout::NCHW);
+    }
+
+    return Status{};
+}
+
+std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *sum, ITensorInfo *output, unsigned int axis)
+{
+    const unsigned int num_elems_processed_per_iteration     = 16 / data_size_from_type(input->data_type());
+    const unsigned int num_elems_processed_per_iteration_sum = (axis == 0) ? 1 : num_elems_processed_per_iteration;
+
+    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+
+    // Output auto initialization if not yet initialized
+    auto_init_if_empty(*output, input->tensor_shape(), 1, input->data_type(), input->fixed_point_position());
+
+    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
+    AccessWindowHorizontal sum_access(sum, 0, num_elems_processed_per_iteration_sum);
+    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+
+    bool window_changed = update_window_and_padding(win, input_access, sum_access, output_access);
+    output_access.set_valid_region(win, input->valid_region());
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+
+    return std::make_tuple(err, win);
+}
 } // namespace
 
 NEL2NormalizeLayerKernel::NEL2NormalizeLayerKernel()
@@ -77,18 +126,7 @@ NEL2NormalizeLayerKernel::NEL2NormalizeLayerKernel()
 void NEL2NormalizeLayerKernel::configure(const ITensor *input, const ITensor *sum, ITensor *output, unsigned int axis, float epsilon)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, sum, output);
-    ARM_COMPUTE_ERROR_ON_MSG(axis >= TensorShape::num_max_dimensions, "Normalization axis greater than max number of dimensions");
-    ARM_COMPUTE_ERROR_ON_MSG(axis > 0, "Unsupported normalization axis, Supported axis is 0");
-
-    // Output auto initialization if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
-
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output, sum);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
-
-    unsigned int num_elems_processed_per_iteration     = 16 / data_size_from_type(input->info()->data_type());
-    unsigned int num_elems_processed_per_iteration_sum = (axis == 0) ? 1 : num_elems_processed_per_iteration;
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), sum->info(), output->info(), axis, epsilon));
 
     _input   = input;
     _sum     = sum;
@@ -97,16 +135,18 @@ void NEL2NormalizeLayerKernel::configure(const ITensor *input, const ITensor *su
     _epsilon = epsilon;
 
     // Configure kernel window
-    Window                 win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
-    AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowHorizontal sum_access(sum->info(), 0, num_elems_processed_per_iteration_sum);
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
+    auto win_config = validate_and_configure_window(_input->info(), _sum->info(), _output->info(), axis);
+    ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
-    update_window_and_padding(win, input_access, sum_access, output_access);
+    INEKernel::configure(std::get<1>(win_config));
+}
 
-    output_access.set_valid_region(win, input->info()->valid_region());
+Status NEL2NormalizeLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, unsigned int axis, float epsilon)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, sum, output, axis, epsilon));
+    ARM_COMPUTE_RETURN_ON_ERROR(std::get<0>(validate_and_configure_window(input->clone().get(), sum->clone().get(), output->clone().get(), axis)));
 
-    INEKernel::configure(win);
+    return Status{};
 }
 
 void NEL2NormalizeLayerKernel::run(const Window &window, const ThreadInfo &info)

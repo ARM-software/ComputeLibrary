@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,42 +24,115 @@
 #ifndef __ARM_COMPUTE_CPP_TYPES_H__
 #define __ARM_COMPUTE_CPP_TYPES_H__
 
+#include <vector>
+
 namespace arm_compute
 {
-/** Available CPU Targets */
-enum class CPUTarget
+/** CPU models - we only need to detect CPUs we have
+ * microarchitecture-specific code for.
+ *
+ * Architecture features are detected via HWCAPs.
+ */
+enum class CPUModel
 {
-    ARCH_MASK  = 0x0F00,
-    CPU_MODEL  = 0x00FF,
-    INTRINSICS = 0x0100,
-    ARMV7      = 0x0200,
-    ARMV8      = 0x0300,
-    ARMV8_2    = 0x0400,
-    A7x        = 0x0070,
-    A5x        = 0x0050,
-    DOT        = 0x1000,
-
-    A53     = (ARMV8 | A5x | 0x3),
-    A55     = (ARMV8_2 | A5x | 0x5),
-    A55_DOT = (A55 | DOT),
-    A72     = (ARMV8 | A7x | 0x2),
-    A73     = (ARMV8 | A7x | 0x3),
-    A75     = (ARMV8_2 | A7x | 0x5),
-    A75_DOT = (A75 | DOT),
+    GENERIC,
+    A53,
+    A55r0,
+    A55r1,
 };
 
-struct CPUInfo
+class CPUInfo final
 {
-    CPUTarget CPU{ CPUTarget::INTRINSICS };
-    int       L1_size{ 0 };
-    int       L2_size{ 0 };
+public:
+    /** Constructor */
+    CPUInfo();
+
+    /** Disable copy constructor and assignment operator to avoid copying the vector of CPUs each time
+     *  CPUInfo is initialized once in the IScheduler and ThreadInfo will get a pointer to it.
+     */
+    CPUInfo &operator=(const CPUInfo &cpuinfo) = delete;
+    CPUInfo(const CPUInfo &cpuinfo)            = delete;
+    CPUInfo &operator=(const CPUInfo &&cpuinfo) = delete;
+    CPUInfo(const CPUInfo &&cpuinfo)            = delete;
+
+    /** Checks if the cpu model supports fp16.
+     *
+     * @return true of the cpu supports fp16, false otherwise
+     */
+    bool has_fp16() const;
+    /** Checks if the cpu model supports dot product.
+     *
+     * @return true of the cpu supports dot product, false otherwise
+     */
+    bool has_dotprod() const;
+    /** Gets the cpu model for a given cpuid.
+     *
+     * @param[in] cpuid the id of the cpu core to be retrieved,
+     *
+     * @return the @ref CPUModel of the cpuid queiried.
+     */
+    CPUModel get_cpu_model(unsigned int cpuid) const;
+    /** Gets the current thread's cpu model
+     *
+     * @return Current thread's @ref CPUModel
+     */
+    CPUModel get_cpu_model() const;
+    /** Gets the L1 cache size
+     *
+     * @return the size of the L1 cache
+     */
+    unsigned int get_L1_cache_size() const;
+    /** Gets the L2 cache size
+     *
+     * @return the size of the L1 cache
+     */
+    unsigned int get_L2_cache_size() const;
+    /** Set the L1 cache size
+     *
+     * @param[in] size the new size to be set.
+     */
+    void set_L1_cache_size(unsigned int size);
+    /** Set the L2 cache size
+     *
+     * @param[in] size the new size to be set.
+     */
+    void set_L2_cache_size(unsigned int size);
+    /** Set fp16 support
+     *
+     * @param[in] fp16 whether the cpu supports fp16.
+     */
+    void set_fp16(const bool fp16);
+    /** Set dot product support
+     *
+     * @param[in] dotprod whether the cpu supports dot product.
+     */
+    void set_dotprod(const bool dotprod);
+    /** Set the cpumodel for a given cpu core
+     *
+     * @param[in] cpuid the id of the core to be set.
+     * @param[in] model the @ref CPUModel to be set.
+     */
+    void set_cpu_model(unsigned int cpuid, CPUModel model);
+    /** Set max number of cpus
+     *
+     * @param[in] cpu_count the number of CPUs in the system.
+     */
+    void set_cpu_num(unsigned int cpu_count);
+
+private:
+    std::vector<CPUModel> _percpu        = {};
+    bool                  _fp16          = false;
+    bool                  _dotprod       = false;
+    unsigned int          _L1_cache_size = 32768;
+    unsigned int          _L2_cache_size = 262144;
 };
 
+/** Information about executing thread and CPU. */
 struct ThreadInfo
 {
-    int     thread_id{ 0 };
-    int     num_threads{ 1 };
-    CPUInfo cpu_info{};
+    int            thread_id{ 0 };
+    int            num_threads{ 1 };
+    const CPUInfo *cpu_info{ nullptr };
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CPP_TYPES_H__ */

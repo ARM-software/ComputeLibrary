@@ -28,6 +28,29 @@
 
 namespace arm_compute
 {
+/** GLES Compute kernel to perform reshaping on the weights used by convolution and locally connected layer
+ *
+ * Rearranges each 3-dimensional kernel to a single row leading to a matrix with linearized kernels.
+ * In combination with the @ref GCIm2ColKernel can transform a convolution to a matrix multiplication.
+ *
+ * For example assuming a 3D weight kernel of 3x3 dimensions and depth of 2 we have:
+ * @f[
+ * \left( \begin{array}{ccc}
+ * a000 & a001 & a002 \\
+ * a010 & a011 & a012 \\
+ * a020 & a021 & a022 \\
+ * \end{array} \right)
+ * \left( \begin{array}{ccc}
+ * a100 & a101 & a102 \\
+ * a110 & a111 & a112 \\
+ * a120 & a121 & a122 \\
+ * \end{array} \right)
+ * \rightarrow
+ * \left( \begin{array}{ccccccccc}
+ * a000 & a001 & a002 & a010 & a011 & a012 & a020 & a021 & a022 & a100 & a101 & a102 & a110 & a111 & a112 & a120 & a121 & a122 \\
+ * \end{array} \right)
+ * @f]
+ */
 class GCWeightsReshapeKernel : public IGCKernel
 {
 public:

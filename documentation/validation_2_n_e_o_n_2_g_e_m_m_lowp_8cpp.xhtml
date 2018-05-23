@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -121,9 +121,7 @@ $(document).ready(function(){initNavTree('validation_2_n_e_o_n_2_g_e_m_m_lowp_8c
 <div class="title">GEMMLowp.cpp File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &quot;<a class="el" href="_n_e_g_e_m_m_interleave_blocked_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/NEGEMMInterleaveBlockedKernel.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_n_e_g_e_m_m_lowp_a_arch64_kernel_8h_source.xhtml">arm_compute/core/NEON/kernels/arm64/NEGEMMLowpAArch64Kernel.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">arm_compute/core/Types.h</a>&quot;</code><br />
+<div class="textblock"><code>#include &quot;<a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">arm_compute/core/Types.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_n_e_g_e_m_m_lowp_assembly_matrix_multiply_core_8h_source.xhtml">arm_compute/runtime/NEON/functions/NEGEMMLowpAssemblyMatrixMultiplyCore.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_n_e_g_e_m_m_lowp_matrix_multiply_core_8h_source.xhtml">arm_compute/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_n_e_g_e_m_m_lowp_output_stage_8h_source.xhtml">arm_compute/runtime/NEON/functions/NEGEMMLowpOutputStage.h</a>&quot;</code><br />
@@ -132,16 +130,15 @@ $(document).ready(function(){initNavTree('validation_2_n_e_o_n_2_g_e_m_m_lowp_8c
 <code>#include &quot;<a class="el" href="_accessor_8h_source.xhtml">tests/NEON/Accessor.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_n_e_o_n_2_helper_8h_source.xhtml">tests/NEON/Helper.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_padding_calculator_8h_source.xhtml">tests/PaddingCalculator.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_large_g_e_m_m_lowp_dataset_8h_source.xhtml">tests/datasets/LargeGEMMLowpDataset.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_shape_datasets_8h_source.xhtml">tests/datasets/ShapeDatasets.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_small_g_e_m_m_lowp_dataset_8h_source.xhtml">tests/datasets/SmallGEMMLowpDataset.h</a>&quot;</code><br />
+<code>#include &quot;tests/datasets/LargeGEMMLowpDataset.h&quot;</code><br />
+<code>#include &quot;tests/datasets/ShapeDatasets.h&quot;</code><br />
+<code>#include &quot;tests/datasets/SmallGEMMLowpDataset.h&quot;</code><br />
 <code>#include &quot;<a class="el" href="_asserts_8h_source.xhtml">tests/framework/Asserts.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="tests_2framework_2_macros_8h_source.xhtml">tests/framework/Macros.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_datasets_8h_source.xhtml">tests/framework/datasets/Datasets.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_validation_8h_source.xhtml">tests/validation/Validation.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_g_e_m_m_interleave_blocked_fixture_8h_source.xhtml">tests/validation/fixtures/GEMMInterleaveBlockedFixture.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_g_e_m_m_lowp_assembly_fixture_8h_source.xhtml">tests/validation/fixtures/GEMMLowpAssemblyFixture.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="validation_2fixtures_2_g_e_m_m_lowp_fixture_8h_source.xhtml">tests/validation/fixtures/GEMMLowpFixture.h</a>&quot;</code><br />
+<code>#include &quot;tests/validation/fixtures/GEMMLowpAssemblyFixture.h&quot;</code><br />
+<code>#include &quot;tests/validation/fixtures/GEMMLowpFixture.h&quot;</code><br />
 </div>
 <p><a href="validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -161,14 +158,6 @@ Typedefs</h2></td></tr>
 <tr class="separator:a2a3ba835cab60c32a83400ab9b6dd3d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a81a5e6a019eb49bf186adbae0baa7325"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a81a5e6a019eb49bf186adbae0baa7325">NEGEMMAssemblyFixture_U8</a> = GEMMLowpAssemblyFixture&lt; Tensor, Accessor, NEGEMMLowpAssemblyMatrixMultiplyCore, uint8_t &gt;</td></tr>
 <tr class="separator:a81a5e6a019eb49bf186adbae0baa7325"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a59af82151dcf24adc0f37077b324627e"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a59af82151dcf24adc0f37077b324627e">NEInterleaveBlocked</a> = NESynthetizeFunction&lt; NEGEMMInterleaveBlockedKernel &gt;</td></tr>
-<tr class="separator:a59af82151dcf24adc0f37077b324627e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeca58b06cdc60571e2cc28dc9d7c5543"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aeca58b06cdc60571e2cc28dc9d7c5543">NEGEMMInterleaveBlockedFixture</a> = GEMMInterleaveBlockedValidationFixture&lt; Tensor, Accessor, NEInterleaveBlocked &gt;</td></tr>
-<tr class="separator:aeca58b06cdc60571e2cc28dc9d7c5543"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a38192c506e584cf71509211ec11bafdf"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a38192c506e584cf71509211ec11bafdf">NEInterleaveBlockedTransposed</a> = NESynthetizeFunction&lt; NEGEMMInterleaveBlockedKernel &gt;</td></tr>
-<tr class="separator:a38192c506e584cf71509211ec11bafdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a27b4b49a7797215b519ce3e9c64cc678"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a27b4b49a7797215b519ce3e9c64cc678">NEGEMMInterleaveBlockedTransposedFixture</a> = GEMMInterleaveBlockedValidationFixture&lt; Tensor, Accessor, NEInterleaveBlockedTransposed, true &gt;</td></tr>
-<tr class="separator:a27b4b49a7797215b519ce3e9c64cc678"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad6880410d254bb87a46a663bcdd944bf"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ad6880410d254bb87a46a663bcdd944bf">NEGEMMLowpMatrixMultiplyCoreFixture</a> = GEMMLowpMatrixMultiplyCoreValidationFixture&lt; Tensor, Accessor, NEGEMMLowpMatrixMultiplyCore &gt;</td></tr>
 <tr class="separator:ad6880410d254bb87a46a663bcdd944bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a174a5f51b17ff15bdf18ece0907ce1b0"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a174a5f51b17ff15bdf18ece0907ce1b0">NEGEMMLowpQuantizeDownInt32ToUint8ScaleFixture</a> = GEMMLowpQuantizeDownInt32ToUint8ScaleValidationFixture&lt; Tensor, Accessor, NEGEMMLowpQuantizeDownInt32ToUint8Scale &gt;</td></tr>
@@ -182,10 +171,6 @@ Functions</h2></td></tr>
 <tr class="separator:acacfa792d9ac8cc563f34f192c9fdf7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aff14b2b9d2c0f1013bcbecc88d620a8d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aff14b2b9d2c0f1013bcbecc88d620a8d">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NEGEMMAssemblyFixture_U8, framework::DatasetMode::PRECOMMIT, data_matrix_multiply)</td></tr>
 <tr class="separator:aff14b2b9d2c0f1013bcbecc88d620a8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a653a3831fd0aaa026d574647e2327bc0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a653a3831fd0aaa026d574647e2327bc0">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NEGEMMInterleaveBlockedFixture, framework::DatasetMode::PRECOMMIT, data_int_blk)</td></tr>
-<tr class="separator:a653a3831fd0aaa026d574647e2327bc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a35d32316aca679919af5c84e176eae91"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a35d32316aca679919af5c84e176eae91">FIXTURE_DATA_TEST_CASE</a> (RunSmall, NEGEMMInterleaveBlockedTransposedFixture, framework::DatasetMode::PRECOMMIT, data_int_blk_tr)</td></tr>
-<tr class="separator:a35d32316aca679919af5c84e176eae91"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac60bce01d83538dd27cddcbea97046c8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ac60bce01d83538dd27cddcbea97046c8">DATA_TEST_CASE</a> (Configuration, framework::DatasetMode::ALL, framework::dataset::concat(datasets::SmallGEMMLowpDataset(), datasets::LargeGEMMLowpDataset()), shape_a, shape_b, shape_c, a_offset, b_offset)</td></tr>
 <tr class="separator:ac60bce01d83538dd27cddcbea97046c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4c5ee20f9d24c1402ddf06145ccb2aa0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a4c5ee20f9d24c1402ddf06145ccb2aa0">DATA_TEST_CASE</a> (Validate, framework::DatasetMode::ALL, zip(zip(zip(framework::dataset::make(&quot;InputAInfo&quot;,{TensorInfo(TensorShape(21U, 13U), 1, DataType::QASYMM8, QuantizationInfo(1.f/255, 10)), TensorInfo(TensorShape(21U, 13U), 1, DataType::QS8, 2), TensorInfo(TensorShape(20U, 13U), 1, DataType::QASYMM8, QuantizationInfo(1.f/255, 10)), TensorInfo(TensorShape(21U, 13U), 1, DataType::QASYMM8, QuantizationInfo(1.f/255, 10)), TensorInfo(TensorShape(16U, 32U), 1, DataType::QASYMM8, QuantizationInfo(1.f/255, 10)),}), framework::dataset::make(&quot;InputBInfo&quot;,{TensorInfo(TensorShape(33U, 21U), 1, DataType::QASYMM8, QuantizationInfo(1.f/256, 10)), TensorInfo(TensorShape(33U, 21U), 1, DataType::QASYMM8, QuantizationInfo(1.f/256, 10)), TensorInfo(TensorShape(33U, 21U), 1, DataType::QASYMM8, QuantizationInfo(1.f/256, 10)), TensorInfo(TensorShape(33U, 21U), 1, DataType::QASYMM8, QuantizationInfo(1.f/256, 10)), TensorInfo(TensorShape(64U, 16U), 1, DataType::QASYMM8, QuantizationInfo(1.f/256, 10)),})), framework::dataset::make(&quot;OutputInfo&quot;,{TensorInfo(TensorShape(33U, 13U), 1, DataType::S32), TensorInfo(TensorShape(33U, 13U), 1, DataType::S32), TensorInfo(TensorShape(33U, 13U), 1, DataType::S32), TensorInfo(TensorShape(8U, 11U), 1, DataType::S32), TensorInfo(TensorShape(64U, 32U), 1, DataType::S32),})), framework::dataset::make(&quot;Expected&quot;,{false, false, false, false, true})), a_info, b_info, output_info, expected)</td></tr>
@@ -221,7 +206,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_e7c7b16542faa38cb4655ff1750d3604.xhtml">validation</a></li><li class="navelem"><a class="el" href="dir_0538a82dae0483a21d0f1e9d7e0a45c6.xhtml">NEON</a></li><li class="navelem"><a class="el" href="validation_2_n_e_o_n_2_g_e_m_m_lowp_8cpp.xhtml">GEMMLowp.cpp</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:56 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

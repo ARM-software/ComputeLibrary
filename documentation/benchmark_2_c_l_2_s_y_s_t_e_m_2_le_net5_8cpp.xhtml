@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -131,10 +131,10 @@ $(document).ready(function(){initNavTree('benchmark_2_c_l_2_s_y_s_t_e_m_2_le_net
 <code>#include &quot;<a class="el" href="_c_l_pooling_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLPoolingLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_softmax_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLSoftmaxLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_accessor_8h_source.xhtml">tests/CL/CLAccessor.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_le_net5_fixture_8h_source.xhtml">tests/benchmark/fixtures/LeNet5Fixture.h</a>&quot;</code><br />
+<code>#include &quot;tests/benchmark/fixtures/LeNet5Fixture.h&quot;</code><br />
 <code>#include &quot;<a class="el" href="tests_2framework_2_macros_8h_source.xhtml">tests/framework/Macros.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_datasets_8h_source.xhtml">tests/framework/datasets/Datasets.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_type_printer_8h_source.xhtml">utils/TypePrinter.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="utils_2_type_printer_8h_source.xhtml">utils/TypePrinter.h</a>&quot;</code><br />
 </div>
 <p><a href="benchmark_2_c_l_2_s_y_s_t_e_m_2_le_net5_8cpp_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -145,16 +145,18 @@ Namespaces</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacearm__compute_1_1test"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml">arm_compute::test</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:namespacearm__compute_1_1test_1_1benchmark"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml">arm_compute::test::benchmark</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:ae3b678c8477dd5acc5e264eae37b562c"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#ae3b678c8477dd5acc5e264eae37b562c">CLLeNet5Fixture</a> = <a class="el" href="classarm__compute_1_1test_1_1_le_net5_fixture.xhtml">LeNet5Fixture</a>&lt; <a class="el" href="classarm__compute_1_1_c_l_tensor.xhtml">CLTensor</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml">CLAccessor</a>, <a class="el" href="classarm__compute_1_1_c_l_activation_layer.xhtml">CLActivationLayer</a>, <a class="el" href="classarm__compute_1_1_c_l_convolution_layer.xhtml">CLConvolutionLayer</a>, <a class="el" href="classarm__compute_1_1_c_l_fully_connected_layer.xhtml">CLFullyConnectedLayer</a>, <a class="el" href="classarm__compute_1_1_c_l_pooling_layer.xhtml">CLPoolingLayer</a>, <a class="el" href="classarm__compute_1_1_c_l_softmax_layer.xhtml">CLSoftmaxLayer</a> &gt;</td></tr>
+<tr class="memitem:ae3b678c8477dd5acc5e264eae37b562c"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#ae3b678c8477dd5acc5e264eae37b562c">CLLeNet5Fixture</a> = LeNet5Fixture&lt; CLTensor, CLAccessor, CLActivationLayer, CLConvolutionLayer, CLFullyConnectedLayer, CLPoolingLayer, CLSoftmaxLayer &gt;</td></tr>
 <tr class="separator:ae3b678c8477dd5acc5e264eae37b562c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a485c6b6af55e2f12c1b7ef40546c08f7"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a485c6b6af55e2f12c1b7ef40546c08f7">REGISTER_FIXTURE_DATA_TEST_CASE</a> (LeNet5, <a class="el" href="namespacearm__compute_1_1test.xhtml#ae3b678c8477dd5acc5e264eae37b562c">CLLeNet5Fixture</a>, framework::DatasetMode::ALL, framework::dataset::make(&quot;Batches&quot;,{1, 4, 8}))</td></tr>
-<tr class="separator:a485c6b6af55e2f12c1b7ef40546c08f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32e726a8a21441302e83cfed493f6741"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a32e726a8a21441302e83cfed493f6741">REGISTER_FIXTURE_DATA_TEST_CASE</a> (LeNet5, CLLeNet5Fixture, framework::DatasetMode::ALL, framework::dataset::make(&quot;Batches&quot;,{1, 4, 8}))</td></tr>
+<tr class="separator:a32e726a8a21441302e83cfed493f6741"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -162,7 +164,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_4f2df8950dc650bf7cf9176fae02facc.xhtml">benchmark</a></li><li class="navelem"><a class="el" href="dir_4da487531dc5bdc76b523c9e82b781b1.xhtml">CL</a></li><li class="navelem"><a class="el" href="dir_2dfba1021aeb15d8e1228add590b046a.xhtml">SYSTEM</a></li><li class="navelem"><a class="el" href="benchmark_2_c_l_2_s_y_s_t_e_m_2_le_net5_8cpp.xhtml">LeNet5.cpp</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:56 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -64,6 +64,7 @@ public:
     {
     }
 
+    /** Allow instances of this class to be move constructed */
     JoinDataset(JoinDataset &&) = default;
 
     /** Type of the dataset. */
@@ -72,21 +73,38 @@ public:
     /** Iterator for the dataset. */
     struct iterator
     {
+        /** Construct an iterator.
+         *
+         * @param[in] dataset1 Dataset 1.
+         * @param[in] dataset2 Dataset 2.
+         */
         iterator(const T_noref *dataset1, const U_noref *dataset2)
             : _iter1{ dataset1->begin() }, _iter2{ dataset2->begin() }, _first_size{ dataset1->size() }
         {
         }
 
+        /** Get the description of the current value.
+         *
+         * @return description of the current value.
+         */
         std::string description() const
         {
             return _first_size > 0 ? _iter1.description() : _iter2.description();
         }
 
+        /** Get the value of the iterator.
+         *
+         * @return the value of the iterator.
+         */
         JoinDataset::type operator*() const
         {
             return _first_size > 0 ? *_iter1 : *_iter2;
         }
 
+        /** Inrement the iterator.
+         *
+         * @return *this;
+         */
         iterator &operator++()
         {
             if(_first_size > 0)

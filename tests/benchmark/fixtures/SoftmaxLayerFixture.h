@@ -35,6 +35,8 @@ namespace arm_compute
 {
 namespace test
 {
+namespace benchmark
+{
 /** Fixture that can be used for NEON, CL and OpenGL ES */
 template <typename TensorType, typename Function, typename Accessor>
 class SoftmaxLayerFixture : public framework::Fixture
@@ -82,6 +84,7 @@ private:
     TensorType dst{};
     Function   smx_layer{};
 };
+} // namespace benchmark
 } // namespace test
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_TEST_SOFTMAXLAYERFIXTURE */

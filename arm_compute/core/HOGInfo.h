@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2018 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -129,13 +129,13 @@ public:
      * @return The Size2D data object which stores the number of cells per block stride along the x and y directions
      */
     Size2D num_cells_per_block_stride() const;
-    /** Calculates the number of blocks for the given image size
+    /** Calculates the number of block positions for the given image size
      *
      * @param[in] image_size The input image size data object
      *
-     * @return The Size2D data object which stores the number of blocks along the x and y directions
+     * @return The Size2D data object which stores the number of block positions along the x and y directions
      */
-    Size2D num_blocks_per_image(const Size2D &image_size) const;
+    Size2D num_block_positions_per_image(const Size2D &image_size) const;
 
 private:
     Size2D      _cell_size;

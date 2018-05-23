@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,13 +36,13 @@ class IGCSimpleKernel : public IGCKernel
 public:
     /** Constructor. */
     IGCSimpleKernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     IGCSimpleKernel(const IGCSimpleKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     IGCSimpleKernel &operator=(const IGCSimpleKernel &) = delete;
-    /** Allow instances of this class to be moved. */
+    /** Allow instances of this class to be moved */
     IGCSimpleKernel(IGCSimpleKernel &&) = default;
-    /** Allow instances of this class to be moved. */
+    /** Allow instances of this class to be moved */
     IGCSimpleKernel &operator=(IGCSimpleKernel &&) = default;
     /** Default destructor */
     ~IGCSimpleKernel() = default;

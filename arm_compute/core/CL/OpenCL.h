@@ -43,8 +43,13 @@ static const NDRange Range_128_1 = NDRange(128, 1);
 
 namespace arm_compute
 {
+/** Check if OpenCL is available.
+ *
+ * @return True if OpenCL is available.
+ */
 bool opencl_is_available();
 
+/** Class for loading OpenCL symbols. */
 class CLSymbols final
 {
 private:
@@ -52,8 +57,22 @@ private:
     void load_symbols(void *handle);
 
 public:
+    /** Get the static instance of CLSymbols.
+     *
+     * @return The static instance of CLSymbols.
+     */
     static CLSymbols &get();
+    /** Load symbols from the given OpenCL library path.
+     *
+     * @param[in] library Path to the OpenCL library.
+     *
+     * @return True if loading the library is successful.
+     */
     bool load(const std::string &library);
+    /** Load symbols from any of the default OpenCL library names.
+     *
+     * @return True if loading any library is successful.
+     */
     bool load_default();
 
 #define DECLARE_FUNCTION_PTR(func_name) \
@@ -96,6 +115,12 @@ public:
     DECLARE_FUNCTION_PTR(clGetCommandQueueInfo);
     DECLARE_FUNCTION_PTR(clGetKernelInfo);
     DECLARE_FUNCTION_PTR(clGetEventProfilingInfo);
+    DECLARE_FUNCTION_PTR(clSVMAlloc);
+    DECLARE_FUNCTION_PTR(clSVMFree);
+    DECLARE_FUNCTION_PTR(clEnqueueSVMMap);
+    DECLARE_FUNCTION_PTR(clEnqueueSVMUnmap);
+    DECLARE_FUNCTION_PTR(clEnqueueMarker);
+    DECLARE_FUNCTION_PTR(clWaitForEvents);
 
 #undef DECLARE_FUNCTION_PTR
 

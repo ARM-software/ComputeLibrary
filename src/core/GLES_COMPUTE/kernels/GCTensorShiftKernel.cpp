@@ -36,7 +36,6 @@
 #include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
-using namespace arm_compute::gles_compute;
 
 GCTensorShiftKernel::GCTensorShiftKernel()
     : _input(nullptr), _lws(gles::NDRange(1U, 1U, 1U)), _left_padding(0)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,7 +34,6 @@
 #include "arm_compute/core/Window.h"
 
 using namespace arm_compute;
-using namespace arm_compute::gles_compute;
 
 GCGEMMMatrixAdditionKernel::GCGEMMMatrixAdditionKernel()
     : _input(nullptr), _output(nullptr)

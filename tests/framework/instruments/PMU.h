@@ -64,10 +64,16 @@ public:
     template <typename T>
     T get_value() const;
 
-    /** Open the specified counter based on the default configuration. */
+    /** Open the specified counter based on the default configuration.
+     *
+     * @param[in] config The default configuration.
+     */
     void open(uint64_t config);
 
-    /** Open the specified configuration. */
+    /** Open the specified configuration.
+     *
+     * @param[in] perf_config The specified configuration.
+     */
     void open(const perf_event_attr &perf_config);
 
     /** Close the currently open counter. */

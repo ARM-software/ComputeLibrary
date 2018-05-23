@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -170,8 +170,19 @@ $(document).ready(function(){initNavTree('functions_d.xhtml','');});
 , <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#ad3b74abc0bab69f337c70783e73f5bef">CLAccessor</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a0c52a8f0085b55d907af7210ef2069d0">SimpleTensor&lt; T &gt;</a>
 </li>
-<li>data_type()
-: <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a7cfb31af63202568efef5214acfbf3ba">ITensorInfo</a>
+<li>data_layout()
+: <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a367b5090ab432bc7de2c32369e087ab1">ITensorInfo</a>
+, <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#a5f63b63606dbbbe54474e6e970a6738c">SubTensorInfo</a>
+, <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#a5f63b63606dbbbe54474e6e970a6738c">TensorInfo</a>
+, <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#a5f63b63606dbbbe54474e6e970a6738c">Accessor</a>
+, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#a5f63b63606dbbbe54474e6e970a6738c">CLAccessor</a>
+, <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a5f63b63606dbbbe54474e6e970a6738c">GCAccessor</a>
+, <a class="el" href="classarm__compute_1_1test_1_1_i_accessor.xhtml#a367b5090ab432bc7de2c32369e087ab1">IAccessor</a>
+, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a5f63b63606dbbbe54474e6e970a6738c">SimpleTensor&lt; T &gt;</a>
+</li>
+<li>data_type
+: <a class="el" href="structarm__compute_1_1graph_1_1_tensor_descriptor.xhtml#a6118865e7371b107bd5fb4dd4a9e99a3">TensorDescriptor</a>
+, <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a7cfb31af63202568efef5214acfbf3ba">ITensorInfo</a>
 , <a class="el" href="classarm__compute_1_1_sub_tensor_info.xhtml#a9a3e72153aeb3ed212e9c3698774e881">SubTensorInfo</a>
 , <a class="el" href="classarm__compute_1_1_tensor_info.xhtml#a9a3e72153aeb3ed212e9c3698774e881">TensorInfo</a>
 , <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#a9a3e72153aeb3ed212e9c3698774e881">Accessor</a>
@@ -185,6 +196,9 @@ $(document).ready(function(){initNavTree('functions_d.xhtml','');});
 </li>
 <li>DataTestCaseFactory()
 : <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_data_test_case_factory.xhtml#aacdf355fbfb7579c36e50c757809c148">DataTestCaseFactory&lt; T, D &gt;</a>
+</li>
+<li>ddk_version
+: <a class="el" href="structarm__compute_1_1_c_l_device_options.xhtml#ae19afa6eae26622a0068daa092b25f6a">CLDeviceOptions</a>
 </li>
 <li>decorate()
 : <a class="el" href="classarm__compute_1_1logging_1_1_date_decorator.xhtml#a7cc31af1c60cf2317350fca65ba16597">DateDecorator</a>
@@ -200,38 +214,33 @@ $(document).ready(function(){initNavTree('functions_d.xhtml','');});
 <li>default_ndrange()
 : <a class="el" href="classarm__compute_1_1_c_l_kernel_library.xhtml#a6dc2398a934f02224ad3743185f27699">CLKernelLibrary</a>
 </li>
-<li>DepthConcatenateLayerShapes()
-: <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_depth_concatenate_layer_shapes.xhtml#aad6e899d276c6cd937242b0d8a3d8632">DepthConcatenateLayerShapes</a>
+<li>default_visit()
+: <a class="el" href="classarm__compute_1_1graph_1_1_default_node_visitor.xhtml#a78d9695424cce30cc0465770427fab06">DefaultNodeVisitor</a>
+, <a class="el" href="classarm__compute_1_1graph_1_1_dot_graph_visitor.xhtml#af62b93bea1e98919a10bf65eb71f9fce">DotGraphVisitor</a>
 </li>
-<li>DepthConvertLayer()
-: <a class="el" href="classarm__compute_1_1graph_1_1_depth_convert_layer.xhtml#ad18269df802e687a49b318d6a1276f88">DepthConvertLayer</a>
+<li>DepthConcatenateLayerNode()
+: <a class="el" href="classarm__compute_1_1graph_1_1_depth_concatenate_layer_node.xhtml#a56e2f16867dd2ff0b6ceb7ba242317ad">DepthConcatenateLayerNode</a>
+</li>
+<li>depthwise_convolution_method()
+: <a class="el" href="classarm__compute_1_1graph_1_1_depthwise_convolution_layer_node.xhtml#a715cc3cf041f67ddeaffc9f8916a41aa">DepthwiseConvolutionLayerNode</a>
+</li>
+<li>depthwise_convolution_method_hint
+: <a class="el" href="structarm__compute_1_1graph_1_1frontend_1_1_stream_hints.xhtml#a67ede056be3dfba6dfbb934a1b96661e">StreamHints</a>
 </li>
 <li>DepthwiseConvolutionLayer()
-: <a class="el" href="classarm__compute_1_1graph_1_1_depthwise_convolution_layer.xhtml#a05b24637e46bb00e60e6e4c4efdf8054">DepthwiseConvolutionLayer</a>
+: <a class="el" href="classarm__compute_1_1graph_1_1frontend_1_1_depthwise_convolution_layer.xhtml#a36e83ad4becd0b24268a048413726f49">DepthwiseConvolutionLayer</a>
 </li>
-<li>DequantizationLayer()
-: <a class="el" href="classarm__compute_1_1graph_1_1_dequantization_layer.xhtml#a94b1a90ed04042ae1d4caa7f37fb5876">DequantizationLayer</a>
+<li>DepthwiseConvolutionLayerNode()
+: <a class="el" href="classarm__compute_1_1graph_1_1_depthwise_convolution_layer_node.xhtml#ae9cb7fc533420bbfa029f6019106b7c5">DepthwiseConvolutionLayerNode</a>
 </li>
 <li>dequantize()
 : <a class="el" href="structarm__compute_1_1_quantization_info.xhtml#a9f956adfa6525f0edd3c702e7e5afb8f">QuantizationInfo</a>
 </li>
+<li>desc()
+: <a class="el" href="classarm__compute_1_1graph_1_1_tensor.xhtml#ace1b6c0005a4c373e54bcfdc6d5b7d68">Tensor</a>
+</li>
 <li>description()
-: <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_batch_normalization_layer_dataset_1_1iterator.xhtml#a7b5000e45c1386c4e56ef650f6b0ef5b">BatchNormalizationLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_convolution_layer_dataset_1_1iterator.xhtml#a7b5000e45c1386c4e56ef650f6b0ef5b">ConvolutionLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_depthwise_convolution_layer_dataset_1_1iterator.xhtml#a7b5000e45c1386c4e56ef650f6b0ef5b">DepthwiseConvolutionLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_depthwise_separable_convolution_layer_dataset_1_1iterator.xhtml#a7b5000e45c1386c4e56ef650f6b0ef5b">DepthwiseSeparableConvolutionLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_fully_connected_layer_dataset_1_1iterator.xhtml#a7b5000e45c1386c4e56ef650f6b0ef5b">FullyConnectedLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_g_e_m_m_dataset_1_1iterator.xhtml#a7b5000e45c1386c4e56ef650f6b0ef5b">GEMMDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_g_e_m_m_lowp_dataset_1_1iterator.xhtml#a7b5000e45c1386c4e56ef650f6b0ef5b">GEMMLowpDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_h_o_g_descriptor_dataset_1_1iterator.xhtml#a7b5000e45c1386c4e56ef650f6b0ef5b">HOGDescriptorDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_image_file_dataset_1_1iterator.xhtml#a7b5000e45c1386c4e56ef650f6b0ef5b">ImageFileDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_normalize_planar_y_u_v_layer_dataset_1_1iterator.xhtml#a7b5000e45c1386c4e56ef650f6b0ef5b">NormalizePlanarYUVLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_pooling_layer_dataset_1_1iterator.xhtml#a7b5000e45c1386c4e56ef650f6b0ef5b">PoolingLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_reshape_layer_dataset_1_1iterator.xhtml#a7b5000e45c1386c4e56ef650f6b0ef5b">ReshapeLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_r_o_i_pooling_layer_dataset_1_1iterator.xhtml#a7b5000e45c1386c4e56ef650f6b0ef5b">ROIPoolingLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_scale_layer_dataset_1_1iterator.xhtml#a7b5000e45c1386c4e56ef650f6b0ef5b">ScaleLayerDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1datasets_1_1_threshold_dataset_1_1iterator.xhtml#a7b5000e45c1386c4e56ef650f6b0ef5b">ThresholdDataset::iterator</a>
-, <a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_cartesian_product_dataset_1_1iterator.xhtml#a7b5000e45c1386c4e56ef650f6b0ef5b">CartesianProductDataset&lt; T, U &gt;::iterator</a>
+: <a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_cartesian_product_dataset_1_1iterator.xhtml#a7b5000e45c1386c4e56ef650f6b0ef5b">CartesianProductDataset&lt; T, U &gt;::iterator</a>
 , <a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_container_dataset_1_1iterator.xhtml#a7b5000e45c1386c4e56ef650f6b0ef5b">ContainerDataset&lt; T &gt;::iterator</a>
 , <a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_initializer_list_dataset_1_1iterator.xhtml#a7b5000e45c1386c4e56ef650f6b0ef5b">InitializerListDataset&lt; T &gt;::iterator</a>
 , <a class="el" href="structarm__compute_1_1test_1_1framework_1_1dataset_1_1_join_dataset_1_1iterator.xhtml#a7b5000e45c1386c4e56ef650f6b0ef5b">JoinDataset&lt; T, U &gt;::iterator</a>
@@ -243,6 +252,9 @@ $(document).ready(function(){initNavTree('functions_d.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_h_o_g.xhtml#a548b8c6fda024da07113ff6cf6ec6af6">HOG</a>
 , <a class="el" href="classarm__compute_1_1_i_c_l_h_o_g.xhtml#a548b8c6fda024da07113ff6cf6ec6af6">ICLHOG</a>
 , <a class="el" href="classarm__compute_1_1_i_h_o_g.xhtml#afc824305b2eaceab36baf5b66a535316">IHOG</a>
+, <a class="el" href="classarm__compute_1_1test_1_1_c_l_h_o_g_accessor.xhtml#a548b8c6fda024da07113ff6cf6ec6af6">CLHOGAccessor</a>
+, <a class="el" href="classarm__compute_1_1test_1_1_h_o_g_accessor.xhtml#a548b8c6fda024da07113ff6cf6ec6af6">HOGAccessor</a>
+, <a class="el" href="classarm__compute_1_1test_1_1_i_h_o_g_accessor.xhtml#afc824305b2eaceab36baf5b66a535316">IHOGAccessor</a>
 </li>
 <li>descriptor_size()
 : <a class="el" href="classarm__compute_1_1_h_o_g_info.xhtml#a8f6435e0a7c016e3cb0fc94b33067e50">HOGInfo</a>
@@ -259,7 +271,7 @@ $(document).ready(function(){initNavTree('functions_d.xhtml','');});
 : <a class="el" href="classarm__compute_1_1_window_1_1_dimension.xhtml#a2c532d398a5661ff04367252701fa3d4">Window::Dimension</a>
 </li>
 <li>Dimensions()
-: <a class="el" href="classarm__compute_1_1_dimensions.xhtml#aa521fcebc508ef8447da413cc64d020a">Dimensions&lt; T &gt;</a>
+: <a class="el" href="classarm__compute_1_1_dimensions.xhtml#aa2c609345b3b6fa8da2486f75fff8ed8">Dimensions&lt; T &gt;</a>
 </li>
 <li>dimensions()
 : <a class="el" href="classarm__compute_1_1gles_1_1_n_d_range.xhtml#a25852fda6086826370f2230b22549c0f">NDRange</a>
@@ -275,8 +287,8 @@ $(document).ready(function(){initNavTree('functions_d.xhtml','');});
 <li>DimZ
 : <a class="el" href="classarm__compute_1_1_window.xhtml#a893d17b56b9abc4423ce26e9a24ac5dc">Window</a>
 </li>
-<li>DirectConvolutionLayerDataset()
-: <a class="el" href="classarm__compute_1_1test_1_1datasets_1_1_direct_convolution_layer_dataset.xhtml#ad091161b4638cc29d326237f9a8ac9e5">DirectConvolutionLayerDataset</a>
+<li>disconnect()
+: <a class="el" href="classarm__compute_1_1utils_1_1signal_1_1detail_1_1_signal_impl_3_01_return_type_07_args_8_8_8_08_4.xhtml#a960705de531a20389fb29928d43258c3">SignalImpl&lt; ReturnType(Args...)&gt;</a>
 </li>
 <li>dispatch()
 : <a class="el" href="classarm__compute_1_1_g_c_scheduler.xhtml#a66a29e27a51a13250143981b0ee4ad19">GCScheduler</a>
@@ -302,6 +314,9 @@ $(document).ready(function(){initNavTree('functions_d.xhtml','');});
 : <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_test_case.xhtml#a9b3acd6be09cf86066760caaa89f7be5">TestCase</a>
 , <a class="el" href="classarm__compute_1_1utils_1_1_example.xhtml#a9b3acd6be09cf86066760caaa89f7be5">Example</a>
 </li>
+<li>DotGraphVisitor()
+: <a class="el" href="classarm__compute_1_1graph_1_1_dot_graph_visitor.xhtml#aba079420016162d60cc142401885db44">DotGraphVisitor</a>
+</li>
 <li>dummy
 : <a class="el" href="structarm__compute_1_1_c_l_l_k_internal_keypoint.xhtml#aaf67d90c5e431e85ea2b7681537beab9">CLLKInternalKeypoint</a>
 , <a class="el" href="structarm__compute_1_1_c_l_old_value.xhtml#a7531a17738ce5ec5517e2d160e7508a0">CLOldValue</a>
@@ -309,7 +324,7 @@ $(document).ready(function(){initNavTree('functions_d.xhtml','');});
 , <a class="el" href="struct_internal_keypoint.xhtml#aaf67d90c5e431e85ea2b7681537beab9">InternalKeypoint</a>
 </li>
 <li>DummyAccessor()
-: <a class="el" href="classarm__compute_1_1graph__utils_1_1_dummy_accessor.xhtml#ac5ae9597ba20e5581726743fe7c154b5">DummyAccessor</a>
+: <a class="el" href="classarm__compute_1_1graph__utils_1_1_dummy_accessor.xhtml#a4a48cd865f33e4a907338c42d652d80f">DummyAccessor</a>
 </li>
 <li>duplicate()
 : <a class="el" href="classarm__compute_1_1_blob_memory_pool.xhtml#aceea990dd135afa94795f0ad3a532df5">BlobMemoryPool</a>
@@ -322,7 +337,7 @@ $(document).ready(function(){initNavTree('functions_d.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Fri Mar 2 2018 12:38:02 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:46 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

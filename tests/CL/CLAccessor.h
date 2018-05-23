@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,18 +44,35 @@ public:
      */
     CLAccessor(CLTensor &tensor);
 
+    /** Prevent instances of this class from being copy constructed */
     CLAccessor(const CLAccessor &) = delete;
+    /** Prevent instances of this class from being copied */
     CLAccessor &operator=(const CLAccessor &) = delete;
-    CLAccessor(CLAccessor &&)                 = default;
+    /** Allow instances of this class to be move constructed */
+    CLAccessor(CLAccessor &&) = default;
+    /** Allow instances of this class to be moved */
     CLAccessor &operator=(CLAccessor &&) = default;
 
     /** Destructor that unmaps the CL memory. */
     ~CLAccessor();
 
+    /** Get the tensor data.
+     *
+     * @return a constant pointer to the tensor data.
+     */
+    const void *data() const;
+    /** Get the tensor data.
+     *
+     * @return a pointer to the tensor data.
+     */
+    void *data();
+
+    // Inherited method overrides
     TensorShape      shape() const override;
     size_t           element_size() const override;
     size_t           size() const override;
     Format           format() const override;
+    DataLayout       data_layout() const override;
     DataType         data_type() const override;
     int              num_channels() const override;
     int              num_elements() const override;
@@ -64,8 +81,6 @@ public:
     QuantizationInfo quantization_info() const override;
     const void *operator()(const Coordinates &coord) const override;
     void *operator()(const Coordinates &coord) override;
-    const void *data() const;
-    void       *data();
 
 private:
     CLTensor &_tensor;
@@ -100,6 +115,11 @@ inline size_t CLAccessor::size() const
 inline Format CLAccessor::format() const
 {
     return _tensor.info()->format();
+}
+
+inline DataLayout CLAccessor::data_layout() const
+{
+    return _tensor.info()->data_layout();
 }
 
 inline DataType CLAccessor::data_type() const

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,12 +47,23 @@ public:
     NEReductionOperation();
     /** Set the input and output tensors.
      *
-     * @param[in, out] input  Source tensor. Data type supported: F32. (Written to only for border_size != 0)
-     * @param[out]     output Destination tensor. Data types supported: same as @p input.
+     * @param[in, out] input  Source tensor. Data type supported: F32. Data layouts supported: NCHW. (Written to only for border_size != 0)
+     * @param[out]     output Destination tensor. Data types and data layouts supported: same as @p input.
      * @param[in]      axis   Dimension along which to reduce. Supported reduction axis : 0
      * @param[in]      op     Reduction operation to perform.
      */
     void configure(ITensor *input, ITensor *output, unsigned int axis, ReductionOperation op);
+
+    /** Static function to check if given info will lead to a valid configuration of @ref NEReductionOperation.
+     *
+     * @param[in] input  Source tensor info. Data type supported: F32. Data layouts supported: NCHW. (Written to only for border_size != 0)
+     * @param[in] output Destination tensor info. Data types and data layouts supported: same as @p input.
+     * @param[in] axis   Dimension along which to reduce. Supported reduction axis : 0
+     * @param[in] op     Reduction operation to perform.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op);
 
     // Inherited methods overridden:
     void run() override;

@@ -43,6 +43,8 @@ namespace arm_compute
 {
 namespace test
 {
+namespace benchmark
+{
 using CLMobileNetV1_224_Fixture = MobileNetV1Fixture<CLTensor,
       CLAccessor,
       CLActivationLayer,
@@ -78,5 +80,6 @@ REGISTER_FIXTURE_DATA_TEST_CASE(MobileNetV1_128, CLMobileNetV1_128_Fixture, fram
 
 TEST_SUITE_END()
 TEST_SUITE_END()
+} // namespace benchmark
 } // namespace test
 } // namespace arm_compute

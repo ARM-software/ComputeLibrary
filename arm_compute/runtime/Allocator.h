@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,12 +26,14 @@
 
 #include "arm_compute/runtime/IAllocator.h"
 
+#include "arm_compute/runtime/IMemoryRegion.h"
+
 #include <cstddef>
 
 namespace arm_compute
 {
 /** Default malloc allocator implementation */
-class Allocator : public IAllocator
+class Allocator final : public IAllocator
 {
 public:
     /** Default constructor */
@@ -40,6 +42,7 @@ public:
     // Inherited methods overridden:
     void *allocate(size_t size, size_t alignment) override;
     void free(void *ptr) override;
+    std::unique_ptr<IMemoryRegion> make_region(size_t size, size_t alignment) override;
 };
 } // arm_compute
 #endif /*__ARM_COMPUTE_ALLOCATOR_H__ */

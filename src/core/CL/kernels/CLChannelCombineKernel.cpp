@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -48,41 +48,62 @@ CLChannelCombineKernel::CLChannelCombineKernel()
 
 void CLChannelCombineKernel::configure(const ICLTensor *plane0, const ICLTensor *plane1, const ICLTensor *plane2, const ICLTensor *plane3, ICLTensor *output)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(plane0, plane1, plane2, output);
+    ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(plane0);
+    ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(plane1);
+    ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(plane2);
+    ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(output);
+
     ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(plane0, Format::U8);
     ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(plane1, Format::U8);
     ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(plane2, Format::U8);
     ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(output, Format::RGB888, Format::RGBA8888, Format::YUYV422, Format::UYVY422);
 
-    const Format fmt = output->info()->format();
-    _planes[0]       = plane0;
-    _planes[1]       = plane1;
-    _planes[2]       = plane2;
-    if(Format::RGBA8888 == fmt)
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(plane0, 1, DataType::U8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(plane1, 1, DataType::U8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(plane2, 1, DataType::U8);
+
+    const Format output_format = output->info()->format();
+
+    // Check if horizontal dimension of Y plane is even and validate horizontal sub-sampling dimensions for U and V planes
+    if(Format::YUYV422 == output_format || Format::UYVY422 == output_format)
     {
+        // Validate Y plane of input and output
+        ARM_COMPUTE_ERROR_ON_TENSORS_NOT_EVEN(output_format, plane0, output);
+
+        // Validate U and V plane of the input
+        ARM_COMPUTE_ERROR_ON_TENSORS_NOT_SUBSAMPLED(output_format, plane0->info()->tensor_shape(), plane1, plane2);
+    }
+
+    _planes[0] = plane0;
+    _planes[1] = plane1;
+    _planes[2] = plane2;
+    _planes[3] = nullptr;
+
+    // Validate the last input tensor only for RGBA format
+    if(Format::RGBA8888 == output_format)
+    {
+        ARM_COMPUTE_ERROR_ON_NULLPTR(plane3);
+        ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(plane3);
+
         ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(plane3, Format::U8);
+        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(plane3, 1, DataType::U8);
+
         _planes[3] = plane3;
     }
-    else
-    {
-        _planes[3] = nullptr;
-    }
+
     _output       = output;
     _output_multi = nullptr;
 
-    // Half the processed elements for U,V channels due to sub-sampling of 2
-    if(Format::YUYV422 == fmt || Format::UYVY422 == fmt)
+    // Half the processed elements for U and V channels due to horizontal sub-sampling of 2
+    if(Format::YUYV422 == output_format || Format::UYVY422 == output_format)
     {
-        _x_subsampling = { { 1, 2, 2 } };
-        _y_subsampling = { { 1, 2, 2 } };
-    }
-    else
-    {
-        _x_subsampling = { { 1, 1, 1 } };
-        _y_subsampling = { { 1, 1, 1 } };
+        _x_subsampling[1] = 2;
+        _x_subsampling[2] = 2;
     }
 
     // Create kernel
-    std::string kernel_name = "channel_combine_" + string_from_format(fmt);
+    std::string kernel_name = "channel_combine_" + string_from_format(output_format);
     _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name));
 
     // Configure window
@@ -112,50 +133,78 @@ void CLChannelCombineKernel::configure(const ICLTensor *plane0, const ICLTensor 
 
 void CLChannelCombineKernel::configure(const ICLImage *plane0, const ICLImage *plane1, const ICLImage *plane2, ICLMultiImage *output)
 {
+    ARM_COMPUTE_ERROR_ON_NULLPTR(plane0, plane1, plane2, output);
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(plane0);
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(plane1);
     ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(plane2);
+
     ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(plane0, Format::U8);
     ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(plane1, Format::U8);
     ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(plane2, Format::U8);
     ARM_COMPUTE_ERROR_ON_FORMAT_NOT_IN(output, Format::NV12, Format::NV21, Format::IYUV, Format::YUV444);
 
-    _planes[0]           = plane0;
-    _planes[1]           = plane1;
-    _planes[2]           = plane2;
-    _planes[3]           = nullptr;
-    _output              = nullptr;
-    _output_multi        = output;
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(plane0, 1, DataType::U8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(plane1, 1, DataType::U8);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(plane2, 1, DataType::U8);
+
+    const Format output_format = output->info()->format();
+
+    // Validate shape of Y plane to be even and shape of sub-sampling dimensions for U and V planes
+    // Perform validation only for formats which require sub-sampling.
+    if(Format::YUV444 != output_format)
+    {
+        // Validate Y plane of input and output
+        ARM_COMPUTE_ERROR_ON_TENSORS_NOT_EVEN(output_format, plane0, output->plane(0));
+
+        // Validate U and V plane of the input
+        ARM_COMPUTE_ERROR_ON_TENSORS_NOT_SUBSAMPLED(output_format, plane0->info()->tensor_shape(), plane1, plane2);
+
+        // Validate second plane U (NV12 and NV21 have a UV88 combined plane while IYUV has only the U plane)
+        // MultiImage generates the correct tensor shape but also check in case the tensor shape of planes was changed to a wrong size
+        ARM_COMPUTE_ERROR_ON_TENSORS_NOT_SUBSAMPLED(output_format, plane0->info()->tensor_shape(), output->plane(1));
+
+        // Validate the last plane V of format IYUV
+        if(Format::IYUV == output_format)
+        {
+            // Validate Y plane of the output
+            ARM_COMPUTE_ERROR_ON_TENSORS_NOT_SUBSAMPLED(output_format, plane0->info()->tensor_shape(), output->plane(2));
+        }
+    }
+
+    // Set input tensors
+    _planes[0] = plane0;
+    _planes[1] = plane1;
+    _planes[2] = plane2;
+    _planes[3] = nullptr;
+
+    // Set output tensor
+    _output       = nullptr;
+    _output_multi = output;
+
     bool has_two_planars = false;
 
     // Set sub-sampling parameters for each plane
-    const Format          fmt = output->info()->format();
     std::string           kernel_name;
     std::set<std::string> build_opts;
 
-    if(Format::NV12 == fmt || Format::NV21 == fmt)
+    if(Format::NV12 == output_format || Format::NV21 == output_format)
     {
         _x_subsampling = { { 1, 2, 2 } };
         _y_subsampling = { { 1, 2, 2 } };
         kernel_name    = "channel_combine_NV";
-        build_opts.emplace(Format::NV12 == fmt ? "-DNV12" : "-DNV21");
+        build_opts.emplace(Format::NV12 == output_format ? "-DNV12" : "-DNV21");
         has_two_planars = true;
     }
     else
     {
-        if(Format::IYUV == fmt)
+        if(Format::IYUV == output_format)
         {
             _x_subsampling = { { 1, 2, 2 } };
             _y_subsampling = { { 1, 2, 2 } };
         }
-        else
-        {
-            _x_subsampling = { { 1, 1, 1 } };
-            _y_subsampling = { { 1, 1, 1 } };
-        }
 
         kernel_name = "copy_planes_3p";
-        build_opts.emplace(Format::IYUV == fmt ? "-DIYUV" : "-DYUV444");
+        build_opts.emplace(Format::IYUV == output_format ? "-DIYUV" : "-DYUV444");
     }
 
     // Create kernel
@@ -166,12 +215,12 @@ void CLChannelCombineKernel::configure(const ICLImage *plane0, const ICLImage *p
 
     Window win = calculate_max_window(*plane0->info(), Steps(num_elems_processed_per_iteration));
 
-    AccessWindowHorizontal input_plane0_access(plane0->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowRectangle  input_plane1_access(plane1->info(), 0, 0, num_elems_processed_per_iteration, 1, 1.f / _x_subsampling[1], 1.f / _y_subsampling[1]);
-    AccessWindowRectangle  input_plane2_access(plane2->info(), 0, 0, num_elems_processed_per_iteration, 1, 1.f / _x_subsampling[2], 1.f / _y_subsampling[2]);
-    AccessWindowRectangle  output_plane0_access(output->plane(0)->info(), 0, 0, num_elems_processed_per_iteration, 1, 1.f, 1.f / _y_subsampling[1]);
-    AccessWindowRectangle  output_plane1_access(output->plane(1)->info(), 0, 0, num_elems_processed_per_iteration, 1, 1.f / _x_subsampling[1], 1.f / _y_subsampling[1]);
-    AccessWindowRectangle  output_plane2_access(has_two_planars ? nullptr : output->plane(2)->info(), 0, 0, num_elems_processed_per_iteration, 1, 1.f / _x_subsampling[2], 1.f / _y_subsampling[2]);
+    AccessWindowRectangle input_plane0_access(plane0->info(), 0, 0, num_elems_processed_per_iteration, 1.f);
+    AccessWindowRectangle input_plane1_access(plane1->info(), 0, 0, num_elems_processed_per_iteration, 1.f, 1.f / _x_subsampling[1], 1.f / _y_subsampling[1]);
+    AccessWindowRectangle input_plane2_access(plane2->info(), 0, 0, num_elems_processed_per_iteration, 1.f, 1.f / _x_subsampling[2], 1.f / _y_subsampling[2]);
+    AccessWindowRectangle output_plane0_access(output->plane(0)->info(), 0, 0, num_elems_processed_per_iteration, 1.f, 1.f, 1.f / _y_subsampling[1]);
+    AccessWindowRectangle output_plane1_access(output->plane(1)->info(), 0, 0, num_elems_processed_per_iteration, 1.f, 1.f / _x_subsampling[1], 1.f / _y_subsampling[1]);
+    AccessWindowRectangle output_plane2_access(has_two_planars ? nullptr : output->plane(2)->info(), 0, 0, num_elems_processed_per_iteration, 1.f, 1.f / _x_subsampling[2], 1.f / _y_subsampling[2]);
 
     update_window_and_padding(win,
                               input_plane0_access, input_plane1_access, input_plane2_access,
@@ -192,6 +241,7 @@ void CLChannelCombineKernel::run(const Window &window, cl::CommandQueue &queue)
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(ICLKernel::window(), window);
 
     Window slice = window.first_slice_window_2D();
+    slice.set_dimension_step(Window::DimY, 1);
 
     do
     {

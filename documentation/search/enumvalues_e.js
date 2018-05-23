@@ -1,8 +1,9 @@
 var searchData=
 [
-  ['qasymm8',['QASYMM8',['../namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6af14462d71aa842202c3e4b272c7ec924',1,'arm_compute']]],
-  ['qs16',['QS16',['../namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a48d877702a2957f5a932c43a357866f9',1,'arm_compute']]],
-  ['qs32',['QS32',['../namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6ad5695915456312560039ee411667cdbf',1,'arm_compute']]],
-  ['qs8',['QS8',['../namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6a11cde4d3551db3f9498d339a67189543',1,'arm_compute']]],
-  ['quantizationlayer',['QuantizationLayer',['../namespacearm__compute_1_1graph.xhtml#a9a2c9c31d675b34f6ec35cc1ca89e047a399e260d5d6886e9917d4313cd05f6fe',1,'arm_compute::graph']]]
+  ['pmu',['PMU',['../namespacearm__compute_1_1test_1_1framework.xhtml#aac6b258eb313f96447f4f0e273431005ab31212eaa6bb6d27e51301ef753dd4a8',1,'arm_compute::test::framework']]],
+  ['pmu_5fcycle_5fcounter',['PMU_CYCLE_COUNTER',['../namespacearm__compute_1_1test_1_1framework.xhtml#aac6b258eb313f96447f4f0e273431005ae84d32a2737edd67fcd3616cf7a674f7',1,'arm_compute::test::framework']]],
+  ['pmu_5finstruction_5fcounter',['PMU_INSTRUCTION_COUNTER',['../namespacearm__compute_1_1test_1_1framework.xhtml#aac6b258eb313f96447f4f0e273431005ae6848a94f594156fc477885835034257',1,'arm_compute::test::framework']]],
+  ['poolinglayer',['PoolingLayer',['../namespacearm__compute_1_1graph.xhtml#acac9cbaeea226ed297804c012dc12b16aea068ae5aae640d018c4300bc7619575',1,'arm_compute::graph']]],
+  ['precommit',['PRECOMMIT',['../namespacearm__compute_1_1test_1_1framework.xhtml#a7edf31944a6144ffd493d2f9a7bfb5cfab829534c7b40afdbd3c3ffea05202a97',1,'arm_compute::test::framework']]],
+  ['pretty',['PRETTY',['../namespacearm__compute_1_1test_1_1framework.xhtml#a043aa97de3c71ad015852f46ec4cc6ada2b908e3bfd5ebc739a3ce26d5045b76f',1,'arm_compute::test::framework']]]
 ];

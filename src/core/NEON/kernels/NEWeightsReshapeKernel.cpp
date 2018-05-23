@@ -34,12 +34,16 @@ using namespace arm_compute;
 
 namespace
 {
-template <typename T>
+template <typename T, bool is_nhwc>
 void weights_reshape(const ITensor *input, const ITensor *bias, ITensor *output, const Window &window)
 {
-    const unsigned int kernel_size_x   = input->info()->dimension(0);
-    const unsigned int kernel_size_y   = input->info()->dimension(1);
-    const unsigned int kernel_depth    = input->info()->dimension(2);
+    DataLayout         data_layout     = input->info()->data_layout();
+    const int          idx_width       = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const int          idx_height      = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const int          idx_channel     = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
+    const unsigned int kernel_size_x   = input->info()->dimension(idx_width);
+    const unsigned int kernel_size_y   = input->info()->dimension(idx_height);
+    const unsigned int kernel_depth    = input->info()->dimension(idx_channel);
     const unsigned int input_stride_x  = input->info()->strides_in_bytes().x();
     const unsigned int input_stride_y  = input->info()->strides_in_bytes().y();
     const unsigned int input_stride_z  = input->info()->strides_in_bytes().z();
@@ -67,13 +71,13 @@ void weights_reshape(const ITensor *input, const ITensor *bias, ITensor *output,
                 for(unsigned int i = 0; i < kernel_size_x; ++i)
                 {
                     *(reinterpret_cast<T *>(tmp_output_ptr)) = *(reinterpret_cast<const T *>(tmp_input_ptr));
-                    tmp_input_ptr += input_stride_x;
+                    tmp_input_ptr += is_nhwc ? input_stride_y : input_stride_x;
                     tmp_output_ptr += output_stride_y;
                 }
-                curr_input_row_ptr += input_stride_y;
+                curr_input_row_ptr += is_nhwc ? input_stride_z : input_stride_y;
                 tmp_input_ptr = curr_input_row_ptr;
             }
-            curr_input_depth_ptr += input_stride_z;
+            curr_input_depth_ptr += is_nhwc ? input_stride_x : input_stride_z;
             curr_input_row_ptr = curr_input_depth_ptr;
             tmp_input_ptr      = curr_input_depth_ptr;
         }
@@ -161,21 +165,24 @@ void NEWeightsReshapeKernel::configure(const ITensor *input, const ITensor *bias
     _bias   = bias;
     _output = output;
 
+    const DataLayout data_layout = input->info()->data_layout();
+    const bool       is_nhwc     = data_layout == DataLayout::NHWC;
+
     switch(_input->info()->element_size())
     {
         case 4:
         {
-            _func = &weights_reshape<uint32_t>;
+            _func = is_nhwc ? &weights_reshape<uint32_t, true> : &weights_reshape<uint32_t, false>;
             break;
         }
         case 2:
         {
-            _func = &weights_reshape<uint16_t>;
+            _func = is_nhwc ? &weights_reshape<uint16_t, true> : &weights_reshape<uint16_t, false>;
             break;
         }
         case 1:
         {
-            _func = &weights_reshape<uint8_t>;
+            _func = is_nhwc ? &weights_reshape<uint8_t, true> : &weights_reshape<uint8_t, false>;
             break;
         }
         default:

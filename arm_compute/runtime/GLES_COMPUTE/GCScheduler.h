@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -64,6 +64,24 @@ public:
     /** Defines a barrier ordering memory transactions. */
     void memory_barrier();
 
+    /** Get the target GPU.
+     *
+     * @return The target GPU.
+     */
+    GPUTarget get_target() const
+    {
+        return _target;
+    }
+
+    /** Accessor to set target GPU to be used by the scheduler.
+     *
+     * @param[in] target The target GPU.
+     */
+    void set_target(GPUTarget target)
+    {
+        _target = target;
+    }
+
 private:
     /** Constructor */
     GCScheduler();
@@ -82,6 +100,8 @@ private:
 
     EGLDisplay _display; /**< Underlying EGL Display. */
     EGLContext _context; /**< Underlying EGL Context. */
+
+    GPUTarget _target;
 };
 }
 #endif /* __ARM_COMPUTE_GCSCHEDULER_H__ */

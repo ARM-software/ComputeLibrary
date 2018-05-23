@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,13 +36,13 @@ class ICLSimpleKernel : public ICLKernel
 public:
     /** Constructor. */
     ICLSimpleKernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     ICLSimpleKernel(const ICLSimpleKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     ICLSimpleKernel &operator=(const ICLSimpleKernel &) = delete;
-    /** Allow instances of this class to be moved. */
+    /** Allow instances of this class to be moved */
     ICLSimpleKernel(ICLSimpleKernel &&) = default;
-    /** Allow instances of this class to be moved. */
+    /** Allow instances of this class to be moved */
     ICLSimpleKernel &operator=(ICLSimpleKernel &&) = default;
     /** Default destructor */
     ~ICLSimpleKernel() = default;

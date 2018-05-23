@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,9 +22,11 @@
  * SOFTWARE.
  */
 #include "arm_compute/runtime/CL/CLBufferAllocator.h"
+#include "arm_compute/runtime/CL/CLMemoryRegion.h"
 
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
+#include "support/ToolchainSupport.h"
 
 #include <cstddef>
 
@@ -46,4 +48,10 @@ void CLBufferAllocator::free(void *ptr)
 {
     ARM_COMPUTE_ERROR_ON(ptr == nullptr);
     clReleaseMemObject(static_cast<cl_mem>(ptr));
+}
+
+std::unique_ptr<IMemoryRegion> CLBufferAllocator::make_region(size_t size, size_t alignment)
+{
+    ARM_COMPUTE_UNUSED(alignment);
+    return arm_compute::support::cpp14::make_unique<CLBufferMemoryRegion>(_context, CL_MEM_ALLOC_HOST_PTR | CL_MEM_READ_WRITE, size);
 }

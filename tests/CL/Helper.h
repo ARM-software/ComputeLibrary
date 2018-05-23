@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,11 +31,15 @@ namespace arm_compute
 {
 namespace test
 {
-// This template synthetizes an ICLSimpleFunction which runs the given kernel K
+/** This template synthetizes an ICLSimpleFunction which runs the given kernel K */
 template <typename K>
 class CLSynthetizeFunction : public ICLSimpleFunction
 {
 public:
+    /** Configure the kernel.
+     *
+     * @param[in] args Configuration arguments.
+     */
     template <typename... Args>
     void configure(Args &&... args)
     {
@@ -45,11 +49,16 @@ public:
     }
 };
 
-// As above but this also setups a Zero border on the input tensor of the specified bordersize
+/** As above but this also setups a Zero border on the input tensor of the specified bordersize */
 template <typename K, int bordersize>
 class CLSynthetizeFunctionWithZeroConstantBorder : public ICLSimpleFunction
 {
 public:
+    /** Configure the kernel.
+     *
+     * @param[in] first First configuration argument.
+     * @param[in] args  Rest of the configuration arguments.
+     */
     template <typename T, typename... Args>
     void configure(T first, Args &&... args)
     {

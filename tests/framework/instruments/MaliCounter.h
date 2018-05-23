@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,10 +41,15 @@ namespace framework
 class MaliCounter : public Instrument
 {
 public:
-    /** Default constructor. */
+    /** Default constructor.
+     *
+     * @param[in] scale_factor Measurement scale factor;
+     */
     MaliCounter(ScaleFactor scale_factor);
 
+    /** Prevent instances of this class from being copy constructed */
     MaliCounter(const MaliCounter &) = delete;
+    /** Prevent instances of this class from being copied */
     MaliCounter &operator=(const MaliCounter &) = delete;
 
     /** Default destructor */

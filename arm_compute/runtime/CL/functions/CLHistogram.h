@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,7 +31,6 @@ namespace arm_compute
 {
 class ICLDistribution1D;
 class ICLTensor;
-using ICLTensor = ICLImage;
 
 /** Basic function to execute histogram. This function calls the following OpenCL kernels:
  *

@@ -7,7 +7,7 @@ var dir_e575b855d3e83e3374bc2a6f9bf89d98 =
     [ "IPrinter.h", "_i_printer_8h.xhtml", [
       [ "Printer", "classarm__compute_1_1logging_1_1_printer.xhtml", "classarm__compute_1_1logging_1_1_printer" ]
     ] ],
-    [ "Logger.h", "_logger_8h.xhtml", [
+    [ "Logger.h", "core_2utils_2logging_2_logger_8h.xhtml", [
       [ "Logger", "classarm__compute_1_1logging_1_1_logger.xhtml", "classarm__compute_1_1logging_1_1_logger" ]
     ] ],
     [ "LoggerRegistry.h", "_logger_registry_8h.xhtml", [

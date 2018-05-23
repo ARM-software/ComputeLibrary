@@ -1,10 +1,11 @@
 var searchData=
 [
-  ['v',['v',['../structarm__compute_1_1test_1_1framework_1_1_measurement_1_1_value.xhtml#a63d8879fa76962b7d0e6cb0364be2e34',1,'arm_compute::test::framework::Measurement::Value']]],
-  ['valpha',['valpha',['../structarm__compute_1_1detail_1_1brelu.xhtml#abd5aa7b37cf4c0a02b4bf2d4692d3750',1,'arm_compute::detail::brelu::valpha()'],['../structarm__compute_1_1detail_1_1lubrelu.xhtml#abd5aa7b37cf4c0a02b4bf2d4692d3750',1,'arm_compute::detail::lubrelu::valpha()']]],
-  ['value',['value',['../structarm__compute_1_1enable__bitwise__ops_3_01arm__compute_1_1_g_p_u_target_01_4.xhtml#a5b4ee4ae6cba6bb75200ba7af1910873',1,'arm_compute::enable_bitwise_ops&lt; arm_compute::GPUTarget &gt;::value()'],['../structarm__compute_1_1enable__bitwise__ops.xhtml#a5b4ee4ae6cba6bb75200ba7af1910873',1,'arm_compute::enable_bitwise_ops::value()'],['../classarm__compute_1_1_pixel_value.xhtml#a3e79b9ee2384b30bb1a1bb85155bb803',1,'arm_compute::PixelValue::value()'],['../hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76',1,'value():&#160;hwc.hpp']]],
-  ['varname',['varname',['../namespacecaffe__data__extractor.xhtml#a49e21719b906edce54a892874d995cac',1,'caffe_data_extractor.varname()'],['../namespacetensorflow__data__extractor.xhtml#a49e21719b906edce54a892874d995cac',1,'tensorflow_data_extractor.varname()']]],
-  ['vbeta',['vbeta',['../structarm__compute_1_1detail_1_1lubrelu.xhtml#a7bf6867cd97f3be4a120c87d1ede868b',1,'arm_compute::detail::lubrelu']]],
-  ['version_5fstatus',['version_status',['../structmali__userspace_1_1mali__base__gpu__core__props.xhtml#aa0f66be4635ad1d4fa3af18743e31e80',1,'mali_userspace::mali_base_gpu_core_props']]],
-  ['vzero',['vzero',['../structarm__compute_1_1detail_1_1relu.xhtml#a457deb9a1852991a4fec651d7a4e5e09',1,'arm_compute::detail::relu::vzero()'],['../structarm__compute_1_1detail_1_1brelu.xhtml#a457deb9a1852991a4fec651d7a4e5e09',1,'arm_compute::detail::brelu::vzero()']]]
+  ['u16',['u16',['../classarm__compute_1_1_pixel_value.xhtml#a1234f83efa812e259523c91799614a3c',1,'arm_compute::PixelValue']]],
+  ['u32',['u32',['../classarm__compute_1_1_pixel_value.xhtml#ae65af0c4a8ee050043fe4b575f0a26a0',1,'arm_compute::PixelValue']]],
+  ['u64',['u64',['../classarm__compute_1_1_pixel_value.xhtml#a91ee3b6e2425e78feef03fb5c69d63e5',1,'arm_compute::PixelValue']]],
+  ['u8',['u8',['../classarm__compute_1_1_pixel_value.xhtml#a0084c9e8c5778849f41d9de5df9c0f85',1,'arm_compute::PixelValue']]],
+  ['use_5ffunction_5fmemory_5fmanager',['use_function_memory_manager',['../structarm__compute_1_1graph_1_1_graph_config.xhtml#a20ed0cdea50eeeabdb8f4673b37802e9',1,'arm_compute::graph::GraphConfig']]],
+  ['use_5finitial_5festimate',['use_initial_estimate',['../structarm__compute_1_1_optical_flow_parameters.xhtml#a1d79cd7ed111d3a441ba1372f90210de',1,'arm_compute::OpticalFlowParameters']]],
+  ['use_5ftransition_5fmemory_5fmanager',['use_transition_memory_manager',['../structarm__compute_1_1graph_1_1_graph_config.xhtml#a1930adfaf721b59d516d41cce63746cc',1,'arm_compute::graph::GraphConfig']]],
+  ['use_5ftuner',['use_tuner',['../structarm__compute_1_1graph_1_1_graph_config.xhtml#a9da74af255a3e6ea61180d4a03192a48',1,'arm_compute::graph::GraphConfig']]]
 ];

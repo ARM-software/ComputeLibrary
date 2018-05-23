@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -172,7 +172,7 @@ void CLHOGBlockNormalizationKernel::configure(const ICLTensor *input, ICLTensor 
                               AccessWindowRectangle(input->info(), 0, 0, num_elems_read_per_iteration, num_rows_read_per_iteration),
                               output_access);
 
-    output_access.set_valid_region(win, input->info()->valid_region());
+    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     ICLKernel::configure(win);
 }

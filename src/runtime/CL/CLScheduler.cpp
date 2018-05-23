@@ -31,7 +31,7 @@ using namespace arm_compute;
 std::once_flag CLScheduler::_initialize_symbols;
 
 CLScheduler::CLScheduler()
-    : _context(), _queue(), _target(GPUTarget::MIDGARD), _is_initialised(false), _cl_tuner()
+    : _queue(), _target(GPUTarget::MIDGARD), _is_initialised(false), _cl_tuner()
 {
 }
 
@@ -52,7 +52,7 @@ void CLScheduler::enqueue(ICLKernel &kernel, bool flush)
     if(_cl_tuner != nullptr)
     {
         // Tune the OpenCL kernel
-        _cl_tuner->tune_kernel(kernel);
+        _cl_tuner->tune_kernel_dynamic(kernel);
     }
 
     // Run kernel

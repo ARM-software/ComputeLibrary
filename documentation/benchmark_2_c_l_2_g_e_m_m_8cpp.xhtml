@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -126,14 +126,14 @@ $(document).ready(function(){initNavTree('benchmark_2_c_l_2_g_e_m_m_8cpp.xhtml',
 <code>#include &quot;<a class="el" href="_c_l_tensor_allocator_8h_source.xhtml">arm_compute/runtime/CL/CLTensorAllocator.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_g_e_m_m_8h_source.xhtml">arm_compute/runtime/CL/functions/CLGEMM.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_accessor_8h_source.xhtml">tests/CL/CLAccessor.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="benchmark_2fixtures_2_g_e_m_m_fixture_8h_source.xhtml">tests/benchmark/fixtures/GEMMFixture.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_alex_net_g_e_m_m_dataset_8h_source.xhtml">tests/datasets/AlexNetGEMMDataset.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_google_net_g_e_m_m_dataset_8h_source.xhtml">tests/datasets/GoogleNetGEMMDataset.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_matrix_multiply_g_e_m_m_dataset_8h_source.xhtml">tests/datasets/MatrixMultiplyGEMMDataset.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_goog_le_net_inception_v1_g_e_m_m_dataset_8h_source.xhtml">tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1GEMMDataset.h</a>&quot;</code><br />
+<code>#include &quot;tests/benchmark/fixtures/GEMMFixture.h&quot;</code><br />
+<code>#include &quot;tests/datasets/AlexNetGEMMDataset.h&quot;</code><br />
+<code>#include &quot;tests/datasets/GoogleNetGEMMDataset.h&quot;</code><br />
+<code>#include &quot;tests/datasets/MatrixMultiplyGEMMDataset.h&quot;</code><br />
+<code>#include &quot;tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1GEMMDataset.h&quot;</code><br />
 <code>#include &quot;<a class="el" href="tests_2framework_2_macros_8h_source.xhtml">tests/framework/Macros.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_datasets_8h_source.xhtml">tests/framework/datasets/Datasets.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_type_printer_8h_source.xhtml">utils/TypePrinter.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="utils_2_type_printer_8h_source.xhtml">utils/TypePrinter.h</a>&quot;</code><br />
 </div>
 <p><a href="benchmark_2_c_l_2_g_e_m_m_8cpp_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -144,22 +144,24 @@ Namespaces</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacearm__compute_1_1test"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml">arm_compute::test</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:namespacearm__compute_1_1test_1_1benchmark"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml">arm_compute::test::benchmark</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:abf07c2bf7d8e9c76e146f9b21bee88fd"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#abf07c2bf7d8e9c76e146f9b21bee88fd">CLGEMMFixture</a> = GEMMFixture&lt; CLTensor, CLGEMM, CLAccessor &gt;</td></tr>
+<tr class="memitem:abf07c2bf7d8e9c76e146f9b21bee88fd"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#abf07c2bf7d8e9c76e146f9b21bee88fd">CLGEMMFixture</a> = GEMMFixture&lt; CLTensor, CLGEMM, CLAccessor &gt;</td></tr>
 <tr class="separator:abf07c2bf7d8e9c76e146f9b21bee88fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:aa9f837576c9fa3ee6b7fddee59c75353"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#aa9f837576c9fa3ee6b7fddee59c75353">REGISTER_FIXTURE_DATA_TEST_CASE</a> (GoogLeNetInceptionV1GEMM, CLGEMMFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1GEMMDataset(), data_types), reshape_b_only_once))</td></tr>
-<tr class="separator:aa9f837576c9fa3ee6b7fddee59c75353"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a326b8d33cd89489c2c80017d855bccbb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a326b8d33cd89489c2c80017d855bccbb">REGISTER_FIXTURE_DATA_TEST_CASE</a> (MatrixMultiplyGEMM, CLGEMMFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(datasets::MatrixMultiplyGEMMDataset(), data_types), reshape_b_only_once))</td></tr>
-<tr class="separator:a326b8d33cd89489c2c80017d855bccbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0f3738178470e508923318c3ee860999"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a0f3738178470e508923318c3ee860999">REGISTER_FIXTURE_DATA_TEST_CASE</a> (GoogleNetGEMM, CLGEMMFixture, framework::DatasetMode::NIGHTLY, framework::dataset::combine(framework::dataset::combine(datasets::GoogleNetGEMMDataset(), data_types), reshape_b_only_once))</td></tr>
-<tr class="separator:a0f3738178470e508923318c3ee860999"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a76eeda27b0b6ee7a741eef009765bffa"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a76eeda27b0b6ee7a741eef009765bffa">REGISTER_FIXTURE_DATA_TEST_CASE</a> (AlexNetGEMM, CLGEMMFixture, framework::DatasetMode::NIGHTLY, framework::dataset::combine(framework::dataset::combine(datasets::AlexNetGEMMDataset(), data_types), reshape_b_only_once))</td></tr>
-<tr class="separator:a76eeda27b0b6ee7a741eef009765bffa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a28897eaf05aeeec9d9c641e8d8c594af"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a28897eaf05aeeec9d9c641e8d8c594af">REGISTER_FIXTURE_DATA_TEST_CASE</a> (GoogLeNetInceptionV1GEMM, CLGEMMFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(datasets::GoogLeNetInceptionV1GEMMDataset(), data_types), reshape_b_only_once))</td></tr>
+<tr class="separator:a28897eaf05aeeec9d9c641e8d8c594af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c2eca4c70bb9efd10046abd0862ca22"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a9c2eca4c70bb9efd10046abd0862ca22">REGISTER_FIXTURE_DATA_TEST_CASE</a> (MatrixMultiplyGEMM, CLGEMMFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(datasets::MatrixMultiplyGEMMDataset(), data_types), reshape_b_only_once))</td></tr>
+<tr class="separator:a9c2eca4c70bb9efd10046abd0862ca22"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abf4ac350b9926548b9e5f1733c6f0b50"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#abf4ac350b9926548b9e5f1733c6f0b50">REGISTER_FIXTURE_DATA_TEST_CASE</a> (GoogleNetGEMM, CLGEMMFixture, framework::DatasetMode::NIGHTLY, framework::dataset::combine(framework::dataset::combine(datasets::GoogleNetGEMMDataset(), data_types), reshape_b_only_once))</td></tr>
+<tr class="separator:abf4ac350b9926548b9e5f1733c6f0b50"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a67758981e21ab8f0fe4766925534bf1b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a67758981e21ab8f0fe4766925534bf1b">REGISTER_FIXTURE_DATA_TEST_CASE</a> (AlexNetGEMM, CLGEMMFixture, framework::DatasetMode::NIGHTLY, framework::dataset::combine(framework::dataset::combine(datasets::AlexNetGEMMDataset(), data_types), reshape_b_only_once))</td></tr>
+<tr class="separator:a67758981e21ab8f0fe4766925534bf1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -167,7 +169,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_4f2df8950dc650bf7cf9176fae02facc.xhtml">benchmark</a></li><li class="navelem"><a class="el" href="dir_4da487531dc5bdc76b523c9e82b781b1.xhtml">CL</a></li><li class="navelem"><a class="el" href="benchmark_2_c_l_2_g_e_m_m_8cpp.xhtml">GEMM.cpp</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:56 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

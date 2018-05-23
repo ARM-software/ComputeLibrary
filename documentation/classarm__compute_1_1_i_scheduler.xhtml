@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -144,12 +144,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a38e28e556fea6e2024019dbb9c7cc943"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a38e28e556fea6e2024019dbb9c7cc943">schedule</a> (<a class="el" href="classarm__compute_1_1_i_c_p_p_kernel.xhtml">ICPPKernel</a> *kernel, unsigned int split_dimension)=0</td></tr>
 <tr class="memdesc:a38e28e556fea6e2024019dbb9c7cc943"><td class="mdescLeft">&#160;</td><td class="mdescRight">Runs the kernel in the same thread as the caller synchronously.  <a href="#a38e28e556fea6e2024019dbb9c7cc943">More...</a><br /></td></tr>
 <tr class="separator:a38e28e556fea6e2024019dbb9c7cc943"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6a49fcb6640894fb5ec2da99f10a1593"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a6a49fcb6640894fb5ec2da99f10a1593">set_target</a> (<a class="el" href="namespacearm__compute.xhtml#a5bc939238e1f14a4c39aaee8186a853d">CPUTarget</a> target)</td></tr>
-<tr class="memdesc:a6a49fcb6640894fb5ec2da99f10a1593"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the target CPU architecture.  <a href="#a6a49fcb6640894fb5ec2da99f10a1593">More...</a><br /></td></tr>
-<tr class="separator:a6a49fcb6640894fb5ec2da99f10a1593"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a671307bb78c1d64435708feead8c04da"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structarm__compute_1_1_c_p_u_info.xhtml">CPUInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a671307bb78c1d64435708feead8c04da">cpu_info</a> () const </td></tr>
-<tr class="memdesc:a671307bb78c1d64435708feead8c04da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get CPU info.  <a href="#a671307bb78c1d64435708feead8c04da">More...</a><br /></td></tr>
-<tr class="separator:a671307bb78c1d64435708feead8c04da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a95f26c7763b9472437a8da8aa6089c9b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_c_p_u_info.xhtml">CPUInfo</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a95f26c7763b9472437a8da8aa6089c9b">cpu_info</a> ()</td></tr>
+<tr class="memdesc:a95f26c7763b9472437a8da8aa6089c9b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get CPU info.  <a href="#a95f26c7763b9472437a8da8aa6089c9b">More...</a><br /></td></tr>
+<tr class="separator:a95f26c7763b9472437a8da8aa6089c9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6298e3b887acb402fdda318de12428ef"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_scheduler.xhtml#a6298e3b887acb402fdda318de12428ef">num_threads_hint</a> () const </td></tr>
 <tr class="memdesc:a6298e3b887acb402fdda318de12428ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a hint for the best possible number of execution threads.  <a href="#a6298e3b887acb402fdda318de12428ef">More...</a><br /></td></tr>
 <tr class="separator:a6298e3b887acb402fdda318de12428ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -202,15 +199,15 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a671307bb78c1d64435708feead8c04da"></a>
+<a class="anchor" id="a95f26c7763b9472437a8da8aa6089c9b"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="structarm__compute_1_1_c_p_u_info.xhtml">CPUInfo</a> cpu_info </td>
+          <td class="memname"><a class="el" href="classarm__compute_1_1_c_p_u_info.xhtml">CPUInfo</a>&amp; cpu_info </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
-          <td> const</td>
+          <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -218,7 +215,7 @@ Public Member Functions</h2></td></tr>
 <p>Get CPU info. </p>
 <dl class="section return"><dt>Returns</dt><dd>CPU info. </dd></dl>
 
-<p>Referenced by <a class="el" href="_alex_net_network_8h_source.xhtml#l00057">AlexNetNetwork&lt; ITensorType, TensorType, SubTensorType, arm_compute::test::Accessor, ActivationLayerFunction, ConvolutionLayerFunction, DirectConvolutionLayerFunction, FullyConnectedLayerFunction, NormalizationLayerFunction, PoolingLayerFunction, SoftmaxLayerFunction &gt;::init()</a>, and <a class="el" href="validation_2fixtures_2_convolution_layer_fixture_8h_source.xhtml#l00057">ConvolutionValidationGenericFixture&lt; TensorType, AccessorType, FunctionType, T &gt;::setup()</a>.</p>
+<p>Referenced by <a class="el" href="_assembly_helper_8h_source.xhtml#l00159">arm_compute::setup_assembly_kernel()</a>.</p>
 
 </div>
 </div>
@@ -247,6 +244,8 @@ Public Member Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>Number of threads available in <a class="el" href="classarm__compute_1_1_single_thread_scheduler.xhtml" title="Pool of threads to automatically split a kernel&#39;s execution among several threads. ">SingleThreadScheduler</a>. </dd></dl>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_c_p_p_scheduler.xhtml#a0da94220ee1e0f4928aa31ed0d4b30f7">CPPScheduler</a>, <a class="el" href="classarm__compute_1_1_o_m_p_scheduler.xhtml#a0da94220ee1e0f4928aa31ed0d4b30f7">OMPScheduler</a>, and <a class="el" href="classarm__compute_1_1_single_thread_scheduler.xhtml#a0da94220ee1e0f4928aa31ed0d4b30f7">SingleThreadScheduler</a>.</p>
+
+<p>Referenced by <a class="el" href="_assembly_helper_8h_source.xhtml#l00159">arm_compute::setup_assembly_kernel()</a>.</p>
 
 </div>
 </div>
@@ -312,6 +311,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_c_p_p_scheduler.xhtml#aa4fc1e7b1c1d9d42903cfc48351e57ad">CPPScheduler</a>, <a class="el" href="classarm__compute_1_1_o_m_p_scheduler.xhtml#aa4fc1e7b1c1d9d42903cfc48351e57ad">OMPScheduler</a>, and <a class="el" href="classarm__compute_1_1_single_thread_scheduler.xhtml#aa4fc1e7b1c1d9d42903cfc48351e57ad">SingleThreadScheduler</a>.</p>
 
+<p>Referenced by <a class="el" href="_assembly_helper_8h_source.xhtml#l00081">AssemblyKernelGlue&lt; int8_t, int32_t &gt;::run()</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a645ac2d9d4144fd0174296de7eb1e1b5"></a>
@@ -350,30 +351,6 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a6a49fcb6640894fb5ec2da99f10a1593"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void set_target </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="namespacearm__compute.xhtml#a5bc939238e1f14a4c39aaee8186a853d">CPUTarget</a>&#160;</td>
-          <td class="paramname"><em>target</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Sets the target CPU architecture. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">target</td><td>Target CPU. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>arm_compute/runtime/<a class="el" href="_i_scheduler_8h_source.xhtml">IScheduler.h</a></li>
 </ul>
@@ -383,7 +360,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_i_scheduler.xhtml">IScheduler</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:58 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:42 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,17 +35,26 @@ template <class T>
 class ICLArray : public IArray<T>
 {
 public:
-    /* Constructor */
+    /** Constructor
+     *
+     * @param[in] max_num_values Maximum size of the array.
+     *
+     */
     explicit ICLArray(size_t max_num_values)
         : IArray<T>(max_num_values), _mapping(nullptr)
     {
     }
 
+    /** Prevent instances of this class from being copy constructed */
     ICLArray(const ICLArray &) = delete;
+    /** Prevent instances of this class from being copied */
     ICLArray &operator=(const ICLArray &) = delete;
-    ICLArray(ICLArray &&)                 = default;
+    /** Allow instances of this class to be move constructed */
+    ICLArray(ICLArray &&) = default;
+    /** Allow instances of this class to be moved */
     ICLArray &operator=(ICLArray &&) = default;
-    virtual ~ICLArray()              = default;
+    /** Default virtual destructor. */
+    virtual ~ICLArray() = default;
     /** Interface to be implemented by the child class to return a reference to the OpenCL buffer containing the array's data.
      *
      * @return A reference to an OpenCL buffer containing the array's data.
@@ -106,16 +115,27 @@ private:
     uint8_t *_mapping;
 };
 
-using ICLKeyPointArray        = ICLArray<KeyPoint>;
-using ICLCoordinates2DArray   = ICLArray<Coordinates2D>;
+/** Interface for OpenCL Array of Key Points. */
+using ICLKeyPointArray = ICLArray<KeyPoint>;
+/** Interface for OpenCL Array of 2D Coordinates. */
+using ICLCoordinates2DArray = ICLArray<Coordinates2D>;
+/** Interface for OpenCL Array of Detection Windows. */
 using ICLDetectionWindowArray = ICLArray<DetectionWindow>;
-using ICLROIArray             = ICLArray<ROI>;
-using ICLSize2DArray          = ICLArray<Size2D>;
-using ICLUInt8Array           = ICLArray<cl_uchar>;
-using ICLUInt16Array          = ICLArray<cl_ushort>;
-using ICLUInt32Array          = ICLArray<cl_uint>;
-using ICLInt16Array           = ICLArray<cl_short>;
-using ICLInt32Array           = ICLArray<cl_int>;
-using ICLFloatArray           = ICLArray<cl_float>;
+/** Interface for OpenCL Array of ROIs. */
+using ICLROIArray = ICLArray<ROI>;
+/** Interface for OpenCL Array of 2D Sizes. */
+using ICLSize2DArray = ICLArray<Size2D>;
+/** Interface for OpenCL Array of uint8s. */
+using ICLUInt8Array = ICLArray<cl_uchar>;
+/** Interface for OpenCL Array of uint16s. */
+using ICLUInt16Array = ICLArray<cl_ushort>;
+/** Interface for OpenCL Array of uint32s. */
+using ICLUInt32Array = ICLArray<cl_uint>;
+/** Interface for OpenCL Array of int16s. */
+using ICLInt16Array = ICLArray<cl_short>;
+/** Interface for OpenCL Array of int32s. */
+using ICLInt32Array = ICLArray<cl_int>;
+/** Interface for OpenCL Array of floats. */
+using ICLFloatArray = ICLArray<cl_float>;
 }
 #endif /*__ARM_COMPUTE_ICLARRAY_H__*/

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,11 +34,21 @@ class ICLTuner
 public:
     /** Virtual destructor */
     virtual ~ICLTuner() = default;
-    /** Tune OpenCL kernel
+    /** Tune OpenCL kernel statically
+     *
+     * @note Tuning is performed using only kernel and tensor metadata,
+     *       thus can be performed when memory is not available
      *
      * @param[in] kernel Kernel to tune
      */
-    virtual void tune_kernel(ICLKernel &kernel) = 0;
+    virtual void tune_kernel_static(ICLKernel &kernel) = 0;
+    /** Tune OpenCL kernel dynamically
+     *
+     * @note Tuning requires memory to be available on all kernel tensors and objects in order to be performed
+     *
+     * @param[in] kernel Kernel to tune
+     */
+    virtual void tune_kernel_dynamic(ICLKernel &kernel) = 0;
 };
 }
 #endif /*__ARM_COMPUTE_ICLTUNER_H__ */

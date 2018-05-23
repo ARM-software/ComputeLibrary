@@ -59,6 +59,9 @@ InstrumentsDescription instrument_type_from_name(const std::string &name)
         { "opencl_timer_us", std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::TIME_US) },
         { "opencl_timer_ms", std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::TIME_MS) },
         { "opencl_timer_s", std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_TIMER, ScaleFactor::TIME_S) },
+        { "opencl_memory_usage", std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_MEMORY_USAGE, ScaleFactor::NONE) },
+        { "opencl_memory_usage_k", std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_MEMORY_USAGE, ScaleFactor::SCALE_1K) },
+        { "opencl_memory_usage_m", std::pair<InstrumentType, ScaleFactor>(InstrumentType::OPENCL_MEMORY_USAGE, ScaleFactor::SCALE_1M) },
     };
 
     try

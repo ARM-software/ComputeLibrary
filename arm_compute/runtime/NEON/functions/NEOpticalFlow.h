@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,6 +42,7 @@ namespace arm_compute
 {
 class Pyramid;
 
+/** Array of LK Internel Keypoints */
 using LKInternalKeypointArray = Array<NELKInternalKeypoint>;
 /** Basic function to execute optical flow. This function calls the following NEON kernels and functions:
  *
@@ -52,7 +53,10 @@ using LKInternalKeypointArray = Array<NELKInternalKeypoint>;
 class NEOpticalFlow : public IFunction
 {
 public:
-    /** Constructor */
+    /** Constructor
+     *
+     * @param[in] memory_manager (Optional) Memory manager.
+     */
     NEOpticalFlow(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     NEOpticalFlow(const NEOpticalFlow &) = delete;

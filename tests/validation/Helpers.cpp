@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,6 +22,9 @@
  * SOFTWARE.
  */
 #include "tests/validation/Helpers.h"
+
+#include <algorithm>
+#include <cmath>
 
 namespace arm_compute
 {
@@ -95,12 +98,27 @@ TensorShape calculate_depth_concatenate_shape(const std::vector<TensorShape> &in
     return out_shape;
 }
 
+TensorShape calculate_width_concatenate_shape(const std::vector<TensorShape> &input_shapes)
+{
+    ARM_COMPUTE_ERROR_ON(input_shapes.empty());
+
+    TensorShape out_shape = input_shapes[0];
+
+    int width = std::accumulate(input_shapes.begin(), input_shapes.end(), 0, [](int sum, const TensorShape & shape)
+    {
+        return sum + shape.x();
+    });
+    out_shape.set(0, width);
+
+    return out_shape;
+}
+
 HarrisCornersParameters harris_corners_parameters()
 {
     HarrisCornersParameters params;
 
     std::mt19937                           gen(library->seed());
-    std::uniform_real_distribution<float>  threshold_dist(0.f, 0.01f);
+    std::uniform_real_distribution<float>  threshold_dist(0.f, 0.001f);
     std::uniform_real_distribution<float>  sensitivity(0.04f, 0.15f);
     std::uniform_real_distribution<float>  euclidean_distance(0.f, 30.f);
     std::uniform_int_distribution<uint8_t> int_dist(0, 255);
@@ -116,7 +134,8 @@ HarrisCornersParameters harris_corners_parameters()
 SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint8_t> &src)
 {
     const QuantizationInfo &quantization_info = src.quantization_info();
-    SimpleTensor<float>     dst{ src.shape(), DataType::F32, 1, 0 };
+    SimpleTensor<float>     dst{ src.shape(), DataType::F32, 1, 0, QuantizationInfo(), src.data_layout() };
+
     for(int i = 0; i < src.num_elements(); ++i)
     {
         dst[i] = quantization_info.dequantize(src[i]);
@@ -133,6 +152,111 @@ SimpleTensor<uint8_t> convert_to_asymmetric(const SimpleTensor<float> &src, cons
     }
     return dst;
 }
+
+void matrix_multiply(const SimpleTensor<float> &a, const SimpleTensor<float> &b, SimpleTensor<float> &out)
+{
+    ARM_COMPUTE_ERROR_ON(a.shape()[0] != b.shape()[1]);
+    ARM_COMPUTE_ERROR_ON(a.shape()[1] != out.shape()[1]);
+    ARM_COMPUTE_ERROR_ON(b.shape()[0] != out.shape()[0]);
+
+    const int M = a.shape()[1]; // Rows
+    const int N = b.shape()[0]; // Cols
+    const int K = b.shape()[1];
+
+    for(int y = 0; y < M; ++y)
+    {
+        for(int x = 0; x < N; ++x)
+        {
+            float acc = 0.0f;
+            for(int k = 0; k < K; ++k)
+            {
+                acc += a[y * K + k] * b[x + k * N];
+            }
+
+            out[x + y * N] = acc;
+        }
+    }
+}
+
+void transpose_matrix(const SimpleTensor<float> &in, SimpleTensor<float> &out)
+{
+    ARM_COMPUTE_ERROR_ON((in.shape()[0] != out.shape()[1]) || (in.shape()[1] != out.shape()[0]));
+
+    const int width  = in.shape()[0];
+    const int height = in.shape()[1];
+
+    for(int y = 0; y < height; ++y)
+    {
+        for(int x = 0; x < width; ++x)
+        {
+            const float val = in[x + y * width];
+
+            out[x * height + y] = val;
+        }
+    }
+}
+
+template <typename T>
+void get_tile(const SimpleTensor<T> &in, SimpleTensor<T> &tile, const Coordinates &coord)
+{
+    ARM_COMPUTE_ERROR_ON(tile.shape().num_dimensions() != 2);
+
+    const int w_tile = tile.shape()[0];
+    const int h_tile = tile.shape()[1];
+
+    // Fill the tile with zeros
+    std::fill(tile.data() + 0, (tile.data() + (w_tile * h_tile)), static_cast<T>(0));
+
+    // Check if with the dimensions greater than 2 we could have out-of-bound reads
+    for(size_t d = 2; d < Coordinates::num_max_dimensions; ++d)
+    {
+        if(coord[d] < 0 || coord[d] >= static_cast<int>(in.shape()[d]))
+        {
+            ARM_COMPUTE_ERROR("coord[d] < 0 || coord[d] >= in.shape()[d] with d >= 2");
+        }
+    }
+
+    // Since we could have out-of-bound reads along the X and Y dimensions,
+    // we start calculating the input address with x = 0 and y = 0
+    Coordinates start_coord = coord;
+    start_coord[0]          = 0;
+    start_coord[1]          = 0;
+
+    // Get input and roi pointers
+    auto in_ptr  = static_cast<const T *>(in(start_coord));
+    auto roi_ptr = static_cast<T *>(tile.data());
+
+    const int x_in_start = std::max(0, coord[0]);
+    const int y_in_start = std::max(0, coord[1]);
+    const int x_in_end   = std::min(static_cast<int>(in.shape()[0]), coord[0] + w_tile);
+    const int y_in_end   = std::min(static_cast<int>(in.shape()[1]), coord[1] + h_tile);
+
+    // Number of elements to copy per row
+    const int n = x_in_end - x_in_start;
+
+    // Starting coordinates for the ROI
+    const int x_tile_start = coord[0] > 0 ? 0 : std::abs(coord[0]);
+    const int y_tile_start = coord[1] > 0 ? 0 : std::abs(coord[1]);
+
+    // Update input pointer
+    in_ptr += x_in_start;
+    in_ptr += (y_in_start * in.shape()[0]);
+
+    // Update ROI pointer
+    roi_ptr += x_tile_start;
+    roi_ptr += (y_tile_start * tile.shape()[0]);
+
+    for(int y = y_in_start; y < y_in_end; ++y)
+    {
+        // Copy per row
+        std::copy(in_ptr, in_ptr + n, roi_ptr);
+
+        in_ptr += in.shape()[0];
+        roi_ptr += tile.shape()[0];
+    }
+}
+
+template void get_tile(const SimpleTensor<float> &in, SimpleTensor<float> &roi, const Coordinates &coord);
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

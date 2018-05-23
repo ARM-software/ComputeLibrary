@@ -1,4 +1,4 @@
-# Copyright (c) 2017 ARM Limited.
+# Copyright (c) 2017, 2018 ARM Limited.
 #
 # SPDX-License-Identifier: MIT
 #
@@ -56,29 +56,29 @@ test_env.Append(LIBS = arm_compute_test_framework)
 if env['os'] in ['android', 'bare_metal'] or env['standalone']:
     Import("arm_compute_a")
     Import("arm_compute_core_a")
-    test_env.Append(LIBS = [arm_compute_a, arm_compute_core_a])
-    arm_compute_lib = arm_compute_a
+    Import("arm_compute_graph_a")
+    test_env.Append(LIBS = [arm_compute_graph_a, arm_compute_a, arm_compute_core_a])
+    arm_compute_lib = arm_compute_graph_a
 else:
-    Import("arm_compute_so")
-    test_env.Append(LIBS = ["arm_compute", "arm_compute_core"])
-    arm_compute_lib = arm_compute_so
+    Import("arm_compute_graph_so")
+    test_env.Append(LIBS = ["arm_compute_graph", "arm_compute", "arm_compute_core"])
+    arm_compute_lib = arm_compute_graph_so
 
 test_env.Append(CPPPATH = ["#3rdparty/include"])
 test_env.Append(LIBPATH = ["#3rdparty/%s/%s" % (env['os'], env['arch'])])
 test_env.Append(LIBPATH = ["#build/%s" % env['build_dir']])
-test_env.Append(LIBPATH = ["#build/%s/opencl-1.2-stubs" % env['build_dir']])
 
 common_files = Glob('*.cpp')
 common_objects = [test_env.StaticObject(f) for f in common_files]
 
 files_benchmark = Glob('benchmark/*.cpp')
-files_validation = Glob('validation/*.cpp')
+files_validation_framework = [test_env.Object(f) for f in Glob('validation/*.cpp')]
 
 # Always compile reference for validation
-files_validation += Glob('validation/reference/*.cpp')
+files_validation_framework += [ test_env.Object(f) for f in Glob('validation/reference/*.cpp')]
 
 # Add unit tests
-files_validation += Glob('validation/UNIT/*/*.cpp')
+files_validation = Glob('validation/UNIT/*/*.cpp')
 files_validation += Glob('validation/UNIT/*.cpp')
 
 # Add CPP tests
@@ -86,11 +86,9 @@ filter_pattern = test_env['test_filter']
 files_validation += Glob('validation/CPP/' + filter_pattern)
 
 if env['opencl']:
-    Import('opencl')
     filter_pattern = test_env['test_filter']
 
     test_env.Append(CPPDEFINES=['ARM_COMPUTE_CL'])
-    test_env.Append(LIBS = ["OpenCL"])
 
     files_benchmark += Glob('benchmark/CL/*/' + filter_pattern)
     files_benchmark += Glob('benchmark/CL/' + filter_pattern)
@@ -107,17 +105,6 @@ if env['neon']:
     files_validation += Glob('validation/NEON/' + filter_pattern)
 
 if env['gles_compute']:
-    if env['os'] != 'android':
-        Import('egl')
-        Import('glesv2')
-
-        test_env.Append(LIBS = ["EGL", "GLESv2"])
-    else:
-        if env['arch'] != 'armv7a':
-            test_env.Append(LIBS = ["EGL", "GLESv3"])
-        else:
-            test_env.Append(LIBS = ["EGL", "GLESv2"])
-
     test_env.Append(CPPDEFINES=['ARM_COMPUTE_GC'])
 
     files_benchmark += Glob('benchmark/GLES_COMPUTE/*/*.cpp')
@@ -135,26 +122,13 @@ if test_env['benchmark_tests']:
     arm_compute_benchmark = test_env.Program('arm_compute_benchmark', files_benchmark + common_objects)
     Depends(arm_compute_benchmark, arm_compute_test_framework)
     Depends(arm_compute_benchmark, arm_compute_lib)
-
-    if env['opencl']:
-        Depends(arm_compute_benchmark, opencl)
-    if env['gles_compute'] and env['os'] != 'android':
-        Depends(arm_compute_benchmark, egl)
-        Depends(arm_compute_benchmark, glesv2)
-
     Default(arm_compute_benchmark)
     Export('arm_compute_benchmark')
 
 if test_env['validation_tests']:
-    arm_compute_validation = test_env.Program('arm_compute_validation', files_validation + common_objects)
+    arm_compute_validation = test_env.Program('arm_compute_validation', files_validation_framework + files_validation + common_objects)
     Depends(arm_compute_validation, arm_compute_test_framework)
     Depends(arm_compute_validation, arm_compute_lib)
-
-    if env['opencl']:
-        Depends(arm_compute_validation, opencl)
-    if env['gles_compute'] and env['os'] != 'android':
-        Depends(arm_compute_validation, egl)
-        Depends(arm_compute_validation, glesv2)
 
     Default(arm_compute_validation)
     Export('arm_compute_validation')

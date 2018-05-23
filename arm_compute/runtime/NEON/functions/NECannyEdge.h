@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -56,6 +56,8 @@ public:
     /** Constructor
      *
      * Initialize Sobel kernel to nullptr.
+     *
+     * @param[in] memory_manager (Optional) Memory manager.
      */
     NECannyEdge(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Prevent instances of this class from being copied (As this class contains pointers) */

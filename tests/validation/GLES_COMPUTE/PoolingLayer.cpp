@@ -87,14 +87,17 @@ using GCPoolingLayerFixture = PoolingLayerValidationFixture<GCTensor, GCAccessor
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
-FIXTURE_DATA_TEST_CASE(RunSmall, GCPoolingLayerFixture<float>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), combine(PoolingLayerDatasetFP, framework::dataset::make("DataType",
-                                                                                                    DataType::F32))))
+FIXTURE_DATA_TEST_CASE(RunSmall, GCPoolingLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetFP, framework::dataset::make("DataType",
+                                                                                                            DataType::F32))),
+                                                                                                    framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f32);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, GCPoolingLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), combine(PoolingLayerDatasetFP, framework::dataset::make("DataType",
-                                                                                                        DataType::F32))))
+FIXTURE_DATA_TEST_CASE(RunLarge, GCPoolingLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), combine(PoolingLayerDatasetFP,
+                                                                                                                framework::dataset::make("DataType",
+                                                                                                                        DataType::F32))),
+                                                                                                        framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f32);
@@ -102,14 +105,16 @@ FIXTURE_DATA_TEST_CASE(RunLarge, GCPoolingLayerFixture<float>, framework::Datase
 TEST_SUITE_END()
 
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(RunSmall, GCPoolingLayerFixture<half>, framework::DatasetMode::ALL, combine(datasets::SmallShapes(), combine(PoolingLayerDatasetFP,
-                                                                                                   framework::dataset::make("DataType", DataType::F16))))
+FIXTURE_DATA_TEST_CASE(RunSmall, GCPoolingLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetFP,
+                                                                                                           framework::dataset::make("DataType", DataType::F16))),
+                                                                                                   framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f16);
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, GCPoolingLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeShapes(), combine(PoolingLayerDatasetFP,
-                                                                                                       framework::dataset::make("DataType", DataType::F16))))
+FIXTURE_DATA_TEST_CASE(RunLarge, GCPoolingLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), combine(PoolingLayerDatasetFP,
+                                                                                                               framework::dataset::make("DataType", DataType::F16))),
+                                                                                                       framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     // Validate output
     validate(GCAccessor(_target), _reference, tolerance_f16);

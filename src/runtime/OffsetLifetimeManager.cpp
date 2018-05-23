@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -58,19 +58,24 @@ void OffsetLifetimeManager::update_blobs_and_mappings()
     ARM_COMPUTE_ERROR_ON(_active_group == nullptr);
 
     // Update blob size
-    size_t max_group_size = std::accumulate(std::begin(_active_elements), std::end(_active_elements), static_cast<size_t>(0), [](size_t s, const Element & e)
+    size_t max_group_size = std::accumulate(std::begin(_free_blobs), std::end(_free_blobs), static_cast<size_t>(0), [](size_t s, const Blob & b)
     {
-        return s + e.size;
+        return s + b.max_size;
     });
     _blob = std::max(_blob, max_group_size);
 
     // Calculate group mappings
     auto &group_mappings = _active_group->mappings();
     size_t offset         = 0;
-    for(auto &e : _active_elements)
+    for(auto &free_blob : _free_blobs)
     {
-        group_mappings[e.handle] = offset;
-        offset += e.size;
+        for(auto &bound_element_id : free_blob.bound_elements)
+        {
+            ARM_COMPUTE_ERROR_ON(_active_elements.find(bound_element_id) == std::end(_active_elements));
+            Element &bound_element               = _active_elements[bound_element_id];
+            group_mappings[bound_element.handle] = offset;
+        }
+        offset += free_blob.max_size;
         ARM_COMPUTE_ERROR_ON(offset > _blob);
     }
 }

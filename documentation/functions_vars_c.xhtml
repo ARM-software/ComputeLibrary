@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -108,11 +108,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="functions_vars_h.xhtml#index_h"><span>h</span></a></li>
       <li><a href="functions_vars_i.xhtml#index_i"><span>i</span></a></li>
       <li><a href="functions_vars_j.xhtml#index_j"><span>j</span></a></li>
+      <li><a href="functions_vars_k.xhtml#index_k"><span>k</span></a></li>
       <li><a href="functions_vars_l.xhtml#index_l"><span>l</span></a></li>
       <li><a href="functions_vars_m.xhtml#index_m"><span>m</span></a></li>
       <li><a href="functions_vars_n.xhtml#index_n"><span>n</span></a></li>
       <li><a href="functions_vars_o.xhtml#index_o"><span>o</span></a></li>
       <li><a href="functions_vars_p.xhtml#index_p"><span>p</span></a></li>
+      <li><a href="functions_vars_q.xhtml#index_q"><span>q</span></a></li>
       <li><a href="functions_vars_r.xhtml#index_r"><span>r</span></a></li>
       <li><a href="functions_vars_s.xhtml#index_s"><span>s</span></a></li>
       <li><a href="functions_vars_t.xhtml#index_t"><span>t</span></a></li>
@@ -157,6 +159,9 @@ $(document).ready(function(){initNavTree('functions_vars_c.xhtml','');});
 &#160;
 
 <h3><a class="anchor" id="index_c"></a>- c -</h3><ul>
+<li>cache_size
+: <a class="el" href="structarm__compute_1_1_c_l_device_options.xhtml#a95bd826331e8ced007cf895e1d70c670">CLDeviceOptions</a>
+</li>
 <li>clBuildProgram_ptr
 : <a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml#ad35af0d314615874e570540e9853668c">CLSymbols</a>
 </li>
@@ -181,11 +186,20 @@ $(document).ready(function(){initNavTree('functions_vars_c.xhtml','');});
 <li>clEnqueueMapBuffer_ptr
 : <a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml#abd0ba6c593ff83cb0c3d0e1b746f068a">CLSymbols</a>
 </li>
+<li>clEnqueueMarker_ptr
+: <a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml#a527fd99779c605a2203158219f18e95f">CLSymbols</a>
+</li>
 <li>clEnqueueNDRangeKernel_ptr
 : <a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml#ab5c1d962dbe252b8d6a9a3414557d194">CLSymbols</a>
 </li>
 <li>clEnqueueReadBuffer_ptr
 : <a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml#a114ecc5c7e99f380a84d33f32038dc27">CLSymbols</a>
+</li>
+<li>clEnqueueSVMMap_ptr
+: <a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml#ae4a0c63c4f06c8d80788da461812bf4c">CLSymbols</a>
+</li>
+<li>clEnqueueSVMUnmap_ptr
+: <a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml#ab30bda3641f8d1a73126884a9fd66a89">CLSymbols</a>
 </li>
 <li>clEnqueueUnmapMemObject_ptr
 : <a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml#aab857577e126a171222277703b724639">CLSymbols</a>
@@ -268,14 +282,14 @@ $(document).ready(function(){initNavTree('functions_vars_c.xhtml','');});
 <li>clSetKernelArg_ptr
 : <a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml#a021f5850b98ba79d84067e762b84aa52">CLSymbols</a>
 </li>
-<li>coherency
-: <a class="el" href="structmali__userspace_1_1mali__base__gpu__coherent__group__info.xhtml#a17b6d906b8c58cfdd8611153a8aaca75">mali_base_gpu_coherent_group_info</a>
+<li>clSVMAlloc_ptr
+: <a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml#abf58c6d99585520b40a396a890caa9ee">CLSymbols</a>
 </li>
-<li>coherency_info
-: <a class="el" href="structmali__userspace_1_1mali__base__gpu__props.xhtml#adc150f0f4988256ec0abed29939f2f25">mali_base_gpu_props</a>
+<li>clSVMFree_ptr
+: <a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml#adbd557acca5bc0f92a1a7f8ebc26e9ed">CLSymbols</a>
 </li>
-<li>coherency_mode
-: <a class="el" href="structmali__userspace_1_1gpu__raw__gpu__props.xhtml#a8ffca6ecc5f31b7667cb1eae3d2d068f">gpu_raw_gpu_props</a>
+<li>clWaitForEvents_ptr
+: <a class="el" href="classarm__compute_1_1_c_l_symbols.xhtml#a8fd1b20db02f6fb96562ddff20134a53">CLSymbols</a>
 </li>
 <li>color_output
 : <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_common_options.xhtml#a41c4e0b7da82201358ea94bf8e9b45b4">CommonOptions</a>
@@ -283,18 +297,23 @@ $(document).ready(function(){initNavTree('functions_vars_c.xhtml','');});
 <li>constant_border_value
 : <a class="el" href="structarm__compute_1_1test_1_1validation_1_1_harris_corners_parameters.xhtml#adbc7a7f2ed8211ad938edc9e795fbb6f">HarrisCornersParameters</a>
 </li>
-<li>core_mask
-: <a class="el" href="structmali__userspace_1_1gpu__props.xhtml#a20c31568eb4bc4222cebae5f7b810c9b">gpu_props</a>
-, <a class="el" href="structmali__userspace_1_1mali__base__gpu__coherent__group.xhtml#a5808ae796e4af5af50d671d461abfd17">mali_base_gpu_coherent_group</a>
+<li>convolution_info
+: <a class="el" href="structarm__compute_1_1_winograd_info.xhtml#ad99e40b120f0a9e96821c08bf60a84f2">WinogradInfo</a>
 </li>
-<li>core_props
-: <a class="el" href="structmali__userspace_1_1mali__base__gpu__props.xhtml#a6558102a877521afc9ce9bee3a9173cc">mali_base_gpu_props</a>
-</li>
-<li>CPU
-: <a class="el" href="structarm__compute_1_1_c_p_u_info.xhtml#a6446992b5303784eb509ecaf4fc4f8e6">CPUInfo</a>
+<li>convolution_method_hint
+: <a class="el" href="structarm__compute_1_1graph_1_1frontend_1_1_stream_hints.xhtml#af18f64d6fa79da2fd4fd585bf818b3d2">StreamHints</a>
 </li>
 <li>cpu_info
-: <a class="el" href="structarm__compute_1_1_thread_info.xhtml#aa122040552579e3f388b81cb23cbdbef">ThreadInfo</a>
+: <a class="el" href="structarm__compute_1_1_thread_info.xhtml#a92a85dfb6988cb6da124c05d9eeef869">ThreadInfo</a>
+</li>
+<li>cross_group
+: <a class="el" href="structarm__compute_1_1graph_1_1_memory_manager_context.xhtml#a9a1a8b3c7023ca46b49d051c2ac25489">MemoryManagerContext</a>
+</li>
+<li>cross_mm
+: <a class="el" href="structarm__compute_1_1graph_1_1_memory_manager_context.xhtml#a4e1e0a2d09540e4c286f7ef4b5a02053">MemoryManagerContext</a>
+</li>
+<li>ctx
+: <a class="el" href="structarm__compute_1_1graph_1_1_execution_workload.xhtml#abda8fc9044eb180a388401a256d4ed05">ExecutionWorkload</a>
 </li>
 </ul>
 </div><!-- contents -->
@@ -302,7 +321,7 @@ $(document).ready(function(){initNavTree('functions_vars_c.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Fri Mar 2 2018 12:38:02 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:46 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

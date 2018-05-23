@@ -29,7 +29,9 @@
 #endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED)
 
 #if defined(ARM_COMPUTE_DEBUG_ENABLED)
+#if defined(cl_arm_printf)
 #pragma OPENCL EXTENSION cl_arm_printf : enable
+#endif // defined(cl_arm_printf)
 #endif // defined(ARM_COMPUTE_DEBUG_ENABLED)
 
 #define EXPAND(x) x

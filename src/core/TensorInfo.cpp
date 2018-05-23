@@ -34,7 +34,7 @@ using namespace arm_compute;
 
 TensorInfo::TensorInfo()
     : _total_size(0), _fixed_point_position(0), _offset_first_element_in_bytes(0), _strides_in_bytes(), _num_channels(0), _tensor_shape(), _data_type(DataType::UNKNOWN), _format(Format::UNKNOWN),
-      _is_resizable{ true }, _valid_region{ Coordinates(), _tensor_shape }, _padding{ 0 }, _quantization_info()
+      _is_resizable{ true }, _valid_region{ Coordinates(), _tensor_shape }, _padding{ 0 }, _quantization_info(), _data_layout(DataLayout::NCHW)
 {
 }
 
@@ -53,6 +53,7 @@ TensorInfo::TensorInfo(const ITensorInfo &info)
     _valid_region                  = info.valid_region();
     _padding                       = info.padding();
     _quantization_info             = info.quantization_info();
+    _data_layout                   = info.data_layout();
 }
 
 TensorInfo::TensorInfo(Format format)
@@ -167,13 +168,13 @@ void TensorInfo::init(const HOGInfo &hog_info, unsigned int width, unsigned int 
     // Number of cells for each block
     const Size2D num_cells_per_block = hog_info.num_cells_per_block();
 
-    // Tensor Size = (Number of horizontal blocks) * (Number of vertical blocks )
-    const Size2D num_blocks_per_img = hog_info.num_blocks_per_image(Size2D(width, height));
+    // Tensor Size = (Number of horizontal block positions) * (Number of vertical block positions)
+    const Size2D num_block_positions_per_img = hog_info.num_block_positions_per_image(Size2D(width, height));
 
     // Number of tensor channels = (Number of cells per block) * (Number of bins per cell)
     const size_t num_channels = num_cells_per_block.area() * hog_info.num_bins();
 
-    init(TensorShape(num_blocks_per_img.width, num_blocks_per_img.height), num_channels, DataType::F32);
+    init(TensorShape(num_block_positions_per_img.width, num_block_positions_per_img.height), num_channels, DataType::F32);
 }
 
 size_t TensorInfo::init_auto_padding(const TensorShape &tensor_shape, Format format)
@@ -211,13 +212,13 @@ size_t TensorInfo::init_auto_padding(const HOGInfo &hog_info, unsigned int width
     // Number of cells for each block
     const Size2D num_cells_per_block = hog_info.num_cells_per_block();
 
-    // Tensor Size = (Number of horizontal blocks) * (Number of vertical blocks )
-    const Size2D num_blocks_per_img = hog_info.num_blocks_per_image(Size2D(width, height));
+    // Tensor Size = (Number of horizontal block positions) * (Number of vertical block positions)
+    const Size2D num_block_positions_per_img = hog_info.num_block_positions_per_image(Size2D(width, height));
 
     // Number of tensor channels = (Number of cells per block) * (Number of bins per cell)
     const size_t num_channels = num_cells_per_block.area() * hog_info.num_bins();
 
-    return init_auto_padding(TensorShape(num_blocks_per_img.width, num_blocks_per_img.height), num_channels, DataType::F32);
+    return init_auto_padding(TensorShape(num_block_positions_per_img.width, num_block_positions_per_img.height), num_channels, DataType::F32);
 }
 
 bool TensorInfo::auto_padding()
@@ -321,7 +322,7 @@ ITensorInfo &TensorInfo::set_data_type(DataType data_type)
 {
     _data_type = data_type;
     _format    = Format::UNKNOWN;
-    return *this;
+    return set_tensor_shape(tensor_shape()); // Force total size and strides to update
 }
 
 ITensorInfo &TensorInfo::set_num_channels(int num_channels)
@@ -381,6 +382,12 @@ ITensorInfo &TensorInfo::set_fixed_point_position(int fixed_point_position)
 ITensorInfo &TensorInfo::set_quantization_info(const QuantizationInfo &quantization_info)
 {
     _quantization_info = quantization_info;
+    return *this;
+}
+
+ITensorInfo &TensorInfo::set_data_layout(const DataLayout &data_layout)
+{
+    _data_layout = data_layout;
     return *this;
 }
 

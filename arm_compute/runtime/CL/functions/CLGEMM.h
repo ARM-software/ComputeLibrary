@@ -51,8 +51,19 @@ class ICLTensor;
 class CLGEMM : public IFunction
 {
 public:
-    /** Default constructor. */
+    /** Default constructor.
+     *
+     * @param[in] memory_manager (Optional) Memory manager.
+     */
     CLGEMM(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLGEMM(const CLGEMM &) = delete;
+    /** Default move constructor */
+    CLGEMM(CLGEMM &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLGEMM &operator=(const CLGEMM &) = delete;
+    /** Default move assignment operator */
+    CLGEMM &operator=(CLGEMM &&) = default;
     /** Initialise the kernel's inputs and output
      *
      * @note GEMM: General Matrix Multiply - [alpha * A * B + beta * C].
@@ -74,10 +85,10 @@ public:
     void configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, float alpha, float beta, const GEMMInfo &gemm_info = GEMMInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMM.
      *
-     * @param[in]  a         First input tensor  (Matrix or Vector A). Data types supported: QS8/QS16/F16/F32
-     * @param[in]  b         Second input tensor (Matrix B). Data type supported: same as @p a.
-     * @param[in]  c         Third input tensor  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a.
-     * @param[out] output    Output tensor. Data type supported: same as @p a
+     * @param[in]  a         First input tensor info  (Matrix or Vector A). Data types supported: QS8/QS16/F16/F32
+     * @param[in]  b         Second input tensor info (Matrix B). Data type supported: same as @p a.
+     * @param[in]  c         Third input tensor info  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a.
+     * @param[out] output    Output tensor info. Data type supported: same as @p a
      * @param[in]  alpha     Weight of the matrix product
      * @param[in]  beta      Weight of matrix C
      * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
@@ -85,10 +96,11 @@ public:
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ICLTensor *c, const ITensorInfo *output, const float alpha, const float beta, const GEMMInfo &gemm_info = GEMMInfo());
+    static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info = GEMMInfo());
 
     // Inherited methods overridden:
     void run() override;
+    void prepare() override;
 
 private:
     CLMemoryGroup              _memory_group;
@@ -98,10 +110,11 @@ private:
     CLGEMMMatrixAdditionKernel _ma_kernel;
     CLTensor                   _tmp_a;
     CLTensor                   _tmp_b;
+    const ICLTensor           *_original_b;
     bool                       _is_interleaved_transposed;
     bool                       _run_addition;
-    bool                       _is_first_run;
     bool                       _reshape_b_only_on_first_run;
+    bool                       _is_prepared;
 };
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,14 +81,7 @@ protected:
         TensorInfo tensor_info_hog_descriptor(hog_info, shape.x(), shape.y());
 
         // Create HOG
-        HOGType hog = create_HOG<HOGType>(hog_info.cell_size(),
-                                          hog_info.block_size(),
-                                          hog_info.detection_window_size(),
-                                          hog_info.block_stride(),
-                                          hog_info.num_bins(),
-                                          hog_info.normalization_type(),
-                                          hog_info.l2_hyst_threshold(),
-                                          hog_info.phase_type());
+        HOGType hog = create_HOG<HOGType>(hog_info);
 
         // Create tensors
         TensorType src = create_tensor<TensorType>(shape, data_type_from_format(format));

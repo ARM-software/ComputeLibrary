@@ -30,17 +30,25 @@ namespace arm_compute
 {
 namespace detail
 {
-// Dummy activation object
 /** Dummy activation object */
 template <typename T, int S>
 struct dummy
 {
+    /** NEON vector type. */
     using ExactType = typename wrapper::traits::neon_vector<T, S>::type;
 
+    /** Construct a dummy activation object.
+     *
+     * @param[in] act_info Activation layer information.
+     */
     explicit dummy(ActivationLayerInfo act_info)
     {
         ARM_COMPUTE_UNUSED(act_info);
     }
+    /** Run activation function.
+     *
+     * @param[in] vval Vector of values.
+     */
     void operator()(ExactType &vval)
     {
         ARM_COMPUTE_UNUSED(vval);
@@ -50,62 +58,97 @@ struct dummy
 template <typename T, int S>
 struct relu
 {
-    using ExactType    = typename wrapper::traits::neon_vector<T, S>::type;
+    /** NEON vector type. */
+    using ExactType = typename wrapper::traits::neon_vector<T, S>::type;
+    /** NEON vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
 
+    /** Construct a RELU activation object.
+     *
+     * @param[in] act_info Activation layer information.
+     */
     explicit relu(ActivationLayerInfo act_info)
         : vzero(wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{}))
     {
         ARM_COMPUTE_UNUSED(act_info);
     }
 
+    /** Run activation function.
+     *
+     * @param[in] vval Vector of values.
+     */
     void operator()(ExactType &vval)
     {
         vval = wrapper::vmax(vzero, vval);
     }
 
+    /** Vector of zeroes. */
     const ExactType vzero;
 };
 /** Bounded RELU activation object */
 template <typename T, int S>
 struct brelu
 {
-    using ExactType    = typename wrapper::traits::neon_vector<T, S>::type;
+    /** NEON vector type. */
+    using ExactType = typename wrapper::traits::neon_vector<T, S>::type;
+    /** NEON vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
 
+    /** Construct a bounded RELU activation object.
+     *
+     * @param[in] act_info Activation layer information.
+     */
     explicit brelu(ActivationLayerInfo act_info)
         : vzero(wrapper::vdup_n(static_cast<T>(0.f), ExactTagType{})),
           valpha(wrapper::vdup_n(static_cast<T>(act_info.a()), ExactTagType{}))
     {
     }
 
+    /** Run activation function.
+     *
+     * @param[in] vval Vector of values.
+     */
     void operator()(ExactType &vval)
     {
         vval = wrapper::vmin(valpha, wrapper::vmax(vzero, vval));
     }
 
+    /** Vector of zeroes. */
     const ExactType vzero;
+    /** Vector of alphas. */
     const ExactType valpha;
 };
 /** Lower-Upper Bounded RELU activation object */
 template <typename T, int S>
 struct lubrelu
 {
-    using ExactType    = typename wrapper::traits::neon_vector<T, S>::type;
+    /** NEON vector type. */
+    using ExactType = typename wrapper::traits::neon_vector<T, S>::type;
+    /** NEON vector tag type. */
     using ExactTagType = typename wrapper::traits::neon_vector<T, S>::tag_type;
 
+    /** Construct a lower-upper bounded RELU activation object.
+     *
+     * @param[in] act_info Activation layer information.
+     */
     explicit lubrelu(ActivationLayerInfo act_info)
         : valpha(wrapper::vdup_n(static_cast<T>(act_info.a()), ExactTagType{})),
           vbeta(wrapper::vdup_n(static_cast<T>(act_info.b()), ExactTagType{}))
     {
     }
 
+    /** Run activation function.
+     *
+     * @param[in] vval Vector of values.
+     */
     void operator()(ExactType &vval)
     {
         vval = wrapper::vmin(valpha, wrapper::vmax(vbeta, vval));
     }
 
+    /** Vector of alphas. */
     const ExactType valpha;
+    /** Vector of betas. */
     const ExactType vbeta;
 };
 } // namespace detail

@@ -51,7 +51,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, s
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), compute_col2im_shape(*input, convolved_dims));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
     }
 
     return Status{};
@@ -111,8 +111,8 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
 
     // Configure the local work size for Bifrost with a value obtained
     // via exhaustive autotuning over 30 representative tensor shapes.
-    const GPUTarget gpu_target = get_arch_from_target(get_target());
-    if(gpu_target == GPUTarget::BIFROST)
+    const GPUTarget gpu_target = get_target();
+    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX))
     {
         if((_convolved_dims.first == 7) || (_convolved_dims.first == 14))
         {

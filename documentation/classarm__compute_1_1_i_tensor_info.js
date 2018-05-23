@@ -2,8 +2,10 @@ var classarm__compute_1_1_i_tensor_info =
 [
     [ "~ITensorInfo", "classarm__compute_1_1_i_tensor_info.xhtml#ad998b50febf68540277e121a9c670bfa", null ],
     [ "auto_padding", "classarm__compute_1_1_i_tensor_info.xhtml#a4f2d0ac983637a0459daf43bcd65cc38", null ],
+    [ "data_layout", "classarm__compute_1_1_i_tensor_info.xhtml#a367b5090ab432bc7de2c32369e087ab1", null ],
     [ "data_type", "classarm__compute_1_1_i_tensor_info.xhtml#a7cfb31af63202568efef5214acfbf3ba", null ],
     [ "dimension", "classarm__compute_1_1_i_tensor_info.xhtml#a178f0d3d87f959e00a743328d95359d2", null ],
+    [ "dimension", "classarm__compute_1_1_i_tensor_info.xhtml#ae3372a4569b4702a881b1606b0c144c4", null ],
     [ "element_size", "classarm__compute_1_1_i_tensor_info.xhtml#aa459796b5489eca8a9160cb5dcf1a103", null ],
     [ "extend_padding", "classarm__compute_1_1_i_tensor_info.xhtml#a0cd5aea514f03afb48ebe22581ea4c66", null ],
     [ "fixed_point_position", "classarm__compute_1_1_i_tensor_info.xhtml#ab21a362740e892b6e913bd8db03b0e67", null ],
@@ -17,6 +19,7 @@ var classarm__compute_1_1_i_tensor_info =
     [ "padding", "classarm__compute_1_1_i_tensor_info.xhtml#a07b929c34ad1dc823d8315876aa403ce", null ],
     [ "quantization_info", "classarm__compute_1_1_i_tensor_info.xhtml#a3f3e1a3200223e6a304a533b1016e749", null ],
     [ "reset_padding", "classarm__compute_1_1_i_tensor_info.xhtml#afc135290818a7ae02d2195c013796fdd", null ],
+    [ "set_data_layout", "classarm__compute_1_1_i_tensor_info.xhtml#abb9481fe056b9749f9b4c08db101cc15", null ],
     [ "set_data_type", "classarm__compute_1_1_i_tensor_info.xhtml#a9ebcdce876b4cd07736afa47d50154de", null ],
     [ "set_fixed_point_position", "classarm__compute_1_1_i_tensor_info.xhtml#a8d9488caf817e12132f0ca2a4c30deba", null ],
     [ "set_format", "classarm__compute_1_1_i_tensor_info.xhtml#a17394f0f7aea22d9b2d4c6f33bfa69ca", null ],

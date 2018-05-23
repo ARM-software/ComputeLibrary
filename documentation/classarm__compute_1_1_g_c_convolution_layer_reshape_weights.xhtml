@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -138,9 +138,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab2cb1decf7fb2217d6f7b85c1c6b60a0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_convolution_layer_reshape_weights.xhtml#ab2cb1decf7fb2217d6f7b85c1c6b60a0">GCConvolutionLayerReshapeWeights</a> ()</td></tr>
 <tr class="memdesc:ab2cb1decf7fb2217d6f7b85c1c6b60a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#ab2cb1decf7fb2217d6f7b85c1c6b60a0">More...</a><br /></td></tr>
 <tr class="separator:ab2cb1decf7fb2217d6f7b85c1c6b60a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a30fce7e9257d1dff9645d65a67ff7998"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_convolution_layer_reshape_weights.xhtml#a30fce7e9257d1dff9645d65a67ff7998">configure</a> (const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *weights, const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *biases, <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *output, bool transpose1xW)</td></tr>
-<tr class="memdesc:a30fce7e9257d1dff9645d65a67ff7998"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the input and output tensors.  <a href="#a30fce7e9257d1dff9645d65a67ff7998">More...</a><br /></td></tr>
-<tr class="separator:a30fce7e9257d1dff9645d65a67ff7998"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35aacc414eddf01fa5ae44483c110a33"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_convolution_layer_reshape_weights.xhtml#a35aacc414eddf01fa5ae44483c110a33">configure</a> (const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *weights, const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *biases, <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *output)</td></tr>
+<tr class="memdesc:a35aacc414eddf01fa5ae44483c110a33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the input and output tensors.  <a href="#a35aacc414eddf01fa5ae44483c110a33">More...</a><br /></td></tr>
+<tr class="separator:a35aacc414eddf01fa5ae44483c110a33"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad1717410afd0be936c6213a63c8005fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_convolution_layer_reshape_weights.xhtml#ad1717410afd0be936c6213a63c8005fb">run</a> () override</td></tr>
 <tr class="memdesc:ad1717410afd0be936c6213a63c8005fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run the kernels contained in the function.  <a href="#ad1717410afd0be936c6213a63c8005fb">More...</a><br /></td></tr>
 <tr class="separator:ad1717410afd0be936c6213a63c8005fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -148,15 +148,17 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_function.xhtml#ab921ecc3f3f6ae2b4bd61f3e1998d8c4">~IFunction</a> ()=default</td></tr>
 <tr class="memdesc:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#ab921ecc3f3f6ae2b4bd61f3e1998d8c4">More...</a><br /></td></tr>
 <tr class="separator:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a820f7291c24155a2980512fae45aac26 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c24155a2980512fae45aac26">prepare</a> ()</td></tr>
+<tr class="memdesc:a820f7291c24155a2980512fae45aac26 inherit pub_methods_classarm__compute_1_1_i_function"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prepare the function for executing.  <a href="#a820f7291c24155a2980512fae45aac26">More...</a><br /></td></tr>
+<tr class="separator:a820f7291c24155a2980512fae45aac26 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Function to reshape and transpose the weights. </p>
 <p>This function calls the following kernels:</p><ol type="1">
-<li><a class="el" href="classarm__compute_1_1_g_c_weights_reshape_kernel.xhtml">GCWeightsReshapeKernel</a></li>
-<li><a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_transpose1x_w_kernel.xhtml">GCGEMMTranspose1xWKernel</a> </li>
+<li><a class="el" href="classarm__compute_1_1_g_c_weights_reshape_kernel.xhtml">GCWeightsReshapeKernel</a> </li>
 </ol>
 
-<p>Definition at line <a class="el" href="_g_c_convolution_layer_8h_source.xhtml#l00049">49</a> of file <a class="el" href="_g_c_convolution_layer_8h_source.xhtml">GCConvolutionLayer.h</a>.</p>
+<p>Definition at line <a class="el" href="_g_c_convolution_layer_8h_source.xhtml#l00048">48</a> of file <a class="el" href="_g_c_convolution_layer_8h_source.xhtml">GCConvolutionLayer.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="ab2cb1decf7fb2217d6f7b85c1c6b60a0"></a>
 <div class="memitem">
@@ -176,7 +178,7 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a30fce7e9257d1dff9645d65a67ff7998"></a>
+<a class="anchor" id="a35aacc414eddf01fa5ae44483c110a33"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -196,13 +198,7 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *&#160;</td>
-          <td class="paramname"><em>output</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>transpose1xW</em>&#160;</td>
+          <td class="paramname"><em>output</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -218,7 +214,6 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">weights</td><td>Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: F16/F32. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">biases</td><td>Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as <code>weights</code>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor. Data types supported: Same as <code>weights</code>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">transpose1xW</td><td>True if the weights are to undergo a 1xW transposition after reshaping (in case of GEMM operation), false otherwise. Data types supported: Same as <code>weights</code>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -256,7 +251,9 @@ Public Member Functions</h2></td></tr>
 <li>All the kernels are enqueued on the queue associated with <a class="el" href="classarm__compute_1_1_c_l_scheduler.xhtml" title="Provides global access to a CL context and command queue. ">CLScheduler</a>.</li>
 <li>The queue is then flushed.</li>
 </ul>
-<dl class="section note"><dt>Note</dt><dd>The function will not block until the kernels are executed. It is the user's responsibility to wait. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The function will not block until the kernels are executed. It is the user's responsibility to wait. </dd>
+<dd>
+Will call <a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c24155a2980512fae45aac26" title="Prepare the function for executing. ">prepare()</a> on first run if hasn't been done </dd></dl>
 
 <p>Implements <a class="el" href="classarm__compute_1_1_i_function.xhtml#a18954417d3124a8095783ea13dc6d00b">IFunction</a>.</p>
 
@@ -271,7 +268,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_g_c_convolution_layer_reshape_weights.xhtml">GCConvolutionLayerReshapeWeights</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:58 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:41 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

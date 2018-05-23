@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,7 @@
 
 namespace arm_compute
 {
-/* Exponent polynomial coefficients */
+/** Exponent polynomial coefficients */
 const std::array<float32x4_t, 8> exp_tab =
 {
     {
@@ -39,7 +39,7 @@ const std::array<float32x4_t, 8> exp_tab =
     }
 };
 
-/* Logarithm polynomial coefficients */
+/** Logarithm polynomial coefficients */
 const std::array<float32x4_t, 8> log_tab =
 {
     {
@@ -54,6 +54,7 @@ const std::array<float32x4_t, 8> log_tab =
     }
 };
 
+#ifndef DOXYGEN_SKIP_THIS
 inline float32x4_t vfloorq_f32(float32x4_t val)
 {
     static const float32x4_t CONST_1 = vdupq_n_f32(1.f);
@@ -168,8 +169,10 @@ inline float32x4_t vpowq_f32(float32x4_t val, float32x4_t n)
 {
     return vexpq_f32(vmulq_f32(n, vlogq_f32(val)));
 }
+#endif /* DOXYGEN_SKIP_THIS */
+
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-/* Exponent polynomial coefficients */
+/** Exponent polynomial coefficients */
 const std::array<float16x8_t, 8> exp_tab_f16 =
 {
     {
@@ -184,7 +187,7 @@ const std::array<float16x8_t, 8> exp_tab_f16 =
     }
 };
 
-/* Logarithm polynomial coefficients */
+/** Logarithm polynomial coefficients */
 const std::array<float16x8_t, 8> log_tab_f16 =
 {
     {
@@ -199,6 +202,7 @@ const std::array<float16x8_t, 8> log_tab_f16 =
     }
 };
 
+#ifndef DOXYGEN_SKIP_THIS
 inline float16x4_t vinvsqrt_f16(float16x4_t x)
 {
     float16x4_t sqrt_reciprocal = vrsqrte_f16(x);
@@ -301,5 +305,6 @@ inline float16x8_t vpowq_f16(float16x8_t val, float16x8_t n)
 {
     return vexpq_f16(vmulq_f16(n, vlogq_f16(val)));
 }
+#endif /* DOXYGEN_SKIP_THIS */
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 } // namespace arm_compute

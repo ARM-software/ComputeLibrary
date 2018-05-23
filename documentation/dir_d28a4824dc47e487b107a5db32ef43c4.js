@@ -13,6 +13,7 @@ var dir_d28a4824dc47e487b107a5db32ef43c4 =
     [ "graph_mobilenet.cpp", "graph__mobilenet_8cpp.xhtml", "graph__mobilenet_8cpp" ],
     [ "graph_mobilenet_qasymm8.cpp", "graph__mobilenet__qasymm8_8cpp.xhtml", "graph__mobilenet__qasymm8_8cpp" ],
     [ "graph_resnet50.cpp", "graph__resnet50_8cpp.xhtml", "graph__resnet50_8cpp" ],
+    [ "graph_resnext50.cpp", "graph__resnext50_8cpp.xhtml", "graph__resnext50_8cpp" ],
     [ "graph_squeezenet.cpp", "graph__squeezenet_8cpp.xhtml", "graph__squeezenet_8cpp" ],
     [ "graph_squeezenet_v1_1.cpp", "graph__squeezenet__v1__1_8cpp.xhtml", "graph__squeezenet__v1__1_8cpp" ],
     [ "graph_vgg16.cpp", "graph__vgg16_8cpp.xhtml", "graph__vgg16_8cpp" ],

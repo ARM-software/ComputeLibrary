@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,6 +53,14 @@ class NELocallyConnectedLayer : public IFunction
 public:
     /** Default constructor */
     NELocallyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NELocallyConnectedLayer(const NELocallyConnectedLayer &) = delete;
+    /** Default move constructor */
+    NELocallyConnectedLayer(NELocallyConnectedLayer &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NELocallyConnectedLayer &operator=(const NELocallyConnectedLayer &) = delete;
+    /** Default move assignment operator */
+    NELocallyConnectedLayer &operator=(NELocallyConnectedLayer &&) = default;
     /** Set the input and output tensors.
      *
      * @param[in]  input     Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -65,6 +73,20 @@ public:
      * @param[in]  conv_info Contains padding and stride information described in @ref PadStrideInfo.
      */
     void configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, const PadStrideInfo &conv_info);
+    /** Static function to check if given info will lead to a valid configuration of @ref NELocallyConnectedLayer
+     *
+     * @param[in] input     Input tensor info. 3 lower dimensions represent a single input [width, height, IFM],
+     *                      while every optional dimension from 4 and above represent a batch of inputs.
+     *                      Data types supported: F16, F32.
+     * @param[in] weights   Weights tensor info. Weights are 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM, num_patches]. Data type supported:Same as @p input.
+     * @param[in] biases    Biases tensor info. Shared biases supported. Biases are 2D tensor with dimensions [OFM, num_patches]. Data type supported:Same as @p input.
+     * @param[in] output    Output tensor info. 3 lower dimensions represent a single output [width, height, OFM], while the rest represent batch of outputs.
+     *                      Data types supported: Same as @p input.
+     * @param[in] conv_info Contains padding and stride information described in @ref PadStrideInfo.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info);
 
     // Inherited methods overridden:
     void run() override;
@@ -79,6 +101,7 @@ private:
     Tensor                                 _weights_reshaped;
     Tensor                                 _gemm_output;
     bool                                   _is_first_run;
+    const ITensor                         *_original_weights;
 };
 }
 #endif /* __ARM_COMPUTE_NELOCALLYCONNECTEDLAYER_H__ */

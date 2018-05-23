@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -154,9 +154,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aa33f475c59df8d7ea699d6031553d232"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml">NEDepthwiseConvolutionLayer3x3Kernel</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml#aa33f475c59df8d7ea699d6031553d232">operator=</a> (<a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml">NEDepthwiseConvolutionLayer3x3Kernel</a> &amp;&amp;)=default</td></tr>
 <tr class="memdesc:aa33f475c59df8d7ea699d6031553d232"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default move assignment operator.  <a href="#aa33f475c59df8d7ea699d6031553d232">More...</a><br /></td></tr>
 <tr class="separator:aa33f475c59df8d7ea699d6031553d232"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a185cf08a1ed4b6dfbd36121492849ff4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml#a185cf08a1ed4b6dfbd36121492849ff4">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *weights, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;conv_info, <a class="el" href="namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0">DataLayout</a> data_layout=<a class="el" href="namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0a6b99f356fe3b30a2a850b5ea897c289f">DataLayout::NCHW</a>)</td></tr>
-<tr class="memdesc:a185cf08a1ed4b6dfbd36121492849ff4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the function's source, destination, conv and border_size.  <a href="#a185cf08a1ed4b6dfbd36121492849ff4">More...</a><br /></td></tr>
-<tr class="separator:a185cf08a1ed4b6dfbd36121492849ff4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b9e97a619f7222a14a9c61009b57920"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml#a4b9e97a619f7222a14a9c61009b57920">configure</a> (const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *weights, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> *output, const <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> &amp;conv_info, unsigned int depth_multiplier=1, <a class="el" href="namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0">DataLayout</a> data_layout=<a class="el" href="namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0a6b99f356fe3b30a2a850b5ea897c289f">DataLayout::NCHW</a>)</td></tr>
+<tr class="memdesc:a4b9e97a619f7222a14a9c61009b57920"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the function's source, destination, conv and border_size.  <a href="#a4b9e97a619f7222a14a9c61009b57920">More...</a><br /></td></tr>
+<tr class="separator:a4b9e97a619f7222a14a9c61009b57920"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af77d9d6fcc740068192d3fca9421311f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml#af77d9d6fcc740068192d3fca9421311f">generate_convolver</a> ()</td></tr>
 <tr class="memdesc:af77d9d6fcc740068192d3fca9421311f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates the convolver object.  <a href="#af77d9d6fcc740068192d3fca9421311f">More...</a><br /></td></tr>
 <tr class="separator:af77d9d6fcc740068192d3fca9421311f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -186,9 +186,9 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:aceef5ed4bcd2b3691a06aea1b852446b"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml#aceef5ed4bcd2b3691a06aea1b852446b">is_optimized_execution_possible</a> (<a class="el" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a> input_shape, <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> conv_info, <a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6">DataType</a> dt, <a class="el" href="namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0">DataLayout</a> data_layout=<a class="el" href="namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0a6b99f356fe3b30a2a850b5ea897c289f">DataLayout::NCHW</a>)</td></tr>
-<tr class="memdesc:aceef5ed4bcd2b3691a06aea1b852446b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static method that checks if optimized execution is supported for the given parameters.  <a href="#aceef5ed4bcd2b3691a06aea1b852446b">More...</a><br /></td></tr>
-<tr class="separator:aceef5ed4bcd2b3691a06aea1b852446b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f5245ff1a8acbc154295f17e4571465"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml#a1f5245ff1a8acbc154295f17e4571465">is_optimized_execution_possible</a> (<a class="el" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a> input_shape, <a class="el" href="classarm__compute_1_1_pad_stride_info.xhtml">PadStrideInfo</a> conv_info, <a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6">DataType</a> dt, unsigned int depth_multiplier=1, <a class="el" href="namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0">DataLayout</a> data_layout=<a class="el" href="namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0a6b99f356fe3b30a2a850b5ea897c289f">DataLayout::NCHW</a>)</td></tr>
+<tr class="memdesc:a1f5245ff1a8acbc154295f17e4571465"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static method that checks if optimized execution is supported for the given parameters.  <a href="#a1f5245ff1a8acbc154295f17e4571465">More...</a><br /></td></tr>
+<tr class="separator:a1f5245ff1a8acbc154295f17e4571465"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Interface for the kernel to run a 3x3 depthwise convolution on a tensor. </p>
@@ -297,7 +297,7 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a185cf08a1ed4b6dfbd36121492849ff4"></a>
+<a class="anchor" id="a4b9e97a619f7222a14a9c61009b57920"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -328,6 +328,12 @@ Static Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>depth_multiplier</em> = <code>1</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype"><a class="el" href="namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0">DataLayout</a>&#160;</td>
           <td class="paramname"><em>data_layout</em> = <code><a class="el" href="namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0a6b99f356fe3b30a2a850b5ea897c289f">DataLayout::NCHW</a></code>&#160;</td>
         </tr>
@@ -346,6 +352,7 @@ Static Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">weights</td><td>Weights tensor. This is a 3D tensor with dimensions [3, 3, IFM]. Data type supported: Same as <code>input</code>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor. Data type supported: Same as <code>input</code>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">conv_info</td><td>Padding and stride information to use for the convolution. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">depth_multiplier</td><td>(Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">data_layout</td><td>(Optional) Data layout of the input and weights tensor </td></tr>
   </table>
   </dd>
@@ -374,7 +381,7 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="aceef5ed4bcd2b3691a06aea1b852446b"></a>
+<a class="anchor" id="a1f5245ff1a8acbc154295f17e4571465"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -402,6 +409,12 @@ Static Public Member Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">unsigned int&#160;</td>
+          <td class="paramname"><em>depth_multiplier</em> = <code>1</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype"><a class="el" href="namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0">DataLayout</a>&#160;</td>
           <td class="paramname"><em>data_layout</em> = <code><a class="el" href="namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0a6b99f356fe3b30a2a850b5ea897c289f">DataLayout::NCHW</a></code>&#160;</td>
         </tr>
@@ -424,13 +437,14 @@ Static Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">input_shape</td><td>Input shape </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">conv_info</td><td>Padding and stride information to use for the convolution. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dt</td><td>Data type of the input and weights </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">data_layout</td><td>(Optional) Data layout of the input and weights tensor</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">data_layout</td><td>(Optional) Data layout of the input and weights tensor </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">depth_multiplier</td><td>(Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if the optimized kernels can be executed else false </dd></dl>
 
-<p>Referenced by <a class="el" href="validation_2_n_e_o_n_2_depthwise_convolution_layer_8cpp_source.xhtml#l00052">arm_compute::test::validation::DATA_TEST_CASE()</a>, and <a class="el" href="_n_e_depthwise_convolution_layer3x3_kernel_8h_source.xhtml#l00040">NEDepthwiseConvolutionLayer3x3Kernel::name()</a>.</p>
+<p>Referenced by <a class="el" href="validation_2_n_e_o_n_2_depthwise_convolution_layer_8cpp_source.xhtml#l00057">arm_compute::test::validation::DATA_TEST_CASE()</a>, and <a class="el" href="_n_e_depthwise_convolution_layer3x3_kernel_8h_source.xhtml#l00040">NEDepthwiseConvolutionLayer3x3Kernel::name()</a>.</p>
 
 </div>
 </div>
@@ -462,7 +476,7 @@ Static Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_n_e_depthwise_convolution_layer3x3_kernel_8h_source.xhtml#l00040">40</a> of file <a class="el" href="_n_e_depthwise_convolution_layer3x3_kernel_8h_source.xhtml">NEDepthwiseConvolutionLayer3x3Kernel.h</a>.</p>
 
-<p>References <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7">NEDepthwiseConvolutionLayer3x3Kernel::border_size()</a>, <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml#a185cf08a1ed4b6dfbd36121492849ff4">NEDepthwiseConvolutionLayer3x3Kernel::configure()</a>, <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml#af77d9d6fcc740068192d3fca9421311f">NEDepthwiseConvolutionLayer3x3Kernel::generate_convolver()</a>, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">arm_compute::test::validation::info()</a>, <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml#aceef5ed4bcd2b3691a06aea1b852446b">NEDepthwiseConvolutionLayer3x3Kernel::is_optimized_execution_possible()</a>, <a class="el" href="namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0a6b99f356fe3b30a2a850b5ea897c289f">arm_compute::NCHW</a>, <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml#abf0a671d5f84d64b22c1baacbc30d42c">NEDepthwiseConvolutionLayer3x3Kernel::NEDepthwiseConvolutionLayer3x3Kernel()</a>, <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml#a4f080336e12b8a0a378f008780eeff5a">NEDepthwiseConvolutionLayer3x3Kernel::operator=()</a>, <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEDepthwiseConvolutionLayer3x3Kernel::run()</a>, <a class="el" href="_c_l_2_convolution_8cpp_source.xhtml#l00133">arm_compute::test::validation::shape</a>, and <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">IKernel::window()</a>.</p>
+<p>References <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml#a423f9a45a52983b4de5e2b347f4369c7">NEDepthwiseConvolutionLayer3x3Kernel::border_size()</a>, <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml#a4b9e97a619f7222a14a9c61009b57920">NEDepthwiseConvolutionLayer3x3Kernel::configure()</a>, <a class="el" href="_c_l_2_winograd_8cpp_source.xhtml#l00360">arm_compute::test::validation::conv_info</a>, <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml#af77d9d6fcc740068192d3fca9421311f">NEDepthwiseConvolutionLayer3x3Kernel::generate_convolver()</a>, <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a096668313a9a819d54a2e65ec21ff0cc">arm_compute::test::validation::info()</a>, <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml#a1f5245ff1a8acbc154295f17e4571465">NEDepthwiseConvolutionLayer3x3Kernel::is_optimized_execution_possible()</a>, <a class="el" href="namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0a6b99f356fe3b30a2a850b5ea897c289f">arm_compute::NCHW</a>, <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml#abf0a671d5f84d64b22c1baacbc30d42c">NEDepthwiseConvolutionLayer3x3Kernel::NEDepthwiseConvolutionLayer3x3Kernel()</a>, <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml#a4f080336e12b8a0a378f008780eeff5a">NEDepthwiseConvolutionLayer3x3Kernel::operator=()</a>, <a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml#a112b35dd205c62ea6ed1447ef226da82">NEDepthwiseConvolutionLayer3x3Kernel::run()</a>, and <a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">IKernel::window()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    {</div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        <span class="keywordflow">return</span> <span class="stringliteral">&quot;NEDepthwiseConvolutionLayer3x3Kernel&quot;</span>;</div><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
@@ -580,7 +594,7 @@ The width of the window has to be a multiple of num_elems_processed_per_iteratio
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_n_e_depthwise_convolution_layer3x3_kernel.xhtml">NEDepthwiseConvolutionLayer3x3Kernel</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:58 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:42 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

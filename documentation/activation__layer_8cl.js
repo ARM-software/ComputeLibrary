@@ -15,7 +15,6 @@ var activation__layer_8cl =
     [ "TANH_OP", "activation__layer_8cl.xhtml#ae8e589b942df134846634fc08b969f94", null ],
     [ "TYPE", "activation__layer_8cl.xhtml#a5a392548f2df67370cb15d2a5d75cd7b", null ],
     [ "abs_op", "activation__layer_8cl.xhtml#a9662f169f7eeb73c3a835eea59c1e222", null ],
-    [ "activation_layer", "activation__layer_8cl.xhtml#a22355c125bcfe5bf82a7c5d4c422dc50", null ],
     [ "brelu_op", "activation__layer_8cl.xhtml#aceaec5c948eb4a004fad33f4c769882a", null ],
     [ "linear_op", "activation__layer_8cl.xhtml#a75fd6a1c539ef6ab44e460be072fcc6b", null ],
     [ "logistic_op", "activation__layer_8cl.xhtml#a7c4dbd924da062c3dc248dcc4993884e", null ],

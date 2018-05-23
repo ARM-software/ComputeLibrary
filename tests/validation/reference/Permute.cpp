@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,7 +42,7 @@ SimpleTensor<T> permute(const SimpleTensor<T> &src, PermutationVector perm)
     permute(dst_shape, perm);
 
     // Create reference
-    SimpleTensor<T> dst{ dst_shape, src.data_type() };
+    SimpleTensor<T> dst{ dst_shape, src.data_type(), src.num_channels(), src.fixed_point_position(), src.quantization_info() };
 
     // Compute reference
     for(int i = 0; i < src.num_elements(); ++i)
@@ -57,9 +57,13 @@ SimpleTensor<T> permute(const SimpleTensor<T> &src, PermutationVector perm)
     return dst;
 }
 
+template SimpleTensor<int8_t> permute(const SimpleTensor<int8_t> &src, PermutationVector perm);
 template SimpleTensor<uint8_t> permute(const SimpleTensor<uint8_t> &src, PermutationVector perm);
+template SimpleTensor<int16_t> permute(const SimpleTensor<int16_t> &src, PermutationVector perm);
 template SimpleTensor<uint16_t> permute(const SimpleTensor<uint16_t> &src, PermutationVector perm);
 template SimpleTensor<uint32_t> permute(const SimpleTensor<uint32_t> &src, PermutationVector perm);
+template SimpleTensor<float> permute(const SimpleTensor<float> &src, PermutationVector perm);
+template SimpleTensor<half> permute(const SimpleTensor<half> &src, PermutationVector perm);
 } // namespace reference
 } // namespace validation
 } // namespace test

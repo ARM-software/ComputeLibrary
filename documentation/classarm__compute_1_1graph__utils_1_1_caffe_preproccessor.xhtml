@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -139,15 +139,17 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a60e1354276a6ffd7359634e1ab464cff"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default Constructor.  <a href="#a60e1354276a6ffd7359634e1ab464cff">More...</a><br /></td></tr>
 <tr class="separator:a60e1354276a6ffd7359634e1ab464cff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1545d087d050b8e9733e7e212df73666"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph__utils_1_1_caffe_preproccessor.xhtml#a1545d087d050b8e9733e7e212df73666">preprocess</a> (<a class="el" href="classarm__compute_1_1_i_tensor.xhtml">ITensor</a> &amp;tensor) override</td></tr>
+<tr class="memdesc:a1545d087d050b8e9733e7e212df73666"><td class="mdescLeft">&#160;</td><td class="mdescRight">Preprocess the given tensor.  <a href="#a1545d087d050b8e9733e7e212df73666">More...</a><br /></td></tr>
 <tr class="separator:a1545d087d050b8e9733e7e212df73666"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classarm__compute_1_1graph__utils_1_1_i_preprocessor"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1graph__utils_1_1_i_preprocessor')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1graph__utils_1_1_i_preprocessor.xhtml">IPreprocessor</a></td></tr>
 <tr class="memitem:a145ae89877c556306c3b0a8d869b33f3 inherit pub_methods_classarm__compute_1_1graph__utils_1_1_i_preprocessor"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph__utils_1_1_i_preprocessor.xhtml#a145ae89877c556306c3b0a8d869b33f3">~IPreprocessor</a> ()=default</td></tr>
+<tr class="memdesc:a145ae89877c556306c3b0a8d869b33f3 inherit pub_methods_classarm__compute_1_1graph__utils_1_1_i_preprocessor"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default destructor.  <a href="#a145ae89877c556306c3b0a8d869b33f3">More...</a><br /></td></tr>
 <tr class="separator:a145ae89877c556306c3b0a8d869b33f3 inherit pub_methods_classarm__compute_1_1graph__utils_1_1_i_preprocessor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Caffe preproccessor. </p>
 
-<p>Definition at line <a class="el" href="_graph_utils_8h_source.xhtml#l00050">50</a> of file <a class="el" href="_graph_utils_8h_source.xhtml">GraphUtils.h</a>.</p>
+<p>Definition at line <a class="el" href="_graph_utils_8h_source.xhtml#l00057">57</a> of file <a class="el" href="_graph_utils_8h_source.xhtml">GraphUtils.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a60e1354276a6ffd7359634e1ab464cff"></a>
 <div class="memitem">
@@ -182,10 +184,10 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_graph_utils_8cpp_source.xhtml#l00053">53</a> of file <a class="el" href="_graph_utils_8cpp_source.xhtml">GraphUtils.cpp</a>.</p>
+<p>Definition at line <a class="el" href="_graph_utils_8cpp_source.xhtml#l00071">71</a> of file <a class="el" href="_graph_utils_8cpp_source.xhtml">GraphUtils.cpp</a>.</p>
 
-<p>References <a class="el" href="_simple_tensor_8h_source.xhtml#l00367">arm_compute::test::swap()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    : _mean(mean), _bgr(bgr)</div><div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;{</div><div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <span class="keywordflow">if</span>(_bgr)</div><div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    {</div><div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        <a class="code" href="namespacearm__compute_1_1test.xhtml#a28edc8880596d14c099f3c2509efc8b3">std::swap</a>(_mean[0], _mean[2]);</div><div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    }</div><div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;}</div><div class="ttc" id="namespacearm__compute_1_1test_xhtml_a28edc8880596d14c099f3c2509efc8b3"><div class="ttname"><a href="namespacearm__compute_1_1test.xhtml#a28edc8880596d14c099f3c2509efc8b3">arm_compute::test::swap</a></div><div class="ttdeci">void swap(SimpleTensor&lt; U &gt; &amp;tensor1, SimpleTensor&lt; U &gt; &amp;tensor2)</div><div class="ttdef"><b>Definition:</b> <a href="_simple_tensor_8h_source.xhtml#l00367">SimpleTensor.h:367</a></div></div>
+<p>References <a class="el" href="_simple_tensor_8h_source.xhtml#l00422">arm_compute::test::swap()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    : _mean(mean), _bgr(bgr)</div><div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;{</div><div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    <span class="keywordflow">if</span>(_bgr)</div><div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    {</div><div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        <a class="code" href="namespacearm__compute_1_1test.xhtml#a28edc8880596d14c099f3c2509efc8b3">std::swap</a>(_mean[0], _mean[2]);</div><div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    }</div><div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;}</div><div class="ttc" id="namespacearm__compute_1_1test_xhtml_a28edc8880596d14c099f3c2509efc8b3"><div class="ttname"><a href="namespacearm__compute_1_1test.xhtml#a28edc8880596d14c099f3c2509efc8b3">arm_compute::test::swap</a></div><div class="ttdeci">void swap(SimpleTensor&lt; U &gt; &amp;tensor1, SimpleTensor&lt; U &gt; &amp;tensor2)</div><div class="ttdef"><b>Definition:</b> <a href="_simple_tensor_8h_source.xhtml#l00422">SimpleTensor.h:422</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -212,13 +214,20 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Preprocess the given tensor. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">tensor</td><td><a class="el" href="classarm__compute_1_1_tensor.xhtml" title="Basic implementation of the tensor interface. ">Tensor</a> to preprocess. </td></tr>
+  </table>
+  </dd>
+</dl>
+
 <p>Implements <a class="el" href="classarm__compute_1_1graph__utils_1_1_i_preprocessor.xhtml#ae699b63165de5182fda5a2337009641f">IPreprocessor</a>.</p>
 
-<p>Definition at line <a class="el" href="_graph_utils_8cpp_source.xhtml#l00062">62</a> of file <a class="el" href="_graph_utils_8cpp_source.xhtml">GraphUtils.cpp</a>.</p>
+<p>Definition at line <a class="el" href="_graph_utils_8cpp_source.xhtml#l00080">80</a> of file <a class="el" href="_graph_utils_8cpp_source.xhtml">GraphUtils.cpp</a>.</p>
 
-<p>References <a class="el" href="_helpers_8inl_source.xhtml#l00122">arm_compute::execute_window_loop()</a>, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a0e95dc1e53c361348314873b168ae237">ITensor::info()</a>, <a class="el" href="_i_tensor_8h_source.xhtml#l00063">ITensor::ptr_to_element()</a>, <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a7c66505457d00ece3aa4b34cab80757d">ITensorInfo::tensor_shape()</a>, <a class="el" href="_window_8inl_source.xhtml#l00240">Window::use_tensor_dimensions()</a>, and <a class="el" href="hwc_8hpp_source.xhtml#l00278">value</a>.</p>
-<div class="fragment"><div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;{</div><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    Window window;</div><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    window.use_tensor_dimensions(tensor.info()-&gt;tensor_shape());</div><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;</div><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    <a class="code" href="namespacearm__compute.xhtml#a6c0dcc38187027dcb89cd9724bc5a823">execute_window_loop</a>(window, [&amp;](<span class="keyword">const</span> Coordinates &amp; <span class="keywordtype">id</span>)</div><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    {</div><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">float</span> <a class="code" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>                                     = *<span class="keyword">reinterpret_cast&lt;</span><span class="keywordtype">float</span> *<span class="keyword">&gt;</span>(tensor.ptr_to_element(<span class="keywordtype">id</span>)) - _mean[<span class="keywordtype">id</span>.z()];</div><div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        *<span class="keyword">reinterpret_cast&lt;</span><span class="keywordtype">float</span> *<span class="keyword">&gt;</span>(tensor.ptr_to_element(<span class="keywordtype">id</span>)) = value;</div><div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    });</div><div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;}</div><div class="ttc" id="namespacearm__compute_xhtml_a6c0dcc38187027dcb89cd9724bc5a823"><div class="ttname"><a href="namespacearm__compute.xhtml#a6c0dcc38187027dcb89cd9724bc5a823">arm_compute::execute_window_loop</a></div><div class="ttdeci">void execute_window_loop(const Window &amp;w, L &amp;&amp;lambda_function, Ts &amp;&amp;...iterators)</div><div class="ttdoc">Iterate through the passed window, automatically adjusting the iterators and calling the lambda_funct...</div><div class="ttdef"><b>Definition:</b> <a href="_helpers_8inl_source.xhtml#l00122">Helpers.inl:122</a></div></div>
-<div class="ttc" id="hwc_8hpp_xhtml_a0f61d63b009d0880a89c843bd50d8d76"><div class="ttname"><a href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a></div><div class="ttdeci">void * value</div><div class="ttdef"><b>Definition:</b> <a href="hwc_8hpp_source.xhtml#l00278">hwc.hpp:278</a></div></div>
+<p>References <a class="el" href="_helpers_8inl_source.xhtml#l00122">arm_compute::execute_window_loop()</a>, <a class="el" href="classarm__compute_1_1_i_tensor.xhtml#a0e95dc1e53c361348314873b168ae237">ITensor::info()</a>, <a class="el" href="_i_tensor_8h_source.xhtml#l00063">ITensor::ptr_to_element()</a>, <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml#a7c66505457d00ece3aa4b34cab80757d">ITensorInfo::tensor_shape()</a>, and <a class="el" href="_window_8inl_source.xhtml#l00240">Window::use_tensor_dimensions()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;{</div><div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    Window window;</div><div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    window.use_tensor_dimensions(tensor.info()-&gt;tensor_shape());</div><div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;</div><div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    <a class="code" href="namespacearm__compute.xhtml#a6c0dcc38187027dcb89cd9724bc5a823">execute_window_loop</a>(window, [&amp;](<span class="keyword">const</span> Coordinates &amp; <span class="keywordtype">id</span>)</div><div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;    {</div><div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">float</span> value                                     = *<span class="keyword">reinterpret_cast&lt;</span><span class="keywordtype">float</span> *<span class="keyword">&gt;</span>(tensor.ptr_to_element(<span class="keywordtype">id</span>)) - _mean[<span class="keywordtype">id</span>.z()];</div><div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;        *<span class="keyword">reinterpret_cast&lt;</span><span class="keywordtype">float</span> *<span class="keyword">&gt;</span>(tensor.ptr_to_element(<span class="keywordtype">id</span>)) = value;</div><div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    });</div><div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;}</div><div class="ttc" id="namespacearm__compute_xhtml_a6c0dcc38187027dcb89cd9724bc5a823"><div class="ttname"><a href="namespacearm__compute.xhtml#a6c0dcc38187027dcb89cd9724bc5a823">arm_compute::execute_window_loop</a></div><div class="ttdeci">void execute_window_loop(const Window &amp;w, L &amp;&amp;lambda_function, Ts &amp;&amp;...iterators)</div><div class="ttdoc">Iterate through the passed window, automatically adjusting the iterators and calling the lambda_funct...</div><div class="ttdef"><b>Definition:</b> <a href="_helpers_8inl_source.xhtml#l00122">Helpers.inl:122</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -232,7 +241,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph__utils.xhtml">graph_utils</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1graph__utils_1_1_caffe_preproccessor.xhtml">CaffePreproccessor</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:59 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

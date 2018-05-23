@@ -41,13 +41,28 @@ void CLPoolingLayer::configure(ICLTensor *input, ICLTensor *output, const Poolin
     _kernel = std::move(k);
 
     // Configure border depending on operation required (quantize border in case of asymmetric data_type)
-    BorderMode border_mode = (PoolingType::MAX == pool_info.pool_type()) ? BorderMode::REPLICATE : BorderMode::CONSTANT;
-    PixelValue zero_value(0.f);
+    BorderMode border_mode{};
+    PixelValue pixel_value(0.f);
     if(is_data_type_quantized_asymmetric(input->info()->data_type()) && !pool_info.exclude_padding())
     {
-        zero_value = PixelValue(static_cast<uint32_t>(input->info()->quantization_info().offset));
+        pixel_value = PixelValue(static_cast<uint32_t>(input->info()->quantization_info().offset));
     }
-    _border_handler.configure(input, _kernel->border_size(), border_mode, zero_value);
+    switch(input->info()->data_layout())
+    {
+        case DataLayout::NCHW:
+            border_mode = (PoolingType::MAX == pool_info.pool_type()) ? BorderMode::REPLICATE : BorderMode::CONSTANT;
+            break;
+        case DataLayout::NHWC:
+            border_mode = BorderMode::CONSTANT;
+            if(PoolingType::MAX == pool_info.pool_type() && !is_data_type_quantized_asymmetric(input->info()->data_type()))
+            {
+                pixel_value = PixelValue(std::numeric_limits<float>::lowest());
+            }
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Data layout not supported");
+    }
+    _border_handler.configure(input, _kernel->border_size(), border_mode, pixel_value);
 }
 
 Status CLPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)

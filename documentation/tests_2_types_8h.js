@@ -1,6 +1,8 @@
 var tests_2_types_8h =
 [
     [ "MinMaxLocationValues", "structarm__compute_1_1_min_max_location_values.xhtml", "structarm__compute_1_1_min_max_location_values" ],
+    [ "OpticalFlowParameters", "structarm__compute_1_1_optical_flow_parameters.xhtml", "structarm__compute_1_1_optical_flow_parameters" ],
+    [ "InternalKeyPoint", "structarm__compute_1_1_internal_key_point.xhtml", "structarm__compute_1_1_internal_key_point" ],
     [ "FixedPointOp", "tests_2_types_8h.xhtml#afa20b6a7f4383003babd690f026f22dc", [
       [ "ADD", "tests_2_types_8h.xhtml#afa20b6a7f4383003babd690f026f22dca9eeb52badb613229884838847294b90d", null ],
       [ "SUB", "tests_2_types_8h.xhtml#afa20b6a7f4383003babd690f026f22dca241dd841abade20fcb27b8a9f494e1eb", null ],

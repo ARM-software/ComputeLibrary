@@ -36,6 +36,8 @@ namespace arm_compute
 {
 namespace test
 {
+namespace benchmark
+{
 /** Fixture that can be used for NEON and CL */
 template <typename TensorType, typename Function, typename Accessor, typename Array_T, typename ArrayAccessor>
 class ROIPoolingLayerFixture : public framework::Fixture
@@ -93,6 +95,7 @@ private:
     std::unique_ptr<Array_T> rois_array{};
     Function                 roi_pool{};
 };
+} // namespace benchmark
 } // namespace test
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_TEST_ROIPOOLINGLAYERFIXTURE */

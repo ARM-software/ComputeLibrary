@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -116,7 +116,8 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_g_c_g_e_m_m_matr
 
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a>  </div>
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a>  </div>
   <div class="headertitle">
 <div class="title">GCGEMMMatrixMultiplyKernel Class Reference</div>  </div>
 </div><!--header-->
@@ -150,9 +151,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a6cda598544253c29aec8f10ea78a8aed"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_multiply_kernel.xhtml">GCGEMMMatrixMultiplyKernel</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_multiply_kernel.xhtml#a6cda598544253c29aec8f10ea78a8aed">operator=</a> (<a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_multiply_kernel.xhtml">GCGEMMMatrixMultiplyKernel</a> &amp;&amp;)=default</td></tr>
 <tr class="memdesc:a6cda598544253c29aec8f10ea78a8aed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allow instances of this class to be moved.  <a href="#a6cda598544253c29aec8f10ea78a8aed">More...</a><br /></td></tr>
 <tr class="separator:a6cda598544253c29aec8f10ea78a8aed"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a46c079128d5df79ba758501f3aeea07a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_multiply_kernel.xhtml#a46c079128d5df79ba758501f3aeea07a">configure</a> (const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *input0, const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *input1, <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *output, float alpha, bool is_interleaved_transposed=true)</td></tr>
-<tr class="memdesc:a46c079128d5df79ba758501f3aeea07a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialise the kernel's input, output and alpha.  <a href="#a46c079128d5df79ba758501f3aeea07a">More...</a><br /></td></tr>
-<tr class="separator:a46c079128d5df79ba758501f3aeea07a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ada3b192e7f6ec5a8950b57fae93e9166"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_multiply_kernel.xhtml#ada3b192e7f6ec5a8950b57fae93e9166">configure</a> (const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *input0, const <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *input1, <a class="el" href="classarm__compute_1_1_i_g_c_tensor.xhtml">IGCTensor</a> *output, float alpha, bool is_interleaved_transposed=true, const <a class="el" href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml">GEMMReshapeInfo</a> &amp;reshape_info=<a class="el" href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml">GEMMReshapeInfo</a>())</td></tr>
+<tr class="memdesc:ada3b192e7f6ec5a8950b57fae93e9166"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialise the kernel's input, output and alpha.  <a href="#ada3b192e7f6ec5a8950b57fae93e9166">More...</a><br /></td></tr>
+<tr class="separator:ada3b192e7f6ec5a8950b57fae93e9166"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8fd12b95bdde3f93db96bc9b1598db69"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_multiply_kernel.xhtml#a8fd12b95bdde3f93db96bc9b1598db69">run</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;<a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>) override</td></tr>
 <tr class="memdesc:a8fd12b95bdde3f93db96bc9b1598db69"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enqueue the OpenGL ES shader to process the given window.  <a href="#a8fd12b95bdde3f93db96bc9b1598db69">More...</a><br /></td></tr>
 <tr class="separator:a8fd12b95bdde3f93db96bc9b1598db69"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -184,6 +185,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3c6173aecfebc9030bf8a0bee0c0ced8 inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_g_c_kernel.xhtml#a3c6173aecfebc9030bf8a0bee0c0ced8">set_lws_hint</a> (<a class="el" href="classarm__compute_1_1gles_1_1_n_d_range.xhtml">gles::NDRange</a> &amp;lws_hint)</td></tr>
 <tr class="memdesc:a3c6173aecfebc9030bf8a0bee0c0ced8 inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the Local-Workgroup-Size hint.  <a href="#a3c6173aecfebc9030bf8a0bee0c0ced8">More...</a><br /></td></tr>
 <tr class="separator:a3c6173aecfebc9030bf8a0bee0c0ced8 inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad5ba9d34a3a855bf1dd2e36316ff550a inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_g_c_kernel.xhtml#ad5ba9d34a3a855bf1dd2e36316ff550a">set_target</a> (<a class="el" href="namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3">GPUTarget</a> target)</td></tr>
+<tr class="memdesc:ad5ba9d34a3a855bf1dd2e36316ff550a inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the targeted GPU architecture.  <a href="#ad5ba9d34a3a855bf1dd2e36316ff550a">More...</a><br /></td></tr>
+<tr class="separator:ad5ba9d34a3a855bf1dd2e36316ff550a inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a646cd535a16835b246c3367a63d96250 inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3">GPUTarget</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_g_c_kernel.xhtml#a646cd535a16835b246c3367a63d96250">get_target</a> () const </td></tr>
+<tr class="memdesc:a646cd535a16835b246c3367a63d96250 inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the targeted GPU architecture.  <a href="#a646cd535a16835b246c3367a63d96250">More...</a><br /></td></tr>
+<tr class="separator:a646cd535a16835b246c3367a63d96250 inherit pub_methods_classarm__compute_1_1_i_g_c_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classarm__compute_1_1_i_kernel"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1_i_kernel')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_kernel.xhtml">IKernel</a></td></tr>
 <tr class="memitem:a7250cb8cbaa4104a93a2d77155085507 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a7250cb8cbaa4104a93a2d77155085507">IKernel</a> ()</td></tr>
 <tr class="memdesc:a7250cb8cbaa4104a93a2d77155085507 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="#a7250cb8cbaa4104a93a2d77155085507">More...</a><br /></td></tr>
@@ -200,16 +207,19 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3f5646133956f06348b310ccc3d36353 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a> () const </td></tr>
 <tr class="memdesc:a3f5646133956f06348b310ccc3d36353 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">The maximum window the kernel can be executed on.  <a href="#a3f5646133956f06348b310ccc3d36353">More...</a><br /></td></tr>
 <tr class="separator:a3f5646133956f06348b310ccc3d36353 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:af6aca2f775b12495d9a7f4cce3ca2b04"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_multiply_kernel.xhtml#af6aca2f775b12495d9a7f4cce3ca2b04">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input0, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input1, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output, float alpha, bool is_interleaved_transposed, const <a class="el" href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml">GEMMReshapeInfo</a> &amp;reshape_info, <a class="el" href="namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3">GPUTarget</a> gpu_target)</td></tr>
+<tr class="memdesc:af6aca2f775b12495d9a7f4cce3ca2b04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_multiply_kernel.xhtml">GCGEMMMatrixMultiplyKernel</a>.  <a href="#af6aca2f775b12495d9a7f4cce3ca2b04">More...</a><br /></td></tr>
+<tr class="separator:af6aca2f775b12495d9a7f4cce3ca2b04"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>GLES Compute kernel to multiply two input matrices "A" and "B" or to multiply a vector "A" by a matrix "B". </p>
 <p>All elements of the output matrix/vector will be multiplied by alpha</p>
-<dl class="section note"><dt>Note</dt><dd>If the output tensor is a matrix, the implementation assumes that the input tensors <code>input0</code> and <code>input1</code> are both matrices and reshaped respectively with <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_interleave4x4_kernel.xhtml">GCGEMMInterleave4x4Kernel</a>" and <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_transpose1x_w_kernel.xhtml">GCGEMMTranspose1xWKernel</a> </dd>
-<dd>
-If the output tensor is a vector and the data type is F32, the implementation assumes that the first input tensor <code>input0</code> is a vector and the second input tensor <code>input1</code> a matrix. The implementation also assumes that both tensors have not been reshaped</dd></dl>
 <dl class="section attention"><dt>Attention</dt><dd>The second input tensor must have at least 2 dimensions (matrix) </dd></dl>
 
-<p>Definition at line <a class="el" href="_g_c_g_e_m_m_matrix_multiply_kernel_8h_source.xhtml#l00041">41</a> of file <a class="el" href="_g_c_g_e_m_m_matrix_multiply_kernel_8h_source.xhtml">GCGEMMMatrixMultiplyKernel.h</a>.</p>
+<p>Definition at line <a class="el" href="_g_c_g_e_m_m_matrix_multiply_kernel_8h_source.xhtml#l00039">39</a> of file <a class="el" href="_g_c_g_e_m_m_matrix_multiply_kernel_8h_source.xhtml">GCGEMMMatrixMultiplyKernel.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="ad8d2a97f9d5033932caaddcde107e9ce"></a>
 <div class="memitem">
@@ -281,7 +291,7 @@ If the output tensor is a vector and the data type is F32, the implementation as
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a46c079128d5df79ba758501f3aeea07a"></a>
+<a class="anchor" id="ada3b192e7f6ec5a8950b57fae93e9166"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -313,7 +323,13 @@ If the output tensor is a vector and the data type is F32, the implementation as
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>is_interleaved_transposed</em> = <code>true</code>&#160;</td>
+          <td class="paramname"><em>is_interleaved_transposed</em> = <code>true</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml">GEMMReshapeInfo</a> &amp;&#160;</td>
+          <td class="paramname"><em>reshape_info</em> = <code><a class="el" href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml">GEMMReshapeInfo</a>()</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -331,6 +347,7 @@ If the output tensor is a vector and the data type is F32, the implementation as
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output tensor to store the result of matrix multiplication. Data type supported: same as <code>input0</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>Weight of the matrix product </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">is_interleaved_transposed</td><td>(Optional) True if input0 and input1 have been reshaped respectively using <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_interleave4x4_kernel.xhtml">GCGEMMInterleave4x4Kernel</a> and <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_transpose1x_w_kernel.xhtml">GCGEMMTranspose1xWKernel</a> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">reshape_info</td><td>(Optional) GEMM reshape info. If is_interleaved_transposed = true, this object must contain the information to understand how the matrix A and matrix B have been reshaped </td></tr>
   </table>
   </dd>
 </dl>
@@ -423,6 +440,85 @@ If the output tensor is a vector and the data type is F32, the implementation as
 
 </div>
 </div>
+<a class="anchor" id="af6aca2f775b12495d9a7f4cce3ca2b04"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a> validate </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>input0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>input1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
+          <td class="paramname"><em>output</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>alpha</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>is_interleaved_transposed</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml">GEMMReshapeInfo</a> &amp;&#160;</td>
+          <td class="paramname"><em>reshape_info</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacearm__compute.xhtml#a735ac6c2a02e320969625308810444f3">GPUTarget</a>&#160;</td>
+          <td class="paramname"><em>gpu_target</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_multiply_kernel.xhtml">GCGEMMMatrixMultiplyKernel</a>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">input0</td><td>Input tensor containing the Matrix A. Data types supported: F16/F32 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">input1</td><td>Input tensor containing the Matrix B. Data type supported: same as <code>input0</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Output tensor to store the result of matrix multiplication. Data type supported: same as <code>input0</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>Weight of the matrix product </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">is_interleaved_transposed</td><td>True if input0 and input1 have been reshaped respectively using <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_interleave4x4_kernel.xhtml">GCGEMMInterleave4x4Kernel</a> and <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_transpose1x_w_kernel.xhtml">GCGEMMTranspose1xWKernel</a> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">reshape_info</td><td>GEMM reshape info. If is_interleaved_transposed = true, this object must contain the information to understand how the matrix A and matrix B have been reshaped </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">gpu_target</td><td>GPU Target</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a status </dd></dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>arm_compute/core/GLES_COMPUTE/kernels/<a class="el" href="_g_c_g_e_m_m_matrix_multiply_kernel_8h_source.xhtml">GCGEMMMatrixMultiplyKernel.h</a></li>
 </ul>
@@ -432,7 +528,7 @@ If the output tensor is a vector and the data type is F32, the implementation as
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_matrix_multiply_kernel.xhtml">GCGEMMMatrixMultiplyKernel</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:58 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:41 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

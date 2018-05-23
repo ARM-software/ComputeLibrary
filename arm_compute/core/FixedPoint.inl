@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/utils/misc/utility.h"
+#include "arm_compute/core/utils/misc/Utility.h"
 
 #include <cmath>
 #include <limits>

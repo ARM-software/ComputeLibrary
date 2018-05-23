@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -130,8 +130,10 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1test_1_1_tensor_c
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ab9838ae8ffe3b1f98e1330d3ee260f98"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1test_1_1_raw_tensor.xhtml">RawTensor</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1test_1_1_tensor_cache.xhtml#ab9838ae8ffe3b1f98e1330d3ee260f98">find</a> (std::tuple&lt; const std::string &amp;, <a class="el" href="namespacearm__compute.xhtml#ab4e88c89b3b7ea1735996cc4def22d58">Format</a> &gt; key)</td></tr>
+<tr class="memdesc:ab9838ae8ffe3b1f98e1330d3ee260f98"><td class="mdescLeft">&#160;</td><td class="mdescRight">Search the cache for a tensor of created from the specified image and format.  <a href="#ab9838ae8ffe3b1f98e1330d3ee260f98">More...</a><br /></td></tr>
 <tr class="separator:ab9838ae8ffe3b1f98e1330d3ee260f98"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a77d062d1fc4b239c215c4534deee8a2f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1test_1_1_raw_tensor.xhtml">RawTensor</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1test_1_1_tensor_cache.xhtml#a77d062d1fc4b239c215c4534deee8a2f">find</a> (std::tuple&lt; const std::string &amp;, <a class="el" href="namespacearm__compute.xhtml#ab4e88c89b3b7ea1735996cc4def22d58">Format</a>, <a class="el" href="namespacearm__compute.xhtml#a1ce9b523fd4f3b5bbcadcd796183455a">Channel</a> &gt; key)</td></tr>
+<tr class="memdesc:a77d062d1fc4b239c215c4534deee8a2f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Search the cache for a tensor of created from the specified image, format and channel.  <a href="#a77d062d1fc4b239c215c4534deee8a2f">More...</a><br /></td></tr>
 <tr class="separator:a77d062d1fc4b239c215c4534deee8a2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a00b2f7f657ef8060c64fce93abac54e1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1test_1_1_raw_tensor.xhtml">RawTensor</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1test_1_1_tensor_cache.xhtml#a00b2f7f657ef8060c64fce93abac54e1">add</a> (std::tuple&lt; const std::string &amp;, <a class="el" href="namespacearm__compute.xhtml#ab4e88c89b3b7ea1735996cc4def22d58">Format</a> &gt; key, <a class="el" href="classarm__compute_1_1test_1_1_raw_tensor.xhtml">RawTensor</a> raw)</td></tr>
 <tr class="memdesc:a00b2f7f657ef8060c64fce93abac54e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add the given tensor to the cache.  <a href="#a00b2f7f657ef8060c64fce93abac54e1">More...</a><br /></td></tr>
@@ -190,7 +192,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Definition at line <a class="el" href="_tensor_cache_8h_source.xhtml#l00105">105</a> of file <a class="el" href="_tensor_cache_8h_source.xhtml">TensorCache.h</a>.</p>
 
-<p>Referenced by <a class="el" href="_assets_library_8cpp_source.xhtml#l00236">AssetsLibrary::fill()</a>.</p>
+<p>Referenced by <a class="el" href="_assets_library_8cpp_source.xhtml#l00276">AssetsLibrary::fill()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;{</div><div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;    std::lock_guard&lt;std::mutex&gt; lock(_raw_tensor_channel_cache_mutex);</div><div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;    <span class="keywordflow">return</span> std::get&lt;0&gt;(_raw_tensor_cache.emplace(std::move(key), std::move(raw)))-&gt;second;</div><div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
@@ -263,9 +265,18 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Search the cache for a tensor of created from the specified image and format. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">key</td><td>Key to look up the tensor. Consists of image name and format.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The cached tensor matching the image name and format if found. A nullptr otherwise. </dd></dl>
+
 <p>Definition at line <a class="el" href="_tensor_cache_8h_source.xhtml#l00093">93</a> of file <a class="el" href="_tensor_cache_8h_source.xhtml">TensorCache.h</a>.</p>
 
-<p>Referenced by <a class="el" href="_assets_library_8cpp_source.xhtml#l00236">AssetsLibrary::fill()</a>.</p>
+<p>Referenced by <a class="el" href="_assets_library_8cpp_source.xhtml#l00276">AssetsLibrary::fill()</a>.</p>
 <div class="fragment"><div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;{</div><div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;    <span class="keyword">const</span> <span class="keyword">auto</span> it = _raw_tensor_cache.find(key);</div><div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;    <span class="keywordflow">return</span> it == _raw_tensor_cache.end() ? <span class="keyword">nullptr</span> : &amp;it-&gt;second;</div><div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
@@ -291,6 +302,15 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
+<p>Search the cache for a tensor of created from the specified image, format and channel. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">key</td><td>Key to look up the tensor. Consists of image name, format and channel.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The cached tensor matching the image name and format if found. A nullptr otherwise. </dd></dl>
+
 <p>Definition at line <a class="el" href="_tensor_cache_8h_source.xhtml#l00099">99</a> of file <a class="el" href="_tensor_cache_8h_source.xhtml">TensorCache.h</a>.</p>
 <div class="fragment"><div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;{</div><div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;    <span class="keyword">const</span> <span class="keyword">auto</span> it = _raw_tensor_channel_cache.find(key);</div><div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;    <span class="keywordflow">return</span> it == _raw_tensor_channel_cache.end() ? <span class="keyword">nullptr</span> : &amp;it-&gt;second;</div><div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;}</div></div><!-- fragment -->
 </div>
@@ -304,7 +324,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test.xhtml">test</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1test_1_1_tensor_cache.xhtml">TensorCache</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:59 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:44 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

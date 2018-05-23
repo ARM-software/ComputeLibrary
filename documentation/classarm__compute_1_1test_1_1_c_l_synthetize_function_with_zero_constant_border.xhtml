@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -122,6 +122,9 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1test_1_1_c_l_synt
 </div><!--header-->
 <div class="contents">
 
+<p>As above but this also setups a Zero border on the input tensor of the specified bordersize.  
+ <a href="classarm__compute_1_1test_1_1_c_l_synthetize_function_with_zero_constant_border.xhtml#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="_c_l_2_helper_8h_source.xhtml">Helper.h</a>&gt;</code></p>
 <div class="dynheader">
 Collaboration diagram for CLSynthetizeFunctionWithZeroConstantBorder&lt; K, bordersize &gt;:</div>
@@ -134,6 +137,7 @@ Collaboration diagram for CLSynthetizeFunctionWithZeroConstantBorder&lt; K, bord
 Public Member Functions</h2></td></tr>
 <tr class="memitem:af17ecdf32d92ead23cc2d971f2ba7cb5"><td class="memTemplParams" colspan="2">template&lt;typename T , typename... Args&gt; </td></tr>
 <tr class="memitem:af17ecdf32d92ead23cc2d971f2ba7cb5"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1test_1_1_c_l_synthetize_function_with_zero_constant_border.xhtml#af17ecdf32d92ead23cc2d971f2ba7cb5">configure</a> (T first, Args &amp;&amp;...args)</td></tr>
+<tr class="memdesc:af17ecdf32d92ead23cc2d971f2ba7cb5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure the kernel.  <a href="#af17ecdf32d92ead23cc2d971f2ba7cb5">More...</a><br /></td></tr>
 <tr class="separator:af17ecdf32d92ead23cc2d971f2ba7cb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classarm__compute_1_1_i_c_l_simple_function"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1_i_c_l_simple_function')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_c_l_simple_function.xhtml">ICLSimpleFunction</a></td></tr>
 <tr class="memitem:aa8149af857c4bface8ad712e418a63f1 inherit pub_methods_classarm__compute_1_1_i_c_l_simple_function"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_simple_function.xhtml#aa8149af857c4bface8ad712e418a63f1">ICLSimpleFunction</a> ()</td></tr>
@@ -146,13 +150,17 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_function.xhtml#ab921ecc3f3f6ae2b4bd61f3e1998d8c4">~IFunction</a> ()=default</td></tr>
 <tr class="memdesc:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#ab921ecc3f3f6ae2b4bd61f3e1998d8c4">More...</a><br /></td></tr>
 <tr class="separator:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a820f7291c24155a2980512fae45aac26 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c24155a2980512fae45aac26">prepare</a> ()</td></tr>
+<tr class="memdesc:a820f7291c24155a2980512fae45aac26 inherit pub_methods_classarm__compute_1_1_i_function"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prepare the function for executing.  <a href="#a820f7291c24155a2980512fae45aac26">More...</a><br /></td></tr>
+<tr class="separator:a820f7291c24155a2980512fae45aac26 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><h3>template&lt;typename K, int bordersize&gt;<br />
 class arm_compute::test::CLSynthetizeFunctionWithZeroConstantBorder&lt; K, bordersize &gt;</h3>
 
+<p>As above but this also setups a Zero border on the input tensor of the specified bordersize. </p>
 
-<p>Definition at line <a class="el" href="_c_l_2_helper_8h_source.xhtml#l00050">50</a> of file <a class="el" href="_c_l_2_helper_8h_source.xhtml">Helper.h</a>.</p>
+<p>Definition at line <a class="el" href="_c_l_2_helper_8h_source.xhtml#l00054">54</a> of file <a class="el" href="_c_l_2_helper_8h_source.xhtml">Helper.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a class="anchor" id="af17ecdf32d92ead23cc2d971f2ba7cb5"></a>
 <div class="memitem">
@@ -186,11 +194,19 @@ class arm_compute::test::CLSynthetizeFunctionWithZeroConstantBorder&lt; K, borde
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_c_l_2_helper_8h_source.xhtml#l00054">54</a> of file <a class="el" href="_c_l_2_helper_8h_source.xhtml">Helper.h</a>.</p>
+<p>Configure the kernel. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">first</td><td>First configuration argument. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">args</td><td>Rest of the configuration arguments. </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p>References <a class="el" href="caffe__data__extractor_8py_source.xhtml#l00021">caffe_data_extractor::args</a>, and <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327a8d6b5cada83510220f59e00ce86d4d92">arm_compute::CONSTANT</a>.</p>
-<div class="fragment"><div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    {</div><div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        <span class="keyword">auto</span> k = arm_compute::support::cpp14::make_unique&lt;K&gt;();</div><div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        k-&gt;configure(first, std::forward&lt;Args&gt;(<a class="code" href="namespacecaffe__data__extractor.xhtml#a8187411843a6284ffb964ef3fb9fcab3">args</a>)...);</div><div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        _kernel = std::move(k);</div><div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        _border_handler.configure(first, BorderSize(bordersize), <a class="code" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327a8d6b5cada83510220f59e00ce86d4d92">BorderMode::CONSTANT</a>, PixelValue(0));</div><div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_xhtml_a15a05537a472ee742404821851529327a8d6b5cada83510220f59e00ce86d4d92"><div class="ttname"><a href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327a8d6b5cada83510220f59e00ce86d4d92">arm_compute::BorderMode::CONSTANT</a></div><div class="ttdoc">Pixels outside the image are assumed to have a constant value. </div></div>
-<div class="ttc" id="namespacecaffe__data__extractor_xhtml_a8187411843a6284ffb964ef3fb9fcab3"><div class="ttname"><a href="namespacecaffe__data__extractor.xhtml#a8187411843a6284ffb964ef3fb9fcab3">caffe_data_extractor.args</a></div><div class="ttdeci">args</div><div class="ttdef"><b>Definition:</b> <a href="caffe__data__extractor_8py_source.xhtml#l00021">caffe_data_extractor.py:21</a></div></div>
+<p>Definition at line <a class="el" href="_c_l_2_helper_8h_source.xhtml#l00063">63</a> of file <a class="el" href="_c_l_2_helper_8h_source.xhtml">Helper.h</a>.</p>
+
+<p>References <a class="el" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327a8d6b5cada83510220f59e00ce86d4d92">arm_compute::CONSTANT</a>.</p>
+<div class="fragment"><div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    {</div><div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        <span class="keyword">auto</span> k = arm_compute::support::cpp14::make_unique&lt;K&gt;();</div><div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        k-&gt;configure(first, std::forward&lt;Args&gt;(args)...);</div><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        _kernel = std::move(k);</div><div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        _border_handler.configure(first, BorderSize(bordersize), <a class="code" href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327a8d6b5cada83510220f59e00ce86d4d92">BorderMode::CONSTANT</a>, PixelValue(0));</div><div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    }</div><div class="ttc" id="namespacearm__compute_xhtml_a15a05537a472ee742404821851529327a8d6b5cada83510220f59e00ce86d4d92"><div class="ttname"><a href="namespacearm__compute.xhtml#a15a05537a472ee742404821851529327a8d6b5cada83510220f59e00ce86d4d92">arm_compute::BorderMode::CONSTANT</a></div><div class="ttdoc">Pixels outside the image are assumed to have a constant value. </div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -203,7 +219,7 @@ class arm_compute::test::CLSynthetizeFunctionWithZeroConstantBorder&lt; K, borde
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test.xhtml">test</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1test_1_1_c_l_synthetize_function_with_zero_constant_border.xhtml">CLSynthetizeFunctionWithZeroConstantBorder</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:59 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

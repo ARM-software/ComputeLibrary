@@ -69,12 +69,17 @@ inline std::string to_string(T && value)
  *
  * @return Integer representation of @p str.
  */
-inline int stoi(const std::string &str)
+inline int stoi(const std::string &str, std::size_t *pos = 0, int base = 10)
 {
-    std::stringstream stream(str);
-    int               value = 0;
-    stream >> value;
-    return value;
+    unsigned int      x;
+    std::stringstream ss;
+    if(base == 16)
+    {
+        ss << std::hex;
+    }
+    ss << str;
+    ss >> x;
+    return x;
 }
 
 /** Convert string values to unsigned long.
@@ -86,10 +91,15 @@ inline int stoi(const std::string &str)
  *
  * @return Unsigned long representation of @p str.
  */
-inline unsigned long stoul(const std::string &str)
+inline unsigned long stoul(const std::string &str, std::size_t *pos = 0, int base = 10)
 {
-    std::stringstream stream(str);
+    std::stringstream stream;
     unsigned long     value = 0;
+    if(base == 16)
+    {
+        stream << std::hex;
+    }
+    stream << str;
     stream >> value;
     return value;
 }
@@ -339,24 +349,37 @@ inline bool isfinite(half_float::half value)
 namespace cpp14
 {
 /** make_unique is missing in CPP11. Re-implement it according to the standard proposal. */
+
+/**<Template for single object */
 template <class T>
 struct _Unique_if
 {
-    typedef std::unique_ptr<T> _Single_object;
+    typedef std::unique_ptr<T> _Single_object; /**< Single object type */
 };
 
+/** Template for array */
 template <class T>
 struct _Unique_if<T[]>
 {
-    typedef std::unique_ptr<T[]> _Unknown_bound;
+    typedef std::unique_ptr<T[]> _Unknown_bound; /**< Array type */
 };
 
+/** Template for array with known bounds (to throw an error).
+ *
+ * @note this is intended to never be hit.
+ */
 template <class T, size_t N>
 struct _Unique_if<T[N]>
 {
-    typedef void _Known_bound;
+    typedef void _Known_bound; /**< Should never be used */
 };
 
+/** Construct a single object and return a unique pointer to it.
+ *
+ * @param[in] args Constructor arguments.
+ *
+ * @return a unique pointer to the new object.
+ */
 template <class T, class... Args>
 typename _Unique_if<T>::_Single_object
 make_unique(Args &&... args)
@@ -364,6 +387,12 @@ make_unique(Args &&... args)
     return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
 
+/** Construct an array of objects and return a unique pointer to it.
+ *
+ * @param[in] n Array size
+ *
+ * @return a unique pointer to the new array.
+ */
 template <class T>
 typename _Unique_if<T>::_Unknown_bound
 make_unique(size_t n)
@@ -372,6 +401,7 @@ make_unique(size_t n)
     return std::unique_ptr<T>(new U[n]());
 }
 
+/** It is invalid to attempt to make_unique an array with known bounds. */
 template <class T, class... Args>
 typename _Unique_if<T>::_Known_bound
 make_unique(Args &&...) = delete;

@@ -37,6 +37,8 @@ class ITensorInfo;
 class CLSubTensor : public ICLTensor
 {
 public:
+    /** Default Constructor */
+    CLSubTensor();
     /** Constructor
      *
      * @param[in] parent        Parent tensor

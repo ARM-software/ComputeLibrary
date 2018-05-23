@@ -69,7 +69,10 @@ public:
     {
     }
 
-    /** Implicit conversion to the underlying type. */
+    /** Implicit conversion to the underlying type.
+     *
+     * @return the underlying type.
+     */
     constexpr operator T() const
     {
         return _value;
@@ -102,7 +105,10 @@ public:
     {
     }
 
-    /** Implicit conversion to the underlying type. */
+    /** Implicit conversion to the underlying type.
+     *
+     * @return the underlying type.
+     */
     constexpr operator value_type() const
     {
         return _value;
@@ -131,18 +137,44 @@ inline ::std::ostream &operator<<(::std::ostream &os, const RelativeTolerance<T>
 }
 
 template <typename T>
-bool compare_dimensions(const Dimensions<T> &dimensions1, const Dimensions<T> &dimensions2)
+bool compare_dimensions(const Dimensions<T> &dimensions1, const Dimensions<T> &dimensions2, const DataLayout &data_layout = DataLayout::NCHW)
 {
-    if(dimensions1.num_dimensions() != dimensions2.num_dimensions())
-    {
-        return false;
-    }
+    ARM_COMPUTE_ERROR_ON(data_layout == DataLayout::UNKNOWN);
 
-    for(unsigned int i = 0; i < dimensions1.num_dimensions(); ++i)
+    if(data_layout == DataLayout::NCHW)
     {
-        if(dimensions1[i] != dimensions2[i])
+        if(dimensions1.num_dimensions() != dimensions2.num_dimensions())
         {
             return false;
+        }
+
+        for(unsigned int i = 0; i < dimensions1.num_dimensions(); ++i)
+        {
+            if(dimensions1[i] != dimensions2[i])
+            {
+                return false;
+            }
+        }
+    }
+    else
+    {
+        // In case a 2D shape becomes 3D after permutation, the permuted tensor will have one dimension more and the first value will be 1
+        if((dimensions1.num_dimensions() != dimensions2.num_dimensions()) && ((dimensions1.num_dimensions() != (dimensions2.num_dimensions() + 1)) || (dimensions1.x() != 1)))
+        {
+            return false;
+        }
+
+        if((dimensions1[0] != dimensions2[2]) || (dimensions1[1] != dimensions2[0]) || (dimensions1[2] != dimensions2[1]))
+        {
+            return false;
+        }
+
+        for(unsigned int i = 3; i < dimensions1.num_dimensions(); ++i)
+        {
+            if(dimensions1[i] != dimensions2[i])
+            {
+                return false;
+            }
         }
     }
 
@@ -241,27 +273,40 @@ template <typename T, typename U, typename V = AbsoluteTolerance<float>>
 void validate_keypoints(T target_first, T target_last, U reference_first, U reference_last, V tolerance = AbsoluteTolerance<float>(),
                         float allowed_missing_percentage = 5.f, float allowed_mismatch_percentage = 5.f);
 
+/** Validate detection windows. */
+template <typename T, typename U, typename V = AbsoluteTolerance<float>>
+void validate_detection_windows(T target_first, T target_last, U reference_first, U reference_last, V tolerance = AbsoluteTolerance<float>(),
+                                float allowed_missing_percentage = 5.f, float allowed_mismatch_percentage = 5.f);
+
 template <typename T>
 struct compare_base
 {
+    /** Construct a comparison object.
+     *
+     * @param[in] target    Target value.
+     * @param[in] reference Reference value.
+     * @param[in] tolerance Allowed tolerance.
+     */
     compare_base(typename T::value_type target, typename T::value_type reference, T tolerance = T(0))
         : _target{ target }, _reference{ reference }, _tolerance{ tolerance }
     {
     }
 
-    typename T::value_type _target{};
-    typename T::value_type _reference{};
-    T                      _tolerance{};
+    typename T::value_type _target{};    /**< Target value */
+    typename T::value_type _reference{}; /**< Reference value */
+    T                      _tolerance{}; /**< Tolerance value */
 };
 
 template <typename T>
 struct compare;
 
+/** Compare values with an absolute tolerance */
 template <typename U>
 struct compare<AbsoluteTolerance<U>> : public compare_base<AbsoluteTolerance<U>>
 {
     using compare_base<AbsoluteTolerance<U>>::compare_base;
 
+    /** Perform comparison */
     operator bool() const
     {
         if(!support::cpp11::isfinite(this->_target) || !support::cpp11::isfinite(this->_reference))
@@ -281,11 +326,13 @@ struct compare<AbsoluteTolerance<U>> : public compare_base<AbsoluteTolerance<U>>
     }
 };
 
+/** Compare values with a relative tolerance */
 template <typename U>
 struct compare<RelativeTolerance<U>> : public compare_base<RelativeTolerance<U>>
 {
     using compare_base<RelativeTolerance<U>>::compare_base;
 
+    /** Perform comparison */
     operator bool() const
     {
         if(!support::cpp11::isfinite(this->_target) || !support::cpp11::isfinite(this->_reference))
@@ -310,7 +357,7 @@ struct compare<RelativeTolerance<U>> : public compare_base<RelativeTolerance<U>>
                 return false;
             }
 
-            const double relative_change = std::abs(static_cast<double>(this->_target) - static_cast<double>(this->_reference)) / this->_reference;
+            const double relative_change = std::abs((static_cast<double>(this->_target) - static_cast<double>(this->_reference)) / this->_reference);
 
             return relative_change <= static_cast<U>(this->_tolerance);
         }
@@ -321,14 +368,14 @@ template <typename T, typename U>
 void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, U tolerance_value, float tolerance_number, float absolute_tolerance_value)
 {
     // Validate with valid region covering the entire shape
-    validate(tensor, reference, shape_to_valid_region(tensor.shape()), tolerance_value, tolerance_number, absolute_tolerance_value);
+    validate(tensor, reference, shape_to_valid_region(reference.shape()), tolerance_value, tolerance_number, absolute_tolerance_value);
 }
 
 template <typename T, typename U, typename = typename std::enable_if<std::is_integral<T>::value>::type>
 void validate_wrap(const IAccessor &tensor, const SimpleTensor<T> &reference, U tolerance_value, float tolerance_number)
 {
     // Validate with valid region covering the entire shape
-    validate_wrap(tensor, reference, shape_to_valid_region(tensor.shape()), tolerance_value, tolerance_number);
+    validate_wrap(tensor, reference, shape_to_valid_region(reference.shape()), tolerance_value, tolerance_number);
 }
 
 template <typename T, typename U>
@@ -346,7 +393,7 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const V
     }
 
     ARM_COMPUTE_EXPECT_EQUAL(tensor.num_channels(), reference.num_channels(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(compare_dimensions(tensor.shape(), reference.shape()), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(compare_dimensions(tensor.shape(), reference.shape(), tensor.data_layout()), framework::LogLevel::ERRORS);
 
     const int min_elements = std::min(tensor.num_elements(), reference.num_elements());
     const int min_channels = std::min(tensor.num_channels(), reference.num_channels());
@@ -356,12 +403,18 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const V
     {
         const Coordinates id = index2coord(reference.shape(), element_idx);
 
+        Coordinates target_id(id);
+        if(tensor.data_layout() == DataLayout::NHWC)
+        {
+            permute(target_id, PermutationVector(2U, 0U, 1U));
+        }
+
         if(is_in_valid_region(valid_region, id))
         {
             // Iterate over all channels within one element
             for(int c = 0; c < min_channels; ++c)
             {
-                const T &target_value    = reinterpret_cast<const T *>(tensor(id))[c];
+                const T &target_value    = reinterpret_cast<const T *>(tensor(target_id))[c];
                 const T &reference_value = reinterpret_cast<const T *>(reference(id))[c];
 
                 if(!compare<U>(target_value, reference_value, tolerance_value))
@@ -415,7 +468,7 @@ void validate_wrap(const IAccessor &tensor, const SimpleTensor<T> &reference, co
     }
 
     ARM_COMPUTE_EXPECT_EQUAL(tensor.num_channels(), reference.num_channels(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(compare_dimensions(tensor.shape(), reference.shape()), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(compare_dimensions(tensor.shape(), reference.shape(), tensor.data_layout()), framework::LogLevel::ERRORS);
 
     const int min_elements = std::min(tensor.num_elements(), reference.num_elements());
     const int min_channels = std::min(tensor.num_channels(), reference.num_channels());
@@ -425,12 +478,18 @@ void validate_wrap(const IAccessor &tensor, const SimpleTensor<T> &reference, co
     {
         const Coordinates id = index2coord(reference.shape(), element_idx);
 
+        Coordinates target_id(id);
+        if(tensor.data_layout() == DataLayout::NHWC)
+        {
+            permute(target_id, PermutationVector(2U, 0U, 1U));
+        }
+
         if(is_in_valid_region(valid_region, id))
         {
             // Iterate over all channels within one element
             for(int c = 0; c < min_channels; ++c)
             {
-                const T &target_value    = reinterpret_cast<const T *>(tensor(id))[c];
+                const T &target_value    = reinterpret_cast<const T *>(tensor(target_id))[c];
                 const T &reference_value = reinterpret_cast<const T *>(reference(id))[c];
 
                 bool equal = compare<U>(target_value, reference_value, tolerance_value);
@@ -497,7 +556,7 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const S
     }
 
     ARM_COMPUTE_EXPECT_EQUAL(tensor.num_channels(), reference.num_channels(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(compare_dimensions(tensor.shape(), reference.shape()), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(compare_dimensions(tensor.shape(), reference.shape(), tensor.data_layout()), framework::LogLevel::ERRORS);
 
     const int min_elements = std::min(tensor.num_elements(), reference.num_elements());
     const int min_channels = std::min(tensor.num_channels(), reference.num_channels());
@@ -507,12 +566,18 @@ void validate(const IAccessor &tensor, const SimpleTensor<T> &reference, const S
     {
         const Coordinates id = index2coord(reference.shape(), element_idx);
 
+        Coordinates target_id(id);
+        if(tensor.data_layout() == DataLayout::NHWC)
+        {
+            permute(target_id, PermutationVector(2U, 0U, 1U));
+        }
+
         if(valid_mask[element_idx] == 1)
         {
             // Iterate over all channels within one element
             for(int c = 0; c < min_channels; ++c)
             {
-                const T &target_value    = reinterpret_cast<const T *>(tensor(id))[c];
+                const T &target_value    = reinterpret_cast<const T *>(tensor(target_id))[c];
                 const T &reference_value = reinterpret_cast<const T *>(reference(id))[c];
 
                 if(!compare<U>(target_value, reference_value, tolerance_value))
@@ -712,6 +777,77 @@ void validate_keypoints(T target_first, T target_last, U reference_first, U refe
         ARM_COMPUTE_TEST_INFO(num_missing << " keypoints (" << std::fixed << std::setprecision(2) << percent_missing << "%) in target are missing from ref");
         ARM_COMPUTE_TEST_INFO("Missing (not in ref): " << num_missing << "/" << num_elements_target << " = " << std::fixed << std::setprecision(2) << percent_missing
                               << "% \tMax allowed: " << allowed_missing_percentage << "%");
+        ARM_COMPUTE_EXPECT(percent_missing <= allowed_missing_percentage, framework::LogLevel::ERRORS);
+    }
+}
+
+/** Check which detection windows from [first1, last1) are missing in [first2, last2) */
+template <typename T, typename U, typename V>
+std::pair<int64_t, int64_t> compare_detection_windows(T first1, T last1, U first2, U last2, V tolerance)
+{
+    int64_t num_missing    = 0;
+    int64_t num_mismatches = 0;
+
+    while(first1 != last1)
+    {
+        const auto window = std::find_if(first2, last2, [&](DetectionWindow window)
+        {
+            return window.x == first1->x && window.y == first1->y && window.width == first1->width && window.height == first1->height && window.idx_class == first1->idx_class;
+        });
+
+        if(window == last2)
+        {
+            ++num_missing;
+            ARM_COMPUTE_TEST_INFO("Detection window not found " << *first1)
+        }
+        else
+        {
+            if(!compare<V>(window->score, first1->score, tolerance))
+            {
+                ++num_mismatches;
+                ARM_COMPUTE_TEST_INFO("Mismatching detection window")
+                ARM_COMPUTE_TEST_INFO("detection window 1= " << *first1)
+                ARM_COMPUTE_TEST_INFO("detection window 2= " << *window)
+            }
+        }
+
+        ++first1;
+    }
+
+    return std::make_pair(num_missing, num_mismatches);
+}
+
+template <typename T, typename U, typename V>
+void validate_detection_windows(T target_first, T target_last, U reference_first, U reference_last, V tolerance,
+                                float allowed_missing_percentage, float allowed_mismatch_percentage)
+{
+    const int64_t num_elements_target    = std::distance(target_first, target_last);
+    const int64_t num_elements_reference = std::distance(reference_first, reference_last);
+
+    int64_t num_missing    = 0;
+    int64_t num_mismatches = 0;
+
+    if(num_elements_reference > 0)
+    {
+        std::tie(num_missing, num_mismatches) = compare_detection_windows(reference_first, reference_last, target_first, target_last, tolerance);
+
+        const float percent_missing    = static_cast<float>(num_missing) / num_elements_reference * 100.f;
+        const float percent_mismatches = static_cast<float>(num_mismatches) / num_elements_reference * 100.f;
+
+        ARM_COMPUTE_TEST_INFO(num_missing << " detection windows (" << std::fixed << std::setprecision(2) << percent_missing << "%) are missing in target");
+        ARM_COMPUTE_EXPECT(percent_missing <= allowed_missing_percentage, framework::LogLevel::ERRORS);
+
+        ARM_COMPUTE_TEST_INFO(num_mismatches << " detection windows (" << std::fixed << std::setprecision(2) << percent_mismatches << "%) mismatched");
+        ARM_COMPUTE_EXPECT(percent_mismatches <= allowed_mismatch_percentage, framework::LogLevel::ERRORS);
+    }
+
+    if(num_elements_target > 0)
+    {
+        std::tie(num_missing, num_mismatches) = compare_detection_windows(target_first, target_last, reference_first, reference_last, tolerance);
+
+        const float percent_missing = static_cast<float>(num_missing) / num_elements_target * 100.f;
+
+        ARM_COMPUTE_TEST_INFO(num_missing << " detection windows (" << std::fixed << std::setprecision(2) << percent_missing << "%) are not part of target");
         ARM_COMPUTE_EXPECT(percent_missing <= allowed_missing_percentage, framework::LogLevel::ERRORS);
     }
 }

@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -132,6 +132,9 @@ Data Structures</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph__utils_1_1_i_preprocessor.xhtml">IPreprocessor</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Preprocessor interface.  <a href="classarm__compute_1_1graph__utils_1_1_i_preprocessor.xhtml#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph__utils_1_1_num_py_accessor.xhtml">NumPyAccessor</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">NumPy accessor class.  <a href="classarm__compute_1_1graph__utils_1_1_num_py_accessor.xhtml#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1graph__utils_1_1_num_py_bin_loader.xhtml">NumPyBinLoader</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Numpy Binary loader class.  <a href="classarm__compute_1_1graph__utils_1_1_num_py_bin_loader.xhtml#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -156,18 +159,21 @@ Functions</h2></td></tr>
 <tr class="memitem:ab7e905c7bfd2944e67bd069a3de3e7a2"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_accessor.xhtml">graph::ITensorAccessor</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#ab7e905c7bfd2944e67bd069a3de3e7a2">get_random_accessor</a> (<a class="el" href="classarm__compute_1_1_pixel_value.xhtml">PixelValue</a> lower, <a class="el" href="classarm__compute_1_1_pixel_value.xhtml">PixelValue</a> upper, const std::random_device::result_type seed=0)</td></tr>
 <tr class="memdesc:ab7e905c7bfd2944e67bd069a3de3e7a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates appropriate random accessor.  <a href="#ab7e905c7bfd2944e67bd069a3de3e7a2">More...</a><br /></td></tr>
 <tr class="separator:ab7e905c7bfd2944e67bd069a3de3e7a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a73a37a4970294106ed22e8f916ef3810"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_accessor.xhtml">graph::ITensorAccessor</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#a73a37a4970294106ed22e8f916ef3810">get_weights_accessor</a> (const std::string &amp;path, const std::string &amp;data_file)</td></tr>
-<tr class="memdesc:a73a37a4970294106ed22e8f916ef3810"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates appropriate weights accessor according to the specified path.  <a href="#a73a37a4970294106ed22e8f916ef3810">More...</a><br /></td></tr>
-<tr class="separator:a73a37a4970294106ed22e8f916ef3810"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30bee0b52a919bbcb1dc48b1b6546a16"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_accessor.xhtml">graph::ITensorAccessor</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#a30bee0b52a919bbcb1dc48b1b6546a16">get_weights_accessor</a> (const std::string &amp;path, const std::string &amp;data_file, <a class="el" href="namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0">DataLayout</a> file_layout=<a class="el" href="namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0a6b99f356fe3b30a2a850b5ea897c289f">DataLayout::NCHW</a>)</td></tr>
+<tr class="memdesc:a30bee0b52a919bbcb1dc48b1b6546a16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates appropriate weights accessor according to the specified path.  <a href="#a30bee0b52a919bbcb1dc48b1b6546a16">More...</a><br /></td></tr>
+<tr class="separator:a30bee0b52a919bbcb1dc48b1b6546a16"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9984cc47279cdb732b7b83caf0627de6"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_accessor.xhtml">graph::ITensorAccessor</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#a9984cc47279cdb732b7b83caf0627de6">get_input_accessor</a> (const std::string &amp;ppm_path, std::unique_ptr&lt; <a class="el" href="classarm__compute_1_1graph__utils_1_1_i_preprocessor.xhtml">IPreprocessor</a> &gt; preprocessor=nullptr, bool bgr=true)</td></tr>
 <tr class="memdesc:a9984cc47279cdb732b7b83caf0627de6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates appropriate input accessor according to the specified ppm_path.  <a href="#a9984cc47279cdb732b7b83caf0627de6">More...</a><br /></td></tr>
 <tr class="separator:a9984cc47279cdb732b7b83caf0627de6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9216738b309b6b230b7ba8bca5ba7477"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a8d5e69e9a697c2007e241eb413c9833b">graph::TargetHint</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#a9216738b309b6b230b7ba8bca5ba7477">set_target_hint</a> (int target)</td></tr>
-<tr class="memdesc:a9216738b309b6b230b7ba8bca5ba7477"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility function to return the TargetHint.  <a href="#a9216738b309b6b230b7ba8bca5ba7477">More...</a><br /></td></tr>
-<tr class="separator:a9216738b309b6b230b7ba8bca5ba7477"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaf0c8eff756108c8bb23aecf51d44f79"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_accessor.xhtml">graph::ITensorAccessor</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#aaf0c8eff756108c8bb23aecf51d44f79">get_output_accessor</a> (const std::string &amp;labels_path, size_t top_n=5, std::ostream &amp;output_stream=std::cout)</td></tr>
 <tr class="memdesc:aaf0c8eff756108c8bb23aecf51d44f79"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates appropriate output accessor according to the specified labels_path.  <a href="#aaf0c8eff756108c8bb23aecf51d44f79">More...</a><br /></td></tr>
 <tr class="separator:aaf0c8eff756108c8bb23aecf51d44f79"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2347ca9557fd9e841d5f2104b1687996"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; <a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_accessor.xhtml">graph::ITensorAccessor</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#a2347ca9557fd9e841d5f2104b1687996">get_npy_output_accessor</a> (const std::string &amp;npy_path, <a class="el" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a> shape, <a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6">DataType</a> data_type, std::ostream &amp;output_stream=std::cout)</td></tr>
+<tr class="memdesc:a2347ca9557fd9e841d5f2104b1687996"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates appropriate npy output accessor according to the specified npy_path.  <a href="#a2347ca9557fd9e841d5f2104b1687996">More...</a><br /></td></tr>
+<tr class="separator:a2347ca9557fd9e841d5f2104b1687996"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab6dc388200717b5fae17342af13f5e41"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a31488d29805a596498c0234ae392d35d">graph::Target</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1graph__utils.xhtml#ab6dc388200717b5fae17342af13f5e41">set_target_hint</a> (int target)</td></tr>
+<tr class="memdesc:ab6dc388200717b5fae17342af13f5e41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility function to return the TargetHint.  <a href="#ab6dc388200717b5fae17342af13f5e41">More...</a><br /></td></tr>
+<tr class="separator:ab6dc388200717b5fae17342af13f5e41"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
 <a class="anchor" id="a9984cc47279cdb732b7b83caf0627de6"></a>
@@ -220,8 +226,76 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>An appropriate tensor accessor </dd></dl>
 
-<p>Definition at line <a class="el" href="_graph_utils_8h_source.xhtml#l00256">256</a> of file <a class="el" href="_graph_utils_8h_source.xhtml">GraphUtils.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;{</div><div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;    <span class="keywordflow">if</span>(ppm_path.empty())</div><div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;    {</div><div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;        <span class="keywordflow">return</span> arm_compute::support::cpp14::make_unique&lt;DummyAccessor&gt;();</div><div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;    }</div><div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;    <span class="keywordflow">else</span></div><div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;    {</div><div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;        <span class="keywordflow">return</span> arm_compute::support::cpp14::make_unique&lt;PPMAccessor&gt;(ppm_path, bgr, std::move(preprocessor));</div><div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;    }</div><div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;}</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="_graph_utils_8h_source.xhtml#l00299">299</a> of file <a class="el" href="_graph_utils_8h_source.xhtml">GraphUtils.h</a>.</p>
+
+<p>References <a class="el" href="_utility_8h_source.xhtml#l00168">arm_compute::utility::endswith()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;{</div><div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;    <span class="keywordflow">if</span>(ppm_path.empty())</div><div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;    {</div><div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;        <span class="keywordflow">return</span> arm_compute::support::cpp14::make_unique&lt;DummyAccessor&gt;();</div><div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;    }</div><div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;    <span class="keywordflow">else</span></div><div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;    {</div><div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;        <span class="keywordflow">if</span>(<a class="code" href="namespacearm__compute_1_1utility.xhtml#aa8ea4e861e5782f66a5a90588e7cf904">arm_compute::utility::endswith</a>(ppm_path, <span class="stringliteral">&quot;.npy&quot;</span>))</div><div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;        {</div><div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;            <span class="keywordflow">return</span> arm_compute::support::cpp14::make_unique&lt;NumPyBinLoader&gt;(ppm_path);</div><div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;        }</div><div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;        <span class="keywordflow">else</span></div><div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;        {</div><div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;            <span class="keywordflow">return</span> arm_compute::support::cpp14::make_unique&lt;PPMAccessor&gt;(ppm_path, bgr, std::move(preprocessor));</div><div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;        }</div><div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;    }</div><div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;}</div><div class="ttc" id="namespacearm__compute_1_1utility_xhtml_aa8ea4e861e5782f66a5a90588e7cf904"><div class="ttname"><a href="namespacearm__compute_1_1utility.xhtml#aa8ea4e861e5782f66a5a90588e7cf904">arm_compute::utility::endswith</a></div><div class="ttdeci">bool endswith(const std::string &amp;filename, const std::string &amp;suffix)</div><div class="ttdef"><b>Definition:</b> <a href="_utility_8h_source.xhtml#l00168">Utility.h:168</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a class="anchor" id="a2347ca9557fd9e841d5f2104b1687996"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::unique_ptr&lt;<a class="el" href="classarm__compute_1_1graph_1_1_i_tensor_accessor.xhtml">graph::ITensorAccessor</a>&gt; arm_compute::graph_utils::get_npy_output_accessor </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>npy_path</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classarm__compute_1_1_tensor_shape.xhtml">TensorShape</a>&#160;</td>
+          <td class="paramname"><em>shape</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6">DataType</a>&#160;</td>
+          <td class="paramname"><em>data_type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::ostream &amp;&#160;</td>
+          <td class="paramname"><em>output_stream</em> = <code>std::cout</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Generates appropriate npy output accessor according to the specified npy_path. </p>
+<dl class="section note"><dt>Note</dt><dd>If npy_path is empty will generate a <a class="el" href="classarm__compute_1_1graph__utils_1_1_dummy_accessor.xhtml" title="Dummy accessor class. ">DummyAccessor</a> else will generate a NpyAccessor</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">npy_path</td><td>Path to npy file. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">shape</td><td>Shape of the numpy tensor data. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">data_type</td><td>DataType of the numpy tensor data. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output_stream</td><td>(Optional) Output stream</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>An appropriate tensor accessor </dd></dl>
+
+<p>Definition at line <a class="el" href="_graph_utils_8h_source.xhtml#l00352">352</a> of file <a class="el" href="_graph_utils_8h_source.xhtml">GraphUtils.h</a>.</p>
+
+<p>References <a class="el" href="validation_2_c_l_2_g_e_m_m_8cpp_source.xhtml#l00116">arm_compute::test::validation::data_type</a>, and <a class="el" href="_c_l_2_convolution_8cpp_source.xhtml#l00133">arm_compute::test::validation::shape</a>.</p>
+<div class="fragment"><div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;{</div><div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;    <span class="keywordflow">if</span>(npy_path.empty())</div><div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;    {</div><div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;        <span class="keywordflow">return</span> arm_compute::support::cpp14::make_unique&lt;DummyAccessor&gt;(0);</div><div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;    }</div><div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;    <span class="keywordflow">else</span></div><div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;    {</div><div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;        <span class="keywordflow">return</span> arm_compute::support::cpp14::make_unique&lt;NumPyAccessor&gt;(npy_path, <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#a45cde9abb508c62d67c3bb2b9bf566a5">shape</a>, <a class="code" href="namespacearm__compute_1_1test_1_1validation.xhtml#ac2ad7f431e3446fddcd9b6b9f93c4c14">data_type</a>, output_stream);</div><div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;    }</div><div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;}</div><div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_a45cde9abb508c62d67c3bb2b9bf566a5"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#a45cde9abb508c62d67c3bb2b9bf566a5">arm_compute::test::validation::shape</a></div><div class="ttdeci">shape</div><div class="ttdef"><b>Definition:</b> <a href="_c_l_2_convolution_8cpp_source.xhtml#l00133">Convolution.cpp:133</a></div></div>
+<div class="ttc" id="namespacearm__compute_1_1test_1_1validation_xhtml_ac2ad7f431e3446fddcd9b6b9f93c4c14"><div class="ttname"><a href="namespacearm__compute_1_1test_1_1validation.xhtml#ac2ad7f431e3446fddcd9b6b9f93c4c14">arm_compute::test::validation::data_type</a></div><div class="ttdeci">data_type</div><div class="ttdef"><b>Definition:</b> <a href="validation_2_c_l_2_g_e_m_m_8cpp_source.xhtml#l00116">GEMM.cpp:116</a></div></div>
+</div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="aaf0c8eff756108c8bb23aecf51d44f79"></a>
@@ -274,8 +348,8 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>An appropriate tensor accessor </dd></dl>
 
-<p>Definition at line <a class="el" href="_graph_utils_8h_source.xhtml#l00300">300</a> of file <a class="el" href="_graph_utils_8h_source.xhtml">GraphUtils.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;{</div><div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;    <span class="keywordflow">if</span>(labels_path.empty())</div><div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;    {</div><div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;        <span class="keywordflow">return</span> arm_compute::support::cpp14::make_unique&lt;DummyAccessor&gt;(0);</div><div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;    }</div><div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;    <span class="keywordflow">else</span></div><div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;    {</div><div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;        <span class="keywordflow">return</span> arm_compute::support::cpp14::make_unique&lt;TopNPredictionsAccessor&gt;(labels_path, top_n, output_stream);</div><div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;    }</div><div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;}</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="_graph_utils_8h_source.xhtml#l00330">330</a> of file <a class="el" href="_graph_utils_8h_source.xhtml">GraphUtils.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;{</div><div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;    <span class="keywordflow">if</span>(labels_path.empty())</div><div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;    {</div><div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;        <span class="keywordflow">return</span> arm_compute::support::cpp14::make_unique&lt;DummyAccessor&gt;(0);</div><div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;    }</div><div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;    <span class="keywordflow">else</span></div><div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;    {</div><div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;        <span class="keywordflow">return</span> arm_compute::support::cpp14::make_unique&lt;TopNPredictionsAccessor&gt;(labels_path, top_n, output_stream);</div><div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;    }</div><div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="ab7e905c7bfd2944e67bd069a3de3e7a2"></a>
@@ -327,11 +401,11 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A ramdom accessor </dd></dl>
 
-<p>Definition at line <a class="el" href="_graph_utils_8h_source.xhtml#l00220">220</a> of file <a class="el" href="_graph_utils_8h_source.xhtml">GraphUtils.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;{</div><div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;    <span class="keywordflow">return</span> arm_compute::support::cpp14::make_unique&lt;RandomAccessor&gt;(lower, upper, seed);</div><div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;}</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="_graph_utils_8h_source.xhtml#l00260">260</a> of file <a class="el" href="_graph_utils_8h_source.xhtml">GraphUtils.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;{</div><div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;    <span class="keywordflow">return</span> arm_compute::support::cpp14::make_unique&lt;RandomAccessor&gt;(lower, upper, seed);</div><div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
-<a class="anchor" id="a73a37a4970294106ed22e8f916ef3810"></a>
+<a class="anchor" id="a30bee0b52a919bbcb1dc48b1b6546a16"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -348,7 +422,13 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>data_file</em>&#160;</td>
+          <td class="paramname"><em>data_file</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0">DataLayout</a>&#160;</td>
+          <td class="paramname"><em>file_layout</em> = <code><a class="el" href="namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0a6b99f356fe3b30a2a850b5ea897c289f">DataLayout::NCHW</a></code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -368,17 +448,18 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>Path to the data files </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">data_file</td><td>Relative path to the data files from path</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">data_file</td><td>Relative path to the data files from path </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">file_layout</td><td>(Optional) Layout of file. Defaults to NCHW</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>An appropriate tensor accessor </dd></dl>
 
-<p>Definition at line <a class="el" href="_graph_utils_8h_source.xhtml#l00234">234</a> of file <a class="el" href="_graph_utils_8h_source.xhtml">GraphUtils.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;{</div><div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;    <span class="keywordflow">if</span>(path.empty())</div><div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;    {</div><div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;        <span class="keywordflow">return</span> arm_compute::support::cpp14::make_unique&lt;DummyAccessor&gt;();</div><div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;    }</div><div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;    <span class="keywordflow">else</span></div><div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;    {</div><div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;        <span class="keywordflow">return</span> arm_compute::support::cpp14::make_unique&lt;NumPyBinLoader&gt;(path + data_file);</div><div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;    }</div><div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;}</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="_graph_utils_8h_source.xhtml#l00275">275</a> of file <a class="el" href="_graph_utils_8h_source.xhtml">GraphUtils.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;{</div><div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;    <span class="keywordflow">if</span>(path.empty())</div><div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;    {</div><div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;        <span class="keywordflow">return</span> arm_compute::support::cpp14::make_unique&lt;DummyAccessor&gt;();</div><div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;    }</div><div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;    <span class="keywordflow">else</span></div><div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;    {</div><div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;        <span class="keywordflow">return</span> arm_compute::support::cpp14::make_unique&lt;NumPyBinLoader&gt;(path + data_file, file_layout);</div><div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;    }</div><div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
-<a class="anchor" id="a9216738b309b6b230b7ba8bca5ba7477"></a>
+<a class="anchor" id="ab6dc388200717b5fae17342af13f5e41"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -386,7 +467,7 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a8d5e69e9a697c2007e241eb413c9833b">graph::TargetHint</a> arm_compute::graph_utils::set_target_hint </td>
+          <td class="memname"><a class="el" href="namespacearm__compute_1_1graph.xhtml#a31488d29805a596498c0234ae392d35d">graph::Target</a> arm_compute::graph_utils::set_target_hint </td>
           <td>(</td>
           <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>target</em></td><td>)</td>
@@ -403,17 +484,16 @@ Functions</h2></td></tr>
 <p>Utility function to return the TargetHint. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">target</td><td>Integer value which expresses the selected target. Must be 0 for NEON, 1 for OpenCL or 2 for OpenCL with Tuner</td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">target</td><td>Integer value which expresses the selected target. Must be 0 for NEON or 1 for OpenCL or 2 (OpenCL with Tuner)</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>the TargetHint </dd></dl>
 
-<p>Definition at line <a class="el" href="_graph_utils_8h_source.xhtml#l00276">276</a> of file <a class="el" href="_graph_utils_8h_source.xhtml">GraphUtils.h</a>.</p>
+<p>Definition at line <a class="el" href="_graph_utils_8h_source.xhtml#l00370">370</a> of file <a class="el" href="_graph_utils_8h_source.xhtml">GraphUtils.h</a>.</p>
 
-<p>References <a class="el" href="core_2_error_8h_source.xhtml#l00297">ARM_COMPUTE_ERROR_ON_MSG</a>, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a8d5e69e9a697c2007e241eb413c9833bacaf162e9233294cadf62d2a71a14ca09">arm_compute::graph::NEON</a>, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a8d5e69e9a697c2007e241eb413c9833ba542f952490e2db695a1d544338a70cda">arm_compute::graph::OPENCL</a>, and <a class="el" href="classarm__compute_1_1graph_1_1_graph.xhtml#aa8e898112793d13b363806c4332f1832">Graph::opencl_is_available()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;{</div><div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;    <a class="code" href="core_2_error_8h.xhtml#a5bbdcf574d3f5e412fa6a1117911e67b">ARM_COMPUTE_ERROR_ON_MSG</a>(target &gt; 2, <span class="stringliteral">&quot;Invalid target. Target must be 0 (NEON), 1 (OpenCL) or 2 (OpenCL with Tuner)&quot;</span>);</div><div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;    <span class="keywordflow">if</span>((target == 1 || target == 2) &amp;&amp; <a class="code" href="namespacearm__compute.xhtml#aa4f4d7a58287017588fc338965873f14">graph::Graph::opencl_is_available</a>())</div><div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;    {</div><div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;        <span class="comment">// If type of target is OpenCL, check if OpenCL is available and initialize the scheduler</span></div><div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;        <span class="keywordflow">return</span> graph::TargetHint::OPENCL;</div><div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;    }</div><div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;    <span class="keywordflow">else</span></div><div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;    {</div><div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;        <span class="keywordflow">return</span> graph::TargetHint::NEON;</div><div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;    }</div><div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;}</div><div class="ttc" id="namespacearm__compute_xhtml_aa4f4d7a58287017588fc338965873f14"><div class="ttname"><a href="namespacearm__compute.xhtml#aa4f4d7a58287017588fc338965873f14">arm_compute::opencl_is_available</a></div><div class="ttdeci">bool opencl_is_available()</div></div>
-<div class="ttc" id="core_2_error_8h_xhtml_a5bbdcf574d3f5e412fa6a1117911e67b"><div class="ttname"><a href="core_2_error_8h.xhtml#a5bbdcf574d3f5e412fa6a1117911e67b">ARM_COMPUTE_ERROR_ON_MSG</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_ON_MSG(cond,...)</div><div class="ttdef"><b>Definition:</b> <a href="core_2_error_8h_source.xhtml#l00297">Error.h:297</a></div></div>
+<p>References <a class="el" href="_error_8h_source.xhtml#l00319">ARM_COMPUTE_ERROR_ON_MSG</a>, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a31488d29805a596498c0234ae392d35da5bc574a47246f122016869b32a6aa6f0">arm_compute::graph::CL</a>, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a31488d29805a596498c0234ae392d35da7359c3eb5c57547295a76ac1bf775b29">arm_compute::graph::GC</a>, and <a class="el" href="namespacearm__compute_1_1graph.xhtml#a31488d29805a596498c0234ae392d35dacaf162e9233294cadf62d2a71a14ca09">arm_compute::graph::NEON</a>.</p>
+<div class="fragment"><div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;{</div><div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;    <a class="code" href="_error_8h.xhtml#a5bbdcf574d3f5e412fa6a1117911e67b">ARM_COMPUTE_ERROR_ON_MSG</a>(target &gt; 3, <span class="stringliteral">&quot;Invalid target. Target must be 0 (NEON), 1 (OpenCL), 2 (OpenCL + Tuner), 3 (GLES)&quot;</span>);</div><div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;    <span class="keywordflow">if</span>((target == 1 || target == 2))</div><div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;    {</div><div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;        <span class="keywordflow">return</span> graph::Target::CL;</div><div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;    }</div><div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;    <span class="keywordflow">else</span> <span class="keywordflow">if</span>(target == 3)</div><div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;    {</div><div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;        <span class="keywordflow">return</span> graph::Target::GC;</div><div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;    }</div><div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;    <span class="keywordflow">else</span></div><div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;    {</div><div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;        <span class="keywordflow">return</span> graph::Target::NEON;</div><div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;    }</div><div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;}</div><div class="ttc" id="_error_8h_xhtml_a5bbdcf574d3f5e412fa6a1117911e67b"><div class="ttname"><a href="_error_8h.xhtml#a5bbdcf574d3f5e412fa6a1117911e67b">ARM_COMPUTE_ERROR_ON_MSG</a></div><div class="ttdeci">#define ARM_COMPUTE_ERROR_ON_MSG(cond,...)</div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00319">Error.h:319</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -423,7 +503,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1graph__utils.xhtml">graph_utils</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:59 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

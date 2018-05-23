@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,12 +35,16 @@ template <typename T>
 class IArrayAccessor
 {
 public:
+    /** Array value type */
     using value_type = T;
 
     /** Virtual destructor. */
     virtual ~IArrayAccessor() = default;
 
-    /** Number of elements of the tensor. */
+    /** Number of elements of the tensor.
+     *
+     * @return the number of elements.
+     */
     virtual size_t num_values() const = 0;
 
     /** Access to the buffer.

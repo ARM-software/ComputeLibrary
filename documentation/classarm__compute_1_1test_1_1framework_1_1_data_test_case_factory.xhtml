@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -122,6 +122,9 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1test_1_1framework
 </div><!--header-->
 <div class="contents">
 
+<p>Implementation of a test case factory to create data test cases.  
+ <a href="classarm__compute_1_1test_1_1framework_1_1_data_test_case_factory.xhtml#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="_test_case_factory_8h_source.xhtml">TestCaseFactory.h</a>&gt;</code></p>
 <div class="dynheader">
 Collaboration diagram for DataTestCaseFactory&lt; T, D &gt;:</div>
@@ -169,8 +172,9 @@ Additional Inherited Members</h2></td></tr>
 <div class="textblock"><h3>template&lt;typename T, typename D&gt;<br />
 class arm_compute::test::framework::DataTestCaseFactory&lt; T, D &gt;</h3>
 
+<p>Implementation of a test case factory to create data test cases. </p>
 
-<p>Definition at line <a class="el" href="_test_case_factory_8h_source.xhtml#l00114">114</a> of file <a class="el" href="_test_case_factory_8h_source.xhtml">TestCaseFactory.h</a>.</p>
+<p>Definition at line <a class="el" href="_test_case_factory_8h_source.xhtml#l00115">115</a> of file <a class="el" href="_test_case_factory_8h_source.xhtml">TestCaseFactory.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="aacdf355fbfb7579c36e50c757809c148"></a>
 <div class="memitem">
@@ -241,12 +245,12 @@ class arm_compute::test::framework::DataTestCaseFactory&lt; T, D &gt;</h3>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="_test_case_factory_8h_source.xhtml#l00189">189</a> of file <a class="el" href="_test_case_factory_8h_source.xhtml">TestCaseFactory.h</a>.</p>
+<p>Definition at line <a class="el" href="_test_case_factory_8h_source.xhtml#l00190">190</a> of file <a class="el" href="_test_case_factory_8h_source.xhtml">TestCaseFactory.h</a>.</p>
 
-<p>References <a class="el" href="_test_case_factory_8h_source.xhtml#l00152">TestCaseFactory::mode()</a>, and <a class="el" href="_test_case_factory_8h_source.xhtml#l00157">TestCaseFactory::status()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;    : <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a2d128e015a7913a30691094670608cfd">TestCaseFactory</a>{ std::move(suite_name), std::move(test_name), <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a9be3f6632542d3381d0d646236579fc4">mode</a>, <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a53db8bc0a7fc4a59903bd0492614bc3e">status</a>, std::move(description) }, _data{ data }</div><div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;{</div><div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_test_case_factory_xhtml_a53db8bc0a7fc4a59903bd0492614bc3e"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a53db8bc0a7fc4a59903bd0492614bc3e">arm_compute::test::framework::TestCaseFactory::status</a></div><div class="ttdeci">Status status() const </div><div class="ttdoc">Get the status of the test case. </div><div class="ttdef"><b>Definition:</b> <a href="_test_case_factory_8h_source.xhtml#l00157">TestCaseFactory.h:157</a></div></div>
-<div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_test_case_factory_xhtml_a2d128e015a7913a30691094670608cfd"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a2d128e015a7913a30691094670608cfd">arm_compute::test::framework::TestCaseFactory::TestCaseFactory</a></div><div class="ttdeci">TestCaseFactory(std::string suite_name, std::string name, DatasetMode mode, Status status, std::string description=&quot;&quot;)</div><div class="ttdoc">Constructor. </div><div class="ttdef"><b>Definition:</b> <a href="_test_case_factory_8h_source.xhtml#l00134">TestCaseFactory.h:134</a></div></div>
-<div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_test_case_factory_xhtml_a9be3f6632542d3381d0d646236579fc4"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a9be3f6632542d3381d0d646236579fc4">arm_compute::test::framework::TestCaseFactory::mode</a></div><div class="ttdeci">DatasetMode mode() const </div><div class="ttdoc">Get the mode for which test case will be enabled. </div><div class="ttdef"><b>Definition:</b> <a href="_test_case_factory_8h_source.xhtml#l00152">TestCaseFactory.h:152</a></div></div>
+<p>References <a class="el" href="_test_case_factory_8h_source.xhtml#l00153">TestCaseFactory::mode()</a>, and <a class="el" href="_test_case_factory_8h_source.xhtml#l00158">TestCaseFactory::status()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;    : <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a2d128e015a7913a30691094670608cfd">TestCaseFactory</a>{ std::move(suite_name), std::move(test_name), <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a9be3f6632542d3381d0d646236579fc4">mode</a>, <a class="code" href="classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a53db8bc0a7fc4a59903bd0492614bc3e">status</a>, std::move(description) }, _data{ data }</div><div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;{</div><div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;}</div><div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_test_case_factory_xhtml_a53db8bc0a7fc4a59903bd0492614bc3e"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a53db8bc0a7fc4a59903bd0492614bc3e">arm_compute::test::framework::TestCaseFactory::status</a></div><div class="ttdeci">Status status() const </div><div class="ttdoc">Get the status of the test case. </div><div class="ttdef"><b>Definition:</b> <a href="_test_case_factory_8h_source.xhtml#l00158">TestCaseFactory.h:158</a></div></div>
+<div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_test_case_factory_xhtml_a2d128e015a7913a30691094670608cfd"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a2d128e015a7913a30691094670608cfd">arm_compute::test::framework::TestCaseFactory::TestCaseFactory</a></div><div class="ttdeci">TestCaseFactory(std::string suite_name, std::string name, DatasetMode mode, Status status, std::string description=&quot;&quot;)</div><div class="ttdoc">Constructor. </div><div class="ttdef"><b>Definition:</b> <a href="_test_case_factory_8h_source.xhtml#l00135">TestCaseFactory.h:135</a></div></div>
+<div class="ttc" id="classarm__compute_1_1test_1_1framework_1_1_test_case_factory_xhtml_a9be3f6632542d3381d0d646236579fc4"><div class="ttname"><a href="classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a9be3f6632542d3381d0d646236579fc4">arm_compute::test::framework::TestCaseFactory::mode</a></div><div class="ttdeci">DatasetMode mode() const </div><div class="ttdoc">Get the mode for which test case will be enabled. </div><div class="ttdef"><b>Definition:</b> <a href="_test_case_factory_8h_source.xhtml#l00153">TestCaseFactory.h:153</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -277,8 +281,8 @@ class arm_compute::test::framework::DataTestCaseFactory&lt; T, D &gt;</h3>
 
 <p>Implements <a class="el" href="classarm__compute_1_1test_1_1framework_1_1_test_case_factory.xhtml#a15cffdfdea029e4617b983044f27f25e">TestCaseFactory</a>.</p>
 
-<p>Definition at line <a class="el" href="_test_case_factory_8h_source.xhtml#l00195">195</a> of file <a class="el" href="_test_case_factory_8h_source.xhtml">TestCaseFactory.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;{</div><div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;    <span class="keywordflow">return</span> support::cpp14::make_unique&lt;T&gt;(_data);</div><div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;}</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="_test_case_factory_8h_source.xhtml#l00196">196</a> of file <a class="el" href="_test_case_factory_8h_source.xhtml">TestCaseFactory.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;{</div><div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;    <span class="keywordflow">return</span> support::cpp14::make_unique&lt;T&gt;(_data);</div><div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;}</div></div><!-- fragment -->
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
@@ -290,7 +294,7 @@ class arm_compute::test::framework::DataTestCaseFactory&lt; T, D &gt;</h3>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test.xhtml">test</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test_1_1framework.xhtml">framework</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1test_1_1framework_1_1_data_test_case_factory.xhtml">DataTestCaseFactory</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:38:00 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:44 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

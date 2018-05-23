@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,9 +40,13 @@ namespace framework
 class TestCase
 {
 public:
+    /** Setup the test */
     virtual void do_setup() {};
+    /** Run the test */
     virtual void do_run() {};
+    /** Sync the test */
     virtual void do_sync() {};
+    /** Teardown the test */
     virtual void do_teardown() {};
 
     /** Default destructor. */
@@ -54,10 +58,15 @@ protected:
     friend class TestCaseFactory;
 };
 
+/** Data test case class */
 template <typename T>
 class DataTestCase : public TestCase
 {
 protected:
+    /** Construct a data test case.
+     *
+     * @param[in] data Test data.
+     */
     explicit DataTestCase(T data)
         : _data{ std::move(data) }
     {

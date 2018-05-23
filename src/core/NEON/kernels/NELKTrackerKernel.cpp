@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -356,12 +356,15 @@ void NELKTrackerKernel::configure(const ITensor *input_old, const ITensor *input
     _termination          = termination;
     _use_initial_estimate = use_initial_estimate;
     _epsilon              = epsilon;
-    _num_iterations       = num_iterations;
     _window_dimension     = window_dimension;
     _level                = level;
     _num_levels           = num_levels;
     _pyramid_scale        = pyramid_scale;
     _num_levels           = num_levels;
+
+    // Set maximum number of iterations used for convergence
+    const size_t max_iterations = 1000;
+    _num_iterations             = (termination == Termination::TERM_CRITERIA_EPSILON) ? max_iterations : num_iterations;
 
     Window window;
     window.set(Window::DimX, Window::Dimension(0, old_points->num_values()));
@@ -471,7 +474,7 @@ void NELKTrackerKernel::run(const Window &window, const ThreadInfo &info)
         float prev_delta_x = 0.0f;
         float prev_delta_y = 0.0f;
 
-        for(unsigned int j = 0; j < _num_iterations || _termination == Termination::TERM_CRITERIA_EPSILON; ++j)
+        for(unsigned int j = 0; j < _num_iterations; ++j)
         {
             if(is_invalid_keypoint(new_keypoint))
             {

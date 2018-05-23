@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -122,6 +122,9 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1test_1_1_c_l_synt
 </div><!--header-->
 <div class="contents">
 
+<p>This template synthetizes an <a class="el" href="classarm__compute_1_1_i_c_l_simple_function.xhtml" title="Basic interface for functions which have a single OpenCL kernel. ">ICLSimpleFunction</a> which runs the given kernel K.  
+ <a href="classarm__compute_1_1test_1_1_c_l_synthetize_function.xhtml#details">More...</a></p>
+
 <p><code>#include &lt;<a class="el" href="_c_l_2_helper_8h_source.xhtml">Helper.h</a>&gt;</code></p>
 <div class="dynheader">
 Collaboration diagram for CLSynthetizeFunction&lt; K &gt;:</div>
@@ -134,6 +137,7 @@ Collaboration diagram for CLSynthetizeFunction&lt; K &gt;:</div>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:af7d3737a24fb89e8de416714752b3429"><td class="memTemplParams" colspan="2">template&lt;typename... Args&gt; </td></tr>
 <tr class="memitem:af7d3737a24fb89e8de416714752b3429"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1test_1_1_c_l_synthetize_function.xhtml#af7d3737a24fb89e8de416714752b3429">configure</a> (Args &amp;&amp;...args)</td></tr>
+<tr class="memdesc:af7d3737a24fb89e8de416714752b3429"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure the kernel.  <a href="#af7d3737a24fb89e8de416714752b3429">More...</a><br /></td></tr>
 <tr class="separator:af7d3737a24fb89e8de416714752b3429"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classarm__compute_1_1_i_c_l_simple_function"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1_i_c_l_simple_function')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_c_l_simple_function.xhtml">ICLSimpleFunction</a></td></tr>
 <tr class="memitem:aa8149af857c4bface8ad712e418a63f1 inherit pub_methods_classarm__compute_1_1_i_c_l_simple_function"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_simple_function.xhtml#aa8149af857c4bface8ad712e418a63f1">ICLSimpleFunction</a> ()</td></tr>
@@ -146,11 +150,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_function.xhtml#ab921ecc3f3f6ae2b4bd61f3e1998d8c4">~IFunction</a> ()=default</td></tr>
 <tr class="memdesc:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <a href="#ab921ecc3f3f6ae2b4bd61f3e1998d8c4">More...</a><br /></td></tr>
 <tr class="separator:ab921ecc3f3f6ae2b4bd61f3e1998d8c4 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a820f7291c24155a2980512fae45aac26 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_function.xhtml#a820f7291c24155a2980512fae45aac26">prepare</a> ()</td></tr>
+<tr class="memdesc:a820f7291c24155a2980512fae45aac26 inherit pub_methods_classarm__compute_1_1_i_function"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prepare the function for executing.  <a href="#a820f7291c24155a2980512fae45aac26">More...</a><br /></td></tr>
+<tr class="separator:a820f7291c24155a2980512fae45aac26 inherit pub_methods_classarm__compute_1_1_i_function"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><h3>template&lt;typename K&gt;<br />
 class arm_compute::test::CLSynthetizeFunction&lt; K &gt;</h3>
 
+<p>This template synthetizes an <a class="el" href="classarm__compute_1_1_i_c_l_simple_function.xhtml" title="Basic interface for functions which have a single OpenCL kernel. ">ICLSimpleFunction</a> which runs the given kernel K. </p>
 
 <p>Definition at line <a class="el" href="_c_l_2_helper_8h_source.xhtml#l00036">36</a> of file <a class="el" href="_c_l_2_helper_8h_source.xhtml">Helper.h</a>.</p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
@@ -176,11 +184,16 @@ class arm_compute::test::CLSynthetizeFunction&lt; K &gt;</h3>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_c_l_2_helper_8h_source.xhtml#l00040">40</a> of file <a class="el" href="_c_l_2_helper_8h_source.xhtml">Helper.h</a>.</p>
+<p>Configure the kernel. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">args</td><td>Configuration arguments. </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p>References <a class="el" href="caffe__data__extractor_8py_source.xhtml#l00021">caffe_data_extractor::args</a>.</p>
-<div class="fragment"><div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    {</div><div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        <span class="keyword">auto</span> k = arm_compute::support::cpp14::make_unique&lt;K&gt;();</div><div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        k-&gt;configure(std::forward&lt;Args&gt;(<a class="code" href="namespacecaffe__data__extractor.xhtml#a8187411843a6284ffb964ef3fb9fcab3">args</a>)...);</div><div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        _kernel = std::move(k);</div><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    }</div><div class="ttc" id="namespacecaffe__data__extractor_xhtml_a8187411843a6284ffb964ef3fb9fcab3"><div class="ttname"><a href="namespacecaffe__data__extractor.xhtml#a8187411843a6284ffb964ef3fb9fcab3">caffe_data_extractor.args</a></div><div class="ttdeci">args</div><div class="ttdef"><b>Definition:</b> <a href="caffe__data__extractor_8py_source.xhtml#l00021">caffe_data_extractor.py:21</a></div></div>
-</div><!-- fragment -->
+<p>Definition at line <a class="el" href="_c_l_2_helper_8h_source.xhtml#l00044">44</a> of file <a class="el" href="_c_l_2_helper_8h_source.xhtml">Helper.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    {</div><div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        <span class="keyword">auto</span> k = arm_compute::support::cpp14::make_unique&lt;K&gt;();</div><div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        k-&gt;configure(std::forward&lt;Args&gt;(args)...);</div><div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        _kernel = std::move(k);</div><div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
@@ -192,7 +205,7 @@ class arm_compute::test::CLSynthetizeFunction&lt; K &gt;</h3>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test.xhtml">test</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1test_1_1_c_l_synthetize_function.xhtml">CLSynthetizeFunction</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:59 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

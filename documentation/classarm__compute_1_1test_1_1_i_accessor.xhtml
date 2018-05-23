@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -144,6 +144,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a57360dd9ca408834c0ea1a8ef70a11f4"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacearm__compute.xhtml#ab4e88c89b3b7ea1735996cc4def22d58">Format</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1test_1_1_i_accessor.xhtml#a57360dd9ca408834c0ea1a8ef70a11f4">format</a> () const =0</td></tr>
 <tr class="memdesc:a57360dd9ca408834c0ea1a8ef70a11f4"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="struct_image.xhtml" title="Structure to hold Image information. ">Image</a> format of the tensor.  <a href="#a57360dd9ca408834c0ea1a8ef70a11f4">More...</a><br /></td></tr>
 <tr class="separator:a57360dd9ca408834c0ea1a8ef70a11f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a367b5090ab432bc7de2c32369e087ab1"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0">DataLayout</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1test_1_1_i_accessor.xhtml#a367b5090ab432bc7de2c32369e087ab1">data_layout</a> () const =0</td></tr>
+<tr class="memdesc:a367b5090ab432bc7de2c32369e087ab1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Data layout of the tensor.  <a href="#a367b5090ab432bc7de2c32369e087ab1">More...</a><br /></td></tr>
+<tr class="separator:a367b5090ab432bc7de2c32369e087ab1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7cfb31af63202568efef5214acfbf3ba"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespacearm__compute.xhtml#ad8ed01ff3ff33333d8e19db4d2818bb6">DataType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1test_1_1_i_accessor.xhtml#a7cfb31af63202568efef5214acfbf3ba">data_type</a> () const =0</td></tr>
 <tr class="memdesc:a7cfb31af63202568efef5214acfbf3ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Data type of the tensor.  <a href="#a7cfb31af63202568efef5214acfbf3ba">More...</a><br /></td></tr>
 <tr class="separator:a7cfb31af63202568efef5214acfbf3ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -200,6 +203,36 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a367b5090ab432bc7de2c32369e087ab1"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="namespacearm__compute.xhtml#ad1d5cce2d9e9a5d61c243e5c989112e0">DataLayout</a> data_layout </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Data layout of the tensor. </p>
+<dl class="section return"><dt>Returns</dt><dd>the data layout of the tensor. </dd></dl>
+
+<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a5f63b63606dbbbe54474e6e970a6738c">SimpleTensor&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a5f63b63606dbbbe54474e6e970a6738c">SimpleTensor&lt; uint8_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#a5f63b63606dbbbe54474e6e970a6738c">CLAccessor</a>, <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#a5f63b63606dbbbe54474e6e970a6738c">Accessor</a>, and <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a5f63b63606dbbbe54474e6e970a6738c">GCAccessor</a>.</p>
+
+<p>Referenced by <a class="el" href="_validation_8h_source.xhtml#l00382">arm_compute::test::validation::validate()</a>, and <a class="el" href="_validation_8h_source.xhtml#l00457">arm_compute::test::validation::validate_wrap()</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="a7cfb31af63202568efef5214acfbf3ba"></a>
 <div class="memitem">
 <div class="memproto">
@@ -222,10 +255,11 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Data type of the tensor. </p>
+<dl class="section return"><dt>Returns</dt><dd>the data type of the tensor. </dd></dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a9a3e72153aeb3ed212e9c3698774e881">SimpleTensor&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a9a3e72153aeb3ed212e9c3698774e881">SimpleTensor&lt; uint32_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a9a3e72153aeb3ed212e9c3698774e881">SimpleTensor&lt; T2 &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a9a3e72153aeb3ed212e9c3698774e881">SimpleTensor&lt; T3 &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a9a3e72153aeb3ed212e9c3698774e881">SimpleTensor&lt; float &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a9a3e72153aeb3ed212e9c3698774e881">SimpleTensor&lt; U &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a9a3e72153aeb3ed212e9c3698774e881">SimpleTensor&lt; int32_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a9a3e72153aeb3ed212e9c3698774e881">SimpleTensor&lt; uint8_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#a9a3e72153aeb3ed212e9c3698774e881">CLAccessor</a>, <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a9a3e72153aeb3ed212e9c3698774e881">GCAccessor</a>, and <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#a9a3e72153aeb3ed212e9c3698774e881">Accessor</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a9a3e72153aeb3ed212e9c3698774e881">SimpleTensor&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a9a3e72153aeb3ed212e9c3698774e881">SimpleTensor&lt; uint8_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#a9a3e72153aeb3ed212e9c3698774e881">CLAccessor</a>, <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#a9a3e72153aeb3ed212e9c3698774e881">Accessor</a>, and <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a9a3e72153aeb3ed212e9c3698774e881">GCAccessor</a>.</p>
 
-<p>Referenced by <a class="el" href="_validation_8cpp_source.xhtml#l00181">arm_compute::test::validation::validate()</a>, and <a class="el" href="_validation_8h_source.xhtml#l00404">arm_compute::test::validation::validate_wrap()</a>.</p>
+<p>Referenced by <a class="el" href="_validation_8cpp_source.xhtml#l00181">arm_compute::test::validation::validate()</a>, and <a class="el" href="_validation_8h_source.xhtml#l00457">arm_compute::test::validation::validate_wrap()</a>.</p>
 
 </div>
 </div>
@@ -251,10 +285,11 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Size of each element in the tensor in bytes. </p>
+<dl class="section return"><dt>Returns</dt><dd>the size of each element in the tensor in bytes. </dd></dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a62b67b578f684c4d516843c9dea86a23">SimpleTensor&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a62b67b578f684c4d516843c9dea86a23">SimpleTensor&lt; uint32_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a62b67b578f684c4d516843c9dea86a23">SimpleTensor&lt; T2 &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a62b67b578f684c4d516843c9dea86a23">SimpleTensor&lt; T3 &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a62b67b578f684c4d516843c9dea86a23">SimpleTensor&lt; float &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a62b67b578f684c4d516843c9dea86a23">SimpleTensor&lt; U &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a62b67b578f684c4d516843c9dea86a23">SimpleTensor&lt; int32_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a62b67b578f684c4d516843c9dea86a23">SimpleTensor&lt; uint8_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#a62b67b578f684c4d516843c9dea86a23">CLAccessor</a>, <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a62b67b578f684c4d516843c9dea86a23">GCAccessor</a>, and <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#a62b67b578f684c4d516843c9dea86a23">Accessor</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a62b67b578f684c4d516843c9dea86a23">SimpleTensor&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a62b67b578f684c4d516843c9dea86a23">SimpleTensor&lt; uint8_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#a62b67b578f684c4d516843c9dea86a23">CLAccessor</a>, <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#a62b67b578f684c4d516843c9dea86a23">Accessor</a>, and <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a62b67b578f684c4d516843c9dea86a23">GCAccessor</a>.</p>
 
-<p>Referenced by <a class="el" href="_validation_8h_source.xhtml#l00335">arm_compute::test::validation::validate()</a>, and <a class="el" href="_validation_8h_source.xhtml#l00404">arm_compute::test::validation::validate_wrap()</a>.</p>
+<p>Referenced by <a class="el" href="_validation_8h_source.xhtml#l00382">arm_compute::test::validation::validate()</a>, and <a class="el" href="_validation_8h_source.xhtml#l00457">arm_compute::test::validation::validate_wrap()</a>.</p>
 
 </div>
 </div>
@@ -280,8 +315,9 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Number of bits for the fractional part. </p>
+<dl class="section return"><dt>Returns</dt><dd>the number of bits for the fractional part. </dd></dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a35ccf2eb0c18a15feab2db98b307b78b">SimpleTensor&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a35ccf2eb0c18a15feab2db98b307b78b">SimpleTensor&lt; uint32_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a35ccf2eb0c18a15feab2db98b307b78b">SimpleTensor&lt; T2 &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a35ccf2eb0c18a15feab2db98b307b78b">SimpleTensor&lt; T3 &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a35ccf2eb0c18a15feab2db98b307b78b">SimpleTensor&lt; float &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a35ccf2eb0c18a15feab2db98b307b78b">SimpleTensor&lt; U &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a35ccf2eb0c18a15feab2db98b307b78b">SimpleTensor&lt; int32_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a35ccf2eb0c18a15feab2db98b307b78b">SimpleTensor&lt; uint8_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#a35ccf2eb0c18a15feab2db98b307b78b">CLAccessor</a>, <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a35ccf2eb0c18a15feab2db98b307b78b">GCAccessor</a>, and <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#a35ccf2eb0c18a15feab2db98b307b78b">Accessor</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a35ccf2eb0c18a15feab2db98b307b78b">SimpleTensor&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a35ccf2eb0c18a15feab2db98b307b78b">SimpleTensor&lt; uint8_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#a35ccf2eb0c18a15feab2db98b307b78b">CLAccessor</a>, <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#a35ccf2eb0c18a15feab2db98b307b78b">Accessor</a>, and <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a35ccf2eb0c18a15feab2db98b307b78b">GCAccessor</a>.</p>
 
 </div>
 </div>
@@ -307,10 +343,11 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p><a class="el" href="struct_image.xhtml" title="Structure to hold Image information. ">Image</a> format of the tensor. </p>
+<dl class="section return"><dt>Returns</dt><dd>the format of the tensor. </dd></dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ac4b36cc1e56b0b7e579bb4b7196490db">SimpleTensor&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ac4b36cc1e56b0b7e579bb4b7196490db">SimpleTensor&lt; uint32_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ac4b36cc1e56b0b7e579bb4b7196490db">SimpleTensor&lt; T2 &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ac4b36cc1e56b0b7e579bb4b7196490db">SimpleTensor&lt; T3 &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ac4b36cc1e56b0b7e579bb4b7196490db">SimpleTensor&lt; float &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ac4b36cc1e56b0b7e579bb4b7196490db">SimpleTensor&lt; U &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ac4b36cc1e56b0b7e579bb4b7196490db">SimpleTensor&lt; int32_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ac4b36cc1e56b0b7e579bb4b7196490db">SimpleTensor&lt; uint8_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#ac4b36cc1e56b0b7e579bb4b7196490db">CLAccessor</a>, <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#ac4b36cc1e56b0b7e579bb4b7196490db">GCAccessor</a>, and <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#ac4b36cc1e56b0b7e579bb4b7196490db">Accessor</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ac4b36cc1e56b0b7e579bb4b7196490db">SimpleTensor&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ac4b36cc1e56b0b7e579bb4b7196490db">SimpleTensor&lt; uint8_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#ac4b36cc1e56b0b7e579bb4b7196490db">CLAccessor</a>, <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#ac4b36cc1e56b0b7e579bb4b7196490db">Accessor</a>, and <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#ac4b36cc1e56b0b7e579bb4b7196490db">GCAccessor</a>.</p>
 
-<p>Referenced by <a class="el" href="_validation_8h_source.xhtml#l00335">arm_compute::test::validation::validate()</a>, and <a class="el" href="_validation_8h_source.xhtml#l00404">arm_compute::test::validation::validate_wrap()</a>.</p>
+<p>Referenced by <a class="el" href="_validation_8h_source.xhtml#l00382">arm_compute::test::validation::validate()</a>, and <a class="el" href="_validation_8h_source.xhtml#l00457">arm_compute::test::validation::validate_wrap()</a>.</p>
 
 </div>
 </div>
@@ -336,10 +373,11 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Number of channels of the tensor. </p>
+<dl class="section return"><dt>Returns</dt><dd>the number of channels of the tensor. </dd></dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#abdd3637f2bbde9d7d0cc0b7bbd8400bb">SimpleTensor&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#abdd3637f2bbde9d7d0cc0b7bbd8400bb">SimpleTensor&lt; uint32_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#abdd3637f2bbde9d7d0cc0b7bbd8400bb">SimpleTensor&lt; T2 &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#abdd3637f2bbde9d7d0cc0b7bbd8400bb">SimpleTensor&lt; T3 &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#abdd3637f2bbde9d7d0cc0b7bbd8400bb">SimpleTensor&lt; float &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#abdd3637f2bbde9d7d0cc0b7bbd8400bb">SimpleTensor&lt; U &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#abdd3637f2bbde9d7d0cc0b7bbd8400bb">SimpleTensor&lt; int32_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#abdd3637f2bbde9d7d0cc0b7bbd8400bb">SimpleTensor&lt; uint8_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#abdd3637f2bbde9d7d0cc0b7bbd8400bb">CLAccessor</a>, <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#abdd3637f2bbde9d7d0cc0b7bbd8400bb">GCAccessor</a>, and <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#abdd3637f2bbde9d7d0cc0b7bbd8400bb">Accessor</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#abdd3637f2bbde9d7d0cc0b7bbd8400bb">SimpleTensor&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#abdd3637f2bbde9d7d0cc0b7bbd8400bb">SimpleTensor&lt; uint8_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#abdd3637f2bbde9d7d0cc0b7bbd8400bb">CLAccessor</a>, <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#abdd3637f2bbde9d7d0cc0b7bbd8400bb">Accessor</a>, and <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#abdd3637f2bbde9d7d0cc0b7bbd8400bb">GCAccessor</a>.</p>
 
-<p>Referenced by <a class="el" href="_validation_8cpp_source.xhtml#l00181">arm_compute::test::validation::validate()</a>, and <a class="el" href="_validation_8h_source.xhtml#l00404">arm_compute::test::validation::validate_wrap()</a>.</p>
+<p>Referenced by <a class="el" href="_validation_8cpp_source.xhtml#l00181">arm_compute::test::validation::validate()</a>, and <a class="el" href="_validation_8h_source.xhtml#l00457">arm_compute::test::validation::validate_wrap()</a>.</p>
 
 </div>
 </div>
@@ -365,10 +403,11 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Number of elements of the tensor. </p>
+<dl class="section return"><dt>Returns</dt><dd>the number of elements of the tensor. </dd></dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#aedcfdd4c3b92fe0d63b5463c7ad1d21e">SimpleTensor&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#aedcfdd4c3b92fe0d63b5463c7ad1d21e">SimpleTensor&lt; uint32_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#aedcfdd4c3b92fe0d63b5463c7ad1d21e">SimpleTensor&lt; T2 &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#aedcfdd4c3b92fe0d63b5463c7ad1d21e">SimpleTensor&lt; T3 &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#aedcfdd4c3b92fe0d63b5463c7ad1d21e">SimpleTensor&lt; float &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#aedcfdd4c3b92fe0d63b5463c7ad1d21e">SimpleTensor&lt; U &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#aedcfdd4c3b92fe0d63b5463c7ad1d21e">SimpleTensor&lt; int32_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#aedcfdd4c3b92fe0d63b5463c7ad1d21e">SimpleTensor&lt; uint8_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#aedcfdd4c3b92fe0d63b5463c7ad1d21e">CLAccessor</a>, <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#aedcfdd4c3b92fe0d63b5463c7ad1d21e">GCAccessor</a>, and <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#aedcfdd4c3b92fe0d63b5463c7ad1d21e">Accessor</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#aedcfdd4c3b92fe0d63b5463c7ad1d21e">SimpleTensor&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#aedcfdd4c3b92fe0d63b5463c7ad1d21e">SimpleTensor&lt; uint8_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#aedcfdd4c3b92fe0d63b5463c7ad1d21e">CLAccessor</a>, <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#aedcfdd4c3b92fe0d63b5463c7ad1d21e">Accessor</a>, and <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#aedcfdd4c3b92fe0d63b5463c7ad1d21e">GCAccessor</a>.</p>
 
-<p>Referenced by <a class="el" href="_validation_8cpp_source.xhtml#l00181">arm_compute::test::validation::validate()</a>, and <a class="el" href="_validation_8h_source.xhtml#l00404">arm_compute::test::validation::validate_wrap()</a>.</p>
+<p>Referenced by <a class="el" href="_validation_8cpp_source.xhtml#l00181">arm_compute::test::validation::validate()</a>, and <a class="el" href="_validation_8h_source.xhtml#l00457">arm_compute::test::validation::validate_wrap()</a>.</p>
 
 </div>
 </div>
@@ -403,7 +442,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A pointer to the desired element. </dd></dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a39537b09ccc3ce3d17922f4ef49a123f">SimpleTensor&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a39537b09ccc3ce3d17922f4ef49a123f">SimpleTensor&lt; uint32_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a39537b09ccc3ce3d17922f4ef49a123f">SimpleTensor&lt; T2 &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a39537b09ccc3ce3d17922f4ef49a123f">SimpleTensor&lt; T3 &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a39537b09ccc3ce3d17922f4ef49a123f">SimpleTensor&lt; float &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a39537b09ccc3ce3d17922f4ef49a123f">SimpleTensor&lt; U &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a39537b09ccc3ce3d17922f4ef49a123f">SimpleTensor&lt; int32_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a39537b09ccc3ce3d17922f4ef49a123f">SimpleTensor&lt; uint8_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_raw_tensor.xhtml#a39537b09ccc3ce3d17922f4ef49a123f">RawTensor</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#a39537b09ccc3ce3d17922f4ef49a123f">CLAccessor</a>, <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a39537b09ccc3ce3d17922f4ef49a123f">GCAccessor</a>, and <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#a39537b09ccc3ce3d17922f4ef49a123f">Accessor</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a39537b09ccc3ce3d17922f4ef49a123f">SimpleTensor&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a39537b09ccc3ce3d17922f4ef49a123f">SimpleTensor&lt; uint8_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_raw_tensor.xhtml#a39537b09ccc3ce3d17922f4ef49a123f">RawTensor</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#a39537b09ccc3ce3d17922f4ef49a123f">CLAccessor</a>, <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#a39537b09ccc3ce3d17922f4ef49a123f">Accessor</a>, and <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a39537b09ccc3ce3d17922f4ef49a123f">GCAccessor</a>.</p>
 
 </div>
 </div>
@@ -438,7 +477,7 @@ Public Member Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A pointer to the desired element. </dd></dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a2df95f7046b81e69a1265a42202ea068">SimpleTensor&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a2df95f7046b81e69a1265a42202ea068">SimpleTensor&lt; uint32_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a2df95f7046b81e69a1265a42202ea068">SimpleTensor&lt; T2 &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a2df95f7046b81e69a1265a42202ea068">SimpleTensor&lt; T3 &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a2df95f7046b81e69a1265a42202ea068">SimpleTensor&lt; float &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a2df95f7046b81e69a1265a42202ea068">SimpleTensor&lt; U &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a2df95f7046b81e69a1265a42202ea068">SimpleTensor&lt; int32_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a2df95f7046b81e69a1265a42202ea068">SimpleTensor&lt; uint8_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_raw_tensor.xhtml#a2df95f7046b81e69a1265a42202ea068">RawTensor</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#a2df95f7046b81e69a1265a42202ea068">CLAccessor</a>, <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a2df95f7046b81e69a1265a42202ea068">GCAccessor</a>, and <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#a2df95f7046b81e69a1265a42202ea068">Accessor</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a2df95f7046b81e69a1265a42202ea068">SimpleTensor&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a2df95f7046b81e69a1265a42202ea068">SimpleTensor&lt; uint8_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_raw_tensor.xhtml#a2df95f7046b81e69a1265a42202ea068">RawTensor</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#a2df95f7046b81e69a1265a42202ea068">CLAccessor</a>, <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#a2df95f7046b81e69a1265a42202ea068">Accessor</a>, and <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a2df95f7046b81e69a1265a42202ea068">GCAccessor</a>.</p>
 
 </div>
 </div>
@@ -464,8 +503,9 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Available padding around the tensor. </p>
+<dl class="section return"><dt>Returns</dt><dd>the available padding around the tensor. </dd></dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a79e20eacb1e963e24a21ebd7369effd7">SimpleTensor&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a79e20eacb1e963e24a21ebd7369effd7">SimpleTensor&lt; uint32_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a79e20eacb1e963e24a21ebd7369effd7">SimpleTensor&lt; T2 &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a79e20eacb1e963e24a21ebd7369effd7">SimpleTensor&lt; T3 &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a79e20eacb1e963e24a21ebd7369effd7">SimpleTensor&lt; float &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a79e20eacb1e963e24a21ebd7369effd7">SimpleTensor&lt; U &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a79e20eacb1e963e24a21ebd7369effd7">SimpleTensor&lt; int32_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a79e20eacb1e963e24a21ebd7369effd7">SimpleTensor&lt; uint8_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#a79e20eacb1e963e24a21ebd7369effd7">CLAccessor</a>, <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a79e20eacb1e963e24a21ebd7369effd7">GCAccessor</a>, and <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#a79e20eacb1e963e24a21ebd7369effd7">Accessor</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a79e20eacb1e963e24a21ebd7369effd7">SimpleTensor&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#a79e20eacb1e963e24a21ebd7369effd7">SimpleTensor&lt; uint8_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#a79e20eacb1e963e24a21ebd7369effd7">CLAccessor</a>, <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#a79e20eacb1e963e24a21ebd7369effd7">Accessor</a>, and <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a79e20eacb1e963e24a21ebd7369effd7">GCAccessor</a>.</p>
 
 </div>
 </div>
@@ -491,8 +531,9 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Quantization info in case of asymmetric quantized type. </p>
+<dl class="section return"><dt>Returns</dt><dd></dd></dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ac74736e3863207232a23b7181c1d0f44">SimpleTensor&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ac74736e3863207232a23b7181c1d0f44">SimpleTensor&lt; uint32_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ac74736e3863207232a23b7181c1d0f44">SimpleTensor&lt; T2 &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ac74736e3863207232a23b7181c1d0f44">SimpleTensor&lt; T3 &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ac74736e3863207232a23b7181c1d0f44">SimpleTensor&lt; float &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ac74736e3863207232a23b7181c1d0f44">SimpleTensor&lt; U &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ac74736e3863207232a23b7181c1d0f44">SimpleTensor&lt; int32_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ac74736e3863207232a23b7181c1d0f44">SimpleTensor&lt; uint8_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#ac74736e3863207232a23b7181c1d0f44">CLAccessor</a>, <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#ac74736e3863207232a23b7181c1d0f44">GCAccessor</a>, and <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#ac74736e3863207232a23b7181c1d0f44">Accessor</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ac74736e3863207232a23b7181c1d0f44">SimpleTensor&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ac74736e3863207232a23b7181c1d0f44">SimpleTensor&lt; uint8_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#ac74736e3863207232a23b7181c1d0f44">CLAccessor</a>, <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#ac74736e3863207232a23b7181c1d0f44">Accessor</a>, and <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#ac74736e3863207232a23b7181c1d0f44">GCAccessor</a>.</p>
 
 </div>
 </div>
@@ -518,10 +559,11 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Shape of the tensor. </p>
+<dl class="section return"><dt>Returns</dt><dd>the shape of the tensor. </dd></dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#aba5871b3e4a65d057ec1c28fce8b00ba">SimpleTensor&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#aba5871b3e4a65d057ec1c28fce8b00ba">SimpleTensor&lt; uint32_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#aba5871b3e4a65d057ec1c28fce8b00ba">SimpleTensor&lt; T2 &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#aba5871b3e4a65d057ec1c28fce8b00ba">SimpleTensor&lt; T3 &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#aba5871b3e4a65d057ec1c28fce8b00ba">SimpleTensor&lt; float &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#aba5871b3e4a65d057ec1c28fce8b00ba">SimpleTensor&lt; U &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#aba5871b3e4a65d057ec1c28fce8b00ba">SimpleTensor&lt; int32_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#aba5871b3e4a65d057ec1c28fce8b00ba">SimpleTensor&lt; uint8_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#aba5871b3e4a65d057ec1c28fce8b00ba">CLAccessor</a>, <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#aba5871b3e4a65d057ec1c28fce8b00ba">GCAccessor</a>, and <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#aba5871b3e4a65d057ec1c28fce8b00ba">Accessor</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#aba5871b3e4a65d057ec1c28fce8b00ba">SimpleTensor&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#aba5871b3e4a65d057ec1c28fce8b00ba">SimpleTensor&lt; uint8_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#aba5871b3e4a65d057ec1c28fce8b00ba">CLAccessor</a>, <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#aba5871b3e4a65d057ec1c28fce8b00ba">Accessor</a>, and <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#aba5871b3e4a65d057ec1c28fce8b00ba">GCAccessor</a>.</p>
 
-<p>Referenced by <a class="el" href="_validation_8cpp_source.xhtml#l00181">arm_compute::test::validation::validate()</a>, and <a class="el" href="_validation_8h_source.xhtml#l00328">arm_compute::test::validation::validate_wrap()</a>.</p>
+<p>Referenced by <a class="el" href="_validation_8cpp_source.xhtml#l00181">arm_compute::test::validation::validate()</a>, and <a class="el" href="_validation_8h_source.xhtml#l00457">arm_compute::test::validation::validate_wrap()</a>.</p>
 
 </div>
 </div>
@@ -547,8 +589,9 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Total size of the tensor in bytes. </p>
+<dl class="section return"><dt>Returns</dt><dd>the total size of the tensor in bytes. </dd></dl>
 
-<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ad7701a09a964eab360a8e51fa7ad2c16">SimpleTensor&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ad7701a09a964eab360a8e51fa7ad2c16">SimpleTensor&lt; uint32_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ad7701a09a964eab360a8e51fa7ad2c16">SimpleTensor&lt; T2 &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ad7701a09a964eab360a8e51fa7ad2c16">SimpleTensor&lt; T3 &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ad7701a09a964eab360a8e51fa7ad2c16">SimpleTensor&lt; float &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ad7701a09a964eab360a8e51fa7ad2c16">SimpleTensor&lt; U &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ad7701a09a964eab360a8e51fa7ad2c16">SimpleTensor&lt; int32_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ad7701a09a964eab360a8e51fa7ad2c16">SimpleTensor&lt; uint8_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#ad7701a09a964eab360a8e51fa7ad2c16">CLAccessor</a>, <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#ad7701a09a964eab360a8e51fa7ad2c16">GCAccessor</a>, and <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#ad7701a09a964eab360a8e51fa7ad2c16">Accessor</a>.</p>
+<p>Implemented in <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ad7701a09a964eab360a8e51fa7ad2c16">SimpleTensor&lt; T &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_simple_tensor.xhtml#ad7701a09a964eab360a8e51fa7ad2c16">SimpleTensor&lt; uint8_t &gt;</a>, <a class="el" href="classarm__compute_1_1test_1_1_c_l_accessor.xhtml#ad7701a09a964eab360a8e51fa7ad2c16">CLAccessor</a>, <a class="el" href="classarm__compute_1_1test_1_1_accessor.xhtml#ad7701a09a964eab360a8e51fa7ad2c16">Accessor</a>, and <a class="el" href="classarm__compute_1_1test_1_1_g_c_accessor.xhtml#ad7701a09a964eab360a8e51fa7ad2c16">GCAccessor</a>.</p>
 
 </div>
 </div>
@@ -561,7 +604,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1test.xhtml">test</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1test_1_1_i_accessor.xhtml">IAccessor</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:59 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:44 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

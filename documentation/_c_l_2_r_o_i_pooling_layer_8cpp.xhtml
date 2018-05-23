@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -129,11 +129,11 @@ $(document).ready(function(){initNavTree('_c_l_2_r_o_i_pooling_layer_8cpp.xhtml'
 <code>#include &quot;<a class="el" href="_c_l_r_o_i_pooling_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLROIPoolingLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_accessor_8h_source.xhtml">tests/CL/CLAccessor.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_array_accessor_8h_source.xhtml">tests/CL/CLArrayAccessor.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_r_o_i_pooling_layer_fixture_8h_source.xhtml">tests/benchmark/fixtures/ROIPoolingLayerFixture.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_r_o_i_pooling_layer_dataset_8h_source.xhtml">tests/datasets/ROIPoolingLayerDataset.h</a>&quot;</code><br />
+<code>#include &quot;tests/benchmark/fixtures/ROIPoolingLayerFixture.h&quot;</code><br />
+<code>#include &quot;tests/datasets/ROIPoolingLayerDataset.h&quot;</code><br />
 <code>#include &quot;<a class="el" href="tests_2framework_2_macros_8h_source.xhtml">tests/framework/Macros.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_datasets_8h_source.xhtml">tests/framework/datasets/Datasets.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_type_printer_8h_source.xhtml">utils/TypePrinter.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="utils_2_type_printer_8h_source.xhtml">utils/TypePrinter.h</a>&quot;</code><br />
 </div>
 <p><a href="_c_l_2_r_o_i_pooling_layer_8cpp_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -144,16 +144,18 @@ Namespaces</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacearm__compute_1_1test"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml">arm_compute::test</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:namespacearm__compute_1_1test_1_1benchmark"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml">arm_compute::test::benchmark</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:a41884dec2ecae6674396802641b01060"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a41884dec2ecae6674396802641b01060">CLROIPoolingLayerFixture</a> = ROIPoolingLayerFixture&lt; CLTensor, CLROIPoolingLayer, CLAccessor, CLArray&lt; ROI &gt;, CLArrayAccessor&lt; ROI &gt;&gt;</td></tr>
+<tr class="memitem:a41884dec2ecae6674396802641b01060"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a41884dec2ecae6674396802641b01060">CLROIPoolingLayerFixture</a> = ROIPoolingLayerFixture&lt; CLTensor, CLROIPoolingLayer, CLAccessor, CLArray&lt; ROI &gt;, CLArrayAccessor&lt; ROI &gt;&gt;</td></tr>
 <tr class="separator:a41884dec2ecae6674396802641b01060"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ac7d54f1a842ebb07f378846c21ccbe97"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#ac7d54f1a842ebb07f378846c21ccbe97">REGISTER_FIXTURE_DATA_TEST_CASE</a> (SmallROIPoolingLayer, CLROIPoolingLayerFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(datasets::SmallROIPoolingLayerDataset(), framework::dataset::make(&quot;DataType&quot;,{DataType::F16, DataType::F32})), framework::dataset::make(&quot;Batches&quot;,{1, 4, 8})))</td></tr>
-<tr class="separator:ac7d54f1a842ebb07f378846c21ccbe97"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a631a05fb287eaa6a42f46ebc08e8eeed"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a631a05fb287eaa6a42f46ebc08e8eeed">REGISTER_FIXTURE_DATA_TEST_CASE</a> (SmallROIPoolingLayer, CLROIPoolingLayerFixture, framework::DatasetMode::ALL, framework::dataset::combine(framework::dataset::combine(datasets::SmallROIPoolingLayerDataset(), framework::dataset::make(&quot;DataType&quot;,{DataType::F16, DataType::F32})), framework::dataset::make(&quot;Batches&quot;,{1, 4, 8})))</td></tr>
+<tr class="separator:a631a05fb287eaa6a42f46ebc08e8eeed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -161,7 +163,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_4f2df8950dc650bf7cf9176fae02facc.xhtml">benchmark</a></li><li class="navelem"><a class="el" href="dir_4da487531dc5bdc76b523c9e82b781b1.xhtml">CL</a></li><li class="navelem"><a class="el" href="_c_l_2_r_o_i_pooling_layer_8cpp.xhtml">ROIPoolingLayer.cpp</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:56 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

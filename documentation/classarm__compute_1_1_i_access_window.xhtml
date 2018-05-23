@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -130,6 +130,7 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1_i_access_window.
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:abc3996ab36cfa27811d661debfca5b5f"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_access_window.xhtml#abc3996ab36cfa27811d661debfca5b5f">~IAccessWindow</a> ()=default</td></tr>
+<tr class="memdesc:abc3996ab36cfa27811d661debfca5b5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default virtual destructor.  <a href="#abc3996ab36cfa27811d661debfca5b5f">More...</a><br /></td></tr>
 <tr class="separator:abc3996ab36cfa27811d661debfca5b5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5b6940395e0168f3f00da892ded537aa"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_access_window.xhtml#a5b6940395e0168f3f00da892ded537aa">update_window_if_needed</a> (<a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;window) const =0</td></tr>
 <tr class="memdesc:a5b6940395e0168f3f00da892ded537aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shrink the window if padding is not large enough.  <a href="#a5b6940395e0168f3f00da892ded537aa">More...</a><br /></td></tr>
@@ -166,6 +167,8 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Default virtual destructor. </p>
 
 </div>
 </div>
@@ -221,14 +224,15 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">window</td><td>Execution window of the kernel. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">input_valid_region</td><td>Combined valid region of all inputs. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">border_undefined</td><td>Undefined borders are excluded from the valid region. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">border_size</td><td>Size of the border around the XY-plane of the tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">border_size</td><td>Size of the border around the XY-plane of the tensor.</td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>a valid region. </dd></dl>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_access_window_rectangle.xhtml#ae80edc371ba9f02d756aed720040878b">AccessWindowRectangle</a>, <a class="el" href="classarm__compute_1_1_access_window_static.xhtml#ae80edc371ba9f02d756aed720040878b">AccessWindowStatic</a>, <a class="el" href="classarm__compute_1_1_access_window_auto_padding.xhtml#ae80edc371ba9f02d756aed720040878b">AccessWindowAutoPadding</a>, and <a class="el" href="classarm__compute_1_1_access_window_transpose.xhtml#ae80edc371ba9f02d756aed720040878b">AccessWindowTranspose</a>.</p>
 
-<p>Referenced by <a class="el" href="_i_access_window_8h_source.xhtml#l00132">AccessWindowRectangle::AccessWindowRectangle()</a>.</p>
+<p>Referenced by <a class="el" href="_i_access_window_8h_source.xhtml#l00137">AccessWindowRectangle::AccessWindowRectangle()</a>.</p>
 
 </div>
 </div>
@@ -265,7 +269,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_access_window_rectangle.xhtml#a69cb887416c766f20cbec0677b3c8e88">AccessWindowRectangle</a>, <a class="el" href="classarm__compute_1_1_access_window_static.xhtml#a69cb887416c766f20cbec0677b3c8e88">AccessWindowStatic</a>, <a class="el" href="classarm__compute_1_1_access_window_auto_padding.xhtml#a69cb887416c766f20cbec0677b3c8e88">AccessWindowAutoPadding</a>, and <a class="el" href="classarm__compute_1_1_access_window_transpose.xhtml#a69cb887416c766f20cbec0677b3c8e88">AccessWindowTranspose</a>.</p>
 
-<p>Referenced by <a class="el" href="_i_access_window_8h_source.xhtml#l00132">AccessWindowRectangle::AccessWindowRectangle()</a>, and <a class="el" href="arm__compute_2core_2_helpers_8h_source.xhtml#l00341">arm_compute::update_window_and_padding()</a>.</p>
+<p>Referenced by <a class="el" href="_i_access_window_8h_source.xhtml#l00137">AccessWindowRectangle::AccessWindowRectangle()</a>, and <a class="el" href="arm__compute_2core_2_helpers_8h_source.xhtml#l00368">arm_compute::update_window_and_padding()</a>.</p>
 
 </div>
 </div>
@@ -302,7 +306,7 @@ Public Member Functions</h2></td></tr>
 
 <p>Implemented in <a class="el" href="classarm__compute_1_1_access_window_rectangle.xhtml#a7ad9fe991410dc3550f6c4fd6e87a708">AccessWindowRectangle</a>, <a class="el" href="classarm__compute_1_1_access_window_static.xhtml#a7ad9fe991410dc3550f6c4fd6e87a708">AccessWindowStatic</a>, <a class="el" href="classarm__compute_1_1_access_window_auto_padding.xhtml#a7ad9fe991410dc3550f6c4fd6e87a708">AccessWindowAutoPadding</a>, and <a class="el" href="classarm__compute_1_1_access_window_transpose.xhtml#a7ad9fe991410dc3550f6c4fd6e87a708">AccessWindowTranspose</a>.</p>
 
-<p>Referenced by <a class="el" href="_i_access_window_8h_source.xhtml#l00132">AccessWindowRectangle::AccessWindowRectangle()</a>, and <a class="el" href="arm__compute_2core_2_helpers_8h_source.xhtml#l00341">arm_compute::update_window_and_padding()</a>.</p>
+<p>Referenced by <a class="el" href="_i_access_window_8h_source.xhtml#l00137">AccessWindowRectangle::AccessWindowRectangle()</a>, and <a class="el" href="arm__compute_2core_2_helpers_8h_source.xhtml#l00368">arm_compute::update_window_and_padding()</a>.</p>
 
 </div>
 </div>
@@ -315,7 +319,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_i_access_window.xhtml">IAccessWindow</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:58 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:41 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

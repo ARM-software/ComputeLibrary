@@ -37,19 +37,26 @@ namespace test
 {
 namespace datasets
 {
-class SmallWinogradLayerDataset final : public ConvolutionLayerDataset
+class SmallWinogradConvolutionLayer3x3Dataset final : public ConvolutionLayerDataset
 {
 public:
-    SmallWinogradLayerDataset()
+    SmallWinogradConvolutionLayer3x3Dataset()
     {
-        // Kernel size 3
+        // Channel size big enough to force multithreaded execution of the input transform
+        add_config(TensorShape(8U, 8U, 32U), TensorShape(3U, 3U, 32U, 1U), TensorShape(1U), TensorShape(6U, 6U, 1U), PadStrideInfo(1, 1, 0, 0));
         // Batch size 1
         add_config(TensorShape(8U, 8U, 2U), TensorShape(3U, 3U, 2U, 1U), TensorShape(1U), TensorShape(6U, 6U, 1U), PadStrideInfo(1, 1, 0, 0));
         // Batch size 4
         add_config(TensorShape(23U, 27U, 5U, 4U), TensorShape(3U, 3U, 5U, 21U), TensorShape(21U), TensorShape(21U, 25U, 21U, 4U), PadStrideInfo(1, 1, 0, 0));
         add_config(TensorShape(8U, 8U, 2U), TensorShape(3U, 3U, 2U, 1U), TensorShape(1U), TensorShape(8U, 8U, 1U), PadStrideInfo(1, 1, 1, 1));
+    }
+};
 
-        // Kernel size 5
+class SmallWinogradConvolutionLayer5x5Dataset final : public ConvolutionLayerDataset
+{
+public:
+    SmallWinogradConvolutionLayer5x5Dataset()
+    {
         add_config(TensorShape(8U, 8U, 2U), TensorShape(5U, 5U, 2U, 1U), TensorShape(1U), TensorShape(4U, 4U, 1U), PadStrideInfo(1, 1, 0, 0));
         add_config(TensorShape(8U, 8U, 2U), TensorShape(5U, 5U, 2U), TensorShape(1U), TensorShape(8U, 8U, 1U), PadStrideInfo(1, 1, 2, 2));
     }
@@ -60,6 +67,8 @@ class SmallConvolutionLayerDataset final : public ConvolutionLayerDataset
 public:
     SmallConvolutionLayerDataset()
     {
+        add_config(TensorShape(224U, 224U, 3U), TensorShape(3U, 3U, 3U, 32U), TensorShape(32U), TensorShape(112U, 112U, 32U),
+                   PadStrideInfo(2, 2, /*left*/ 0, /*right*/ 1, /*top*/ 0, /*bottom*/ 1, DimensionRoundingType::FLOOR));
         // Batch size 1
         add_config(TensorShape(23U, 27U, 5U), TensorShape(3U, 3U, 5U, 21U), TensorShape(21U), TensorShape(11U, 25U, 21U), PadStrideInfo(2, 1, 0, 0));
         add_config(TensorShape(33U, 27U, 7U), TensorShape(5U, 5U, 7U, 16U), TensorShape(16U), TensorShape(11U, 12U, 16U), PadStrideInfo(3, 2, 1, 0));

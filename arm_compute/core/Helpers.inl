@@ -227,6 +227,7 @@ inline bool auto_init_if_empty(ITensorInfo &info_sink, const ITensorInfo &info_s
         info_sink.set_tensor_shape(info_source.tensor_shape());
         info_sink.set_fixed_point_position(info_source.fixed_point_position());
         info_sink.set_quantization_info(info_source.quantization_info());
+        info_sink.set_data_layout(info_source.data_layout());
         return true;
     }
 
@@ -266,6 +267,17 @@ inline bool set_data_type_if_unknown(ITensorInfo &info, DataType data_type)
     return false;
 }
 
+inline bool set_data_layout_if_unknown(ITensorInfo &info, DataLayout data_layout)
+{
+    if(info.data_layout() == DataLayout::UNKNOWN)
+    {
+        info.set_data_layout(data_layout);
+        return true;
+    }
+
+    return false;
+}
+
 inline bool set_fixed_point_position_if_zero(ITensorInfo &info, int fixed_point_position)
 {
     if(info.fixed_point_position() == 0 && (info.data_type() == DataType::QS8 || info.data_type() == DataType::QS16))
@@ -286,39 +298,6 @@ inline bool set_quantization_info_if_empty(ITensorInfo &info, QuantizationInfo q
     }
 
     return false;
-}
-
-inline ValidRegion calculate_valid_region_scale(const ITensorInfo &src_info, const TensorShape &dst_shape, InterpolationPolicy policy, BorderSize border_size, bool border_undefined)
-{
-    const auto wr = static_cast<float>(dst_shape[0]) / static_cast<float>(src_info.tensor_shape()[0]);
-    const auto hr = static_cast<float>(dst_shape[1]) / static_cast<float>(src_info.tensor_shape()[1]);
-
-    ValidRegion valid_region{ Coordinates(), dst_shape, src_info.tensor_shape().num_dimensions() };
-
-    Coordinates &anchor = valid_region.anchor;
-    TensorShape &shape  = valid_region.shape;
-
-    anchor.set(0, (policy == InterpolationPolicy::BILINEAR
-                   && border_undefined) ?
-               ((static_cast<int>(src_info.valid_region().anchor[0]) + border_size.left + 0.5f) * wr - 0.5f) :
-               ((static_cast<int>(src_info.valid_region().anchor[0]) + 0.5f) * wr - 0.5f));
-    anchor.set(1, (policy == InterpolationPolicy::BILINEAR
-                   && border_undefined) ?
-               ((static_cast<int>(src_info.valid_region().anchor[1]) + border_size.top + 0.5f) * hr - 0.5f) :
-               ((static_cast<int>(src_info.valid_region().anchor[1]) + 0.5f) * hr - 0.5f));
-    float shape_out_x = (policy == InterpolationPolicy::BILINEAR
-                         && border_undefined) ?
-                        ((static_cast<int>(src_info.valid_region().anchor[0]) + static_cast<int>(src_info.valid_region().shape[0]) - 1) - 1 + 0.5f) * wr - 0.5f :
-                        ((static_cast<int>(src_info.valid_region().anchor[0]) + static_cast<int>(src_info.valid_region().shape[0])) + 0.5f) * wr - 0.5f;
-    float shape_out_y = (policy == InterpolationPolicy::BILINEAR
-                         && border_undefined) ?
-                        ((static_cast<int>(src_info.valid_region().anchor[1]) + static_cast<int>(src_info.valid_region().shape[1]) - 1) - 1 + 0.5f) * hr - 0.5f :
-                        ((static_cast<int>(src_info.valid_region().anchor[1]) + static_cast<int>(src_info.valid_region().shape[1])) + 0.5f) * hr - 0.5f;
-
-    shape.set(0, shape_out_x - anchor[0]);
-    shape.set(1, shape_out_y - anchor[1]);
-
-    return valid_region;
 }
 
 inline Coordinates index2coords(const TensorShape &shape, int index)
@@ -356,5 +335,34 @@ inline int coords2index(const TensorShape &shape, const Coordinates &coord)
     }
 
     return index;
+}
+
+inline size_t get_data_layout_dimension_index(const DataLayout data_layout, const DataLayoutDimension data_layout_dimension)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(data_layout == DataLayout::UNKNOWN, "Cannot retrieve the dimension index for an unknown layout!");
+
+    /* Return the index based on the data layout
+     * [N C H W]
+     * [3 2 1 0]
+     * [N H W C]
+    */
+    switch(data_layout_dimension)
+    {
+        case DataLayoutDimension::CHANNEL:
+            return (data_layout == DataLayout::NCHW) ? 2 : 0;
+            break;
+        case DataLayoutDimension::HEIGHT:
+            return (data_layout == DataLayout::NCHW) ? 1 : 2;
+            break;
+        case DataLayoutDimension::WIDTH:
+            return (data_layout == DataLayout::NCHW) ? 0 : 1;
+            break;
+        case DataLayoutDimension::BATCHES:
+            return 3;
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Data layout index not supported!");
+            break;
+    }
 }
 } // namespace arm_compute

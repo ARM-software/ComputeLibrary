@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,6 +36,8 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <unistd.h>
+
+#ifndef DOXYGEN_SKIP_THIS
 
 #if defined(ANDROID) || defined(__ANDROID__)
 /* We use _IOR_BAD/_IOW_BAD rather than _IOR/_IOW otherwise fails to compile with NDK-BUILD because of _IOC_TYPECHECK is defined, not because the paramter is invalid */
@@ -387,4 +389,7 @@ static inline int mali_ioctl(int fd, T &arg)
     return 0;
 }
 } // namespace mali_userspace
+
+#endif /* DOXYGEN_SKIP_THIS */
+
 #endif /* ARM_COMPUTE_TEST_HWC */

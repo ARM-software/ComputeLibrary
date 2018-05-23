@@ -39,6 +39,8 @@ namespace arm_compute
 {
 namespace test
 {
+namespace benchmark
+{
 namespace
 {
 const auto data_types          = framework::dataset::make("DataType", { DataType::F16, DataType::F32 });
@@ -63,5 +65,6 @@ REGISTER_FIXTURE_DATA_TEST_CASE(AlexNetGEMM, CLGEMMFixture, framework::DatasetMo
                                 reshape_b_only_once));
 
 TEST_SUITE_END()
+} // namespace benchmark
 } // namespace test
 } // namespace arm_compute

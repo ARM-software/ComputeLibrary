@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,5 +29,6 @@
 #include "arm_compute/core/CPP/kernels/CPPDetectionWindowNonMaximaSuppressionKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPPermuteKernel.h"
 #include "arm_compute/core/CPP/kernels/CPPSortEuclideanDistanceKernel.h"
+#include "arm_compute/core/CPP/kernels/CPPUpsampleKernel.h"
 
 #endif /* __ARM_COMPUTE_CPPKERNELS_H__ */

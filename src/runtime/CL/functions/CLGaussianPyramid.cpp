@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,7 +49,8 @@ CLGaussianPyramid::CLGaussianPyramid()
 }
 
 CLGaussianPyramidHalf::CLGaussianPyramidHalf() // NOLINT
-    : _border_handler(),
+    : _horizontal_border_handler(),
+      _vertical_border_handler(),
       _horizontal_reduction(),
       _vertical_reduction()
 {
@@ -64,6 +65,9 @@ void CLGaussianPyramidHalf::configure(ICLTensor *input, CLPyramid *pyramid, Bord
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(1) != pyramid->info()->height());
     ARM_COMPUTE_ERROR_ON(SCALE_PYRAMID_HALF != pyramid->info()->scale());
 
+    // Constant value to use for vertical fill border when the border mode is CONSTANT
+    const uint16_t pixel_value_u16 = static_cast<uint16_t>(constant_border_value) * 2 + static_cast<uint16_t>(constant_border_value) * 8 + static_cast<uint16_t>(constant_border_value) * 6;
+
     /* Get number of pyramid levels */
     const size_t num_levels = pyramid->info()->num_levels();
 
@@ -72,28 +76,31 @@ void CLGaussianPyramidHalf::configure(ICLTensor *input, CLPyramid *pyramid, Bord
 
     if(num_levels > 1)
     {
-        _border_handler       = arm_compute::support::cpp14::make_unique<CLFillBorderKernel[]>(num_levels - 1);
-        _horizontal_reduction = arm_compute::support::cpp14::make_unique<CLGaussianPyramidHorKernel[]>(num_levels - 1);
-        _vertical_reduction   = arm_compute::support::cpp14::make_unique<CLGaussianPyramidVertKernel[]>(num_levels - 1);
+        _horizontal_border_handler = arm_compute::support::cpp14::make_unique<CLFillBorderKernel[]>(num_levels - 1);
+        _vertical_border_handler   = arm_compute::support::cpp14::make_unique<CLFillBorderKernel[]>(num_levels - 1);
+        _horizontal_reduction      = arm_compute::support::cpp14::make_unique<CLGaussianPyramidHorKernel[]>(num_levels - 1);
+        _vertical_reduction        = arm_compute::support::cpp14::make_unique<CLGaussianPyramidVertKernel[]>(num_levels - 1);
 
         // Apply half scale to the X dimension of the tensor shape
         TensorShape tensor_shape = pyramid->info()->tensor_shape();
         tensor_shape.set(0, (pyramid->info()->width() + 1) * SCALE_PYRAMID_HALF);
 
         PyramidInfo pyramid_info(num_levels - 1, SCALE_PYRAMID_HALF, tensor_shape, Format::U16);
-
         _tmp.init(pyramid_info);
 
         for(size_t i = 0; i < num_levels - 1; ++i)
         {
             /* Configure horizontal kernel */
-            _horizontal_reduction[i].configure(_pyramid->get_pyramid_level(i), _tmp.get_pyramid_level(i), border_mode == BorderMode::UNDEFINED);
+            _horizontal_reduction[i].configure(_pyramid->get_pyramid_level(i), _tmp.get_pyramid_level(i));
 
             /* Configure vertical kernel */
-            _vertical_reduction[i].configure(_tmp.get_pyramid_level(i), _pyramid->get_pyramid_level(i + 1), border_mode == BorderMode::UNDEFINED);
+            _vertical_reduction[i].configure(_tmp.get_pyramid_level(i), _pyramid->get_pyramid_level(i + 1));
 
             /* Configure border */
-            _border_handler[i].configure(_pyramid->get_pyramid_level(i), _horizontal_reduction[i].border_size(), border_mode, PixelValue(constant_border_value));
+            _horizontal_border_handler[i].configure(_pyramid->get_pyramid_level(i), _horizontal_reduction[i].border_size(), border_mode, PixelValue(constant_border_value));
+
+            /* Configure border */
+            _vertical_border_handler[i].configure(_tmp.get_pyramid_level(i), _vertical_reduction[i].border_size(), border_mode, PixelValue(pixel_value_u16));
         }
         _tmp.allocate();
     }
@@ -110,13 +117,15 @@ void CLGaussianPyramidHalf::run()
     _pyramid->get_pyramid_level(0)->map(CLScheduler::get().queue(), true /* blocking */);
     _input->map(CLScheduler::get().queue(), true /* blocking */);
     _pyramid->get_pyramid_level(0)->copy_from(*_input);
+
     _input->unmap(CLScheduler::get().queue());
     _pyramid->get_pyramid_level(0)->unmap(CLScheduler::get().queue());
 
     for(unsigned int i = 0; i < num_levels - 1; ++i)
     {
-        CLScheduler::get().enqueue(_border_handler[i], false);
+        CLScheduler::get().enqueue(_horizontal_border_handler[i], false);
         CLScheduler::get().enqueue(_horizontal_reduction[i], false);
+        CLScheduler::get().enqueue(_vertical_border_handler[i], false);
         CLScheduler::get().enqueue(_vertical_reduction[i], false);
     }
 }

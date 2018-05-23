@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -154,9 +154,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aafb7a9f7e113cbb1f93dd030a4994b4a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_batch_normalization_layer_kernel.xhtml#aafb7a9f7e113cbb1f93dd030a4994b4a">~CLBatchNormalizationLayerKernel</a> ()=default</td></tr>
 <tr class="memdesc:aafb7a9f7e113cbb1f93dd030a4994b4a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default destructor.  <a href="#aafb7a9f7e113cbb1f93dd030a4994b4a">More...</a><br /></td></tr>
 <tr class="separator:aafb7a9f7e113cbb1f93dd030a4994b4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2e219b7129ffd19b0f06066b297bed49"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_batch_normalization_layer_kernel.xhtml#a2e219b7129ffd19b0f06066b297bed49">configure</a> (<a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *input, <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *output, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *mean, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *var, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *beta, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *gamma, float epsilon, <a class="el" href="classarm__compute_1_1_activation_layer_info.xhtml">ActivationLayerInfo</a> act_info=<a class="el" href="classarm__compute_1_1_activation_layer_info.xhtml">ActivationLayerInfo</a>())</td></tr>
-<tr class="memdesc:a2e219b7129ffd19b0f06066b297bed49"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the input and output tensors.  <a href="#a2e219b7129ffd19b0f06066b297bed49">More...</a><br /></td></tr>
-<tr class="separator:a2e219b7129ffd19b0f06066b297bed49"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b8fc7ef9b53c8a4e6b13995109ebf18"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_batch_normalization_layer_kernel.xhtml#a2b8fc7ef9b53c8a4e6b13995109ebf18">configure</a> (<a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *input, <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *output, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *mean, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *var, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *beta=nullptr, const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *gamma=nullptr, float epsilon=0.001f, ActivationLayerInfo act_info=ActivationLayerInfo())</td></tr>
+<tr class="memdesc:a2b8fc7ef9b53c8a4e6b13995109ebf18"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the input and output tensors.  <a href="#a2b8fc7ef9b53c8a4e6b13995109ebf18">More...</a><br /></td></tr>
+<tr class="separator:a2b8fc7ef9b53c8a4e6b13995109ebf18"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a493987e85723a8000eb26d1f00e2ad0e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_batch_normalization_layer_kernel.xhtml#a493987e85723a8000eb26d1f00e2ad0e">run</a> (const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;<a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>, cl::CommandQueue &amp;queue) override</td></tr>
 <tr class="memdesc:a493987e85723a8000eb26d1f00e2ad0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enqueue the OpenCL kernel to process the given window on the passed OpenCL command queue.  <a href="#a493987e85723a8000eb26d1f00e2ad0e">More...</a><br /></td></tr>
 <tr class="separator:a493987e85723a8000eb26d1f00e2ad0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -184,12 +184,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a33e09c946b338fbfc780a9d1c66e68ad inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add the passed 4D tensor's parameters to the object's kernel's arguments starting from the index idx.  <a href="#a33e09c946b338fbfc780a9d1c66e68ad">More...</a><br /></td></tr>
 <tr class="separator:a33e09c946b338fbfc780a9d1c66e68ad inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a50f427a1d9419800972b9e03c4034311 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a50f427a1d9419800972b9e03c4034311 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a50f427a1d9419800972b9e03c4034311">add_argument</a> (unsigned int &amp;idx, T <a class="el" href="hwc_8hpp.xhtml#a0f61d63b009d0880a89c843bd50d8d76">value</a>)</td></tr>
+<tr class="memitem:a50f427a1d9419800972b9e03c4034311 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a50f427a1d9419800972b9e03c4034311">add_argument</a> (unsigned int &amp;idx, T value)</td></tr>
 <tr class="memdesc:a50f427a1d9419800972b9e03c4034311 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add the passed parameters to the object's kernel's arguments starting from the index idx.  <a href="#a50f427a1d9419800972b9e03c4034311">More...</a><br /></td></tr>
 <tr class="separator:a50f427a1d9419800972b9e03c4034311 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a44c701b9dbd01a171de4928254d1ecbf inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a44c701b9dbd01a171de4928254d1ecbf">set_lws_hint</a> (cl::NDRange &amp;lws_hint)</td></tr>
-<tr class="memdesc:a44c701b9dbd01a171de4928254d1ecbf inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the Local-Workgroup-Size hint.  <a href="#a44c701b9dbd01a171de4928254d1ecbf">More...</a><br /></td></tr>
-<tr class="separator:a44c701b9dbd01a171de4928254d1ecbf inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad356b88c8f61267d593d9ed99835bde9 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#ad356b88c8f61267d593d9ed99835bde9">set_lws_hint</a> (const cl::NDRange &amp;<a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a0737b867334392d5dc5c2e3291d67dbf">lws_hint</a>)</td></tr>
+<tr class="memdesc:ad356b88c8f61267d593d9ed99835bde9 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the Local-Workgroup-Size hint.  <a href="#ad356b88c8f61267d593d9ed99835bde9">More...</a><br /></td></tr>
+<tr class="separator:ad356b88c8f61267d593d9ed99835bde9 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0737b867334392d5dc5c2e3291d67dbf inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memItemLeft" align="right" valign="top">cl::NDRange&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a0737b867334392d5dc5c2e3291d67dbf">lws_hint</a> () const </td></tr>
+<tr class="memdesc:a0737b867334392d5dc5c2e3291d67dbf inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the Local-Workgroup-Size hint.  <a href="#a0737b867334392d5dc5c2e3291d67dbf">More...</a><br /></td></tr>
+<tr class="separator:a0737b867334392d5dc5c2e3291d67dbf inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a226d2e9e6d3c42d681666566fe950b2d inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memItemLeft" align="right" valign="top">const std::string &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a226d2e9e6d3c42d681666566fe950b2d">config_id</a> () const </td></tr>
 <tr class="memdesc:a226d2e9e6d3c42d681666566fe950b2d inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the configuration ID.  <a href="#a226d2e9e6d3c42d681666566fe950b2d">More...</a><br /></td></tr>
 <tr class="separator:a226d2e9e6d3c42d681666566fe950b2d inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -207,6 +210,7 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:abca336f832d730e8494049bd714df60a inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2d7c6b5f3332604ad6a637457f65c342 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memTemplParams" colspan="2">template&lt;typename T , unsigned int dimension_size&gt; </td></tr>
 <tr class="memitem:a2d7c6b5f3332604ad6a637457f65c342 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a2d7c6b5f3332604ad6a637457f65c342">add_array_argument</a> (unsigned &amp;idx, const <a class="el" href="classarm__compute_1_1_i_c_l_array.xhtml">ICLArray</a>&lt; T &gt; *array, const <a class="el" href="classarm__compute_1_1_strides.xhtml">Strides</a> &amp;strides, unsigned int num_dimensions, const <a class="el" href="classarm__compute_1_1_window.xhtml">Window</a> &amp;<a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a3f5646133956f06348b310ccc3d36353">window</a>)</td></tr>
+<tr class="memdesc:a2d7c6b5f3332604ad6a637457f65c342 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add the passed array's parameters to the object's kernel's arguments starting from the index idx.  <a href="#a2d7c6b5f3332604ad6a637457f65c342">More...</a><br /></td></tr>
 <tr class="separator:a2d7c6b5f3332604ad6a637457f65c342 inherit pub_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classarm__compute_1_1_i_kernel"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classarm__compute_1_1_i_kernel')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_kernel.xhtml">IKernel</a></td></tr>
 <tr class="memitem:a7250cb8cbaa4104a93a2d77155085507 inherit pub_methods_classarm__compute_1_1_i_kernel"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_kernel.xhtml#a7250cb8cbaa4104a93a2d77155085507">IKernel</a> ()</td></tr>
@@ -227,9 +231,9 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a83daf577791f7e7e86b2dab68b5ca81a"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_batch_normalization_layer_kernel.xhtml#a83daf577791f7e7e86b2dab68b5ca81a">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *mean, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *var, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *beta, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *gamma, float epsilon, <a class="el" href="classarm__compute_1_1_activation_layer_info.xhtml">ActivationLayerInfo</a> act_info)</td></tr>
-<tr class="memdesc:a83daf577791f7e7e86b2dab68b5ca81a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_batch_normalization_layer_kernel.xhtml">CLBatchNormalizationLayerKernel</a>.  <a href="#a83daf577791f7e7e86b2dab68b5ca81a">More...</a><br /></td></tr>
-<tr class="separator:a83daf577791f7e7e86b2dab68b5ca81a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5f30ebbb928758897f5dcd17fc50181"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="classarm__compute_1_1_status.xhtml">Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_c_l_batch_normalization_layer_kernel.xhtml#af5f30ebbb928758897f5dcd17fc50181">validate</a> (const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *input, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *output, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *mean, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *var, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *beta=nullptr, const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *gamma=nullptr, float epsilon=0.001f, ActivationLayerInfo act_info=ActivationLayerInfo())</td></tr>
+<tr class="memdesc:af5f30ebbb928758897f5dcd17fc50181"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static function to check if given info will lead to a valid configuration of <a class="el" href="classarm__compute_1_1_c_l_batch_normalization_layer_kernel.xhtml">CLBatchNormalizationLayerKernel</a>.  <a href="#af5f30ebbb928758897f5dcd17fc50181">More...</a><br /></td></tr>
+<tr class="separator:af5f30ebbb928758897f5dcd17fc50181"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td colspan="2" onclick="javascript:toggleInherit('pub_static_methods_classarm__compute_1_1_i_c_l_kernel')"><img src="closed.png" alt="-"/>&#160;Static Public Member Functions inherited from <a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml">ICLKernel</a></td></tr>
 <tr class="memitem:a278f0e6c68ca17e71f4c4ff82f360aa0 inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="memItemLeft" align="right" valign="top">static constexpr unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1_i_c_l_kernel.xhtml#a278f0e6c68ca17e71f4c4ff82f360aa0">num_arguments_per_1D_array</a> ()</td></tr>
 <tr class="memdesc:a278f0e6c68ca17e71f4c4ff82f360aa0 inherit pub_static_methods_classarm__compute_1_1_i_c_l_kernel"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the number of arguments enqueued per 1D array object.  <a href="#a278f0e6c68ca17e71f4c4ff82f360aa0">More...</a><br /></td></tr>
@@ -350,7 +354,7 @@ Static Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a class="anchor" id="a2e219b7129ffd19b0f06066b297bed49"></a>
+<a class="anchor" id="a2b8fc7ef9b53c8a4e6b13995109ebf18"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -382,19 +386,19 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *&#160;</td>
-          <td class="paramname"><em>beta</em>, </td>
+          <td class="paramname"><em>beta</em> = <code>nullptr</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_c_l_tensor.xhtml">ICLTensor</a> *&#160;</td>
-          <td class="paramname"><em>gamma</em>, </td>
+          <td class="paramname"><em>gamma</em> = <code>nullptr</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>epsilon</em>, </td>
+          <td class="paramname"><em>epsilon</em> = <code>0.001f</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -418,9 +422,9 @@ Static Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Destination tensor. Output will have the same number of dimensions as input. Data type supported: same as <code>input</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">mean</td><td>Mean values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as <code>input</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">var</td><td>Variance values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as <code>input</code> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>Beta values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as <code>input</code> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">gamma</td><td>Gamma values tensor. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as <code>input</code> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">epsilon</td><td>Small value to avoid division with zero. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>(Optional) Beta values tensor info. 1 dimension with size equal to the feature maps [FM]. If not provided, default value for beta is 0. Data types supported: Same as <code>input</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">gamma</td><td>(Optional) Gamma values tensor info. 1 dimension with size equal to the feature maps [FM]. If not provided, default value for gamma is 1. Data types supported: Same as <code>input</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">epsilon</td><td>(Optional) Small value to avoid division with zero. Default value is 0.001f. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">act_info</td><td>(Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported. </td></tr>
   </table>
   </dd>
@@ -526,7 +530,7 @@ Static Public Member Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a83daf577791f7e7e86b2dab68b5ca81a"></a>
+<a class="anchor" id="af5f30ebbb928758897f5dcd17fc50181"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -561,25 +565,25 @@ Static Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
-          <td class="paramname"><em>beta</em>, </td>
+          <td class="paramname"><em>beta</em> = <code>nullptr</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="classarm__compute_1_1_i_tensor_info.xhtml">ITensorInfo</a> *&#160;</td>
-          <td class="paramname"><em>gamma</em>, </td>
+          <td class="paramname"><em>gamma</em> = <code>nullptr</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>epsilon</em>, </td>
+          <td class="paramname"><em>epsilon</em> = <code>0.001f</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="classarm__compute_1_1_activation_layer_info.xhtml">ActivationLayerInfo</a>&#160;</td>
-          <td class="paramname"><em>act_info</em>&#160;</td>
+          <td class="paramname"><em>act_info</em> = <code><a class="el" href="classarm__compute_1_1_activation_layer_info.xhtml">ActivationLayerInfo</a>()</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -601,9 +605,9 @@ Static Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>Destination tensor info. Output will have the same number of dimensions as input. Data type supported: same as <code>input</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">mean</td><td>Mean values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as <code>input</code> </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">var</td><td>Variance values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as <code>input</code> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>Beta values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as <code>input</code> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">gamma</td><td>Gamma values tensor info. 1 dimension with size equal to the feature maps [FM]. Data types supported: Same as <code>input</code> </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">epsilon</td><td>Small value to avoid division with zero. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>(Optional) Beta values tensor info. 1 dimension with size equal to the feature maps [FM]. If not provided, default value for beta is 0. Data types supported: Same as <code>input</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">gamma</td><td>(Optional) Gamma values tensor info. 1 dimension with size equal to the feature maps [FM]. If not provided, default value for gamma is 1. Data types supported: Same as <code>input</code> </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">epsilon</td><td>(Optional) Small value to avoid division with zero. Default value is 0.001f. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">act_info</td><td>(Optional) Activation layer information in case of a fused activation. Only RELU, BOUNDED_RELU and LU_BOUNDED_RELU supported.</td></tr>
   </table>
   </dd>
@@ -621,7 +625,7 @@ Static Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_c_l_batch_normalization_layer_kernel.xhtml">CLBatchNormalizationLayerKernel</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:57 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:40 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

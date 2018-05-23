@@ -34,6 +34,8 @@ namespace arm_compute
 {
 namespace test
 {
+namespace benchmark
+{
 /** Fixture that can be used for NEON and CL */
 template <typename TensorType, typename Function, typename Accessor>
 class GEMMFixture : public framework::Fixture
@@ -86,6 +88,7 @@ private:
     TensorType dst{};
     Function   gemm{};
 };
+} // namespace benchmark
 } // namespace test
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_TEST_GEMMFIXTURE */

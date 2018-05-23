@@ -33,6 +33,7 @@
 namespace arm_compute
 {
 class ITensor;
+/** Interface for CPP Images. */
 using IImage = ITensor;
 
 /** CPP kernel to perform corner candidates

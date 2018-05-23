@@ -61,7 +61,7 @@ inline bool have_different_dimensions(const Dimensions<T> &dim1, const Dimension
     return false;
 }
 
-/** Functor to compare two @ref Dimensions objects and throw an error on mismatch.
+/** Function to compare two @ref Dimensions objects and throw an error on mismatch.
  *
  * @param[in] dim      Object to compare against.
  * @param[in] function Function in which the error occurred.
@@ -72,6 +72,13 @@ template <typename T>
 class compare_dimension
 {
 public:
+    /** Construct a comparison function.
+     *
+     * @param[in] dim      Dimensions to compare.
+     * @param[in] function Source function. Used for error reporting.
+     * @param[in] file     Source code file. Used for error reporting.
+     * @param[in] line     Source code line. Used for error reporting.
+     */
     compare_dimension(const Dimensions<T> &dim, const char *function, const char *file, int line)
         : _dim{ dim }, _function{ function }, _file{ file }, _line{ line }
     {
@@ -80,6 +87,8 @@ public:
     /** Compare the given object against the stored one.
      *
      * @param[in] dim To be compared object.
+     *
+     * @return a status.
      */
     arm_compute::Status operator()(const Dimensions<T> &dim)
     {
@@ -109,11 +118,19 @@ inline arm_compute::Status for_each_error(F &&func, T &&arg, Ts &&... args)
     return arm_compute::Status{};
 }
 
+/** Get the info for a tensor, dummy struct */
 template <typename T>
 struct get_tensor_info_t;
+/** Get the info for a tensor */
 template <>
 struct get_tensor_info_t<ITensorInfo *>
 {
+    /** Get the info for a tensor.
+     *
+     * @param[in] tensor Tensor.
+     *
+     * @return tensor info.
+     */
     ITensorInfo *operator()(const ITensor *tensor)
     {
         return tensor->info();
@@ -303,6 +320,39 @@ arm_compute::Status error_on_tensors_not_even(const char *function, const char *
 #define ARM_COMPUTE_RETURN_ERROR_ON_TENSORS_NOT_EVEN(...) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_tensors_not_even(__func__, __FILE__, __LINE__, __VA_ARGS__))
 
+/** Return an error if the passed tensor objects are not sub-sampled.
+ *
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] format   Format to check if sub-sampling allowed.
+ * @param[in] shape    The tensor shape to calculate sub-sampling from.
+ * @param[in] tensor1  The first object to be compared.
+ * @param[in] tensors  (Optional) Further allowed objects.
+ *
+ * @return Status
+ */
+template <typename... Ts>
+arm_compute::Status error_on_tensors_not_subsampled(const char *function, const char *file, int line,
+                                                    const Format &format, const TensorShape &shape, const ITensor *tensor1, Ts... tensors)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor1 == nullptr, function, file, line);
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, std::forward<Ts>(tensors)...));
+    const TensorShape sub2_shape = calculate_subsampled_shape(shape, format);
+    const std::array < const ITensor *, 1 + sizeof...(Ts) > tensors_info_array{ { tensor1, std::forward<Ts>(tensors)... } };
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(std::any_of(tensors_info_array.cbegin(), tensors_info_array.cend(), [&](const ITensor * tensor)
+    {
+        return detail::have_different_dimensions(tensor->info()->tensor_shape(), sub2_shape, 2);
+    }),
+    function, file, line, "Tensor shape has mismatch dimensions for sub-sampling");
+    return arm_compute::Status{};
+}
+
+#define ARM_COMPUTE_ERROR_ON_TENSORS_NOT_SUBSAMPLED(...) \
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_tensors_not_subsampled(__func__, __FILE__, __LINE__, __VA_ARGS__))
+#define ARM_COMPUTE_RETURN_ERROR_ON_TENSORS_NOT_SUBSAMPLED(...) \
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_tensors_not_subsampled(__func__, __FILE__, __LINE__, __VA_ARGS__))
+
 /** Return an error if the passed two tensor infos have different shapes from the given dimension
  *
  * @param[in] function      Function in which the error occurred.
@@ -392,6 +442,57 @@ inline arm_compute::Status error_on_mismatching_shapes(const char *function, con
     ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_mismatching_shapes(__func__, __FILE__, __LINE__, __VA_ARGS__))
 #define ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(...) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_shapes(__func__, __FILE__, __LINE__, __VA_ARGS__))
+
+/** Return an error if the passed tensor infos have different data layouts
+ *
+ * @param[in] function     Function in which the error occurred.
+ * @param[in] file         Name of the file where the error occurred.
+ * @param[in] line         Line on which the error occurred.
+ * @param[in] tensor_info  The first tensor info to be compared.
+ * @param[in] tensor_infos (Optional) Further allowed tensor infos.
+ *
+ * @return Status
+ */
+template <typename... Ts>
+inline arm_compute::Status error_on_mismatching_data_layouts(const char *function, const char *file, const int line,
+                                                             const ITensorInfo *tensor_info, Ts... tensor_infos)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_info == nullptr, function, file, line);
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, std::forward<Ts>(tensor_infos)...));
+
+    DataLayout &&tensor_data_layout = tensor_info->data_layout();
+    const std::array<const ITensorInfo *, sizeof...(Ts)> tensors_infos_array{ { std::forward<Ts>(tensor_infos)... } };
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(std::any_of(tensors_infos_array.begin(), tensors_infos_array.end(), [&](const ITensorInfo * tensor_info_obj)
+    {
+        return tensor_info_obj->data_layout() != tensor_data_layout;
+    }),
+    function, file, line, "Tensors have different data layouts");
+    return arm_compute::Status{};
+}
+/** Return an error if the passed tensors have different data layouts
+ *
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] tensor   The first tensor to be compared.
+ * @param[in] tensors  (Optional) Further allowed tensors.
+ *
+ * @return Status
+ */
+template <typename... Ts>
+inline arm_compute::Status error_on_mismatching_data_layouts(const char *function, const char *file, const int line,
+                                                             const ITensor *tensor, Ts... tensors)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor == nullptr, function, file, line);
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_nullptr(function, file, line, std::forward<Ts>(tensors)...));
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_data_layouts(function, file, line, tensor->info(),
+                                                                                 detail::get_tensor_info_t<ITensorInfo *>()(tensors)...));
+    return arm_compute::Status{};
+}
+#define ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_LAYOUT(...) \
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_mismatching_data_layouts(__func__, __FILE__, __LINE__, __VA_ARGS__))
+#define ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(...) \
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_mismatching_data_layouts(__func__, __FILE__, __LINE__, __VA_ARGS__))
 
 /** Return an error if the passed two tensor infos have different data types
  *
@@ -794,6 +895,8 @@ arm_compute::Status error_on_invalid_multi_hog(const char *function, const char 
  * @param[in] file     Name of the file where the error occurred.
  * @param[in] line     Line on which the error occurred.
  * @param[in] kernel   Kernel to validate.
+ *
+ * @return Status
  */
 arm_compute::Status error_on_unconfigured_kernel(const char *function, const char *file, const int line,
                                                  const IKernel *kernel);

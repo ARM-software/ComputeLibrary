@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -157,7 +157,7 @@ Public Member Functions</h2></td></tr>
 <p>The matrix A can only be reshaped through <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel.xhtml">CLGEMMInterleave4x4Kernel</a> or <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_interleave4x4_kernel.xhtml">NEGEMMInterleave4x4Kernel</a> or <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_interleave4x4_kernel.xhtml">GCGEMMInterleave4x4Kernel</a> Note: Optionally just for <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_interleave4x4_kernel.xhtml">CLGEMMInterleave4x4Kernel</a> is it possible to set mult_interleave4x4_height, the multiplication factor for the height of the 4x4 interleaved block</p>
 <p>The matrix B can only be reshaped through <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_transpose1x_w_kernel.xhtml">CLGEMMTranspose1xWKernel</a> or <a class="el" href="classarm__compute_1_1_n_e_g_e_m_m_transpose1x_w_kernel.xhtml">NEGEMMTranspose1xWKernel</a> or <a class="el" href="classarm__compute_1_1_g_c_g_e_m_m_transpose1x_w_kernel.xhtml">GCGEMMTranspose1xWKernel</a> Note: Optionally just for <a class="el" href="classarm__compute_1_1_c_l_g_e_m_m_transpose1x_w_kernel.xhtml">CLGEMMTranspose1xWKernel</a> is it possible to set mult_transpose1xW_width, the multiplication factor for the width of the 1xW transposed block </p>
 
-<p>Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00885">885</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<p>Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01004">1004</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="aee6f5a043173c4d51c11a54db8e0f519"></a>
 <div class="memitem">
@@ -182,8 +182,8 @@ Public Member Functions</h2></td></tr>
 
 <p>Default constructor. </p>
 
-<p>Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00889">889</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00890"></a><span class="lineno">  890</span>&#160;        : _m(1), _n(1), _k(1), _mult_transpose1xW_width(1), _mult_interleave4x4_height(1)</div><div class="line"><a name="l00891"></a><span class="lineno">  891</span>&#160;    {</div><div class="line"><a name="l00892"></a><span class="lineno">  892</span>&#160;    }</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01008">1008</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l01009"></a><span class="lineno"> 1009</span>&#160;        : _m(1), _n(1), _k(1), _mult_transpose1xW_width(1), _mult_interleave4x4_height(1)</div><div class="line"><a name="l01010"></a><span class="lineno"> 1010</span>&#160;    {</div><div class="line"><a name="l01011"></a><span class="lineno"> 1011</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="af921bf25616f9504b1da5f43d5023416"></a>
@@ -248,12 +248,12 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00901">901</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00902"></a><span class="lineno">  902</span>&#160;        : _m(<a class="code" href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#a38bef5b3852701d3b1958a8ca4f96683">m</a>), _n(<a class="code" href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#a327d17199b3bb3d4ab67b819a5553510">n</a>), _k(<a class="code" href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#a3f077e40406c116e6e61e54f17d9b8be">k</a>), _mult_transpose1xW_width(<a class="code" href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#aa14924f4569745bea117b3f506cf734d">mult_transpose1xW_width</a>), _mult_interleave4x4_height(<a class="code" href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#a2c08b51c2f39ba68a69d654c507aa48f">mult_interleave4x4_height</a>)</div><div class="line"><a name="l00903"></a><span class="lineno">  903</span>&#160;    {</div><div class="line"><a name="l00904"></a><span class="lineno">  904</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1_g_e_m_m_reshape_info_xhtml_a2c08b51c2f39ba68a69d654c507aa48f"><div class="ttname"><a href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#a2c08b51c2f39ba68a69d654c507aa48f">arm_compute::GEMMReshapeInfo::mult_interleave4x4_height</a></div><div class="ttdeci">int mult_interleave4x4_height() const </div><div class="ttdoc">Multiplication factor for the height of the 4x4 interleaved block. </div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00941">Types.h:941</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_g_e_m_m_reshape_info_xhtml_a3f077e40406c116e6e61e54f17d9b8be"><div class="ttname"><a href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#a3f077e40406c116e6e61e54f17d9b8be">arm_compute::GEMMReshapeInfo::k</a></div><div class="ttdeci">int k() const </div><div class="ttdoc">Number of matrix A columns or matrix B rows. </div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00925">Types.h:925</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_g_e_m_m_reshape_info_xhtml_a38bef5b3852701d3b1958a8ca4f96683"><div class="ttname"><a href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#a38bef5b3852701d3b1958a8ca4f96683">arm_compute::GEMMReshapeInfo::m</a></div><div class="ttdeci">int m() const </div><div class="ttdoc">Number of matrix A rows. </div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00909">Types.h:909</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_g_e_m_m_reshape_info_xhtml_a327d17199b3bb3d4ab67b819a5553510"><div class="ttname"><a href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#a327d17199b3bb3d4ab67b819a5553510">arm_compute::GEMMReshapeInfo::n</a></div><div class="ttdeci">int n() const </div><div class="ttdoc">Number of matrix B columns. </div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00917">Types.h:917</a></div></div>
-<div class="ttc" id="classarm__compute_1_1_g_e_m_m_reshape_info_xhtml_aa14924f4569745bea117b3f506cf734d"><div class="ttname"><a href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#aa14924f4569745bea117b3f506cf734d">arm_compute::GEMMReshapeInfo::mult_transpose1xW_width</a></div><div class="ttdeci">int mult_transpose1xW_width() const </div><div class="ttdoc">Multiplication factor for the width of the 1xW transposed block. </div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l00933">Types.h:933</a></div></div>
+<p>Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01020">1020</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l01021"></a><span class="lineno"> 1021</span>&#160;        : _m(<a class="code" href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#a38bef5b3852701d3b1958a8ca4f96683">m</a>), _n(<a class="code" href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#a327d17199b3bb3d4ab67b819a5553510">n</a>), _k(<a class="code" href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#a3f077e40406c116e6e61e54f17d9b8be">k</a>), _mult_transpose1xW_width(<a class="code" href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#aa14924f4569745bea117b3f506cf734d">mult_transpose1xW_width</a>), _mult_interleave4x4_height(<a class="code" href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#a2c08b51c2f39ba68a69d654c507aa48f">mult_interleave4x4_height</a>)</div><div class="line"><a name="l01022"></a><span class="lineno"> 1022</span>&#160;    {</div><div class="line"><a name="l01023"></a><span class="lineno"> 1023</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1_g_e_m_m_reshape_info_xhtml_a2c08b51c2f39ba68a69d654c507aa48f"><div class="ttname"><a href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#a2c08b51c2f39ba68a69d654c507aa48f">arm_compute::GEMMReshapeInfo::mult_interleave4x4_height</a></div><div class="ttdeci">int mult_interleave4x4_height() const </div><div class="ttdoc">Multiplication factor for the height of the 4x4 interleaved block. </div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l01060">Types.h:1060</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_g_e_m_m_reshape_info_xhtml_a3f077e40406c116e6e61e54f17d9b8be"><div class="ttname"><a href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#a3f077e40406c116e6e61e54f17d9b8be">arm_compute::GEMMReshapeInfo::k</a></div><div class="ttdeci">int k() const </div><div class="ttdoc">Number of matrix A columns or matrix B rows. </div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l01044">Types.h:1044</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_g_e_m_m_reshape_info_xhtml_a38bef5b3852701d3b1958a8ca4f96683"><div class="ttname"><a href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#a38bef5b3852701d3b1958a8ca4f96683">arm_compute::GEMMReshapeInfo::m</a></div><div class="ttdeci">int m() const </div><div class="ttdoc">Number of matrix A rows. </div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l01028">Types.h:1028</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_g_e_m_m_reshape_info_xhtml_a327d17199b3bb3d4ab67b819a5553510"><div class="ttname"><a href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#a327d17199b3bb3d4ab67b819a5553510">arm_compute::GEMMReshapeInfo::n</a></div><div class="ttdeci">int n() const </div><div class="ttdoc">Number of matrix B columns. </div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l01036">Types.h:1036</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_g_e_m_m_reshape_info_xhtml_aa14924f4569745bea117b3f506cf734d"><div class="ttname"><a href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml#aa14924f4569745bea117b3f506cf734d">arm_compute::GEMMReshapeInfo::mult_transpose1xW_width</a></div><div class="ttdeci">int mult_transpose1xW_width() const </div><div class="ttdoc">Multiplication factor for the width of the 1xW transposed block. </div><div class="ttdef"><b>Definition:</b> <a href="arm__compute_2core_2_types_8h_source.xhtml#l01052">Types.h:1052</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -282,8 +282,8 @@ Public Member Functions</h2></td></tr>
 <p>Number of matrix A columns or matrix B rows. </p>
 <dl class="section return"><dt>Returns</dt><dd>the number of matrix A columns or matrix B rows </dd></dl>
 
-<p>Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00925">925</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00926"></a><span class="lineno">  926</span>&#160;    {</div><div class="line"><a name="l00927"></a><span class="lineno">  927</span>&#160;        <span class="keywordflow">return</span> _k;</div><div class="line"><a name="l00928"></a><span class="lineno">  928</span>&#160;    }</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01044">1044</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l01045"></a><span class="lineno"> 1045</span>&#160;    {</div><div class="line"><a name="l01046"></a><span class="lineno"> 1046</span>&#160;        <span class="keywordflow">return</span> _k;</div><div class="line"><a name="l01047"></a><span class="lineno"> 1047</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="a38bef5b3852701d3b1958a8ca4f96683"></a>
@@ -310,8 +310,10 @@ Public Member Functions</h2></td></tr>
 <p>Number of matrix A rows. </p>
 <dl class="section return"><dt>Returns</dt><dd>the number of matrix A rows </dd></dl>
 
-<p>Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00909">909</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00910"></a><span class="lineno">  910</span>&#160;    {</div><div class="line"><a name="l00911"></a><span class="lineno">  911</span>&#160;        <span class="keywordflow">return</span> _m;</div><div class="line"><a name="l00912"></a><span class="lineno">  912</span>&#160;    }</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01028">1028</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+
+<p>Referenced by <a class="el" href="_shape_calculator_8h_source.xhtml#l00361">arm_compute::misc::shape_calculator::compute_mm_shape()</a>.</p>
+<div class="fragment"><div class="line"><a name="l01029"></a><span class="lineno"> 1029</span>&#160;    {</div><div class="line"><a name="l01030"></a><span class="lineno"> 1030</span>&#160;        <span class="keywordflow">return</span> _m;</div><div class="line"><a name="l01031"></a><span class="lineno"> 1031</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="a2c08b51c2f39ba68a69d654c507aa48f"></a>
@@ -338,8 +340,8 @@ Public Member Functions</h2></td></tr>
 <p>Multiplication factor for the height of the 4x4 interleaved block. </p>
 <dl class="section return"><dt>Returns</dt><dd>the multiplication factor for the height of the 4x4 interleaved block </dd></dl>
 
-<p>Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00941">941</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00942"></a><span class="lineno">  942</span>&#160;    {</div><div class="line"><a name="l00943"></a><span class="lineno">  943</span>&#160;        <span class="keywordflow">return</span> _mult_interleave4x4_height;</div><div class="line"><a name="l00944"></a><span class="lineno">  944</span>&#160;    }</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01060">1060</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l01061"></a><span class="lineno"> 1061</span>&#160;    {</div><div class="line"><a name="l01062"></a><span class="lineno"> 1062</span>&#160;        <span class="keywordflow">return</span> _mult_interleave4x4_height;</div><div class="line"><a name="l01063"></a><span class="lineno"> 1063</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="aa14924f4569745bea117b3f506cf734d"></a>
@@ -366,8 +368,8 @@ Public Member Functions</h2></td></tr>
 <p>Multiplication factor for the width of the 1xW transposed block. </p>
 <dl class="section return"><dt>Returns</dt><dd>the multiplication factor for the width of the 1xW transposed block </dd></dl>
 
-<p>Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00933">933</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00934"></a><span class="lineno">  934</span>&#160;    {</div><div class="line"><a name="l00935"></a><span class="lineno">  935</span>&#160;        <span class="keywordflow">return</span> _mult_transpose1xW_width;</div><div class="line"><a name="l00936"></a><span class="lineno">  936</span>&#160;    }</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01052">1052</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l01053"></a><span class="lineno"> 1053</span>&#160;    {</div><div class="line"><a name="l01054"></a><span class="lineno"> 1054</span>&#160;        <span class="keywordflow">return</span> _mult_transpose1xW_width;</div><div class="line"><a name="l01055"></a><span class="lineno"> 1055</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <a class="anchor" id="a327d17199b3bb3d4ab67b819a5553510"></a>
@@ -394,8 +396,10 @@ Public Member Functions</h2></td></tr>
 <p>Number of matrix B columns. </p>
 <dl class="section return"><dt>Returns</dt><dd>the number of matrix B columns </dd></dl>
 
-<p>Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l00917">917</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00918"></a><span class="lineno">  918</span>&#160;    {</div><div class="line"><a name="l00919"></a><span class="lineno">  919</span>&#160;        <span class="keywordflow">return</span> _n;</div><div class="line"><a name="l00920"></a><span class="lineno">  920</span>&#160;    }</div></div><!-- fragment -->
+<p>Definition at line <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml#l01036">1036</a> of file <a class="el" href="arm__compute_2core_2_types_8h_source.xhtml">Types.h</a>.</p>
+
+<p>Referenced by <a class="el" href="_shape_calculator_8h_source.xhtml#l00361">arm_compute::misc::shape_calculator::compute_mm_shape()</a>.</p>
+<div class="fragment"><div class="line"><a name="l01037"></a><span class="lineno"> 1037</span>&#160;    {</div><div class="line"><a name="l01038"></a><span class="lineno"> 1038</span>&#160;        <span class="keywordflow">return</span> _n;</div><div class="line"><a name="l01039"></a><span class="lineno"> 1039</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
@@ -407,7 +411,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1_g_e_m_m_reshape_info.xhtml">GEMMReshapeInfo</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:58 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:41 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

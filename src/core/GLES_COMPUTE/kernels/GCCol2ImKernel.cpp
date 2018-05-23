@@ -62,30 +62,32 @@ void GCCol2ImKernel::configure(const IGCTensor *input, IGCTensor    *output,
     _output         = output;
     _convolved_dims = convolved_dims;
 
-    unsigned int num_elems_processed_per_iteration = 1;
+    const DataType     dt         = input->info()->data_type();
+    const unsigned int local_size = 1;
 
     // Create kernel
     std::set<std::string> build_opts;
+    build_opts.emplace("#define COL2IM ");
     build_opts.emplace("#define WIDTH_OUTPUT " + support::cpp11::to_string(_convolved_dims.first));
-    std::string dt_name = (input->info()->data_type() == DataType::F32) ? "DATA_TYPE_FP32" : "DATA_TYPE_FP16";
+    const std::string dt_name = (dt == DataType::F32) ? "DATA_TYPE_FP32" : "DATA_TYPE_FP16";
     build_opts.emplace(("#define " + dt_name));
-    build_opts.emplace("#define LOCAL_SIZE_X " + support::cpp11::to_string(num_elems_processed_per_iteration));
-    build_opts.emplace("#define LOCAL_SIZE_Y " + support::cpp11::to_string(num_elems_processed_per_iteration));
-    build_opts.emplace("#define LOCAL_SIZE_Z " + support::cpp11::to_string(num_elems_processed_per_iteration));
+    build_opts.emplace("#define LOCAL_SIZE_X " + support::cpp11::to_string(local_size));
+    build_opts.emplace("#define LOCAL_SIZE_Y " + support::cpp11::to_string(local_size));
+    build_opts.emplace("#define LOCAL_SIZE_Z " + support::cpp11::to_string(local_size));
 
     _kernel = static_cast<GCKernel>(GCKernelLibrary::get().create_kernel("col2im", build_opts));
 
     // Configure window
-    unsigned int nums = 2;
-    Window       win  = calculate_max_window(*output->info(), Steps(nums));
+    const unsigned int num_elems_processed_per_iteration = (dt == DataType::F32) ? 1 : 2;
 
-    AccessWindowHorizontal output_access(output->info(), 0, 2);
+    Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
+
+    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
     const int              input_padding = ceil_to_multiple(input->info()->dimension(0), 2) - input->info()->dimension(0);
 
     AccessWindowStatic input_access(input->info(), 0, 0, input->info()->dimension(0) + input_padding, input->info()->dimension(1) + 1);
 
-    update_window_and_padding(win, input_access,
-                              output_access);
+    update_window_and_padding(win, input_access, output_access);
 
     output_access.set_valid_region(win, output->info()->valid_region());
 

@@ -35,7 +35,6 @@
 #include "arm_compute/core/Window.h"
 
 using namespace arm_compute;
-using namespace arm_compute::gles_compute;
 
 GCGEMMInterleave4x4Kernel::GCGEMMInterleave4x4Kernel()
     : _input(nullptr), _output(nullptr)

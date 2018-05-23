@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -122,7 +122,7 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1detail_1_1compare
 </div><!--header-->
 <div class="contents">
 
-<p>Functor to compare two <a class="el" href="classarm__compute_1_1_dimensions.xhtml">Dimensions</a> objects and throw an error on mismatch.  
+<p>Function to compare two <a class="el" href="classarm__compute_1_1_dimensions.xhtml">Dimensions</a> objects and throw an error on mismatch.  
  <a href="classarm__compute_1_1detail_1_1compare__dimension.xhtml#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="_validate_8h_source.xhtml">Validate.h</a>&gt;</code></p>
@@ -130,6 +130,7 @@ $(document).ready(function(){initNavTree('classarm__compute_1_1detail_1_1compare
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:afe99c6d8da678f7dce4e4a58ad1e0175"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1detail_1_1compare__dimension.xhtml#afe99c6d8da678f7dce4e4a58ad1e0175">compare_dimension</a> (const <a class="el" href="classarm__compute_1_1_dimensions.xhtml">Dimensions</a>&lt; T &gt; &amp;dim, const char *function, const char *file, int line)</td></tr>
+<tr class="memdesc:afe99c6d8da678f7dce4e4a58ad1e0175"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a comparison function.  <a href="#afe99c6d8da678f7dce4e4a58ad1e0175">More...</a><br /></td></tr>
 <tr class="separator:afe99c6d8da678f7dce4e4a58ad1e0175"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a90462712db283368a62956b9b38aa6a5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classarm__compute_1_1_status.xhtml">arm_compute::Status</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classarm__compute_1_1detail_1_1compare__dimension.xhtml#a90462712db283368a62956b9b38aa6a5">operator()</a> (const <a class="el" href="classarm__compute_1_1_dimensions.xhtml">Dimensions</a>&lt; T &gt; &amp;dim)</td></tr>
 <tr class="memdesc:a90462712db283368a62956b9b38aa6a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compare the given object against the stored one.  <a href="#a90462712db283368a62956b9b38aa6a5">More...</a><br /></td></tr>
@@ -139,7 +140,7 @@ Public Member Functions</h2></td></tr>
 <div class="textblock"><h3>template&lt;typename T&gt;<br />
 class arm_compute::detail::compare_dimension&lt; T &gt;</h3>
 
-<p>Functor to compare two <a class="el" href="classarm__compute_1_1_dimensions.xhtml">Dimensions</a> objects and throw an error on mismatch. </p>
+<p>Function to compare two <a class="el" href="classarm__compute_1_1_dimensions.xhtml">Dimensions</a> objects and throw an error on mismatch. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">dim</td><td>Object to compare against. </td></tr>
@@ -196,8 +197,19 @@ class arm_compute::detail::compare_dimension&lt; T &gt;</h3>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="_validate_8h_source.xhtml#l00075">75</a> of file <a class="el" href="_validate_8h_source.xhtml">Validate.h</a>.</p>
-<div class="fragment"><div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        : _dim{ dim }, _function{ <span class="keyword">function</span> }, _file{ file }, _line{ line }</div><div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    {</div><div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    }</div></div><!-- fragment -->
+<p>Construct a comparison function. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">dim</td><td><a class="el" href="classarm__compute_1_1_dimensions.xhtml" title="Dimensions with dimensionality. ">Dimensions</a> to compare. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">function</td><td>Source function. Used for error reporting. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">file</td><td>Source code file. Used for error reporting. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">line</td><td>Source code line. Used for error reporting. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Definition at line <a class="el" href="_validate_8h_source.xhtml#l00082">82</a> of file <a class="el" href="_validate_8h_source.xhtml">Validate.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;        : _dim{ dim }, _function{ <span class="keyword">function</span> }, _file{ file }, _line{ line }</div><div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    {</div><div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    }</div></div><!-- fragment -->
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -226,16 +238,17 @@ class arm_compute::detail::compare_dimension&lt; T &gt;</h3>
 <p>Compare the given object against the stored one. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">dim</td><td>To be compared object. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dim</td><td>To be compared object.</td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>a status. </dd></dl>
 
-<p>Definition at line <a class="el" href="_validate_8h_source.xhtml#l00084">84</a> of file <a class="el" href="_validate_8h_source.xhtml">Validate.h</a>.</p>
+<p>Definition at line <a class="el" href="_validate_8h_source.xhtml#l00093">93</a> of file <a class="el" href="_validate_8h_source.xhtml">Validate.h</a>.</p>
 
-<p>References <a class="el" href="core_2_error_8h_source.xhtml#l00208">ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG</a>, and <a class="el" href="_validate_8h_source.xhtml#l00051">arm_compute::detail::have_different_dimensions()</a>.</p>
-<div class="fragment"><div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    {</div><div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        <a class="code" href="core_2_error_8h.xhtml#ab4ebbfbeedd9d66614ddbfdb14199cbf">ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG</a>(<a class="code" href="namespacearm__compute_1_1detail.xhtml#a45d610a8bc262f7007c934293361e888">have_different_dimensions</a>(_dim, dim, 0), _function, _file, _line,</div><div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;                                            <span class="stringliteral">&quot;Objects have different dimensions&quot;</span>);</div><div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_status.xhtml">arm_compute::Status</a>{};</div><div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    }</div><div class="ttc" id="classarm__compute_1_1_status_xhtml"><div class="ttname"><a href="classarm__compute_1_1_status.xhtml">arm_compute::Status</a></div><div class="ttdoc">Status class. </div><div class="ttdef"><b>Definition:</b> <a href="core_2_error_8h_source.xhtml#l00039">Error.h:39</a></div></div>
-<div class="ttc" id="core_2_error_8h_xhtml_ab4ebbfbeedd9d66614ddbfdb14199cbf"><div class="ttname"><a href="core_2_error_8h.xhtml#ab4ebbfbeedd9d66614ddbfdb14199cbf">ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG</a></div><div class="ttdeci">#define ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(cond, func, file, line,...)</div><div class="ttdoc">If the condition is true, an error is thrown. </div><div class="ttdef"><b>Definition:</b> <a href="core_2_error_8h_source.xhtml#l00208">Error.h:208</a></div></div>
+<p>References <a class="el" href="_error_8h_source.xhtml#l00230">ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG</a>, and <a class="el" href="_validate_8h_source.xhtml#l00051">arm_compute::detail::have_different_dimensions()</a>.</p>
+<div class="fragment"><div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;    {</div><div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;        <a class="code" href="_error_8h.xhtml#ab4ebbfbeedd9d66614ddbfdb14199cbf">ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG</a>(<a class="code" href="namespacearm__compute_1_1detail.xhtml#a45d610a8bc262f7007c934293361e888">have_different_dimensions</a>(_dim, dim, 0), _function, _file, _line,</div><div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;                                            <span class="stringliteral">&quot;Objects have different dimensions&quot;</span>);</div><div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;        <span class="keywordflow">return</span> <a class="code" href="classarm__compute_1_1_status.xhtml">arm_compute::Status</a>{};</div><div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    }</div><div class="ttc" id="_error_8h_xhtml_ab4ebbfbeedd9d66614ddbfdb14199cbf"><div class="ttname"><a href="_error_8h.xhtml#ab4ebbfbeedd9d66614ddbfdb14199cbf">ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG</a></div><div class="ttdeci">#define ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG(cond, func, file, line,...)</div><div class="ttdoc">If the condition is true, an error is thrown. </div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00230">Error.h:230</a></div></div>
+<div class="ttc" id="classarm__compute_1_1_status_xhtml"><div class="ttname"><a href="classarm__compute_1_1_status.xhtml">arm_compute::Status</a></div><div class="ttdoc">Status class. </div><div class="ttdef"><b>Definition:</b> <a href="_error_8h_source.xhtml#l00051">Error.h:51</a></div></div>
 <div class="ttc" id="namespacearm__compute_1_1detail_xhtml_a45d610a8bc262f7007c934293361e888"><div class="ttname"><a href="namespacearm__compute_1_1detail.xhtml#a45d610a8bc262f7007c934293361e888">arm_compute::detail::have_different_dimensions</a></div><div class="ttdeci">bool have_different_dimensions(const Dimensions&lt; T &gt; &amp;dim1, const Dimensions&lt; T &gt; &amp;dim2, unsigned int upper_dim)</div><div class="ttdef"><b>Definition:</b> <a href="_validate_8h_source.xhtml#l00051">Validate.h:51</a></div></div>
 </div><!-- fragment -->
 </div>
@@ -249,7 +262,7 @@ class arm_compute::detail::compare_dimension&lt; T &gt;</h3>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="namespacearm__compute.xhtml">arm_compute</a></li><li class="navelem"><a class="el" href="namespacearm__compute_1_1detail.xhtml">detail</a></li><li class="navelem"><a class="el" href="classarm__compute_1_1detail_1_1compare__dimension.xhtml">compare_dimension</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:59 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:43 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

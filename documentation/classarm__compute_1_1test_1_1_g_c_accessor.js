@@ -4,6 +4,7 @@ var classarm__compute_1_1test_1_1_g_c_accessor =
     [ "GCAccessor", "classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a62e16c41eba15fc5043db5fcc0e57698", null ],
     [ "GCAccessor", "classarm__compute_1_1test_1_1_g_c_accessor.xhtml#af7752bed6faa3588f795d65a3bb34f31", null ],
     [ "~GCAccessor", "classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a6f0e7701f5cd0a4c5891e79444846228", null ],
+    [ "data_layout", "classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a5f63b63606dbbbe54474e6e970a6738c", null ],
     [ "data_type", "classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a9a3e72153aeb3ed212e9c3698774e881", null ],
     [ "element_size", "classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a62b67b578f684c4d516843c9dea86a23", null ],
     [ "fixed_point_position", "classarm__compute_1_1test_1_1_g_c_accessor.xhtml#a35ccf2eb0c18a15feab2db98b307b78b", null ],

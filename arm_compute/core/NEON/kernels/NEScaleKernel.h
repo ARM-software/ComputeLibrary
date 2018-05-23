@@ -56,17 +56,32 @@ public:
      *
      * @note dx, dy and offsets have the same dimensions (width and height) of the output tensor
      *
-     * @param[in]  input            Source tensor. Data types supported: U8/S16/F32.
-     * @param[in]  dx               Pixel's distance between the X real coordinate and the smallest X following integer. Data type supported: F32
-     * @param[in]  dy               Pixel's distance between the Y real coordinate and the smallest Y following integer. Data type supported: F32
-     * @param[in]  offsets          Offset to access the pixel with NEAREST interpolation or the top-left pixel with BILINEAR interpolation in the input tensor. Data type supported: S32.
-     * @param[out] output           Destination tensor. Data types supported: Same as @p input. All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
-     * @param[in]  policy           Interpolation type to use
-     * @param[in]  border_undefined True if the border mode is undefined. False if it's replicate or constant.
-     * @param[in]  sampling_policy  (Optional) Sampling policy used by the interpolation. Defaults to @ref SamplingPolicy::CENTER
+     * @param[in]  input           Source tensor. Data types supported: U8/S16/F32.
+     * @param[in]  dx              Pixel's distance between the X real coordinate and the smallest X following integer. Data type supported: F32
+     * @param[in]  dy              Pixel's distance between the Y real coordinate and the smallest Y following integer. Data type supported: F32
+     * @param[in]  offsets         Offset to access the pixel with NEAREST interpolation or the top-left pixel with BILINEAR interpolation in the input tensor. Data type supported: S32.
+     * @param[out] output          Destination tensor. Data types supported: Same as @p input. All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
+     * @param[in]  policy          Interpolation type to use
+     * @param[in]  border_mode     Border mode policy
+     * @param[in]  sampling_policy (Optional) Sampling policy used by the interpolation. Defaults to @ref SamplingPolicy::CENTER
      */
-    void configure(const ITensor *input, const ITensor *dx, const ITensor *dy, const ITensor *offsets, ITensor *output, InterpolationPolicy policy, bool border_undefined,
-                   SamplingPolicy sampling_policy = SamplingPolicy::CENTER);
+    void configure(const ITensor *input, const ITensor *dx, const ITensor *dy, const ITensor *offsets, ITensor *output,
+                   InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy = SamplingPolicy::CENTER);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEScaleKernel
+     *
+     * @note dx, dy and offsets have the same dimensions (width and height) of the output tensor
+     *
+     * @param[in] input           Source tensor. Data types supported: U8/S16/F32.
+     * @param[in] dx              Pixel's distance between the X real coordinate and the smallest X following integer. Data type supported: F32
+     * @param[in] dy              Pixel's distance between the Y real coordinate and the smallest Y following integer. Data type supported: F32
+     * @param[in] offsets         Offset to access the pixel with NEAREST interpolation or the top-left pixel with BILINEAR interpolation in the input tensor. Data type supported: S32.
+     * @param[in] output          Destination tensor. Data types supported: Same as @p input. All but the lowest two dimensions must be the same size as in the input tensor, i.e. scaling is only performed within the XY-plane.
+     * @param[in] policy          Interpolation type to use
+     * @param[in] border_mode     Border mode policy
+     * @param[in] sampling_policy (Optional) Sampling policy used by the interpolation. Defaults to @ref SamplingPolicy::CENTER
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *dx, const ITensorInfo *dy, const ITensorInfo *offsets, ITensorInfo *output,
+                           InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy = SamplingPolicy::CENTER);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
@@ -74,22 +89,27 @@ public:
 
 private:
     /** function to perform scale using nearest interpolation on the given window */
-    void scale_nearest(const Window &window);
+    void scale_nearest_nchw(const Window &window);
     /** function to perform scale using bilinear interpolation on the given window */
-    void scale_bilinear(const Window &window);
+    void scale_bilinear_nchw(const Window &window);
     /** function to perform scale using area interpolation on the given window
      *
      *  @note Used only in case down-sampling.
      */
-    void scale_area(const Window &window);
+    void scale_area_nchw(const Window &window);
+    /** function to perform scale on the given window */
+    void scale_nhwc(const Window &window);
     /** Scale function to use for the particular interpolation type passed to configure() */
     void (NEScaleKernel::*_func)(const Window &window);
 
-    const ITensor *_offsets;
-    const ITensor *_dx;
-    const ITensor *_dy;
-    const ITensor *_input;
-    ITensor       *_output;
+    const ITensor      *_offsets;
+    const ITensor      *_dx;
+    const ITensor      *_dy;
+    const ITensor      *_input;
+    ITensor            *_output;
+    InterpolationPolicy _policy;
+    BorderSize          _border_size;
+    BorderMode          _border_mode;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_NESCALEKERNEL_H__ */

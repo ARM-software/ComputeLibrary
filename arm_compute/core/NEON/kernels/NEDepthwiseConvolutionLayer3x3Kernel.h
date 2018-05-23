@@ -49,27 +49,29 @@ public:
     NEDepthwiseConvolutionLayer3x3Kernel &operator=(const NEDepthwiseConvolutionLayer3x3Kernel &) = delete;
     /** Default Move Constructor. */
     NEDepthwiseConvolutionLayer3x3Kernel(NEDepthwiseConvolutionLayer3x3Kernel &&) = default;
-    /** Default move assignment operator. */
+    /** Default move assignment operator */
     NEDepthwiseConvolutionLayer3x3Kernel &operator=(NEDepthwiseConvolutionLayer3x3Kernel &&) = default;
     /** Initialize the function's source, destination, conv and border_size.
      *
-     * @param[in]  input       Source tensor. DataType supported: QASYMM8, F32.
-     * @param[in]  weights     Weights tensor. This is a 3D tensor with dimensions [3, 3, IFM]. Data type supported: Same as @p input.
-     * @param[out] output      Destination tensor. Data type supported: Same as @p input.
-     * @param[in]  conv_info   Padding and stride information to use for the convolution.
-     * @param[in]  data_layout (Optional) Data layout of the input and weights tensor
+     * @param[in]  input            Source tensor. DataType supported: QASYMM8, F32.
+     * @param[in]  weights          Weights tensor. This is a 3D tensor with dimensions [3, 3, IFM]. Data type supported: Same as @p input.
+     * @param[out] output           Destination tensor. Data type supported: Same as @p input.
+     * @param[in]  conv_info        Padding and stride information to use for the convolution.
+     * @param[in]  depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
+     * @param[in]  data_layout      (Optional) Data layout of the input and weights tensor
      */
-    void configure(const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info, DataLayout data_layout = DataLayout::NCHW);
+    void configure(const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier = 1, DataLayout data_layout = DataLayout::NCHW);
     /** Static method that checks if optimized execution is supported for the given parameters
      *
-     * @param[in] input_shape Input shape
-     * @param[in] conv_info   Padding and stride information to use for the convolution.
-     * @param[in] dt          Data type of the input and weights
-     * @param[in] data_layout (Optional) Data layout of the input and weights tensor
+     * @param[in] input_shape      Input shape
+     * @param[in] conv_info        Padding and stride information to use for the convolution.
+     * @param[in] dt               Data type of the input and weights
+     * @param[in] data_layout      (Optional) Data layout of the input and weights tensor
+     * @param[in] depth_multiplier (Optional) Multiplier to apply to the input's depth in order to retrieve the output's depth. Defaults to 1.
      *
      * @return True if the optimized kernels can be executed else false
      */
-    static bool is_optimized_execution_possible(TensorShape input_shape, PadStrideInfo conv_info, DataType dt, DataLayout data_layout = DataLayout::NCHW);
+    static bool is_optimized_execution_possible(TensorShape input_shape, PadStrideInfo conv_info, DataType dt, unsigned int depth_multiplier = 1, DataLayout data_layout = DataLayout::NCHW);
     /** Generates the convolver object */
     void generate_convolver();
 
@@ -82,8 +84,24 @@ private:
     void configure_optimized();
     void run_generic(const Window &window, const ThreadInfo &info);
     void run_optimized(const Window &window, const ThreadInfo &info);
-    std::unique_ptr<depthwise::IDepthwiseConvolution> create_convolver_object(TensorShape shape, PadStrideInfo conv_info,
-                                                                              const uint8_t *w_ptr, uint8_t *in_ptr, uint8_t *out_ptr);
+    /** Creates an optimized backend convolver object
+     *
+     * @note Convolver of strides 1,2 and convolution size of 3 is currently supported
+     *
+     * @param[in] conv_info     Padding and stride information to use for the convolution
+     * @param[in] w             Weights tensor
+     * @param[in] in            Input tensor
+     * @param[in] out           Output tensor
+     * @param[in] setup_strides (Optional) Boolean to enable setting the strides of the tensors
+     *                           in the convolver in case of padding. Defaults to false
+     *
+     * @return  A convolver object or nullptr if the configuration is not supported
+     */
+    std::unique_ptr<depthwise::IDepthwiseConvolution> create_convolver_object(PadStrideInfo  conv_info,
+                                                                              const ITensor *w,
+                                                                              const ITensor *in,
+                                                                              ITensor       *out,
+                                                                              bool           setup_strides = false);
 
 private:
     BorderSize                                        _border_size;
@@ -94,6 +112,7 @@ private:
     std::unique_ptr<depthwise::IDepthwiseConvolution> _convolver;
     unsigned int                                      _num_elems_written_per_iteration;
     bool                                              _run_optimized;
+    unsigned int                                      _depth_multiplier;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEDEPTHWISECONVOLUTIONKERNEL3x3_H__ */

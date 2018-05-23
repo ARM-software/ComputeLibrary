@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,15 +41,31 @@ public:
      */
     Accessor(Tensor &tensor);
 
+    /** Prevent instances of this class from being copy constructed */
     Accessor(const Accessor &) = delete;
+    /** Prevent instances of this class from being copied */
     Accessor &operator=(const Accessor &) = delete;
-    Accessor(Accessor &&)                 = default;
+    /** Allow instances of this class to be move constructed */
+    Accessor(Accessor &&) = default;
+    /** Allow instances of this class to be moved */
     Accessor &operator=(Accessor &&) = default;
+
+    /** Get the tensor data.
+     *
+     * @return a constant pointer to the tensor data.
+     */
+    const void *data() const;
+    /** Get the tensor data.
+     *
+     * @return a pointer to the tensor data.
+     */
+    void *data();
 
     TensorShape      shape() const override;
     size_t           element_size() const override;
     size_t           size() const override;
     Format           format() const override;
+    DataLayout       data_layout() const override;
     DataType         data_type() const override;
     int              num_channels() const override;
     int              num_elements() const override;
@@ -58,8 +74,6 @@ public:
     QuantizationInfo quantization_info() const override;
     const void *operator()(const Coordinates &coord) const override;
     void *operator()(const Coordinates &coord) override;
-    const void *data() const;
-    void       *data();
 
 private:
     Tensor &_tensor;
@@ -88,6 +102,11 @@ inline size_t Accessor::size() const
 inline Format Accessor::format() const
 {
     return _tensor.info()->format();
+}
+
+inline DataLayout Accessor::data_layout() const
+{
+    return _tensor.info()->data_layout();
 }
 
 inline DataType Accessor::data_type() const

@@ -54,7 +54,7 @@ public:
     /** Initialise the kernel's source, destination and border mode.
      *
      * @param[in]  input  Source tensor. Data type supported: U8.
-     * @param[out] output Destination tensor. Data type supported: S16.
+     * @param[out] output Destination tensor. Output should have half the input width. Data type supported: S16.
      */
     void configure(const ITensor *input, ITensor *output);
 
@@ -90,7 +90,7 @@ public:
     /** Initialise the kernel's source, destination and border mode.
      *
      * @param[in]  input  Source tensor. Data type supported: S16.
-     * @param[out] output Destination tensor. Data type supported: U8.
+     * @param[out] output Destination tensor. Output should have half the input height. Data type supported: U8.
      */
     void configure(const ITensor *input, ITensor *output);
 

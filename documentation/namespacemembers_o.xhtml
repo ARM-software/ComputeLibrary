@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -90,7 +90,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="namespacemembers_vars.xhtml"><span>Variables</span></a></li>
       <li><a href="namespacemembers_type.xhtml"><span>Typedefs</span></a></li>
       <li><a href="namespacemembers_enum.xhtml"><span>Enumerations</span></a></li>
-      <li><a href="namespacemembers_eval.xhtml"><span>Enumerator</span></a></li>
     </ul>
   </div>
   <div id="navrow4" class="tabs3">
@@ -155,25 +154,18 @@ $(document).ready(function(){initNavTree('namespacemembers_o.xhtml','');});
 <div class="textblock">Here is a list of all namespace members with links to the namespace documentation for each member:</div>
 
 <h3><a class="anchor" id="index_o"></a>- o -</h3><ul>
-<li>offset
-: <a class="el" href="namespacemali__userspace.xhtml#aadb6d6eb83e646653a1402032e45dcab">mali_userspace</a>
-</li>
 <li>opencl_is_available()
 : <a class="el" href="namespacearm__compute.xhtml#aa4f4d7a58287017588fc338965873f14">arm_compute</a>
 </li>
 <li>opengles31_is_available()
 : <a class="el" href="namespacearm__compute.xhtml#a19c7b9bc5f36935ba40314907ffe54ce">arm_compute</a>
 </li>
-<li>OperationType
-: <a class="el" href="namespacearm__compute_1_1graph.xhtml#a9a2c9c31d675b34f6ec35cc1ca89e047">arm_compute::graph</a>
-</li>
 <li>operator!=()
 : <a class="el" href="namespacearm__compute.xhtml#a4e3ff85e1f6c648dfbe264f54c147451">arm_compute</a>
 , <a class="el" href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#a3d0ef475c458544f4ac7b56060f62f6e">arm_compute::test::fixed_point_arithmetic::detail</a>
 </li>
 <li>operator&amp;()
-: <a class="el" href="namespacearm__compute.xhtml#adfe7525e3cd542da6c043a98f93a8d3c">arm_compute</a>
-, <a class="el" href="namespacearm__compute_1_1test_1_1framework.xhtml#ad22ccda995864716ed21d20630405215">arm_compute::test::framework</a>
+: <a class="el" href="namespacearm__compute_1_1test_1_1framework.xhtml#ad22ccda995864716ed21d20630405215">arm_compute::test::framework</a>
 </li>
 <li>operator*()
 : <a class="el" href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#acdde00e55846c9f6704f87b9d2112cce">arm_compute::test::fixed_point_arithmetic::detail</a>
@@ -193,8 +185,9 @@ $(document).ready(function(){initNavTree('namespacemembers_o.xhtml','');});
 , <a class="el" href="namespacearm__compute_1_1test_1_1framework.xhtml#a9ec753fd569ec1bf169e26013898eb4a">arm_compute::test::framework</a>
 </li>
 <li>operator&lt;&lt;()
-: <a class="el" href="namespacearm__compute_1_1graph.xhtml#a2efd084c3be5fb3d31d18dad2356adb2">arm_compute::graph</a>
-, <a class="el" href="namespacearm__compute.xhtml#a530d86eec3dbd22cab6336ffdceb0d37">arm_compute</a>
+: <a class="el" href="namespacearm__compute_1_1graph_1_1frontend.xhtml#a8aa83abfaa698052fbf74953829a607e">arm_compute::graph::frontend</a>
+, <a class="el" href="namespacearm__compute_1_1graph.xhtml#a911c9bc037aa47a3ed7eefdd005fdada">arm_compute::graph</a>
+, <a class="el" href="namespacearm__compute.xhtml#abd35c1c3fb716078b1f4a25981defac4">arm_compute</a>
 , <a class="el" href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#a2716b652645cadf2a460c1259ccf7235">arm_compute::test::fixed_point_arithmetic::detail</a>
 , <a class="el" href="namespacearm__compute_1_1test_1_1framework.xhtml#a380fb68611f394f4f7525c463a3588dc">arm_compute::test::framework</a>
 , <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#ab6d7586446a24baaa269c5f9a65ecd7f">arm_compute::test::validation</a>
@@ -215,7 +208,7 @@ $(document).ready(function(){initNavTree('namespacemembers_o.xhtml','');});
 <li>operator&gt;&gt;()
 : <a class="el" href="namespacearm__compute.xhtml#a1379e5f8a8b4640d7a52d901f0539ccd">arm_compute</a>
 , <a class="el" href="namespacearm__compute_1_1test_1_1fixed__point__arithmetic_1_1detail.xhtml#a26723c21135a6a96f98a9dc41143044d">arm_compute::test::fixed_point_arithmetic::detail</a>
-, <a class="el" href="namespacearm__compute_1_1test_1_1framework.xhtml#aecd1325e94d00cb3d986e766000b3e38">arm_compute::test::framework</a>
+, <a class="el" href="namespacearm__compute_1_1test_1_1framework.xhtml#a24f9c11e339a0326e95e07e0c97cb405">arm_compute::test::framework</a>
 </li>
 <li>operator|()
 : <a class="el" href="namespacearm__compute_1_1test_1_1framework.xhtml#ab41cdda516d16fb4d7f1217fc93c7814">arm_compute::test::framework</a>
@@ -223,11 +216,14 @@ $(document).ready(function(){initNavTree('namespacemembers_o.xhtml','');});
 <li>operator|=()
 : <a class="el" href="namespacearm__compute_1_1test_1_1framework.xhtml#a59f57ab337b18c6dcd298fdd062fd804">arm_compute::test::framework</a>
 </li>
-<li>outname
-: <a class="el" href="namespacecaffe__data__extractor.xhtml#a9e3448e9350a8c3d5e421ecb1e64ba50">caffe_data_extractor</a>
+<li>optical_flow()
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation_1_1reference.xhtml#a6890d0541805e29cc8cb546ac3ed5239">arm_compute::test::validation::reference</a>
 </li>
 <li>output_data_type
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#aa30f40707893f8201695a2c20e2d8c7d">arm_compute::test::validation</a>
+</li>
+<li>output_info
+: <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a25cae7166733a51d1354f3f395652782">arm_compute::test::validation</a>
 </li>
 <li>output_shape
 : <a class="el" href="namespacearm__compute_1_1test_1_1validation.xhtml#a7fc93f37dac131a1a40b7921f9df3a9a">arm_compute::test::validation</a>
@@ -241,7 +237,7 @@ $(document).ready(function(){initNavTree('namespacemembers_o.xhtml','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Fri Mar 2 2018 12:38:01 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:45 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

@@ -33,6 +33,8 @@ namespace arm_compute
 {
 namespace test
 {
+namespace benchmark
+{
 template <typename ITensorType,
           typename TensorType,
           typename SubTensorType,
@@ -88,6 +90,7 @@ private:
              SoftmaxLayerFunction>
              network{};
 };
+} // namespace benchmark
 } // namespace test
 } // namespace arm_compute
 #endif /* ARM_COMPUTE_TEST_ALEXNETFIXTURE */

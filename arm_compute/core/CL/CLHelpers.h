@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,9 @@
 #ifndef __ARM_COMPUTE_CLHELPERS_H__
 #define __ARM_COMPUTE_CLHELPERS_H__
 
+#include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/CL/OpenCL.h"
+#include "arm_compute/core/GPUTarget.h"
 #include "arm_compute/core/Helpers.h"
 #include "support/ToolchainSupport.h"
 
@@ -33,14 +35,6 @@
 namespace arm_compute
 {
 enum class DataType;
-enum class GPUTarget;
-
-/** Enable operation operations on GPUTarget enumerations */
-template <>
-struct enable_bitwise_ops<arm_compute::GPUTarget>
-{
-    static constexpr bool value = true;
-};
 
 /** Max vector width of an OpenCL vector */
 static constexpr unsigned int max_cl_vector_width = 16;
@@ -69,40 +63,6 @@ std::string get_data_size_from_data_type(const DataType &dt);
  */
 std::string get_underlying_cl_type_from_data_type(const DataType &dt);
 
-/** Translates a given gpu device target to string.
- *
- * @param[in] target Given gpu target.
- *
- * @return The string describing the target.
- */
-const std::string &string_from_target(GPUTarget target);
-
-/** Helper function to create and return a unique_ptr pointed to a CL kernel object
- *  It also calls the kernel's configuration.
- *
- * @param[in] args All the arguments that need pass to kernel's configuration.
- *
- * @return A unique pointer pointed to a CL kernel object
- */
-template <typename Kernel, typename... T>
-std::unique_ptr<Kernel> create_configure_kernel(T &&... args)
-{
-    std::unique_ptr<Kernel> k = arm_compute::support::cpp14::make_unique<Kernel>();
-    k->configure(std::forward<T>(args)...);
-    return k;
-}
-
-/** Helper function to create and return a unique_ptr pointed to a CL kernel object
- *
- * @return A unique pointer pointed to a CL kernel object
- */
-template <typename Kernel>
-std::unique_ptr<Kernel> create_kernel()
-{
-    std::unique_ptr<Kernel> k = arm_compute::support::cpp14::make_unique<Kernel>();
-    return k;
-}
-
 /** Helper function to get the GPU target from CL device
  *
  * @param[in] device A CL device
@@ -111,14 +71,6 @@ std::unique_ptr<Kernel> create_kernel()
  */
 GPUTarget get_target_from_device(cl::Device &device);
 
-/** Helper function to get the GPU arch
- *
- * @param[in] target GPU target
- *
- * @return the GPU target which shows the arch
- */
-GPUTarget get_arch_from_target(GPUTarget target);
-
 /** Helper function to get the highest OpenCL version supported
  *
  * @param[in] device A CL device
@@ -126,19 +78,29 @@ GPUTarget get_arch_from_target(GPUTarget target);
  * @return the highest OpenCL version supported
  */
 CLVersion get_cl_version(const cl::Device &device);
+
+/** Helper function to check whether a given extension is supported
+ *
+ * @param[in] device         A CL device
+ * @param[in] extension_name Name of the extension to be checked
+ *
+ * @return True if the extension is supported
+ */
+bool device_supports_extension(const cl::Device &device, const char *extension_name);
+
 /** Helper function to check whether the cl_khr_fp16 extension is supported
  *
  * @param[in] device A CL device
  *
  * @return True if the extension is supported
  */
-bool fp16_support(const cl::Device &device);
+bool fp16_supported(const cl::Device &device);
 /** Helper function to check whether the arm_non_uniform_work_group_size extension is supported
  *
  * @param[in] device A CL device
  *
  * @return True if the extension is supported
  */
-bool non_uniform_workgroup_support(const cl::Device &device);
+bool arm_non_uniform_workgroup_supported(const cl::Device &device);
 }
 #endif /* __ARM_COMPUTE_CLHELPERS_H__ */

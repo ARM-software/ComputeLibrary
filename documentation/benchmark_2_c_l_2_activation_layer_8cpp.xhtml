@@ -40,7 +40,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Compute Library
-   &#160;<span id="projectnumber">18.03</span>
+   &#160;<span id="projectnumber">18.05</span>
    </div>
   </td>
  </tr>
@@ -126,18 +126,18 @@ $(document).ready(function(){initNavTree('benchmark_2_c_l_2_activation_layer_8cp
 <code>#include &quot;<a class="el" href="_c_l_tensor_allocator_8h_source.xhtml">arm_compute/runtime/CL/CLTensorAllocator.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_activation_layer_8h_source.xhtml">arm_compute/runtime/CL/functions/CLActivationLayer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_c_l_accessor_8h_source.xhtml">tests/CL/CLAccessor.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="benchmark_2fixtures_2_activation_layer_fixture_8h_source.xhtml">tests/benchmark/fixtures/ActivationLayerFixture.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_alex_net_activation_layer_dataset_8h_source.xhtml">tests/datasets/system_tests/alexnet/AlexNetActivationLayerDataset.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_goog_le_net_inception_v1_activation_layer_dataset_8h_source.xhtml">tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1ActivationLayerDataset.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_goog_le_net_inception_v4_activation_layer_dataset_8h_source.xhtml">tests/datasets/system_tests/googlenet/inceptionv4/GoogLeNetInceptionV4ActivationLayerDataset.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_le_net5_activation_layer_dataset_8h_source.xhtml">tests/datasets/system_tests/lenet5/LeNet5ActivationLayerDataset.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_mobile_net_activation_layer_dataset_8h_source.xhtml">tests/datasets/system_tests/mobilenet/MobileNetActivationLayerDataset.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_squeeze_net_activation_layer_dataset_8h_source.xhtml">tests/datasets/system_tests/squeezenet/SqueezeNetActivationLayerDataset.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_v_g_g16_activation_layer_dataset_8h_source.xhtml">tests/datasets/system_tests/vgg/vgg16/VGG16ActivationLayerDataset.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_y_o_l_o_v2_activation_layer_dataset_8h_source.xhtml">tests/datasets/system_tests/yolo/v2/YOLOV2ActivationLayerDataset.h</a>&quot;</code><br />
+<code>#include &quot;tests/benchmark/fixtures/ActivationLayerFixture.h&quot;</code><br />
+<code>#include &quot;tests/datasets/system_tests/alexnet/AlexNetActivationLayerDataset.h&quot;</code><br />
+<code>#include &quot;tests/datasets/system_tests/googlenet/inceptionv1/GoogLeNetInceptionV1ActivationLayerDataset.h&quot;</code><br />
+<code>#include &quot;tests/datasets/system_tests/googlenet/inceptionv4/GoogLeNetInceptionV4ActivationLayerDataset.h&quot;</code><br />
+<code>#include &quot;tests/datasets/system_tests/lenet5/LeNet5ActivationLayerDataset.h&quot;</code><br />
+<code>#include &quot;tests/datasets/system_tests/mobilenet/MobileNetActivationLayerDataset.h&quot;</code><br />
+<code>#include &quot;tests/datasets/system_tests/squeezenet/SqueezeNetActivationLayerDataset.h&quot;</code><br />
+<code>#include &quot;tests/datasets/system_tests/vgg/vgg16/VGG16ActivationLayerDataset.h&quot;</code><br />
+<code>#include &quot;tests/datasets/system_tests/yolo/v2/YOLOV2ActivationLayerDataset.h&quot;</code><br />
 <code>#include &quot;<a class="el" href="tests_2framework_2_macros_8h_source.xhtml">tests/framework/Macros.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_datasets_8h_source.xhtml">tests/framework/datasets/Datasets.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="_type_printer_8h_source.xhtml">utils/TypePrinter.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="utils_2_type_printer_8h_source.xhtml">utils/TypePrinter.h</a>&quot;</code><br />
 </div>
 <p><a href="benchmark_2_c_l_2_activation_layer_8cpp_source.xhtml">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -148,14 +148,16 @@ Namespaces</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:namespacearm__compute_1_1test"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml">arm_compute::test</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:namespacearm__compute_1_1test_1_1_c_l_suite"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1_c_l_suite.xhtml">arm_compute::test::CLSuite</a></td></tr>
+<tr class="memitem:namespacearm__compute_1_1test_1_1benchmark"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml">arm_compute::test::benchmark</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:namespacearm__compute_1_1test_1_1_c_l_suite_1_1_n_i_g_h_t_l_y_suite"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1_c_l_suite_1_1_n_i_g_h_t_l_y_suite.xhtml">arm_compute::test::CLSuite::NIGHTLYSuite</a></td></tr>
+<tr class="memitem:namespacearm__compute_1_1test_1_1benchmark_1_1_c_l_suite"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark_1_1_c_l_suite.xhtml">arm_compute::test::benchmark::CLSuite</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:namespacearm__compute_1_1test_1_1benchmark_1_1_c_l_suite_1_1_n_i_g_h_t_l_y_suite"><td class="memItemLeft" align="right" valign="top"> &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark_1_1_c_l_suite_1_1_n_i_g_h_t_l_y_suite.xhtml">arm_compute::test::benchmark::CLSuite::NIGHTLYSuite</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:a74a10374253178ae54e1baab173698a1"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test.xhtml#a74a10374253178ae54e1baab173698a1">CLActivationLayerFixture</a> = ActivationLayerFixture&lt; CLTensor, CLActivationLayer, CLAccessor &gt;</td></tr>
+<tr class="memitem:a74a10374253178ae54e1baab173698a1"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacearm__compute_1_1test_1_1benchmark.xhtml#a74a10374253178ae54e1baab173698a1">CLActivationLayerFixture</a> = ActivationLayerFixture&lt; CLTensor, CLActivationLayer, CLAccessor &gt;</td></tr>
 <tr class="separator:a74a10374253178ae54e1baab173698a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
@@ -164,7 +166,7 @@ Typedefs</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_59425e443f801f1f2fd8bbe4959a3ccf.xhtml">tests</a></li><li class="navelem"><a class="el" href="dir_4f2df8950dc650bf7cf9176fae02facc.xhtml">benchmark</a></li><li class="navelem"><a class="el" href="dir_4da487531dc5bdc76b523c9e82b781b1.xhtml">CL</a></li><li class="navelem"><a class="el" href="benchmark_2_c_l_2_activation_layer_8cpp.xhtml">ActivationLayer.cpp</a></li>
-    <li class="footer">Generated on Fri Mar 2 2018 12:37:56 for Compute Library by
+    <li class="footer">Generated on Wed May 23 2018 11:36:39 for Compute Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.11 </li>
   </ul>

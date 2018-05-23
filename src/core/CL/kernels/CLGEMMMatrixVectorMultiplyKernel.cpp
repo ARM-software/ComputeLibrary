@@ -34,6 +34,42 @@
 
 using namespace arm_compute;
 
+namespace
+{
+Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input0, input1, output);
+    ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_asymmetric(input0->data_type()) && (output->data_type() != DataType::S32));
+    ARM_COMPUTE_RETURN_ERROR_ON(input0->dimension(2) != input1->dimension(1));
+
+    return Status{};
+}
+
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITensorInfo *input1, ITensorInfo *output)
+{
+    constexpr unsigned int num_elems_read_per_iteration = 4;
+    constexpr unsigned int num_rows_read_per_iteration  = 4;
+
+    const unsigned int border_x = ceil_to_multiple(input0->dimension(0), num_elems_read_per_iteration) - input0->dimension(0);
+    const unsigned int border_y = ceil_to_multiple(input0->dimension(1), num_rows_read_per_iteration) - input0->dimension(1);
+
+    Window win = calculate_max_window(*input0, Steps(num_elems_read_per_iteration));
+
+    AccessWindowRectangle  input0_access(input0, 0, 0, num_elems_read_per_iteration, num_rows_read_per_iteration);
+    AccessWindowHorizontal input1_access(input1, 0, num_elems_read_per_iteration);
+    AccessWindowStatic     output_access(output, 0, 0, output->dimension(0) + border_x, output->dimension(1) + border_y);
+
+    bool window_changed = update_window_and_padding(win, input0_access, input1_access, output_access);
+
+    output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+} // namespace
+
 CLGEMMMatrixVectorMultiplyKernel::CLGEMMMatrixVectorMultiplyKernel()
     : _input0(nullptr), _input1(nullptr), _output(nullptr), _num_rows_read_per_iteration(0), _border_size(0)
 {
@@ -45,11 +81,8 @@ BorderSize CLGEMMMatrixVectorMultiplyKernel::border_size() const
 
 void CLGEMMMatrixVectorMultiplyKernel::configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input0, input1, output);
-    ARM_COMPUTE_ERROR_ON(is_data_type_quantized_asymmetric(input0->info()->data_type()) && (output->info()->data_type() != DataType::S32));
-    ARM_COMPUTE_ERROR_ON(input0->info()->dimension(2) != input1->info()->dimension(1));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input0, input1, output);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(), input1->info(), output->info()));
 
     _input0 = input0;
     _input1 = input1;
@@ -77,8 +110,8 @@ void CLGEMMMatrixVectorMultiplyKernel::configure(const ICLTensor *input0, const 
 
     // Configure the local work size for Bifrost with a value obtained
     // via exhaustive autotuning for the MobileNets tensor shapes.
-    const GPUTarget gpu_target = get_arch_from_target(get_target());
-    if(gpu_target == GPUTarget::BIFROST)
+    const GPUTarget gpu_target = get_target();
+    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX))
     {
         _lws_hint = cl::NDRange(1, 1, 1);
     }
@@ -93,17 +126,17 @@ void CLGEMMMatrixVectorMultiplyKernel::configure(const ICLTensor *input0, const 
 
     _border_size = BorderSize(border_y, border_x);
 
-    Window win = calculate_max_window(*input0->info(), Steps(num_elems_read_per_iteration));
+    auto win_config = validate_and_configure_window(input0->info(), input1->info(), output->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    ICLKernel::configure(win_config.second);
+}
 
-    AccessWindowRectangle  input0_access(input0->info(), 0, 0, num_elems_read_per_iteration, _num_rows_read_per_iteration);
-    AccessWindowHorizontal input1_access(input1->info(), 0, num_elems_read_per_iteration);
-    AccessWindowStatic     output_access(_output->info(), 0, 0, _output->info()->dimension(0) + border_x, _output->info()->dimension(1) + border_y);
+Status CLGEMMMatrixVectorMultiplyKernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input0, input1, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input0->clone().get(), input1->clone().get(), output->clone().get()).first);
 
-    update_window_and_padding(win, input0_access, input1_access, output_access);
-
-    _output->info()->set_valid_region(ValidRegion(Coordinates(), _output->info()->tensor_shape()));
-
-    ICLKernel::configure(win);
+    return Status{};
 }
 
 void CLGEMMMatrixVectorMultiplyKernel::run(const Window &window, cl::CommandQueue &queue)

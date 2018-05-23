@@ -1,6 +1,7 @@
 var dir_b986aa98f9b6490bb4fc7918500346fb =
 [
     [ "functions", "dir_251c63bc3f70b60acf43edd6d870a3ef.xhtml", "dir_251c63bc3f70b60acf43edd6d870a3ef" ],
+    [ "tuners", "dir_50b23570393db6a4ca8647d7d5ff6dbe.xhtml", "dir_50b23570393db6a4ca8647d7d5ff6dbe" ],
     [ "CLArray.h", "_c_l_array_8h.xhtml", "_c_l_array_8h" ],
     [ "CLBufferAllocator.h", "_c_l_buffer_allocator_8h.xhtml", [
       [ "CLBufferAllocator", "classarm__compute_1_1_c_l_buffer_allocator.xhtml", "classarm__compute_1_1_c_l_buffer_allocator" ]
@@ -18,7 +19,17 @@ var dir_b986aa98f9b6490bb4fc7918500346fb =
     [ "CLLutAllocator.h", "_c_l_lut_allocator_8h.xhtml", [
       [ "CLLutAllocator", "classarm__compute_1_1_c_l_lut_allocator.xhtml", "classarm__compute_1_1_c_l_lut_allocator" ]
     ] ],
+    [ "CLMemory.h", "_c_l_memory_8h.xhtml", [
+      [ "CLMemory", "classarm__compute_1_1_c_l_memory.xhtml", "classarm__compute_1_1_c_l_memory" ]
+    ] ],
     [ "CLMemoryGroup.h", "_c_l_memory_group_8h.xhtml", "_c_l_memory_group_8h" ],
+    [ "CLMemoryRegion.h", "_c_l_memory_region_8h.xhtml", [
+      [ "ICLMemoryRegion", "classarm__compute_1_1_i_c_l_memory_region.xhtml", "classarm__compute_1_1_i_c_l_memory_region" ],
+      [ "CLBufferMemoryRegion", "classarm__compute_1_1_c_l_buffer_memory_region.xhtml", "classarm__compute_1_1_c_l_buffer_memory_region" ],
+      [ "ICLSVMMemoryRegion", "classarm__compute_1_1_i_c_l_s_v_m_memory_region.xhtml", null ],
+      [ "CLCoarseSVMMemoryRegion", "classarm__compute_1_1_c_l_coarse_s_v_m_memory_region.xhtml", "classarm__compute_1_1_c_l_coarse_s_v_m_memory_region" ],
+      [ "CLFineSVMMemoryRegion", "classarm__compute_1_1_c_l_fine_s_v_m_memory_region.xhtml", "classarm__compute_1_1_c_l_fine_s_v_m_memory_region" ]
+    ] ],
     [ "CLMultiHOG.h", "_c_l_multi_h_o_g_8h.xhtml", [
       [ "CLMultiHOG", "classarm__compute_1_1_c_l_multi_h_o_g.xhtml", "classarm__compute_1_1_c_l_multi_h_o_g" ]
     ] ],

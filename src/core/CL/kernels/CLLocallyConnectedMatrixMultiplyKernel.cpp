@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,13 +46,44 @@ CLLocallyConnectedMatrixMultiplyKernel::CLLocallyConnectedMatrixMultiplyKernel()
 {
 }
 
+namespace
+{
+Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input0, input1, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1, output);
+    ARM_COMPUTE_RETURN_ERROR_ON(input0->dimension(0) != input1->dimension(1));
+
+    return Status{};
+}
+
+std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITensorInfo *input1, ITensorInfo *output)
+{
+    const unsigned int num_elems_processed_per_iteration_x = max_cl_vector_width / data_size_from_type(input0->data_type());
+
+    Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration_x));
+
+    AccessWindowHorizontal input0_access(input0, 0, num_elems_processed_per_iteration_x);
+    AccessWindowHorizontal input1_access(input1, 0, num_elems_processed_per_iteration_x);
+    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration_x);
+
+    bool window_changed = update_window_and_padding(win, input0_access, input1_access, output_access);
+
+    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+
+    return std::make_tuple(err, win);
+}
+} // namespace
+
 void CLLocallyConnectedMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTensor *input1, ICLTensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1, output);
-    ARM_COMPUTE_ERROR_ON(input0->info()->dimension(0) != input1->info()->dimension(1));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input0, input1, output);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(), input1->info(), output->info()));
 
     _input0 = input0;
     _input1 = input1;
@@ -77,20 +108,20 @@ void CLLocallyConnectedMatrixMultiplyKernel::configure(const ICLTensor *input0, 
     std::string data_type_name = lower_string(string_from_data_type(input0->info()->data_type()));
     _kernel                    = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(("gemm_lc_vm_" + data_type_name), build_opts));
 
-    // Configure window kernel
-    const unsigned int num_elems_processed_per_iteration_x = max_cl_vector_width / data_size_from_type(input0->info()->data_type());
+    // Configure kernel window
+    auto win_config = validate_and_configure_window(input0->info(), input1->info(), output->info());
 
-    Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration_x));
+    ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
-    AccessWindowRectangle input0_access(input0->info(), 0, 0, num_elems_processed_per_iteration_x, 1);
-    AccessWindowRectangle input1_access(input1->info(), 0, 0, num_elems_processed_per_iteration_x, 1);
-    AccessWindowRectangle output_access(output->info(), 0, 0, num_elems_processed_per_iteration_x, 1);
+    ICLKernel::configure(std::get<1>(win_config));
+}
 
-    update_window_and_padding(win, input0_access, input1_access, output_access);
+Status CLLocallyConnectedMatrixMultiplyKernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input0, input1, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(std::get<0>(validate_and_configure_window(input0->clone().get(), input1->clone().get(), output->clone().get())));
 
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
-
-    ICLKernel::configure(win);
+    return Status{};
 }
 
 void CLLocallyConnectedMatrixMultiplyKernel::run(const Window &window, cl::CommandQueue &queue)
