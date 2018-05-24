@@ -25,6 +25,7 @@
 #define ARM_COMPUTE_TEST_TOOLCHAINSUPPORT
 
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <limits>
@@ -42,6 +43,62 @@ namespace support
 {
 namespace cpp11
 {
+enum class NumericBase
+{
+    BASE_10,
+    BASE_16
+};
+
+/** Convert string values to integer.
+ *
+ * @note This function implements the same behaviour as std::stoi. The latter
+ *       is missing in some Android toolchains.
+ *
+ * @param[in] str  String to be converted to int.
+ * @param[in] pos  If idx is not a null pointer, the function sets the value of pos to the position of the first character in str after the number.
+ * @param[in] base Numeric base used to interpret the string.
+ *
+ * @return Integer representation of @p str.
+ */
+inline int stoi(const std::string &str, std::size_t *pos = 0, NumericBase base = NumericBase::BASE_10)
+{
+    assert(base == NumericBase::BASE_10 || base == NumericBase::BASE_16);
+    unsigned int      x;
+    std::stringstream ss;
+    if(base == NumericBase::BASE_16)
+    {
+        ss << std::hex;
+    }
+    ss << str;
+    ss >> x;
+    return x;
+}
+
+/** Convert string values to unsigned long.
+ *
+ * @note This function implements the same behaviour as std::stoul. The latter
+ *       is missing in some Android toolchains.
+ *
+ * @param[in] str  String to be converted to unsigned long.
+ * @param[in] pos  If idx is not a null pointer, the function sets the value of pos to the position of the first character in str after the number.
+ * @param[in] base Numeric base used to interpret the string.
+ *
+ * @return Unsigned long representation of @p str.
+ */
+inline unsigned long stoul(const std::string &str, std::size_t *pos = 0, NumericBase base = NumericBase::BASE_10)
+{
+    assert(base == NumericBase::BASE_10 || base == NumericBase::BASE_16);
+    std::stringstream stream;
+    unsigned long     value = 0;
+    if(base == NumericBase::BASE_16)
+    {
+        stream << std::hex;
+    }
+    stream << str;
+    stream >> value;
+    return value;
+}
+
 #if(__ANDROID__ || BARE_METAL)
 /** Convert integer and float values to string.
  *
@@ -58,50 +115,6 @@ inline std::string to_string(T && value)
     std::stringstream stream;
     stream << std::forward<T>(value);
     return stream.str();
-}
-
-/** Convert string values to integer.
- *
- * @note This function implements the same behaviour as std::stoi. The latter
- *       is missing in some Android toolchains.
- *
- * @param[in] str String to be converted to int.
- *
- * @return Integer representation of @p str.
- */
-inline int stoi(const std::string &str, std::size_t *pos = 0, int base = 10)
-{
-    unsigned int      x;
-    std::stringstream ss;
-    if(base == 16)
-    {
-        ss << std::hex;
-    }
-    ss << str;
-    ss >> x;
-    return x;
-}
-
-/** Convert string values to unsigned long.
- *
- * @note This function implements the same behaviour as std::stoul. The latter
- *       is missing in some Android toolchains.
- *
- * @param[in] str String to be converted to unsigned long.
- *
- * @return Unsigned long representation of @p str.
- */
-inline unsigned long stoul(const std::string &str, std::size_t *pos = 0, int base = 10)
-{
-    std::stringstream stream;
-    unsigned long     value = 0;
-    if(base == 16)
-    {
-        stream << std::hex;
-    }
-    stream << str;
-    stream >> value;
-    return value;
 }
 
 /** Convert string values to float.
@@ -197,36 +210,6 @@ template <typename T>
 inline std::string to_string(T &&value)
 {
     return ::std::to_string(std::forward<T>(value));
-}
-
-/** Convert string values to integer.
- *
- * @note This function acts as a convenience wrapper around std::stoi. The
- *       latter is missing in some Android toolchains.
- *
- * @param[in] args Arguments forwarded to std::stoi.
- *
- * @return Integer representation of input string.
- */
-template <typename... Ts>
-int stoi(Ts &&... args)
-{
-    return ::std::stoi(std::forward<Ts>(args)...);
-}
-
-/** Convert string values to unsigned long.
- *
- * @note This function acts as a convenience wrapper around std::stoul. The
- *       latter is missing in some Android toolchains.
- *
- * @param[in] args Arguments forwarded to std::stoul.
- *
- * @return Unsigned long representation of input string.
- */
-template <typename... Ts>
-int stoul(Ts &&... args)
-{
-    return ::std::stoul(std::forward<Ts>(args)...);
 }
 
 /** Convert string values to float.

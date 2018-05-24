@@ -126,7 +126,7 @@ void populate_models_cpuid(std::vector<PerCPUData> &cpusv)
             std::string line;
             if(bool(getline(file, line)))
             {
-                const unsigned long midr = support::cpp11::stoul(line, nullptr, 16);
+                const unsigned long midr = support::cpp11::stoul(line, nullptr, support::cpp11::NumericBase::BASE_16);
                 c.midr                   = (midr & 0xffffffff);
                 c.model                  = midr_to_model(c.midr);
                 c.model_set              = true;
@@ -160,7 +160,7 @@ void populate_models_cpuinfo(std::vector<PerCPUData> &cpusv)
             if(std::regex_match(line, match, proc_regex))
             {
                 std::string id     = match[1];
-                int         newcpu = support::cpp11::stoi(id, nullptr, 0);
+                int         newcpu = support::cpp11::stoi(id, nullptr);
 
                 if(curcpu >= 0 && midr == 0)
                 {
@@ -183,28 +183,28 @@ void populate_models_cpuinfo(std::vector<PerCPUData> &cpusv)
 
             if(std::regex_match(line, match, imp_regex))
             {
-                int impv = support::cpp11::stoi(match[1], nullptr, 16);
+                int impv = support::cpp11::stoi(match[1], nullptr, support::cpp11::NumericBase::BASE_16);
                 midr |= (impv << 24);
                 continue;
             }
 
             if(std::regex_match(line, match, var_regex))
             {
-                int varv = support::cpp11::stoi(match[1], nullptr, 16);
+                int varv = support::cpp11::stoi(match[1], nullptr, support::cpp11::NumericBase::BASE_16);
                 midr |= (varv << 16);
                 continue;
             }
 
             if(std::regex_match(line, match, part_regex))
             {
-                int partv = support::cpp11::stoi(match[1], nullptr, 16);
+                int partv = support::cpp11::stoi(match[1], nullptr, support::cpp11::NumericBase::BASE_16);
                 midr |= (partv << 4);
                 continue;
             }
 
             if(std::regex_match(line, match, rev_regex))
             {
-                int regv = support::cpp11::stoi(match[1], nullptr, 10);
+                int regv = support::cpp11::stoi(match[1], nullptr);
                 midr |= (regv);
                 midr |= (0xf << 16);
                 continue;
@@ -251,7 +251,7 @@ int get_max_cpus()
 
             line.erase(line.begin(), startfrom);
 
-            max_cpus = support::cpp11::stoi(line, nullptr, 0) + 1;
+            max_cpus = support::cpp11::stoi(line, nullptr) + 1;
             success  = true;
         }
     }
@@ -262,7 +262,6 @@ int get_max_cpus()
         max_cpus = std::thread::hardware_concurrency();
     }
 #endif /* BARE_METAL */
-
     return max_cpus;
 }
 #endif /* !defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__)) */
