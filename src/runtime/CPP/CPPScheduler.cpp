@@ -270,12 +270,12 @@ void CPPScheduler::run_workloads(std::vector<IScheduler::Workload> &workloads)
     }
 }
 
-void CPPScheduler::schedule(ICPPKernel *kernel, unsigned int split_dimension)
+void CPPScheduler::schedule(ICPPKernel *kernel, const Hints &hints)
 {
     ARM_COMPUTE_ERROR_ON_MSG(!kernel, "The child class didn't set the kernel");
 
     const Window      &max_window     = kernel->window();
-    const unsigned int num_iterations = max_window.num_iterations(split_dimension);
+    const unsigned int num_iterations = max_window.num_iterations(hints.split_dimension());
     const unsigned int num_threads    = std::min(num_iterations, _num_threads);
 
     if(num_iterations == 0)
@@ -291,12 +291,29 @@ void CPPScheduler::schedule(ICPPKernel *kernel, unsigned int split_dimension)
     }
     else
     {
-        std::vector<IScheduler::Workload> workloads(num_threads);
-        for(unsigned int t = 0; t < num_threads; t++)
+        unsigned int num_windows = 0;
+        switch(hints.strategy())
         {
-            workloads[t] = [&](const ThreadInfo & info)
+            case StrategyHint::STATIC:
+                num_windows = num_threads;
+                break;
+            case StrategyHint::DYNAMIC:
             {
-                Window win = max_window.split_window(split_dimension, info.thread_id, info.num_threads);
+                // Make sure we don't use some windows which are too small as this might create some contention on the ThreadFeeder
+                const unsigned int max_iterations = static_cast<unsigned int>(_num_threads) * 3;
+                num_windows                       = num_iterations > max_iterations ? max_iterations : num_iterations;
+                break;
+            }
+            default:
+                ARM_COMPUTE_ERROR("Unknown strategy");
+        }
+        std::vector<IScheduler::Workload> workloads(num_windows);
+        for(unsigned int t = 0; t < num_windows; t++)
+        {
+            //Capture 't' by copy, all the other variables by reference:
+            workloads[t] = [t, &hints, &max_window, &num_windows, &kernel](const ThreadInfo & info)
+            {
+                Window win = max_window.split_window(hints.split_dimension(), t, num_windows);
                 win.validate();
                 kernel->run(win, info);
             };

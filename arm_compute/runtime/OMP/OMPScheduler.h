@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,10 +53,10 @@ public:
      * - ICPPKernel::is_parallelisable() returns false
      * - The scheduler has been initialized with only one thread.
      *
-     * @param[in] kernel          Kernel to execute.
-     * @param[in] split_dimension Dimension along which to split the kernel's execution window.
+     * @param[in] kernel Kernel to execute.
+     * @param[in] hints  Hints for the scheduler.
      */
-    void schedule(ICPPKernel *kernel, unsigned int split_dimension) override;
+    void schedule(ICPPKernel *kernel, const Hints &hints) override;
 
 private:
     /** Constructor. */

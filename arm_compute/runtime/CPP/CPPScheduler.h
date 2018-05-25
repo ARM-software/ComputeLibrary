@@ -56,10 +56,10 @@ public:
      * - ICPPKernel::is_parallelisable() returns false
      * - The scheduler has been initialized with only one thread.
      *
-     * @param[in] kernel          Kernel to execute.
-     * @param[in] split_dimension Dimension along which to split the kernel's execution window.
+     * @param[in] kernel Kernel to execute.
+     * @param[in] hints  Hints for the scheduler.
      */
-    void schedule(ICPPKernel *kernel, unsigned int split_dimension) override;
+    void schedule(ICPPKernel *kernel, const Hints &hints) override;
 
     /** Will run the workloads in parallel using num_threads
      *

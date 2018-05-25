@@ -63,10 +63,10 @@ public:
         _prefix = std::move(prefix);
     }
 
-    void schedule(ICPPKernel *kernel, unsigned int split_dimension) override
+    void schedule(ICPPKernel *kernel, const Hints &hints) override
     {
         _timer.start();
-        _real_scheduler.schedule(kernel, split_dimension);
+        _real_scheduler.schedule(kernel, hints.split_dimension());
         _timer.stop();
 
         SchedulerTimer::kernel_info info;

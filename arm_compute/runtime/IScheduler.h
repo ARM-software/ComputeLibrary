@@ -36,6 +36,72 @@ class ICPPKernel;
 class IScheduler
 {
 public:
+    /** Strategies available to split a workload */
+    enum class StrategyHint
+    {
+        STATIC,  /**< Split the workload evenly among the threads */
+        DYNAMIC, /**< Split the workload dynamically using a bucket system */
+    };
+    /** Scheduler hints
+     *
+     * Collection of preferences set by the function regarding how to split a given workload
+     */
+    class Hints
+    {
+    public:
+        /** Constructor
+         *
+         * @param[in] split_dimension Dimension along which to split the kernel's execution window.
+         * @param[in] strategy        (Optional) Split strategy.
+         */
+        Hints(unsigned int split_dimension, StrategyHint strategy = StrategyHint::STATIC)
+            : _split_dimension(split_dimension), _strategy(strategy)
+        {
+        }
+        /** Set the split_dimension hint
+         *
+         * @param[in] split_dimension Dimension along which to split the kernel's execution window.
+         *
+         * @return the Hints object
+         */
+        Hints &set_split_dimension(unsigned int split_dimension)
+        {
+            _split_dimension = split_dimension;
+            return *this;
+        }
+        /** Return the prefered split dimension
+         *
+         * @return The split dimension
+         */
+        unsigned int split_dimension() const
+        {
+            return _split_dimension;
+        }
+
+        /** Set the strategy hint
+         *
+         * @param[in] strategy Prefered strategy to use to split the workload
+         *
+         * @return the Hints object
+         */
+        Hints &set_strategy(StrategyHint strategy)
+        {
+            _strategy = strategy;
+            return *this;
+        }
+        /** Return the prefered strategy to use to split workload.
+         *
+         * @return The strategy
+         */
+        StrategyHint strategy() const
+        {
+            return _strategy;
+        }
+
+    private:
+        unsigned int _split_dimension;
+        StrategyHint _strategy;
+    };
     /** Signature for the workloads to execute */
     using Workload = std::function<void(const ThreadInfo &)>;
     /** Default constructor. */
@@ -58,10 +124,10 @@ public:
 
     /** Runs the kernel in the same thread as the caller synchronously.
      *
-     * @param[in] kernel          Kernel to execute.
-     * @param[in] split_dimension Dimension along which to split the kernel's execution window.
+     * @param[in] kernel Kernel to execute.
+     * @param[in] hints  Hints for the scheduler.
      */
-    virtual void schedule(ICPPKernel *kernel, unsigned int split_dimension) = 0;
+    virtual void schedule(ICPPKernel *kernel, const Hints &hints) = 0;
 
     /** Execute all the passed workloads
      *
