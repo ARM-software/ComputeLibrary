@@ -76,6 +76,19 @@ public:
         _kernels.push_back(std::move(info));
     }
 
+    void run_workloads(std::vector<Workload> &workloads) override
+    {
+        _timer.start();
+        _real_scheduler.run_workloads(workloads);
+        _timer.stop();
+
+        SchedulerTimer::kernel_info info;
+        info.name         = "Unknown";
+        info.prefix       = _prefix;
+        info.measurements = _timer.measurements();
+        _kernels.push_back(std::move(info));
+    }
+
 private:
     std::list<SchedulerTimer::kernel_info> &_kernels;
     IScheduler                             &_real_scheduler;

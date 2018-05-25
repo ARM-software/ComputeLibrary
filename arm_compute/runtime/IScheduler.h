@@ -26,6 +26,8 @@
 
 #include "arm_compute/core/CPP/CPPTypes.h"
 
+#include <functional>
+
 namespace arm_compute
 {
 class ICPPKernel;
@@ -34,6 +36,8 @@ class ICPPKernel;
 class IScheduler
 {
 public:
+    /** Signature for the workloads to execute */
+    using Workload = std::function<void(const ThreadInfo &)>;
     /** Default constructor. */
     IScheduler();
 
@@ -58,6 +62,14 @@ public:
      * @param[in] split_dimension Dimension along which to split the kernel's execution window.
      */
     virtual void schedule(ICPPKernel *kernel, unsigned int split_dimension) = 0;
+
+    /** Execute all the passed workloads
+     *
+     * @note there is no guarantee regarding the order in which the workloads will be executed or whether or not they will be executed in parallel.
+     *
+     * @param[in] workloads Array of workloads to run
+     */
+    virtual void run_workloads(std::vector<Workload> &workloads) = 0;
 
     /** Get CPU info.
      *

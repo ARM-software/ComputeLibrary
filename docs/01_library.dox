@@ -77,11 +77,57 @@ kernel.run( max_window ); // Run the kernel on the full window
 
 The previous section shows how to run a NEON / CPP kernel in the current thread, however if your system has several CPU cores, you will probably want the kernel to use several cores. Here is how this can be done:
 
-@snippet src/runtime/CPP/CPPScheduler.cpp Scheduler example
+@code{.cpp}
+    ThreadInfo info;
+    info.cpu_info = &_cpu_info;
 
-This is the very basic implementation used in the NEON runtime library by all the NEON functions.
+    const Window      &max_window     = kernel->window();
+    const unsigned int num_iterations = max_window.num_iterations(split_dimension);
+    info.num_threads                  = std::min(num_iterations, _num_threads);
 
-@sa CPPScheduler.
+    if(num_iterations == 0)
+    {
+        return;
+    }
+
+    if(!kernel->is_parallelisable() || info.num_threads == 1)
+    {
+        kernel->run(max_window, info);
+    }
+    else
+    {
+        int  t         = 0;
+        auto thread_it = _threads.begin();
+
+        for(; t < info.num_threads - 1; ++t, ++thread_it)
+        {
+            Window win     = max_window.split_window(split_dimension, t, info.num_threads);
+            info.thread_id = t;
+            thread_it->start(kernel, win, info);
+        }
+
+        // Run last part on main thread
+        Window win     = max_window.split_window(split_dimension, t, info.num_threads);
+        info.thread_id = t;
+        kernel->run(win, info);
+
+        try
+        {
+            for(auto &thread : _threads)
+            {
+                thread.wait();
+            }
+        }
+        catch(const std::system_error &e)
+        {
+            std::cerr << "Caught system_error with code " << e.code() << " meaning " << e.what() << '\n';
+        }
+    }
+@endcode
+
+This is a very basic implementation which was originally used in the NEON runtime library by all the NEON functions.
+
+@sa CPPScheduler
 
 @note Some kernels like for example @ref NEHistogramKernel need some local temporary buffer to perform their calculations. In order to avoid memory corruption between threads, the local buffer must be of size: ```memory_needed_per_thread * num_threads``` and a unique thread_id between 0 and num_threads must be assigned to the @ref ThreadInfo object passed to the ```run``` function.
 

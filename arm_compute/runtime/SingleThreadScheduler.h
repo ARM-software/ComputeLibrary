@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,6 +53,12 @@ public:
      * @param[in] split_dimension Dimension along which to split the kernel's execution window.
      */
     void schedule(ICPPKernel *kernel, unsigned int split_dimension) override;
+
+    /** Will run the workloads sequentially and in order.
+     *
+     * @param[in] workloads Workloads to run
+     */
+    void run_workloads(std::vector<Workload> &workloads) override;
 
 private:
     /** Constructor. */

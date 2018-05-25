@@ -49,6 +49,15 @@ void SingleThreadScheduler::schedule(ICPPKernel *kernel, unsigned int split_dime
     kernel->run(kernel->window(), info);
 }
 
+void SingleThreadScheduler::run_workloads(std::vector<Workload> &workloads)
+{
+    ThreadInfo info;
+    info.cpu_info = &_cpu_info;
+    for(auto &wl : workloads)
+    {
+        wl(info);
+    }
+}
 unsigned int SingleThreadScheduler::num_threads() const
 {
     return 1;

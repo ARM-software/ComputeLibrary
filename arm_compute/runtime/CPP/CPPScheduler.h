@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,8 +30,6 @@
 
 namespace arm_compute
 {
-class Thread;
-
 /** C++11 implementation of a pool of threads to automatically split a kernel's execution among several threads. */
 class CPPScheduler : public IScheduler
 {
@@ -63,7 +61,14 @@ public:
      */
     void schedule(ICPPKernel *kernel, unsigned int split_dimension) override;
 
+    /** Will run the workloads in parallel using num_threads
+     *
+     * @param[in] workloads Workloads to run
+     */
+    void run_workloads(std::vector<Workload> &workloads) override;
+
 private:
+    class Thread;
     /** Constructor: create a pool of threads. */
     CPPScheduler();
 
