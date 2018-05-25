@@ -27,12 +27,12 @@
 #include "arm_compute/core/AccessWindowTranspose.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
@@ -46,6 +46,7 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, int mult_transpose1xW_width)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(mult_transpose1xW_width < 1);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::U8, DataType::S8,
                                                          DataType::QS16, DataType::U16, DataType::S16, DataType::U32, DataType::S32,
                                                          DataType::F16, DataType::F32);

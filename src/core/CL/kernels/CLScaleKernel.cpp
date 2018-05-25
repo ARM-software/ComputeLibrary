@@ -26,13 +26,13 @@
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
-#include "arm_compute/core/Validate.h"
 
 #include <set>
 #include <string>
@@ -46,6 +46,7 @@ BorderSize CLScaleKernel::border_size() const
 
 void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, bool border_undefined, SamplingPolicy sampling_policy)
 {
+    ARM_COMPUTE_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);

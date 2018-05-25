@@ -26,6 +26,7 @@
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Error.h"
@@ -44,6 +45,7 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier,
                           const ActivationLayerInfo &act_info)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(act_info.enabled() && ((input->data_type() != DataType::QASYMM8) || ((act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
                                                                                                          && (act_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)

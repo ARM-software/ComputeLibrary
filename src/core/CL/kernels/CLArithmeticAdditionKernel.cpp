@@ -24,6 +24,7 @@
 #include "arm_compute/core/CL/kernels/CLArithmeticAdditionKernel.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 
 using namespace arm_compute;
@@ -35,8 +36,9 @@ constexpr unsigned int num_elems_processed_per_iteration = 16;
 Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, const ITensorInfo &output, ConvertPolicy policy)
 {
     ARM_COMPUTE_UNUSED(policy);
-
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&input1);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QS8, DataType::QS16, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&input2);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::QS8, DataType::QS16, DataType::S16, DataType::F16, DataType::F32);
 
     const TensorShape out_shape = TensorShape::broadcast_shape(input1.tensor_shape(), input2.tensor_shape());
@@ -47,6 +49,7 @@ Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, 
     // Validate in case of configured output
     if(output.total_size() > 0)
     {
+        ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(&output);
         ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&output, 1, DataType::U8, DataType::QS8, DataType::QS16, DataType::S16, DataType::F16, DataType::F32);
         ARM_COMPUTE_RETURN_ERROR_ON_MSG((output.data_type() == DataType::U8) && ((input1.data_type() != DataType::U8) || (input2.data_type() != DataType::U8)),
                                         "Output can only be U8 if both inputs are U8");

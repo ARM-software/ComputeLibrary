@@ -25,12 +25,12 @@
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
 #include "support/ToolchainSupport.h"
@@ -45,6 +45,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output,
                           float epsilon, ActivationLayerInfo act_info)
 {
     ARM_COMPUTE_UNUSED(epsilon);
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mean, var);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, mean, var);

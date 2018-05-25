@@ -26,13 +26,13 @@
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
@@ -58,6 +58,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     DataLayout data_layout = input->data_layout();
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     switch(data_layout)
     {
         case DataLayout::NCHW:

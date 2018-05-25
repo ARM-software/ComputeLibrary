@@ -804,6 +804,43 @@ inline arm_compute::Status error_on_data_type_channel_not_in(const char *functio
 #define ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(t, c, ...) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_data_type_channel_not_in(__func__, __FILE__, __LINE__, t, c, __VA_ARGS__))
 
+/** Return an error if the data type of the passed tensor info is FP16 and FP16 extension is not supported by the device.
+ *
+ * @param[in] function          Function in which the error occurred.
+ * @param[in] file              Name of the file where the error occurred.
+ * @param[in] line              Line on which the error occurred.
+ * @param[in] tensor_info       Tensor info to validate.
+ * @param[in] is_fp16_supported Is fp16 supported by the device.
+ *
+ * @return Status
+ */
+inline arm_compute::Status error_on_unsupported_fp16(const char *function, const char *file, const int line,
+                                                     const ITensorInfo *tensor_info, bool is_fp16_supported)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor_info == nullptr, function, file, line);
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC_MSG((tensor_info->data_type() == DataType::F16 && !is_fp16_supported),
+                                        function, file, line, "FP16 not supported by the device");
+    return arm_compute::Status{};
+}
+
+/** Return an error if the data type of the passed tensor is FP16 and FP16 extension is not supported by the device.
+ *
+ * @param[in] function          Function in which the error occurred.
+ * @param[in] file              Name of the file where the error occurred.
+ * @param[in] line              Line on which the error occurred.
+ * @param[in] tensor            Tensor to validate.
+ * @param[in] is_fp16_supported Is fp16 supported by the device.
+ *
+ * @return Status
+ */
+inline arm_compute::Status error_on_unsupported_fp16(const char *function, const char *file, const int line,
+                                                     const ITensor *tensor, bool is_fp16_supported)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC(tensor == nullptr, function, file, line);
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_unsupported_fp16(function, file, line, tensor->info(), is_fp16_supported));
+    return arm_compute::Status{};
+}
+
 /** Return an error if the tensor is not 2D.
  *
  * @param[in] function Function in which the error occurred.

@@ -26,13 +26,13 @@
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLArray.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
 #include <cmath>
@@ -49,6 +49,7 @@ CLROIPoolingLayerKernel::CLROIPoolingLayerKernel()
 void CLROIPoolingLayerKernel::configure(const ICLTensor *input, const ICLROIArray *rois, ICLTensor *output, const ROIPoolingLayerInfo &pool_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, rois, output);
+    ARM_COMPUTE_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON((pool_info.pooled_width() == 0) || (pool_info.pooled_height() == 0));
     ARM_COMPUTE_ERROR_ON(rois->num_values() == 0);

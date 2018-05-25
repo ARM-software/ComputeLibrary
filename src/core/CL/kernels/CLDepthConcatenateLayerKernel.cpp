@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
@@ -32,7 +33,6 @@
 #include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
-#include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
 #include "support/ToolchainSupport.h"
@@ -61,6 +61,7 @@ void CLDepthConcatenateLayerKernel::configure(const ICLTensor *input, unsigned i
         { 8, { "ulong", 2 } },
     };
 
+    ARM_COMPUTE_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, output);

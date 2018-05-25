@@ -329,6 +329,12 @@ public:
      */
     void add_built_program(const std::string &built_program_name, cl::Program program);
 
+    /** Returns true if FP16 is supported by the CL device
+     *
+     * @return true if the CL device supports FP16
+     */
+    bool fp16_supported() const;
+
 private:
     /** Load program and its dependencies.
      *

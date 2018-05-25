@@ -741,7 +741,7 @@ Kernel CLKernelLibrary::create_kernel(const std::string &kernel_name, const Stri
     }
     std::string concat_str;
 
-    if(fp16_supported(_device))
+    if(fp16_supported())
     {
         concat_str += " -DARM_COMPUTE_OPENCL_FP16_ENABLED=1 ";
     }
@@ -792,6 +792,11 @@ Kernel CLKernelLibrary::create_kernel(const std::string &kernel_name, const Stri
 void CLKernelLibrary::add_built_program(const std::string &built_program_name, cl::Program program)
 {
     _built_programs_map.emplace(built_program_name, program);
+}
+
+bool CLKernelLibrary::fp16_supported() const
+{
+    return ::fp16_supported(_device);
 }
 
 const Program &CLKernelLibrary::load_program(const std::string &program_name) const
