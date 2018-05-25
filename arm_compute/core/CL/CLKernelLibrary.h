@@ -335,6 +335,12 @@ public:
      */
     bool fp16_supported() const;
 
+    /** Returns true if int64_base_atomics extension is supported by the CL device
+     *
+     * @return true if the CL device supports int64_base_atomics extension
+     */
+    bool int64_base_atomics_supported() const;
+
 private:
     /** Load program and its dependencies.
      *

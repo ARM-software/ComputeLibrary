@@ -34,5 +34,28 @@ namespace arm_compute
 #define ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(tensor) \
     ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_unsupported_fp16(__func__, __FILE__, __LINE__, tensor, CLKernelLibrary::get().fp16_supported()))
 
+/** Return an error if int64_base_atomics extension is not supported by the device.
+ *
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ *
+ * @return Status
+ */
+inline arm_compute::Status error_on_unsupported_int64_base_atomics(const char *function, const char *file, const int line)
+{
+    if(!CLKernelLibrary::get().int64_base_atomics_supported())
+    {
+        return ARM_COMPUTE_CREATE_ERROR_LOC(arm_compute::ErrorCode::UNSUPPORTED_EXTENSION_USE, function, file, line, "Atomic functions are not supported");
+    }
+    return arm_compute::Status{};
+}
+
+#define ARM_COMPUTE_ERROR_ON_INT64_BASE_ATOMICS_UNSUPPORTED() \
+    ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_unsupported_int64_base_atomics(__func__, __FILE__, __LINE__));
+
+#define ARM_COMPUTE_RETURN_ERROR_ON_INT64_BASE_ATOMICS_UNSUPPORTED() \
+    ARM_COMPUTE_RETURN_ON_ERROR(::arm_compute::error_on_unsupported_int64_base_atomics(__func__, __FILE__, __LINE__));
+
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CL_VALIDATE_H__ */

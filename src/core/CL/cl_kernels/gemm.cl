@@ -2499,6 +2499,7 @@ __kernel void gemm_ma_f32(IMAGE_DECLARATION(src),
     vstore4(out, 0, (__global float *)dst.ptr);
 }
 
+#if defined(ARM_COMPUTE_OPENCL_FP16_ENABLED)
 /** This OpenCL kernel performs the in-place matrix addition between 2 matrices taking into account that the second matrix might be weighted by a scalar value beta:
  *
  * @note The beta's value need to be passed at compile time using -DBETA
@@ -2535,6 +2536,7 @@ __kernel void gemm_ma_f16(IMAGE_DECLARATION(src),
     // Store final result in axb matrix
     vstore8(out, 0, (__global half *)dst.ptr);
 }
+#endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED)
 
 #if defined(FIXED_POINT_POSITION)
 /** This OpenCL kernel performs the in-place matrix addition between 2 matrices in 8 bit fixed point taking into account that the second matrix might be weighted by a scalar value beta:

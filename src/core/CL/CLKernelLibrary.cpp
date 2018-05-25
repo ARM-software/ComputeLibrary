@@ -799,6 +799,11 @@ bool CLKernelLibrary::fp16_supported() const
     return ::fp16_supported(_device);
 }
 
+bool CLKernelLibrary::int64_base_atomics_supported() const
+{
+    return device_supports_extension(_device, "cl_khr_int64_base_atomics");
+}
+
 const Program &CLKernelLibrary::load_program(const std::string &program_name) const
 {
     const auto program_it = _programs_map.find(program_name);

@@ -43,8 +43,9 @@ inline void ignore_unused(T &&...)
 /** Available error codes */
 enum class ErrorCode
 {
-    OK,           /**< No error */
-    RUNTIME_ERROR /**< Generic runtime error */
+    OK,                       /**< No error */
+    RUNTIME_ERROR,            /**< Generic runtime error */
+    UNSUPPORTED_EXTENSION_USE /**< Unsupported extension used*/
 };
 
 /** Status class */
