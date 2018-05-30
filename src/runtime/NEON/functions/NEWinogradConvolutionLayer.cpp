@@ -60,8 +60,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     ARM_COMPUTE_UNUSED(output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
-    ARM_COMPUTE_RETURN_ERROR_ON(data_layout != DataLayout::NCHW); // COMPMID-1162
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(width_idx) != 3 && weights->dimension(height_idx) != 5, "Only 3 and 5 kernels are supported");
+    ARM_COMPUTE_RETURN_ERROR_ON(data_layout != DataLayout::NCHW); // COMPMID-1287
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.stride().first != 1 || conv_info.stride().second != 1, "Winograd layer only supports unit strides.");
@@ -107,6 +107,7 @@ bool check_support_fast_math(const Size2D &output_tile, const Size2D &kernel_siz
 
     return std::find(fast_math_winograd.begin(), fast_math_winograd.end(), p) != fast_math_winograd.end();
 }
+
 } //namespace
 
 NEWinogradConvolutionLayer::NEWinogradConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
@@ -218,33 +219,60 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     _output_nhwc.allocator()->init(info);
     _output_nhwc.allocator()->allocate();
 
-    // Re-order a weight tensor from [Output feature map x Input feature map x Height x Width] to [Height x Width x Input feature map x Output feature map]
-    _permute_weights.configure(weights, &_weights_hwio, PermutationVector(3U, 2U, 0U, 1U));
-    _weights_hwio.allocator()->allocate();
-
-    // configure the kernel to transform the input tensor from NCHW -> NHWC
-    _permute_input.configure(input, &_input_nhwc, PermutationVector(2U, 0U, 1U));
-    _input_nhwc.allocator()->allocate();
-
     const KernelShape kernel_shape({ out_channels, static_cast<int>(kernel_size.height), static_cast<int>(kernel_size.width), in_channels });
 
     // Configure the InputTransform
     const int input_matrix_stride = transform_input_kernel->get_matrix_stride(kernel_shape, in_shape, use_padding_type);
-    transform_input_kernel->configure(reinterpret_cast<float *>(_input_nhwc.buffer()), in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, in_shape.n_channels, use_padding_type,
-                                      reinterpret_cast<float *>(_input_workspace.buffer()), input_matrix_stride);
+
+    if(data_layout == DataLayout::NCHW)
+    {
+        // configure the kernel to transform the input tensor from NCHW -> NHWC
+        _permute_input.configure(input, &_input_nhwc, PermutationVector(2U, 0U, 1U));
+        _input_nhwc.allocator()->allocate();
+        transform_input_kernel->configure(&_input_nhwc, in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, in_shape.n_channels, use_padding_type,
+                                          reinterpret_cast<float *>(_input_workspace.buffer()), input_matrix_stride);
+    }
+    else
+    {
+        transform_input_kernel->configure(_input, in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, in_shape.n_channels, use_padding_type,
+                                          reinterpret_cast<float *>(_input_workspace.buffer()), input_matrix_stride);
+    }
 
     // Configure WeightsTransform
     const int kernel_matrix_stride = transform_weights_kernel->get_matrix_stride(kernel_shape);
-    transform_weights_kernel->configure(&_weights_hwio, reinterpret_cast<float *>(_kernel_storage.buffer()), kernel_matrix_stride, out_channels, in_channels);
+    if(data_layout == DataLayout::NCHW)
+    {
+        // Re-order a weight tensor from [Output feature map x Input feature map x Height x Width] to [Height x Width x Input feature map x Output feature map]
+        _permute_weights.configure(weights, &_weights_hwio, PermutationVector(3U, 2U, 0U, 1U));
+
+        transform_weights_kernel->configure(&_weights_hwio, reinterpret_cast<float *>(_kernel_storage.buffer()), kernel_matrix_stride, out_channels, in_channels);
+    }
+    else
+    {
+        // Re-order a weight tensor from [Output feature map x Input feature map x Height x Width] to [Height x Width x Input feature map x Output feature map]
+        _permute_weights.configure(weights, &_weights_hwio, PermutationVector(3U, 0U, 1U, 2U));
+
+        transform_weights_kernel->configure(&_weights_hwio, reinterpret_cast<float *>(_kernel_storage.buffer()), kernel_matrix_stride, out_channels, in_channels);
+    }
+    _weights_hwio.allocator()->allocate();
 
     // Configure OutputTransform
     //The biases tensor has not been allocated at this point in time, the output transform will add the biases to the final result in the run() method
     const int  output_matrix_stride = transform_output_kernel->get_matrix_stride(kernel_shape, in_shape, use_padding_type);
     const auto output_shape(transform_output_kernel->get_output_shape(kernel_shape, in_shape, use_padding_type));
 
-    transform_output_kernel->configure(biases, reinterpret_cast<float *>(_output_workspace.buffer()),
-                                       output_matrix_stride, reinterpret_cast<float *>(_output_nhwc.buffer()),
-                                       in_shape.n_batches, output_shape.n_rows, output_shape.n_cols, out_channels);
+    if(data_layout == DataLayout::NCHW)
+    {
+        transform_output_kernel->configure(biases, reinterpret_cast<float *>(_output_workspace.buffer()),
+                                           output_matrix_stride, &_output_nhwc,
+                                           in_shape.n_batches, output_shape.n_rows, output_shape.n_cols, out_channels);
+    }
+    else
+    {
+        transform_output_kernel->configure(biases, reinterpret_cast<float *>(_output_workspace.buffer()),
+                                           output_matrix_stride, _output,
+                                           in_shape.n_batches, output_shape.n_rows, output_shape.n_cols, out_channels);
+    }
 
     // Configure GEMM
     const int    tile_rows                = iceildiv(output_shape.n_rows, output_tile.height);
@@ -293,14 +321,16 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
 
     //Configure Activation Layer
     _is_activationlayer_enabled = act_info.enabled();
-    if(_is_activationlayer_enabled)
+    if(data_layout == DataLayout::NCHW && _is_activationlayer_enabled)
     {
-        _activationlayer_function.configure(output, nullptr, act_info);
+        _activationlayer_function.configure(_output, nullptr, act_info);
     }
 }
 
 void NEWinogradConvolutionLayer::run()
 {
+    const DataLayout data_layout = _input->info()->data_layout();
+
     _memory_group.acquire();
     if(!_reshaped_kernel)
     {
@@ -308,9 +338,12 @@ void NEWinogradConvolutionLayer::run()
         _permute_weights.run();
         NEScheduler::get().schedule(_transform_weights_kernel.get(), Window::DimX);
     }
-    //Bring channels to the front as Winograd code expects the tensor to be in the format NHWC
-    _permute_input.run();
 
+    if(data_layout == DataLayout::NCHW)
+    {
+        //Bring channels to the front as Winograd code expects the tensor to be in the format NHWC
+        _permute_input.run();
+    }
     // Transform input tensor to the winograd domain
     NEScheduler::get().schedule(_transform_input_kernel.get(), Window::DimX);
 
@@ -320,8 +353,11 @@ void NEWinogradConvolutionLayer::run()
     // Transform output tensor to the spatial domain
     NEScheduler::get().schedule(_transform_output_kernel.get(), Window::DimX);
 
-    // Reorder the convoluted output to ACL's ordering NCHW
-    _permute_output.run();
+    if(data_layout == DataLayout::NCHW)
+    {
+        // Reorder the convoluted output to ACL's ordering NCHW
+        _permute_output.run();
+    }
 
     if(_is_activationlayer_enabled)
     {

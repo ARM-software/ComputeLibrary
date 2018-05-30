@@ -55,7 +55,8 @@ class WinogradConvolutionLayerValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, DataType data_type, ActivationLayerInfo act_info)
+    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation,
+               DataType data_type, ActivationLayerInfo act_info)
     {
         ARM_COMPUTE_UNUSED(dilation);
 
@@ -84,7 +85,7 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, const PadStrideInfo &info,
+    TensorType compute_target(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, const PadStrideInfo &info,
                               DataType data_type, ActivationLayerInfo act_info)
     {
         // Create tensors
