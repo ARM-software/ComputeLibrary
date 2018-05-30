@@ -53,6 +53,7 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
 
     _input  = input;
     _output = output;
+    _interpolationPolicy = policy;
 
     // Compute the ratio between source width/height and destination width/height
     const auto wr = static_cast<float>(input->info()->dimension(0)) / static_cast<float>(output->info()->dimension(0));
