@@ -71,7 +71,7 @@ public:
     InterpolationPolicy interpolationPolicy() const { return _interpolationPolicy; }
 
 private:
-    InterpolationPolicy _interpolationPolicy;
+    InterpolationPolicy _interpolationPolicy = InterpolationPolicy::BILINEAR;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLSCALEKERNEL_H__ */
