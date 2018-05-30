@@ -133,13 +133,13 @@ void tune_scale_kernel(CLScaleKernel& k)
 {
     cl::NDRange lws_hint = k.lws_hint();
 
-    const GPUTarget   gpu_target         = k.get_target();
-    const DataType    dt                 = k.input()->info()->data_type();
-    const std::string interpolation_name = string_from_interpolation_policy(k.interpolationPolicy());
+    const GPUTarget           gpu_target    = k.get_target();
+    const DataType            dt            = k.input()->info()->data_type();
+    const InterpolationPolicy interpolation = k.interpolationPolicy();
 
-    // Configure the local work size for Bifrost, interpolation name (bilinear) and datatype F32.
+    // Configure the local work size for Bifrost, interpolation (bilinear) and datatype F32.
     // The value are obtained via exhaustive autotuning.
-    if(gpu_target_is_in(gpu_target, GPUTarget::BIFROST) && (dt == DataType::F32) && (interpolation_name == "bilinear"))
+    if(gpu_target_is_in(gpu_target, GPUTarget::BIFROST) && (dt == DataType::F32) && (interpolation == InterpolationPolicy::BILINEAR))
     {
         auto dim_0 = k.output()->info()->dimension(0);
         if(dim_0 == 480)
