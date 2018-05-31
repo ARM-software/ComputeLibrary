@@ -77,6 +77,24 @@ void weights_reshape(const ITensor *input, const ITensor *bias, ITensor *output,
     },
     in, out);
 }
+
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *biases)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_asymmetric(input->data_type()) && (biases != nullptr));
+    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(2) != output->dimension(1));
+    ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(0) != (input->dimension(0) * input->dimension(1) + ((biases != nullptr) ? 1 : 0)));
+
+    if(biases != nullptr)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
+        ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != input->dimension(2));
+        ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
+    }
+
+    return Status{};
+}
 } // namespace
 
 NEDepthwiseWeightsReshapeKernel::NEDepthwiseWeightsReshapeKernel()
@@ -86,18 +104,9 @@ NEDepthwiseWeightsReshapeKernel::NEDepthwiseWeightsReshapeKernel()
 
 void NEDepthwiseWeightsReshapeKernel::configure(const ITensor *input, ITensor *output, const ITensor *biases)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON(is_data_type_quantized_asymmetric(input->info()->data_type()) && (biases != nullptr));
-    ARM_COMPUTE_ERROR_ON(input->info()->dimension(2) != output->info()->dimension(1));
-    ARM_COMPUTE_ERROR_ON(output->info()->dimension(0) != (input->info()->dimension(0) * input->info()->dimension(1) + ((biases != nullptr) ? 1 : 0)));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
-    if(biases != nullptr)
-    {
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
-        ARM_COMPUTE_ERROR_ON(biases->info()->dimension(0) != input->info()->dimension(2));
-        ARM_COMPUTE_ERROR_ON(biases->info()->num_dimensions() > 1);
-    }
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), (biases != nullptr) ? biases->info() : nullptr));
 
     _input  = input;
     _output = output;
@@ -133,6 +142,13 @@ void NEDepthwiseWeightsReshapeKernel::configure(const ITensor *input, ITensor *o
     output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
     INEKernel::configure(win);
+}
+
+Status NEDepthwiseWeightsReshapeKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *biases)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, biases));
+    return Status{};
 }
 
 void NEDepthwiseWeightsReshapeKernel::run(const Window &window, const ThreadInfo &info)

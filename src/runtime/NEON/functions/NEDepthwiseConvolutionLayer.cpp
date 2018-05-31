@@ -123,6 +123,16 @@ void NEDepthwiseConvolutionLayer3x3::configure(ITensor *input, const ITensor *we
     }
 }
 
+Status NEDepthwiseConvolutionLayer3x3::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
+                                                unsigned int depth_multiplier)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
+    ARM_COMPUTE_UNUSED(biases);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() != DataLayout::NCHW && input->data_layout() != DataLayout::NHWC);
+
+    return NEDepthwiseConvolutionLayer3x3Kernel::validate(input, weights, output, conv_info, depth_multiplier);
+}
+
 void NEDepthwiseConvolutionLayer3x3::run()
 {
     if(_is_first_run && _is_optimized)
@@ -261,6 +271,58 @@ void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weigh
     // Allocate intermediate tensors
     _input_reshaped.allocator()->allocate();
     _v2mm_output.allocator()->allocate();
+}
+
+Status NEDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
+                                             unsigned int depth_multiplier)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() != DataLayout::NCHW && input->data_layout() != DataLayout::NHWC);
+
+    const bool         is_quantized = is_data_type_quantized_asymmetric(input->data_type());
+    const bool         append_bias  = (biases != nullptr) && !is_quantized;
+    const TensorShape  output_shape = shape_calculator::compute_depthwise_convolution_shape(*input, *weights, conv_info, depth_multiplier);
+    const size_t       weights_w    = weights->dimension(0);
+    const size_t       weights_h    = weights->dimension(1);
+    const size_t       weights_z    = weights->dimension(2);
+    const unsigned int conv_w       = output_shape.x();
+    const unsigned int conv_h       = output_shape.y();
+    const size_t       patch_size   = weights_w * weights_h + (append_bias ? 1 : 0);
+    const size_t       conv_size    = conv_w * conv_h;
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
+
+    // Im2Col configuration
+    TensorShape shape_im2col = input->tensor_shape();
+    shape_im2col.set(0, patch_size);
+    shape_im2col.set(1, conv_size);
+    shape_im2col.set(2, weights_z);
+    TensorInfo input_reshaped(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_im2col));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEDepthwiseIm2ColKernel::validate(input, &input_reshaped, Size2D(weights_w, weights_h), conv_info, append_bias, depth_multiplier));
+
+    // Weights reshape configuration
+    const TensorShape shape_weights_reshape(patch_size, weights_z);
+    TensorInfo        weights_reshaped(weights->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_weights_reshape));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEDepthwiseWeightsReshapeKernel::validate(weights, &weights_reshaped, append_bias ? biases : nullptr));
+
+    // GEMV configuration
+    DataType    v2mm_dt        = (input->data_type() == DataType::QASYMM8) ? DataType::S32 : input->data_type();
+    TensorShape shape_v2mm_out = input->tensor_shape();
+    shape_v2mm_out.set(0, conv_size * weights_z);
+    shape_v2mm_out.set(1, 1);
+    shape_v2mm_out.set(2, 1);
+    TensorInfo v2mm_output(input->clone()->set_is_resizable(true).reset_padding().set_data_type(v2mm_dt).set_tensor_shape(shape_v2mm_out));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMMatrixVectorMultiplyKernel::validate(&input_reshaped, &weights_reshaped, &v2mm_output));
+
+    TensorInfo output_reshaped(v2mm_output.clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEDepthwiseVectorToTensorKernel::validate(&v2mm_output, (is_quantized) ? &output_reshaped : output, conv_w, conv_h));
+
+    if(is_quantized)
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR(NEDirectConvolutionLayerOutputStageKernel::validate(&output_reshaped, biases, output));
+    }
+
+    return Status{};
 }
 
 void NEDepthwiseConvolutionLayer::run()

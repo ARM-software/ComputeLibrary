@@ -54,56 +54,139 @@ const auto depth_multipliers = framework::dataset::make("DepthMultiplier", { 1, 
 TEST_SUITE(NEON)
 TEST_SUITE(DepthwiseConvLayer)
 
-DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
-                                                                                                      datasets::LargeDepthwiseConvolutionLayerDataset3x3()),
-                                                                           depth_multipliers),
-                                                                   framework::dataset::make("DataType", DataType::F32)),
-               input_shape, kernel_size, info, depth_multiplier, data_type)
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate3x3, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
+               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(32U, 18U, 2U), 1, DataType::F32),     // Mismatching data type input/weights
+                                                       TensorInfo(TensorShape(32U, 18U, 3U), 1, DataType::F32),     // Mismatching input feature maps
+                                                       TensorInfo(TensorShape(32U, 18U, 2U), 1, DataType::F32),     // Unsupported weights dimensions
+                                                       TensorInfo(TensorShape(32U, 18U, 2U), 1, DataType::F32),     // Mismatching depth multiplier
+                                                       TensorInfo(TensorShape(32U, 18U, 2U), 1, DataType::F32),     // Invalid stride
+                                                       TensorInfo(TensorShape(32U, 18U, 2U), 1, DataType::F32),     // Invalid biases size
+                                                       TensorInfo(TensorShape(32U, 18U, 2U), 1, DataType::F32),     // Invalid biases dimensions
+                                                       TensorInfo(TensorShape(32U, 18U, 2U), 1, DataType::F32),     // Invalid output size
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Window shrink
+                                                     }),
+               framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(3U, 3U, 2U), 1, DataType::F16),
+                                                         TensorInfo(TensorShape(3U, 3U, 2U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(5U, 5U, 2U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(3U, 3U, 2U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(3U, 3U, 2U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(3U, 3U, 2U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(3U, 3U, 2U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(3U, 3U, 2U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(3U, 3U, 2U), 1, DataType::F32),
+                                                       })),
+               framework::dataset::make("BiasesInfo", { TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(4U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(2U, 2U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                      })),
+               framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(30U, 16U, 2U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(30U, 16U, 2U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(30U, 16U, 2U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(30U, 16U, 2U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(30U, 16U, 2U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(30U, 16U, 2U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(30U, 16U, 2U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(32U, 18U, 2U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32),
+                                                      })),
+               framework::dataset::make("ConvInfo", { PadStrideInfo(1, 1, 0, 0),
+                                                      PadStrideInfo(1, 1, 0, 0),
+                                                      PadStrideInfo(1, 1, 0, 0),
+                                                      PadStrideInfo(1, 1, 0, 0),
+                                                      PadStrideInfo(4, 1, 0, 0),
+                                                      PadStrideInfo(1, 1, 0, 0),
+                                                      PadStrideInfo(1, 1, 0, 0),
+                                                      PadStrideInfo(1, 1, 0, 0),
+                                                      PadStrideInfo(1, 1, 0, 0),
+                                                     })),
+               framework::dataset::make("DepthMultiplier", { 1,
+                                                             1,
+                                                             1,
+                                                             3,
+                                                             1,
+                                                             1,
+                                                             1,
+                                                             1,
+                                                             1,
+                                                            })),
+               framework::dataset::make("Expected", { false, false, false, false, false, false, false, false, false })),
+               input_info, weights_info, biases_info, output_info, conv_info, depth_multiplier, expected)
 {
-    // Get shapes
-    TensorShape weights_shape(kernel_size.width, kernel_size.height);
-
-    const TensorInfo  in_info(input_shape, 1, data_type);
-    const TensorInfo  we_info(weights_shape, 1, data_type);
-    const TensorShape output_shape = compute_depthwise_convolution_shape(in_info, we_info, info, depth_multiplier);
-
-    weights_shape.set(2, output_shape.z());
-
-    // Create tensors
-    Tensor            src     = create_tensor<Tensor>(input_shape, data_type);
-    Tensor            dst     = create_tensor<Tensor>(output_shape, data_type);
-    Tensor            weights = create_tensor<Tensor>(weights_shape, data_type);
-    const TensorShape bias_shape(weights_shape[2]);
-    Tensor            bias = create_tensor<Tensor>(bias_shape, data_type);
-
-    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
-    ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
-
-    // Create and configure function
-    NEDepthwiseConvolutionLayer3x3 depthwise_layer;
-    depthwise_layer.configure(&src, &weights, &bias, &dst, info, depth_multiplier);
-
-    // Validate valid region
-    const ValidRegion input_valid_region   = shape_to_valid_region(input_shape);
-    const ValidRegion output_valid_region  = shape_to_valid_region(output_shape);
-    const ValidRegion weights_valid_region = shape_to_valid_region(weights_shape);
-    const ValidRegion bias_valid_region    = shape_to_valid_region(bias_shape);
-
-    validate(src.info()->valid_region(), input_valid_region);
-    validate(dst.info()->valid_region(), output_valid_region);
-    validate(weights.info()->valid_region(), weights_valid_region);
-    validate(bias.info()->valid_region(), bias_valid_region);
-
-    // Validate padding
-    bool              is_optimized_run = NEDepthwiseConvolutionLayer3x3Kernel::is_optimized_execution_possible(input_shape, info, data_type, depth_multiplier, DataLayout::NCHW);
-    const int         step_non_opt_dwc = 16 >> info.stride().first;
-    const int         step_bias_add    = 16 / src.info()->element_size();
-    const int         step             = is_optimized_run ? step_bias_add : std::max(step_non_opt_dwc, step_bias_add);
-    const PaddingSize padding          = PaddingCalculator(output_shape.x(), step).required_padding();
-    validate(dst.info()->padding(), padding);
+    bool is_valid = bool(NEDepthwiseConvolutionLayer3x3::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &biases_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), conv_info, depth_multiplier));
+    ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
+
+DATA_TEST_CASE(ValidateGeneric, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
+                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),    // Mismatching data type input/weights
+                                                        TensorInfo(TensorShape(27U, 13U, 3U), 1, DataType::F32),    // Mismatching input feature maps
+                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),    // Mismatching depth multiplier
+                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),    // Invalid biases size
+                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),    // Invalid biases dimensions
+                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),    // Invalid output size
+                                                        TensorInfo(TensorShape(27U, 13U, 8U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(32U, 13U, 8U), 1, DataType::QASYMM8),
+                                                      }),
+                framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(3U, 3U, 2U), 1, DataType::F16),
+                                                          TensorInfo(TensorShape(3U, 3U, 2U), 1, DataType::F32),
+                                                          TensorInfo(TensorShape(3U, 3U, 2U), 1, DataType::F32),
+                                                          TensorInfo(TensorShape(3U, 3U, 2U), 1, DataType::F32),
+                                                          TensorInfo(TensorShape(3U, 3U, 2U), 1, DataType::F32),
+                                                          TensorInfo(TensorShape(3U, 3U, 2U), 1, DataType::F32),
+                                                          TensorInfo(TensorShape(3U, 3U, 16U), 1, DataType::F32),
+                                                          TensorInfo(TensorShape(3U, 3U, 24U), 1, DataType::QASYMM8),
+                                                        })),
+                framework::dataset::make("BiasesInfo", { TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(4U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(2U, 2U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(16U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(24U), 1, DataType::S32),
+                                                       })),
+                framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(25U, 11U, 16U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(32U, 11U, 24U), 1, DataType::QASYMM8),
+                                                       })),
+                framework::dataset::make("ConvInfo", { PadStrideInfo(1, 1, 0, 0),
+                                                       PadStrideInfo(1, 1, 0, 0),
+                                                       PadStrideInfo(1, 1, 0, 0),
+                                                       PadStrideInfo(1, 1, 0, 0),
+                                                       PadStrideInfo(1, 1, 0, 0),
+                                                       PadStrideInfo(1, 1, 0, 0),
+                                                       PadStrideInfo(1, 1, 0, 0),
+                                                       PadStrideInfo(1, 1, 1, 0),
+                                                      })),
+                framework::dataset::make("DepthMultiplier", { 1,
+                                                              1,
+                                                              3,
+                                                              1,
+                                                              1,
+                                                              1,
+                                                              2,
+                                                              3,
+                                                             })),
+                framework::dataset::make("Expected", { false, false, false, false, false, false, true, true })),
+                input_info, weights_info, biases_info, output_info, conv_info, depth_multiplier, expected)
+{
+    bool is_valid = bool(NEDepthwiseConvolutionLayer::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &biases_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), conv_info, depth_multiplier));
+    ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
 
 TEST_SUITE(Float)
 TEST_SUITE(F32)

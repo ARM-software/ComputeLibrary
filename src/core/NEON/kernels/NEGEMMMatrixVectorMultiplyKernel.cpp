@@ -39,6 +39,43 @@
 
 using namespace arm_compute;
 
+namespace
+{
+Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::QASYMM8, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_NOT_IN(output, DataType::S32, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1);
+    ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_asymmetric(input0->data_type()) && (output->data_type() != DataType::S32));
+    ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_float(input0->data_type()) && (output->data_type() != DataType::F32));
+
+    ARM_COMPUTE_RETURN_ERROR_ON(input0->num_dimensions() == input1->num_dimensions());
+    ARM_COMPUTE_RETURN_ERROR_ON(input0->dimension(2) != input1->dimension(1));
+    ARM_COMPUTE_RETURN_ERROR_ON(input0->dimension(DataLayoutDimension::HEIGHT) != output->dimension(DataLayoutDimension::HEIGHT));
+    ARM_COMPUTE_RETURN_ERROR_ON(input1->dimension(DataLayoutDimension::WIDTH) != output->dimension(DataLayoutDimension::WIDTH));
+
+    return Status{};
+}
+
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input0, ITensorInfo *input1, ITensorInfo *output)
+{
+    const unsigned int num_elems_read_per_iteration = 16 / input0->element_size();
+
+    Window win = calculate_max_window(*input0, Steps(num_elems_read_per_iteration));
+
+    AccessWindowHorizontal input0_access(input0, 0, num_elems_read_per_iteration);
+    AccessWindowHorizontal input1_access(input1, 0, num_elems_read_per_iteration);
+    AccessWindowStatic     output_access(output, 0, 0, output->dimension(0), output->dimension(1));
+
+    bool window_changed = update_window_and_padding(win, input0_access, input1_access, output_access);
+
+    output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+} // namespace
+
 template <typename I0, typename I1, typename O>
 void NEGEMMMatrixVectorMultiplyKernel::matrix_vector_multiply(const Window &window_in, const Window &window_w, const Window &window_out)
 {
@@ -175,10 +212,9 @@ BorderSize NEGEMMMatrixVectorMultiplyKernel::border_size() const
 
 void NEGEMMMatrixVectorMultiplyKernel::configure(const ITensor *input0, const ITensor *input1, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::QASYMM8, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1);
-    ARM_COMPUTE_ERROR_ON(is_data_type_quantized_asymmetric(input0->info()->data_type()) && (output->info()->data_type() != DataType::S32));
-    ARM_COMPUTE_ERROR_ON(input0->info()->dimension(2) != input1->info()->dimension(1));
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input0, input1, output);
+
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(), input1->info(), output->info()));
 
     _input0 = input0;
     _input1 = input1;
@@ -203,17 +239,17 @@ void NEGEMMMatrixVectorMultiplyKernel::configure(const ITensor *input0, const IT
     const unsigned int border_x = ceil_to_multiple(input0->info()->dimension(0), num_elems_read_per_iteration) - input0->info()->dimension(0);
     _border_size                = BorderSize(0, border_x);
 
-    Window win = calculate_max_window(*input0->info(), Steps(num_elems_read_per_iteration));
+    auto win_config = validate_and_configure_window(input0->info(), input1->info(), output->info());
+    ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
+    INEKernel::configure(win_config.second);
+}
 
-    AccessWindowHorizontal input0_access(input0->info(), 0, num_elems_read_per_iteration);
-    AccessWindowHorizontal input1_access(input1->info(), 0, num_elems_read_per_iteration);
-    AccessWindowStatic     output_access(output->info(), 0, 0, output->info()->dimension(0), output->info()->dimension(1));
-
-    update_window_and_padding(win, input0_access, input1_access, output_access);
-
-    _output->info()->set_valid_region(ValidRegion(Coordinates(), _output->info()->tensor_shape()));
-
-    INEKernel::configure(win);
+Status NEGEMMMatrixVectorMultiplyKernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input0, input1, output);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input0, input1, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input0->clone().get(), input1->clone().get(), output->clone().get()).first);
+    return Status{};
 }
 
 void NEGEMMMatrixVectorMultiplyKernel::run(const Window &window, const ThreadInfo &info)

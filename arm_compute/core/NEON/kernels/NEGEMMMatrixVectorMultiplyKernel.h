@@ -56,6 +56,16 @@ public:
      */
     void configure(const ITensor *input0, const ITensor *input1, ITensor *output);
 
+    /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMMatrixVectorMultiplyKernel
+     *
+     * @param[in] input0 First Input tensor. Data types supported: QASYMM8/F32
+     * @param[in] input1 Second Input tensor. Data types supported: same as @p input.
+     * @param[in] output Output tensor which stores the interleaved matrix. Data type supported: same as @p input, S32 for QASYMM8 input.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output);
+
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
     BorderSize border_size() const override;

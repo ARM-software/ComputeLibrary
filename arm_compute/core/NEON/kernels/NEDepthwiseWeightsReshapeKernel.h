@@ -59,6 +59,16 @@ public:
      */
     void configure(const ITensor *input, ITensor *output, const ITensor *biases);
 
+    /** Static function to check if given info will lead to a valid configuration of @ref NEDepthwiseWeightsReshapeKernel
+     *
+     * @param[in] input  The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM]. Data type supported: QASYMM8, F32.
+     * @param[in] output The output tensor. Data type supported: same as @p input.
+     * @param[in] biases (Optional) The input biases to add. Shape [IFM]. Data type supported: same as @p input.
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *biases);
+
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
 

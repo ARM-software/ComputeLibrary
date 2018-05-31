@@ -31,26 +31,14 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "support/ToolchainSupport.h"
 
 using namespace arm_compute;
+using namespace arm_compute::misc::shape_calculator;
 
 namespace
 {
-TensorShape compute_output_shape(const TensorShape &input, size_t conv_w, size_t conv_h, const DataLayout &data_layout)
-{
-    const size_t idx_w = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const size_t idx_h = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-    const size_t idx_c = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
-
-    TensorShape output_shape(input);
-    output_shape.set(idx_w, conv_w);
-    output_shape.set(idx_h, conv_h);
-    output_shape.set(idx_c, input.x() / (conv_w * conv_h));
-
-    return output_shape;
-}
-
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, size_t conv_w, size_t conv_h)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
@@ -58,7 +46,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, s
 
     if(output->total_size() != 0)
     {
-        TensorShape output_shape = compute_output_shape(input->tensor_shape(), conv_w, conv_h, output->data_layout());
+        TensorShape output_shape = compute_vector_to_tensor_output_shape(input->tensor_shape(), conv_w, conv_h, output->data_layout());
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     }
@@ -77,7 +65,7 @@ void CLDepthwiseVectorToTensorKernel::configure(const ICLTensor *input, ICLTenso
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output auto inizialitation if not yet initialized
-    TensorShape output_shape = compute_output_shape(input->info()->tensor_shape(), conv_w, conv_h, output->info()->data_layout());
+    TensorShape output_shape = compute_vector_to_tensor_output_shape(input->info()->tensor_shape(), conv_w, conv_h, output->info()->data_layout());
     auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(output_shape));
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), conv_w, conv_h));

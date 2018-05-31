@@ -36,6 +36,19 @@ namespace misc
 {
 namespace shape_calculator
 {
+inline TensorShape compute_vector_to_tensor_output_shape(const TensorShape &input, size_t conv_w, size_t conv_h, const DataLayout &data_layout)
+{
+    const size_t idx_w = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const size_t idx_h = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const size_t idx_c = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
+
+    TensorShape output_shape(input);
+    output_shape.set(idx_w, conv_w);
+    output_shape.set(idx_h, conv_h);
+    output_shape.set(idx_c, input.x() / (conv_w * conv_h));
+
+    return output_shape;
+}
 inline TensorShape compute_permutation_output_shape(const ITensorInfo &input, const PermutationVector &perm)
 {
     TensorShape output_shape = input.tensor_shape();
