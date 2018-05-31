@@ -86,26 +86,32 @@ public:
     CLFullyConnectedLayer &operator=(CLFullyConnectedLayer &&) = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input                Source tensor. Data type supported: QS8/QASYMM8/QS16/F16/F32.
-     * @param[in]  weights              Weights tensor. The weights must be 2 dimensional. Data type supported: Same as @p input
-     * @param[in]  biases               Bias tensor. It can be nullptr. Data type supported:Same as @p input.
-     * @param[out] output               Destination tensor. Data type supported: Same as @p input.
-     * @param[in]  transpose_weights    (Optional) Transpose weights if true. Defaults to true.
-     * @param[in]  are_weights_reshaped (Optional) Reshape the weights tensor if false. Defaults to false.
+     * @param[in]  input                   Source tensor. Data type supported: QS8/QASYMM8/QS16/F16/F32.
+     * @param[in]  weights                 Weights tensor. The weights must be 2 dimensional. Data type supported: Same as @p input
+     * @param[in]  biases                  Bias tensor. It can be nullptr. Data type supported:Same as @p input.
+     * @param[out] output                  Destination tensor. Data type supported: Same as @p input.
+     * @param[in]  transpose_weights       (Optional) Transpose weights if true. Defaults to true.
+     * @param[in]  are_weights_reshaped    (Optional) Reshape the weights tensor if false. Defaults to false.
+     * @param[in]  retain_internal_weights (Optional) Retain internal reshaped weights. Defaults to false.
+     *                                     Used for reconfiguration purposes.
      */
-    void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, bool transpose_weights = true, bool are_weights_reshaped = false);
+    void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, bool transpose_weights = true, bool are_weights_reshaped = false,
+                   bool retain_internal_weights = false);
     /** Static function to check if given info will lead to a valid configuration of @ref CLFullyConnectedLayer
      *
-     * @param[in] input                Source tensor. Data type supported: QS8/QASYMM8/QS16/F16/F32.
-     * @param[in] weights              Weights tensor. The weights must be 2 dimensional. Data type supported: Same as @p input
-     * @param[in] biases               Bias tensor. It can be nullptr. Data type supported:Same as @p input.
-     * @param[in] output               Destination tensor. Data type supported: Same as @p input.
-     * @param[in] transpose_weights    (Optional) Transpose weights if true. Defaults to true.
-     * @param[in] are_weights_reshaped (Optional) Reshape the weights tensor if false. Defaults to false.
+     * @param[in] input                   Source tensor. Data type supported: QS8/QASYMM8/QS16/F16/F32.
+     * @param[in] weights                 Weights tensor. The weights must be 2 dimensional. Data type supported: Same as @p input
+     * @param[in] biases                  Bias tensor. It can be nullptr. Data type supported:Same as @p input.
+     * @param[in] output                  Destination tensor. Data type supported: Same as @p input.
+     * @param[in] transpose_weights       (Optional) Transpose weights if true. Defaults to true.
+     * @param[in] are_weights_reshaped    (Optional) Reshape the weights tensor if false. Defaults to false.
+     * @param[in] retain_internal_weights (Optional) Retain internal reshaped weights. Defaults to false.
+     *                                    Used for reconfiguration purposes.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, bool transpose_weights = true, bool are_weights_reshaped = false);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, bool transpose_weights = true, bool are_weights_reshaped = false,
+                           bool retain_internal_weights = false);
 
     //Inherited methods override
     void run() override;
