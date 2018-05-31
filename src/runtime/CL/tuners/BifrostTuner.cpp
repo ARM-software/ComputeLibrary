@@ -139,7 +139,7 @@ void tune_scale_kernel(CLScaleKernel& k)
 
     // Configure the local work size for Bifrost, interpolation (bilinear) and datatype F32.
     // The value are obtained via exhaustive autotuning.
-    if(gpu_target_is_in(gpu_target, GPUTarget::BIFROST) && (dt == DataType::F32) && (interpolation == InterpolationPolicy::BILINEAR))
+    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72) && (dt == DataType::F32) && (interpolation == InterpolationPolicy::BILINEAR))
     {
         auto dim_0 = k.output()->info()->dimension(0);
         if(dim_0 == 480)
