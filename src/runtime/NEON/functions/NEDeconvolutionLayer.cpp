@@ -61,8 +61,8 @@ Status NEDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
     auto out_dims = deconvolution_output_dimensions(input->dimension(0), input->dimension(1), weights->dimension(0), weights->dimension(1),
                                                     info.pad().first, info.pad().second, inner_border_right, inner_border_top, stride_x, stride_y);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights, bias);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, weights, bias);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, weights);
 
     if(bias != nullptr)
     {
