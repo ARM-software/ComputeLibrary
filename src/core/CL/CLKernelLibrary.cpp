@@ -741,6 +741,11 @@ Kernel CLKernelLibrary::create_kernel(const std::string &kernel_name, const Stri
     }
     std::string concat_str;
 
+#if defined(ARM_COMPUTE_DEBUG_ENABLED)
+    // Enable debug properties in CL kernels
+    concat_str += " -DARM_COMPUTE_DEBUG_ENABLED";
+#endif // defined(ARM_COMPUTE_DEBUG_ENABLED)
+
     if(fp16_supported())
     {
         concat_str += " -DARM_COMPUTE_OPENCL_FP16_ENABLED=1 ";

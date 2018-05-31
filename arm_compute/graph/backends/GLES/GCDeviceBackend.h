@@ -53,7 +53,8 @@ public:
     std::shared_ptr<arm_compute::IMemoryManager> create_memory_manager(MemoryManagerAffinity affinity) override;
 
 private:
-    GCBufferAllocator _allocator; /**< GLES buffer affinity allocator */
+    bool              _initialized; /**< Flag that specifies if the backend has been default initialized */
+    GCBufferAllocator _allocator;   /**< GLES buffer affinity allocator */
 };
 } // namespace backends
 } // namespace graph

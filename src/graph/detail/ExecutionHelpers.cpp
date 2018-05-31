@@ -35,14 +35,6 @@ namespace graph
 {
 namespace detail
 {
-void default_initialize_backends()
-{
-    for(const auto &backend : backends::BackendRegistry::get().backends())
-    {
-        backend.second->initialize_backend();
-    }
-}
-
 void validate_all_nodes(Graph &g)
 {
     auto &nodes = g.nodes();

@@ -66,7 +66,7 @@ static detail::BackendRegistrar<CLDeviceBackend> CLDeviceBackend_registrar(Targe
 static const std::string tuner_data_filename = "acl_tuner.csv";
 
 CLDeviceBackend::CLDeviceBackend()
-    : _tuner(), _allocator(cl::Context::getDefault())
+    : _initialized(false), _tuner(), _allocator(nullptr)
 {
 }
 
@@ -96,11 +96,18 @@ void CLDeviceBackend::initialize_backend()
     CLScheduler::get().default_init(&_tuner);
 
     // Create allocator with new context
-    _allocator = CLBufferAllocator();
+    _allocator = support::cpp14::make_unique<CLBufferAllocator>();
 }
 
 void CLDeviceBackend::setup_backend_context(GraphContext &ctx)
 {
+    // Force backend initialization
+    if(!_initialized)
+    {
+        initialize_backend();
+        _initialized = true;
+    }
+
     // Setup tuner
     set_kernel_tuning(ctx.config().use_tuner);
 
@@ -124,7 +131,7 @@ bool CLDeviceBackend::is_backend_supported()
 
 IAllocator *CLDeviceBackend::backend_allocator()
 {
-    return &_allocator;
+    return _allocator.get();
 }
 
 std::unique_ptr<ITensorHandle> CLDeviceBackend::create_tensor(const Tensor &tensor)
@@ -180,7 +187,7 @@ std::shared_ptr<arm_compute::IMemoryManager> CLDeviceBackend::create_memory_mana
     auto pool_mgr     = std::make_shared<PoolManager>();
     auto mm           = std::make_shared<MemoryManagerOnDemand>(lifetime_mgr, pool_mgr);
 
-    mm->set_allocator(&_allocator);
+    mm->set_allocator(_allocator.get());
 
     return mm;
 }

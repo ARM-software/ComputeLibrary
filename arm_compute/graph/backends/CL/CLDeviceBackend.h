@@ -63,8 +63,9 @@ public:
     std::shared_ptr<arm_compute::IMemoryManager> create_memory_manager(MemoryManagerAffinity affinity) override;
 
 private:
-    CLTuner           _tuner;     /**< CL kernel tuner */
-    CLBufferAllocator _allocator; /**< CL buffer affinity allocator */
+    bool                               _initialized; /**< Flag that specifies if the backend has been default initialized */
+    CLTuner                            _tuner;       /**< CL kernel tuner */
+    std::unique_ptr<CLBufferAllocator> _allocator;   /**< CL buffer affinity allocator */
 };
 } // namespace backends
 } // namespace graph

@@ -534,12 +534,15 @@ bool Framework::run()
             // Every 5000 tests, reset the OpenCL context to release the allocated memory
             if((id_run_test % 5000) == 0)
             {
-                cl::Context::setDefault(cl::Context());
-                CLScheduler::get().set_context(cl::Context());
-                CLKernelLibrary::get().clear_programs_cache();
+                auto ctx_properties   = CLScheduler::get().context().getInfo<CL_CONTEXT_PROPERTIES>(nullptr);
+                auto queue_properties = CLScheduler::get().queue().getInfo<CL_QUEUE_PROPERTIES>(nullptr);
 
-                cl::Context::setDefault(cl::Context(CL_DEVICE_TYPE_DEFAULT));
-                CLScheduler::get().set_context(cl::Context::getDefault());
+                cl::Context      new_ctx   = cl::Context(CL_DEVICE_TYPE_DEFAULT, ctx_properties.data());
+                cl::CommandQueue new_queue = cl::CommandQueue(new_ctx, cl::Device::getDefault(), queue_properties);
+
+                CLKernelLibrary::get().clear_programs_cache();
+                CLScheduler::get().set_context(new_ctx);
+                CLScheduler::get().set_queue(new_queue);
             }
 #endif // ARM_COMPUTE_CL
             run_test(test_info, *test_factory);

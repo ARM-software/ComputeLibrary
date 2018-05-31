@@ -39,8 +39,6 @@ class INode;
 
 namespace detail
 {
-/** Initializes the available backends **/
-void default_initialize_backends();
 /** Validates all nodes
  *
  * @param[in] g Graph to validate

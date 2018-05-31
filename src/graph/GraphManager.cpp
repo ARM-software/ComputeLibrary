@@ -38,7 +38,6 @@ namespace graph
 GraphManager::GraphManager()
     : _workloads()
 {
-    detail::default_initialize_backends();
 }
 
 void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &pm, Target target)

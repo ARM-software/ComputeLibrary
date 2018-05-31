@@ -53,7 +53,7 @@ namespace backends
 static detail::BackendRegistrar<GCDeviceBackend> GCDeviceBackend_registrar(Target::GC);
 
 GCDeviceBackend::GCDeviceBackend()
-    : _allocator()
+    : _initialized(false), _allocator()
 {
 }
 
@@ -65,6 +65,13 @@ void GCDeviceBackend::initialize_backend()
 
 void GCDeviceBackend::setup_backend_context(GraphContext &ctx)
 {
+    // Force backend initialization
+    if(!_initialized)
+    {
+        initialize_backend();
+        _initialized = true;
+    }
+
     // Setup a management backend
     if(ctx.memory_management_ctx(Target::GC) == nullptr)
     {

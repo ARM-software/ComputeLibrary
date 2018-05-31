@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -110,7 +110,7 @@ void compute_target_impl(const TensorShape &shape, DataType dt, FixedPointOp op,
     sources.push_back(fixed_point_operation_kernel);
 
     // Create program
-    ::cl::Program program(sources);
+    ::cl::Program program(CLScheduler::get().context(), sources);
 
     // Build program
     program.build(build_opts.c_str());
