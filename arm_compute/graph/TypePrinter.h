@@ -156,6 +156,77 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DataLayout &data_lay
     return os;
 }
 
+inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
+{
+    switch(node_type)
+    {
+        case NodeType::ActivationLayer:
+            os << "ActivationLayer";
+            break;
+        case NodeType::BatchNormalizationLayer:
+            os << "BatchNormalizationLayer";
+            break;
+        case NodeType::ChannelShuffleLayer:
+            os << "ChannelShuffleLayer";
+            break;
+        case NodeType::ConvolutionLayer:
+            os << "ConvolutionLayer";
+            break;
+        case NodeType::DeconvolutionLayer:
+            os << "DeconvolutionLayer";
+            break;
+        case NodeType::DepthConcatenateLayer:
+            os << "DepthConcatenateLayer";
+            break;
+        case NodeType::DepthwiseConvolutionLayer:
+            os << "DepthwiseConvolutionLayer";
+            break;
+        case NodeType::EltwiseLayer:
+            os << "EltwiseLayer";
+            break;
+        case NodeType::FlattenLayer:
+            os << "FlattenLayer";
+            break;
+        case NodeType::FullyConnectedLayer:
+            os << "FullyConnectedLayer";
+            break;
+        case NodeType::NormalizationLayer:
+            os << "NormalizationLayer";
+            break;
+        case NodeType::PoolingLayer:
+            os << "PoolingLayer";
+            break;
+        case NodeType::ReshapeLayer:
+            os << "ReshapeLayer";
+            break;
+        case NodeType::ResizeLayer:
+            os << "ResizeLayer";
+            break;
+        case NodeType::SoftmaxLayer:
+            os << "SoftmaxLayer";
+            break;
+        case NodeType::SplitLayer:
+            os << "SplitLayer";
+            break;
+        case NodeType::Input:
+            os << "Input";
+            break;
+        case NodeType::Output:
+            os << "Output";
+            break;
+        case NodeType::Const:
+            os << "Const";
+            break;
+        case NodeType::Dummy:
+            os << "Dummy";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
 /** Formatted output of the activation function type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo::ActivationFunction &act_function)
 {
