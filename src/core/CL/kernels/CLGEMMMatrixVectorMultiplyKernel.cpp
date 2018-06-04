@@ -110,14 +110,6 @@ void CLGEMMMatrixVectorMultiplyKernel::configure(const ICLTensor *input0, const 
         _kernel.setArg<int>(idx++, -_input1->info()->quantization_info().offset);
     }
 
-    // Configure the local work size for Bifrost with a value obtained
-    // via exhaustive autotuning for the MobileNets tensor shapes.
-    const GPUTarget gpu_target = get_target();
-    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX))
-    {
-        _lws_hint = cl::NDRange(1, 1, 1);
-    }
-
     // Configure kernel window
     const unsigned int num_elems_read_per_iteration = 4;
 

@@ -61,7 +61,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, b
 } // namespace
 
 CLIm2ColKernel::CLIm2ColKernel()
-    : _input(nullptr), _output(nullptr), _convolved_dims(), _num_elems_processed_per_iteration(1), _run_func(nullptr), _kernel_dims()
+    : _input(nullptr), _output(nullptr), _conv_info(), _convolved_dims(), _num_elems_processed_per_iteration(1), _run_func(nullptr), _kernel_dims()
 {
 }
 
@@ -74,6 +74,7 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
 
     _input       = input;
     _output      = output;
+    _conv_info   = conv_info;
     _kernel_dims = kernel_dims;
 
     const DataType  data_type  = input->info()->data_type();
@@ -190,10 +191,9 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
                 {
                     vector_size = kernel_dims.width;
                 }
-                // Local work size and vector size optimized for the 11x11 AlexNet convolution on Bifrost.
+                // Vector size optimized for the 11x11 AlexNet convolution on Bifrost.
                 if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX) && kernel_dims.width == 11)
                 {
-                    _lws_hint   = cl::NDRange(1, 1, 1);
                     vector_size = 8;
                 }
                 const size_t width_mod_vector_size = kernel_dims.width % vector_size;

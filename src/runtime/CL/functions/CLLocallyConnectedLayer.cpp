@@ -163,6 +163,8 @@ void CLLocallyConnectedLayer::configure(const ICLTensor *input, const ICLTensor 
     _weights_reshaped.allocator()->allocate();
     _input_im2col_reshaped.allocator()->allocate();
     _gemm_output.allocator()->allocate();
+
+    CLScheduler::get().tune_kernel_static(_input_im2col_kernel);
 }
 
 void CLLocallyConnectedLayer::run()

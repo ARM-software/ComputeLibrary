@@ -230,10 +230,11 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
     _gemm_output.allocator()->init(info_gemm);
     _memory_group.manage(&_gemm_output);
 
-    // Configure im2col
+    // Configure and tune im2col
     _im2col_kernel.configure(input, &_im2col_output, Size2D(kernel_width, kernel_height), conv_info, append_bias, dilation);
+    CLScheduler::get().tune_kernel_static(_im2col_kernel);
 
-    // Configure GEMM
+    // Configure and tune GEMM
     configure_mm(&_im2col_output, weights, &_gemm_output);
 
     _im2col_output.allocator()->allocate();
@@ -250,8 +251,9 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
         _gemmlowp_output_stage.configure(&_gemm_output, biases, &_tmp_output, output_multiplier, output_shift, output_quant_info.offset);
     }
 
-    // Configure Col2Im
+    // Configure and tune Col2Im
     _col2im_kernel.configure(_is_quantized ? &_tmp_output : &_gemm_output, output, std::make_pair(conv_w, conv_h));
+    CLScheduler::get().tune_kernel_static(_col2im_kernel);
     if(_is_quantized)
     {
         _tmp_output.allocator()->allocate();

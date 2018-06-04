@@ -113,9 +113,10 @@ private:
     /** Common signature for the kernel to run */
     using Im2ColFunction = void (CLIm2ColKernel::*)(const Window &, cl::CommandQueue &);
 
-private:
+public:
     const ICLTensor *_input;
     ICLTensor       *_output;
+    PadStrideInfo    _conv_info;
     std::pair<unsigned int, unsigned int> _convolved_dims;
     unsigned int   _num_elems_processed_per_iteration;
     Im2ColFunction _run_func;

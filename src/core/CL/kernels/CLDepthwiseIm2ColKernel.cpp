@@ -90,15 +90,6 @@ void CLDepthwiseIm2ColKernel::configure(const ICLTensor *input, ICLTensor *outpu
 
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("depthwise_im2col", build_opts.options()));
 
-    // Configure the local work size for Bifrost with a value obtained
-    // via exhaustive autotuning for the MobileNets tensor shapes.
-    const GPUTarget gpu_target = get_target();
-
-    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX))
-    {
-        _lws_hint = cl::NDRange(1, 2, 1);
-    }
-
     // Configure  kernel window
     Window win = calculate_max_window(*output->info(), Steps());
     // CLDepthwiseIm2ColKernel doesn't need padding so update_window_and_padding() can be skipped

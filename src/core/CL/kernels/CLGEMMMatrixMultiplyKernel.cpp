@@ -194,51 +194,9 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
     _output         = output;
     _slide_matrix_b = _input1->info()->num_dimensions() >= _input0->info()->num_dimensions();
 
-    const DataType data_type = input0->info()->data_type();
-    const int      fp_pos    = input0->info()->fixed_point_position();
-
-    // Get target architecture
-    GPUTarget gpu_target = get_target();
-
-    // Configure LWS hint
-    switch(gpu_target)
-    {
-        case GPUTarget::MIDGARD:
-        case GPUTarget::T600:
-        case GPUTarget::T700:
-        case GPUTarget::T800:
-            if(output->info()->dimension(1) == 196)
-            {
-                _lws_hint = cl::NDRange(1, 7);
-            }
-            else
-            {
-                _lws_hint = cl::NDRange(8, 8);
-            }
-            break;
-        case GPUTarget::G71:
-        case GPUTarget::G72:
-        case GPUTarget::G51:
-        case GPUTarget::G51BIG:
-        case GPUTarget::G51LIT:
-        case GPUTarget::TNOX:
-            if(input1->info()->dimension(1) == 24)
-            {
-                // LWS optimized for the 11x11 AlexNet convolution on Bifrost.
-                _lws_hint = cl::NDRange(2, 2);
-            }
-            else if(output->info()->dimension(1) == 196)
-            {
-                _lws_hint = cl::NDRange(1, 7);
-            }
-            else
-            {
-                _lws_hint = cl::NDRange(8, 8);
-            }
-            break;
-        default:
-            _lws_hint = cl::NullRange;
-    }
+    const DataType  data_type  = input0->info()->data_type();
+    const int       fp_pos     = input0->info()->fixed_point_position();
+    const GPUTarget gpu_target = get_target();
 
     ElementsProcessed num_elements_processed{};
 

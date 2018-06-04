@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -72,7 +72,7 @@ public:
     void run(const Window &window, cl::CommandQueue &queue) override;
     BorderSize border_size() const override;
 
-private:
+public:
     const ICLTensor *_input;
     ICLTensor       *_output;
     PoolingLayerInfo _pool_info;

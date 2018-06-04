@@ -86,7 +86,7 @@ public:
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
 
-private:
+public:
     const ICLTensor *_input;
     ICLTensor       *_output;
     std::pair<unsigned int, unsigned int> _convolved_dims;

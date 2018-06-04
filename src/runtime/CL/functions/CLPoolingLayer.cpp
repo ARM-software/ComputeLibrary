@@ -63,6 +63,9 @@ void CLPoolingLayer::configure(ICLTensor *input, ICLTensor *output, const Poolin
             ARM_COMPUTE_ERROR("Data layout not supported");
     }
     _border_handler.configure(input, _kernel->border_size(), border_mode, pixel_value);
+
+    // Tune kernels
+    CLScheduler::get().tune_kernel_static(*_kernel);
 }
 
 Status CLPoolingLayer::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)

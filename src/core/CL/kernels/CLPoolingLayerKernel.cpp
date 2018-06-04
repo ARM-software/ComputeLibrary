@@ -208,8 +208,7 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     _output    = output;
     _pool_info = pool_info;
 
-    const GPUTarget gpu_target = get_target();
-    const DataType  data_type  = input->info()->data_type();
+    const DataType data_type = input->info()->data_type();
 
     // Set build options
     CLBuildOptions build_opts;
@@ -273,20 +272,11 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
     ICLKernel::configure(std::get<1>(win_config));
 
-    // Configure the local work size (hint) from the first two dimensions of the global work size.
-    // On Bifrost, this works for up to 35x35xC filters, for which the pooling_layer_3_optimized
-    // kernel is launched with gws=(9, 33, C). In any case, the hint will be ignored if it is
-    // invalid (e.g. exceeds the maximum workgroup size that the kernel can be launched with).
     if(data_layout == DataLayout::NCHW)
     {
         CLPoolingConfig pooling_config     = std::get<2>(win_config);
         _num_elems_processed_per_iteration = pooling_config.first;
         _border_size                       = pooling_config.second;
-        if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX))
-        {
-            cl::NDRange gws = ICLKernel::gws_from_window(std::get<1>(win_config));
-            _lws_hint       = cl::NDRange(gws[0], gws[1], 1);
-        }
     }
     else
     {

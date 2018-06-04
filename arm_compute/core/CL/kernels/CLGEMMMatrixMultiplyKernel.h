@@ -80,7 +80,7 @@ public:
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
 
-private:
+public:
     const ICLTensor *_input0;
     const ICLTensor *_input1;
     ICLTensor       *_output;

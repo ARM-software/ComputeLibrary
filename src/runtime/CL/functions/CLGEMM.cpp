@@ -143,7 +143,9 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
         _transpose_kernel.configure(b, &_tmp_b, mult_transpose1xW_width);
     }
 
+    // Configure and tune matrix multiply kernel
     _mm_kernel.configure(matrix_a, matrix_b, output, alpha, _is_interleaved_transposed, GEMMReshapeInfo(m, n, k, mult_transpose1xW_width, mult_interleave4x4_height));
+    CLScheduler::get().tune_kernel_static(_mm_kernel);
 
     if(_is_interleaved_transposed)
     {

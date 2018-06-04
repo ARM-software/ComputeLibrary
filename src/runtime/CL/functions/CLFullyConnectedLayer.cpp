@@ -117,6 +117,7 @@ void CLFullyConnectedLayer::configure_conv_fc(const ICLTensor *input, const ICLT
     // Configure im2col kernel
     _memory_group.manage(&_im2col_output);
     _im2col_kernel.configure(input, &_im2col_output, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false);
+    CLScheduler::get().tune_kernel_static(_im2col_kernel);
 
     // Configure matrix multiply kernel
     configure_mm(&_im2col_output, weights, output);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,19 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/CL/functions/CLFlattenLayer.h"
+#ifndef __ARM_COMPUTE_TUNERS_MIDGARD_TUNER_H__
+#define __ARM_COMPUTE_TUNERS_MIDGARD_TUNER_H__
 
-#include "arm_compute/core/CL/kernels/CLIm2ColKernel.h"
-#include "arm_compute/core/Size2D.h"
-#include "arm_compute/runtime/CL/CLScheduler.h"
-#include "support/ToolchainSupport.h"
+#include "arm_compute/runtime/CL/ICLTuner.h"
 
-using namespace arm_compute;
-
-void CLFlattenLayer::configure(const ICLTensor *input, ICLTensor *output)
+namespace arm_compute
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLIm2ColKernel>();
-    k->configure(input, output, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false);
-    _kernel = std::move(k);
-    CLScheduler::get().tune_kernel_static(*_kernel);
-}
+namespace tuners
+{
+/** Midgard based OpenCL tuner implementation */
+class MidgardTuner final : public ICLTuner
+{
+public:
+    // Inherited overriden methods
+    void tune_kernel_static(ICLKernel &kernel) override;
+    void tune_kernel_dynamic(ICLKernel &kernel) override;
+};
+} // namespace tuners
+} // namespace arm_compute
+#endif /*__ARM_COMPUTE_TUNERS_MIDGARD_TUNER_H__ */
