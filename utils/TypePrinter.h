@@ -42,6 +42,25 @@
 
 namespace arm_compute
 {
+/** Formatted output if arg is not null
+ *
+ * @param[in] arg Object to print
+ *
+ * @return String representing arg.
+ */
+template <typename T>
+std::string to_string_if_not_null(T *arg)
+{
+    if(arg == nullptr)
+    {
+        return "nullptr";
+    }
+    else
+    {
+        return to_string(*arg);
+    }
+}
+
 /** Formatted output of the Dimensions type.
  *
  * @param[out] os         Output stream.
@@ -899,6 +918,143 @@ inline std::string to_string(const Coordinates &coord)
 {
     std::stringstream str;
     str << coord;
+    return str.str();
+}
+
+/** Formatted output of the GEMMReshapeInfo type.
+ *
+ * @param[out] os   Output stream.
+ * @param[in]  info Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const GEMMReshapeInfo &info)
+{
+    os << "{m=" << info.m() << ",";
+    os << "n=" << info.n() << ",";
+    os << "k=" << info.k() << ",";
+    os << "mult_transpose1xW_width=" << info.mult_transpose1xW_width() << ",";
+    os << "mult_interleave4x4_height=" << info.mult_interleave4x4_height();
+    os << "}";
+
+    return os;
+}
+
+/** Formatted output of the GEMMInfo type.
+ *
+ * @param[out] os   Output stream.
+ * @param[in]  info Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const GEMMInfo &info)
+{
+    os << "{is_a_reshaped=" << info.is_a_reshaped() << ",";
+    os << "is_b_reshaped=" << info.is_b_reshaped() << ",";
+    os << "reshape_b_only_on_first_run=" << info.reshape_b_only_on_first_run() << ",";
+    os << "reshape_info=" << info.reshape_info();
+    os << "}";
+
+    return os;
+}
+
+/** Formatted output of the Window::Dimension type.
+ *
+ * @param[out] os  Output stream.
+ * @param[in]  dim Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const Window::Dimension &dim)
+{
+    os << "{start=" << dim.start() << ", end=" << dim.end() << ", step=" << dim.step() << "}";
+
+    return os;
+}
+/** Formatted output of the Window type.
+ *
+ * @param[out] os  Output stream.
+ * @param[in]  win Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const Window &win)
+{
+    os << "{";
+    for(unsigned int i = 0; i < Coordinates::num_max_dimensions; i++)
+    {
+        if(i > 0)
+        {
+            os << ", ";
+        }
+        os << win[i];
+    }
+    os << "}";
+
+    return os;
+}
+
+/** Formatted output of the WeightsInfo type.
+ *
+ * @param[in] info Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const WeightsInfo &info)
+{
+    std::stringstream str;
+    str << info;
+    return str.str();
+}
+
+/** Formatted output of the GEMMReshapeInfo type.
+ *
+ * @param[in] info Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const GEMMReshapeInfo &info)
+{
+    std::stringstream str;
+    str << info;
+    return str.str();
+}
+
+/** Formatted output of the GEMMInfo type.
+ *
+ * @param[in] info Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const GEMMInfo &info)
+{
+    std::stringstream str;
+    str << info;
+    return str.str();
+}
+
+/** Formatted output of the Window::Dimension type.
+ *
+ * @param[in] dim Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const Window::Dimension &dim)
+{
+    std::stringstream str;
+    str << dim;
+    return str.str();
+}
+/** Formatted output of the Window type.
+ *
+ * @param[in] win Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const Window &win)
+{
+    std::stringstream str;
+    str << win;
     return str.str();
 }
 
