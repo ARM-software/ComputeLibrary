@@ -134,10 +134,13 @@ inline void Window::adjust(size_t dimension, int adjust_value, bool is_at_start)
 inline void Window::scale(size_t dimension, float scale_value)
 {
     ARM_COMPUTE_ERROR_ON(dimension >= Coordinates::num_max_dimensions);
-    Window::Dimension &d           = _dims[dimension];
-    const int          scaled_step = d.step() * scale_value;
-    const int          scaled_end  = ceil_to_multiple(d.end() * scale_value, scaled_step);
-    d                              = Window::Dimension(d.start() * scale_value, scaled_end, scaled_step);
+    Window::Dimension &d            = _dims[dimension];
+    const int          scaled_step  = d.step() * scale_value;
+    const int          scaled_start = d.start() * scale_value;
+    const int          scaled_diff  = (d.end() - d.start()) * scale_value;
+    const int          scaled_end   = scaled_start + ceil_to_multiple(scaled_diff, scaled_step);
+
+    d = Window::Dimension(scaled_start, scaled_end, scaled_step);
 }
 
 inline void Window::set_dimension_step(size_t dimension, int step)
