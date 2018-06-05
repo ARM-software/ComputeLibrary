@@ -66,54 +66,15 @@ protected:
 
         if(is_separable)
         {
-            create_separable_conv(conv.data());
+            init_separable_conv(conv.data(), width, height, library->seed());
         }
         else
         {
-            create_conv(conv.data());
+            init_conv(conv.data(), width, height, library->seed());
         }
 
         _target    = compute_target(shape, output_data_type, conv.data(), scale, border_mode, constant_border_value);
         _reference = compute_reference(shape, output_data_type, conv.data(), scale, border_mode, constant_border_value);
-    }
-
-    void
-    create_conv(int16_t *conv)
-    {
-        std::mt19937                           gen(library->seed());
-        std::uniform_int_distribution<int16_t> distribution_int16(-32768, 32767);
-
-        for(unsigned int i = 0; i < _width * _height; ++i)
-        {
-            conv[i] = distribution_int16(gen);
-        }
-    }
-
-    void
-    create_separable_conv(int16_t *conv)
-    {
-        std::mt19937 gen(library->seed());
-        // Set it between -128 and 127 to ensure the matrix does not overflow
-        std::uniform_int_distribution<int16_t> distribution_int16(-128, 127);
-
-        int16_t conv_row[_width];
-        int16_t conv_col[_height];
-
-        conv_row[0] = conv_col[0] = 1;
-        for(unsigned int i = 1; i < _width; ++i)
-        {
-            conv_row[i] = distribution_int16(gen);
-            conv_col[i] = distribution_int16(gen);
-        }
-
-        // Multiply two matrices
-        for(unsigned int i = 0; i < _width; ++i)
-        {
-            for(unsigned int j = 0; j < _height; ++j)
-            {
-                conv[i * _width + j] = conv_col[i] * conv_row[j];
-            }
-        }
     }
 
     template <typename U>

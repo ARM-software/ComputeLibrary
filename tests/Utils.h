@@ -596,6 +596,61 @@ inline T create_pyramid(const PyramidInfo &pyramid_info)
     return pyramid;
 }
 
+/** Initialize a convolution matrix.
+ *
+ * @param[in, out] conv   The input convolution matrix.
+ * @param[in]      width  The width of the convolution matrix.
+ * @param[in]      height The height of the convolution matrix.
+ * @param[in]      seed   The random seed to be used.
+ */
+inline void init_conv(int16_t *conv, unsigned int width, unsigned int height, std::random_device::result_type seed)
+{
+    std::mt19937                           gen(seed);
+    std::uniform_int_distribution<int16_t> distribution_int16(-32768, 32767);
+
+    for(unsigned int i = 0; i < width * height; ++i)
+    {
+        conv[i] = distribution_int16(gen);
+    }
+}
+
+/** Initialize a separable convolution matrix.
+ *
+ * @param[in, out] conv   The input convolution matrix.
+ * @param[in]      width  The width of the convolution matrix.
+ * @param[in]      height The height of the convolution matrix.
+ * @param[in]      seed   The random seed to be used.
+ */
+inline void init_separable_conv(int16_t *conv, unsigned int width, unsigned int height, std::random_device::result_type seed)
+{
+    std::mt19937 gen(seed);
+    // Set it between -128 and 127 to ensure the matrix does not overflow
+    std::uniform_int_distribution<int16_t> distribution_int16(-128, 127);
+
+    int16_t conv_row[width];
+    int16_t conv_col[height];
+
+    conv_row[0] = conv_col[0] = 1;
+    for(unsigned int i = 1; i < width; ++i)
+    {
+        conv_row[i] = distribution_int16(gen);
+    }
+
+    for(unsigned int i = 1; i < height; ++i)
+    {
+        conv_col[i] = distribution_int16(gen);
+    }
+
+    // Multiply two matrices
+    for(unsigned int i = 0; i < width; ++i)
+    {
+        for(unsigned int j = 0; j < height; ++j)
+        {
+            conv[i * width + j] = conv_col[i] * conv_row[j];
+        }
+    }
+}
+
 /** Create a vector of random ROIs.
  *
  * @param[in] shape     The shape of the input tensor.
