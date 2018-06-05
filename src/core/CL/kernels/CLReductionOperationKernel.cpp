@@ -101,14 +101,18 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), axis, op));
 
     const unsigned int num_elems_processed_per_iteration = 16;
-    const unsigned int border_width                      = ((input->info()->dimension(0) % 128) != 0) ? 128 - input->info()->dimension(0) % 128 : 0;
+    const unsigned int border_width                      = ((input->info()->dimension(0) % 16) != 0) ? 16 - input->info()->dimension(0) % 16 : 0;
+    const unsigned int num_of_threads                    = ((input->info()->dimension(0) + border_width) / 16);
 
     _input          = input;
     _output         = output;
     _reduction_axis = axis;
     _op             = op;
-    _lws_hint       = cl::NDRange(8);
-    _border_size    = BorderSize(0, border_width, 0, 0);
+
+    // Set the number of WG based on the input size. If input width is < 128
+    // we can use fewer threads than 8.
+    _lws_hint    = cl::NDRange(std::min(8U, num_of_threads));
+    _border_size = BorderSize(0, border_width, 0, 0);
 
     // Set build options
     std::set<std::string> build_opts;
@@ -164,7 +168,7 @@ void CLReductionOperationKernel::run(const Window &window, cl::CommandQueue &que
     Window out_slice = out_window.first_slice_window_2D();
 
     // Reshape window
-    const unsigned int border_width = ((in_slice.x().end() % 128) != 0) ? 128 - in_slice.x().end() % 128 : 0;
+    const unsigned int border_width = ((in_slice.x().end() % 16) != 0) ? 16 - in_slice.x().end() % 16 : 0;
     in_slice.set(Window::DimX, Window::Dimension(in_slice.x().start(), in_slice.x().end() + border_width, in_slice.x().step()));
 
     // Set local sums buffer
