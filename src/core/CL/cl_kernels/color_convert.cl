@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -135,9 +135,19 @@ __kernel void UYVY422_to_RGB888_bt709(
     char8  cb   = (char8)(uyvy.s0, uyvy.s0, uyvy.s4, uyvy.s4, uyvy.s8, uyvy.s8, uyvy.sc, uyvy.sc) - (char8)(128);
     char8  cr   = (char8)(uyvy.s2, uyvy.s2, uyvy.s6, uyvy.s6, uyvy.sa, uyvy.sa, uyvy.se, uyvy.se) - (char8)(128);
 
-    float8 f_r = convert_float8(luma) + (float8)(0.0000f) * convert_float8(cb) + (float8)(1.5748f) * convert_float8(cr);
-    float8 f_g = convert_float8(luma) - (float8)(0.1873f) * convert_float8(cb) - (float8)(0.4681f) * convert_float8(cr);
-    float8 f_b = convert_float8(luma) + (float8)(1.8556f) * convert_float8(cb) + (float8)(0.0000f) * convert_float8(cr);
+    float8 red_coef_bt709    = (float8)(1.5748f);
+    float8 green_coef_bt709  = (float8)(-0.1873f);
+    float8 green_coef2_bt709 = (float8)(-0.4681f);
+    float8 blue_coef_bt709   = (float8)(1.8556f);
+    float8 lumav             = convert_float8(luma);
+
+    float8 f_r = red_coef_bt709 * convert_float8(cr);
+    float8 f_g = green_coef_bt709 * convert_float8(cb) + green_coef2_bt709 * convert_float8(cr);
+    float8 f_b = blue_coef_bt709 * convert_float8(cb);
+
+    f_r += lumav;
+    f_g += lumav;
+    f_b += lumav;
 
     uchar8 r_0 = convert_uchar8_rtz(f_r);
     uchar8 g_0 = convert_uchar8_rtz(f_g);
@@ -183,9 +193,19 @@ __kernel void UYVY422_to_RGBA8888_bt709(
     char8  cb   = (char8)(uyvy.s0, uyvy.s0, uyvy.s4, uyvy.s4, uyvy.s8, uyvy.s8, uyvy.sc, uyvy.sc) - (char8)(128);
     char8  cr   = (char8)(uyvy.s2, uyvy.s2, uyvy.s6, uyvy.s6, uyvy.sa, uyvy.sa, uyvy.se, uyvy.se) - (char8)(128);
 
-    float8 f_r = convert_float8(luma) + (float8)(0.0000f) * convert_float8(cb) + (float8)(1.5748f) * convert_float8(cr);
-    float8 f_g = convert_float8(luma) - (float8)(0.1873f) * convert_float8(cb) - (float8)(0.4681f) * convert_float8(cr);
-    float8 f_b = convert_float8(luma) + (float8)(1.8556f) * convert_float8(cb) + (float8)(0.0000f) * convert_float8(cr);
+    float8 red_coef_bt709    = (float8)(1.5748f);
+    float8 green_coef_bt709  = (float8)(-0.1873f);
+    float8 green_coef2_bt709 = (float8)(-0.4681f);
+    float8 blue_coef_bt709   = (float8)(1.8556f);
+    float8 lumav             = convert_float8(luma);
+
+    float8 f_r = red_coef_bt709 * convert_float8(cr);
+    float8 f_g = green_coef_bt709 * convert_float8(cb) + green_coef2_bt709 * convert_float8(cr);
+    float8 f_b = blue_coef_bt709 * convert_float8(cb);
+
+    f_r += lumav;
+    f_g += lumav;
+    f_b += lumav;
 
     uchar8 r_0 = convert_uchar8_rtz(f_r);
     uchar8 g_0 = convert_uchar8_rtz(f_g);
@@ -232,9 +252,19 @@ __kernel void YUYV422_to_RGB888_bt709(
     char8  cb   = (char8)(uyvy.s1, uyvy.s1, uyvy.s5, uyvy.s5, uyvy.s9, uyvy.s9, uyvy.sd, uyvy.sd) - (char8)(128);
     char8  cr   = (char8)(uyvy.s3, uyvy.s3, uyvy.s7, uyvy.s7, uyvy.sb, uyvy.sb, uyvy.sf, uyvy.sf) - (char8)(128);
 
-    float8 f_r = convert_float8(luma) + (float8)(0.0000f) * convert_float8(cb) + (float8)(1.5748f) * convert_float8(cr);
-    float8 f_g = convert_float8(luma) - (float8)(0.1873f) * convert_float8(cb) - (float8)(0.4681f) * convert_float8(cr);
-    float8 f_b = convert_float8(luma) + (float8)(1.8556f) * convert_float8(cb) + (float8)(0.0000f) * convert_float8(cr);
+    float8 red_coef_bt709    = (float8)(1.5748f);
+    float8 green_coef_bt709  = (float8)(-0.1873f);
+    float8 green_coef2_bt709 = (float8)(-0.4681f);
+    float8 blue_coef_bt709   = (float8)(1.8556f);
+    float8 lumav             = convert_float8(luma);
+
+    float8 f_r = red_coef_bt709 * convert_float8(cr);
+    float8 f_g = green_coef_bt709 * convert_float8(cb) + green_coef2_bt709 * convert_float8(cr);
+    float8 f_b = blue_coef_bt709 * convert_float8(cb);
+
+    f_r += lumav;
+    f_g += lumav;
+    f_b += lumav;
 
     uchar8 r_0 = convert_uchar8_rtz(f_r);
     uchar8 g_0 = convert_uchar8_rtz(f_g);
@@ -280,9 +310,19 @@ __kernel void YUYV422_to_RGBA8888_bt709(
     char8  cb   = (char8)(uyvy.s1, uyvy.s1, uyvy.s5, uyvy.s5, uyvy.s9, uyvy.s9, uyvy.sd, uyvy.sd) - (char8)(128);
     char8  cr   = (char8)(uyvy.s3, uyvy.s3, uyvy.s7, uyvy.s7, uyvy.sb, uyvy.sb, uyvy.sf, uyvy.sf) - (char8)(128);
 
-    float8 f_r = convert_float8(luma) + (float8)(0.0000f) * convert_float8(cb) + (float8)(1.5748f) * convert_float8(cr);
-    float8 f_g = convert_float8(luma) - (float8)(0.1873f) * convert_float8(cb) - (float8)(0.4681f) * convert_float8(cr);
-    float8 f_b = convert_float8(luma) + (float8)(1.8556f) * convert_float8(cb) + (float8)(0.0000f) * convert_float8(cr);
+    float8 red_coef_bt709    = (float8)(1.5748f);
+    float8 green_coef_bt709  = (float8)(-0.1873f);
+    float8 green_coef2_bt709 = (float8)(-0.4681f);
+    float8 blue_coef_bt709   = (float8)(1.8556f);
+    float8 lumav             = convert_float8(luma);
+
+    float8 f_r = red_coef_bt709 * convert_float8(cr);
+    float8 f_g = green_coef_bt709 * convert_float8(cb) + green_coef2_bt709 * convert_float8(cr);
+    float8 f_b = blue_coef_bt709 * convert_float8(cb);
+
+    f_r += lumav;
+    f_g += lumav;
+    f_b += lumav;
 
     uchar8 r_0 = convert_uchar8_rtz(f_r);
     uchar8 g_0 = convert_uchar8_rtz(f_g);
