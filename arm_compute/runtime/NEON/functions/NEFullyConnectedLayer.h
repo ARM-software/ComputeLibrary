@@ -104,7 +104,7 @@ public:
     NEFullyConnectedLayer &operator=(NEFullyConnectedLayer &&) = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input                Source tensor. Data type supported: QS8/QS16/F32.
+     * @param[in]  input                Source tensor. Data type supported: QS8/QS16/F16/F32.
      * @param[in]  weights              Weights tensor. The weights must be 2 dimensional. Data type supported: Same as @p input.
      * @param[in]  biases               Bias tensor. Can be nullptr. Data type supported:Same as @p input.
      * @param[out] output               Destination tensor. Data type supported: Same as @p input.
