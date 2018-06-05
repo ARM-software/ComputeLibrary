@@ -53,7 +53,14 @@ class NEGEMM : public IFunction
 public:
     /** Constructor */
     NEGEMM(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
-
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEGEMM(const NEGEMM &) = delete;
+    /** Default move constructor */
+    NEGEMM(NEGEMM &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEGEMM &operator=(const NEGEMM &) = delete;
+    /** Default move assignment operator */
+    NEGEMM &operator=(NEGEMM &&) = default;
     /** Initialise the kernel's inputs, output
      *
      * @note GEMM: General Matrix Multiply - [alpha * A * B + beta * C].
@@ -72,6 +79,7 @@ public:
 
     // Inherited methods overridden:
     void run() override;
+    void prepare() override;
 
 private:
     MemoryGroup                _memory_group;
@@ -84,10 +92,11 @@ private:
     Tensor                     _tmp_b;
     Tensor                     _workspace;
     Tensor                     _B_pretransposed;
+    const ITensor             *_original_b;
     bool                       _run_vector_matrix_multiplication;
     bool                       _run_addition;
-    bool                       _is_first_run;
     bool                       _reshape_b_only_on_first_run;
+    bool                       _is_prepared;
 };
-}
+} // namespace arm_compute
 #endif /*__ARM_COMPUTE_NEGEMM_H__ */

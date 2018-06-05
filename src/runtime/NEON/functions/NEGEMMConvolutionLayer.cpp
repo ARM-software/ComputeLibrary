@@ -231,7 +231,7 @@ NEGEMMConvolutionLayer::NEGEMMConvolutionLayer(const std::shared_ptr<IMemoryMana
     : _asm_glue(), _memory_group(memory_manager), _input_im2col_kernel(), _input_interleave_kernel(), _reshape_weights(), _mm_kernel(), _mm_gemmlowp(memory_manager), _gemmlowp_output_stage(),
       _output_col2im_kernel(), _activationlayer_function(), _add_bias_kernel(), _original_weights(nullptr), _input_im2col_reshaped(), _input_interleaved_reshaped(), _weights_reshaped(), _gemm_output(),
       _tmp_output(), _workspace(), _B_pretransposed(), _data_layout(DataLayout::NCHW), _append_bias(false), _is_fully_connected_convolution(false), _are_weights_reshaped(false), _is_quantized(false),
-      _is_interleaved(false), _is_activationlayer_enabled(false), _skip_im2col(false)
+      _is_interleaved(false), _is_activationlayer_enabled(false), _skip_im2col(false), _is_prepared(false)
 {
 }
 
@@ -287,6 +287,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
 
     ARM_COMPUTE_ERROR_THROW_ON(status);
 
+    _is_prepared                            = false;
     _original_weights                       = weights;
     const unsigned int fixed_point_position = input->info()->fixed_point_position();
     const ITensor     *biases_to_use        = (_append_bias) ? biases : nullptr;
@@ -442,12 +443,6 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
 
     ARM_COMPUTE_ERROR_ON_MSG((output->info()->dimension(idx_width) != conv_w) || (output->info()->dimension(idx_height) != conv_h), "Output shape does not match the expected one");
 
-    // Allocate intermediate tensor
-    if(!_are_weights_reshaped)
-    {
-        _weights_reshaped.allocator()->allocate();
-    }
-
     //Configure Activation Layer
     if(_is_activationlayer_enabled)
     {
@@ -585,17 +580,7 @@ Status NEGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 
 void NEGEMMConvolutionLayer::run()
 {
-    // Run weights reshaping (Runs once for every configure)
-    if(!_are_weights_reshaped)
-    {
-        ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
-
-        _are_weights_reshaped = true;
-        _reshape_weights.run();
-
-        // Mark original weights tensor as unused
-        _original_weights->mark_as_unused();
-    }
+    prepare();
 
     _memory_group.acquire();
 
@@ -610,11 +595,6 @@ void NEGEMMConvolutionLayer::run()
     if(_asm_glue._optimised_kernel != nullptr)
     {
         _asm_glue.run();
-        // Release weights in case buffer is pretransposed
-        if(!_weights_reshaped.is_used())
-        {
-            _weights_reshaped.allocator()->free();
-        }
     }
     else
     {
@@ -658,5 +638,44 @@ void NEGEMMConvolutionLayer::run()
     }
 
     _memory_group.release();
+}
+
+void NEGEMMConvolutionLayer::prepare()
+{
+    if(!_is_prepared)
+    {
+        // Run weights reshaping (Runs once for every configure)
+        if(!_are_weights_reshaped)
+        {
+            ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
+
+            _weights_reshaped.allocator()->allocate();
+            _reshape_weights.run();
+            _reshape_weights = NEConvolutionLayerReshapeWeights();
+            _original_weights->mark_as_unused();
+            _are_weights_reshaped = true;
+        }
+
+        // Run GEMM prepare stage
+        if(_asm_glue._optimised_kernel)
+        {
+            _asm_glue.prepare();
+        }
+        else
+        {
+            if(_is_quantized)
+            {
+                _mm_gemmlowp.prepare();
+            }
+        }
+
+        // Release weights in case buffer is pretransposed
+        if(!_weights_reshaped.is_used())
+        {
+            _weights_reshaped.allocator()->free();
+        }
+
+        _is_prepared = true;
+    }
 }
 } // namespace arm_compute

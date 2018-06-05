@@ -131,8 +131,8 @@ void NEFullyConnectedLayerReshapeWeights::run()
 }
 
 NEFullyConnectedLayer::NEFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _im2col_kernel(), _reshape_weights_kernel(), _interleave4x4_kernel(), _mm_kernel(), _accumulate_biases_kernel(), _im2col_output(), _interleave4x4_output(),
-      _reshape_weights_output(), _are_weights_reshaped(false), _is_batched_fc_layer(false), _linearize_input(false), _accumulate_biases(false), _original_weights(nullptr)
+    : _memory_group(std::move(memory_manager)), _im2col_kernel(), _reshape_weights_function(), _interleave4x4_kernel(), _mm_kernel(), _accumulate_biases_kernel(), _im2col_output(),
+      _interleave4x4_output(), _reshape_weights_output(), _original_weights(nullptr), _is_batched_fc_layer(false), _linearize_input(false), _accumulate_biases(false), _is_prepared(false)
 {
 }
 
@@ -163,16 +163,16 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
     const int    num_input_dimensions = input->info()->tensor_shape().num_dimensions() - num_batch_dimensions;
     const size_t linear_input_size    = input->info()->tensor_shape().total_size_lower(num_input_dimensions);
 
-    _original_weights     = weights;
-    _linearize_input      = (input->info()->tensor_shape().x() != linear_input_size) || (num_input_dimensions > 1 && linear_input_size == 1);
-    _are_weights_reshaped = are_weights_reshaped;
-    _accumulate_biases    = biases != nullptr;
-    _is_batched_fc_layer  = num_batch_dimensions > 0;
+    _original_weights    = weights;
+    _linearize_input     = (input->info()->tensor_shape().x() != linear_input_size) || (num_input_dimensions > 1 && linear_input_size == 1);
+    _accumulate_biases   = biases != nullptr;
+    _is_batched_fc_layer = num_batch_dimensions > 0;
+    _is_prepared         = are_weights_reshaped || (!transpose_weights && !_is_batched_fc_layer);
 
     const size_t   interleave_width = 16 / input->info()->element_size();
     const ITensor *weights_to_use   = weights;
 
-    if(!are_weights_reshaped && (transpose_weights || _is_batched_fc_layer))
+    if(!_is_prepared)
     {
         weights_to_use = &_reshape_weights_output;
 
@@ -181,7 +181,7 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
                                                   _is_batched_fc_layer, interleave_width)));
 
         // Reshape the weights
-        _reshape_weights_kernel.configure(weights, &_reshape_weights_output, transpose_weights, _is_batched_fc_layer);
+        _reshape_weights_function.configure(weights, &_reshape_weights_output, transpose_weights, _is_batched_fc_layer);
     }
 
     const ITensor *multiply_input = input;
@@ -218,13 +218,6 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
     {
         // Configure accumulate biases kernel
         _accumulate_biases_kernel.configure(output, biases);
-    }
-
-    // Allocate the transpose tensor if the are_weights_reshaped flag is false and once all the configure methods have been called
-    if(!are_weights_reshaped && (transpose_weights || _is_batched_fc_layer))
-    {
-        // Allocate the tensor for the weights reshaped
-        _reshape_weights_output.allocator()->allocate();
     }
 
     if(_linearize_input)
@@ -322,17 +315,7 @@ Status NEFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
 
 void NEFullyConnectedLayer::run()
 {
-    // Reshape of the weights (happens only once)
-    if(!_are_weights_reshaped)
-    {
-        ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
-
-        _are_weights_reshaped = true;
-        _reshape_weights_kernel.run();
-
-        // Mark original weights tensor as unused
-        _original_weights->mark_as_unused();
-    }
+    prepare();
 
     _memory_group.acquire();
 
@@ -358,4 +341,21 @@ void NEFullyConnectedLayer::run()
     }
 
     _memory_group.release();
+}
+
+void NEFullyConnectedLayer::prepare()
+{
+    // Reshape of the weights (happens only once)
+    if(!_is_prepared)
+    {
+        ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
+
+        // Run weights reshape, clean internal tensors and mark original weights tensor as unused
+        _reshape_weights_output.allocator()->allocate();
+        _reshape_weights_function.run();
+        _reshape_weights_function = NEFullyConnectedLayerReshapeWeights();
+        _original_weights->mark_as_unused();
+
+        _is_prepared = true;
+    }
 }

@@ -113,7 +113,7 @@ bool check_support_fast_math(const Size2D &output_tile, const Size2D &kernel_siz
 NEWinogradConvolutionLayer::NEWinogradConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _arm_gemm(nullptr), _gemm_kernel(nullptr), _transform_input_kernel(nullptr), _transform_output_kernel(nullptr), _transform_weights_kernel(nullptr),
       _activationlayer_function(), _permute_input(), _permute_weights(), _permute_output(), _input_workspace(), _output_workspace(), _kernel_storage(), _input_nhwc(), _output_nhwc(), _weights_hwio(),
-      _workspace(), _input(), _weights(), _output(), _reshaped_kernel(false), _is_activationlayer_enabled(false)
+      _workspace(), _input(), _weights(), _output(), _is_prepared(false), _is_activationlayer_enabled(false)
 {
 } /* arm_compute */
 
@@ -139,9 +139,10 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
         ARM_COMPUTE_ERROR_ON_MSG(check_support_fast_math(output_tile, kernel_size), "This Winograd configuration requires enable_fast_math=true");
     }
 
-    _weights = weights;
-    _input   = input;
-    _output  = output;
+    _weights     = weights;
+    _input       = input;
+    _output      = output;
+    _is_prepared = false;
 
     std::unique_ptr<INEWinogradLayerTransformInputKernel<float>>   transform_input_kernel;
     std::unique_ptr<INEWinogradLayerTransformWeightsKernel<float>> transform_weights_kernel;
@@ -198,10 +199,13 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     const Tensor4DShape in_shape(internal_get_input_shape(input));
     const size_t        data_type_size = input->info()->element_size();
     // Get the memory required to instantiate a new Winograd operator.
-    constexpr size_t storage_alignment   = 64;
-    const size_t     kernel_storage_size = transform_weights_kernel->get_weight_storage_size(out_channels, in_channels) * data_type_size;
+    constexpr size_t storage_alignment = 64;
+
+    // Kernel Storage
+    const size_t kernel_storage_size = transform_weights_kernel->get_weight_storage_size(out_channels, in_channels) * data_type_size;
     _kernel_storage.allocator()->init(TensorInfo(TensorShape{ (kernel_storage_size + storage_alignment - 1) }, 1, DataType::U8));
     _kernel_storage.allocator()->allocate();
+
     // Input storage
     const size_t input_storage_size = transform_input_kernel->get_input_storage_size(in_shape.n_batches, in_shape.n_channels, in_shape.n_rows, in_shape.n_cols, use_same_padding) * data_type_size;
     _input_workspace.allocator()->init(TensorInfo(TensorShape{ (input_storage_size + storage_alignment - 1) }, 1, DataType::U8));
@@ -331,13 +335,9 @@ void NEWinogradConvolutionLayer::run()
 {
     const DataLayout data_layout = _input->info()->data_layout();
 
+    prepare();
+
     _memory_group.acquire();
-    if(!_reshaped_kernel)
-    {
-        _reshaped_kernel = true;
-        _permute_weights.run();
-        NEScheduler::get().schedule(_transform_weights_kernel.get(), Window::DimX);
-    }
 
     if(data_layout == DataLayout::NCHW)
     {
@@ -489,6 +489,22 @@ Status NEWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITen
         NEActivationLayer::validate(output, nullptr, act_info);
     }
     return Status{};
+}
+
+void NEWinogradConvolutionLayer::prepare()
+{
+    if(!_is_prepared)
+    {
+        // Permute weights
+        _permute_weights.run();
+        _weights->mark_as_unused();
+
+        // Transform weights
+        NEScheduler::get().schedule(_transform_weights_kernel.get(), Window::DimX);
+        _weights_hwio.allocator()->free();
+
+        _is_prepared = true;
+    }
 }
 
 } // namespace arm_compute

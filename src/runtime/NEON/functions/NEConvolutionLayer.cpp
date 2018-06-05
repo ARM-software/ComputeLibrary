@@ -155,6 +155,12 @@ ConvolutionMethod NEConvolutionLayer::get_convolution_method(const ITensorInfo *
 
 void NEConvolutionLayer::run()
 {
+    prepare();
     _function->run();
+}
+
+void NEConvolutionLayer::prepare()
+{
+    _function->prepare();
 }
 } // namespace arm_compute

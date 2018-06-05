@@ -195,7 +195,6 @@ private:
     bool _is_quantized;
     bool _is_activationlayer_enabled;
     bool _is_prepared;
-    bool _retain_internal_weights;
 };
 }
 #endif /* __ARM_COMPUTE_CLGEMMCONVOLUTIONLAYER_H__ */

@@ -38,7 +38,8 @@ NEDeconvolutionLayer::NEDeconvolutionLayer(std::shared_ptr<IMemoryManager> memor
       _scaled_output(),
       _input(nullptr),
       _info(),
-      _inner_border()
+      _inner_border(),
+      _is_prepared(false)
 {
 }
 
@@ -104,6 +105,7 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
     _input        = input;
     _info         = info;
     _inner_border = std::make_pair(inner_border_right, inner_border_top);
+    _is_prepared  = false;
 
     const unsigned int stride_x = info.stride().first;
     const unsigned int stride_y = info.stride().second;
@@ -132,13 +134,21 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
 
 void NEDeconvolutionLayer::run()
 {
+    prepare();
+
     _memory_group.acquire();
 
-    // Run upsample kernel
     _upsample_f.run();
-
-    // Run convolution layer
     _conv_f.run();
 
     _memory_group.release();
+}
+
+void NEDeconvolutionLayer::prepare()
+{
+    if(!_is_prepared)
+    {
+        _conv_f.prepare();
+        _is_prepared = true;
+    }
 }

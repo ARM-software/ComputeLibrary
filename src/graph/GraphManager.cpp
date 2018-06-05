@@ -76,12 +76,8 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     detail::allocate_const_tensors(graph);
     detail::call_all_const_node_accessors(graph);
 
-    // TODO (COMPMID-920) : Update prepare for NEON/GC
-    if(forced_target == Target::CL)
-    {
-        // Prepare graph
-        detail::prepare_all_tasks(workload);
-    }
+    // Prepare graph
+    detail::prepare_all_tasks(workload);
 
     // Setup tensor memory (Allocate all tensors or setup transition manager)
     if(ctx.config().use_transition_memory_manager)
@@ -99,16 +95,6 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     // Register graph
     _workloads.insert(std::make_pair(graph.id(), std::move(workload)));
     ARM_COMPUTE_LOG_GRAPH_VERBOSE("Created workload for graph with ID : " << graph.id().get() << std::endl);
-
-    // TODO (COMPMID-920) : Update prepare for NEON/GC
-    if(forced_target != Target::CL)
-    {
-        // Make first run
-        execute_graph(graph);
-
-        // Release all unused const tensors
-        detail::release_unused_tensors(graph);
-    }
 }
 
 void GraphManager::execute_graph(Graph &graph)

@@ -38,7 +38,8 @@ CLDeconvolutionLayer::CLDeconvolutionLayer(std::shared_ptr<IMemoryManager> memor
     : _memory_group(std::move(memory_manager)),
       _scale_f(),
       _conv_f(),
-      _scaled_output()
+      _scaled_output(),
+      _is_prepared(false)
 {
 }
 
@@ -104,6 +105,8 @@ void CLDeconvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights,
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(CLDeconvolutionLayer::validate(input->info(), weights->info(), bias == nullptr ? nullptr : bias->info(), output->info(), info, inner_border_right, inner_border_top));
 
+    _is_prepared = false;
+
     _memory_group.manage(&_scaled_output);
 
     // configure scale function
@@ -126,8 +129,21 @@ void CLDeconvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights,
 
 void CLDeconvolutionLayer::run()
 {
+    prepare();
+
     _memory_group.acquire();
+
     _scale_f.run();
     _conv_f.run();
+
     _memory_group.release();
+}
+
+void CLDeconvolutionLayer::prepare()
+{
+    if(!_is_prepared)
+    {
+        _conv_f.prepare();
+        _is_prepared = true;
+    }
 }

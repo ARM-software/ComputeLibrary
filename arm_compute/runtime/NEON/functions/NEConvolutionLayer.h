@@ -112,6 +112,7 @@ public:
                                                     const WeightsInfo &weights_info = WeightsInfo(), const Size2D &dilation = Size2D(1U, 1U), const ActivationLayerInfo &act_info = ActivationLayerInfo(), bool enable_fast_math = false);
     // Inherited methods overridden:
     void run() override;
+    void prepare() override;
 
 private:
     std::shared_ptr<IMemoryManager> _memory_manager;

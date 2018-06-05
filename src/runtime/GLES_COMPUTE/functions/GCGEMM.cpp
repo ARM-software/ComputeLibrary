@@ -73,8 +73,8 @@ Status validate_arguments(const ITensorInfo *a, const ITensorInfo *b, const IGCT
 } // namespace
 
 GCGEMM::GCGEMM(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _ma_kernel(), _tmp_a(), _tmp_b(), _is_interleaved_transposed(false), _run_addition(false),
-      _is_first_run(true), _reshape_b_only_on_first_run(false)
+    : _memory_group(std::move(memory_manager)), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _ma_kernel(), _tmp_a(), _tmp_b(), _original_b(nullptr), _is_interleaved_transposed(false),
+      _run_addition(false), _reshape_b_only_on_first_run(false), _is_prepared(false)
 {
 }
 
@@ -87,6 +87,8 @@ void GCGEMM::configure(const IGCTensor *a, const IGCTensor *b, const IGCTensor *
 
     // Check if we need to reshape the matrix B only on the first run
     _reshape_b_only_on_first_run = gemm_info.reshape_b_only_on_first_run();
+    _is_prepared                 = false;
+    _original_b                  = b;
 
     const IGCTensor *matrix_a = a;
     const IGCTensor *matrix_b = b;
@@ -136,7 +138,10 @@ void GCGEMM::configure(const IGCTensor *a, const IGCTensor *b, const IGCTensor *
     {
         // Allocate intermediate tensors
         _tmp_a.allocator()->allocate();
-        _tmp_b.allocator()->allocate();
+        if(!_reshape_b_only_on_first_run)
+        {
+            _tmp_b.allocator()->allocate();
+        }
     }
 
     // Configure matrix addition kernel
@@ -155,23 +160,21 @@ Status GCGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const IGCTen
 
 void GCGEMM::run()
 {
+    prepare();
+
     _memory_group.acquire();
+
     if(_is_interleaved_transposed)
     {
         // Run interleave kernel
         GCScheduler::get().dispatch(_interleave_kernel, false);
 
-        if(_is_first_run)
-        {
-            // Run transpose kernel
-            GCScheduler::get().dispatch(_transpose_kernel, false);
-            _is_first_run = false;
-        }
-        else if(!_reshape_b_only_on_first_run)
+        if(!_reshape_b_only_on_first_run)
         {
             // Run transpose kernel
             GCScheduler::get().dispatch(_transpose_kernel, false);
         }
+
         GCScheduler::get().memory_barrier();
     }
 
@@ -184,5 +187,27 @@ void GCGEMM::run()
         GCScheduler::get().memory_barrier();
         GCScheduler::get().dispatch(_ma_kernel);
     }
+
     _memory_group.release();
+}
+
+void GCGEMM::prepare()
+{
+    if(!_is_prepared)
+    {
+        if(_is_interleaved_transposed && _reshape_b_only_on_first_run)
+        {
+            ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
+
+            // Run transpose kernel
+            _tmp_b.allocator()->allocate();
+            GCScheduler::get().dispatch(_transpose_kernel, false);
+            GCScheduler::get().memory_barrier();
+
+            // Mark original weights tensor as unused
+            _original_b->mark_as_unused();
+        }
+
+        _is_prepared = true;
+    }
 }

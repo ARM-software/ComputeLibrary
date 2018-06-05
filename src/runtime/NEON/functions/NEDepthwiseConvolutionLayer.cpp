@@ -172,7 +172,7 @@ void NEDepthwiseConvolutionLayer3x3::run()
 
 NEDepthwiseConvolutionLayer::NEDepthwiseConvolutionLayer()
     : _im2col_kernel(), _weights_reshape_kernel(), _v2mm_kernel(), _vector_to_tensor_kernel(), _output_stage_kernel(), _v2mm_input_fill_border(), _v2mm_weights_fill_border(), _input_reshaped(),
-      _weights_reshaped(), _v2mm_output(), _output_reshaped(), _is_first_run(true), _is_quantized(false), _original_weights(nullptr)
+      _weights_reshaped(), _v2mm_output(), _output_reshaped(), _is_prepared(false), _is_quantized(false), _original_weights(nullptr)
 {
 }
 
@@ -187,7 +187,7 @@ void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weigh
     const size_t weights_z = weights->info()->dimension(2);
 
     _is_quantized     = is_data_type_quantized_asymmetric(input->info()->data_type());
-    _is_first_run     = true;
+    _is_prepared      = false;
     _original_weights = weights;
 
     // Should bias be appended ?
@@ -260,24 +260,12 @@ void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weigh
 
     // Allocate intermediate tensors
     _input_reshaped.allocator()->allocate();
-    _weights_reshaped.allocator()->allocate();
     _v2mm_output.allocator()->allocate();
 }
 
 void NEDepthwiseConvolutionLayer::run()
 {
-    // Run weights reshaping (Runs once for every configure)
-    if(_is_first_run)
-    {
-        ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
-
-        NEScheduler::get().schedule(&_weights_reshape_kernel, Window::DimX);
-        NEScheduler::get().schedule(&_v2mm_weights_fill_border, Window::DimX);
-        _is_first_run = false;
-
-        // Mark original weights tensor as unused
-        _original_weights->mark_as_unused();
-    }
+    prepare();
 
     NEScheduler::get().schedule(&_im2col_kernel, Window::DimX);
     NEScheduler::get().schedule(&_v2mm_input_fill_border, Window::DimX);
@@ -286,5 +274,21 @@ void NEDepthwiseConvolutionLayer::run()
     if(_is_quantized)
     {
         NEScheduler::get().schedule(&_output_stage_kernel, Window::DimX);
+    }
+}
+
+void NEDepthwiseConvolutionLayer::prepare()
+{
+    if(!_is_prepared)
+    {
+        ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
+
+        // Run reshape and mark original weights as unused
+        _weights_reshaped.allocator()->allocate();
+        NEScheduler::get().schedule(&_weights_reshape_kernel, Window::DimX);
+        NEScheduler::get().schedule(&_v2mm_weights_fill_border, Window::DimX);
+        _original_weights->mark_as_unused();
+
+        _is_prepared = true;
     }
 }

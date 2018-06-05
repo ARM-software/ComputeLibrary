@@ -122,6 +122,7 @@ public:
 
     // Inherited methods overriden:
     void run() override;
+    void prepare() override;
 
 private:
     NEDepthwiseIm2ColKernel                   _im2col_kernel;
@@ -135,7 +136,7 @@ private:
     Tensor                                    _weights_reshaped;
     Tensor                                    _v2mm_output;
     Tensor                                    _output_reshaped;
-    bool                                      _is_first_run;
+    bool                                      _is_prepared;
     bool                                      _is_quantized;
     const ITensor                            *_original_weights;
 };

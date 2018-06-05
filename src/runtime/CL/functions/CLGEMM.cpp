@@ -84,12 +84,10 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate(a->info(), b->info(), c != nullptr ? c->info() : nullptr, output->info(), alpha, beta, gemm_info));
 
-    // Store original b matrix
-    _original_b = b;
-
     // Check if we need to reshape the matrix B only on the first run
     _reshape_b_only_on_first_run = gemm_info.reshape_b_only_on_first_run();
     _is_prepared                 = false;
+    _original_b                  = b;
 
     const ICLTensor *matrix_a = a;
     const ICLTensor *matrix_b = b;
@@ -262,7 +260,7 @@ void CLGEMM::prepare()
     {
         if(_is_interleaved_transposed && _reshape_b_only_on_first_run)
         {
-            // Run transpose kernel
+            // Run transpose kernel and mark original weights tensor as unused
             _tmp_b.allocator()->allocate();
             CLScheduler::get().enqueue(_transpose_kernel, false);
             _original_b->mark_as_unused();

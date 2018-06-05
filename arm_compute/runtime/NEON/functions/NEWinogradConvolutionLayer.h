@@ -74,6 +74,7 @@ public:
 
     // Inherited methods overridden:
     void run() override;
+    void prepare() override;
 
     /** Static function to check if given info will lead to a valid configuration of @ref NEGEMMConvolutionLayer
      *
@@ -122,7 +123,7 @@ private:
     const ITensor *_input;
     const ITensor *_weights;
     ITensor       *_output;
-    bool           _reshaped_kernel;
+    bool           _is_prepared;
     bool           _is_activationlayer_enabled;
 };
 }

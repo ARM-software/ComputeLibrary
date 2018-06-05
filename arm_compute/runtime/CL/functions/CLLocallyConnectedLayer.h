@@ -90,6 +90,7 @@ public:
 
     // Inherited methods overridden:
     void run() override;
+    void prepare() override;
 
 private:
     CLMemoryGroup                          _memory_group;
@@ -100,7 +101,7 @@ private:
     CLTensor                               _input_im2col_reshaped;
     CLTensor                               _weights_reshaped;
     CLTensor                               _gemm_output;
-    bool                                   _is_first_run;
+    bool                                   _is_prepared;
     const ICLTensor                       *_original_weights;
 };
 }

@@ -140,6 +140,7 @@ public:
 
     // Inherited methods overriden:
     void run() override;
+    void prepare() override;
 
 private:
     CLDepthwiseIm2ColKernel                   _im2col_kernel;
@@ -153,7 +154,7 @@ private:
     CLTensor                                  _weights_reshaped;
     CLTensor                                  _v2mm_output;
     CLTensor                                  _output_reshaped;
-    bool                                      _is_first_run;
+    bool                                      _is_prepared;
     bool                                      _is_quantized;
     const ICLTensor                          *_original_weights;
 };

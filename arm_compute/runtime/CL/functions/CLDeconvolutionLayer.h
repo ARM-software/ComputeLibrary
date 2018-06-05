@@ -94,12 +94,14 @@ public:
 
     // Inherited methods overridden:
     void run() override;
+    void prepare() override;
 
 private:
     CLMemoryGroup                _memory_group;
     CLDeconvolutionLayerUpsample _scale_f;
     CLConvolutionLayer           _conv_f;
     CLTensor                     _scaled_output;
+    bool                         _is_prepared;
 };
 }
 #endif /* __ARM_COMPUTE_CLDECONVOLUTIONLAYER_H__ */

@@ -127,22 +127,23 @@ public:
 
     //Inherited methods override
     void run() override;
+    void prepare() override;
 
 private:
     MemoryGroup                         _memory_group;
     NEIm2ColKernel                      _im2col_kernel;
-    NEFullyConnectedLayerReshapeWeights _reshape_weights_kernel;
+    NEFullyConnectedLayerReshapeWeights _reshape_weights_function;
     NEGEMMInterleave4x4Kernel           _interleave4x4_kernel;
     NEGEMMMatrixMultiplyKernel          _mm_kernel;
     NEGEMMMatrixAccumulateBiasesKernel  _accumulate_biases_kernel;
     Tensor                              _im2col_output;
     Tensor                              _interleave4x4_output;
     Tensor                              _reshape_weights_output;
-    bool                                _are_weights_reshaped;
+    const ITensor                      *_original_weights;
     bool                                _is_batched_fc_layer;
     bool                                _linearize_input;
     bool                                _accumulate_biases;
-    const ITensor                      *_original_weights;
+    bool                                _is_prepared;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEFULLYCONNECTEDLAYER_H__ */

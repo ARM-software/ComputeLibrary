@@ -73,7 +73,7 @@ void calculate_shapes(const ITensorInfo *input, const ITensorInfo *weights, cons
 
 CLLocallyConnectedLayer::CLLocallyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _input_im2col_kernel(), _weights_reshape_kernel(), _mm_kernel(), _output_col2im_kernel(), _input_im2col_reshaped(), _weights_reshaped(), _gemm_output(),
-      _is_first_run(false), _original_weights(nullptr)
+      _is_prepared(false), _original_weights(nullptr)
 {
 }
 
@@ -128,7 +128,7 @@ void CLLocallyConnectedLayer::configure(const ICLTensor *input, const ICLTensor 
 
     bool _has_bias    = (biases != nullptr);
     _original_weights = weights;
-    _is_first_run     = true;
+    _is_prepared      = false;
 
     const unsigned int kernel_width  = weights->info()->dimension(0);
     const unsigned int kernel_height = weights->info()->dimension(1);
@@ -160,7 +160,6 @@ void CLLocallyConnectedLayer::configure(const ICLTensor *input, const ICLTensor 
     _output_col2im_kernel.configure(&_gemm_output, output, std::make_pair(conv_w, conv_h));
 
     // Allocate intermediate tensors
-    _weights_reshaped.allocator()->allocate();
     _input_im2col_reshaped.allocator()->allocate();
     _gemm_output.allocator()->allocate();
 
@@ -169,17 +168,7 @@ void CLLocallyConnectedLayer::configure(const ICLTensor *input, const ICLTensor 
 
 void CLLocallyConnectedLayer::run()
 {
-    // Run weights reshaping (Runs once for every configure)
-    if(_is_first_run)
-    {
-        ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
-
-        _is_first_run = false;
-        CLScheduler::get().enqueue(_weights_reshape_kernel);
-
-        // Mark original weights tensor as unused
-        _original_weights->mark_as_unused();
-    }
+    prepare();
 
     _memory_group.acquire();
 
@@ -193,4 +182,20 @@ void CLLocallyConnectedLayer::run()
     CLScheduler::get().enqueue(_output_col2im_kernel, false);
 
     _memory_group.release();
+}
+
+void CLLocallyConnectedLayer::prepare()
+{
+    if(!_is_prepared)
+    {
+        ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
+
+        // Run weights reshaping and mark original weights tensor as unused
+        _weights_reshaped.allocator()->allocate();
+        CLScheduler::get().enqueue(_weights_reshape_kernel);
+        _original_weights->mark_as_unused();
+
+        CLScheduler::get().queue().finish();
+        _is_prepared = true;
+    }
 }

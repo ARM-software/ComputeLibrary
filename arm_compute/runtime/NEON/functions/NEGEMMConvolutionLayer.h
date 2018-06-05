@@ -153,6 +153,7 @@ public:
 
     // Inherited methods overridden:
     void run() override;
+    void prepare() override;
 
 private:
     /** Configures the appropriate matrix multiply routine
@@ -197,6 +198,7 @@ private:
     bool       _is_interleaved;
     bool       _is_activationlayer_enabled;
     bool       _skip_im2col;
+    bool       _is_prepared;
 };
 }
 #endif /* __ARM_COMPUTE_NECONVOLUTIONGEMMLAYER_H__ */

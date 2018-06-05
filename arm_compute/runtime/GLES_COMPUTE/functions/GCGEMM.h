@@ -50,7 +50,14 @@ class GCGEMM : public IFunction
 public:
     /** Default constructor. */
     GCGEMM(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
-
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    GCGEMM(const GCGEMM &) = delete;
+    /** Default move constructor */
+    GCGEMM(GCGEMM &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    GCGEMM &operator=(const GCGEMM &) = delete;
+    /** Default move assignment operator */
+    GCGEMM &operator=(GCGEMM &&) = default;
     /** Initialise the kernel's inputs and output
      *
      * @note GEMM: General Matrix Multiply - [alpha * A * B + beta * C].
@@ -86,6 +93,7 @@ public:
 
     // Inherited methods overridden:
     void run() override;
+    void prepare() override;
 
 private:
     GCMemoryGroup              _memory_group;
@@ -95,10 +103,11 @@ private:
     GCGEMMMatrixAdditionKernel _ma_kernel;
     GCTensor                   _tmp_a;
     GCTensor                   _tmp_b;
+    const IGCTensor           *_original_b;
     bool                       _is_interleaved_transposed;
     bool                       _run_addition;
-    bool                       _is_first_run;
     bool                       _reshape_b_only_on_first_run;
+    bool                       _is_prepared;
 };
 }
 

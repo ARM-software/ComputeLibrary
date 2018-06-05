@@ -59,8 +59,23 @@ inline bool is_interleaved_transposed(int m, int n, int k, bool reshape_b_only_o
 } // namespace
 
 CLGEMMLowpMatrixMultiplyCore::CLGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _mm_kernel(), _mtx_a_reshape_kernel(), _mtx_b_reshape_kernel(), _mtx_a_reduction_kernel(), _mtx_b_reduction_kernel(), _offset_contribution_kernel(),
-      _vector_sum_col(), _vector_sum_row(), _tmp_a(), _tmp_b(), _a_offset(0), _b_offset(0), _is_interleaved_transposed(true), _is_first_run(true), _reshape_b_only_on_first_run(false)
+    : _memory_group(std::move(memory_manager)),
+      _mm_kernel(),
+      _mtx_a_reshape_kernel(),
+      _mtx_b_reshape_kernel(),
+      _mtx_a_reduction_kernel(),
+      _mtx_b_reduction_kernel(),
+      _offset_contribution_kernel(),
+      _vector_sum_col(),
+      _vector_sum_row(),
+      _tmp_a(),
+      _tmp_b(),
+      _original_b(nullptr),
+      _a_offset(0),
+      _b_offset(0),
+      _is_interleaved_transposed(true),
+      _reshape_b_only_on_first_run(false),
+      _is_prepared(false)
 {
 }
 
@@ -70,6 +85,8 @@ void CLGEMMLowpMatrixMultiplyCore::configure(const ICLTensor *a, const ICLTensor
     ARM_COMPUTE_UNUSED(gemm_info);
     ARM_COMPUTE_ERROR_THROW_ON(CLGEMMLowpMatrixMultiplyCore::validate(a->info(), b->info(), output->info(), gemm_info));
 
+    _is_prepared                 = false;
+    _original_b                  = b;
     _reshape_b_only_on_first_run = gemm_info.reshape_b_only_on_first_run();
     _a_offset                    = a->info()->quantization_info().offset;
     _b_offset                    = b->info()->quantization_info().offset;
@@ -149,10 +166,13 @@ void CLGEMMLowpMatrixMultiplyCore::configure(const ICLTensor *a, const ICLTensor
     if(_is_interleaved_transposed)
     {
         _tmp_a.allocator()->allocate();
-        _tmp_b.allocator()->allocate();
+        if(!_reshape_b_only_on_first_run)
+        {
+            _tmp_b.allocator()->allocate();
+        }
     }
 
-    if(_a_offset != 0)
+    if(_a_offset != 0 && !_reshape_b_only_on_first_run)
     {
         _vector_sum_col.allocator()->allocate();
     }
@@ -234,6 +254,8 @@ Status CLGEMMLowpMatrixMultiplyCore::validate(const ITensorInfo *a, const ITenso
 
 void CLGEMMLowpMatrixMultiplyCore::run()
 {
+    prepare();
+
     _memory_group.acquire();
 
     if(_is_interleaved_transposed)
@@ -241,21 +263,17 @@ void CLGEMMLowpMatrixMultiplyCore::run()
         // Run reshape matrix A
         CLScheduler::get().enqueue(_mtx_a_reshape_kernel, false);
 
-        if(_is_first_run || !_reshape_b_only_on_first_run)
+        if(!_reshape_b_only_on_first_run)
         {
             // Run reshape matrix B
             CLScheduler::get().enqueue(_mtx_b_reshape_kernel, false);
         }
     }
 
-    // Note: if _reshape_b_only_on_first_run = true, the reduction kernel can be executed only once
-    if(_is_first_run || !_reshape_b_only_on_first_run)
+    // Run matrix B reduction kernel only if _a_offset is not equal to 0
+    if(_a_offset != 0 && !_reshape_b_only_on_first_run)
     {
-        // Run matrix B reduction kernel only if _a_offset is not equal to 0
-        if(_a_offset != 0)
-        {
-            CLScheduler::get().enqueue(_mtx_b_reduction_kernel, false);
-        }
+        CLScheduler::get().enqueue(_mtx_b_reduction_kernel, false);
     }
 
     // Run matrix multiply
@@ -271,6 +289,30 @@ void CLGEMMLowpMatrixMultiplyCore::run()
     CLScheduler::get().enqueue(_offset_contribution_kernel, true);
 
     _memory_group.release();
+}
 
-    _is_first_run = false;
+void CLGEMMLowpMatrixMultiplyCore::prepare()
+{
+    if(!_is_prepared)
+    {
+        if(_is_interleaved_transposed && _reshape_b_only_on_first_run)
+        {
+            ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
+
+            // Run reshape kernel and mark original weights tensor as unused
+            _tmp_b.allocator()->allocate();
+            CLScheduler::get().enqueue(_mtx_b_reshape_kernel, false);
+            _original_b->mark_as_unused();
+        }
+
+        // Run matrix B reduction kernel only if _a_offset is not equal to 0
+        if(_a_offset != 0 && _reshape_b_only_on_first_run)
+        {
+            _vector_sum_col.allocator()->allocate();
+            CLScheduler::get().enqueue(_mtx_b_reduction_kernel, false);
+        }
+
+        CLScheduler::get().queue().finish();
+        _is_prepared = true;
+    }
 }

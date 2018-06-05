@@ -63,7 +63,6 @@ public:
 
 private:
     GCWeightsReshapeKernel _weights_reshape_kernel;
-    GCTensor               _weights_reshaped;
 };
 
 /** Basic function to compute the convolution layer. This function calls the following GLES kernels:
@@ -128,6 +127,7 @@ public:
 
     // Inherited methods overridden:
     void run() override;
+    void prepare() override;
 
 private:
     /** Configures the appropriate matrix multiply routine
@@ -166,8 +166,8 @@ private:
     GCTensor _gemm_output;
     GCTensor _tmp_output;
 
-    bool _is_first_run;
     bool _is_activationlayer_enabled;
+    bool _is_prepared;
 };
 }
 

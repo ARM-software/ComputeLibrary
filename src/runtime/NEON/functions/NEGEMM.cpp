@@ -40,7 +40,7 @@ namespace arm_compute
 {
 NEGEMM::NEGEMM(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(std::move(memory_manager)), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _asm_glue(), _ma_kernel(), _tmp_a(), _tmp_b(), _workspace(), _B_pretransposed(),
-      _run_vector_matrix_multiplication(false), _run_addition(false), _is_first_run(true), _reshape_b_only_on_first_run(false)
+      _original_b(nullptr), _run_vector_matrix_multiplication(false), _run_addition(false), _reshape_b_only_on_first_run(false), _is_prepared(false)
 {
 }
 
@@ -63,8 +63,11 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
     }
 
     // Check if we need to reshape the matrix B only on the first run
+    _is_prepared                      = false;
     _reshape_b_only_on_first_run      = gemm_info.reshape_b_only_on_first_run();
     _run_vector_matrix_multiplication = a->info()->dimension(1) < 2;
+    _original_b                       = b;
+    _asm_glue._optimised_kernel       = nullptr;
 
     const bool run_optimised = a->info()->data_type() == DataType::F32 && (c == nullptr || beta == 0.f)
                                && setup_assembly_kernel(a, b, d, alpha, beta, _reshape_b_only_on_first_run, _workspace, _B_pretransposed, _memory_group, _asm_glue);
@@ -128,7 +131,10 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
 
             // Allocate once the all configure methods have been called
             _tmp_a.allocator()->allocate();
-            _tmp_b.allocator()->allocate();
+            if(!_reshape_b_only_on_first_run)
+            {
+                _tmp_b.allocator()->allocate();
+            }
 
             // Configure matrix addition kernel
             if(beta != 0 && c != nullptr)
@@ -142,28 +148,24 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
 
 void NEGEMM::run()
 {
-    _memory_group.acquire();
+    prepare();
 
     if(_asm_glue._optimised_kernel != nullptr)
     {
+        _memory_group.acquire();
         _asm_glue.run();
         _memory_group.release();
     }
     else
     {
+        _memory_group.acquire();
+
         if(!_run_vector_matrix_multiplication)
         {
             // Run interleave kernel
             NEScheduler::get().schedule(&_interleave_kernel, Window::DimY);
 
-            if(_is_first_run)
-            {
-                // Run transpose kernel
-                NEScheduler::get().schedule(&_transpose_kernel, Window::DimY);
-
-                _is_first_run = false;
-            }
-            else if(!_reshape_b_only_on_first_run)
+            if(!_reshape_b_only_on_first_run)
             {
                 // Run transpose kernel
                 NEScheduler::get().schedule(&_transpose_kernel, Window::DimY);
@@ -179,6 +181,30 @@ void NEGEMM::run()
         {
             NEScheduler::get().schedule(&_ma_kernel, Window::DimY);
         }
+    }
+}
+
+void NEGEMM::prepare()
+{
+    if(!_is_prepared)
+    {
+        if(_asm_glue._optimised_kernel)
+        {
+            ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
+
+            _asm_glue.prepare();
+            _original_b->mark_as_unused();
+        }
+        else if(_reshape_b_only_on_first_run && !_run_vector_matrix_multiplication && !_asm_glue._optimised_kernel)
+        {
+            ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
+
+            _tmp_b.allocator()->allocate();
+            NEScheduler::get().schedule(&_transpose_kernel, Window::DimY);
+            _original_b->mark_as_unused();
+        }
+
+        _is_prepared = true;
     }
 }
 } // namespace arm_compute

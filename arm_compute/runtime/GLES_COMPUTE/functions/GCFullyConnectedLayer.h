@@ -65,6 +65,14 @@ class GCFullyConnectedLayer : public IFunction
 public:
     /** Constructor */
     GCFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    GCFullyConnectedLayer(const GCFullyConnectedLayer &) = delete;
+    /** Default move constructor */
+    GCFullyConnectedLayer(GCFullyConnectedLayer &&) = default;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    GCFullyConnectedLayer &operator=(const GCFullyConnectedLayer &) = delete;
+    /** Default move assignment operator */
+    GCFullyConnectedLayer &operator=(GCFullyConnectedLayer &&) = default;
     /** Set the input and output tensors.
      *
      * @param[in]  input                   Source tensor. Data type supported: F16/F32.
@@ -81,6 +89,7 @@ public:
 
     //Inherited methods override
     void run() override;
+    void prepare() override;
 
 private:
     void configure_fc_fc(const IGCTensor *input, const IGCTensor *weights, IGCTensor *output);
@@ -93,6 +102,7 @@ private:
     GCGEMMMatrixAccumulateBiasesKernel  _accumulate_biases_kernel;
     GCTensor                            _im2col_output;
     GCTensor                            _reshape_weights_output;
+    const IGCTensor                    *_original_weights;
     bool                                _are_weights_reshaped;
     bool                                _is_fc_after_conv;
     bool                                _accumulate_biases;
