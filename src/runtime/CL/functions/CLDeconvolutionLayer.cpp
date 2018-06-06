@@ -43,7 +43,7 @@ CLDeconvolutionLayer::CLDeconvolutionLayer(std::shared_ptr<IMemoryManager> memor
 }
 
 Status CLDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, ITensorInfo *output, const PadStrideInfo &info,
-                                      unsigned int inner_border_right, unsigned int inner_border_top)
+                                      unsigned int inner_border_right, unsigned int inner_border_top, const WeightsInfo &weights_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
@@ -80,13 +80,13 @@ Status CLDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
     const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
 
     ARM_COMPUTE_RETURN_ON_ERROR(CLDeconvolutionLayerUpsample::validate(input, &scale_out_info, BorderSize(inner_border_right, inner_border_top), info));
-    ARM_COMPUTE_RETURN_ON_ERROR(CLConvolutionLayer::validate(&scale_out_info, weights, bias, output, conv_info, WeightsInfo()));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLConvolutionLayer::validate(&scale_out_info, weights, bias, output, conv_info, weights_info));
 
     return Status{};
 }
 
 void CLDeconvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const PadStrideInfo &info,
-                                     unsigned int inner_border_right, unsigned int inner_border_top)
+                                     unsigned int inner_border_right, unsigned int inner_border_top, const WeightsInfo &weights_info)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
 
@@ -120,7 +120,7 @@ void CLDeconvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights,
 
     // setup the function to convolve the upscaled output
     const PadStrideInfo conv_info(1, 1, 0, 0, 0, 0, DimensionRoundingType::CEIL);
-    _conv_f.configure(&_scaled_output, weights, bias, output, conv_info);
+    _conv_f.configure(&_scaled_output, weights, bias, output, conv_info, weights_info);
     _scaled_output.allocator()->allocate();
 }
 

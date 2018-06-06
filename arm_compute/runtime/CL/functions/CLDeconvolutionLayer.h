@@ -71,10 +71,11 @@ public:
      * @param[in]     info               Contains padding and policies to be used in the deconvolution, this is decribed in @ref PadStrideInfo.
      * @param[in]     inner_border_right The number of zeros added to right edge of the input.
      * @param[in]     inner_border_top   The number of zeros added to top edge of the input.
+     * @param[in]     weights_info       (Optional) Weights information needed for @ref CLConvolutionLayer, specifies if the weights tensor has been reshaped with @ref CLWeightsReshapeKernel.
      *
      */
     void configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *bias, ICLTensor *output, const PadStrideInfo &info,
-                   unsigned int inner_border_right, unsigned int inner_border_top);
+                   unsigned int inner_border_right, unsigned int inner_border_top, const WeightsInfo &weights_info = WeightsInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLDeconvolutionLayer
      *
      * @param[in] input              Input tensor info. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: F16/F32.
@@ -84,11 +85,12 @@ public:
      * @param[in] info               Contains padding and policies to be used in the deconvolution, this is decribed in @ref PadStrideInfo.
      * @param[in] inner_border_right The number of zeros added to right edge of the input.
      * @param[in] inner_border_top   The number of zeros added to top edge of the input.
+     * @param[in] weights_info       (Optional) Weights information needed for @ref CLConvolutionLayer, specifies if the weights tensor has been reshaped with @ref CLWeightsReshapeKernel.
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *bias, ITensorInfo *output, const PadStrideInfo &info,
-                           unsigned int inner_border_right, unsigned int inner_border_top);
+                           unsigned int inner_border_right, unsigned int inner_border_top, const WeightsInfo &weights_info = WeightsInfo());
 
     // Inherited methods overridden:
     void run() override;
