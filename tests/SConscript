@@ -57,6 +57,10 @@ Help(new_options.GenerateHelpText(test_env))
 Import("arm_compute_test_framework")
 test_env.Append(LIBS = arm_compute_test_framework)
 
+# Remove -Wnoexcept from tests
+if 'g++' in test_env['CXX'] and '-Wnoexcept' in test_env['CXXFLAGS']:
+    test_env['CXXFLAGS'].remove("-Wnoexcept")
+
 if env['os'] in ['android', 'bare_metal'] or env['standalone']:
     Import("arm_compute_a")
     Import("arm_compute_core_a")

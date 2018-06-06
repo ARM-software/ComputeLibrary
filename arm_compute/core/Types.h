@@ -127,8 +127,9 @@ enum class DataLayoutDimension
 struct QuantizationInfo
 {
     /** Default constructor */
-    QuantizationInfo()
-        : scale(0.0f), offset(0)
+    QuantizationInfo() noexcept
+        : scale(0.0f),
+          offset(0)
     {
     }
 
