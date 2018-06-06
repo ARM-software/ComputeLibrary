@@ -21,13 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_LAPLACIAN_PYRAMID_FIXTURE
-#define ARM_COMPUTE_TEST_LAPLACIAN_PYRAMID_FIXTURE
+#ifndef ARM_COMPUTE_TEST_LAPLACIAN_RECONSTRUCT_FIXTURE
+#define ARM_COMPUTE_TEST_LAPLACIAN_RECONSTRUCT_FIXTURE
 
 #include "arm_compute/core/TensorShape.h"
 #include "arm_compute/core/Types.h"
 #include "tests/Globals.h"
 #include "tests/Utils.h"
+#include "tests/benchmark/fixtures/LaplacianPyramidFixture.h"
 #include "tests/framework/Fixture.h"
 
 namespace arm_compute
@@ -36,48 +37,29 @@ namespace test
 {
 namespace benchmark
 {
-template <typename TensorType, typename Function, typename Accessor, typename PyramidType>
-class LaplacianPyramidFixture : public framework::Fixture
+template <typename TensorType, typename Function, typename Accessor, typename LaplacianPyramidFunc, typename PyramidType>
+class LaplacianReconstructFixture : public LaplacianPyramidFixture<TensorType, LaplacianPyramidFunc, Accessor, PyramidType>
 {
 public:
     template <typename...>
-    void setup(const TensorShape &input_shape, BorderMode border_mode, size_t num_levels, Format format_in, Format format_out)
+    void setup(TensorShape input_shape, BorderMode border_mode, size_t num_levels, Format format_in, Format format_out)
     {
         const uint8_t constant_border_value = 0;
 
-        // Initialize pyramid
-        PyramidInfo pyramid_info(num_levels, SCALE_PYRAMID_HALF, input_shape, format_out);
-
-        // Use conservative padding strategy to fit all subsequent kernels
-        pyramid.init_auto_padding(pyramid_info);
+        LPF::setup(input_shape, border_mode, num_levels, format_out, format_in);
+        LPF::run();
 
         // Create tensor
-        src = create_tensor<TensorType>(input_shape, format_in);
+        dst = create_tensor<TensorType>(input_shape, DataType::U8);
 
-        // The first two dimensions of the output tensor must match the first
-        // two dimensions of the tensor in the last level of the pyramid
-        TensorShape dst_shape(input_shape);
-        dst_shape.set(0, pyramid.get_pyramid_level(num_levels - 1)->info()->dimension(0));
-        dst_shape.set(1, pyramid.get_pyramid_level(num_levels - 1)->info()->dimension(1));
+        laplacian_reconstruct_func.configure(&(LPF::pyramid), &(LPF::dst), &dst, border_mode, constant_border_value);
 
-        // The lowest resolution tensor necessary to reconstruct the input
-        // tensor from the pyramid.
-        dst = create_tensor<TensorType>(dst_shape, format_out);
-
-        laplacian_pyramid_func.configure(&src, &pyramid, &dst, border_mode, constant_border_value);
-
-        src.allocator()->allocate();
         dst.allocator()->allocate();
-
-        pyramid.allocate();
-
-        // Fill tensor
-        library->fill_tensor_uniform(Accessor(src), 0);
     }
 
     void run()
     {
-        laplacian_pyramid_func.run();
+        laplacian_reconstruct_func.run();
     }
 
     void sync()
@@ -86,15 +68,13 @@ public:
         sync_tensor_if_necessary<TensorType>(dst);
     }
 
-protected:
-    TensorType  dst{};
-    PyramidType pyramid{};
-
 private:
-    TensorType src{};
-    Function   laplacian_pyramid_func{};
+    TensorType dst{};
+    Function   laplacian_reconstruct_func{};
+
+    using LPF = LaplacianPyramidFixture<TensorType, LaplacianPyramidFunc, Accessor, PyramidType>;
 };
 } // namespace benchmark
 } // namespace test
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_LAPLACIAN_PYRAMID_FIXTURE */
+#endif /* ARM_COMPUTE_TEST_LAPLACIAN_RECONSTRUCT_FIXTURE */
