@@ -82,15 +82,11 @@ public:
         sync_if_necessary<TensorType>();
     }
 
-    void teardown()
-    {
-        src.allocator()->free();
-        dst.allocator()->free();
-    }
+protected:
+    TensorType dst{};
 
 private:
     TensorType src{};
-    TensorType dst{};
     Function   hog_descriptor_func{};
 };
 } // namespace benchmark
