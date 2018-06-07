@@ -160,6 +160,8 @@ inline std::string get_typestring(DataType data_type)
             return endianness + "u" + support::cpp11::to_string(sizeof(uint64_t));
         case DataType::S64:
             return endianness + "i" + support::cpp11::to_string(sizeof(int64_t));
+        case DataType::F16:
+            return endianness + "f" + support::cpp11::to_string(sizeof(uint16_t));
         case DataType::F32:
             return endianness + "f" + support::cpp11::to_string(sizeof(float));
         case DataType::F64:
