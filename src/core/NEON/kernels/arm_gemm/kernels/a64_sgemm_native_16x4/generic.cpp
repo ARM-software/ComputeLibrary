@@ -56,8 +56,8 @@ void a64_sgemm_native_16x4(const float *A, int lda, const float *B, int ldb, flo
 
         float *c_ptr0 = C + (y * ldc);
         float *c_ptr1 = (activerows > 1) ? c_ptr0 + ldc : dummy_buffer;
-        float *c_ptr2 = (activerows > 1) ? c_ptr1 + ldc : dummy_buffer;
-        float *c_ptr3 = (activerows > 1) ? c_ptr2 + ldc : dummy_buffer;
+        float *c_ptr2 = (activerows > 2) ? c_ptr1 + ldc : dummy_buffer;
+        float *c_ptr3 = (activerows > 3) ? c_ptr2 + ldc : dummy_buffer;
 
         for (int x0=0; x0<N; x0+=16) {
             const float *a_ptr0 = a_ptr0_base;
