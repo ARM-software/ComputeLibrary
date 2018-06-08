@@ -51,7 +51,7 @@ public:
      * @note Winograd output transform supports the following configurations:
      *       F(output tile, kernel size):F(2x2, 3x3), F(4x4, 3x3), F(4x4, 5x5)
      *       Strides: only unit strides
-     *       Data Layout: NCHW for all configurations, NHWC for F(4x4, 3x3)
+     *       Data Layout: NCHW for all configurations, NHWC for F(4x4, 3x3) and F(4x4, 5x5)
      *
      * @param[in]  input         Source tensor with shape [C, N, K, batches]. Data types supported: F32.
      * @param[in]  bias          Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. It can be a nullptr. Data type supported: as @p input
@@ -64,7 +64,7 @@ public:
      * @note Winograd output transform supports the following configurations:
      *       F(output tile, kernel size):F(2x2, 3x3), F(4x4, 3x3), F(4x4, 5x5)
      *       Strides: only unit strides
-     *       Data Layout: NCHW for all configurations, NHWC for F(4x4, 3x3)
+     *       Data Layout: NCHW for all configurations, NHWC for F(4x4, 3x3) and F(4x4, 5x5)
      *
      * @param[in]  input         Source tensor with shape [C, N, K, batches]. Data types supported: F32.
      * @param[in]  bias          Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. It can be a nullptr. Data type supported: as @p input

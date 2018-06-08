@@ -57,6 +57,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
     const Size2D        input_dimensions = winograd_info.input_dimensions;
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size != Size2D(3U, 3U) && kernel_size != Size2D(5U, 5U), "Only 3x3 and 5x5 kernels are supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_layout() == DataLayout::NHWC && output_tile_size != Size2D(4U, 4U), "Only 4x4 output tile supported for NHWC data layout");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size == Size2D(3U, 3U) && output_tile_size == Size2D(2U, 2U) && input->dimension(2) != 16, "Wrong number of batches");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size == Size2D(3U, 3U) && output_tile_size == Size2D(4U, 4U) && input->dimension(2) != 36, "Wrong number of batches");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size == Size2D(5U, 5U) && output_tile_size == Size2D(4U, 4U) && input->dimension(2) != 64, "Wrong number of batches");
