@@ -47,7 +47,8 @@ namespace validation
 {
 namespace
 {
-const AbsoluteTolerance<float> tolerance_f32(0.002f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+RelativeTolerance<float>       rel_tolerance_f32(0.01f);  /**< Relative tolerance for FP32 types */
+const AbsoluteTolerance<float> abs_tolerance_f32(0.002f); /**< Absolute tolerance for FP32 types */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 const AbsoluteTolerance<float> tolerance_f16(0.01f);       /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
 #endif                                                     /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
@@ -127,7 +128,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEWinogradConvolutionLayerFixture<float>, frame
                                ActivationFunctionsDataset))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f32);
+    validate(Accessor(_target), _reference, abs_tolerance_f32);
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmallNoBias, NEWinogradConvolutionLayerNoBiasFixture<float>, framework::DatasetMode::PRECOMMIT,
@@ -137,7 +138,7 @@ FIXTURE_DATA_TEST_CASE(RunSmallNoBias, NEWinogradConvolutionLayerNoBiasFixture<f
                                ActivationFunctionsDataset))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f32);
+    validate(Accessor(_target), _reference, abs_tolerance_f32);
 }
 
 TEST_SUITE_END()
@@ -228,7 +229,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMConvolutionLayerFixture<float>, framework
                                                                                                                   ActivationFunctionsDataset))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f32);
+    validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeConvolutionLayerDataset(),
                                                                                                                         framework::dataset::make("ReshapeWeights", { true })),
@@ -237,7 +238,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMConvolutionLayerFixture<float>, framework
                                                                                                                 ActivationFunctionsDataset))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f32);
+    validate(Accessor(_target), _reference, rel_tolerance_f32, 0.f, float(abs_tolerance_f32));
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
