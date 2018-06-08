@@ -80,12 +80,12 @@ Status CLSoftmaxLayer::validate(const ITensorInfo *input, const ITensorInfo *out
 
     // Create intermediate tensor info
     DataType   tmp_data_type = is_data_type_quantized_asymmetric(input->data_type()) ? DataType::S32 : input->data_type();
-    TensorInfo tensor_info_tmp(input->clone()->set_data_type(tmp_data_type));
+    TensorInfo tensor_info_tmp(input->clone()->set_data_type(tmp_data_type).set_is_resizable(true));
 
     TensorShape max_sum_shape = input->tensor_shape();
     max_sum_shape.set(0, 1);
-    TensorInfo tensor_info_max(input->clone()->set_tensor_shape(max_sum_shape));
-    TensorInfo tensor_info_sum(input->clone()->set_tensor_shape(max_sum_shape).set_data_type(tmp_data_type).set_quantization_info(QuantizationInfo()));
+    TensorInfo tensor_info_max(input->clone()->set_tensor_shape(max_sum_shape).set_is_resizable(true));
+    TensorInfo tensor_info_sum(input->clone()->set_tensor_shape(max_sum_shape).set_data_type(tmp_data_type).set_quantization_info(QuantizationInfo()).set_is_resizable(true));
 
     ARM_COMPUTE_RETURN_ON_ERROR(CLLogits1DMaxShiftExpSumKernel::validate(input, &tensor_info_max, &tensor_info_tmp, &tensor_info_sum));
     ARM_COMPUTE_RETURN_ON_ERROR(CLLogits1DNormKernel::validate(&tensor_info_tmp, &tensor_info_sum, output));
