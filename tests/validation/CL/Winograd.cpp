@@ -129,7 +129,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
 
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradInputTransformFixture, framework::DatasetMode::PRECOMMIT, combine(framework::dataset::concat(combine(SmallWinogradInputTransformDataset,
                                                                                                              framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                                                                                             combine(datasets::SmallWinogradInputTransformDataset4x4_3x3(),
+                                                                                                             combine(framework::dataset::concat(datasets::SmallWinogradInputTransformDataset4x4_3x3(), datasets::SmallWinogradInputTransformDataset4x4_5x5()),
                                                                                                                      framework::dataset::make("DataLayout", { DataLayout::NHWC }))),
                                                                                                              framework::dataset::make("DataType", { DataType::F32 })))
 {
@@ -138,7 +138,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradInputTransformFixture, framework::Dat
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradInputTransformFixture, framework::DatasetMode::NIGHTLY, combine(framework::dataset::concat(combine(LargeWinogradInputTransformDataset,
                                                                                                            framework::dataset::make("DataLayout", { DataLayout::NCHW })),
-                                                                                                           combine(datasets::LargeWinogradInputTransformDataset4x4_3x3(),
+                                                                                                           combine(framework::dataset::concat(datasets::LargeWinogradInputTransformDataset4x4_3x3(), datasets::LargeWinogradInputTransformDataset4x4_5x5()),
                                                                                                                    framework::dataset::make("DataLayout", { DataLayout::NHWC }))),
                                                                                                            framework::dataset::make("DataType", { DataType::F32 })))
 {

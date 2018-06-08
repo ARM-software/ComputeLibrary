@@ -49,7 +49,7 @@ public:
      * @note Winograd input transform supports the following configurations:
      *       F(output tile, kernel size):F(2x2, 3x3), F(4x4, 3x3), F(4x4, 5x5)
      *       Strides: only unit strides
-     *       Data Layout: NCHW for all configurations, NHWC for F(4x4, 3x3)
+     *       Data Layout: NCHW for all configurations, NHWC for F(4x4, 3x3), F(4x4, 5x5)
      *
      * @param[in] input         The input tensor to transform. Data types supported: F32
      * @param[in] output        The output tensor. The shape for this tensor can be calculated using the utility function @p compute_winograd_input_transform_shape. Data types supported: Same as @p input
@@ -61,7 +61,7 @@ public:
      * @note Winograd input transform supports the following configurations:
      *       F(output tile, kernel size):F(2x2, 3x3), F(4x4, 3x3), F(4x4, 5x5)
      *       Strides: only unit strides
-     *       Data Layout: NCHW for all configurations, NHWC for F(4x4, 3x3)
+     *       Data Layout: NCHW for all configurations, NHWC for F(4x4, 3x3), F(4x4, 5x5)
      *
      * @param[in] input         The input tensor to transform. Data types supported: F32
      * @param[in] output        The output tensor. The shape for this tensor can be calculated using the utility function @p compute_winograd_input_transform_shape. Data types supported: Same as @p input
