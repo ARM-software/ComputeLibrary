@@ -29,6 +29,7 @@
 #include "arm_compute/core/CL/kernels/CLAccumulateKernel.h"
 #include "arm_compute/core/CL/kernels/CLActivationLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLArithmeticAdditionKernel.h"
+#include "arm_compute/core/CL/kernels/CLArithmeticDivisionKernel.h"
 #include "arm_compute/core/CL/kernels/CLArithmeticSubtractionKernel.h"
 #include "arm_compute/core/CL/kernels/CLBatchNormalizationLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLBitwiseAndKernel.h"

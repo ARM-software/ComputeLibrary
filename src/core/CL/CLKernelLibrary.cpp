@@ -151,6 +151,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "activation_layer_qa8", "activation_layer_qa8.cl" },
     { "arithmetic_add", "arithmetic_op.cl" },
     { "arithmetic_sub", "arithmetic_op.cl" },
+    { "arithmetic_div", "arithmetic_op.cl" },
     { "batchnormalization_layer_nchw", "batchnormalization_layer.cl" },
     { "batchnormalization_layer_nhwc", "batchnormalization_layer.cl" },
     { "bitwise_or", "bitwise_op.cl" },

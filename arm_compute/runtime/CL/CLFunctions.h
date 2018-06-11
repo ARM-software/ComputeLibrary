@@ -29,6 +29,7 @@
 #include "arm_compute/runtime/CL/functions/CLAccumulate.h"
 #include "arm_compute/runtime/CL/functions/CLActivationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLArithmeticAddition.h"
+#include "arm_compute/runtime/CL/functions/CLArithmeticDivision.h"
 #include "arm_compute/runtime/CL/functions/CLArithmeticSubtraction.h"
 #include "arm_compute/runtime/CL/functions/CLBatchNormalizationLayer.h"
 #include "arm_compute/runtime/CL/functions/CLBitwiseAnd.h"
