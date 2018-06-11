@@ -36,10 +36,6 @@ namespace validation
 {
 namespace reference
 {
-namespace
-{
-} // namespace
-
 template <typename T>
 SimpleTensor<uint8_t> color_convert(const TensorShape &shape, const std::vector<SimpleTensor<T>> &tensor_planes, Format src_format, Format dst_format)
 {

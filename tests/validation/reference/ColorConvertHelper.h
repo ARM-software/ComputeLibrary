@@ -48,7 +48,7 @@ inline void yuyv_to_rgb_calculation(const SimpleTensor<T> yvec, const SimpleTens
     for(int y = 0; y < dst_height; ++y)
     {
         int x_coord = 0;
-        for(int x = 0; x < dst_width; x += 2, x_coord++)
+        for(int x = 0; x < dst_width; x += 2, ++x_coord)
         {
             Coordinates dst_coord{ x, y };
             auto       *dst_pixel = reinterpret_cast<T *>(dst(dst_coord));
@@ -192,18 +192,17 @@ inline void colorconvert_rgbx_to_rgb(const SimpleTensor<T> src, SimpleTensor<T> 
 template <typename T>
 inline void colorconvert_yuyv_to_rgb(const SimpleTensor<T> src, const Format format, SimpleTensor<T> &dst)
 {
-    SimpleTensor<T> yvec(TensorShape{ src.shape().x(), src.shape().y() }, Format::U8);
-    SimpleTensor<T> uvec(TensorShape{ src.shape().x(), src.shape().y() }, Format::U8);
-    SimpleTensor<T> yyvec(TensorShape{ src.shape().x(), src.shape().y() }, Format::U8);
-    SimpleTensor<T> vvec(TensorShape{ src.shape().x(), src.shape().y() }, Format::U8);
+    SimpleTensor<T> yvec(TensorShape{ src.shape().x() / 2, src.shape().y() }, Format::U8);
+    SimpleTensor<T> uvec(TensorShape{ src.shape().x() / 2, src.shape().y() }, Format::U8);
+    SimpleTensor<T> yyvec(TensorShape{ src.shape().x() / 2, src.shape().y() }, Format::U8);
+    SimpleTensor<T> vvec(TensorShape{ src.shape().x() / 2, src.shape().y() }, Format::U8);
 
     const int step_x = (Format::YUYV422 == format || Format::UYVY422 == format) ? 2 : 1;
+    const int offset = (Format::YUYV422 == format) ? 0 : 1;
 
-    const int   offset = (Format::YUYV422 == format) ? 0 : 1;
     Coordinates elem_coord{ 0, 0 };
-
-    const int width  = vvec.shape().x();
-    const int height = vvec.shape().y();
+    const int   width  = yvec.shape().x();
+    const int   height = yvec.shape().y();
 
     for(int y = 0; y < height; ++y)
     {
