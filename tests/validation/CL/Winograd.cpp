@@ -297,7 +297,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
 
     // Create tensors
     CLTensor a = create_tensor<CLTensor>(shape_a, data_type);
-    CLTensor b = create_tensor<CLTensor>(shape_b, data_type);
+    CLTensor b = create_tensor<CLTensor>(shape_b, data_type, 1, 0, QuantizationInfo(), winograd_info.output_data_layout);
 
     ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);

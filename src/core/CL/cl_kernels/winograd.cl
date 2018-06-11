@@ -1586,15 +1586,15 @@ __kernel void winograd_output_transform_4x4_3x3_nchw(
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ * @param[in]  dst_size                          Size of the destination tensor, minus the last padding
  */
 __kernel void winograd_output_transform_4x4_3x3_nhwc(
     TENSOR3D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst)
+    TENSOR3D_DECLARATION(dst),
 #if defined(HAS_BIAS)
-    ,
-    VECTOR_DECLARATION(bias)
+    VECTOR_DECLARATION(bias),
 #endif // defined(HAS_BIAS)
-)
+    int dst_size)
 {
     // Each thread stores a 4x4 tile
     Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
@@ -1734,25 +1734,27 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
 #endif // defined(HAS_BIAS)
 
     // Get output address
-    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x_out * dst_stride_x + y_out * dst_stride_y + z_out * dst_stride_z;
+    int4 offset = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(float) + y_out * dst_stride_y + z_out * dst_stride_z);
+    offset      = min(offset + (int4)(0, 1, 2, 3) * (int4)dst_stride_z, dst_size); // If address is beyond the last plane, clamp it to dst_size (which points to the last padding).
+    int4 mult_y = min(dst_size - offset, 1);                                       // If out of bound, we don't want to increase dst_stride_y, so we set the multiplier to 0. It will be 1 otherwise.
 
     // Store the 4x4 output tile
-    *((__global float *)(dst_addr + 0 * dst_stride_y + 0 * dst_stride_z)) = out00;
-    *((__global float *)(dst_addr + 1 * dst_stride_y + 0 * dst_stride_z)) = out01;
-    *((__global float *)(dst_addr + 2 * dst_stride_y + 0 * dst_stride_z)) = out02;
-    *((__global float *)(dst_addr + 3 * dst_stride_y + 0 * dst_stride_z)) = out03;
-    *((__global float *)(dst_addr + 0 * dst_stride_y + 1 * dst_stride_z)) = out10;
-    *((__global float *)(dst_addr + 1 * dst_stride_y + 1 * dst_stride_z)) = out11;
-    *((__global float *)(dst_addr + 2 * dst_stride_y + 1 * dst_stride_z)) = out12;
-    *((__global float *)(dst_addr + 3 * dst_stride_y + 1 * dst_stride_z)) = out13;
-    *((__global float *)(dst_addr + 0 * dst_stride_y + 2 * dst_stride_z)) = out20;
-    *((__global float *)(dst_addr + 1 * dst_stride_y + 2 * dst_stride_z)) = out21;
-    *((__global float *)(dst_addr + 2 * dst_stride_y + 2 * dst_stride_z)) = out22;
-    *((__global float *)(dst_addr + 3 * dst_stride_y + 2 * dst_stride_z)) = out23;
-    *((__global float *)(dst_addr + 0 * dst_stride_y + 3 * dst_stride_z)) = out30;
-    *((__global float *)(dst_addr + 1 * dst_stride_y + 3 * dst_stride_z)) = out31;
-    *((__global float *)(dst_addr + 2 * dst_stride_y + 3 * dst_stride_z)) = out32;
-    *((__global float *)(dst_addr + 3 * dst_stride_y + 3 * dst_stride_z)) = out33;
+    *((__global float *)(dst_ptr + mult_y.s0 * 0 * dst_stride_y + offset.s0)) = out00;
+    *((__global float *)(dst_ptr + mult_y.s0 * 1 * dst_stride_y + offset.s0)) = out01;
+    *((__global float *)(dst_ptr + mult_y.s0 * 2 * dst_stride_y + offset.s0)) = out02;
+    *((__global float *)(dst_ptr + mult_y.s0 * 3 * dst_stride_y + offset.s0)) = out03;
+    *((__global float *)(dst_ptr + mult_y.s1 * 0 * dst_stride_y + offset.s1)) = out10;
+    *((__global float *)(dst_ptr + mult_y.s1 * 1 * dst_stride_y + offset.s1)) = out11;
+    *((__global float *)(dst_ptr + mult_y.s1 * 2 * dst_stride_y + offset.s1)) = out12;
+    *((__global float *)(dst_ptr + mult_y.s1 * 3 * dst_stride_y + offset.s1)) = out13;
+    *((__global float *)(dst_ptr + mult_y.s2 * 0 * dst_stride_y + offset.s2)) = out20;
+    *((__global float *)(dst_ptr + mult_y.s2 * 1 * dst_stride_y + offset.s2)) = out21;
+    *((__global float *)(dst_ptr + mult_y.s2 * 2 * dst_stride_y + offset.s2)) = out22;
+    *((__global float *)(dst_ptr + mult_y.s2 * 3 * dst_stride_y + offset.s2)) = out23;
+    *((__global float *)(dst_ptr + mult_y.s3 * 0 * dst_stride_y + offset.s3)) = out30;
+    *((__global float *)(dst_ptr + mult_y.s3 * 1 * dst_stride_y + offset.s3)) = out31;
+    *((__global float *)(dst_ptr + mult_y.s3 * 2 * dst_stride_y + offset.s3)) = out32;
+    *((__global float *)(dst_ptr + mult_y.s3 * 3 * dst_stride_y + offset.s3)) = out33;
 }
 
 #define COMPUTE_TMP_COL(col, d0, d1, d2, d3, d4, d5, d6, d7, comm_fact)  \

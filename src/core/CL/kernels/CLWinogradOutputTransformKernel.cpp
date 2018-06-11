@@ -49,6 +49,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
 
+    ARM_COMPUTE_RETURN_ERROR_ON(output->data_layout() != winograd_info.output_data_layout);
+
     const PadStrideInfo conv_info        = winograd_info.convolution_info;
     const Size2D        output_tile_size = winograd_info.output_tile_size;
     const Size2D        kernel_size      = winograd_info.kernel_size;
@@ -94,19 +96,30 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     Window win            = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
     bool   window_changed = false;
 
+    int output_static_window_end_x = 0;
+    int output_static_window_end_y = 0;
+
+    if(output->data_layout() == DataLayout::NCHW)
+    {
+        output_static_window_end_x = ceil_to_multiple(output->dimension(0), output_tile_size.width);
+        output_static_window_end_y = ceil_to_multiple(output->dimension(1), output_tile_size.height);
+    }
+    else
+    {
+        output_static_window_end_x = output->dimension(0);
+        output_static_window_end_y = std::max(ceil_to_multiple(output->dimension(1), output_tile_size.width), output->dimension(1) + 1 /* For out of bound reads towards the z axis */);
+    }
+
     AccessWindowRectangle input_access(input, 0, 0, num_elems_processed_per_iteration, num_elems_processed_per_iteration);
-    AccessWindowStatic    output_access(output, 0, 0, ceil_to_multiple(output->dimension(0), output_tile_size.width), ceil_to_multiple(output->dimension(1), output_tile_size.height));
+    AccessWindowStatic    output_access(output, 0, 0, output_static_window_end_x, output_static_window_end_y);
+    window_changed = update_window_and_padding(win, input_access, output_access);
+    output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
 
     if(bias != nullptr)
     {
         AccessWindowStatic bias_access(bias, 0, 0, bias->dimension(0), bias->dimension(1));
-        window_changed = update_window_and_padding(win, input_access, bias_access, output_access);
+        window_changed = window_changed || update_window_and_padding(win, bias_access);
     }
-    else
-    {
-        window_changed = update_window_and_padding(win, input_access, output_access);
-    }
-    output->set_valid_region(ValidRegion(Coordinates(), output->tensor_shape()));
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
@@ -195,6 +208,12 @@ void CLWinogradOutputTransformKernel::run(const Window &window, cl::CommandQueue
         Window       slice_biases;
         slice_biases.use_tensor_dimensions(_bias->info()->tensor_shape());
         add_1D_tensor_argument(idx1, _bias, slice_biases);
+    }
+
+    if(_output->info()->data_layout() == DataLayout::NHWC)
+    {
+        unsigned int idx2 = 2 * num_arguments_per_3D_tensor() + ((_bias != nullptr) ? num_arguments_per_1D_tensor() : 0);
+        _kernel.setArg(idx2, static_cast<int>(_output->info()->total_size() - _output->info()->strides_in_bytes().y()));
     }
 
     do
