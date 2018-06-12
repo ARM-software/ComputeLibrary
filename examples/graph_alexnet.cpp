@@ -53,13 +53,9 @@ public:
         std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<CaffePreproccessor>(mean_rgb);
 
         // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
-        const int target      = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
-        Target    target_hint = set_target_hint(target);
-
-        const bool        is_neon              = (target_hint == Target::NEON);
-        ConvolutionMethod convolution_5x5_hint = is_neon ? ConvolutionMethod::GEMM : ConvolutionMethod::DIRECT;
-        ConvolutionMethod convolution_3x3_hint = ConvolutionMethod::DEFAULT;
-        FastMathHint      fast_math_hint       = FastMathHint::DISABLED;
+        const int    target         = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
+        Target       target_hint    = set_target_hint(target);
+        FastMathHint fast_math_hint = FastMathHint::DISABLED;
 
         // Parse arguments
         if(argc < 2)
@@ -117,7 +113,6 @@ public:
               << NormalizationLayer(NormalizationLayerInfo(NormType::CROSS_MAP, 5, 0.0001f, 0.75f)).set_name("norm1")
               << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0))).set_name("pool1")
               // Layer 2
-              << convolution_5x5_hint
               << ConvolutionLayer(
                   5U, 5U, 256U,
                   get_weights_accessor(data_path, "/cnn_data/alexnet_model/conv2_w.npy"),
@@ -127,7 +122,6 @@ public:
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("relu2")
               << NormalizationLayer(NormalizationLayerInfo(NormType::CROSS_MAP, 5, 0.0001f, 0.75f)).set_name("norm2")
               << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0))).set_name("pool2")
-              << convolution_3x3_hint
               // Layer 3
               << ConvolutionLayer(
                   3U, 3U, 384U,

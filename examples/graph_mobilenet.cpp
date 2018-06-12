@@ -35,7 +35,7 @@ using namespace arm_compute::graph_utils;
 /** Example demonstrating how to implement MobileNet's network using the Compute Library's graph API
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL, 2 = OpenCL with Tuner), [optional] Path to the weights folder, [optional] image, [optional] labels, [optional] data layout, [optional] Fast math for convolution layer (0 = DISABLED, 1 = ENABLED) )
+ * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL, 2 = OpenCL with Tuner), [optional] Model ID (0 = MobileNetV1_1.0_224, 1 = MobileNetV1_0.75_160), [optional] Path to the weights folder, [optional] image, [optional] labels, [optional] data layout, [optional] Fast math for convolution layer (0 = DISABLED, 1 = ENABLED) )
  */
 class GraphMobilenetExample : public Example
 {
@@ -52,7 +52,6 @@ public:
         // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
         const int                  target                     = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
         Target                     target_hint                = set_target_hint(target);
-        ConvolutionMethod          convolution_hint           = ConvolutionMethod::GEMM;
         DepthwiseConvolutionMethod depthwise_convolution_hint = DepthwiseConvolutionMethod::OPTIMIZED_3x3;
         FastMathHint               fast_math_hint             = FastMathHint::DISABLED;
 
@@ -133,7 +132,6 @@ public:
         }
 
         graph << target_hint
-              << convolution_hint
               << depthwise_convolution_hint
               << fast_math_hint
               << InputLayer(input_descriptor,

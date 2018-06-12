@@ -54,10 +54,6 @@ public:
         const int    target         = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
         Target       target_hint    = set_target_hint(target);
         FastMathHint fast_math_hint = FastMathHint::DISABLED;
-        const bool   is_opencl      = target_hint == Target::CL;
-
-        ConvolutionMethod first_convolution3x3_hint = is_opencl ? ConvolutionMethod::DIRECT : ConvolutionMethod::GEMM;
-        ConvolutionMethod convolution3x3_hint       = ConvolutionMethod::DEFAULT;
 
         // Parse arguments
         if(argc < 2)
@@ -101,7 +97,6 @@ public:
         }
 
         graph << target_hint
-              << first_convolution3x3_hint
               << fast_math_hint
               << InputLayer(TensorDescriptor(TensorShape(224U, 224U, 3U, 1U), DataType::F32),
                             get_input_accessor(image, std::move(preprocessor)))
@@ -113,7 +108,6 @@ public:
                   PadStrideInfo(1, 1, 1, 1))
               .set_name("conv1_1")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("conv1_1/Relu")
-              << convolution3x3_hint
               << ConvolutionLayer(
                   3U, 3U, 64U,
                   get_weights_accessor(data_path, "/cnn_data/vgg19_model/conv1_2_w.npy"),

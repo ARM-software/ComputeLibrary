@@ -51,13 +51,9 @@ public:
         std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<CaffePreproccessor>(mean_rgb);
 
         // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
-        const int  target      = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
-        Target     target_hint = set_target_hint(target);
-        const bool is_opencl   = target_hint == Target::CL;
-
-        ConvolutionMethod first_convolution3x3_hint = is_opencl ? ConvolutionMethod::DIRECT : ConvolutionMethod::GEMM;
-        ConvolutionMethod convolution3x3_hint       = ConvolutionMethod::DEFAULT;
-        FastMathHint      fast_math_hint            = FastMathHint::DISABLED;
+        const int    target         = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
+        Target       target_hint    = set_target_hint(target);
+        FastMathHint fast_math_hint = FastMathHint::DISABLED;
 
         // Parse arguments
         if(argc < 2)
@@ -102,7 +98,6 @@ public:
 
         graph << target_hint
               << fast_math_hint
-              << first_convolution3x3_hint
               << InputLayer(TensorDescriptor(TensorShape(224U, 224U, 3U, 1U), DataType::F32),
                             get_input_accessor(image, std::move(preprocessor)))
               // Layer 1
@@ -113,7 +108,6 @@ public:
                   PadStrideInfo(1, 1, 1, 1))
               .set_name("conv1_1")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("conv1_1/Relu")
-              << convolution3x3_hint
               // Layer 2
               << ConvolutionLayer(
                   3U, 3U, 64U,
