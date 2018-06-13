@@ -259,6 +259,15 @@ void transpose_matrix(const SimpleTensor<float> &in, SimpleTensor<float> &out);
  */
 template <typename T>
 void get_tile(const SimpleTensor<T> &in, SimpleTensor<T> &tile, const Coordinates &coord);
+
+/** Fill with zeros the input tensor in the area defined by anchor and shape
+ *
+ * @param[in]  in     Input tensor to fill with zeros
+ * @param[out] anchor Starting point of the zeros area
+ * @param[in]  shape  Ending point of the zeros area
+ */
+template <typename T>
+void zeros(SimpleTensor<T> &in, const Coordinates &anchor, const TensorShape &shape);
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

@@ -388,6 +388,38 @@ public:
     }
 };
 
+/** Data set containing small 3x1 tensor shapes. */
+class Small3x1Shapes final : public ShapeDataset
+{
+public:
+    Small3x1Shapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 3U, 1U, 7U, 4U },
+                     TensorShape{ 3U, 1U, 4U, 13U },
+                     TensorShape{ 3U, 1U, 9U, 2U },
+                     TensorShape{ 3U, 1U, 3U, 5U },
+    })
+    {
+    }
+};
+
+/** Data set containing small 1x3 tensor shapes. */
+class Small1x3Shapes final : public ShapeDataset
+{
+public:
+    Small1x3Shapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 1U, 3U, 7U, 4U },
+                     TensorShape{ 1U, 3U, 4U, 13U },
+                     TensorShape{ 1U, 3U, 9U, 2U },
+                     TensorShape{ 1U, 3U, 3U, 5U },
+    })
+    {
+    }
+};
+
 /** Data set containing large 3x3 tensor shapes. */
 class Large3x3Shapes final : public ShapeDataset
 {
@@ -399,6 +431,38 @@ public:
                      TensorShape{ 3U, 3U, 51U, 13U },
                      TensorShape{ 3U, 3U, 53U, 47U },
                      TensorShape{ 3U, 3U, 128U, 384U },
+    })
+    {
+    }
+};
+
+/** Data set containing large 3x1 tensor shapes. */
+class Large3x1Shapes final : public ShapeDataset
+{
+public:
+    Large3x1Shapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 3U, 1U, 32U, 64U },
+                     TensorShape{ 3U, 1U, 51U, 13U },
+                     TensorShape{ 3U, 1U, 53U, 47U },
+                     TensorShape{ 3U, 1U, 128U, 384U },
+    })
+    {
+    }
+};
+
+/** Data set containing large 1x3 tensor shapes. */
+class Large1x3Shapes final : public ShapeDataset
+{
+public:
+    Large1x3Shapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 1U, 3U, 32U, 64U },
+                     TensorShape{ 1U, 3U, 51U, 13U },
+                     TensorShape{ 1U, 3U, 53U, 47U },
+                     TensorShape{ 1U, 3U, 128U, 384U },
     })
     {
     }

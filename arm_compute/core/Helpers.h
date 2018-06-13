@@ -111,6 +111,28 @@ struct is_contained<T, std::tuple<U, Ts...>> : is_contained<T, std::tuple<Ts...>
 };
 }
 
+/** Calculate the number of output tiles required by Winograd Convolution layer. This utility function can be used by the Winograd input transform
+ *  to know the number of tiles on the x and y direction
+ *
+ * @param[in] in_dims          Spatial dimensions of the input tensor of convolution layer
+ * @param[in] kernel_size      Kernel size
+ * @param[in] output_tile_size Size of a single output tile
+ * @param[in] conv_info        Convolution info (i.e. pad, stride,...)
+ *
+ * @return the number of output tiles along the x and y directions of size "output_tile_size"
+ */
+inline Size2D compute_winograd_convolution_tiles(const Size2D &in_dims, const Size2D &kernel_size, const Size2D &output_tile_size, const PadStrideInfo &conv_info)
+{
+    int num_tiles_x = std::ceil((in_dims.width - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right()) / static_cast<float>(output_tile_size.width));
+    int num_tiles_y = std::ceil((in_dims.height - (kernel_size.height - 1) + conv_info.pad_top() + conv_info.pad_bottom()) / static_cast<float>(output_tile_size.height));
+
+    // Clamp in case we provide paddings but we have 1D convolution
+    num_tiles_x = std::min(num_tiles_x, static_cast<int>(in_dims.width));
+    num_tiles_y = std::min(num_tiles_y, static_cast<int>(in_dims.height));
+
+    return Size2D(num_tiles_x, num_tiles_y);
+}
+
 /** Computes bilinear interpolation using the pointer to the top-left pixel and the pixel's distance between
  * the real coordinates and the smallest following integer coordinates. Input must be in single channel format.
  *

@@ -55,20 +55,19 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
     const Size2D        output_tile_size = winograd_info.output_tile_size;
     const Size2D        kernel_size      = winograd_info.kernel_size;
     const Size2D        input_dimensions = winograd_info.input_dimensions;
+    const unsigned int  num_channels     = (winograd_info.kernel_size.width + winograd_info.output_tile_size.width - 1) * (winograd_info.kernel_size.height + winograd_info.output_tile_size.height - 1);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size != Size2D(3U, 3U) && kernel_size != Size2D(5U, 5U), "Only 3x3 and 5x5 kernels are supported");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_layout() == DataLayout::NHWC && output_tile_size != Size2D(4U, 4U), "Only 4x4 output tile supported for NHWC data layout");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size == Size2D(3U, 3U) && output_tile_size == Size2D(2U, 2U) && input->dimension(2) != 16, "Wrong number of batches");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size == Size2D(3U, 3U) && output_tile_size == Size2D(4U, 4U) && input->dimension(2) != 36, "Wrong number of batches");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size == Size2D(5U, 5U) && output_tile_size == Size2D(4U, 4U) && input->dimension(2) != 64, "Wrong number of batches");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!cl_winograd_convolution_layer_supported(output_tile_size, kernel_size, winograd_info.output_data_layout), "Winograd output transform not supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->dimension(2) != num_channels, "Wrong number of channels");
 
     // Compute number of elements to process in the X and Y direction
-    const int num_elements_x = input_dimensions.width - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right();
-    const int num_elements_y = input_dimensions.height - (kernel_size.height - 1) + conv_info.pad_top() + conv_info.pad_bottom();
-    const int num_tiles_x    = std::ceil(num_elements_x / static_cast<float>(output_tile_size.width));
-    const int num_tiles_y    = std::ceil(num_elements_y / static_cast<float>(output_tile_size.height));
+    // Compute the number of output tiles along the x and y direction of size "output_tile_size"
+    const Size2D num_tiles = compute_winograd_convolution_tiles(input_dimensions,
+                                                                kernel_size,
+                                                                output_tile_size,
+                                                                conv_info);
 
-    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(1) != static_cast<unsigned int>((num_tiles_x * num_tiles_y)));
+    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(1) != static_cast<unsigned int>((num_tiles.area())));
 
     if(bias != nullptr)
     {
@@ -150,13 +149,21 @@ void CLWinogradOutputTransformKernel::configure(const ICLTensor *input, const IC
     const Size2D        kernel_size      = winograd_info.kernel_size;
     const Size2D        output_tile_size = winograd_info.output_tile_size;
     const PadStrideInfo conv_info        = winograd_info.convolution_info;
-    const int           num_elements_x   = input_dimensions.width - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right();
-    const int           num_tiles_x      = std::ceil(num_elements_x / static_cast<float>(output_tile_size.width));
+
+    // Compute the number of output tiles along the x and y direction of size "output_tile_size"
+    const Size2D num_tiles = compute_winograd_convolution_tiles(input_dimensions,
+                                                                kernel_size,
+                                                                output_tile_size,
+                                                                conv_info);
 
     // Set build options
     CLBuildOptions build_opts;
     build_opts.add_option_if(_bias != nullptr, std::string("-DHAS_BIAS"));
-    build_opts.add_option("-DNUM_TILES_X=" + support::cpp11::to_string(num_tiles_x));
+    build_opts.add_option("-DNUM_TILES_X=" + support::cpp11::to_string(num_tiles.width));
+    build_opts.add_option("-DOUTPUT_TILE_W=" + support::cpp11::to_string(output_tile_size.width));
+    build_opts.add_option("-DOUTPUT_TILE_H=" + support::cpp11::to_string(output_tile_size.height));
+    build_opts.add_option_if(winograd_info.kernel_size.height == 1, "-DWINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL");
+    build_opts.add_option_if(winograd_info.kernel_size.width == 1, "-DWINOGRAD_OUTPUT_TRANSFORM_VERTICAL");
 
     // Create kernel
     std::string kernel_name = "winograd_output_transform_" + output_tile_size.to_string() + "_" + kernel_size.to_string() + "_" + lower_string(string_from_data_layout(winograd_info.output_data_layout));
@@ -179,6 +186,8 @@ void CLWinogradOutputTransformKernel::configure(const ICLTensor *input, const IC
     _config_id += support::cpp11::to_string(output->info()->dimension(0));
     _config_id += "_";
     _config_id += support::cpp11::to_string(output->info()->dimension(1));
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_layout(winograd_info.output_data_layout));
 }
 
 Status CLWinogradOutputTransformKernel::validate(const ITensorInfo *input, const ITensorInfo *bias, const ITensorInfo *output, const WinogradInfo &winograd_info)

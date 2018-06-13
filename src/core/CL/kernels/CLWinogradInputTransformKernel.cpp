@@ -30,6 +30,7 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "support/ToolchainSupport.h"
 
@@ -45,12 +46,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     const Size2D        output_tile_size = winograd_info.output_tile_size;
     const Size2D        kernel_size      = winograd_info.kernel_size;
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.stride().first != 1 || conv_info.stride().second != 1, "Winograd input transform only supports unit strides");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size != Size2D(3U, 3U) && kernel_size != Size2D(5U, 5U), "Winograd input transform only supports 3x3 and 5x5 kernels");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_layout() == DataLayout::NHWC && output_tile_size != Size2D(4U, 4U), "Winograd input transform only supports 4x4 output tile for NHWC data layout");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size == Size2D(3U, 3U) && output_tile_size != Size2D(2U, 2U)
-                                    && output_tile_size != Size2D(4U, 4U),
-                                    "Winograd input transform only supports 2x2 or 4x4 output tile for 3x3 kernels");
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(kernel_size == Size2D(5U, 5U) && output_tile_size != Size2D(4U, 4U), "Winograd input transform only supports 4x4 output tile for 5x5 kernels");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!cl_winograd_convolution_layer_supported(output_tile_size, kernel_size, input->data_layout()), "Winograd input transform not supported");
+
     ARM_COMPUTE_UNUSED(conv_info);
     ARM_COMPUTE_UNUSED(output_tile_size);
     ARM_COMPUTE_UNUSED(kernel_size);
@@ -131,8 +128,6 @@ void CLWinogradInputTransformKernel::configure(const ICLTensor *input, ICLTensor
     const int num_elements_x = input->info()->dimension(idx_w) - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right();
     const int num_elements_y = input->info()->dimension(idx_h) - (kernel_size.height - 1) + conv_info.pad_top() + conv_info.pad_bottom();
 
-    _input  = input;
-    _output = output;
     if(input->info()->data_layout() == DataLayout::NCHW)
     {
         // Check if we need to extend the right or bottom border
@@ -145,8 +140,17 @@ void CLWinogradInputTransformKernel::configure(const ICLTensor *input, ICLTensor
     {
         _border_size = BorderSize(1U, 0U, 1U, 0);
     }
-    _num_tiles_x = std::ceil(num_elements_x / static_cast<float>(output_tile_size.width));
-    _num_tiles_y = std::ceil(num_elements_y / static_cast<float>(output_tile_size.height));
+
+    // Compute the number of output tiles along the x and y direction of size "output_tile_size"
+    const Size2D num_tiles = compute_winograd_convolution_tiles(Size2D(input->info()->dimension(idx_w), input->info()->dimension(idx_h)),
+                                                                kernel_size,
+                                                                output_tile_size,
+                                                                conv_info);
+
+    _input       = input;
+    _output      = output;
+    _num_tiles_x = num_tiles.width;
+    _num_tiles_y = num_tiles.height;
 
     const TensorShape output_shape = misc::shape_calculator::compute_winograd_input_transform_shape(*input->info(), winograd_info);
 
@@ -159,6 +163,10 @@ void CLWinogradInputTransformKernel::configure(const ICLTensor *input, ICLTensor
     build_opts.add_option("-DNUM_TILES_X=" + support::cpp11::to_string(_num_tiles_x));
     build_opts.add_option("-DPAD_LEFT=" + support::cpp11::to_string(conv_info.pad_left()));
     build_opts.add_option("-DPAD_TOP=" + support::cpp11::to_string(conv_info.pad_top()));
+    build_opts.add_option("-DOUTPUT_TILE_W=" + support::cpp11::to_string(output_tile_size.width));
+    build_opts.add_option("-DOUTPUT_TILE_H=" + support::cpp11::to_string(output_tile_size.height));
+    build_opts.add_option_if(winograd_info.kernel_size.height == 1, "-DWINOGRAD_INPUT_TRANSFORM_HORIZONTAL");
+    build_opts.add_option_if(winograd_info.kernel_size.width == 1, "-DWINOGRAD_INPUT_TRANSFORM_VERTICAL");
 
     if(input->info()->data_layout() == DataLayout::NHWC)
     {
@@ -169,8 +177,11 @@ void CLWinogradInputTransformKernel::configure(const ICLTensor *input, ICLTensor
     // Create kernel
     std::string kernel_name = "winograd_input_transform_" + output_tile_size.to_string() + "_" + kernel_size.to_string();
 
+    // Get the maximum dimension from the tile size
+    const unsigned int tile_max_dim = std::max(output_tile_size.width, output_tile_size.height);
+
     // Check optimized kernel if output_dims == 2x2
-    if(output_tile_size == Size2D(2U, 2U))
+    if(tile_max_dim == 2)
     {
         _step_z = (_input->info()->dimension(2) % 2) != 0 ? 1 : 2;
     }
@@ -199,6 +210,8 @@ void CLWinogradInputTransformKernel::configure(const ICLTensor *input, ICLTensor
     _config_id += support::cpp11::to_string(conv_info.pad_left());
     _config_id += "_";
     _config_id += support::cpp11::to_string(conv_info.pad_top());
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_layout(input->info()->data_layout()));
 }
 
 Status CLWinogradInputTransformKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const WinogradInfo &winograd_info)

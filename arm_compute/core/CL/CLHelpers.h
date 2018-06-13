@@ -109,5 +109,15 @@ bool arm_non_uniform_workgroup_supported(const cl::Device &device);
  * @return True if the extension is supported
  */
 bool dot8_supported(const cl::Device &device);
+
+/** This function checks if the Winograd configuration (defined through the output tile, kernel size and the data layout) is supported on OpenCL
+ *
+ * @param[in] output_tile Output tile for the Winograd filtering algorithm
+ * @param[in] kernel_size Kernel size for the Winograd filtering algorithm
+ * @param[in] data_layout Data layout of the input tensor
+ *
+ * @return True if the configuration is supported
+ */
+bool cl_winograd_convolution_layer_supported(const Size2D &output_tile, const Size2D &kernel_size, DataLayout data_layout);
 }
 #endif /* __ARM_COMPUTE_CLHELPERS_H__ */

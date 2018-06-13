@@ -52,6 +52,36 @@ public:
     }
 };
 
+class SmallWinogradConvolutionLayer3x1Dataset final : public ConvolutionLayerDataset
+{
+public:
+    SmallWinogradConvolutionLayer3x1Dataset()
+    {
+        // Channel size big enough to force multithreaded execution of the input transform
+        add_config(TensorShape(8U, 8U, 32U), TensorShape(3U, 1U, 32U, 1U), TensorShape(1U), TensorShape(6U, 8U, 1U), PadStrideInfo(1, 1, 0, 0));
+        // Batch size 1
+        add_config(TensorShape(8U, 8U, 2U), TensorShape(3U, 1U, 2U, 1U), TensorShape(1U), TensorShape(6U, 8U, 1U), PadStrideInfo(1, 1, 0, 0));
+        // Batch size 4
+        add_config(TensorShape(23U, 27U, 5U, 4U), TensorShape(3U, 1U, 5U, 21U), TensorShape(21U), TensorShape(21U, 27U, 21U, 4U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(8U, 8U, 2U), TensorShape(3U, 1U, 2U, 1U), TensorShape(1U), TensorShape(8U, 8U, 1U), PadStrideInfo(1, 1, 1, 0));
+    }
+};
+
+class SmallWinogradConvolutionLayer1x3Dataset final : public ConvolutionLayerDataset
+{
+public:
+    SmallWinogradConvolutionLayer1x3Dataset()
+    {
+        // Channel size big enough to force multithreaded execution of the input transform
+        add_config(TensorShape(8U, 8U, 32U), TensorShape(1U, 3U, 32U, 1U), TensorShape(1U), TensorShape(8U, 6U, 1U), PadStrideInfo(1, 1, 0, 0));
+        // Batch size 1
+        add_config(TensorShape(8U, 8U, 2U), TensorShape(1U, 3U, 2U, 1U), TensorShape(1U), TensorShape(8U, 6U, 1U), PadStrideInfo(1, 1, 0, 0));
+        // Batch size 4
+        add_config(TensorShape(23U, 27U, 5U, 4U), TensorShape(1U, 3U, 5U, 21U), TensorShape(21U), TensorShape(23U, 25U, 21U, 4U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(8U, 8U, 2U), TensorShape(1U, 3U, 2U, 1U), TensorShape(1U), TensorShape(8U, 8U, 1U), PadStrideInfo(1, 1, 0, 1));
+    }
+};
+
 class SmallWinogradConvolutionLayer5x5Dataset final : public ConvolutionLayerDataset
 {
 public:

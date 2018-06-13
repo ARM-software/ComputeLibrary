@@ -37,11 +37,27 @@ Size2D winograd_output_tile(const Size2D &input_dims, const Size2D &kernel_dims)
 {
     Size2D output_tile = Size2D{};
 
-    if(kernel_dims == Size2D(3U, 3U))
+    const unsigned int kernel_max_dim = std::max(kernel_dims.width, kernel_dims.height);
+
+    // Check if the input spatial dimensions are smaller than 4
+    const bool is_input_lt4 = (input_dims.width <= 4 && input_dims.height <= 4);
+
+    if(kernel_max_dim == 3U)
     {
-        output_tile = (input_dims.width <= 4 && input_dims.height <= 4) ? Size2D(2U, 2U) : Size2D(4U, 4U);
+        if(kernel_dims == Size2D(3U, 3U))
+        {
+            output_tile = is_input_lt4 ? Size2D(2U, 2U) : Size2D(4U, 4U);
+        }
+        else if(kernel_dims == Size2D(3U, 1U))
+        {
+            output_tile = is_input_lt4 ? Size2D(2U, 1U) : Size2D(4U, 1U);
+        }
+        else
+        {
+            output_tile = is_input_lt4 ? Size2D(1U, 2U) : Size2D(1U, 4U);
+        }
     }
-    else if(kernel_dims == Size2D(5U, 5U))
+    else if(kernel_max_dim == 5U)
     {
         output_tile = Size2D(4U, 4U);
     }

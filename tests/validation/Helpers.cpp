@@ -215,7 +215,7 @@ void transpose_matrix(const SimpleTensor<float> &in, SimpleTensor<float> &out)
 template <typename T>
 void get_tile(const SimpleTensor<T> &in, SimpleTensor<T> &tile, const Coordinates &coord)
 {
-    ARM_COMPUTE_ERROR_ON(tile.shape().num_dimensions() != 2);
+    ARM_COMPUTE_ERROR_ON(tile.shape().num_dimensions() > 2);
 
     const int w_tile = tile.shape()[0];
     const int h_tile = tile.shape()[1];
@@ -272,7 +272,36 @@ void get_tile(const SimpleTensor<T> &in, SimpleTensor<T> &tile, const Coordinate
     }
 }
 
+template <typename T>
+void zeros(SimpleTensor<T> &in, const Coordinates &anchor, const TensorShape &shape)
+{
+    ARM_COMPUTE_ERROR_ON(anchor.num_dimensions() != shape.num_dimensions());
+    ARM_COMPUTE_ERROR_ON(in.shape().num_dimensions() > 2);
+    ARM_COMPUTE_ERROR_ON(shape.num_dimensions() > 2);
+
+    // Check if with the dimensions greater than 2 we could have out-of-bound reads
+    for(size_t d = 0; d < Coordinates::num_max_dimensions; ++d)
+    {
+        if(anchor[d] < 0 || ((anchor[d] + shape[d]) > in.shape()[d]))
+        {
+            ARM_COMPUTE_ERROR("anchor[d] < 0 || (anchor[d] + shape[d]) > in.shape()[d]");
+        }
+    }
+
+    // Get input pointer
+    auto in_ptr = static_cast<T *>(in(anchor[0] + anchor[1] * in.shape()[0]));
+
+    const unsigned int n = in.shape()[0];
+
+    for(unsigned int y = 0; y < shape[1]; ++y)
+    {
+        std::fill(in_ptr, in_ptr + shape[0], 0);
+        in_ptr += n;
+    }
+}
+
 template void get_tile(const SimpleTensor<float> &in, SimpleTensor<float> &roi, const Coordinates &coord);
+template void zeros(SimpleTensor<float> &in, const Coordinates &anchor, const TensorShape &shape);
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

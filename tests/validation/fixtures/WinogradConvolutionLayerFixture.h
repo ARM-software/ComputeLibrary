@@ -259,7 +259,18 @@ protected:
             fill(bias, 2, 0.f, 0.f);
         }
 
-        WinogradInfo winograd_info(Size2D(4U, 4U),
+        // Set output tile
+        Size2D output_tile(4U, 4U);
+        if(weights_shape[0] == 1)
+        {
+            output_tile.width = 1;
+        }
+        else if(weights_shape[1] == 1)
+        {
+            output_tile.height = 1;
+        }
+
+        WinogradInfo winograd_info(output_tile,
                                    Size2D(weights_shape[0], weights_shape[1]),
                                    Size2D(input_shape[0], input_shape[1]),
                                    info,

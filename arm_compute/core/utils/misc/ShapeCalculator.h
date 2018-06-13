@@ -255,12 +255,14 @@ inline TensorShape compute_winograd_input_transform_shape(const ITensorInfo &inp
     const size_t idx_h = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::HEIGHT);
     const size_t idx_c = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::CHANNEL);
 
-    // Compute height
-    const unsigned int num_tiles_x = std::ceil((input.tensor_shape()[idx_w] - (kernel_size.width - 1) + conv_info.pad_left() + conv_info.pad_right()) / static_cast<float>(output_tile_size.width));
-    const unsigned int num_tiles_y = std::ceil((input.tensor_shape()[idx_h] - (kernel_size.height - 1) + conv_info.pad_top() + conv_info.pad_bottom()) / static_cast<float>(output_tile_size.height));
+    // Compute the number of output tiles along the x and y direction of size "output_tile_size"
+    const Size2D num_tiles = compute_winograd_convolution_tiles(Size2D(input.tensor_shape()[idx_w], input.tensor_shape()[idx_h]),
+                                                                kernel_size,
+                                                                output_tile_size,
+                                                                conv_info);
 
     const unsigned int width  = input.tensor_shape()[idx_c];
-    const unsigned int height = num_tiles_x * num_tiles_y;
+    const unsigned int height = num_tiles.area();
     const unsigned int depth  = input_tile_size.area();
 
     TensorShape output_shape{ input.tensor_shape() };
