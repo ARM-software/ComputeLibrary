@@ -123,7 +123,7 @@ __kernel void im2col1x1_stridex1_dchw(
 }
 #endif // defined(CONVOLVED_WIDTH) && defined(STRIDE_Y) && defined(KERNEL_DEPTH)
 
-#define PTR_TO_VALUE(PTR, DATA_TYPE) *((DATA_TYPE *)(PTR))
+#define PTR_TO_VALUE(PTR, DATA_TYPE) *((__global DATA_TYPE *)(PTR))
 
 #if defined(CONVOLVED_WIDTH) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(KERNEL_DEPTH) && defined(PAD_LEFT) && defined(PAD_RIGHT) && defined(PAD_TOP) && defined(PAD_BOTTOM) && defined(PAD_VALUE)
 
