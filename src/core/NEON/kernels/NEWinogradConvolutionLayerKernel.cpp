@@ -182,7 +182,6 @@ Status validate_arguments_winograd_output_trans(const ITensorInfo *input, const 
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON(winograd_info.output_data_layout != DataLayout::NCHW);
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(1) != num_tiles.area());
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((kernel_dims.width != 3U && kernel_dims.width != 5U), "Winograd output transform only supports 3x3 and 5x5 kernels");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((kernel_dims.width != kernel_dims.height), "Winograd output transform only supports 3x3 and 5x5 kernels");
@@ -529,12 +528,15 @@ void NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, Ker
     _num_rows          = num_rows;
     _num_cols          = num_cols;
     _num_channels      = num_channels;
-
     // We don't have the biases buffer at this stage as it hasn't been allocated, we pass in nullptr OutputTransform is only used here to compute the window
     OutputTransform output_transform(_output_workspace, _matrix_stride, _matrix_row_stride, nullptr, nullptr, _num_batches, _num_rows, _num_cols, _num_channels);
-    Window          win;
-    auto            win_last = output_transform.get_window();
+
+    Window win;
+    auto   win_last = output_transform.get_window();
     win.set(Window::DimX, Window::Dimension(0, win_last, 1));
+
+    _output_nhwc->info()->set_valid_region(ValidRegion(Coordinates(), _output_nhwc->info()->tensor_shape()));
+
     INEKernel::configure(win);
 }
 
@@ -548,7 +550,7 @@ void NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, Ker
 
     OutputTransform output_transform(_output_workspace, _matrix_stride, _matrix_row_stride,
                                      (_biases ? reinterpret_cast<T *>(_biases->buffer()) : nullptr), reinterpret_cast<T *>(_output_nhwc->buffer()),
-                                     _num_batches, _num_rows, _num_cols, _num_channels);
+                                     _num_batches, _num_rows, _num_cols, _num_channels, 0, _output_nhwc->info()->strides_in_bytes()[2] / sizeof(T), _output_nhwc->info()->strides_in_bytes()[1] / sizeof(T));
 
     // The code below cannot be moved to configure because biases hasn't been allocated at that point
     const size_t fst = window.x().start();

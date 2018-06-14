@@ -61,7 +61,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(width_idx) != 3 && weights->dimension(height_idx) != 5, "Only 3 and 5 kernels are supported");
-    ARM_COMPUTE_RETURN_ERROR_ON(data_layout != DataLayout::NCHW); // COMPMID-1287
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(conv_info.stride().first != 1 || conv_info.stride().second != 1, "Winograd layer only supports unit strides.");
@@ -325,7 +324,7 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
 
     //Configure Activation Layer
     _is_activationlayer_enabled = act_info.enabled();
-    if(data_layout == DataLayout::NCHW && _is_activationlayer_enabled)
+    if(_is_activationlayer_enabled)
     {
         _activationlayer_function.configure(_output, nullptr, act_info);
     }
@@ -363,6 +362,7 @@ void NEWinogradConvolutionLayer::run()
     {
         _activationlayer_function.run();
     }
+
     _memory_group.release();
 }
 
@@ -396,6 +396,7 @@ Status NEWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITen
     // Validate input transform
     const TensorShape input0_shape = misc::shape_calculator::compute_winograd_input_transform_shape(*input, winograd_info);
     const TensorInfo  input0       = input->clone()->set_tensor_shape(input0_shape);
+
     switch(weights->dimension(idx_width))
     {
         case 3:
@@ -482,7 +483,6 @@ Status NEWinogradConvolutionLayer::validate(const ITensorInfo *input, const ITen
             break;
         }
     }
-
     // Validate Activation Layer
     if(act_info.enabled())
     {

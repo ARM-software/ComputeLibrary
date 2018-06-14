@@ -193,12 +193,13 @@ TEST_SUITE_END()
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallShapes(), ActivationDataset), framework::dataset::make("DataType",
                                                                                                              DataType::F32)))
+
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance(_data_type, _function));
 }
-FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), ActivationDataset), framework::dataset::make("DataType",
-                                                                                                           DataType::F32)))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), ActivationDataset),
+                                                                                                           framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance(_data_type, _function));

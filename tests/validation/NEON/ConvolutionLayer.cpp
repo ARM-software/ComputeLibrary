@@ -121,21 +121,26 @@ template <typename T>
 using NEWinogradConvolutionLayerNoBiasFixture = WinogradConvolutionLayerFastMathValidationFixture<Tensor, Accessor, NEWinogradConvolutionLayer, T, false>;
 
 TEST_SUITE(FP32)
+
 FIXTURE_DATA_TEST_CASE(RunSmall, NEWinogradConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(framework::dataset::concat(datasets::SmallWinogradConvolutionLayer3x3Dataset(),
-                                                                  datasets::SmallWinogradConvolutionLayer5x5Dataset()),
-                                       framework::dataset::make("DataType", { DataType::F32 })),
-                               ActivationFunctionsDataset))
+                       combine(combine(combine(framework::dataset::concat(datasets::SmallWinogradConvolutionLayer3x3Dataset(),
+                                                                          datasets::SmallWinogradConvolutionLayer5x5Dataset()),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                       ActivationFunctionsDataset),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
+
 {
     // Validate output
     validate(Accessor(_target), _reference, abs_tolerance_f32);
 }
 
 FIXTURE_DATA_TEST_CASE(RunSmallNoBias, NEWinogradConvolutionLayerNoBiasFixture<float>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(framework::dataset::concat(datasets::SmallWinogradConvolutionLayer3x3Dataset(),
-                                                                  datasets::SmallWinogradConvolutionLayer5x5Dataset()),
-                                       framework::dataset::make("DataType", { DataType::F32 })),
-                               ActivationFunctionsDataset))
+                       combine(combine(combine(framework::dataset::concat(datasets::SmallWinogradConvolutionLayer3x3Dataset(),
+                                                                          datasets::SmallWinogradConvolutionLayer5x5Dataset()),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                       ActivationFunctionsDataset),
+
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(Accessor(_target), _reference, abs_tolerance_f32);

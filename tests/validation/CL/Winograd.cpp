@@ -379,18 +379,20 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
 using CLWinogradConvolutionLayerFastMathFixture = WinogradConvolutionLayerFastMathValidationFixture<CLTensor, CLAccessor, CLWinogradConvolutionLayer, float>;
 TEST_SUITE(Conv3x3)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(datasets::SmallWinogradConvolutionLayer3x3Dataset(),
-                                       framework::dataset::make("DataType", { DataType::F32 })),
-                               framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })))
+                       combine(combine(combine(datasets::SmallWinogradConvolutionLayer3x3Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                       framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::NIGHTLY,
-                       combine(combine(datasets::LargeWinogradConvolutionLayer3x3Dataset(),
-                                       framework::dataset::make("DataType", { DataType::F32 })),
-                               framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })))
+                       combine(combine(combine(datasets::LargeWinogradConvolutionLayer3x3Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                       framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);
@@ -399,18 +401,22 @@ TEST_SUITE_END() // Conv3x3
 
 TEST_SUITE(Conv5x5)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(datasets::SmallWinogradConvolutionLayer5x5Dataset(),
-                                       framework::dataset::make("DataType", { DataType::F32 })),
-                               framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })))
+                       combine(combine(combine(datasets::SmallWinogradConvolutionLayer5x5Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                       framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture, framework::DatasetMode::NIGHTLY,
-                       combine(combine(datasets::LargeWinogradConvolutionLayer5x5Dataset(),
-                                       framework::dataset::make("DataType", { DataType::F32 })),
-                               framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })))
+                       combine(combine(combine(datasets::LargeWinogradConvolutionLayer5x5Dataset(),
+                                               framework::dataset::make("DataType", { DataType::F32 })),
+                                       framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
+                               framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);

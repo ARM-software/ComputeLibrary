@@ -160,11 +160,12 @@ class WinogradConvolutionLayerFastMathValidationFixture : public framework::Fixt
 {
 public:
     template <typename...>
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, DataType data_type, ActivationLayerInfo act_info)
+    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation,
+               DataType data_type, ActivationLayerInfo act_info, const DataLayout &data_layout)
+
     {
         ARM_COMPUTE_UNUSED(dilation);
-
-        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, data_type, act_info);
+        _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, info, data_type, act_info, data_layout);
         _reference = compute_reference(input_shape, weights_shape, bias_shape, output_shape, info, data_type, act_info);
     }
 
@@ -189,14 +190,21 @@ protected:
         }
     }
 
-    TensorType compute_target(const TensorShape &input_shape, const TensorShape &weights_shape, const TensorShape &bias_shape, const TensorShape &output_shape, const PadStrideInfo &info,
-                              DataType data_type, ActivationLayerInfo act_info)
+    TensorType compute_target(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, const PadStrideInfo &info,
+                              DataType data_type, ActivationLayerInfo act_info, const DataLayout data_layout)
     {
+        if(data_layout == DataLayout::NHWC)
+        {
+            permute(input_shape, PermutationVector(2U, 0U, 1U));
+            permute(weights_shape, PermutationVector(2U, 0U, 1U));
+            permute(output_shape, PermutationVector(2U, 0U, 1U));
+        }
+
         // Create tensors
-        TensorType src     = create_tensor<TensorType>(input_shape, data_type, 1);
-        TensorType weights = create_tensor<TensorType>(weights_shape, data_type, 1);
-        TensorType bias    = create_tensor<TensorType>(bias_shape, data_type, 1);
-        TensorType dst     = create_tensor<TensorType>(output_shape, data_type, 1);
+        TensorType src     = create_tensor<TensorType>(input_shape, data_type, 1, 0, QuantizationInfo(), data_layout);
+        TensorType weights = create_tensor<TensorType>(weights_shape, data_type, 1, 0, QuantizationInfo(), data_layout);
+        TensorType bias    = create_tensor<TensorType>(bias_shape, data_type, 1, 0, QuantizationInfo(), data_layout);
+        TensorType dst     = create_tensor<TensorType>(output_shape, data_type, 1, 0, QuantizationInfo(), data_layout);
 
         // Create and configure function
         FunctionType conv;
