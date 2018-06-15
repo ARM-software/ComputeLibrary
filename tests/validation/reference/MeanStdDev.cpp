@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,6 +51,8 @@ std::pair<float, float> mean_and_standard_deviation(const SimpleTensor<T> &in)
 }
 
 template std::pair<float, float> mean_and_standard_deviation(const SimpleTensor<uint8_t> &in);
+template std::pair<float, float> mean_and_standard_deviation(const SimpleTensor<half> &in);
+template std::pair<float, float> mean_and_standard_deviation(const SimpleTensor<float> &in);
 } // namespace reference
 } // namespace validation
 } // namespace test

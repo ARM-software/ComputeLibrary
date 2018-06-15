@@ -44,7 +44,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, u
     ARM_COMPUTE_UNUSED(op);
 
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() != DataLayout::NCHW);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(axis >= TensorShape::num_max_dimensions, "Reduction axis greater than max number of dimensions");
@@ -69,7 +69,7 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
     const unsigned int num_elems_processed_per_iteration = 16;
 
     Window             win          = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
-    const unsigned int border_width = ((input->dimension(0) % 128) != 0) ? 128 - input->dimension(0) % 128 : 0; // TODO (COMPMID-1143): Fix padding (possible value 127!)
+    const unsigned int border_width = ((input->dimension(0) % num_elems_processed_per_iteration) != 0) ? num_elems_processed_per_iteration - input->dimension(0) % num_elems_processed_per_iteration : 0;
 
     AccessWindowStatic     input_access(input, 0, 0, input->dimension(0) + border_width, 1);
     AccessWindowHorizontal output_access(output, 0, 1);

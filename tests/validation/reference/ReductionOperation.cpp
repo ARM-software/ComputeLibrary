@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -53,7 +53,7 @@ T reduce_operation(T *ptr, int reduce_elements, ReductionOperation op)
     switch(op)
     {
         case ReductionOperation::SUM_SQUARE:
-            return std::accumulate(ptr, ptr + reduce_elements, 0.f, square<T>());
+            return std::accumulate(ptr, ptr + reduce_elements, static_cast<T>(0), square<T>());
         default:
             ARM_COMPUTE_ERROR("Unsupported reduction operation");
     }
@@ -87,6 +87,7 @@ SimpleTensor<T> reduction_operation(const SimpleTensor<T> &src, const TensorShap
 }
 
 template SimpleTensor<float> reduction_operation(const SimpleTensor<float> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op);
+template SimpleTensor<half> reduction_operation(const SimpleTensor<half> &src, const TensorShape &dst_shape, unsigned int axis, ReductionOperation op);
 } // namespace reference
 } // namespace validation
 } // namespace test

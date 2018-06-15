@@ -787,6 +787,19 @@ inline arm_compute::Status error_on_unsupported_fp16(const char *function, const
  */
 arm_compute::Status error_on_tensor_not_2d(const char *function, const char *file, const int line,
                                            const ITensor *tensor);
+
+/** Return an error if the tensor info is not 2D.
+ *
+ * @param[in] function Function in which the error occurred.
+ * @param[in] file     Name of the file where the error occurred.
+ * @param[in] line     Line on which the error occurred.
+ * @param[in] tensor   Tensor info to validate.
+ *
+ * @return Status
+ */
+arm_compute::Status error_on_tensor_not_2d(const char *function, const char *file, const int line,
+                                           const ITensorInfo *tensor);
+
 #define ARM_COMPUTE_ERROR_ON_TENSOR_NOT_2D(t) \
     ARM_COMPUTE_ERROR_THROW_ON(::arm_compute::error_on_tensor_not_2d(__func__, __FILE__, __LINE__, t))
 #define ARM_COMPUTE_RETURN_ERROR_ON_TENSOR_NOT_2D(t) \

@@ -45,6 +45,7 @@ namespace
 {
 /** Tolerance for float operations */
 RelativeTolerance<float> tolerance_f32(0.00001f);
+RelativeTolerance<float> tolerance_f16(0.1f);
 } // namespace
 
 TEST_SUITE(CL)
@@ -55,7 +56,7 @@ TEST_SUITE(ReductionOperation)
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
     framework::dataset::make("InputInfo",          { TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Mismatching data type input/output
                                                      TensorInfo(TensorShape(128U, 64U), 2, DataType::F32), // Number of Input channels != 1
-                                                     TensorInfo(TensorShape(128U, 64U), 1, DataType::S16), // DataType != F32
+                                                     TensorInfo(TensorShape(128U, 64U), 1, DataType::S16), // DataType != F16/F32
                                                      TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Axis >= num_max_dimensions
                                                      TensorInfo(TensorShape(128U, 64U), 1, DataType::F32), // Axis > 0
                                                      TensorInfo(TensorShape(128U, 64U), 1, DataType::F32)
@@ -84,9 +85,23 @@ template <typename T>
 using CLReductionOperationFixture = ReductionOperationValidationFixture<CLTensor, CLAccessor, CLReductionOperation, T>;
 
 TEST_SUITE(Float)
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLReductionOperationFixture<half>, framework::DatasetMode::PRECOMMIT,
+                       combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F16)), framework::dataset::make("Axis", { 0 })), datasets::ReductionOperations()))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f16);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLReductionOperationFixture<half>, framework::DatasetMode::NIGHTLY,
+                       combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F16)), framework::dataset::make("Axis", { 0 })), datasets::ReductionOperations()))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f16);
+}
+TEST_SUITE_END() // F16
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLReductionOperationFixture<float>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0 })), datasets::ReductionOperations()))
+                       combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F32)), framework::dataset::make("Axis", { 0 })), datasets::ReductionOperations()))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -97,11 +112,11 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLReductionOperationFixture<float>, framework::
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // F32
+TEST_SUITE_END() // Float
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // Reduction
+TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
