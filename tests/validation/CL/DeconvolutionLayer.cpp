@@ -105,14 +105,14 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, (combine(datasets::Sm
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(
     framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),   // Mismatching data type
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),   // Invalid weights shape
-                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 4),   // Non supported data type
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8, 4),   // Non supported data type
                                             TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 11),  // Invalid bias shape
                                             TensorInfo(TensorShape(13U, 11U, 4U, 3U), 1, DataType::F32, 0), // Window shrink
                                             TensorInfo(TensorShape(32U, 16U, 2U), 1, DataType::F32, 0),
                                           }),
     framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::F16, 0),
                                             TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32, 0),
-                                            TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::QS8, 5),
+                                            TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::QASYMM8, 5),
                                             TensorInfo(TensorShape(3U, 2U, 2U, 2U), 1, DataType::F32, 11),
                                             TensorInfo(TensorShape(3U, 3U, 4U), 1, DataType::F32, 0),
                                               TensorInfo(TensorShape(1U, 1U, 2U, 4U), 1, DataType::F32, 0),

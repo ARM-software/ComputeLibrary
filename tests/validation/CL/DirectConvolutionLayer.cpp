@@ -48,8 +48,6 @@ RelativeTolerance<half>  tolerance_fp16(half(0.2)); /**< Tolerance for floating 
 RelativeTolerance<float> tolerance_fp32(0.02f);     /**< Tolerance for floating point tests */
 constexpr float          tolerance_num = 0.07f;     /**< Tolerance number */
 
-constexpr AbsoluteTolerance<int8_t>  tolerance_qs8(0);     /**< Tolerance for fixed point tests */
-constexpr AbsoluteTolerance<int16_t> tolerance_qs16(0);    /**< Tolerance for fixed point tests */
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1); /**< Tolerance for quantized tests */
 
 /** Direct convolution data set. */
@@ -203,30 +201,6 @@ TEST_SUITE_END()
 
 template <typename T>
 using CLDirectConvolutionLayerFixedPointFixture = DirectConvolutionValidationFixedPointFixture<CLTensor, CLAccessor, CLDirectConvolutionLayer, T>;
-
-TEST_SUITE(FixedPoint)
-TEST_SUITE(QS8)
-FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(data_fixed_point, framework::dataset::make("DataType",
-                                                                                                                    DataType::QS8)),
-                                                                                                                    framework::dataset::make("FractionalBits", 2, 7)),
-                                                                                                                    ActivationFunctionsDataset))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_qs8);
-}
-TEST_SUITE_END()
-
-TEST_SUITE(QS16)
-FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(combine(data_fixed_point, framework::dataset::make("DataType",
-                                                                                                                     DataType::QS16)),
-                                                                                                                     framework::dataset::make("FractionalBits", 2, 15)),
-                                                                                                                     ActivationFunctionsDataset))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_qs16);
-}
-TEST_SUITE_END()
-TEST_SUITE_END()
 
 template <typename T>
 using CLDirectConvolutionLayerQuantizedFixture = DirectConvolutionValidationQuantizedFixture<CLTensor, CLAccessor, CLDirectConvolutionLayer, T>;

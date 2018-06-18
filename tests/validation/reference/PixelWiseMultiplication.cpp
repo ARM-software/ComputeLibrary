@@ -45,10 +45,10 @@ namespace
 {
 /** Compute the result of `src1 * src2 * scale`. The result type always matches the type of @p src2.
  *
- * @param[in] src1            An input value. Data types supported: U8/QS8/QS16/S16/F16/F32.
+ * @param[in] src1            An input value. Data types supported: U8/S16/F16/F32.
  * @param[in] src2            An input value. Data types supported: same as @p src1.
  * @param[in] scale           Scale to apply after multiplication.
- *                            Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15. For QS8 and QS16 scale must be 1.
+ *                            Scale must be positive and its value must be either 1/255 or 1/2^n where n is between 0 and 15.
  * @param[in] convert_policy  Overflow policy. Supported overflow policies: Wrap, Saturate
  * @param[in] rounding_policy Rounding policy. Supported rounding modes: to zero, to nearest even.
  */

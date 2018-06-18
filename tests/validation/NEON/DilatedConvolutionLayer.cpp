@@ -47,7 +47,6 @@ const AbsoluteTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for c
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 const AbsoluteTolerance<float> tolerance_f16(0.01f);       /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
 #endif                                                     /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-const AbsoluteTolerance<float>     tolerance_q(1.0f);      /**< Tolerance value for comparing reference's output against implementation's output for fixed point data types */
 constexpr AbsoluteTolerance<float> tolerance_qasymm8(0.0); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
 
 /** CNN data types */
@@ -57,8 +56,6 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
     DataType::F16,
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
     DataType::F32,
-    DataType::QS8,
-    DataType::QS16,
     DataType::QASYMM8,
 });
 } // namespace
@@ -202,56 +199,6 @@ TEST_SUITE_END()
 
 template <typename T>
 using NEGEMMDilatedConvolutionLayerFixedPointFixture = ConvolutionValidationFixedPointFixture<Tensor, Accessor, NEGEMMConvolutionLayer, T>;
-
-TEST_SUITE(FixedPoint)
-TEST_SUITE(QS8)
-// We test for fixed point precision [4,6]
-FIXTURE_DATA_TEST_CASE(RunTiny, NEGEMMDilatedConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(datasets::TinyDilatedConvolutionLayerDataset(),
-                                                       framework::dataset::make("ReshapeWeights", { true })),
-                                               framework::dataset::make("DataType", DataType::QS8)),
-                                       framework::dataset::make("FractionalBits", 4, 7)),
-                               framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_q);
-}
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMDilatedConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(datasets::SmallDilatedConvolutionLayerDataset(),
-                                                       framework::dataset::make("ReshapeWeights", { true })),
-                                               framework::dataset::make("DataType", DataType::QS8)),
-                                       framework::dataset::make("FractionalBits", 4, 7)),
-                               framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_q);
-}
-TEST_SUITE_END()
-
-TEST_SUITE(QS16)
-// Testing for fixed point position [1,14)
-FIXTURE_DATA_TEST_CASE(RunTiny, NEGEMMDilatedConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(datasets::TinyDilatedConvolutionLayerDataset(),
-                                                       framework::dataset::make("ReshapeWeights", { true })),
-                                               framework::dataset::make("DataType", DataType::QS16)),
-                                       framework::dataset::make("FractionalBits", 1, 14)),
-                               framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_q);
-}
-FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMDilatedConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(datasets::SmallDilatedConvolutionLayerDataset(),
-                                                       framework::dataset::make("ReshapeWeights", { true })),
-                                               framework::dataset::make("DataType", DataType::QS16)),
-                                       framework::dataset::make("FractionalBits", 1, 14)),
-                               framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_q);
-}
-TEST_SUITE_END()
-TEST_SUITE_END()
 
 template <typename T>
 using NEGEMMDilatedConvolutionLayerQuantizedFixture = ConvolutionValidationQuantizedFixture<Tensor, Accessor, NEGEMMConvolutionLayer, T>;

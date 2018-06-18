@@ -62,14 +62,10 @@ double get_double_data(const void *ptr, DataType data_type)
             return *reinterpret_cast<const uint8_t *>(ptr);
         case DataType::S8:
             return *reinterpret_cast<const int8_t *>(ptr);
-        case DataType::QS8:
-            return *reinterpret_cast<const qint8_t *>(ptr);
         case DataType::U16:
             return *reinterpret_cast<const uint16_t *>(ptr);
         case DataType::S16:
             return *reinterpret_cast<const int16_t *>(ptr);
-        case DataType::QS16:
-            return *reinterpret_cast<const qint16_t *>(ptr);
         case DataType::U32:
             return *reinterpret_cast<const uint32_t *>(ptr);
         case DataType::S32:

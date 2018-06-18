@@ -564,7 +564,6 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
             break;
         }
         case DataType::S8:
-        case DataType::QS8:
         {
             std::uniform_int_distribution<int8_t> distribution_s8(std::numeric_limits<int8_t>::lowest(), std::numeric_limits<int8_t>::max());
             fill(tensor, distribution_s8, seed_offset);
@@ -577,7 +576,6 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
             break;
         }
         case DataType::S16:
-        case DataType::QS16:
         {
             std::uniform_int_distribution<int16_t> distribution_s16(std::numeric_limits<int16_t>::lowest(), std::numeric_limits<int16_t>::max());
             fill(tensor, distribution_s16, seed_offset);
@@ -653,7 +651,6 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
             break;
         }
         case DataType::S8:
-        case DataType::QS8:
         {
             ARM_COMPUTE_ERROR_ON(!(std::is_same<int8_t, D>::value));
             std::uniform_int_distribution<int8_t> distribution_s8(low, high);
@@ -668,7 +665,6 @@ void AssetsLibrary::fill_tensor_uniform(T &&tensor, std::random_device::result_t
             break;
         }
         case DataType::S16:
-        case DataType::QS16:
         {
             ARM_COMPUTE_ERROR_ON(!(std::is_same<int16_t, D>::value));
             std::uniform_int_distribution<int16_t> distribution_s16(low, high);

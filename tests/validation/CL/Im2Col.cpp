@@ -58,20 +58,18 @@ using CLIm2Col = CLSynthetizeFunction<CLIm2ColKernel>;
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(10U, 12U, 2U), 1, DataType::U8),      // Unsupported data type
                                                        TensorInfo(TensorShape(10U, 12U, 2U), 1, DataType::F32),     // Mismatching data type
-                                                       TensorInfo(TensorShape(10U, 12U, 2U), 1, DataType::QS8, 2),  // Mismatching fixed point
                                                        TensorInfo(TensorShape(10U, 12U, 2U), 1, DataType::QASYMM8), // Bias not supported with QASYMM8
                                                        TensorInfo(TensorShape(10U, 12U, 2U), 1, DataType::QASYMM8), // Mismatching shapes
                                                        TensorInfo(TensorShape(10U, 12U, 2U, 2U), 1, DataType::QASYMM8),
                                                      }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(3U, 4U, 10U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(3U, 4U, 10U, 2U), 1, DataType::F16),
-                                                       TensorInfo(TensorShape(3U, 4U, 10U, 2U), 1, DataType::QS8, 3),
                                                        TensorInfo(TensorShape(3U, 3U, 10U, 2U), 1, DataType::QASYMM8),
                                                        TensorInfo(TensorShape(3U, 4U, 10U, 2U), 1, DataType::QASYMM8),
                                                        TensorInfo(TensorShape(18U, 80U, 1U, 2U), 1, DataType::QASYMM8),
                                                      })),
-               framework::dataset::make("HasBias", { true, true, true, true, false, false })),
-               framework::dataset::make("Expected", { false, false, false, false, true, true })),
+               framework::dataset::make("HasBias", { true, true, true, false, false })),
+               framework::dataset::make("Expected", { false, false, false, true, true })),
                input_info, output_info, has_bias, expected)
 {
 

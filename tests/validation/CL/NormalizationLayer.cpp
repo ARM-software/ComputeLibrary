@@ -47,10 +47,6 @@ namespace
 RelativeTolerance<half>  tolerance_f16(half(0.2));
 RelativeTolerance<float> tolerance_f32(0.05f);
 
-/** Tolerance for fixed point operations */
-constexpr AbsoluteTolerance<int8_t>  tolerance_qs8(2);
-constexpr AbsoluteTolerance<int16_t> tolerance_qs16(4);
-
 /** Input data set. */
 const auto NormalizationDataset = combine(combine(combine(combine(datasets::SmallShapes(), datasets::NormalizationTypes()),
                                                           framework::dataset::make("NormalizationSize", 3, 9, 2)),
@@ -83,7 +79,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Mismatching shapes
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Even normalization
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Non implemented IN_MAP_2D
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 4), // Mismatching fixed point position
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Window shrink
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32, 0),
                                                      }),
@@ -91,7 +86,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(27U, 11U, 2U), 1, DataType::F32, 0),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 3),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32, 0),
                                                      })),
@@ -100,10 +94,9 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        NormalizationLayerInfo(NormType::IN_MAP_1D, 4),
                                                        NormalizationLayerInfo(NormType::IN_MAP_2D, 5),
                                                        NormalizationLayerInfo(NormType::IN_MAP_1D, 5),
-                                                       NormalizationLayerInfo(NormType::IN_MAP_1D, 5),
                                                        NormalizationLayerInfo(NormType::CROSS_MAP, 5),
                                                       })),
-               framework::dataset::make("Expected", { false, false, false, false, false, false, true })),
+               framework::dataset::make("Expected", { false, false, false, false, false, true })),
                input_info, output_info, norm_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLNormalizationLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), norm_info)) == expected, framework::LogLevel::ERRORS);
@@ -144,44 +137,6 @@ TEST_SUITE_END()
 
 template <typename T>
 using CLNormalizationLayerFixedPointFixture = NormalizationValidationFixedPointFixture<CLTensor, CLAccessor, CLNormalizationLayer, T>;
-
-TEST_SUITE(Quantized)
-TEST_SUITE(QS8)
-// Testing for fixed point position [1,6) as reciprocal limits the maximum fixed point position to 5
-FIXTURE_DATA_TEST_CASE(RunTiny, CLNormalizationLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(NormalizationDatasetQS, framework::dataset::make("DataType",
-                       DataType::QS8)),
-                       framework::dataset::make("FractionalBits", 1, 6)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_qs8);
-}
-FIXTURE_DATA_TEST_CASE(RunSmall, CLNormalizationLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(NormalizationDataset, framework::dataset::make("DataType",
-                       DataType::QS8)),
-                       framework::dataset::make("FractionalBits", 1, 6)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_qs8);
-}
-TEST_SUITE_END()
-
-TEST_SUITE(QS16)
-// Testing for fixed point position [1,14) as reciprocal limits the maximum fixed point position to 5
-FIXTURE_DATA_TEST_CASE(RunTiny, CLNormalizationLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(NormalizationDatasetQS, framework::dataset::make("DataType",
-                       DataType::QS16)),
-                       framework::dataset::make("FractionalBits", 1, 14)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_qs16);
-}
-FIXTURE_DATA_TEST_CASE(RunSmall, CLNormalizationLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(NormalizationDataset, framework::dataset::make("DataType",
-                       DataType::QS16)),
-                       framework::dataset::make("FractionalBits", 1, 14)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_qs16);
-}
-TEST_SUITE_END()
-TEST_SUITE_END()
 
 TEST_SUITE_END()
 TEST_SUITE_END()

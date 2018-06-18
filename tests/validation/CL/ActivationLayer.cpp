@@ -99,9 +99,7 @@ AbsoluteTolerance<float> tolerance(ActivationLayerInfo::ActivationFunction activ
 const auto CNNDataTypes = framework::dataset::make("DataType",
 {
     DataType::F16,
-    DataType::F32,
-    DataType::QS8,
-    DataType::QS16,
+    DataType::F32
 });
 
 /** Input data sets. */
@@ -114,12 +112,9 @@ TEST_SUITE(ActivationLayer)
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), CNNDataTypes), framework::dataset::make("InPlace", { false, true })),
                shape, data_type, in_place)
 {
-    // Set fixed point position data type allowed
-    const int fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
-
     // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, data_type, 1, fixed_point_position);
-    CLTensor dst = create_tensor<CLTensor>(shape, data_type, 1, fixed_point_position);
+    CLTensor src = create_tensor<CLTensor>(shape, data_type, 1);
+    CLTensor dst = create_tensor<CLTensor>(shape, data_type, 1);
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -165,9 +160,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8), // Unsupported activation
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Mismatching shapes
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 2),  // Mismatching fixed point
-                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),
-                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),
                                                      }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
@@ -175,9 +167,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8),
                                                        TensorInfo(TensorShape(30U, 11U, 2U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 3),
-                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QS8, 2),
-                                                       TensorInfo(),
                                                      })),
                framework::dataset::make("ActivationInfo", { ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
                                                             ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
@@ -185,11 +174,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                             ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU),
                                                             ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::TANH),
                                                             ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
-                                                            ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
-                                                            ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
-                                                            ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
                                                           })),
-               framework::dataset::make("Expected", { false, false, true, true, false, false, false, true, true })),
+               framework::dataset::make("Expected", { false, false, true, true, false, false })),
                input_info, output_info, act_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLActivationLayer::validate(&input_info.clone()->set_is_resizable(false), (output_info.total_size() == 0) ? nullptr : &output_info.clone()->set_is_resizable(false), act_info)) == expected, framework::LogLevel::ERRORS);
@@ -236,49 +222,6 @@ TEST_SUITE_END()
 
 template <typename T>
 using CLActivationLayerFixedPointFixture = ActivationValidationFixedPointFixture<CLTensor, CLAccessor, CLActivationLayer, T>;
-
-TEST_SUITE(FixedPoint)
-TEST_SUITE(QS8)
-// We test for fixed point precision [3,5] because [1,2] and [6,7] ranges cause
-// overflowing issues in most of the transcendentals functions.
-FIXTURE_DATA_TEST_CASE(RunTiny, CLActivationLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::TinyShapes(), ActivationDataset),
-                                                                                                                       framework::dataset::make("DataType",
-                                                                                                                               DataType::QS8)),
-                                                                                                                       framework::dataset::make("FractionalBits", 3, 6)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance(_function, _data_type));
-}
-FIXTURE_DATA_TEST_CASE(RunSmall, CLActivationLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallShapes(), ActivationDataset),
-                                                                                                                      framework::dataset::make("DataType",
-                                                                                                                              DataType::QS8)),
-                                                                                                                      framework::dataset::make("FractionalBits", 3, 6)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance(_function, _data_type));
-}
-TEST_SUITE_END()
-
-TEST_SUITE(QS16)
-// Testing for fixed point position [1,14) as reciprocal limits the maximum fixed point position to 14
-FIXTURE_DATA_TEST_CASE(RunTiny, CLActivationLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::TinyShapes(), ActivationDataset),
-                                                                                                                        framework::dataset::make("DataType",
-                                                                                                                                DataType::QS16)),
-                                                                                                                        framework::dataset::make("FractionalBits", 1, 14)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance(_function, _data_type));
-}
-FIXTURE_DATA_TEST_CASE(RunSmall, CLActivationLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::SmallShapes(), ActivationDataset),
-                                                                                                                       framework::dataset::make("DataType",
-                                                                                                                               DataType::QS16)),
-                                                                                                                       framework::dataset::make("FractionalBits", 1, 14)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance(_function, _data_type));
-}
-TEST_SUITE_END()
-TEST_SUITE_END()
 
 template <typename T>
 using CLActivationLayerQuantizedFixture = ActivationValidationQuantizedFixture<CLTensor, CLAccessor, CLActivationLayer, T>;

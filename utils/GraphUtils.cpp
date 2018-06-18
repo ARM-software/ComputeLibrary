@@ -322,7 +322,6 @@ bool RandomAccessor::access_tensor(ITensor &tensor)
             break;
         }
         case DataType::S8:
-        case DataType::QS8:
         {
             std::uniform_int_distribution<int8_t> distribution_s8(_lower.get<int8_t>(), _upper.get<int8_t>());
             fill<int8_t>(tensor, distribution_s8);
@@ -335,7 +334,6 @@ bool RandomAccessor::access_tensor(ITensor &tensor)
             break;
         }
         case DataType::S16:
-        case DataType::QS16:
         {
             std::uniform_int_distribution<int16_t> distribution_s16(_lower.get<int16_t>(), _upper.get<int16_t>());
             fill<int16_t>(tensor, distribution_s16);

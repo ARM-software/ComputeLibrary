@@ -104,26 +104,6 @@ std::pair<T, T> get_activation_layer_test_bounds(ActivationLayerInfo::Activation
                     break;
             }
             break;
-        case DataType::QS8:
-        case DataType::QS16:
-            switch(activation)
-            {
-                case ActivationLayerInfo::ActivationFunction::LOGISTIC:
-                case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
-                case ActivationLayerInfo::ActivationFunction::TANH:
-                    // Reduce range as exponent overflows
-                    bounds = std::make_pair(-(1 << fixed_point_position), 1 << fixed_point_position);
-                    break;
-                case ActivationLayerInfo::ActivationFunction::SQRT:
-                    // Reduce range as sqrt should take a non-negative number
-                    // Can't be zero either as inv_sqrt is used in NEON.
-                    bounds = std::make_pair(1, std::numeric_limits<T>::max());
-                    break;
-                default:
-                    bounds = std::make_pair(std::numeric_limits<T>::lowest(), std::numeric_limits<T>::max());
-                    break;
-            }
-            break;
         default:
             ARM_COMPUTE_ERROR("Unsupported data type");
     }

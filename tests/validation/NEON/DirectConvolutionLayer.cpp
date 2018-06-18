@@ -42,7 +42,6 @@ namespace validation
 {
 namespace
 {
-constexpr AbsoluteTolerance<float> tolerance_qs(1.f); /**< Tolerance for fixed point tests */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 constexpr AbsoluteTolerance<float> tolerance_fp16(0.01f);  /**< Tolerance for half precision floating point tests */
 #endif                                                     /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
@@ -59,33 +58,12 @@ const auto data_pad_f32 = concat(concat(combine(framework::dataset::make("PadX",
                                          combine(framework::dataset::make("PadY", { 0, 3 }),
                                                  framework::dataset::make("KernelSize", 5))));
 
-const auto data_pad_qs8 = concat(combine(framework::dataset::make("PadX", 0),
-                                         combine(framework::dataset::make("PadY", 0),
-                                                 framework::dataset::make("KernelSize", 1))),
-                                 combine(framework::dataset::make("PadX", { 0, 2 }),
-                                         combine(framework::dataset::make("PadY", { 0, 2 }),
-                                                 framework::dataset::make("KernelSize", 3))));
-
 const auto data_f32 = combine(datasets::SmallDirectConvolutionShapes(),
                               combine(framework::dataset::make("StrideX", { 1, 3 }),
                                       combine(framework::dataset::make("StrideY", { 1, 3 }),
                                               combine(data_pad_f32,
                                                       framework::dataset::make("NumKernels", { 1, 4, 8, 16 })))));
 
-const auto data_qs8 = combine(datasets::TinyDirectConvolutionShapes(),
-                              combine(framework::dataset::make("StrideX", { 1, 3 }),
-                                      combine(framework::dataset::make("StrideY", { 1, 3 }),
-                                              combine(data_pad_qs8,
-                                                      framework::dataset::make("NumKernels", { 1, 4, 8, 16 })))));
-
-/** Direct convolution QS16 data set. */
-const auto data_qs16 = combine(datasets::TinyDirectConvolutionShapes(),
-                               combine(framework::dataset::make("StrideX", { 1, 3 }),
-                                       combine(framework::dataset::make("StrideY", { 1, 3 }),
-                                               combine(framework::dataset::make("PadX", 0),
-                                                       combine(framework::dataset::make("PadY", 0),
-                                                               combine(framework::dataset::make("KernelSize", 1),
-                                                                       framework::dataset::make("NumKernels", { 1, 4, 8, 16 })))))));
 /** Activation function Dataset*/
 const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
 {
@@ -204,30 +182,6 @@ const auto QuantizedActivationFunctionsDataset = framework::dataset::make("Activ
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU),
     ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f)
 });
-
-TEST_SUITE(Quantized)
-TEST_SUITE(QS8)
-// We test for fixed point precision [4,6]
-FIXTURE_DATA_TEST_CASE(Run, NEDirectConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(combine(data_qs8, framework::dataset::make("DataType", DataType::QS8)),
-                                                                                                                    framework::dataset::make("FractionalBits", 4, 7)),
-                                                                                                                    QuantizedActivationFunctionsDataset))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_qs);
-}
-TEST_SUITE_END()
-
-TEST_SUITE(QS16)
-// We test for fixed point precision [4,13]
-FIXTURE_DATA_TEST_CASE(Run, NEDirectConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(combine(data_qs16, framework::dataset::make("DataType", DataType::QS16)),
-                                                                                                                     framework::dataset::make("FractionalBits", 4, 14)),
-                                                                                                                     QuantizedActivationFunctionsDataset))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance_qs);
-}
-TEST_SUITE_END()
-TEST_SUITE_END()
 
 TEST_SUITE_END()
 TEST_SUITE_END()

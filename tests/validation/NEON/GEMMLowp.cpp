@@ -102,7 +102,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, framework::dataset::c
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
     framework::dataset::make("InputAInfo", { TensorInfo(TensorShape(21U, 13U), 1, DataType::QASYMM8, QuantizationInfo(1.f/255, 10)), // Input not a multiple of 4
-                                             TensorInfo(TensorShape(21U, 13U), 1, DataType::QS8, 2),                                 // Mismatching data type
+                                             TensorInfo(TensorShape(21U, 13U), 1, DataType::S32, 2),                                 // Mismatching data type
                                              TensorInfo(TensorShape(20U, 13U), 1, DataType::QASYMM8, QuantizationInfo(1.f/255, 10)), // Invalid dimensions
                                              TensorInfo(TensorShape(21U, 13U), 1, DataType::QASYMM8, QuantizationInfo(1.f/255, 10)), // Invalid dimensions
                                              TensorInfo(TensorShape(16U, 32U), 1, DataType::QASYMM8, QuantizationInfo(1.f/255, 10)),

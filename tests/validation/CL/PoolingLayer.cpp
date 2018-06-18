@@ -49,11 +49,6 @@ const auto PoolingLayerDatasetFP = combine(combine(combine(datasets::PoolingType
                                                    framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) })),
                                            framework::dataset::make("ExcludePadding", { true, false }));
 
-/** Input data set for fixed-point data types */
-const auto PoolingLayerDatasetQS = combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }), framework::dataset::make("PoolingSize", { Size2D(2, 2), Size2D(3, 3) })),
-                                                   framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) })),
-                                           framework::dataset::make("ExcludePadding", { true, false }));
-
 /** Input data set for asymmetric data type */
 const auto PoolingLayerDatasetQASYMM8 = combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }), framework::dataset::make("PoolingSize", { Size2D(2, 2), Size2D(3, 3), Size2D(5, 7), Size2D(8, 9) })),
                                                         framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) })),
@@ -61,8 +56,6 @@ const auto PoolingLayerDatasetQASYMM8 = combine(combine(combine(framework::datas
 
 constexpr AbsoluteTolerance<float>   tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for 32-bit floating-point type */
 constexpr AbsoluteTolerance<float>   tolerance_f16(0.01f);  /**< Tolerance value for comparing reference's output against implementation's output for 16-bit floating-point type */
-constexpr AbsoluteTolerance<float>   tolerance_qs16(6);     /**< Tolerance value for comparing reference's output against implementation's output for 16-bit fixed-point type */
-constexpr AbsoluteTolerance<float>   tolerance_qs8(3);      /**< Tolerance value for comparing reference's output against implementation's output for 8-bit fixed-point type */
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);  /**< Tolerance value for comparing reference's output against implementation's output for 8-bit asymmetric type */
 } // namespace
 
@@ -74,8 +67,6 @@ TEST_SUITE(PoolingLayer)
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),     // Mismatching data type
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),     // Window shrink
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS8, 4),     // Mismatching fixed point position
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QS16, 11),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),     // Invalid pad/size combination
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),     // Invalid pad/size combination
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8, 0), // Invalid parameters
@@ -85,8 +76,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                      }),
                framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F16, 0),
                                                        TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32, 0),
-                                                       TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::QS8, 5),
-                                                       TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::QS16, 11),
                                                        TensorInfo(TensorShape(30U, 11U, 2U), 1, DataType::F32, 0),
                                                        TensorInfo(TensorShape(25U, 16U, 2U), 1, DataType::F32, 0),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8, 0),
@@ -96,8 +85,6 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                      })),
                framework::dataset::make("PoolInfo",  { PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)),
                                                        PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)),
-                                                       PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)),
-                                                       PoolingLayerInfo(PoolingType::AVG, 3, PadStrideInfo(1, 1, 0, 0)),
                                                        PoolingLayerInfo(PoolingType::AVG, 2, PadStrideInfo(1, 1, 2, 0)),
                                                        PoolingLayerInfo(PoolingType::AVG, 2, PadStrideInfo(1, 1, 0, 2)),
                                                        PoolingLayerInfo(PoolingType::L2, 3, PadStrideInfo(1, 1, 0, 0)),
@@ -105,7 +92,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                                                        PoolingLayerInfo(PoolingType::MAX),
                                                        PoolingLayerInfo(PoolingType::AVG),
                                                       })),
-               framework::dataset::make("Expected", { false, false, false, true, false, false, false, true, false, true })),
+               framework::dataset::make("Expected", { false, false, false, false, false, true, false, true })),
                input_info, output_info, pool_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLPoolingLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), pool_info)) == expected, framework::LogLevel::ERRORS);
@@ -163,42 +150,6 @@ TEST_SUITE_END() // Float
 
 template <typename T>
 using CLPoolingLayerFixedPointFixture = PoolingLayerValidationFixedPointFixture<CLTensor, CLAccessor, CLPoolingLayer, T>;
-
-TEST_SUITE(FixedPoint)
-TEST_SUITE(QS8)
-FIXTURE_DATA_TEST_CASE(RunTiny, CLPoolingLayerFixedPointFixture<int8_t>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapes(), combine(PoolingLayerDatasetQS,
-                                                                                                                      framework::dataset::make("DataType", DataType::QS8))),
-                                                                                                              framework::dataset::make("FractionalBits", 1, 4)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_qs8);
-}
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetQS,
-                                                                                                                   framework::dataset::make("DataType", DataType::QS8))),
-                                                                                                                   framework::dataset::make("FractionalBits", 1, 4)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_qs8);
-}
-TEST_SUITE_END() // QS8
-
-TEST_SUITE(QS16)
-FIXTURE_DATA_TEST_CASE(RunTiny, CLPoolingLayerFixedPointFixture<int16_t>, framework::DatasetMode::ALL, combine(combine(datasets::TinyShapes(), combine(PoolingLayerDatasetQS,
-                                                                                                                       framework::dataset::make("DataType", DataType::QS16))),
-                                                                                                               framework::dataset::make("FractionalBits", 1, 12)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_qs16);
-}
-FIXTURE_DATA_TEST_CASE(RunSmall, CLPoolingLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SmallShapes(), combine(PoolingLayerDatasetQS,
-                                                                                                                    framework::dataset::make("DataType", DataType::QS16))),
-                                                                                                                    framework::dataset::make("FractionalBits", 1, 12)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_qs16);
-}
-TEST_SUITE_END() // QS16
-TEST_SUITE_END() // fixedPoint
 
 TEST_SUITE(Quantized)
 

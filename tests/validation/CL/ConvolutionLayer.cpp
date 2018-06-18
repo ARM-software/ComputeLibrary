@@ -48,7 +48,6 @@ namespace
 constexpr AbsoluteTolerance<float>  absolute_tolerance_float(0.0001f);    /**< Absolute Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 RelativeTolerance<float>            tolerance_f32(0.05f);                 /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 RelativeTolerance<half_float::half> tolerance_f16(half_float::half(0.2)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-constexpr AbsoluteTolerance<float>  tolerance_fixed(1.0f);                /**< Tolerance value for comparing reference's output against implementation's output for fixed point data types */
 constexpr AbsoluteTolerance<float>  tolerance_qasymm8(0.0);               /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
 constexpr float                     tolerance_num = 0.07f;                /**< Tolerance number */
 
@@ -57,8 +56,6 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
 {
     DataType::F16,
     DataType::F32,
-    DataType::QS8,
-    DataType::QS16,
     DataType::QASYMM8,
 });
 const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
@@ -255,58 +252,6 @@ TEST_SUITE_END()
 
 template <typename T>
 using CLGEMMConvolutionLayerFixedPointFixture = ConvolutionValidationFixedPointFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T>;
-
-TEST_SUITE(FixedPoint)
-TEST_SUITE(QS8)
-// We test for fixed point precision [4,6]
-FIXTURE_DATA_TEST_CASE(RunTiny, CLGEMMConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::TinyConvolutionLayerDataset(),
-                       framework::dataset::make("ReshapeWeights", { true })),
-                       framework::dataset::make("DataType",
-                                                DataType::QS8)),
-                       framework::dataset::make("FractionalBits", 4, 7)),
-                       ActivationFunctionsDataset))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_fixed);
-}
-
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerFixedPointFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
-                       framework::dataset::make("ReshapeWeights", { true })),
-                       framework::dataset::make("DataType",
-                                                DataType::QS8)),
-                       framework::dataset::make("FractionalBits", 4, 7)),
-                       ActivationFunctionsDataset))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_fixed);
-}
-TEST_SUITE_END()
-
-TEST_SUITE(QS16)
-// Testing for fixed point position [1,14)
-FIXTURE_DATA_TEST_CASE(RunTiny, CLGEMMConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::TinyConvolutionLayerDataset(),
-                       framework::dataset::make("ReshapeWeights", { true })),
-                       framework::dataset::make("DataType",
-                                                DataType::QS16)),
-                       framework::dataset::make("FractionalBits", 1, 14)),
-                       ActivationFunctionsDataset))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_fixed);
-}
-
-FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMConvolutionLayerFixedPointFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::SmallConvolutionLayerDataset(),
-                       framework::dataset::make("ReshapeWeights", { true })),
-                       framework::dataset::make("DataType",
-                                                DataType::QS16)),
-                       framework::dataset::make("FractionalBits", 1, 14)),
-                       ActivationFunctionsDataset))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_fixed);
-}
-TEST_SUITE_END()
-TEST_SUITE_END()
 
 template <typename T>
 using CLGEMMConvolutionLayerQuantizedFixture = ConvolutionValidationQuantizedFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T>;

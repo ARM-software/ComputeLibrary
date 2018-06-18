@@ -133,42 +133,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWidthConcatenateLayerFixture<float>, framewor
 TEST_SUITE_END()
 TEST_SUITE_END()
 
-TEST_SUITE(Quantized)
-TEST_SUITE(QS8)
-FIXTURE_DATA_TEST_CASE(RunTiny, CLWidthConcatenateLayerFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Tiny2DShapes(),
-                                                                                                                   framework::dataset::make("DataType",
-                                                                                                                           DataType::QS8)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-FIXTURE_DATA_TEST_CASE(RunSmall, CLWidthConcatenateLayerFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::WidthConcatenateLayerShapes(),
-                                                                                                                  framework::dataset::make("DataType",
-                                                                                                                          DataType::QS8)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-TEST_SUITE_END()
-
-TEST_SUITE(QS16)
-FIXTURE_DATA_TEST_CASE(RunTiny, CLWidthConcatenateLayerFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Tiny2DShapes(),
-                                                                                                                    framework::dataset::make("DataType",
-                                                                                                                            DataType::QS16)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-FIXTURE_DATA_TEST_CASE(RunSmall, CLWidthConcatenateLayerFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(datasets::WidthConcatenateLayerShapes(),
-                                                                                                                   framework::dataset::make("DataType",
-                                                                                                                           DataType::QS16)))
-{
-    // Validate output
-    validate(CLAccessor(_target), _reference);
-}
-TEST_SUITE_END()
-TEST_SUITE_END()
-
 TEST_SUITE_END()
 TEST_SUITE_END()
 } // namespace validation
