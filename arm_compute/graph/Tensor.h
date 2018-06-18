@@ -82,6 +82,13 @@ public:
      * @return Backend tensor accessor
      */
     ITensorAccessor *accessor();
+    /** Extracts accessor from the tensor
+     *
+     * @warning Accessor gets unbound from the tensor
+     *
+     * @return The accessor of the tensor
+     */
+    std::unique_ptr<ITensorAccessor> extract_accessor();
     /** Calls accessor on tensor
      *
      * @return True if the accessor was called else false

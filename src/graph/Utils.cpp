@@ -80,8 +80,8 @@ PassManager create_default_pass_manager(Target target)
 
     if(target != Target::GC)
     {
-        pm.append(support::cpp14::make_unique<InPlaceOperationMutator>());
         pm.append(support::cpp14::make_unique<NodeFusionMutator>());
+        pm.append(support::cpp14::make_unique<InPlaceOperationMutator>());
         pm.append(support::cpp14::make_unique<SplitLayerSubTensorMutator>());
         pm.append(support::cpp14::make_unique<DepthConcatSubTensorMutator>());
     }

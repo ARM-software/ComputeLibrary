@@ -67,6 +67,11 @@ ITensorAccessor *Tensor::accessor()
     return _accessor.get();
 }
 
+std::unique_ptr<ITensorAccessor> Tensor::extract_accessor()
+{
+    return std::move(_accessor);
+}
+
 bool Tensor::call_accessor()
 {
     // Early exit guard
