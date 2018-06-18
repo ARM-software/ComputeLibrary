@@ -89,13 +89,8 @@ public:
             const auto in1_ptr        = reinterpret_cast<const TypeInput *>(_b->buffer());
             const int  multi_stride_b = _b->info()->strides_in_bytes().z() / sizeof(TypeInput);
 
-            // Forcing 128-byte alignment (required by 32-bit kernels)
-            const unsigned int alignment   = 128;
-            void              *raw_ptr     = reinterpret_cast<void *>(_pretranspose->buffer());
-            size_t             space       = _pretranspose->info()->total_size();
-            void              *aligned_ptr = support::cpp11::align(alignment, _gemm_kernel_asm->get_B_pretransposed_array_size(), raw_ptr, space);
             ARM_COMPUTE_ERROR_ON(_pretranspose == nullptr || _pretranspose->buffer() == nullptr);
-            _gemm_kernel_asm->pretranspose_B_array(aligned_ptr, in1_ptr, ldb, multi_stride_b);
+            _gemm_kernel_asm->pretranspose_B_array(_pretranspose->buffer(), in1_ptr, ldb, multi_stride_b);
             _b->mark_as_unused();
         }
 
@@ -169,7 +164,7 @@ using AssemblyKernelGlueS8S32 = AssemblyKernelGlue<int8_t, int32_t>;
 inline void allocate_workspace(size_t workspace_size, Tensor &workspace, MemoryGroup *memory_group, size_t alignment, unsigned int num_threads)
 {
     ARM_COMPUTE_ERROR_ON_MSG(workspace_size == 0, "size cannot be 0");
-    workspace.allocator()->init(TensorInfo(TensorShape{ (workspace_size + alignment - 1) * num_threads }, 1, DataType::S8));
+    workspace.allocator()->init(TensorInfo(TensorShape{ (workspace_size + alignment) * num_threads }, 1, DataType::S8), alignment);
     if(memory_group != nullptr)
     {
         memory_group->manage(&workspace);

@@ -165,15 +165,33 @@ std::vector<size_t> sort_indices(const std::vector<T> &v)
     return idx;
 }
 
-inline bool endswith(const std::string &filename, const std::string &suffix)
+/** Checks if a string contains a given suffix
+ *
+ * @param[in] str    Input string
+ * @param[in] suffix Suffix to check for
+ *
+ * @return True if the string ends with the given suffix else false
+ */
+inline bool endswith(const std::string &str, const std::string &suffix)
 {
-    if(filename.size() < suffix.size())
+    if(str.size() < suffix.size())
     {
         return false;
     }
-    return std::equal(suffix.rbegin(), suffix.rend(), filename.rbegin());
+    return std::equal(suffix.rbegin(), suffix.rend(), str.rbegin());
 }
 
+/** Checks if a pointer complies with a given alignment
+ *
+ * @param[in] ptr       Pointer to check
+ * @param[in] alignment Alignment value
+ *
+ * @return True if the pointer is aligned else false
+ */
+inline bool check_aligned(void *ptr, const size_t alignment)
+{
+    return (reinterpret_cast<std::uintptr_t>(ptr) % alignment) == 0;
+}
 } // namespace utility
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_MISC_UTILITY_H__ */
