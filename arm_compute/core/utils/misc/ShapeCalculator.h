@@ -110,6 +110,7 @@ inline TensorShape compute_reductionB_shape(const ITensorInfo &a)
 inline TensorShape compute_col2im_shape(const ITensorInfo &input, std::pair<unsigned int, unsigned int> convolved_dims)
 {
     TensorShape col2im_shape{ input.tensor_shape() };
+    col2im_shape.shift_right(1);
     col2im_shape.set(0, convolved_dims.first);
     col2im_shape.set(1, convolved_dims.second);
     col2im_shape.set(2, input.tensor_shape()[0]);

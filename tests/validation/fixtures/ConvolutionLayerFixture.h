@@ -214,11 +214,10 @@ class ConvolutionValidationQuantizedFixture : public ConvolutionValidationGeneri
 public:
     template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights, DataType data_type,
-               QuantizationInfo quantization_info, ActivationLayerInfo act_info)
+               DataLayout data_layout, QuantizationInfo quantization_info, ActivationLayerInfo act_info)
     {
-        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights, data_type,
-                                                                                              DataLayout::NCHW, 0,
-                                                                                              quantization_info, act_info);
+        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights,
+                                                                                              data_type, data_layout, 0, quantization_info, act_info);
     }
 };
 } // namespace validation

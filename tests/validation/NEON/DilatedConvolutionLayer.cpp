@@ -206,9 +206,10 @@ using NEGEMMDilatedConvolutionLayerQuantizedFixture = ConvolutionValidationQuant
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMDilatedConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT,
-                       combine(combine(combine(combine(datasets::SmallDilatedConvolutionLayerDataset(),
-                                                       framework::dataset::make("ReshapeWeights", { true })),
-                                               framework::dataset::make("DataType", DataType::QASYMM8)),
+                       combine(combine(combine(combine(combine(datasets::SmallDilatedConvolutionLayerDataset(),
+                                                               framework::dataset::make("ReshapeWeights", { true })),
+                                                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW })),
                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
                                framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
 {
@@ -216,9 +217,10 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMDilatedConvolutionLayerQuantizedFixture<u
     validate(Accessor(_target), _reference, tolerance_qasymm8);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMDilatedConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
-                       combine(combine(combine(combine(datasets::LargeDilatedConvolutionLayerDataset(),
-                                                       framework::dataset::make("ReshapeWeights", { true })),
-                                               framework::dataset::make("DataType", DataType::QASYMM8)),
+                       combine(combine(combine(combine(combine(datasets::LargeDilatedConvolutionLayerDataset(),
+                                                               framework::dataset::make("ReshapeWeights", { true })),
+                                                       framework::dataset::make("DataType", DataType::QASYMM8)),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW })),
                                        framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })),
                                framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
 {

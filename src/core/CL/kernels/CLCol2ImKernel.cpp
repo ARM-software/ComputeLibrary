@@ -140,23 +140,25 @@ void CLCol2ImKernel::run(const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICLKernel::window(), window);
-    // The collapse method rely on the assumption that the third dimension of input buffer is 1
-    ARM_COMPUTE_ERROR_ON(window.z().end() != 1);
+
+    Window out_window;
+    out_window.use_tensor_dimensions(_output->info()->tensor_shape());
 
     Window collapsed_window = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
-    Window slice            = collapsed_window.first_slice_window_3D();
+    Window slice            = collapsed_window.first_slice_window_2D();
+    Window slice_out        = out_window.first_slice_window_3D();
 
     // Set static kernel arguments
-    unsigned int idx = 2 * num_arguments_per_3D_tensor();
+    unsigned int idx = num_arguments_per_2D_tensor() + num_arguments_per_3D_tensor();
     _kernel.setArg<cl_uint>(idx++, _output->info()->strides_in_bytes()[3]);
 
     do
     {
         // Set inputs
         unsigned int idx = 0;
-        add_3D_tensor_argument(idx, _input, slice);
-        add_3D_tensor_argument(idx, _output, slice);
+        add_2D_tensor_argument(idx, _input, slice);
+        add_3D_tensor_argument(idx, _output, slice_out);
         enqueue(queue, *this, slice, _lws_hint);
     }
-    while(collapsed_window.slide_window_slice_3D(slice));
+    while(collapsed_window.slide_window_slice_2D(slice) && out_window.slide_window_slice_3D(slice_out));
 }

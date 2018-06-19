@@ -48,7 +48,10 @@ void calculate_shapes(const ITensorInfo *input, const ITensorInfo *weights, cons
     // Get convolved dimensions
     unsigned int conv_w = 0;
     unsigned int conv_h = 0;
-    std::tie(conv_w, conv_h) = scaled_dimensions(input->dimension(0), input->dimension(1), kernel_width, kernel_height,
+    std::tie(conv_w, conv_h) = scaled_dimensions(input->dimension(0),
+                                                 input->dimension(1),
+                                                 kernel_width,
+                                                 kernel_height,
                                                  conv_info);
 
     const size_t mat_weights_cols = weights->dimension(3);
@@ -61,9 +64,12 @@ void calculate_shapes(const ITensorInfo *input, const ITensorInfo *weights, cons
     const size_t mat_input_rows = conv_w * conv_h;
 
     shape_im2col = input->tensor_shape();
+    if(shape_im2col.num_dimensions() >= 3)
+    {
+        shape_im2col.remove_dimension(2);
+    }
     shape_im2col.set(0, mat_input_cols);
     shape_im2col.set(1, mat_input_rows);
-    shape_im2col.set(2, 1);
 
     shape_gemm = shape_im2col;
     shape_gemm.set(0, mat_weights_cols);

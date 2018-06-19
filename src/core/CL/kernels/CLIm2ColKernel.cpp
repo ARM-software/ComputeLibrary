@@ -143,7 +143,7 @@ CLIm2ColKernel::configure_window(const ICLTensor *input, ICLTensor *output, cons
                 {
                     case 1:
                         // Optimized im2col1x1 if stride_x = 1 and conv_info.has_padding() = false
-                        if(conv_info.stride().first == 1 && !conv_info.has_padding())
+                        if(conv_info.stride().first == 1 && !conv_info.has_padding() && data_layout == DataLayout::NCHW)
                         {
                             // Set hint for LWS
                             _lws_hint                          = cl::NDRange(1, 1, 8);
@@ -350,11 +350,14 @@ void CLIm2ColKernel::run_generic(const Window &window, cl::CommandQueue &queue)
     // Change the Z dimension's step back to 1
     window_collapsed.set_dimension_step(Window::DimZ, 1);
 
+    Window window_output;
+    window_output.use_tensor_dimensions(_output->info()->tensor_shape());
+
     const Window first_slice_3d = window_collapsed.first_slice_window_3D();
 
     Window slice     = first_slice_3d;
     Window slice_in  = first_slice_3d;
-    Window slice_out = first_slice_3d;
+    Window slice_out = window_output.first_slice_window_2D();
 
     const bool out_dim_not_same_input_dim = _convolved_dims.first != _input->info()->dimension(width_idx) || _convolved_dims.second != _input->info()->dimension(height_idx);
 
@@ -386,21 +389,16 @@ void CLIm2ColKernel::run_generic(const Window &window, cl::CommandQueue &queue)
     slice_in.set(Window::DimY, Window::Dimension(0, 0, 0));
     slice_in.set(Window::DimZ, Window::Dimension(0, 0, 0));
 
-    // Setup output slice
-    slice_out.set(Window::DimX, Window::Dimension(0, _output->info()->dimension(0), _kernel_dims.area()));
-    slice_out.set(Window::DimY, Window::Dimension(0, _output->info()->dimension(1), _output->info()->dimension(1)));
-    slice_out.set(Window::DimZ, Window::Dimension(0, 1, 1));
-
     do
     {
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice_in);
         add_2D_tensor_argument(idx, _output, slice_out);
         _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input->info()->strides_in_bytes()[3]));
-        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_output->info()->strides_in_bytes()[3]));
+        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_output->info()->strides_in_bytes()[2]));
         enqueue(queue, *this, slice, _lws_hint);
     }
-    while(window_collapsed.slide_window_slice_3D(slice) && window_collapsed.slide_window_slice_3D(slice_out) && window_collapsed.slide_window_slice_3D(slice_in));
+    while(window_collapsed.slide_window_slice_3D(slice) && window_output.slide_window_slice_2D(slice_out) && window_collapsed.slide_window_slice_3D(slice_in));
 }
 
 void CLIm2ColKernel::run_reduced(const Window &window, cl::CommandQueue &queue)

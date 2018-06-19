@@ -52,8 +52,6 @@
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
  * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
@@ -66,11 +64,11 @@
  * @param[in]  dst_stride_w                      Stride of the destination tensor in W dimension (in bytes)
  */
 __kernel void col2im(
-    TENSOR3D_DECLARATION(src),
+    IMAGE_DECLARATION(src),
     TENSOR3D_DECLARATION(dst),
     uint dst_stride_w)
 {
-    Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
+    Image src = CONVERT_TO_IMAGE_STRUCT(src);
 
     VEC_DATA_TYPE(DATA_TYPE, 8)
     data = vload8(0, (__global DATA_TYPE *)src.ptr);
@@ -113,8 +111,6 @@ __kernel void col2im(
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
  * @param[in]  src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source tensor
  * @param[out] dst_ptr                           Pointer to the destination tensor. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
@@ -127,11 +123,11 @@ __kernel void col2im(
  * @param[in]  dst_stride_w                      Stride of the destination tensor in W dimension (in bytes)
  */
 __kernel void col2im(
-    TENSOR3D_DECLARATION(src),
+    IMAGE_DECLARATION(src),
     TENSOR3D_DECLARATION(dst),
     uint dst_stride_w)
 {
-    Tensor3D src = CONVERT_TO_TENSOR3D_STRUCT(src);
+    Image    src = CONVERT_TO_IMAGE_STRUCT(src);
     Tensor3D dst = CONVERT_TO_TENSOR3D_STRUCT_NO_STEP(dst);
 
     // Compute output offset
