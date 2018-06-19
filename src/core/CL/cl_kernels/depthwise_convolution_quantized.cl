@@ -252,29 +252,24 @@ __kernel void depthwise_convolution_3x3_quantized_nchw(
 
 #endif /* defined(CONV_STRIDE_Y) && defined(CONV_STRIDE_X) */
 
-#if defined(VEC_SIZE) && defined(SRC_DEPTH) && defined(CONV_PAD_TOP) && defined(ROWS_READ)
+#if defined(VEC_SIZE) && defined(SRC_DIM_1) && defined(SRC_DIM_2) && defined(CONV_PAD_TOP) && defined(CONV_PAD_LEFT)
 
 #define asymm_mult_by_quant_multiplier_less_than_one(x, y, z) ASYMM_MULT_BY_QUANT_MULTIPLIER_LESS_THAN_ONE(x, y, z, VEC_SIZE)
 
 #define VEC_INT VEC_DATA_TYPE(int, VEC_SIZE)
 #define VEC_UCHAR VEC_DATA_TYPE(uchar, VEC_SIZE)
+#define VEC_USHORT VEC_DATA_TYPE(ushort, VEC_SIZE)
 
-#define BIFROST_MAD_4(acc, x, y)               \
-    ({                                         \
-        acc.s0 += (ushort)x.s0 * (ushort)y.s0; \
-        acc.s1 += (ushort)x.s1 * (ushort)y.s1; \
-        acc.s2 += (ushort)x.s2 * (ushort)y.s2; \
-        acc.s3 += (ushort)x.s3 * (ushort)y.s3; \
-    })
+#define MULTIPLY_ADD(x, y, acc) acc += CONVERT(CONVERT(x, VEC_USHORT) * CONVERT(y, VEC_USHORT), VEC_INT)
 
 #if WEIGHTS_OFFSET != 0
-#define BIFROST_MAD_ACC_4(acc, sum, x, y) \
-    ({                                    \
-        sum += CONVERT(x, VEC_INT);       \
-        BIFROST_MAD_4(acc, x, y);         \
+#define MULTIPLY_ADD_ACCUMULATE(x, y, acc, sum) \
+    ({                                          \
+        sum += CONVERT(x, VEC_INT);             \
+        MULTIPLY_ADD(x, y, acc);                \
     })
 #else /* WEIGHTS_OFFSET != 0 */
-#define BIFROST_MAD_ACC_4(acc, sum, x, y) BIFROST_MAD_4(acc, x, y)
+#define MULTIPLY_ADD_ACCUMULATE(x, y, acc, sum) MULTIPLY_ADD(x, y, acc)
 #endif /* WEIGHTS_OFFSET != 0 */
 
 /** This function computes the depthwise convolution quantized.
@@ -318,6 +313,10 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc_stride1(
 #endif /* defined(HAS_BIAS) */
 )
 {
+    int x = get_global_id(0);
+    int y = get_global_id(1);
+    int z = get_global_id(2);
+
     Image  dst     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
     Vector weights = CONVERT_TO_VECTOR_STRUCT(weights);
 #if defined(HAS_BIAS)
@@ -326,20 +325,9 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc_stride1(
     VEC_INT bias_values = VLOAD(VEC_SIZE)(0, (__global int *)biases.ptr);
 #endif /* defined(HAS_BIAS) */
 
-    __global uchar *first_elem = src_ptr + src_offset_first_element_in_bytes;
-
-    const int z         = get_global_id(2);
-    const int pad_offs  = -ROWS_READ * src_stride_y;
-    const int src_offs0 = get_global_id(0) * src_step_x + get_global_id(1) * src_step_y + z * src_step_z - CONV_PAD_TOP * src_stride_z;
-    const int src_offs1 = src_offs0 + src_stride_z;
-    const int src_offs2 = src_offs1 + src_stride_z;
-
-    const int cond_top    = z - CONV_PAD_TOP < 0;
-    const int cond_bottom = z * (src_step_z / src_stride_z) + 2 > SRC_DEPTH;
-
-    __global uchar *src_addr0 = first_elem + select(src_offs0, pad_offs, cond_top);
-    __global uchar *src_addr1 = first_elem + src_offs1;
-    __global uchar *src_addr2 = first_elem + select(src_offs2, pad_offs, cond_bottom);
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * src_step_x;
+    int8            y_coord  = (int8)(y * (src_step_y / src_stride_y)) + (int8)(0, 1, 2, 3, 4, 5, 0, 0) - CONV_PAD_LEFT;
+    int             z_coord  = z * (src_step_z / src_stride_z) - CONV_PAD_TOP;
 
     VEC_INT sum_we = 0;
     VEC_INT acc0 = 0, acc1 = 0, acc2 = 0, acc3 = 0;
@@ -355,34 +343,34 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc_stride1(
     sum_we += CONVERT(w0, VEC_INT) + CONVERT(w1, VEC_INT) + CONVERT(w2, VEC_INT);
 #endif /* INPUT_OFFSET != 0 */
 
-    VEC_UCHAR values = VLOAD(VEC_SIZE)(0, src_addr0);
-    BIFROST_MAD_ACC_4(acc0, sum0, values, w0);
+    int  valid_z = z_coord;
+    int8 valid_y = select(y_coord, -1, (int8)valid_z < 0);                 // If z < 0, set y to -1
+    valid_y      = select(valid_y, SRC_DIM_1, (int8)valid_z >= SRC_DIM_2); // If z >= SRC_DIM_2, set y to SRC_DIM_2
+    valid_z      = clamp(valid_z, 0, SRC_DIM_2 - 1);                       // Clamp z coordinate
 
-    src_addr0 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr0);
-    BIFROST_MAD_ACC_4(acc0, sum0, values, w1);
-    BIFROST_MAD_ACC_4(acc1, sum1, values, w0);
+    VEC_UCHAR values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s0 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w0, acc0, sum0);
 
-    src_addr0 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr0);
-    BIFROST_MAD_ACC_4(acc0, sum0, values, w2);
-    BIFROST_MAD_ACC_4(acc1, sum1, values, w1);
-    BIFROST_MAD_ACC_4(acc2, sum2, values, w0);
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s1 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w1, acc0, sum0);
+    MULTIPLY_ADD_ACCUMULATE(values, w0, acc1, sum1);
 
-    src_addr0 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr0);
-    BIFROST_MAD_ACC_4(acc1, sum1, values, w2);
-    BIFROST_MAD_ACC_4(acc2, sum2, values, w1);
-    BIFROST_MAD_ACC_4(acc3, sum3, values, w0);
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s2 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w2, acc0, sum0);
+    MULTIPLY_ADD_ACCUMULATE(values, w1, acc1, sum1);
+    MULTIPLY_ADD_ACCUMULATE(values, w0, acc2, sum2);
 
-    src_addr0 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr0);
-    BIFROST_MAD_ACC_4(acc2, sum2, values, w2);
-    BIFROST_MAD_ACC_4(acc3, sum3, values, w1);
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s3 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w2, acc1, sum1);
+    MULTIPLY_ADD_ACCUMULATE(values, w1, acc2, sum2);
+    MULTIPLY_ADD_ACCUMULATE(values, w0, acc3, sum3);
 
-    src_addr0 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr0);
-    BIFROST_MAD_ACC_4(acc3, sum3, values, w2);
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s4 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w2, acc2, sum2);
+    MULTIPLY_ADD_ACCUMULATE(values, w1, acc3, sum3);
+
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s5 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w2, acc3, sum3);
 
     weights.ptr += weights_stride_z;
 
@@ -395,34 +383,33 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc_stride1(
     sum_we += CONVERT(w0, VEC_INT) + CONVERT(w1, VEC_INT) + CONVERT(w2, VEC_INT);
 #endif /* INPUT_OFFSET != 0 */
 
-    values = VLOAD(VEC_SIZE)(0, src_addr1);
-    BIFROST_MAD_ACC_4(acc0, sum0, values, w0);
+    // Only unit pad_top/bottom allowed, this can never be out of bound
+    valid_z = z_coord + 1;
+    valid_y = y_coord;
 
-    src_addr1 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr1);
-    BIFROST_MAD_ACC_4(acc0, sum0, values, w1);
-    BIFROST_MAD_ACC_4(acc1, sum1, values, w0);
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s0 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w0, acc0, sum0);
 
-    src_addr1 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr1);
-    BIFROST_MAD_ACC_4(acc0, sum0, values, w2);
-    BIFROST_MAD_ACC_4(acc1, sum1, values, w1);
-    BIFROST_MAD_ACC_4(acc2, sum2, values, w0);
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s1 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w1, acc0, sum0);
+    MULTIPLY_ADD_ACCUMULATE(values, w0, acc1, sum1);
 
-    src_addr1 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr1);
-    BIFROST_MAD_ACC_4(acc1, sum1, values, w2);
-    BIFROST_MAD_ACC_4(acc2, sum2, values, w1);
-    BIFROST_MAD_ACC_4(acc3, sum3, values, w0);
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s2 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w2, acc0, sum0);
+    MULTIPLY_ADD_ACCUMULATE(values, w1, acc1, sum1);
+    MULTIPLY_ADD_ACCUMULATE(values, w0, acc2, sum2);
 
-    src_addr1 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr1);
-    BIFROST_MAD_ACC_4(acc2, sum2, values, w2);
-    BIFROST_MAD_ACC_4(acc3, sum3, values, w1);
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s3 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w2, acc1, sum1);
+    MULTIPLY_ADD_ACCUMULATE(values, w1, acc2, sum2);
+    MULTIPLY_ADD_ACCUMULATE(values, w0, acc3, sum3);
 
-    src_addr1 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr1);
-    BIFROST_MAD_ACC_4(acc3, sum3, values, w2);
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s4 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w2, acc2, sum2);
+    MULTIPLY_ADD_ACCUMULATE(values, w1, acc3, sum3);
+
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s5 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w2, acc3, sum3);
 
     weights.ptr += weights_stride_z;
 
@@ -435,34 +422,34 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc_stride1(
     sum_we += CONVERT(w0, VEC_INT) + CONVERT(w1, VEC_INT) + CONVERT(w2, VEC_INT);
 #endif /* INPUT_OFFSET != 0 */
 
-    values = VLOAD(VEC_SIZE)(0, src_addr2);
-    BIFROST_MAD_ACC_4(acc0, sum0, values, w0);
+    valid_z = z_coord + 2;
+    valid_y = select(y_coord, -1, (int8)valid_z < 0);
+    valid_y = select(valid_y, SRC_DIM_1, (int8)valid_z >= SRC_DIM_2);
+    valid_z = clamp(valid_z, 0, SRC_DIM_2 - 1);
 
-    src_addr2 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr2);
-    BIFROST_MAD_ACC_4(acc0, sum0, values, w1);
-    BIFROST_MAD_ACC_4(acc1, sum1, values, w0);
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s0 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w0, acc0, sum0);
 
-    src_addr2 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr2);
-    BIFROST_MAD_ACC_4(acc0, sum0, values, w2);
-    BIFROST_MAD_ACC_4(acc1, sum1, values, w1);
-    BIFROST_MAD_ACC_4(acc2, sum2, values, w0);
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s1 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w1, acc0, sum0);
+    MULTIPLY_ADD_ACCUMULATE(values, w0, acc1, sum1);
 
-    src_addr2 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr2);
-    BIFROST_MAD_ACC_4(acc1, sum1, values, w2);
-    BIFROST_MAD_ACC_4(acc2, sum2, values, w1);
-    BIFROST_MAD_ACC_4(acc3, sum3, values, w0);
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s2 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w2, acc0, sum0);
+    MULTIPLY_ADD_ACCUMULATE(values, w1, acc1, sum1);
+    MULTIPLY_ADD_ACCUMULATE(values, w0, acc2, sum2);
 
-    src_addr2 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr2);
-    BIFROST_MAD_ACC_4(acc2, sum2, values, w2);
-    BIFROST_MAD_ACC_4(acc3, sum3, values, w1);
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s3 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w2, acc1, sum1);
+    MULTIPLY_ADD_ACCUMULATE(values, w1, acc2, sum2);
+    MULTIPLY_ADD_ACCUMULATE(values, w0, acc3, sum3);
 
-    src_addr2 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr2);
-    BIFROST_MAD_ACC_4(acc3, sum3, values, w2);
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s4 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w2, acc2, sum2);
+    MULTIPLY_ADD_ACCUMULATE(values, w1, acc3, sum3);
+
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s5 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w2, acc3, sum3);
 
 #if defined(HAS_BIAS)
     acc0 += bias_values;
@@ -565,6 +552,10 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc_stride2(
 #endif /* defined(HAS_BIAS) */
 )
 {
+    int x = get_global_id(0);
+    int y = get_global_id(1);
+    int z = get_global_id(2);
+
     Image  dst     = CONVERT_TENSOR3D_TO_IMAGE_STRUCT(dst);
     Vector weights = CONVERT_TO_VECTOR_STRUCT(weights);
 #if defined(HAS_BIAS)
@@ -573,20 +564,9 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc_stride2(
     VEC_INT bias_values = VLOAD(VEC_SIZE)(0, (__global int *)biases.ptr);
 #endif /* defined(HAS_BIAS) */
 
-    __global uchar *first_elem = src_ptr + src_offset_first_element_in_bytes;
-
-    const int z         = get_global_id(2);
-    const int pad_offs  = -ROWS_READ * src_stride_y;
-    const int src_offs0 = get_global_id(0) * src_step_x + get_global_id(1) * src_step_y + z * src_step_z - CONV_PAD_TOP * src_stride_z;
-    const int src_offs1 = src_offs0 + src_stride_z;
-    const int src_offs2 = src_offs1 + src_stride_z;
-
-    const int cond_top    = z - CONV_PAD_TOP < 0;
-    const int cond_bottom = z * (src_step_z / src_stride_z) + 2 > SRC_DEPTH;
-
-    __global uchar *src_addr0 = first_elem + select(src_offs0, pad_offs, cond_top);
-    __global uchar *src_addr1 = first_elem + src_offs1;
-    __global uchar *src_addr2 = first_elem + select(src_offs2, pad_offs, cond_bottom);
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * src_step_x;
+    int8            y_coord  = (int8)(y * (src_step_y / src_stride_y)) + (int8)(0, 1, 2, 3, 4, 5, 0, 0) - CONV_PAD_LEFT;
+    int             z_coord  = z * (src_step_z / src_stride_z) - CONV_PAD_TOP;
 
     VEC_INT sum_we = 0;
     VEC_INT acc0 = 0, acc2 = 0;
@@ -602,25 +582,26 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc_stride2(
     sum_we += CONVERT(w0, VEC_INT) + CONVERT(w1, VEC_INT) + CONVERT(w2, VEC_INT);
 #endif /* INPUT_OFFSET != 0 */
 
-    VEC_UCHAR values = VLOAD(VEC_SIZE)(0, src_addr0);
-    BIFROST_MAD_ACC_4(acc0, sum0, values, w0);
+    int  valid_z = z_coord;
+    int8 valid_y = select(y_coord, -1, (int8)valid_z < 0);                 // If z < 0, set y to -1
+    valid_y      = select(valid_y, SRC_DIM_1, (int8)valid_z >= SRC_DIM_2); // If z >= SRC_DIM_2, set y to SRC_DIM_2
+    valid_z      = clamp(valid_z, 0, SRC_DIM_2 - 1);                       // Clamp z coordinate
 
-    src_addr0 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr0);
-    BIFROST_MAD_ACC_4(acc0, sum0, values, w1);
+    VEC_UCHAR values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s0 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w0, acc0, sum0);
 
-    src_addr0 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr0);
-    BIFROST_MAD_ACC_4(acc0, sum0, values, w2);
-    BIFROST_MAD_ACC_4(acc2, sum2, values, w0);
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s1 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w1, acc0, sum0);
 
-    src_addr0 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr0);
-    BIFROST_MAD_ACC_4(acc2, sum2, values, w1);
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s2 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w2, acc0, sum0);
+    MULTIPLY_ADD_ACCUMULATE(values, w0, acc2, sum2);
 
-    src_addr0 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr0);
-    BIFROST_MAD_ACC_4(acc2, sum2, values, w2);
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s3 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w1, acc2, sum2);
+
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s4 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w2, acc2, sum2);
 
     weights.ptr += weights_stride_z;
 
@@ -633,25 +614,25 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc_stride2(
     sum_we += CONVERT(w0, VEC_INT) + CONVERT(w1, VEC_INT) + CONVERT(w2, VEC_INT);
 #endif /* INPUT_OFFSET != 0 */
 
-    values = VLOAD(VEC_SIZE)(0, src_addr1);
-    BIFROST_MAD_ACC_4(acc0, sum0, values, w0);
+    // Only unit pad_top/bottom allowed, this can never be out of bound
+    valid_z = z_coord + 1;
+    valid_y = y_coord;
 
-    src_addr1 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr1);
-    BIFROST_MAD_ACC_4(acc0, sum0, values, w1);
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s0 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w0, acc0, sum0);
 
-    src_addr1 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr1);
-    BIFROST_MAD_ACC_4(acc0, sum0, values, w2);
-    BIFROST_MAD_ACC_4(acc2, sum2, values, w0);
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s1 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w1, acc0, sum0);
 
-    src_addr1 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr1);
-    BIFROST_MAD_ACC_4(acc2, sum2, values, w1);
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s2 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w2, acc0, sum0);
+    MULTIPLY_ADD_ACCUMULATE(values, w0, acc2, sum2);
 
-    src_addr1 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr1);
-    BIFROST_MAD_ACC_4(acc2, sum2, values, w2);
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s3 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w1, acc2, sum2);
+
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s4 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w2, acc2, sum2);
 
     weights.ptr += weights_stride_z;
 
@@ -664,25 +645,26 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc_stride2(
     sum_we += CONVERT(w0, VEC_INT) + CONVERT(w1, VEC_INT) + CONVERT(w2, VEC_INT);
 #endif /* INPUT_OFFSET != 0 */
 
-    values = VLOAD(VEC_SIZE)(0, src_addr2);
-    BIFROST_MAD_ACC_4(acc0, sum0, values, w0);
+    valid_z = z_coord + 2;
+    valid_y = select(y_coord, -1, (int8)valid_z < 0);
+    valid_y = select(valid_y, SRC_DIM_1, (int8)valid_z >= SRC_DIM_2);
+    valid_z = clamp(valid_z, 0, SRC_DIM_2 - 1);
 
-    src_addr2 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr2);
-    BIFROST_MAD_ACC_4(acc0, sum0, values, w1);
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s0 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w0, acc0, sum0);
 
-    src_addr2 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr2);
-    BIFROST_MAD_ACC_4(acc0, sum0, values, w2);
-    BIFROST_MAD_ACC_4(acc2, sum2, values, w0);
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s1 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w1, acc0, sum0);
 
-    src_addr2 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr2);
-    BIFROST_MAD_ACC_4(acc2, sum2, values, w1);
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s2 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w2, acc0, sum0);
+    MULTIPLY_ADD_ACCUMULATE(values, w0, acc2, sum2);
 
-    src_addr2 += src_stride_y;
-    values = VLOAD(VEC_SIZE)(0, src_addr2);
-    BIFROST_MAD_ACC_4(acc2, sum2, values, w2);
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s3 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w1, acc2, sum2);
+
+    values = VLOAD(VEC_SIZE)(0, src_addr + valid_y.s4 * (int)src_stride_y + valid_z * src_stride_z);
+    MULTIPLY_ADD_ACCUMULATE(values, w2, acc2, sum2);
 
 #if defined(HAS_BIAS)
     acc0 += bias_values;
@@ -721,6 +703,6 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc_stride2(
     (res2, 0, dst.ptr + 1 * dst_stride_y);
 }
 
-#endif /* defined(VEC_SIZE) && defined(SRC_DEPTH) && defined(CONV_PAD_TOP) && defined(ROWS_READ) */
+#endif /* defined(VEC_SIZE) && defined(SRC_DIM_1) && defined(SRC_DIM_2) && defined(CONV_PAD_TOP) && defined(CONV_PAD_LEFT) */
 
 #endif /* defined(WEIGHTS_OFFSET) && defined(INPUT_OFFSET) && defined(K_OFFSET) && defined(OUTPUT_OFFSET) && defined(OUTPUT_MULTIPLIER) && defined(OUTPUT_SHIFT) */

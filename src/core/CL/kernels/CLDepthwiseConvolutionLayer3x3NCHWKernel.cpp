@@ -195,7 +195,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 } // namespace
 
 CLDepthwiseConvolutionLayer3x3NCHWKernel::CLDepthwiseConvolutionLayer3x3NCHWKernel()
-    : _conv_stride_x(0), _conv_pad_top(0)
+    : _conv_stride_x(0), _conv_pad_top(0), _conv_pad_left(0)
 {
 }
 

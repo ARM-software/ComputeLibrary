@@ -77,7 +77,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     const unsigned int num_rows_read_per_iteration      = num_rows_processed_per_iteration + 2;
     const unsigned int num_rows_written_per_iteration   = num_rows_processed_per_iteration / conv_info.stride().first;
 
-    const BorderSize border_size(conv_info.pad_left() + num_rows_read_per_iteration * std::max(conv_info.pad_top(), conv_info.pad_bottom()), 0, conv_info.pad_right(), 0);
+    const BorderSize border_size(std::max(conv_info.pad_left(), conv_info.pad_top()), 0, std::max(conv_info.pad_right(), conv_info.pad_bottom()), 0);
 
     // Configure kernel window
     Window win = calculate_max_window(*output, Steps(num_elems_accessed_per_iteration, num_rows_written_per_iteration));
@@ -140,13 +140,11 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
     _weights                          = weights;
     _biases                           = biases;
     _conv_stride_y                    = conv_info.stride().second;
-    _conv_pad_left                    = conv_info.pad_left();
     _num_rows_processed_per_iteration = 4;
 
     const unsigned int num_elems_accessed_per_iteration = 4;
-    const unsigned int num_rows_read_per_iteration      = _num_rows_processed_per_iteration + 2;
 
-    _border_size = BorderSize(_conv_pad_left + num_rows_read_per_iteration * std::max(conv_info.pad_top(), conv_info.pad_bottom()), 0, conv_info.pad_right(), 0);
+    _border_size = BorderSize(std::max(conv_info.pad_left(), conv_info.pad_top()), 0, std::max(conv_info.pad_right(), conv_info.pad_bottom()), 0);
 
     float multiplier        = _input->info()->quantization_info().scale * _weights->info()->quantization_info().scale / _output->info()->quantization_info().scale;
     int   output_multiplier = 0;
@@ -162,9 +160,10 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
     build_opts.add_option("-DOUTPUT_MULTIPLIER=" + support::cpp11::to_string(output_multiplier));
     build_opts.add_option("-DOUTPUT_SHIFT=" + support::cpp11::to_string(output_shift));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_accessed_per_iteration));
-    build_opts.add_option("-DSRC_DEPTH=" + support::cpp11::to_string(_input->info()->dimension(2)));
+    build_opts.add_option("-DSRC_DIM_1=" + support::cpp11::to_string(_input->info()->dimension(1)));
+    build_opts.add_option("-DSRC_DIM_2=" + support::cpp11::to_string(_input->info()->dimension(2)));
     build_opts.add_option("-DCONV_PAD_TOP=" + support::cpp11::to_string(conv_info.pad_top()));
-    build_opts.add_option("-DROWS_READ=" + support::cpp11::to_string(num_rows_read_per_iteration));
+    build_opts.add_option("-DCONV_PAD_LEFT=" + support::cpp11::to_string(conv_info.pad_left()));
 
     if(act_info.enabled())
     {
@@ -236,7 +235,6 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::run(const Window &window, cl::Com
 
     // Create input window and adjust
     Window win_in = window;
-    win_in.adjust(Window::DimY, -_conv_pad_left, true);
     win_in.set_dimension_step(Window::DimY, _num_rows_processed_per_iteration);
     win_in.set_dimension_step(Window::DimZ, _conv_stride_y);
 
