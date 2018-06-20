@@ -141,7 +141,7 @@ CannyEdgeParameters canny_edge_parameters()
 
     params.constant_border_value = int_dist(gen);
     params.upper_thresh          = threshold_dist(gen); // upper_threshold >= 1
-    threshold_dist               = std::uniform_int_distribution<uint8_t>(0, params.upper_thresh);
+    threshold_dist               = std::uniform_int_distribution<uint8_t>(1, params.upper_thresh - 1);
     params.lower_thresh          = threshold_dist(gen);
 
     return params;

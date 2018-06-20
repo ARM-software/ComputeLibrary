@@ -49,38 +49,57 @@ const auto MARK_ZERO  = 0u;
 const auto MARK_MAYBE = 127u;
 const auto MARK_EDGE  = 255u;
 
-template <typename U, typename T, typename F>
-void trace_edge(SimpleTensor<T> &dst, SimpleTensor<U> &grad_mag, const ValidRegion &valid_region, std::vector<bool> &visited, uint32_t upper_thresh, const F &pixel_at_offset)
+template <typename T>
+void trace_edge(SimpleTensor<T> &dst)
 {
+    std::stack<Coordinates> pixels_stack;
     for(auto i = 0; i < dst.num_elements(); ++i)
     {
-        Coordinates coord;
-        if(visited[i] || dst[i] != MARK_MAYBE || !is_in_valid_region(valid_region, coord = index2coord(dst.shape(), i)))
+        if(dst[i] == MARK_EDGE)
         {
-            continue; // Skip visited or confirmed ZERO/EDGE pixels
+            pixels_stack.push(index2coord(dst.shape(), i));
         }
-        visited[i] = true; // Mark as visited
+    }
 
-        // Check if connected to a strong edge pixel
-        std::array<U, 8> neighbours =
+    while(!pixels_stack.empty())
+    {
+        const Coordinates pixel_coord = pixels_stack.top();
+        pixels_stack.pop();
+
+        std::array<Coordinates, 8> neighbours =
         {
             {
-                pixel_at_offset(grad_mag, coord, -1, 0),
-                pixel_at_offset(grad_mag, coord, 1, 0),
-                pixel_at_offset(grad_mag, coord, -1, -1),
-                pixel_at_offset(grad_mag, coord, +1, +1),
-                pixel_at_offset(grad_mag, coord, 0, -1),
-                pixel_at_offset(grad_mag, coord, 0, +1),
-                pixel_at_offset(grad_mag, coord, +1, -1),
-                pixel_at_offset(grad_mag, coord, -1, +1)
+                Coordinates(pixel_coord.x() - 1, pixel_coord.y() + 0),
+                Coordinates(pixel_coord.x() + 1, pixel_coord.y() + 0),
+                Coordinates(pixel_coord.x() - 1, pixel_coord.y() - 1),
+                Coordinates(pixel_coord.x() + 1, pixel_coord.y() + 1),
+                Coordinates(pixel_coord.x() + 0, pixel_coord.y() - 1),
+                Coordinates(pixel_coord.x() + 0, pixel_coord.y() + 1),
+                Coordinates(pixel_coord.x() + 1, pixel_coord.y() - 1),
+                Coordinates(pixel_coord.x() - 1, pixel_coord.y() + 1)
             }
         };
 
-        const auto is_edge_connected = std::any_of(neighbours.begin(), neighbours.end(), [&](const U & pixel)
+        // Mark MAYBE neighbours as edges since they are next to an EDGE
+        std::for_each(neighbours.begin(), neighbours.end(), [&](Coordinates & coord)
         {
-            return pixel >= upper_thresh;
+            const size_t pixel_index = coord2index(dst.shape(), coord);
+            const T      pixel       = dst[pixel_index];
+            if(pixel == MARK_MAYBE)
+            {
+                dst[pixel_index] = MARK_EDGE;
+                pixels_stack.push(coord);
+            }
         });
-        dst[i] = is_edge_connected ? MARK_EDGE : MARK_ZERO;
+    }
+
+    // Mark all remaining MAYBE pixels as ZERO (not edges)
+    for(auto i = 0; i < dst.num_elements(); ++i)
+    {
+        if(dst[i] == MARK_MAYBE)
+        {
+            dst[i] = MARK_ZERO;
+        }
     }
 }
 
@@ -202,8 +221,7 @@ SimpleTensor<T> canny_edge_detector_impl(const SimpleTensor<T> &src, int32_t upp
     }
 
     // Final edge tracing
-    std::vector<bool> visited(dst.num_elements(), false);
-    trace_edge<unsigned_U>(dst, grad_mag, valid_region, visited, upper_thresh, pixel_at_offset);
+    trace_edge<T>(dst);
     return dst;
 }
 } // namespace
