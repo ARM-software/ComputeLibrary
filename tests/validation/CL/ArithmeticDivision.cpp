@@ -44,7 +44,7 @@ namespace validation
 namespace
 {
 RelativeTolerance<float> tolerance_fp32(0.000001f);
-RelativeTolerance<float> tolerance_fp16(0.0001f);
+RelativeTolerance<float> tolerance_fp16(0.001f);
 } // namespace
 
 TEST_SUITE(CL)

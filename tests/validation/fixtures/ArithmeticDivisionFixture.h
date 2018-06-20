@@ -55,7 +55,8 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        library->fill_tensor_uniform(tensor, i);
+        std::uniform_real_distribution<> distribution(1.0f, 5.0f);
+        library->fill(tensor, distribution, i);
     }
 
     TensorType compute_target(const TensorShape &shape0, const TensorShape &shape1, DataType data_type)
