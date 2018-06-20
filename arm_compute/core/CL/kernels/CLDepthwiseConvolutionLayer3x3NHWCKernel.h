@@ -72,6 +72,7 @@ public:
 
 private:
     unsigned int _num_rows_processed_per_iteration;
+    unsigned int _num_planes_processed_per_iteration;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLDEPTHWISECONVOLUTIONNHWCKERNEL3x3_H__ */

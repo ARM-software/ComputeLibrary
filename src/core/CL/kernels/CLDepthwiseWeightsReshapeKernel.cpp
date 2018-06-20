@@ -39,19 +39,23 @@ namespace
 {
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ITensorInfo *biases)
 {
+    const size_t idx_w = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
+    const size_t idx_h = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
+    const size_t idx_c = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL);
+
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_asymmetric(input->data_type()) && (biases != nullptr));
-    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(2) != output->dimension(1));
-    ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(0) != (input->dimension(0) * input->dimension(1) + ((biases != nullptr) ? 1 : 0)));
+    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(idx_c) != output->dimension(1));
+    ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(0) != (input->dimension(idx_w) * input->dimension(idx_h) + ((biases != nullptr) ? 1 : 0)));
 
     if(biases != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, biases);
-        ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != input->dimension(2));
+        ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != input->dimension(idx_c));
         ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
     }
 
@@ -73,11 +77,14 @@ void CLDepthwiseWeightsReshapeKernel::configure(const ICLTensor *input, ICLTenso
     _biases = biases;
     _output = output;
 
+    const size_t idx_w = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::WIDTH);
+
     // Create kernel
     std::set<std::string> build_opts;
 
     build_opts.emplace("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
-    build_opts.emplace("-DSRC_WIDTH=" + support::cpp11::to_string(input->info()->dimension(0)));
+    build_opts.emplace("-DSRC_WIDTH=" + support::cpp11::to_string(input->info()->dimension(idx_w)));
+    build_opts.emplace("-D" + string_from_data_layout(input->info()->data_layout()));
     if(_biases != nullptr)
     {
         build_opts.emplace("-DHAS_BIAS");
@@ -107,10 +114,14 @@ void CLDepthwiseWeightsReshapeKernel::run(const Window &window, cl::CommandQueue
     Window slice     = window.first_slice_window_3D();
     Window slice_out = window.first_slice_window_2D();
 
+    const size_t idx_w = get_data_layout_dimension_index(_input->info()->data_layout(), DataLayoutDimension::WIDTH);
+    const size_t idx_h = get_data_layout_dimension_index(_input->info()->data_layout(), DataLayoutDimension::HEIGHT);
+    const size_t idx_c = get_data_layout_dimension_index(_input->info()->data_layout(), DataLayoutDimension::CHANNEL);
+
     // Setup slice
-    slice.set(Window::DimX, Window::Dimension(0, _input->info()->dimension(0), _input->info()->dimension(0)));
-    slice.set(Window::DimY, Window::Dimension(0, _input->info()->dimension(1), 1));
-    slice.set(Window::DimZ, Window::Dimension(0, _input->info()->dimension(2), 1));
+    slice.set(Window::DimX, Window::Dimension(0, _input->info()->dimension(idx_w), _input->info()->dimension(idx_w)));
+    slice.set(Window::DimY, Window::Dimension(0, _input->info()->dimension(idx_h), 1));
+    slice.set(Window::DimZ, Window::Dimension(0, _input->info()->dimension(idx_c), 1));
 
     // Setup output slice
     // The first two dimensions of the output are increased by the inner loops

@@ -296,7 +296,12 @@ __kernel void output_stage_quantized(
 
 #if defined(HAS_BIAS)
     // Load and add bias
+#if defined(NCHW)
     int bias_value = *((__global int *)(vector_offset(&bias, get_global_id(2))));
+#else  // defined(NCHW)
+    int16 bias_value = vload16(0, ((__global int *)(vector_offset(&bias, get_global_id(0) * 16))));
+#endif // defined(NCHW)
+
     vals += (int16)(bias_value);
 #endif //defined(HAS_BIAS)
 

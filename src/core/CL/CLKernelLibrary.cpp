@@ -197,6 +197,8 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "deconvolution_upsample", "deconvolution_layer.cl" },
     { "depthwise_convolution_3x3", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_f16", "depthwise_convolution.cl" },
+    { "depthwise_convolution_3x3_nhwc", "depthwise_convolution.cl" },
+    { "depthwise_convolution_3x3_nhwc_stride1", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_quantized_nchw", "depthwise_convolution_quantized.cl" },
     { "depthwise_convolution_3x3_quantized_nhwc_stride1", "depthwise_convolution_quantized.cl" },
     { "depthwise_convolution_3x3_quantized_nhwc_stride2", "depthwise_convolution_quantized.cl" },

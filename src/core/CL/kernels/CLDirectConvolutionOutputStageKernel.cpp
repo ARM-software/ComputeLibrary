@@ -168,6 +168,7 @@ void CLDirectConvolutionLayerOutputStageKernel::configure(ICLTensor *input, cons
     // Create kernel
     CLBuildOptions build_opts;
     build_opts.add_option_if(bias != nullptr, "-DHAS_BIAS");
+    build_opts.add_option("-D" + string_from_data_layout(input->info()->data_layout()));
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("output_stage_quantized", build_opts.options()));
 
     // Set static kernel arguments
