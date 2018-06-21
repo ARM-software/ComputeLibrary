@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/CL/kernels/CLIm2ColKernel.h"
 
+#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/CLValidate.h"
@@ -95,6 +96,13 @@ CLIm2ColKernel::configure_window(const ICLTensor *input, ICLTensor *output, cons
     const bool       squared_im2col    = kernel_dims.width == kernel_dims.height;
     const DataLayout data_layout       = input->info()->data_layout();
 
+    const unsigned int width_idx     = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const unsigned int height_idx    = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+    const unsigned int channel_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
+    const unsigned int input_width   = input->info()->dimension(width_idx);
+    const unsigned int input_height  = input->info()->dimension(height_idx);
+    const unsigned int input_channel = input->info()->dimension(channel_idx);
+
     if(!reduced)
     {
         // Default kernel name
@@ -106,13 +114,6 @@ CLIm2ColKernel::configure_window(const ICLTensor *input, ICLTensor *output, cons
         {
             kernel_name = "im2col_generic_nhwc";
         }
-
-        const unsigned int width_idx     = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-        const unsigned int height_idx    = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-        const unsigned int channel_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
-        const unsigned int input_width   = input->info()->dimension(width_idx);
-        const unsigned int input_height  = input->info()->dimension(height_idx);
-        const unsigned int input_channel = input->info()->dimension(channel_idx);
 
         _convolved_dims = scaled_dimensions(input_width, input_height, kernel_dims.width, kernel_dims.height, conv_info, dilation);
 
@@ -255,16 +256,14 @@ CLIm2ColKernel::configure_window(const ICLTensor *input, ICLTensor *output, cons
         }
         else
         {
+            const BorderSize border(conv_info.pad_top(), conv_info.pad_right(), conv_info.pad_bottom(), conv_info.pad_left());
             win = calculate_max_window(*input->info(),
-                                       Steps(_num_elems_processed_per_iteration),
-                                       false,
-                                       BorderSize(conv_info.pad_top(), conv_info.pad_right(), conv_info.pad_bottom(), conv_info.pad_left()));
-
-            const int             x = -conv_info.pad_left();
-            const int             y = -conv_info.pad_top();
-            const int             w = kernel_dims.width * _num_elems_processed_per_iteration;
-            const int             h = kernel_dims.height;
-            AccessWindowRectangle input_access(input->info(), x, y, w, h);
+                                       Steps(_num_elems_processed_per_iteration * conv_info.stride().first, conv_info.stride().second));
+            AccessWindowStatic input_access(input->info(),
+                                            -border.left,
+                                            -border.top,
+                                            ceil_to_multiple(input_width + border.right, kernel_dims.width),
+                                            input_height + border.bottom);
             update_window_and_padding(win, input_access);
         }
     }
