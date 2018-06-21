@@ -1035,9 +1035,6 @@ __kernel void gemm_mm_interleaved_transposed_f16_bifrost(IMAGE_DECLARATION(src0)
     // Compute dst address
     __global uchar *dst_addr = offset(&dst, 0, 0);
 
-    // Add offset for batched GEMM
-    dst_addr += z * dst_stride_z;
-
 #if defined(REINTERPRET_OUTPUT_AS_3D)
     // Since we store a 2D output tile in a 3D tensor, we need to check when the plane changes across the z dimension
     // in order to take into account the presence of possible bottom paddings
