@@ -157,7 +157,7 @@ public:
     /** Constructor
      *
      * @param[in] ppm_path     Path to PPM file
-     * @param[in] bgr          (Optional) Fill the first plane with blue channel (default = false)
+     * @param[in] bgr          (Optional) Fill the first plane with blue channel (default = false - RGB format)
      * @param[in] preprocessor (Optional) PPM pre-processing object
      */
     PPMAccessor(std::string ppm_path, bool bgr = true, std::unique_ptr<IPreprocessor> preprocessor = nullptr);
@@ -171,6 +171,36 @@ private:
     const std::string              _ppm_path;
     const bool                     _bgr;
     std::unique_ptr<IPreprocessor> _preprocessor;
+};
+
+/** Input Accessor used for network validation */
+class ValidationInputAccessor final : public graph::ITensorAccessor
+{
+public:
+    /** Constructor
+     *
+     * @param[in] image_list  File containing all the images to validate
+     * @param[in] images_path Path to images.
+     * @param[in] bgr         (Optional) Fill the first plane with blue channel (default = false - RGB format)
+     * @param[in] start       (Optional) Start range
+     * @param[in] end         (Optional) End range
+     *
+     * @note
+     */
+    ValidationInputAccessor(const std::string &image_list,
+                            std::string        images_path,
+                            bool               bgr   = true,
+                            unsigned int       start = 0,
+                            unsigned int       end   = 0);
+
+    // Inherited methods overriden:
+    bool access_tensor(ITensor &tensor) override;
+
+private:
+    std::string              _path;
+    std::vector<std::string> _images;
+    bool                     _bgr;
+    size_t                   _offset;
 };
 
 /** Result accessor class */

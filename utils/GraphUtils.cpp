@@ -27,6 +27,7 @@
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/SubTensor.h"
+#include "utils/ImageLoader.h"
 #include "utils/Utils.h"
 
 #include <iomanip>
@@ -200,6 +201,71 @@ bool PPMAccessor::access_tensor(ITensor &tensor)
     }
 
     return true;
+}
+
+ValidationInputAccessor::ValidationInputAccessor(const std::string &image_list,
+                                                 std::string        images_path,
+                                                 bool               bgr,
+                                                 unsigned int       start,
+                                                 unsigned int       end)
+    : _path(std::move(images_path)), _images(), _bgr(bgr), _offset(0)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(start > end, "Invalid validation range!");
+
+    std::ifstream ifs;
+    try
+    {
+        ifs.exceptions(std::ifstream::badbit);
+        ifs.open(image_list, std::ios::in | std::ios::binary);
+
+        // Parse image names
+        unsigned int counter = 0;
+        for(std::string line; !std::getline(ifs, line).fail() && counter <= end; ++counter)
+        {
+            // Add image to process if withing range
+            if(counter >= start)
+            {
+                std::stringstream linestream(line);
+                std::string       image_name;
+
+                linestream >> image_name;
+                _images.emplace_back(std::move(image_name));
+            }
+        }
+    }
+    catch(const std::ifstream::failure &e)
+    {
+        ARM_COMPUTE_ERROR("Accessing %s: %s", image_list.c_str(), e.what());
+    }
+}
+
+bool ValidationInputAccessor::access_tensor(arm_compute::ITensor &tensor)
+{
+    bool ret = _offset < _images.size();
+    if(ret)
+    {
+        utils::JPEGLoader jpeg;
+
+        // Open JPEG file
+        jpeg.open(_path + _images[_offset++]);
+
+        // Get permutated shape and permutation parameters
+        TensorShape                    permuted_shape = tensor.info()->tensor_shape();
+        arm_compute::PermutationVector perm;
+        if(tensor.info()->data_layout() != DataLayout::NCHW)
+        {
+            std::tie(permuted_shape, perm) = compute_permutation_paramaters(tensor.info()->tensor_shape(),
+                                                                            tensor.info()->data_layout());
+        }
+        ARM_COMPUTE_ERROR_ON_MSG(jpeg.width() != permuted_shape.x() || jpeg.height() != permuted_shape.y(),
+                                 "Failed to load image file: dimensions [%d,%d] not correct, expected [%d,%d].",
+                                 jpeg.width(), jpeg.height(), permuted_shape.x(), permuted_shape.y());
+
+        // Fill the tensor with the PPM content (BGR)
+        jpeg.fill_planar_tensor(tensor, _bgr);
+    }
+
+    return ret;
 }
 
 TopNPredictionsAccessor::TopNPredictionsAccessor(const std::string &labels_path, size_t top_n, std::ostream &output_stream)
