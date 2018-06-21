@@ -172,7 +172,7 @@ TEST_SUITE_END()
 TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(Run, CLDirectConvolutionLayerFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(data, framework::dataset::make("DataType", DataType::F32)),
                                                                                                                  ActivationFunctionsDataset),
-                                                                                                         framework::dataset::make("DataLayout", DataLayout::NCHW)))
+                                                                                                         framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_fp32);

@@ -106,7 +106,7 @@ protected:
             case DataType::F16:
             case DataType::F32:
             {
-                std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
+                std::uniform_real_distribution<> distribution(-1.f, 1.f);
                 library->fill(tensor, distribution, i);
                 break;
             }
@@ -182,10 +182,8 @@ protected:
         fill(bias, 2);
 
         SimpleTensor<T> dst = reference::convolution_layer<T>(src, weights, bias, output_shape, info);
-
         return (act_info.enabled()) ? reference::activation_layer<T>(dst, act_info) : dst;
     }
-
     TensorType       _target{};
     SimpleTensor<T>  _reference{};
     QuantizationInfo _quantization_info{};
