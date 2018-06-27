@@ -97,7 +97,35 @@ SimpleTensor<T> arithmetic_addition(const SimpleTensor<T> &src1, const SimpleTen
     return dst;
 }
 
-template SimpleTensor<uint8_t> arithmetic_addition(const SimpleTensor<uint8_t> &src1, const SimpleTensor<uint8_t> &src2, DataType dst_data_type, ConvertPolicy convert_policy);
+template <>
+SimpleTensor<uint8_t> arithmetic_addition(const SimpleTensor<uint8_t> &src1, const SimpleTensor<uint8_t> &src2, DataType dst_data_type, ConvertPolicy convert_policy)
+{
+    if(dst_data_type == DataType::QASYMM8)
+    {
+        SimpleTensor<float> src1_tmp = convert_from_asymmetric(src1);
+        SimpleTensor<float> src2_tmp = convert_from_asymmetric(src2);
+        SimpleTensor<float> dst_tmp(TensorShape::broadcast_shape(src1.shape(), src2.shape()), dst_data_type);
+
+        Coordinates id_src1, id_src2, id_dst;
+
+        BroadcastUnroll<Coordinates::num_max_dimensions>::unroll(src1_tmp, src2_tmp, dst_tmp, convert_policy, id_src1, id_src2, id_dst);
+
+        SimpleTensor<uint8_t> dst = convert_to_asymmetric(dst_tmp, src1.quantization_info());
+        return dst;
+    }
+    else
+    {
+        // DataType::U8
+        SimpleTensor<uint8_t> dst(TensorShape::broadcast_shape(src1.shape(), src2.shape()), dst_data_type);
+
+        Coordinates id_src1, id_src2, id_dst;
+
+        BroadcastUnroll<Coordinates::num_max_dimensions>::unroll(src1, src2, dst, convert_policy, id_src1, id_src2, id_dst);
+
+        return dst;
+    }
+}
+
 template SimpleTensor<int16_t> arithmetic_addition(const SimpleTensor<int16_t> &src1, const SimpleTensor<int16_t> &src2, DataType dst_data_type, ConvertPolicy convert_policy);
 template SimpleTensor<int8_t> arithmetic_addition(const SimpleTensor<int8_t> &src1, const SimpleTensor<int8_t> &src2, DataType dst_data_type, ConvertPolicy convert_policy);
 template SimpleTensor<half> arithmetic_addition(const SimpleTensor<half> &src1, const SimpleTensor<half> &src2, DataType dst_data_type, ConvertPolicy convert_policy);

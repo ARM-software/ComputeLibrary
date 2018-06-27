@@ -41,19 +41,19 @@ class CLArithmeticAddition : public ICLSimpleFunction
 public:
     /** Initialise the kernel's inputs, output and convertion policy.
      *
-     * @param[in, out] input1 First tensor input. Data types supported: U8/QS8/QS16/S16/F16/F32.
+     * @param[in, out] input1 First tensor input. Data types supported: U8/QS8/QASYMM8/QS16/S16/F16/F32.
      *                        The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[in, out] input2 Second tensor input. Data types supported: U8, QS8 (only if @p input1 is QS8), QS16 (only if @p input1 is QS16), S16/F16/F32.
+     * @param[in, out] input2 Second tensor input. Data types supported: U8, QS8 (only if @p input1 is QS8), QASYMM8 (only if @p input1 is QASYMM8), QS16 (only if @p input1 is QS16), S16/F16/F32.
      *                        The input tensor is [in, out] because its TensorInfo might be modified inside the kernel in case of broadcasting of dimension 0.
-     * @param[out]     output Output tensor. Data types supported: U8 (Only if both inputs are U8), QS8 (only if both inputs are QS8), QS16 (only if both inputs are QS16), S16/F16/F32.
+     * @param[out]     output Output tensor. Data types supported: U8 (Only if both inputs are U8), QS8 (only if both inputs are QS8), QASYMM8 (only if both inputs are QASYMM8), QS16 (only if both inputs are QS16), S16/F16/F32.
      * @param[in]      policy Policy to use to handle overflow.
      */
     void configure(ICLTensor *input1, ICLTensor *input2, ICLTensor *output, ConvertPolicy policy);
     /** Static function to check if given info will lead to a valid configuration of @ref CLArithmeticAddition
      *
-     * @param[in] input1 First tensor input info. Data types supported: U8/QS8/QS16/S16/F16/F32.
-     * @param[in] input2 Second tensor input info. Data types supported: U8/QS8 (only if @p input1 is QS8), QS16 (only if @p input1 is QS16), S16/F16/F32.
-     * @param[in] output Output tensor info. Data types supported: U8 (Only if both inputs are U8), QS8 (only if both inputs are QS8), QS16 (only if both inputs are QS16), S16/F16/F32.
+     * @param[in] input1 First tensor input info. Data types supported: U8/QS8/QASYMM8/QS16/S16/F16/F32.
+     * @param[in] input2 Second tensor input info. Data types supported: U8/QS8 (only if @p input1 is QS8), QASYMM8 (only if @p input1 is QASYMM8), QS16 (only if @p input1 is QS16), S16/F16/F32.
+     * @param[in] output Output tensor info. Data types supported: U8 (Only if both inputs are U8), QS8 (only if both inputs are QS8), QASYMM8 ( only if both inputs are QASYMM8), QS16 (only if both inputs are QS16), S16/F16/F32.
      * @param[in] policy Policy to use to handle overflow.
      *
      * @return a status

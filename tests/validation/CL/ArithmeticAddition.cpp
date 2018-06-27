@@ -46,6 +46,9 @@ namespace
 /** Input data sets **/
 const auto ArithmeticAdditionU8Dataset = combine(combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U8)), framework::dataset::make("DataType",
                                                  DataType::U8));
+const auto ArithmeticAdditionQASYMM8Dataset = combine(combine(framework::dataset::make("DataType", DataType::QASYMM8), framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                      framework::dataset::make("DataType",
+                                                                               DataType::QASYMM8));
 const auto ArithmeticAdditionS16Dataset = combine(combine(framework::dataset::make("DataType", { DataType::U8, DataType::S16 }), framework::dataset::make("DataType", DataType::S16)),
                                                   framework::dataset::make("DataType", DataType::S16));
 const auto ArithmeticAdditionFP16Dataset = combine(combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F16)),
@@ -119,6 +122,44 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticAdditionFixture<uint8_t>, framework
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
+TEST_SUITE_END()
+
+template <typename T>
+using CLArithmeticAdditionQuantizedFixture = ArithmeticAdditionValidationQuantizedFixture<CLTensor, CLAccessor, CLArithmeticAddition, T>;
+
+TEST_SUITE(Quantized)
+TEST_SUITE(QASYMM8)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+               shape, policy)
+{
+    // Create tensors
+    CLTensor ref_src1 = create_tensor<CLTensor>(shape, DataType::QASYMM8);
+    CLTensor ref_src2 = create_tensor<CLTensor>(shape, DataType::QASYMM8);
+    CLTensor dst      = create_tensor<CLTensor>(shape, DataType::QASYMM8);
+
+    // Create and Configure function
+    CLArithmeticAddition add;
+    add.configure(&ref_src1, &ref_src2, &dst, policy);
+
+    // Validate valid region
+    const ValidRegion valid_region = shape_to_valid_region(shape);
+    validate(dst.info()->valid_region(), valid_region);
+
+    // Validate padding
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    validate(ref_src1.info()->padding(), padding);
+    validate(ref_src2.info()->padding(), padding);
+    validate(dst.info()->padding(), padding);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticAdditionQuantizedFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), ArithmeticAdditionQASYMM8Dataset),
+                       framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(2.f / 255.f, 10) })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END()
 TEST_SUITE_END()
 
 TEST_SUITE(S16)
