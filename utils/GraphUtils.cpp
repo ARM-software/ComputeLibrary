@@ -268,6 +268,121 @@ bool ValidationInputAccessor::access_tensor(arm_compute::ITensor &tensor)
     return ret;
 }
 
+ValidationOutputAccessor::ValidationOutputAccessor(const std::string &image_list,
+                                                   size_t             top_n,
+                                                   std::ostream      &output_stream,
+                                                   unsigned int       start,
+                                                   unsigned int       end)
+    : _results(), _output_stream(output_stream), _top_n(top_n), _offset(0), _positive_samples(0)
+{
+    ARM_COMPUTE_ERROR_ON_MSG(start > end, "Invalid validation range!");
+    ARM_COMPUTE_ERROR_ON(top_n == 0);
+
+    std::ifstream ifs;
+    try
+    {
+        ifs.exceptions(std::ifstream::badbit);
+        ifs.open(image_list, std::ios::in | std::ios::binary);
+
+        // Parse image correctly classified labels
+        unsigned int counter = 0;
+        for(std::string line; !std::getline(ifs, line).fail() && counter <= end; ++counter)
+        {
+            // Add label if within range
+            if(counter >= start)
+            {
+                std::stringstream linestream(line);
+                std::string       image_name;
+                int               result;
+
+                linestream >> image_name >> result;
+                _results.emplace_back(result);
+            }
+        }
+    }
+    catch(const std::ifstream::failure &e)
+    {
+        ARM_COMPUTE_ERROR("Accessing %s: %s", image_list.c_str(), e.what());
+    }
+}
+
+void ValidationOutputAccessor::reset()
+{
+    _offset           = 0;
+    _positive_samples = 0;
+}
+
+bool ValidationOutputAccessor::access_tensor(arm_compute::ITensor &tensor)
+{
+    if(_offset < _results.size())
+    {
+        // Get results
+        std::vector<size_t> tensor_results;
+        switch(tensor.info()->data_type())
+        {
+            case DataType::QASYMM8:
+                tensor_results = access_predictions_tensor<uint8_t>(tensor);
+                break;
+            case DataType::F32:
+                tensor_results = access_predictions_tensor<float>(tensor);
+                break;
+            default:
+                ARM_COMPUTE_ERROR("NOT SUPPORTED!");
+        }
+
+        // Check if tensor results are within top-n accuracy
+        size_t correct_label = _results[_offset++];
+        auto is_valid_label  = [&](size_t label)
+        {
+            return label == correct_label;
+        };
+
+        if(std::any_of(std::begin(tensor_results), std::begin(tensor_results) + _top_n - 1, is_valid_label))
+        {
+            ++_positive_samples;
+        }
+    }
+
+    // Report top_n accuracy
+    bool ret = _offset >= _results.size();
+    if(ret)
+    {
+        size_t total_samples    = _results.size();
+        size_t negative_samples = total_samples - _positive_samples;
+        float  accuracy         = _positive_samples / static_cast<float>(total_samples);
+
+        _output_stream << "----------Top " << _top_n << " accuracy ----------" << std::endl
+                       << std::endl;
+        _output_stream << "Positive samples : " << _positive_samples << std::endl;
+        _output_stream << "Negative samples : " << negative_samples << std::endl;
+        _output_stream << "Accuracy : " << accuracy << std::endl;
+    }
+
+    return ret;
+}
+
+template <typename T>
+std::vector<size_t> ValidationOutputAccessor::access_predictions_tensor(arm_compute::ITensor &tensor)
+{
+    // Get the predicted class
+    std::vector<size_t> index;
+
+    const auto   output_net  = reinterpret_cast<T *>(tensor.buffer() + tensor.info()->offset_first_element_in_bytes());
+    const size_t num_classes = tensor.info()->dimension(0);
+
+    index.resize(num_classes);
+
+    // Sort results
+    std::iota(std::begin(index), std::end(index), static_cast<size_t>(0));
+    std::sort(std::begin(index), std::end(index),
+              [&](size_t a, size_t b)
+    {
+        return output_net[a] > output_net[b];
+    });
+
+    return index;
+}
+
 TopNPredictionsAccessor::TopNPredictionsAccessor(const std::string &labels_path, size_t top_n, std::ostream &output_stream)
     : _labels(), _output_stream(output_stream), _top_n(top_n)
 {
