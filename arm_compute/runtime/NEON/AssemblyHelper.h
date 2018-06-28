@@ -159,12 +159,11 @@ using AssemblyKernelGlueS8S32 = AssemblyKernelGlue<int8_t, int32_t>;
  * @param[out] workspace      Tensor to allocate.
  * @param[in]  memory_group   Tensor memory group.
  * @param[in]  alignment      Workspace memory alignment.
- * @param[in]  num_threads    Number of workspace threads.
  */
-inline void allocate_workspace(size_t workspace_size, Tensor &workspace, MemoryGroup *memory_group, size_t alignment, unsigned int num_threads)
+inline void allocate_workspace(size_t workspace_size, Tensor &workspace, MemoryGroup *memory_group, size_t alignment)
 {
     ARM_COMPUTE_ERROR_ON_MSG(workspace_size == 0, "size cannot be 0");
-    workspace.allocator()->init(TensorInfo(TensorShape{ (workspace_size + alignment) * num_threads }, 1, DataType::S8), alignment);
+    workspace.allocator()->init(TensorInfo(TensorShape{ (workspace_size + alignment /* FIXME: remove alignment after COMPMID-1088 */) }, 1, DataType::S8), alignment);
     if(memory_group != nullptr)
     {
         memory_group->manage(&workspace);
@@ -213,7 +212,7 @@ inline bool setup_assembly_kernel(const ITensor *a, const ITensor *b, ITensor *d
         {
             // Allocate workspace
             const unsigned int alignment = 4096;
-            allocate_workspace(workspace_size, workspace, &memory_group, alignment, num_threads);
+            allocate_workspace(workspace_size, workspace, &memory_group, alignment);
             asm_glue._workspace = &workspace;
         }
 
@@ -234,7 +233,7 @@ inline bool setup_assembly_kernel(const ITensor *a, const ITensor *b, ITensor *d
             // Forcing 128-byte alignment (required by 32-bit kernels)
             const unsigned int alignment           = 128;
             const size_t       B_pretranspose_size = asm_gemm->get_B_pretransposed_array_size();
-            allocate_workspace(B_pretranspose_size, B_pretranspose, nullptr, alignment, 1);
+            allocate_workspace(B_pretranspose_size, B_pretranspose, nullptr, alignment);
             ARM_COMPUTE_ERROR_ON_NULLPTR(B_pretranspose.buffer());
             asm_glue._pretranspose = &B_pretranspose;
         }

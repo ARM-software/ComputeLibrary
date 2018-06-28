@@ -302,7 +302,7 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
         const unsigned int alignment = 4096;
         // TODO (COMPMID-1248) : Add support for memory manager in NEWinogradConvolutionLayer
         // Warning : Do not set a memory group in allocate_workspace, should be done under COMPMID-1248
-        allocate_workspace(workspace_size, _workspace, nullptr, alignment, 1);
+        allocate_workspace(workspace_size, _workspace, nullptr, alignment);
         _arm_gemm->set_working_space(reinterpret_cast<float *>(_workspace.buffer()));
     }
 
