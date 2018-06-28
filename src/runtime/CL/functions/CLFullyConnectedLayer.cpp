@@ -73,12 +73,11 @@ Status CLFullyConnectedLayerReshapeWeights::validate(const ITensorInfo *input, c
 }
 
 CLFullyConnectedLayer::CLFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(memory_manager), _im2col_kernel(), _convert_weights(), _reshape_weights_kernel(), _mm_gemm(memory_manager), _mm_gemmlowp(memory_manager), _gemmlowp_output_stage(),
-      _accumulate_biases_kernel(), _im2col_output(), _gemmlowp_output(), _converted_weights_output(), _reshape_weights_output(), _are_weights_converted(true), _are_weights_reshaped(true),
+    : _memory_group(memory_manager), _convert_weights(), _flatten_layer(), _reshape_weights_kernel(), _mm_gemm(memory_manager), _mm_gemmlowp(memory_manager), _gemmlowp_output_stage(),
+      _accumulate_biases_kernel(), _flatten_output(), _gemmlowp_output(), _converted_weights_output(), _reshape_weights_output(), _are_weights_converted(true), _are_weights_reshaped(true),
       _is_fc_after_conv(true), _accumulate_biases(false), _is_quantized(false), _is_prepared(false), _original_weights(nullptr)
 {
 }
-
 void CLFullyConnectedLayer::configure_mm(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output)
 {
     if(_is_quantized)
@@ -111,20 +110,19 @@ void CLFullyConnectedLayer::configure_conv_fc(const ICLTensor *input, const ICLT
 
     // If the fully connected layer is called after a convolution layer, the input tensor must be linearized
 
-    // Initialize output tensor for im2col
-    TensorShape shape_im2col = compute_im2col_fc_shape(input->info());
-    _im2col_output.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_im2col).set_data_layout(DataLayout::NCHW));
+    // Initialize output tensor for flatten
+    TensorShape shape_flatten = compute_flatten_shape(input->info());
+    _flatten_output.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_flatten).set_data_layout(DataLayout::NCHW));
 
-    // Configure im2col kernel
-    _memory_group.manage(&_im2col_output);
-    _im2col_kernel.configure(input, &_im2col_output, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false);
-    CLScheduler::get().tune_kernel_static(_im2col_kernel);
+    // Configure flatten kernel
+    _memory_group.manage(&_flatten_output);
+    _flatten_layer.configure(input, &_flatten_output);
 
     // Configure matrix multiply kernel
-    configure_mm(&_im2col_output, weights, output);
+    configure_mm(&_flatten_output, weights, output);
 
-    // Allocate the output tensor for im2col once all the configure methods have been called
-    _im2col_output.allocator()->allocate();
+    // Allocate the output tensor for flatten once all the configure methods have been called
+    _flatten_output.allocator()->allocate();
 }
 
 void CLFullyConnectedLayer::configure_fc_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output)
@@ -254,7 +252,7 @@ Status CLFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
     bool            is_quantized     = is_data_type_quantized_asymmetric(input->data_type());
     const GPUTarget gpu_target       = CLScheduler::get().target();
 
-    const ITensorInfo &im2col_input      = TensorInfo(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_im2col_fc_shape(input)).set_data_layout(DataLayout::NCHW));
+    const ITensorInfo &flatten_input     = TensorInfo(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_flatten_shape(input)).set_data_layout(DataLayout::NCHW));
     const ITensorInfo &reshaped_weights  = TensorInfo(weights->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_transposed_shape(*weights)));
     const ITensorInfo &converted_weights = weights_reshaped ? TensorInfo(weights->clone()->set_is_resizable(true).reset_padding()) : TensorInfo(*reshaped_weights.clone());
     const ITensorInfo &gemmlowp_output   = TensorInfo(output->clone()->set_is_resizable(true).reset_padding().set_data_type(DataType::S32));
@@ -311,9 +309,9 @@ Status CLFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
         // Fully Connected layer after a Convolution Layer without batches
         ARM_COMPUTE_RETURN_ERROR_ON((weights_to_use->dimension(1) != (input->dimension(0) * input->dimension(1) * input->dimension(2))));
 
-        // Validate im2col kernel
-        ARM_COMPUTE_RETURN_ON_ERROR(CLIm2ColKernel::validate(input, &im2col_input, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false));
-        input_to_use = &im2col_input;
+        // Validate flatten kernel
+        ARM_COMPUTE_RETURN_ON_ERROR(CLFlattenLayer::validate(input, &flatten_input));
+        input_to_use = &flatten_input;
     }
     else
     {
@@ -341,7 +339,7 @@ void CLFullyConnectedLayer::run()
     // Linearize input if it comes from a convolutional layer
     if(_is_fc_after_conv)
     {
-        CLScheduler::get().enqueue(_im2col_kernel, false);
+        _flatten_layer.run();
     }
 
     // Run matrix multiply

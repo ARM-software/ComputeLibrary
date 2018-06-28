@@ -59,6 +59,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                                              TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32), // Mismatching shape input/bias
                                              TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32), // Mismatching shape input/output
                                              TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32), // Asymmetric padding
+                                             TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32), // Padding required
                                              TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32)
                                            }),
     framework::dataset::make("WeightsInfo",{ TensorInfo(TensorShape(3U, 3U, 5U, 21U, 275U), 1, DataType::F16),
@@ -68,7 +69,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                                              TensorInfo(TensorShape(3U, 3U, 5U, 21U, 275U), 1, DataType::F32),
                                              TensorInfo(TensorShape(3U, 3U, 5U, 21U, 275U), 1, DataType::F32),
                                              TensorInfo(TensorShape(3U, 3U, 5U, 21U, 275U), 1, DataType::F32),
-                                             TensorInfo(TensorShape(3U, 3U, 5U, 21U, 275U), 1, DataType::F32)
+                                             TensorInfo(TensorShape(3U, 3U, 5U, 21U, 275U), 1, DataType::F32),
+                                             TensorInfo(TensorShape(1U, 3U, 5U, 21U, 575U), 1, DataType::F32)
                                            })),
     framework::dataset::make("BiasInfo",   { TensorInfo(TensorShape(21U, 275U), 1, DataType::F32),
                                              TensorInfo(TensorShape(21U, 275U), 1, DataType::F16),
@@ -77,7 +79,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                                              TensorInfo(TensorShape(21U, 274U), 1, DataType::F32),
                                              TensorInfo(TensorShape(21U, 275U), 1, DataType::F32),
                                              TensorInfo(TensorShape(21U, 275U), 1, DataType::F32),
-                                             TensorInfo(TensorShape(21U, 275U), 1, DataType::F32)
+                                             TensorInfo(TensorShape(21U, 275U), 1, DataType::F32),
+                                             TensorInfo(TensorShape(21U, 575U), 1, DataType::F32)
                                            })),
     framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32),
                                              TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32),
@@ -86,7 +89,8 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                                              TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32),
                                              TensorInfo(TensorShape(11U, 25U, 22U), 1, DataType::F32),
                                              TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32),
-                                             TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32)
+                                             TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32),
+                                             TensorInfo(TensorShape(23U, 25U, 21U), 1, DataType::F32)
                                            })),
     framework::dataset::make("PadStride",  { PadStrideInfo(2, 1, 0, 0),
                                              PadStrideInfo(2, 1, 0, 0),
@@ -94,10 +98,11 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                                              PadStrideInfo(2, 1, 0, 0),
                                              PadStrideInfo(2, 1, 0, 0),
                                              PadStrideInfo(2, 1, 0, 0),
-                                             PadStrideInfo(2, 1, 1, 0, 0, 0, DimensionRoundingType::FLOOR),
-                                             PadStrideInfo(2, 1, 0, 0)
+                                             PadStrideInfo(2, 1, 1, 0),
+                                             PadStrideInfo(2, 1, 0, 0),
+                                             PadStrideInfo(1, 1, 0, 0)
                                            })),
-    framework::dataset::make("Expected", { false, false, false, false, false, false, false, true })),
+    framework::dataset::make("Expected", { false, false, false, false, false, false, false, false, true })),
     input_info, weights_info, bias_info, output_info, conv_info, expected)
 {
     bool is_valid = bool(CLLocallyConnectedLayer::validate(&input_info.clone()->set_is_resizable(false),

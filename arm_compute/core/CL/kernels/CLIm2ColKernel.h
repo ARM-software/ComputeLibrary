@@ -96,48 +96,13 @@ public:
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
 
-private:
-    /** Run the reshape kernel optimised for the special case (stride is 1, padding is 0 and kernel's low 3 dimensions are same as input)
-     *
-     * @param[in]     window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
-     * @param[in,out] queue  Command queue on which to enqueue the kernel.
-     */
-    void run_reduced(const Window &window, cl::CommandQueue &queue);
-    /** run the generic convolution layer input reshape kernel
-     *
-     * @param[in]     window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
-     * @param[in,out] queue  Command queue on which to enqueue the kernel.
-     */
-    void run_generic(const Window &window, cl::CommandQueue &queue);
-
-    /** Chooses and configure the right kernel for the given input arguments.
-     *
-     * @param[in]  input       The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
-     *                         while every optional dimension from 4 and above represent a batch of inputs. Data types supported: QASYMM8/F16/F32
-     * @param[in]  output      The output tensor. First 2 lower dimensions represent a transform of each 3D input,
-     *                         while every dimension above represents a batch. Data types supported: Same as @p input
-     * @param[in]  kernel_dims The kernel dimensions (width and height).
-     * @param[in]  dilation    Dilation, in elements, across x and y. Defaults to (1, 1).
-     * @param[in]  conv_info   Contains padding and stride information described in @ref PadStrideInfo.
-     * @param[in]  has_bias    In case biases are provided expands the matrix with 1.
-     * @param[out] build_opts  OpenCL buil program options.
-     *
-     * @return the name of the kernel chosen
-     */
-    std::string configure_window(const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims,
-                                 const Size2D &dilation, const PadStrideInfo &conv_info, CLBuildOptions &build_opts);
-
-    /** Common signature for the kernel to run */
-    using Im2ColFunction = void (CLIm2ColKernel::*)(const Window &, cl::CommandQueue &);
-
 public:
     const ICLTensor *_input;
     ICLTensor       *_output;
-    PadStrideInfo    _conv_info;
     std::pair<unsigned int, unsigned int> _convolved_dims;
-    unsigned int   _num_elems_processed_per_iteration;
-    Im2ColFunction _run_func;
-    Size2D         _kernel_dims;
+    unsigned int  _num_elems_processed_per_iteration;
+    Size2D        _kernel_dims;
+    PadStrideInfo _conv_info;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLIM2COLKERNEL_H__ */

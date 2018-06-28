@@ -171,6 +171,7 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
 Status CLGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *c, const ITensorInfo *output, float alpha, float beta, const GEMMInfo &gemm_info)
 {
     ARM_COMPUTE_UNUSED(alpha);
+    ARM_COMPUTE_UNUSED(output);
 
     // Check if we need to reshape the matrix B only on the first run
     const bool reshape_b_only_on_first_run = gemm_info.reshape_b_only_on_first_run();
@@ -180,7 +181,7 @@ Status CLGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
 
     TensorInfo tmp_a_info{};
     TensorInfo tmp_b_info{};
-    TensorInfo tmp_output_info = *output->clone();
+    TensorInfo tmp_output_info{};
 
     // Get the GPU target
     const GPUTarget gpu_target = CLScheduler::get().target();

@@ -23,8 +23,7 @@
  */
 #include "arm_compute/runtime/CL/functions/CLFlattenLayer.h"
 
-#include "arm_compute/core/CL/kernels/CLIm2ColKernel.h"
-#include "arm_compute/core/Size2D.h"
+#include "arm_compute/core/CL/kernels/CLFlattenLayerKernel.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "support/ToolchainSupport.h"
 
@@ -32,8 +31,13 @@ using namespace arm_compute;
 
 void CLFlattenLayer::configure(const ICLTensor *input, ICLTensor *output)
 {
-    auto k = arm_compute::support::cpp14::make_unique<CLIm2ColKernel>();
-    k->configure(input, output, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false);
+    auto k = arm_compute::support::cpp14::make_unique<CLFlattenLayerKernel>();
+    k->configure(input, output);
     _kernel = std::move(k);
     CLScheduler::get().tune_kernel_static(*_kernel);
+}
+
+Status CLFlattenLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    return CLFlattenLayerKernel::validate(input, output);
 }

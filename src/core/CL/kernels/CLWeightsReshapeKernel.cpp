@@ -87,8 +87,7 @@ void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *
                                                   (biases != nullptr) ? biases->info() : nullptr,
                                                   output->info(), num_groups));
 
-    const DataType   data_type   = input->info()->data_type();
-    const DataLayout data_layout = input->info()->data_layout();
+    const DataType data_type = input->info()->data_type();
 
     _biases = biases;
     _output = output;
@@ -101,8 +100,7 @@ void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *
     build_opts.add_option_if(biases != nullptr, "-DHAS_BIAS");
 
     // Create kernel
-    std::string kernel_name = std::string("reshape_to_columns_") + lower_string(string_from_data_layout(data_layout));
-    _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("reshape_to_columns", build_opts.options()));
 
     // Set static arguments
     unsigned int idx = num_arguments_per_3D_tensor() + num_arguments_per_2D_tensor();

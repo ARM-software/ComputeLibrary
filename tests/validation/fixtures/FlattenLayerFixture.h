@@ -55,7 +55,7 @@ public:
     {
         TensorShape shape_flatten;
         TensorInfo  input_info(shape, 1, data_type);
-        shape_flatten = compute_im2col_flatten_shape(&input_info);
+        shape_flatten = compute_flatten_shape(&input_info);
 
         _target    = compute_target(shape, shape_flatten, data_type);
         _reference = compute_reference(shape, shape_flatten, data_type);

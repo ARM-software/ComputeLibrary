@@ -223,7 +223,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     {
         // Calculate im2col shape
         // For NEON the batch size is on the fourth dimension
-        // TODO (giaiod01): Use auto-init COMPMID-1277
+        // TODO (giaiod01): Auto-initialize the output shape of im2col COMPMID-1482
         TensorShape shape_im2col = input->info()->tensor_shape();
         shape_im2col.set(0, mat_weights_rows);
         shape_im2col.set(1, conv_w * conv_h);
@@ -232,7 +232,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
         _im2col_output.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_im2col));
         _memory_group.manage(&_im2col_output);
 
-        // Configure and tune im2col
+        // Configure
         _im2col_kernel.configure(input, &_im2col_output, Size2D(kernel_width, kernel_height), conv_info, _append_bias, false, false, dilation);
 
         // Update GEMM input

@@ -226,6 +226,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "direct_convolution_1x1_3x3_5x5_quantized", "direct_convolution_1x1_3x3_5x5_quantized.cl" },
     { "erode", "erode.cl" },
     { "fast_corners", "fast_corners.cl" },
+    { "flatten", "flatten.cl" },
     { "fill_image_borders_constant", "fill_border.cl" },
     { "fill_image_borders_replicate", "fill_border.cl" },
     { "finalize", "optical_flow_pyramid_lk.cl" },
@@ -270,13 +271,12 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "hog_detector", "hog.cl" },
     { "hog_orientation_binning", "hog.cl" },
     { "hysteresis", "canny.cl" },
-    { "im2col1x1_stridex1_dchw", "im2col.cl" },
-    { "im2col3x3_dchw", "im2col.cl" },
-    { "im2col5x5_dchw", "im2col.cl" },
-    { "im2col11x11_padx0_pady0_dchw", "im2col.cl" },
-    { "im2col_generic_dchw", "im2col.cl" },
-    { "im2col_generic_padx0_pady0_dchw", "im2col.cl" },
-    { "im2col_reduced_dchw", "im2col.cl" },
+    { "im2col1x1_stridex1_nchw", "im2col.cl" },
+    { "im2col3x3_nchw", "im2col.cl" },
+    { "im2col5x5_nchw", "im2col.cl" },
+    { "im2col11x11_padx0_pady0_nchw", "im2col.cl" },
+    { "im2col_generic_nchw", "im2col.cl" },
+    { "im2col_generic_padx0_pady0_nchw", "im2col.cl" },
     { "im2col3x3_nhwc", "im2col.cl" },
     { "im2col_generic_nhwc", "im2col.cl" },
     { "init_level", "optical_flow_pyramid_lk.cl" },
@@ -333,8 +333,7 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "remap_nearest_neighbour", "remap.cl" },
     { "remap_bilinear", "remap.cl" },
     { "reshape_layer", "reshape_layer.cl" },
-    { "reshape_to_columns_nchw", "convolution_layer.cl" },
-    { "reshape_to_columns_nhwc", "convolution_layer.cl" },
+    { "reshape_to_columns", "convolution_layer.cl" },
     { "RGB888_to_IYUV_bt709", "color_convert.cl" },
     { "RGB888_to_NV12_bt709", "color_convert.cl" },
     { "RGB888_to_RGBA8888_bt709", "color_convert.cl" },
@@ -570,6 +569,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "fast_corners.cl",
 #include "./cl_kernels/fast_corners.clembed"
+    },
+    {
+        "flatten.cl",
+#include "./cl_kernels/flatten.clembed"
     },
     {
         "fill_border.cl",

@@ -215,19 +215,13 @@ inline TensorShape compute_im2col_conv_shape(const ITensorInfo *input, const Siz
 
     return output_shape;
 }
-inline TensorShape compute_im2col_fc_shape(const ITensorInfo *input, const int num_input_dimensions = 3)
+inline TensorShape compute_flatten_shape(const ITensorInfo *input)
 {
+    // The output shape will be the flatten version of the input (i.e. [ width * height * channels, num_batches, ... ] ). Used for FlattenLayer and FullyConnectedLayer.
+
     TensorShape output_shape{ input->tensor_shape() };
 
-    output_shape.collapse(num_input_dimensions);
-
-    return output_shape;
-}
-inline TensorShape compute_im2col_flatten_shape(const ITensorInfo *input)
-{
-    // The output shape will be the flatten version of the input (i.e. [ width * height * channels, 1, 1, ... ] ). Used for FlattenLayer.
-    TensorShape output_shape{ input->tensor_shape() };
-    output_shape.collapse(3, 0);
+    output_shape.collapse(3);
 
     return output_shape;
 }

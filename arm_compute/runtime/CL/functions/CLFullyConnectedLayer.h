@@ -27,11 +27,11 @@
 #include "arm_compute/runtime/CL/ICLSimpleFunction.h"
 
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixAccumulateBiasesKernel.h"
-#include "arm_compute/core/CL/kernels/CLIm2ColKernel.h"
 #include "arm_compute/core/CL/kernels/CLTransposeKernel.h"
 #include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
 #include "arm_compute/runtime/CL/functions/CLConvertFullyConnectedWeights.h"
+#include "arm_compute/runtime/CL/functions/CLFlattenLayer.h"
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
@@ -130,14 +130,14 @@ private:
     void configure_mm(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);
 
     CLMemoryGroup                                       _memory_group;
-    CLIm2ColKernel                                      _im2col_kernel;
     CLConvertFullyConnectedWeights                      _convert_weights;
+    CLFlattenLayer                                      _flatten_layer;
     CLFullyConnectedLayerReshapeWeights                 _reshape_weights_kernel;
     CLGEMM                                              _mm_gemm;
     CLGEMMLowpMatrixMultiplyCore                        _mm_gemmlowp;
     CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint _gemmlowp_output_stage;
     CLGEMMMatrixAccumulateBiasesKernel                  _accumulate_biases_kernel;
-    CLTensor                                            _im2col_output;
+    CLTensor                                            _flatten_output;
     CLTensor                                            _gemmlowp_output;
     CLTensor                                            _converted_weights_output;
     CLTensor                                            _reshape_weights_output;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,25 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLFLATTENLAYER_H__
-#define __ARM_COMPUTE_CLFLATTENLAYER_H__
+#ifndef __ARM_COMPUTE_CLFLATTENLAYERKERNEL_H__
+#define __ARM_COMPUTE_CLFLATTENLAYERKERNEL_H__
 
-#include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
+#include "arm_compute/core/CL/ICLKernel.h"
 
 namespace arm_compute
 {
 class ICLTensor;
 
-/** Basic function to execute flatten. This function calls the following OpenCL kernel:
-*
-* -# @ref CLFlattenLayerKernel
-*
-*/
-class CLFlattenLayer : public ICLSimpleFunction
+/** OpenCL interface for the flatten kernel.*/
+class CLFlattenLayerKernel : public ICLKernel
 {
 public:
-    /** Initialise the kernel's input and output.
+    /** Default constructor */
+    CLFlattenLayerKernel();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLFlattenLayerKernel(const CLFlattenLayerKernel &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLFlattenLayerKernel &operator=(const CLFlattenLayerKernel &) = delete;
+    /** Allow instances of this class to be moved */
+    CLFlattenLayerKernel(CLFlattenLayerKernel &&) = default;
+    /** Allow instances of this class to be moved */
+    CLFlattenLayerKernel &operator=(CLFlattenLayerKernel &&) = default;
+    /** Set the input and output of the kernel.
      *
      * @param[in]  input  First input tensor to flatten with at least 3 dimensions.
      *                    The dimensions above the third will be interpreted as batches. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
@@ -47,7 +52,7 @@ public:
      *                    w = width input tensor, h = height input tensor and d = depth input tensor. Data type supported: same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLTranspose
+    /** Static function to check if given info will lead to a valid configuration of @ref CLFlattenLayerKernel
      *
      * @param[in]  input  First input tensor to flatten with at least 3 dimensions.
      *                    The dimensions above the third will be interpreted as batches. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
@@ -57,7 +62,13 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+
+    // Inherited methods overridden:
+    void run(const Window &window, cl::CommandQueue &queue) override;
+
+public:
+    const ICLTensor *_input;
+    ICLTensor       *_output;
 };
 } // namespace arm_compute
-
-#endif /* __ARM_COMPUTE_CLFLATTENLAYER_H__ */
+#endif /*__ARM_COMPUTE_CLFLATTENLAYERKERNEL_H__ */

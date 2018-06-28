@@ -113,7 +113,7 @@ void NEFullyConnectedLayer::configure_conv_fc(const ITensor *input, const ITenso
     // If the fully connected layer is called after a convolution layer, the input tensor must be linearized
 
     // Initialize output tensor for im2col
-    TensorShape shape_im2col = compute_im2col_fc_shape(input->info());
+    TensorShape shape_im2col = compute_flatten_shape(input->info());
     _im2col_output.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_im2col));
 
     // Configure im2col kernel
@@ -249,7 +249,7 @@ Status NEFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
     bool is_fc_after_conv = true;
     bool is_quantized     = is_data_type_quantized_asymmetric(input->data_type());
 
-    const ITensorInfo &im2col_input      = TensorInfo(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_im2col_fc_shape(input)));
+    const ITensorInfo &im2col_input      = TensorInfo(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_flatten_shape(input)));
     const ITensorInfo &reshaped_weights  = TensorInfo(weights->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_transposed_shape(*weights)));
     const ITensorInfo &converted_weights = weights_reshaped ? TensorInfo(weights->clone()->set_is_resizable(true).reset_padding()) : TensorInfo(*reshaped_weights.clone());
     const ITensorInfo &gemmlowp_output   = TensorInfo(output->clone()->set_is_resizable(true).reset_padding().set_data_type(DataType::S32));

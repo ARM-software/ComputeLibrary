@@ -49,29 +49,26 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 {
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::QASYMM8 && has_bias);
     ARM_COMPUTE_RETURN_ERROR_ON((dilation.x() < 1) || (dilation.y() < 1));
 
-    TensorShape expected_output_shape;
-    if(is_flatten) /* Called by FlattenLayer */
+    if(output->total_size() > 0)
     {
-        expected_output_shape = misc::shape_calculator::compute_im2col_flatten_shape(input);
-    }
-    else if(!is_fully_connected) /* Called by ConvolutionLayer */
-    {
-        expected_output_shape = misc::shape_calculator::compute_im2col_conv_shape(input, kernel_dims, conv_info, has_bias, dilation, false);
-    }
-    else /* Called by FullyConnectedLayer */
-    {
-        const int num_batch_dimensions = std::max(0, static_cast<int>(output->tensor_shape().num_dimensions()) - 1);
-        const int num_input_dimensions = input->tensor_shape().num_dimensions() - num_batch_dimensions;
+        TensorShape expected_output_shape;
 
-        expected_output_shape = misc::shape_calculator::compute_im2col_fc_shape(input, num_input_dimensions);
-    }
+        if(is_flatten || is_fully_connected)
+        {
+            expected_output_shape = misc::shape_calculator::compute_flatten_shape(input);
+        }
+        else
+        {
+            expected_output_shape = misc::shape_calculator::compute_im2col_conv_shape(input, kernel_dims, conv_info, has_bias, dilation, false);
+        }
 
-    TensorInfo expected_output = output->clone()->set_tensor_shape(expected_output_shape);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&expected_output, output);
+        TensorInfo expected_output = output->clone()->set_tensor_shape(expected_output_shape);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&expected_output, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    }
 
     return Status{};
 }
