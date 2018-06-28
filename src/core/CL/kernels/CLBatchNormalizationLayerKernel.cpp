@@ -206,6 +206,8 @@ void CLBatchNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *out
     _config_id += support::cpp11::to_string(input->info()->dimension(1));
     _config_id += "_";
     _config_id += support::cpp11::to_string(input->info()->dimension(2));
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_layout(input->info()->data_layout()));
 }
 
 Status CLBatchNormalizationLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output,

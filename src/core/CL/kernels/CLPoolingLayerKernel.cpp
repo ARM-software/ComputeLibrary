@@ -295,6 +295,8 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     _config_id += support::cpp11::to_string(output->info()->dimension(idx_height));
     _config_id += "_";
     _config_id += support::cpp11::to_string(output->info()->dimension(idx_channel));
+    _config_id += "_";
+    _config_id += lower_string(string_from_data_layout(input->info()->data_layout()));
 }
 
 Status CLPoolingLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const PoolingLayerInfo &pool_info)
