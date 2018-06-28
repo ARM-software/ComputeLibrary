@@ -62,7 +62,7 @@ void CLLSTMLayer::configure(const ICLTensor *input, const ICLTensor *input_to_fo
     LSTMParams<ITensorInfo> lstm_params_info;
     if(lstm_params.has_peephole_opt())
     {
-        lstm_params_info.set_peephole_params(lstm_params.cell_to_input_weights()->info(), lstm_params.cell_to_forget_weights()->info(), lstm_params.cell_to_output_weights()->info());
+        lstm_params_info.set_peephole_params(lstm_params.cell_to_forget_weights()->info(), lstm_params.cell_to_output_weights()->info());
     }
     if(lstm_params.has_projection())
     {
@@ -332,8 +332,7 @@ Status CLLSTMLayer::validate(const ITensorInfo *input, const ITensorInfo *input_
 
     if(lstm_params.has_peephole_opt())
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(lstm_params.cell_to_input_weights(), lstm_params.cell_to_output_weights(), lstm_params.cell_to_forget_weights());
-        ARM_COMPUTE_RETURN_ERROR_ON(lstm_params.cell_to_input_weights()->num_dimensions() != 1);
+        ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(lstm_params.cell_to_output_weights(), lstm_params.cell_to_forget_weights());
         ARM_COMPUTE_RETURN_ERROR_ON(lstm_params.cell_to_forget_weights()->num_dimensions() != 1);
         ARM_COMPUTE_RETURN_ERROR_ON(lstm_params.cell_to_output_weights()->num_dimensions() != 1);
     }

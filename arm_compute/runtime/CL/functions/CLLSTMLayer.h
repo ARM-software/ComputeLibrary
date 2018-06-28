@@ -96,15 +96,13 @@ public:
     }
     /** Set peephole tensor parameters.
      *
-     * @param[in] cell_to_input_weights  1D weights tensor with dimensions [num_units]. Data type supported: Data types supported: F16/F32.
-     * @param[in] cell_to_forget_weights 1D weights tensor with dimensions [num_units]. Data type supported: Same as @p cell_to_input_weights.
+     * @param[in] cell_to_forget_weights 1D weights tensor with dimensions [num_units]. Data type supported: Data types supported: F16/F32.
      * @param[in] cell_to_output_weights 1D weights tensor with dimensions [num_units]. Data type supported: Same as @p cell_to_input_weights.
      *
      * @return Reference to this LSTMParams object
      */
-    LSTMParams &set_peephole_params(const T *cell_to_input_weights, const T *cell_to_forget_weights, const T *cell_to_output_weights)
+    LSTMParams &set_peephole_params(const T *cell_to_forget_weights, const T *cell_to_output_weights)
     {
-        _cell_to_input_weights  = cell_to_input_weights;
         _cell_to_forget_weights = cell_to_forget_weights;
         _cell_to_output_weights = cell_to_output_weights;
         _has_peephole_opt       = true;

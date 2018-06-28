@@ -115,13 +115,9 @@ protected:
 
         if(peephole_opt)
         {
-            if(cifg_opt)
-            {
-                cell_to_input_w = create_tensor<TensorType>(cell_bias_shape, data_type);
-            }
             cell_to_forget_w = create_tensor<TensorType>(cell_bias_shape, data_type);
             cell_to_output_w = create_tensor<TensorType>(cell_bias_shape, data_type);
-            lstm_params.set_peephole_params(&cell_to_input_w, &cell_to_forget_w, &cell_to_output_w);
+            lstm_params.set_peephole_params(&cell_to_forget_w, &cell_to_output_w);
         }
 
         if(projection_opt)
@@ -221,13 +217,6 @@ protected:
 
         if(peephole_opt)
         {
-            if(cifg_opt)
-            {
-                ARM_COMPUTE_EXPECT(cell_to_input_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-                cell_to_input_w.allocator()->allocate();
-                ARM_COMPUTE_EXPECT(!cell_to_input_w.info()->is_resizable(), framework::LogLevel::ERRORS);
-                fill(AccessorType(cell_to_input_w), 15);
-            }
             ARM_COMPUTE_EXPECT(cell_to_forget_w.info()->is_resizable(), framework::LogLevel::ERRORS);
             ARM_COMPUTE_EXPECT(cell_to_output_w.info()->is_resizable(), framework::LogLevel::ERRORS);
             cell_to_forget_w.allocator()->allocate();
