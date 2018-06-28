@@ -29,6 +29,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/runtime/CPUUtils.h"
 
+#include <atomic>
 #include <condition_variable>
 #include <iostream>
 #include <mutex>
@@ -48,7 +49,7 @@ public:
      * @param[in] end   End condition (The last value returned by get_next() will be end - 1)
      */
     explicit ThreadFeeder(unsigned int start = 0, unsigned int end = 0)
-        : _current(start), _end(end), _m()
+        : _atomic_counter(start), _end(end)
     {
     }
     /** Return the next element in the range if there is one.
@@ -59,20 +60,13 @@ public:
      */
     bool get_next(unsigned int &next)
     {
-        std::lock_guard<std::mutex> lock(_m);
-        if(_current < _end)
-        {
-            next = _current;
-            _current++;
-            return true;
-        }
-        return false;
+        next = atomic_fetch_add_explicit(&_atomic_counter, 1u, std::memory_order_relaxed);
+        return next < _end;
     }
 
 private:
-    unsigned int       _current;
+    std::atomic_uint   _atomic_counter;
     const unsigned int _end;
-    std::mutex         _m;
 };
 
 /** Execute workloads[info.thread_id] first, then call the feeder to get the index of the next workload to run.
