@@ -50,7 +50,7 @@ const auto MARK_MAYBE = 127u;
 const auto MARK_EDGE  = 255u;
 
 template <typename T>
-void trace_edge(SimpleTensor<T> &dst)
+void trace_edge(SimpleTensor<T> &dst, const ValidRegion &valid_region)
 {
     std::stack<Coordinates> pixels_stack;
     for(auto i = 0; i < dst.num_elements(); ++i)
@@ -83,12 +83,15 @@ void trace_edge(SimpleTensor<T> &dst)
         // Mark MAYBE neighbours as edges since they are next to an EDGE
         std::for_each(neighbours.begin(), neighbours.end(), [&](Coordinates & coord)
         {
-            const size_t pixel_index = coord2index(dst.shape(), coord);
-            const T      pixel       = dst[pixel_index];
-            if(pixel == MARK_MAYBE)
+            if(is_in_valid_region(valid_region, coord))
             {
-                dst[pixel_index] = MARK_EDGE;
-                pixels_stack.push(coord);
+                const size_t pixel_index = coord2index(dst.shape(), coord);
+                const T      pixel       = dst[pixel_index];
+                if(pixel == MARK_MAYBE)
+                {
+                    dst[pixel_index] = MARK_EDGE;
+                    pixels_stack.push(coord);
+                }
             }
         });
     }
@@ -221,7 +224,7 @@ SimpleTensor<T> canny_edge_detector_impl(const SimpleTensor<T> &src, int32_t upp
     }
 
     // Final edge tracing
-    trace_edge<T>(dst);
+    trace_edge<T>(dst, valid_region);
     return dst;
 }
 } // namespace
