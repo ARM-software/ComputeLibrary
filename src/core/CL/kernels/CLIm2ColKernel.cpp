@@ -171,24 +171,25 @@ CLIm2ColKernel::configure_window(const ICLTensor *input, ICLTensor *output, cons
                         break;
                     case 5:
                         _num_elems_processed_per_iteration = 1;
-                        is_optimized_path                  = true;
                         switch(data_layout)
                         {
                             case DataLayout::NCHW:
-                                kernel_name = "im2col5x5_dchw";
+                                is_optimized_path = true;
+                                kernel_name       = "im2col5x5_dchw";
                                 break;
                             default:
                                 // using generic_nhwc
+                                is_optimized_path = false;
                                 break;
                         }
                         break;
                     case 11:
+                        _num_elems_processed_per_iteration = 1;
                         // Optimized im2col11x11 if pad_x = pad_y = 0
-                        if(!conv_info.has_padding())
+                        if(!conv_info.has_padding() && data_layout == DataLayout::NCHW)
                         {
-                            _num_elems_processed_per_iteration = 1;
-                            is_optimized_path                  = true;
-                            kernel_name                        = "im2col11x11_padx0_pady0_dchw";
+                            is_optimized_path = true;
+                            kernel_name       = "im2col11x11_padx0_pady0_dchw";
                         }
                         break;
                     default:
