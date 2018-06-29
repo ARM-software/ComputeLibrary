@@ -74,12 +74,12 @@ if env['build'] == "embed_only":
     Return()
 
 if env['neon'] and 'x86' in env['arch']:
-    print "Cannot compile NEON for x86"
+    print("Cannot compile NEON for x86")
     Exit(1)
 
 if env['set_soname'] and not version_at_least(SCons.__version__, "2.4"):
-    print "Setting the library's SONAME / SHLIBVERSION requires SCons 2.4 or above"
-    print "Update your version of SCons or use set_soname=0"
+    print("Setting the library's SONAME / SHLIBVERSION requires SCons 2.4 or above")
+    print("Update your version of SCons or use set_soname=0")
     Exit(1)
 
 if env['os'] == 'bare_metal':
@@ -101,7 +101,7 @@ cpp_compiler = os.environ.get('CXX', default_cpp_compiler)
 c_compiler = os.environ.get('CC', default_c_compiler)
 
 if env['os'] == 'android' and ( 'clang++' not in cpp_compiler or 'clang' not in c_compiler ):
-    print "WARNING: Only clang is officially supported to build the Compute Library for Android"
+    print( "WARNING: Only clang is officially supported to build the Compute Library for Android")
 
 if 'clang++' in cpp_compiler:
     env.Append(CXXFLAGS = ['-Wno-format-nonliteral','-Wno-deprecated-increment-bool','-Wno-vla-extension','-Wno-mismatched-tags'])
@@ -113,7 +113,7 @@ if env['cppthreads']:
 
 if env['openmp']:
     if 'clang++' in cpp_compiler:
-        print "Clang does not support OpenMP. Use scheduler=cpp."
+        print( "Clang does not support OpenMP. Use scheduler=cpp.")
         Exit(1)
 
     env.Append(CPPDEFINES = [('ARM_COMPUTE_OPENMP_SCHEDULER', 1)])
@@ -181,10 +181,10 @@ if not GetOption("help"):
 
     if 'clang++' not in cpp_compiler:
         if env['arch'] == 'arm64-v8.2-a' and not version_at_least(compiler_ver, '6.2.1'):
-            print "GCC 6.2.1 or newer is required to compile armv8.2-a code"
+            print("GCC 6.2.1 or newer is required to compile armv8.2-a code")
             Exit(1)
         elif env['arch'] == 'arm64-v8a' and not version_at_least(compiler_ver, '4.9'):
-            print "GCC 4.9 or newer is required to compile NEON code for AArch64"
+            print("GCC 4.9 or newer is required to compile NEON code for AArch64")
             Exit(1)
 
         if version_at_least(compiler_ver, '6.1'):
