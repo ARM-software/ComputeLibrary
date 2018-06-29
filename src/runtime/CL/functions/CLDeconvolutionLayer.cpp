@@ -46,7 +46,7 @@ Status CLDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
                                       unsigned int inner_border_right, unsigned int inner_border_top)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16);
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(0) != weights->dimension(1));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(0) < 1);
     ARM_COMPUTE_RETURN_ERROR_ON(!info.padding_is_symmetric());

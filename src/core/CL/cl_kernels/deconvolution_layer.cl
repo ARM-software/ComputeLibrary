@@ -46,5 +46,6 @@ __kernel void deconvolution_upsample(
     Image dst = CONVERT_TO_IMAGE_STRUCT(dst);
 
     // Store result
-    *((__global float *)dst.ptr) = *((__global float *)src.ptr);
+//    *((__global float *)dst.ptr) = *((__global float *)src.ptr);
+    *((__global DATA_TYPE *)dst.ptr) = *((__global DATA_TYPE *)src.ptr);
 }

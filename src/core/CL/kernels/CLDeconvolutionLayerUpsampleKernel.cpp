@@ -43,7 +43,7 @@ Status CLDeconvolutionLayerUpsampleKernel::validate(const ITensorInfo *input, co
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(0) == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(1) == 0);
@@ -74,7 +74,10 @@ void CLDeconvolutionLayerUpsampleKernel::configure(const ICLTensor *input, ICLTe
     ARM_COMPUTE_ERROR_THROW_ON(CLDeconvolutionLayerUpsampleKernel::validate(input->info(), output->info(), inner_border, info));
 
     // Create kernel
-    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("deconvolution_upsample"));
+    CLBuildOptions build_opts;
+    build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type
+                          (input->info()->data_type()));
+    _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("deconvolution_upsample", build_opts.options()));
 
     constexpr unsigned int num_elems_processed_per_iteration = 1;
 
