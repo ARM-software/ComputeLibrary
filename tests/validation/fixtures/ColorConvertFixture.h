@@ -51,6 +51,7 @@ public:
     void setup(TensorShape shape, Format src_format, Format dst_format)
     {
         shape = adjust_odd_shape(shape, src_format);
+        shape = adjust_odd_shape(shape, dst_format);
 
         _target    = compute_target(shape, src_format, dst_format);
         _reference = compute_reference(shape, src_format, dst_format);
@@ -60,13 +61,11 @@ protected:
     template <typename U>
     void fill(U &&tensor, int i)
     {
-        library->fill_tensor_uniform(tensor, 1);
+        library->fill_tensor_uniform(tensor, i);
     }
 
     std::vector<SimpleTensor<T>> create_tensor_planes_reference(const TensorShape &shape, Format format)
     {
-        TensorShape input = adjust_odd_shape(shape, format);
-
         std::vector<SimpleTensor<T>> tensor_planes;
 
         switch(format)
@@ -76,7 +75,7 @@ protected:
             case Format::YUYV422:
             case Format::UYVY422:
             {
-                tensor_planes.emplace_back(input, format);
+                tensor_planes.emplace_back(shape, format);
                 break;
             }
             case Format::NV12:
@@ -84,7 +83,7 @@ protected:
             {
                 const TensorShape shape_uv88 = calculate_subsampled_shape(shape, Format::UV88);
 
-                tensor_planes.emplace_back(input, Format::U8);
+                tensor_planes.emplace_back(shape, Format::U8);
                 tensor_planes.emplace_back(shape_uv88, Format::UV88);
                 break;
             }
@@ -92,16 +91,16 @@ protected:
             {
                 const TensorShape shape_sub2 = calculate_subsampled_shape(shape, Format::IYUV);
 
-                tensor_planes.emplace_back(input, Format::U8);
+                tensor_planes.emplace_back(shape, Format::U8);
                 tensor_planes.emplace_back(shape_sub2, Format::U8);
                 tensor_planes.emplace_back(shape_sub2, Format::U8);
                 break;
             }
             case Format::YUV444:
             {
-                tensor_planes.emplace_back(input, Format::U8);
-                tensor_planes.emplace_back(input, Format::U8);
-                tensor_planes.emplace_back(input, Format::U8);
+                tensor_planes.emplace_back(shape, Format::U8);
+                tensor_planes.emplace_back(shape, Format::U8);
+                tensor_planes.emplace_back(shape, Format::U8);
                 break;
             }
             default:
@@ -112,51 +111,76 @@ protected:
         return tensor_planes;
     }
 
-    TensorType compute_target(const TensorShape &shape, Format src_format, Format dst_format)
+    MultiImageType compute_target(const TensorShape &shape, Format src_format, Format dst_format)
     {
-        const unsigned int num_planes = num_planes_from_format(src_format);
+        _src_num_planes = num_planes_from_format(src_format);
+        _dst_num_planes = num_planes_from_format(dst_format);
 
         // Create tensors
         MultiImageType ref_src = create_multi_image<MultiImageType>(shape, src_format);
-        TensorType     dst     = create_tensor<TensorType>(shape, dst_format);
+        MultiImageType ref_dst = create_multi_image<MultiImageType>(shape, dst_format);
 
         // Create and configure function
         FunctionType color_convert;
 
-        if(1U == num_planes)
+        if(1U == _src_num_planes)
         {
             const TensorType *plane_src = static_cast<TensorType *>(ref_src.plane(0));
-            color_convert.configure(plane_src, &dst);
+
+            if(1U == _dst_num_planes)
+            {
+                TensorType *dst_plane = static_cast<TensorType *>(ref_dst.plane(0));
+                color_convert.configure(plane_src, dst_plane);
+            }
+            else
+            {
+                color_convert.configure(plane_src, &ref_dst);
+            }
         }
         else
         {
-            color_convert.configure(&ref_src, &dst);
+            if(1U == _dst_num_planes)
+            {
+                TensorType *dst_plane = static_cast<TensorType *>(ref_dst.plane(0));
+                color_convert.configure(&ref_src, dst_plane);
+            }
+            else
+            {
+                color_convert.configure(&ref_src, &ref_dst);
+            }
         }
 
-        for(unsigned int plane_idx = 0; plane_idx < num_planes; ++plane_idx)
+        for(unsigned int plane_idx = 0; plane_idx < _src_num_planes; ++plane_idx)
         {
             const TensorType *src_plane = static_cast<const TensorType *>(ref_src.plane(plane_idx));
 
             ARM_COMPUTE_EXPECT(src_plane->info()->is_resizable(), framework::LogLevel::ERRORS);
         }
+        for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
+        {
+            const TensorType *dst_plane = static_cast<const TensorType *>(ref_dst.plane(plane_idx));
 
-        ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+            ARM_COMPUTE_EXPECT(dst_plane->info()->is_resizable(), framework::LogLevel::ERRORS);
+        }
 
         // Allocate tensors
         ref_src.allocate();
-        dst.allocator()->allocate();
+        ref_dst.allocate();
 
-        for(unsigned int plane_idx = 0; plane_idx < num_planes; ++plane_idx)
+        for(unsigned int plane_idx = 0; plane_idx < _src_num_planes; ++plane_idx)
         {
             const TensorType *src_plane = static_cast<const TensorType *>(ref_src.plane(plane_idx));
-
             ARM_COMPUTE_EXPECT(!src_plane->info()->is_resizable(), framework::LogLevel::ERRORS);
         }
 
-        ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+        for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
+        {
+            const TensorType *dst_plane = static_cast<const TensorType *>(ref_dst.plane(plane_idx));
+            ARM_COMPUTE_EXPECT(!dst_plane->info()->is_resizable(), framework::LogLevel::ERRORS);
+        }
 
         // Fill tensor planes
-        for(unsigned int plane_idx = 0; plane_idx < num_planes; ++plane_idx)
+        for(unsigned int plane_idx = 0; plane_idx < _src_num_planes; ++plane_idx)
         {
             TensorType *src_plane = static_cast<TensorType *>(ref_src.plane(plane_idx));
 
@@ -166,13 +190,11 @@ protected:
         // Compute function
         color_convert.run();
 
-        return dst;
+        return ref_dst;
     }
 
-    SimpleTensor<T> compute_reference(const TensorShape &shape, Format src_format, Format dst_format)
+    std::vector<SimpleTensor<T>> compute_reference(const TensorShape &shape, Format src_format, Format dst_format)
     {
-        _num_planes = num_planes_from_format(dst_format);
-
         // Create reference
         std::vector<SimpleTensor<T>> ref_src = create_tensor_planes_reference(shape, src_format);
 
@@ -185,9 +207,10 @@ protected:
         return reference::color_convert<T>(shape, ref_src, src_format, dst_format);
     }
 
-    unsigned int    _num_planes{};
-    TensorType      _target{};
-    SimpleTensor<T> _reference{};
+    unsigned int                 _src_num_planes{};
+    unsigned int                 _dst_num_planes{};
+    MultiImageType               _target{};
+    std::vector<SimpleTensor<T>> _reference{};
 };
 } // namespace validation
 } // namespace test

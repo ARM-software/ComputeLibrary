@@ -35,12 +35,63 @@ namespace validation
 {
 namespace reference
 {
-template <typename T>
-SimpleTensor<uint8_t> color_convert(const TensorShape &shape, const std::vector<SimpleTensor<T>> &tensor_planes, Format src_format, Format dst_format)
+namespace
 {
-    // Create dst and get src tensor
-    SimpleTensor<T> src = tensor_planes[0];
-    SimpleTensor<T> dst(shape, dst_format);
+template <typename T>
+inline std::vector<SimpleTensor<T>> create_image_planes(const TensorShape &shape, Format format)
+{
+    TensorShape image_shape = adjust_odd_shape(shape, format);
+
+    std::vector<SimpleTensor<T>> image_planes;
+
+    switch(format)
+    {
+        case Format::RGB888:
+        case Format::RGBA8888:
+        case Format::YUYV422:
+        case Format::UYVY422:
+        {
+            image_planes.emplace_back(image_shape, format);
+            break;
+        }
+        case Format::NV12:
+        case Format::NV21:
+        {
+            TensorShape shape_uv88 = calculate_subsampled_shape(image_shape, Format::UV88);
+
+            image_planes.emplace_back(image_shape, Format::U8);
+            image_planes.emplace_back(shape_uv88, Format::UV88);
+            break;
+        }
+        case Format::IYUV:
+        {
+            TensorShape shape_sub2 = calculate_subsampled_shape(image_shape, Format::IYUV);
+
+            image_planes.emplace_back(image_shape, Format::U8);
+            image_planes.emplace_back(shape_sub2, Format::U8);
+            image_planes.emplace_back(shape_sub2, Format::U8);
+            break;
+        }
+        case Format::YUV444:
+        {
+            image_planes.emplace_back(image_shape, Format::U8);
+            image_planes.emplace_back(image_shape, Format::U8);
+            image_planes.emplace_back(image_shape, Format::U8);
+            break;
+        }
+        default:
+            ARM_COMPUTE_ERROR("Not supported");
+            break;
+    }
+
+    return image_planes;
+}
+} // namespace
+
+template <typename T>
+std::vector<SimpleTensor<T>> color_convert(const TensorShape &shape, const std::vector<SimpleTensor<T>> &tensor_planes, Format src_format, Format dst_format)
+{
+    std::vector<SimpleTensor<T>> dst = create_image_planes<T>(shape, dst_format);
 
     switch(src_format)
     {
@@ -49,7 +100,16 @@ SimpleTensor<uint8_t> color_convert(const TensorShape &shape, const std::vector<
             switch(dst_format)
             {
                 case Format::RGBA8888:
-                    colorconvert_helper::detail::colorconvert_rgb_to_rgbx(src, dst);
+                    colorconvert_helper::detail::colorconvert_rgb_to_rgbx(tensor_planes[0], dst[0]);
+                    break;
+                case Format::NV12:
+                    colorconvert_helper::detail::colorconvert_rgb_to_nv12(tensor_planes[0], dst);
+                    break;
+                case Format::IYUV:
+                    colorconvert_helper::detail::colorconvert_rgb_to_iyuv(tensor_planes[0], dst);
+                    break;
+                case Format::YUV444:
+                    colorconvert_helper::detail::colorconvert_rgb_to_yuv4(tensor_planes[0], dst);
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Not Supported");
@@ -62,7 +122,16 @@ SimpleTensor<uint8_t> color_convert(const TensorShape &shape, const std::vector<
             switch(dst_format)
             {
                 case Format::RGB888:
-                    colorconvert_helper::detail::colorconvert_rgbx_to_rgb(src, dst);
+                    colorconvert_helper::detail::colorconvert_rgbx_to_rgb(tensor_planes[0], dst[0]);
+                    break;
+                case Format::NV12:
+                    colorconvert_helper::detail::colorconvert_rgb_to_nv12(tensor_planes[0], dst);
+                    break;
+                case Format::IYUV:
+                    colorconvert_helper::detail::colorconvert_rgb_to_iyuv(tensor_planes[0], dst);
+                    break;
+                case Format::YUV444:
+                    colorconvert_helper::detail::colorconvert_rgb_to_yuv4(tensor_planes[0], dst);
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Not Supported");
@@ -77,7 +146,13 @@ SimpleTensor<uint8_t> color_convert(const TensorShape &shape, const std::vector<
             {
                 case Format::RGB888:
                 case Format::RGBA8888:
-                    colorconvert_helper::detail::colorconvert_yuyv_to_rgb(src, src_format, dst);
+                    colorconvert_helper::detail::colorconvert_yuyv_to_rgb(tensor_planes[0], src_format, dst[0]);
+                    break;
+                case Format::NV12:
+                    colorconvert_helper::detail::colorconvert_yuyv_to_nv12(tensor_planes[0], src_format, dst);
+                    break;
+                case Format::IYUV:
+                    colorconvert_helper::detail::colorconvert_yuyv_to_iyuv(tensor_planes[0], src_format, dst);
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Not Supported");
@@ -91,7 +166,7 @@ SimpleTensor<uint8_t> color_convert(const TensorShape &shape, const std::vector<
             {
                 case Format::RGB888:
                 case Format::RGBA8888:
-                    colorconvert_helper::detail::colorconvert_iyuv_to_rgb(shape, tensor_planes, dst);
+                    colorconvert_helper::detail::colorconvert_iyuv_to_rgb(shape, tensor_planes, dst[0]);
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Not Supported");
@@ -106,7 +181,13 @@ SimpleTensor<uint8_t> color_convert(const TensorShape &shape, const std::vector<
             {
                 case Format::RGB888:
                 case Format::RGBA8888:
-                    colorconvert_helper::detail::colorconvert_nv12_to_rgb(shape, src_format, tensor_planes, dst);
+                    colorconvert_helper::detail::colorconvert_nv12_to_rgb(shape, src_format, tensor_planes, dst[0]);
+                    break;
+                case Format::IYUV:
+                    colorconvert_helper::detail::colorconvert_nv_to_iyuv(tensor_planes, src_format, dst);
+                    break;
+                case Format::YUV444:
+                    colorconvert_helper::detail::colorconvert_nv_to_yuv4(tensor_planes, src_format, dst);
                     break;
                 default:
                     ARM_COMPUTE_ERROR("Not Supported");
@@ -118,11 +199,10 @@ SimpleTensor<uint8_t> color_convert(const TensorShape &shape, const std::vector<
             ARM_COMPUTE_ERROR("Not supported");
             break;
     }
-
     return dst;
 }
 
-template SimpleTensor<uint8_t> color_convert(const TensorShape &shape, const std::vector<SimpleTensor<uint8_t>> &tensor_planes, Format src_format, Format dst_format);
+template std::vector<SimpleTensor<uint8_t>> color_convert(const TensorShape &shape, const std::vector<SimpleTensor<uint8_t>> &tensor_planes, Format src_format, Format dst_format);
 } // namespace reference
 } // namespace validation
 } // namespace test

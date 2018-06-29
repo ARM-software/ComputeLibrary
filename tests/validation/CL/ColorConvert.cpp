@@ -40,6 +40,8 @@ namespace validation
 {
 namespace
 {
+constexpr AbsoluteTolerance<uint8_t> tolerance_nv(2);
+
 // Input data sets
 const auto ColorConvertRGBADataset = combine(framework::dataset::make("FormatType", { Format::RGBA8888 }),
                                              framework::dataset::make("FormatType", { Format::RGB888 }));
@@ -52,36 +54,77 @@ const auto ColorConvertYUVPlanarDataset = combine(framework::dataset::make("Form
 const auto ColorConvertRGBDataset = combine(framework::dataset::make("FormatType", { Format::RGB888 }),
                                             framework::dataset::make("FormatType", { Format::RGBA8888 }));
 
+const auto ColorConvertNVDataset = combine(framework::dataset::make("FormatType", { Format::RGB888, Format::RGBA8888 }),
+                                           framework::dataset::make("FormatType", { Format::NV12, Format::IYUV, Format::YUV444 }));
+
+const auto ColorConvertYUYVtoNVDataset = combine(framework::dataset::make("FormatType", { Format::UYVY422, Format::YUYV422 }),
+                                                 framework::dataset::make("FormatType", { Format::NV12, Format::IYUV }));
+
+const auto ColorConvertNVtoYUVDataset = combine(framework::dataset::make("FormatType", { Format::NV12, Format::NV21 }),
+                                                framework::dataset::make("FormatType", { Format::IYUV, Format::YUV444 }));
+
 inline void validate_configuration(const TensorShape &shape, Format src_format, Format dst_format)
 {
     const unsigned int src_num_planes = num_planes_from_format(src_format);
+    const unsigned int dst_num_planes = num_planes_from_format(dst_format);
 
-    const TensorShape dst_shape = adjust_odd_shape(shape, src_format);
+    TensorShape input = adjust_odd_shape(shape, src_format);
+    input             = adjust_odd_shape(input, src_format);
 
     // Create tensors
-    CLMultiImage ref_src = create_multi_image<CLMultiImage>(shape, src_format);
-    CLTensor     dst     = create_tensor<CLTensor>(dst_shape, dst_format);
+    CLMultiImage ref_src = create_multi_image<CLMultiImage>(input, src_format);
+    CLMultiImage ref_dst = create_multi_image<CLMultiImage>(input, dst_format);
 
     // Create and Configure function
     CLColorConvert color_convert;
 
     if(1U == src_num_planes)
     {
-        const CLTensor *plane_src = ref_src.cl_plane(0);
+        const CLTensor *src_plane = ref_src.cl_plane(0);
 
-        color_convert.configure(plane_src, &dst);
-        const ValidRegion dst_valid_region = shape_to_valid_region(dst_shape);
-        validate(dst.info()->valid_region(), dst_valid_region);
+        if(1U == dst_num_planes)
+        {
+            CLTensor *dst_plane = ref_dst.cl_plane(0);
+            color_convert.configure(src_plane, dst_plane);
+        }
+        else
+        {
+            color_convert.configure(src_plane, &ref_dst);
+        }
     }
     else
     {
-        color_convert.configure(&ref_src, &dst);
+        if(1U == dst_num_planes)
+        {
+            CLTensor *dst_plane = ref_dst.cl_plane(0);
+            color_convert.configure(&ref_src, dst_plane);
+        }
+        else
+        {
+            color_convert.configure(&ref_src, &ref_dst);
+        }
+    }
+
+    for(unsigned int plane_idx = 0; plane_idx < src_num_planes; ++plane_idx)
+    {
+        const CLTensor *src_plane = ref_src.cl_plane(plane_idx);
+
+        ARM_COMPUTE_EXPECT(src_plane->info()->is_resizable(), framework::LogLevel::ERRORS);
+    }
+    for(unsigned int plane_idx = 0; plane_idx < dst_num_planes; ++plane_idx)
+    {
+        const CLTensor *dst_plane = ref_dst.cl_plane(plane_idx);
+
+        ARM_COMPUTE_EXPECT(dst_plane->info()->is_resizable(), framework::LogLevel::ERRORS);
     }
 }
 } // namespace
 
 TEST_SUITE(CL)
 TEST_SUITE(ColorConvert)
+
+template <typename T>
+using CLColorConvertFixture = ColorConvertValidationFixture<CLMultiImage, CLTensor, CLAccessor, CLColorConvert, T>;
 
 TEST_SUITE(Configuration)
 DATA_TEST_CASE(RGBA, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ColorConvertRGBADataset),
@@ -107,34 +150,63 @@ DATA_TEST_CASE(RGB, framework::DatasetMode::ALL, combine(concat(datasets::Small2
 {
     validate_configuration(shape, src_format, dst_format);
 }
-TEST_SUITE_END()
 
-template <typename T>
-using CLColorConvertFixture = ColorConvertValidationFixture<CLMultiImage, CLTensor, CLAccessor, CLColorConvert, T>;
+DATA_TEST_CASE(NV, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ColorConvertNVDataset),
+               shape, src_format, dst_format)
+{
+    validate_configuration(shape, src_format, dst_format);
+}
+
+DATA_TEST_CASE(YUVtoNV, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ColorConvertYUYVtoNVDataset),
+               shape, src_format, dst_format)
+{
+    validate_configuration(shape, src_format, dst_format);
+}
+
+DATA_TEST_CASE(NVtoYUV, framework::DatasetMode::ALL, combine(concat(datasets::Small2DShapes(), datasets::Large2DShapes()), ColorConvertNVtoYUVDataset),
+               shape, src_format, dst_format)
+{
+    validate_configuration(shape, src_format, dst_format);
+}
+TEST_SUITE_END()
 
 TEST_SUITE(RGBA)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvertRGBADataset))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference);
+    for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
+    {
+        validate(CLAccessor(*_target.cl_plane(plane_idx)), _reference[plane_idx]);
+    }
 }
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLColorConvertFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DShapes(), ColorConvertRGBADataset))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference);
+    for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
+    {
+        validate(CLAccessor(*_target.cl_plane(plane_idx)), _reference[plane_idx]);
+    }
 }
+
 TEST_SUITE_END()
 
 TEST_SUITE(YUV)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvertYUVDataset))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference);
+    for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
+    {
+        validate(CLAccessor(*_target.cl_plane(plane_idx)), _reference[plane_idx]);
+    }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLColorConvertFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DShapes(), ColorConvertYUVDataset))
 {
-    validate(CLAccessor(_target), _reference);
+    // Validate output
+    for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
+    {
+        validate(CLAccessor(*_target.cl_plane(plane_idx)), _reference[plane_idx]);
+    }
 }
 TEST_SUITE_END()
 
@@ -142,12 +214,18 @@ TEST_SUITE(YUVPlanar)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvertYUVPlanarDataset))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference);
+    for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
+    {
+        validate(CLAccessor(*_target.cl_plane(plane_idx)), _reference[plane_idx]);
+    }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLColorConvertFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DShapes(), ColorConvertYUVPlanarDataset))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference);
+    for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
+    {
+        validate(CLAccessor(*_target.cl_plane(plane_idx)), _reference[plane_idx]);
+    }
 }
 TEST_SUITE_END()
 
@@ -155,14 +233,80 @@ TEST_SUITE(RGB)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvertRGBDataset))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference);
+    for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
+    {
+        validate(CLAccessor(*_target.cl_plane(plane_idx)), _reference[plane_idx]);
+    }
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLColorConvertFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DShapes(), ColorConvertRGBDataset))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference);
+    for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
+    {
+        validate(CLAccessor(*_target.cl_plane(plane_idx)), _reference[plane_idx]);
+    }
 }
 TEST_SUITE_END()
+
+TEST_SUITE(NV)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvertNVDataset))
+{
+    // Validate output
+    for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
+    {
+        validate(CLAccessor(*_target.cl_plane(plane_idx)), _reference[plane_idx], tolerance_nv);
+    }
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLColorConvertFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DShapes(), ColorConvertNVDataset))
+{
+    // Validate output
+    for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
+    {
+        validate(CLAccessor(*_target.cl_plane(plane_idx)), _reference[plane_idx], tolerance_nv);
+    }
+}
+TEST_SUITE_END()
+
+TEST_SUITE(YUYVtoNV)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvertYUYVtoNVDataset))
+{
+    // Validate output
+    for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
+    {
+        validate(CLAccessor(*_target.cl_plane(plane_idx)), _reference[plane_idx]);
+    }
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLColorConvertFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DShapes(), ColorConvertYUYVtoNVDataset))
+{
+    // Validate output
+    for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
+    {
+        validate(CLAccessor(*_target.cl_plane(plane_idx)), _reference[plane_idx]);
+    }
+}
+
+TEST_SUITE_END()
+
+TEST_SUITE(NVtoYUV)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLColorConvertFixture<uint8_t>, framework::DatasetMode::PRECOMMIT, combine(datasets::Small2DShapes(), ColorConvertNVtoYUVDataset))
+{
+    // Validate output
+    for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
+    {
+        validate(CLAccessor(*_target.cl_plane(plane_idx)), _reference[plane_idx]);
+    }
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLColorConvertFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(datasets::Large2DShapes(), ColorConvertNVtoYUVDataset))
+{
+    // Validate output
+    for(unsigned int plane_idx = 0; plane_idx < _dst_num_planes; ++plane_idx)
+    {
+        validate(CLAccessor(*_target.cl_plane(plane_idx)), _reference[plane_idx]);
+    }
+}
+
+TEST_SUITE_END()
+
 TEST_SUITE_END()
 TEST_SUITE_END()
 } // namespace validation
