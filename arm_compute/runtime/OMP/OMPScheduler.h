@@ -57,6 +57,13 @@ public:
      * @param[in] hints  Hints for the scheduler.
      */
     void schedule(ICPPKernel *kernel, const Hints &hints) override;
+    /** Execute all the passed workloads
+     *
+     * @note there is no guarantee regarding the order in which the workloads will be executed or whether or not they will be executed in parallel.
+     *
+     * @param[in] workloads Array of workloads to run
+     */
+    void run_workloads(std::vector<Workload> &workloads) override;
 
 private:
     /** Constructor. */
