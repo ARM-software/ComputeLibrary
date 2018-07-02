@@ -82,8 +82,8 @@ PassManager create_default_pass_manager(Target target)
     {
         pm.append(support::cpp14::make_unique<NodeFusionMutator>());
         pm.append(support::cpp14::make_unique<InPlaceOperationMutator>());
-        pm.append(support::cpp14::make_unique<SplitLayerSubTensorMutator>());
         pm.append(support::cpp14::make_unique<DepthConcatSubTensorMutator>());
+        pm.append(support::cpp14::make_unique<SplitLayerSubTensorMutator>());
     }
 
     return pm;

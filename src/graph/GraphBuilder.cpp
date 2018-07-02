@@ -387,14 +387,7 @@ NodeID GraphBuilder::add_depthwise_convolution_node(Graph &g, NodeParams params,
 
 NodeID GraphBuilder::add_dummy_node(Graph &g, NodeParams params, NodeIdxPair input, TensorShape shape)
 {
-    CHECK_NODEIDX_PAIR(input, g);
-
-    NodeID nid = g.add_node<DummyNode>(shape);
-    g.add_connection(input.node_id, input.index, nid, 0);
-
-    set_node_params(g, nid, params);
-
-    return nid;
+    return create_simple_single_input_output_node<DummyNode>(g, params, input, shape);
 }
 
 NodeID GraphBuilder::add_elementwise_node(Graph &g, NodeParams params, NodeIdxPair input0, NodeIdxPair input1, EltwiseOperation operation)
