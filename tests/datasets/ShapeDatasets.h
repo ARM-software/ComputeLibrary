@@ -627,7 +627,7 @@ public:
         : ShapeDataset("Shape",
     {
         TensorShape{ 9U, 9U },
-                     TensorShape{ 128U, 10U, 2U },
+                     TensorShape{ 128U, 10U },
     })
     {
     }
@@ -641,11 +641,9 @@ public:
         : ShapeDataset("Shape",
     {
         TensorShape{ 9U, 9U },
-                     TensorShape{ 256U, 10U, 2U },
-                     TensorShape{ 353U, 8U, 2U, 2U },
-                     TensorShape{ 512U, 7U, 2U, 2U },
-                     TensorShape{ 633U, 10U, 1U, 2U },
-                     TensorShape{ 781U, 5U, 2U },
+                     TensorShape{ 256U, 10U },
+                     TensorShape{ 353U, 8U },
+                     TensorShape{ 781U, 5U },
     })
     {
     }
@@ -659,8 +657,7 @@ public:
         : ShapeDataset("Shape",
     {
         TensorShape{ 1000U, 10U },
-                     TensorShape{ 3989U, 10U, 2U },
-                     TensorShape{ 4098U, 8U, 1U, 2U },
+                     TensorShape{ 3989U, 10U },
                      TensorShape{ 7339U, 11U },
     })
     {

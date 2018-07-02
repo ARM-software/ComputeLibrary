@@ -99,25 +99,27 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datase
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(
-               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),    // Mismatching data types
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),    // Mismatching shapes
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8, // Invalid output quantization info
+               framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U), 1, DataType::F32),    // Mismatching data types
+                                                       TensorInfo(TensorShape(27U, 13U), 1, DataType::F32),    // Mismatching shapes
+                                                       TensorInfo(TensorShape(27U, 13U), 1, DataType::QASYMM8, // Invalid output quantization info
                                                                   QuantizationInfo(1.f/256, 12)),
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),    // Window shrink
-                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8,
+                                                       TensorInfo(TensorShape(27U, 13U), 1, DataType::F32),    // Window shrink
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),// Invalid input dimensionality
+                                                       TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(32U, 13U), 1, DataType::QASYMM8,
                                                                   QuantizationInfo(1.f/256, 12)),
                                                       }),
-               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),
-                                                       TensorInfo(TensorShape(27U, 11U, 2U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::QASYMM8,
+               framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U), 1, DataType::F16),
+                                                       TensorInfo(TensorShape(27U, 11U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(27U, 13U), 1, DataType::QASYMM8,
                                                                   QuantizationInfo(1.f/256, 12)),
+                                                       TensorInfo(TensorShape(27U, 13U), 1, DataType::F32),
                                                        TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
-                                                       TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::QASYMM8,
+                                                       TensorInfo(TensorShape(32U, 13U), 1, DataType::F32),
+                                                       TensorInfo(TensorShape(32U, 13U), 1, DataType::QASYMM8,
                                                                   QuantizationInfo(1.f/256, 0)),
                                                      })),
-               framework::dataset::make("Expected", { false, false, false, false, true, true })),
+               framework::dataset::make("Expected", { false, false, false, false, false, true, true })),
                input_info, output_info, expected)
 {
     ARM_COMPUTE_EXPECT(bool(CLSoftmaxLayer::validate(&input_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false))) == expected, framework::LogLevel::ERRORS);

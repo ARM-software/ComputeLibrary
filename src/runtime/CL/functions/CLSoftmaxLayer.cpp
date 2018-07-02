@@ -77,6 +77,7 @@ void CLSoftmaxLayer::configure(const ICLTensor *input, ICLTensor *output, float 
 Status CLSoftmaxLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->num_dimensions() > 2, "Only 2D inputs are supported");
 
     // Create intermediate tensor info
     DataType   tmp_data_type = is_data_type_quantized_asymmetric(input->data_type()) ? DataType::S32 : input->data_type();
