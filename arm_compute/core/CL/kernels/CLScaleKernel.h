@@ -48,6 +48,30 @@ public:
 
     // Inherited methods overridden:
     BorderSize border_size() const override;
+
+    /**
+     * Provides access to input tensor.
+     *
+     * @return Pointer to input tensor.
+     */
+    const ICLTensor* input() const { return _input; }
+
+    /**
+     * Provides access to output tensor.
+     *
+     * @return Pointer to output tensor.
+     */
+    const ICLTensor* output() const { return _output; }
+
+    /**
+     * Returns interpolation policy assigned during configuration of the kernel.
+     *
+     * @return Interpolation policy value.
+     */
+    InterpolationPolicy interpolationPolicy() const { return _interpolationPolicy; }
+
+private:
+    InterpolationPolicy _interpolationPolicy = InterpolationPolicy::BILINEAR;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLSCALEKERNEL_H__ */
