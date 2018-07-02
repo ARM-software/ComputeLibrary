@@ -50,9 +50,6 @@ constexpr AbsoluteTolerance<float> tolerance_f16(0.001f);
 constexpr AbsoluteTolerance<float> tolerance_f32(0.00001f);
 
 /** Input data set. */
-const auto NormalizationDatasetQS = combine(combine(combine(combine(datasets::TinyShapes(), datasets::NormalizationTypes()), framework::dataset::make("NormalizationSize", 3, 9, 2)),
-                                                    framework::dataset::make("Beta", { 0.5f, 1.f, 2.f })),
-                                            framework::dataset::make("IsScaled", { true }));
 const auto NormalizationDataset = combine(combine(combine(combine(datasets::SmallShapes(), datasets::NormalizationTypes()), framework::dataset::make("NormalizationSize", 3, 9, 2)),
                                                   framework::dataset::make("Beta", { 0.5f, 1.f, 2.f })),
                                           framework::dataset::make("IsScaled", { true }));
@@ -131,9 +128,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NENormalizationLayerFixture<float>, framework::
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
-
-template <typename T>
-using NENormalizationLayerFixedPointFixture = NormalizationValidationFixedPointFixture<Tensor, Accessor, NENormalizationLayer, T>;
 
 TEST_SUITE_END()
 TEST_SUITE_END()

@@ -102,12 +102,12 @@ protected:
 
         for(const auto &shape : shapes)
         {
-            srcs.emplace_back(create_tensor<TensorType>(shape, data_type, 1, _fractional_bits));
+            srcs.emplace_back(create_tensor<TensorType>(shape, data_type, 1));
             src_ptrs.emplace_back(&srcs.back());
         }
 
         TensorShape dst_shape = calculate_depth_concatenate_shape(shapes);
-        TensorType  dst       = create_tensor<TensorType>(dst_shape, data_type, 1, _fractional_bits);
+        TensorType  dst       = create_tensor<TensorType>(dst_shape, data_type, 1);
 
         // Create and configure function
         FunctionType depth_concat;
@@ -151,7 +151,7 @@ protected:
         int i = 0;
         for(const auto &shape : shapes)
         {
-            srcs.emplace_back(shape, data_type, 1, _fractional_bits);
+            srcs.emplace_back(shape, data_type, 1);
             fill(srcs.back(), i++);
         }
 
@@ -160,9 +160,6 @@ protected:
 
     TensorType      _target{};
     SimpleTensor<T> _reference{};
-
-private:
-    int _fractional_bits{ 1 };
 };
 } // namespace validation
 } // namespace test

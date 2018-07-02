@@ -45,11 +45,11 @@ class ArithmeticAdditionGenericFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy, int fractional_bits,
+    void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy,
                QuantizationInfo quantization_info)
     {
-        _target    = compute_target(shape0, shape1, data_type0, data_type1, output_data_type, convert_policy, fractional_bits, quantization_info);
-        _reference = compute_reference(shape0, shape1, data_type0, data_type1, output_data_type, convert_policy, fractional_bits, quantization_info);
+        _target    = compute_target(shape0, shape1, data_type0, data_type1, output_data_type, convert_policy, quantization_info);
+        _reference = compute_reference(shape0, shape1, data_type0, data_type1, output_data_type, convert_policy, quantization_info);
     }
 
 protected:
@@ -60,12 +60,12 @@ protected:
     }
 
     TensorType compute_target(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy,
-                              int fixed_point_position, QuantizationInfo quantization_info)
+                              QuantizationInfo quantization_info)
     {
         // Create tensors
-        TensorType ref_src1 = create_tensor<TensorType>(shape0, data_type0, 1, fixed_point_position, quantization_info);
-        TensorType ref_src2 = create_tensor<TensorType>(shape1, data_type1, 1, fixed_point_position, quantization_info);
-        TensorType dst      = create_tensor<TensorType>(TensorShape::broadcast_shape(shape0, shape1), output_data_type, 1, fixed_point_position, quantization_info);
+        TensorType ref_src1 = create_tensor<TensorType>(shape0, data_type0, 1, quantization_info);
+        TensorType ref_src2 = create_tensor<TensorType>(shape1, data_type1, 1, quantization_info);
+        TensorType dst      = create_tensor<TensorType>(TensorShape::broadcast_shape(shape0, shape1), output_data_type, 1, quantization_info);
 
         // Create and configure function
         FunctionType add;
@@ -95,11 +95,11 @@ protected:
     }
 
     SimpleTensor<T> compute_reference(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy,
-                                      int fixed_point_position, QuantizationInfo quantization_info)
+                                      QuantizationInfo quantization_info)
     {
         // Create reference
-        SimpleTensor<T> ref_src1{ shape0, data_type0, 1, fixed_point_position, quantization_info };
-        SimpleTensor<T> ref_src2{ shape1, data_type1, 1, fixed_point_position, quantization_info };
+        SimpleTensor<T> ref_src1{ shape0, data_type0, 1, quantization_info };
+        SimpleTensor<T> ref_src2{ shape1, data_type1, 1, quantization_info };
 
         // Fill reference
         fill(ref_src1, 0);
@@ -117,9 +117,9 @@ class ArithmeticAdditionBroadcastValidationFixedPointFixture : public Arithmetic
 {
 public:
     template <typename...>
-    void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy, int fractional_bits)
+    void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy)
     {
-        ArithmeticAdditionGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape0, shape1, data_type0, data_type1, output_data_type, convert_policy, 0, QuantizationInfo());
+        ArithmeticAdditionGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape0, shape1, data_type0, data_type1, output_data_type, convert_policy, QuantizationInfo());
     }
 };
 
@@ -130,7 +130,7 @@ public:
     template <typename...>
     void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy)
     {
-        ArithmeticAdditionGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape0, shape1, data_type0, data_type1, output_data_type, convert_policy, 0, QuantizationInfo());
+        ArithmeticAdditionGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape0, shape1, data_type0, data_type1, output_data_type, convert_policy, QuantizationInfo());
     }
 };
 
@@ -139,9 +139,9 @@ class ArithmeticAdditionValidationFixedPointFixture : public ArithmeticAdditionG
 {
 public:
     template <typename...>
-    void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy, int fractional_bits)
+    void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy)
     {
-        ArithmeticAdditionGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, shape, data_type0, data_type1, output_data_type, convert_policy, fractional_bits, QuantizationInfo());
+        ArithmeticAdditionGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, shape, data_type0, data_type1, output_data_type, convert_policy, QuantizationInfo());
     }
 };
 
@@ -152,7 +152,7 @@ public:
     template <typename...>
     void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy)
     {
-        ArithmeticAdditionValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type0, data_type1, output_data_type, convert_policy, 0);
+        ArithmeticAdditionValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type0, data_type1, output_data_type, convert_policy);
     }
 };
 
@@ -163,7 +163,7 @@ public:
     template <typename...>
     void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy, QuantizationInfo quantization_info)
     {
-        ArithmeticAdditionGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, shape, data_type0, data_type1, output_data_type, convert_policy, 0, quantization_info);
+        ArithmeticAdditionGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, shape, data_type0, data_type1, output_data_type, convert_policy, quantization_info);
     }
 };
 } // namespace validation

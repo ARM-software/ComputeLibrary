@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -59,14 +59,11 @@ TEST_SUITE(GEMM)
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallGEMMDataset(), datasets::LargeGEMMDataset()), CNNDataTypes),
                shape_a, shape_b, shape_c, output_shape, alpha, beta, data_type)
 {
-    // Set fixed point position data type allowed
-    const int fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
-
     // Create tensors
-    GCTensor a   = create_tensor<GCTensor>(shape_a, data_type, 1, fixed_point_position);
-    GCTensor b   = create_tensor<GCTensor>(shape_b, data_type, 1, fixed_point_position);
-    GCTensor c   = create_tensor<GCTensor>(shape_c, data_type, 1, fixed_point_position);
-    GCTensor dst = create_tensor<GCTensor>(output_shape, data_type, 1, fixed_point_position);
+    GCTensor a   = create_tensor<GCTensor>(shape_a, data_type, 1);
+    GCTensor b   = create_tensor<GCTensor>(shape_b, data_type, 1);
+    GCTensor c   = create_tensor<GCTensor>(shape_c, data_type, 1);
+    GCTensor dst = create_tensor<GCTensor>(output_shape, data_type, 1);
 
     ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);

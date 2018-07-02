@@ -150,7 +150,7 @@ CannyEdgeParameters canny_edge_parameters()
 SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint8_t> &src)
 {
     const QuantizationInfo &quantization_info = src.quantization_info();
-    SimpleTensor<float>     dst{ src.shape(), DataType::F32, 1, 0, QuantizationInfo(), src.data_layout() };
+    SimpleTensor<float>     dst{ src.shape(), DataType::F32, 1, QuantizationInfo(), src.data_layout() };
 
     for(int i = 0; i < src.num_elements(); ++i)
     {
@@ -161,7 +161,7 @@ SimpleTensor<float> convert_from_asymmetric(const SimpleTensor<uint8_t> &src)
 
 SimpleTensor<uint8_t> convert_to_asymmetric(const SimpleTensor<float> &src, const QuantizationInfo &quantization_info)
 {
-    SimpleTensor<uint8_t> dst{ src.shape(), DataType::QASYMM8, 1, 0, quantization_info };
+    SimpleTensor<uint8_t> dst{ src.shape(), DataType::QASYMM8, 1, quantization_info };
     for(int i = 0; i < src.num_elements(); ++i)
     {
         dst[i] = quantization_info.quantize(src[i], RoundingPolicy::TO_NEAREST_UP);

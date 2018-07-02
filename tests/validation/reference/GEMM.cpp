@@ -38,7 +38,7 @@ template <typename T, typename std::enable_if<is_floating_point<T>::value, int>:
 SimpleTensor<T> gemm(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const SimpleTensor<T> &c, float alpha, float beta)
 {
     // Create reference
-    SimpleTensor<T> dst{ c.shape(), c.data_type(), 1, c.fixed_point_position() };
+    SimpleTensor<T> dst{ c.shape(), c.data_type(), 1 };
 
     // Compute reference
     const int M = a.shape().y();
@@ -91,7 +91,7 @@ SimpleTensor<T> gemm(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const S
     using namespace fixed_point_arithmetic;
 
     // Create reference
-    SimpleTensor<T> dst{ c.shape(), c.data_type(), 1, c.fixed_point_position() };
+    SimpleTensor<T> dst{ c.shape(), c.data_type(), 1 };
 
     // Compute reference
     using promoted_type = fixed_point_arithmetic::traits::promote_t<T>;
@@ -156,8 +156,6 @@ SimpleTensor<T> gemm(const SimpleTensor<T> &a, const SimpleTensor<T> &b, const S
 
 template SimpleTensor<float> gemm(const SimpleTensor<float> &a, const SimpleTensor<float> &b, const SimpleTensor<float> &c, float alpha, float beta);
 template SimpleTensor<half> gemm(const SimpleTensor<half> &a, const SimpleTensor<half> &b, const SimpleTensor<half> &c, float alpha, float beta);
-template SimpleTensor<qint8_t> gemm(const SimpleTensor<qint8_t> &a, const SimpleTensor<qint8_t> &b, const SimpleTensor<qint8_t> &c, float alpha, float beta);
-template SimpleTensor<qint16_t> gemm(const SimpleTensor<qint16_t> &a, const SimpleTensor<qint16_t> &b, const SimpleTensor<qint16_t> &c, float alpha, float beta);
 } // namespace reference
 } // namespace validation
 } // namespace test

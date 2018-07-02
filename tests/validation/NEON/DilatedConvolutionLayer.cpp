@@ -106,16 +106,13 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
                                                                    CNNDataTypes),
                input_shape, weights_shape, bias_shape, output_shape, info, dilation, data_type)
 {
-    // Set fixed point position data type allowed
-    int fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
-
     auto bias_data_type = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
 
     // Create tensors
-    Tensor src     = create_tensor<Tensor>(input_shape, data_type, 1, fixed_point_position, QuantizationInfo(2.f / 255.f, 127));
-    Tensor weights = create_tensor<Tensor>(weights_shape, data_type, 1, fixed_point_position, QuantizationInfo(2.f / 255.f, 127));
-    Tensor bias    = create_tensor<Tensor>(bias_shape, bias_data_type, 1, fixed_point_position, QuantizationInfo(2.f / 255.f, 127));
-    Tensor dst     = create_tensor<Tensor>(output_shape, data_type, 1, fixed_point_position, QuantizationInfo(2.f / 255.f, 127));
+    Tensor src     = create_tensor<Tensor>(input_shape, data_type, 1, QuantizationInfo(2.f / 255.f, 127));
+    Tensor weights = create_tensor<Tensor>(weights_shape, data_type, 1, QuantizationInfo(2.f / 255.f, 127));
+    Tensor bias    = create_tensor<Tensor>(bias_shape, bias_data_type, 1, QuantizationInfo(2.f / 255.f, 127));
+    Tensor dst     = create_tensor<Tensor>(output_shape, data_type, 1, QuantizationInfo(2.f / 255.f, 127));
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -196,9 +193,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMDilatedConvolutionLayerFixture<float>, fr
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
-
-template <typename T>
-using NEGEMMDilatedConvolutionLayerFixedPointFixture = ConvolutionValidationFixedPointFixture<Tensor, Accessor, NEGEMMConvolutionLayer, T>;
 
 template <typename T>
 using NEGEMMDilatedConvolutionLayerQuantizedFixture = ConvolutionValidationQuantizedFixture<Tensor, Accessor, NEGEMMConvolutionLayer, T>;

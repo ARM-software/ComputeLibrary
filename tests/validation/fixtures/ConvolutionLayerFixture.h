@@ -57,12 +57,11 @@ public:
 public:
     template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights,
-               DataType data_type, DataLayout data_layout, int fractional_bits, QuantizationInfo quantization_info, ActivationLayerInfo act_info)
+               DataType data_type, DataLayout data_layout, QuantizationInfo quantization_info, ActivationLayerInfo act_info)
     {
         _data_type         = data_type;
         _is_quantized      = is_data_type_quantized_asymmetric(data_type);
         _bias_data_type    = _is_quantized ? DataType::S32 : data_type;
-        _fractional_bits   = fractional_bits;
         _quantization_info = quantization_info;
         _data_layout       = data_layout;
 
@@ -117,10 +116,10 @@ protected:
         TensorShape reshaped_weights_shape(weights_shape);
 
         // Create tensors
-        TensorType src     = create_tensor<TensorType>(input_shape, _data_type, 1, _fractional_bits, _quantization_info, _data_layout);
-        TensorType weights = create_tensor<TensorType>(reshaped_weights_shape, _data_type, 1, _fractional_bits, _quantization_info, _data_layout);
-        TensorType bias    = create_tensor<TensorType>(bias_shape, _bias_data_type, 1, _fractional_bits, _quantization_info, _data_layout);
-        TensorType dst     = create_tensor<TensorType>(output_shape, _data_type, 1, _fractional_bits, _quantization_info, _data_layout);
+        TensorType src     = create_tensor<TensorType>(input_shape, _data_type, 1, _quantization_info, _data_layout);
+        TensorType weights = create_tensor<TensorType>(reshaped_weights_shape, _data_type, 1, _quantization_info, _data_layout);
+        TensorType bias    = create_tensor<TensorType>(bias_shape, _bias_data_type, 1, _quantization_info, _data_layout);
+        TensorType dst     = create_tensor<TensorType>(output_shape, _data_type, 1, _quantization_info, _data_layout);
 
         // Create and configure function
         FunctionType conv;
@@ -157,9 +156,9 @@ protected:
                                       const Size2D &dilation, const ActivationLayerInfo act_info)
     {
         // Create reference
-        SimpleTensor<T>     src{ input_shape, _data_type, 1, _fractional_bits, _quantization_info };
-        SimpleTensor<T>     weights{ weights_shape, _data_type, 1, _fractional_bits, _quantization_info };
-        SimpleTensor<TBias> bias{ bias_shape, _bias_data_type, 1, _fractional_bits, _quantization_info };
+        SimpleTensor<T>     src{ input_shape, _data_type, 1, _quantization_info };
+        SimpleTensor<T>     weights{ weights_shape, _data_type, 1, _quantization_info };
+        SimpleTensor<TBias> bias{ bias_shape, _bias_data_type, 1, _quantization_info };
 
         // Fill reference
         fill(src, 0);
@@ -176,7 +175,6 @@ protected:
     DataType         _data_type{};
     DataType         _bias_data_type{};
     DataLayout       _data_layout{};
-    int              _fractional_bits{};
     QuantizationInfo _quantization_info{};
     bool             _is_quantized = false;
 };
@@ -189,7 +187,7 @@ public:
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights, DataType data_type,
                DataLayout data_layout, ActivationLayerInfo act_info)
     {
-        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights, data_type, data_layout, 0,
+        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights, data_type, data_layout,
                                                                                               QuantizationInfo(), act_info);
     }
 };
@@ -200,11 +198,11 @@ class ConvolutionValidationFixedPointFixture : public ConvolutionValidationGener
 public:
     template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights, DataType data_type,
-               int fractional_bits, ActivationLayerInfo act_info)
+               ActivationLayerInfo act_info)
     {
         ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights, data_type,
                                                                                               DataLayout::NCHW,
-                                                                                              fractional_bits, QuantizationInfo(), act_info);
+                                                                                              QuantizationInfo(), act_info);
     }
 };
 
@@ -217,7 +215,7 @@ public:
                DataLayout data_layout, QuantizationInfo quantization_info, ActivationLayerInfo act_info)
     {
         ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights,
-                                                                                              data_type, data_layout, 0, quantization_info, act_info);
+                                                                                              data_type, data_layout, quantization_info, act_info);
     }
 };
 } // namespace validation

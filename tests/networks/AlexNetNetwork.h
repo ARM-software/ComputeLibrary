@@ -56,37 +56,35 @@ class AlexNetNetwork
 public:
     /** Initialize the network.
      *
-     * @param[in] data_type            Data type.
-     * @param[in] fixed_point_position Fixed point position (for quantized data types).
-     * @param[in] batches              Number of batches.
-     * @param[in] reshaped_weights     Whether the weights need reshaping or not. Default: false.
+     * @param[in] data_type        Data type.
+     * @param[in] batches          Number of batches.
+     * @param[in] reshaped_weights Whether the weights need reshaping or not. Default: false.
      */
-    void init(DataType data_type, int fixed_point_position, int batches, bool reshaped_weights = false)
+    void init(DataType data_type, int batches, bool reshaped_weights = false)
     {
-        _data_type            = data_type;
-        _fixed_point_position = fixed_point_position;
-        _batches              = batches;
-        _reshaped_weights     = reshaped_weights;
+        _data_type        = data_type;
+        _batches          = batches;
+        _reshaped_weights = reshaped_weights;
 
         // Initialize weights and biases
         if(!_reshaped_weights)
         {
-            w[0].allocator()->init(TensorInfo(TensorShape(11U, 11U, 3U, 96U), 1, _data_type, _fixed_point_position));
-            b[0].allocator()->init(TensorInfo(TensorShape(96U), 1, _data_type, _fixed_point_position));
-            w[1].allocator()->init(TensorInfo(TensorShape(5U, 5U, 48U, 256U), 1, _data_type, _fixed_point_position));
-            b[1].allocator()->init(TensorInfo(TensorShape(256U), 1, _data_type, _fixed_point_position));
-            w[2].allocator()->init(TensorInfo(TensorShape(3U, 3U, 256U, 384U), 1, _data_type, _fixed_point_position));
-            b[2].allocator()->init(TensorInfo(TensorShape(384U), 1, _data_type, _fixed_point_position));
-            w[3].allocator()->init(TensorInfo(TensorShape(3U, 3U, 192U, 384U), 1, _data_type, _fixed_point_position));
-            b[3].allocator()->init(TensorInfo(TensorShape(384U), 1, _data_type, _fixed_point_position));
-            w[4].allocator()->init(TensorInfo(TensorShape(3U, 3U, 192U, 256U), 1, _data_type, _fixed_point_position));
-            b[4].allocator()->init(TensorInfo(TensorShape(256U), 1, _data_type, _fixed_point_position));
-            w[5].allocator()->init(TensorInfo(TensorShape(9216U, 4096U), 1, _data_type, _fixed_point_position));
-            b[5].allocator()->init(TensorInfo(TensorShape(4096U), 1, _data_type, _fixed_point_position));
-            w[6].allocator()->init(TensorInfo(TensorShape(4096U, 4096U), 1, _data_type, _fixed_point_position));
-            b[6].allocator()->init(TensorInfo(TensorShape(4096U), 1, _data_type, _fixed_point_position));
-            w[7].allocator()->init(TensorInfo(TensorShape(4096U, 1000U), 1, _data_type, _fixed_point_position));
-            b[7].allocator()->init(TensorInfo(TensorShape(1000U), 1, _data_type, _fixed_point_position));
+            w[0].allocator()->init(TensorInfo(TensorShape(11U, 11U, 3U, 96U), 1, _data_type));
+            b[0].allocator()->init(TensorInfo(TensorShape(96U), 1, _data_type));
+            w[1].allocator()->init(TensorInfo(TensorShape(5U, 5U, 48U, 256U), 1, _data_type));
+            b[1].allocator()->init(TensorInfo(TensorShape(256U), 1, _data_type));
+            w[2].allocator()->init(TensorInfo(TensorShape(3U, 3U, 256U, 384U), 1, _data_type));
+            b[2].allocator()->init(TensorInfo(TensorShape(384U), 1, _data_type));
+            w[3].allocator()->init(TensorInfo(TensorShape(3U, 3U, 192U, 384U), 1, _data_type));
+            b[3].allocator()->init(TensorInfo(TensorShape(384U), 1, _data_type));
+            w[4].allocator()->init(TensorInfo(TensorShape(3U, 3U, 192U, 256U), 1, _data_type));
+            b[4].allocator()->init(TensorInfo(TensorShape(256U), 1, _data_type));
+            w[5].allocator()->init(TensorInfo(TensorShape(9216U, 4096U), 1, _data_type));
+            b[5].allocator()->init(TensorInfo(TensorShape(4096U), 1, _data_type));
+            w[6].allocator()->init(TensorInfo(TensorShape(4096U, 4096U), 1, _data_type));
+            b[6].allocator()->init(TensorInfo(TensorShape(4096U), 1, _data_type));
+            w[7].allocator()->init(TensorInfo(TensorShape(4096U, 1000U), 1, _data_type));
+            b[7].allocator()->init(TensorInfo(TensorShape(1000U), 1, _data_type));
 
             w11 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[1], TensorShape(5U, 5U, 48U, 128U), Coordinates()));
             w12 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[1], TensorShape(5U, 5U, 48U, 128U), Coordinates(0, 0, 0, 128)));
@@ -122,7 +120,7 @@ public:
             };
 
             // Create tensor for the reshaped weights
-            w[0].allocator()->init(TensorInfo(reshape(366U, 96U, true), 1, _data_type, _fixed_point_position));
+            w[0].allocator()->init(TensorInfo(reshape(366U, 96U, true), 1, _data_type));
 
             // Configure the direct convolution's weights. Direct convolution doesn't need reshape weights
             if(!_is_direct_conv)
@@ -133,13 +131,13 @@ public:
                 auto w32_tensor = std::unique_ptr<TensorType>(new TensorType());
                 auto w41_tensor = std::unique_ptr<TensorType>(new TensorType());
                 auto w42_tensor = std::unique_ptr<TensorType>(new TensorType());
-                w11_tensor->allocator()->init(TensorInfo(reshape(1248U, 128U, true), 1, _data_type, _fixed_point_position));
-                w12_tensor->allocator()->init(TensorInfo(reshape(1248U, 128U, true), 1, _data_type, _fixed_point_position));
-                w31_tensor->allocator()->init(TensorInfo(reshape(1920U, 192U, true), 1, _data_type, _fixed_point_position));
-                w32_tensor->allocator()->init(TensorInfo(reshape(1920U, 192U, true), 1, _data_type, _fixed_point_position));
-                w41_tensor->allocator()->init(TensorInfo(reshape(1920U, 128U, true), 1, _data_type, _fixed_point_position));
-                w42_tensor->allocator()->init(TensorInfo(reshape(1920U, 128U, true), 1, _data_type, _fixed_point_position));
-                w[2].allocator()->init(TensorInfo(reshape(2560U, 384U, true), 1, _data_type, _fixed_point_position));
+                w11_tensor->allocator()->init(TensorInfo(reshape(1248U, 128U, true), 1, _data_type));
+                w12_tensor->allocator()->init(TensorInfo(reshape(1248U, 128U, true), 1, _data_type));
+                w31_tensor->allocator()->init(TensorInfo(reshape(1920U, 192U, true), 1, _data_type));
+                w32_tensor->allocator()->init(TensorInfo(reshape(1920U, 192U, true), 1, _data_type));
+                w41_tensor->allocator()->init(TensorInfo(reshape(1920U, 128U, true), 1, _data_type));
+                w42_tensor->allocator()->init(TensorInfo(reshape(1920U, 128U, true), 1, _data_type));
+                w[2].allocator()->init(TensorInfo(reshape(2560U, 384U, true), 1, _data_type));
                 w11 = std::move(w11_tensor);
                 w12 = std::move(w12_tensor);
                 w31 = std::move(w31_tensor);
@@ -149,14 +147,14 @@ public:
             }
             else
             {
-                w[1].allocator()->init(TensorInfo(TensorShape(5U, 5U, 48U, 256U), 1, _data_type, _fixed_point_position));
-                b[1].allocator()->init(TensorInfo(TensorShape(256U), 1, _data_type, _fixed_point_position));
-                w[2].allocator()->init(TensorInfo(TensorShape(3U, 3U, 256U, 384U), 1, _data_type, _fixed_point_position));
-                b[2].allocator()->init(TensorInfo(TensorShape(384U), 1, _data_type, _fixed_point_position));
-                w[3].allocator()->init(TensorInfo(TensorShape(3U, 3U, 192U, 384U), 1, _data_type, _fixed_point_position));
-                b[3].allocator()->init(TensorInfo(TensorShape(384U), 1, _data_type, _fixed_point_position));
-                w[4].allocator()->init(TensorInfo(TensorShape(3U, 3U, 192U, 256U), 1, _data_type, _fixed_point_position));
-                b[4].allocator()->init(TensorInfo(TensorShape(256U), 1, _data_type, _fixed_point_position));
+                w[1].allocator()->init(TensorInfo(TensorShape(5U, 5U, 48U, 256U), 1, _data_type));
+                b[1].allocator()->init(TensorInfo(TensorShape(256U), 1, _data_type));
+                w[2].allocator()->init(TensorInfo(TensorShape(3U, 3U, 256U, 384U), 1, _data_type));
+                b[2].allocator()->init(TensorInfo(TensorShape(384U), 1, _data_type));
+                w[3].allocator()->init(TensorInfo(TensorShape(3U, 3U, 192U, 384U), 1, _data_type));
+                b[3].allocator()->init(TensorInfo(TensorShape(384U), 1, _data_type));
+                w[4].allocator()->init(TensorInfo(TensorShape(3U, 3U, 192U, 256U), 1, _data_type));
+                b[4].allocator()->init(TensorInfo(TensorShape(256U), 1, _data_type));
                 w11 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[1], TensorShape(5U, 5U, 48U, 128U), Coordinates()));
                 w12 = std::unique_ptr<SubTensorType>(new SubTensorType(&w[1], TensorShape(5U, 5U, 48U, 128U), Coordinates(0, 0, 0, 128)));
                 b11 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[1], TensorShape(128U), Coordinates()));
@@ -173,21 +171,21 @@ public:
                 b42 = std::unique_ptr<SubTensorType>(new SubTensorType(&b[4], TensorShape(128U), Coordinates(128)));
             }
 
-            b[5].allocator()->init(TensorInfo(TensorShape(4096U), 1, _data_type, _fixed_point_position));
-            b[6].allocator()->init(TensorInfo(TensorShape(4096U), 1, _data_type, _fixed_point_position));
-            b[7].allocator()->init(TensorInfo(TensorShape(1000U), 1, _data_type, _fixed_point_position));
+            b[5].allocator()->init(TensorInfo(TensorShape(4096U), 1, _data_type));
+            b[6].allocator()->init(TensorInfo(TensorShape(4096U), 1, _data_type));
+            b[7].allocator()->init(TensorInfo(TensorShape(1000U), 1, _data_type));
 
             if(_batches > 1 && std::is_same<TensorType, Tensor>::value)
             {
-                w[5].allocator()->init(TensorInfo(reshape(9216U, 4096U, false), 1, _data_type, _fixed_point_position));
-                w[6].allocator()->init(TensorInfo(reshape(4096U, 4096U, false), 1, _data_type, _fixed_point_position));
-                w[7].allocator()->init(TensorInfo(reshape(4096U, 1000U, false), 1, _data_type, _fixed_point_position));
+                w[5].allocator()->init(TensorInfo(reshape(9216U, 4096U, false), 1, _data_type));
+                w[6].allocator()->init(TensorInfo(reshape(4096U, 4096U, false), 1, _data_type));
+                w[7].allocator()->init(TensorInfo(reshape(4096U, 1000U, false), 1, _data_type));
             }
             else
             {
-                w[5].allocator()->init(TensorInfo(TensorShape(4096U, 9216U), 1, _data_type, _fixed_point_position));
-                w[6].allocator()->init(TensorInfo(TensorShape(4096U, 4096U), 1, _data_type, _fixed_point_position));
-                w[7].allocator()->init(TensorInfo(TensorShape(1000U, 4096U), 1, _data_type, _fixed_point_position));
+                w[5].allocator()->init(TensorInfo(TensorShape(4096U, 9216U), 1, _data_type));
+                w[6].allocator()->init(TensorInfo(TensorShape(4096U, 4096U), 1, _data_type));
+                w[7].allocator()->init(TensorInfo(TensorShape(1000U, 4096U), 1, _data_type));
             }
         }
     }
@@ -195,50 +193,50 @@ public:
     /** Build the network */
     void build()
     {
-        input.allocator()->init(TensorInfo(TensorShape(227U, 227U, 3U, _batches), 1, _data_type, _fixed_point_position));
-        output.allocator()->init(TensorInfo(TensorShape(1000U, _batches), 1, _data_type, _fixed_point_position));
+        input.allocator()->init(TensorInfo(TensorShape(227U, 227U, 3U, _batches), 1, _data_type));
+        output.allocator()->init(TensorInfo(TensorShape(1000U, _batches), 1, _data_type));
 
         // Initialize intermediate tensors
         // Layer 1
-        conv1_out.allocator()->init(TensorInfo(TensorShape(55U, 55U, 96U, _batches), 1, _data_type, _fixed_point_position));
-        act1_out.allocator()->init(TensorInfo(TensorShape(55U, 55U, 96U, _batches), 1, _data_type, _fixed_point_position));
-        norm1_out.allocator()->init(TensorInfo(TensorShape(55U, 55U, 96U, _batches), 1, _data_type, _fixed_point_position));
-        pool1_out.allocator()->init(TensorInfo(TensorShape(27U, 27U, 96U, _batches), 1, _data_type, _fixed_point_position));
+        conv1_out.allocator()->init(TensorInfo(TensorShape(55U, 55U, 96U, _batches), 1, _data_type));
+        act1_out.allocator()->init(TensorInfo(TensorShape(55U, 55U, 96U, _batches), 1, _data_type));
+        norm1_out.allocator()->init(TensorInfo(TensorShape(55U, 55U, 96U, _batches), 1, _data_type));
+        pool1_out.allocator()->init(TensorInfo(TensorShape(27U, 27U, 96U, _batches), 1, _data_type));
         pool11_out = std::unique_ptr<SubTensorType>(new SubTensorType(&pool1_out, TensorShape(27U, 27U, 48U, _batches), Coordinates()));
         pool12_out = std::unique_ptr<SubTensorType>(new SubTensorType(&pool1_out, TensorShape(27U, 27U, 48U, _batches), Coordinates(0, 0, 48)));
         // Layer 2
-        conv2_out.allocator()->init(TensorInfo(TensorShape(27U, 27U, 256U, _batches), 1, _data_type, _fixed_point_position));
+        conv2_out.allocator()->init(TensorInfo(TensorShape(27U, 27U, 256U, _batches), 1, _data_type));
         conv21_out = std::unique_ptr<SubTensorType>(new SubTensorType(&conv2_out, TensorShape(27U, 27U, 128U, _batches), Coordinates()));
         conv22_out = std::unique_ptr<SubTensorType>(new SubTensorType(&conv2_out, TensorShape(27U, 27U, 128U, _batches), Coordinates(0, 0, 128)));
-        act2_out.allocator()->init(TensorInfo(TensorShape(27U, 27U, 256U, _batches), 1, _data_type, _fixed_point_position));
-        norm2_out.allocator()->init(TensorInfo(TensorShape(27U, 27U, 256U, _batches), 1, _data_type, _fixed_point_position));
-        pool2_out.allocator()->init(TensorInfo(TensorShape(13U, 13U, 256U, _batches), 1, _data_type, _fixed_point_position));
+        act2_out.allocator()->init(TensorInfo(TensorShape(27U, 27U, 256U, _batches), 1, _data_type));
+        norm2_out.allocator()->init(TensorInfo(TensorShape(27U, 27U, 256U, _batches), 1, _data_type));
+        pool2_out.allocator()->init(TensorInfo(TensorShape(13U, 13U, 256U, _batches), 1, _data_type));
         // Layer 3
-        conv3_out.allocator()->init(TensorInfo(TensorShape(13U, 13U, 384U, _batches), 1, _data_type, _fixed_point_position));
-        act3_out.allocator()->init(TensorInfo(TensorShape(13U, 13U, 384U, _batches), 1, _data_type, _fixed_point_position));
+        conv3_out.allocator()->init(TensorInfo(TensorShape(13U, 13U, 384U, _batches), 1, _data_type));
+        act3_out.allocator()->init(TensorInfo(TensorShape(13U, 13U, 384U, _batches), 1, _data_type));
         act31_out = std::unique_ptr<SubTensorType>(new SubTensorType(&act3_out, TensorShape(13U, 13U, 192U, _batches), Coordinates()));
         act32_out = std::unique_ptr<SubTensorType>(new SubTensorType(&act3_out, TensorShape(13U, 13U, 192U, _batches), Coordinates(0, 0, 192)));
         // Layer 4
-        conv4_out.allocator()->init(TensorInfo(TensorShape(13U, 13U, 384U, _batches), 1, _data_type, _fixed_point_position));
+        conv4_out.allocator()->init(TensorInfo(TensorShape(13U, 13U, 384U, _batches), 1, _data_type));
         conv41_out = std::unique_ptr<SubTensorType>(new SubTensorType(&conv4_out, TensorShape(13U, 13U, 192U, _batches), Coordinates()));
         conv42_out = std::unique_ptr<SubTensorType>(new SubTensorType(&conv4_out, TensorShape(13U, 13U, 192U, _batches), Coordinates(0, 0, 192)));
-        act4_out.allocator()->init(TensorInfo(TensorShape(13U, 13U, 384U, _batches), 1, _data_type, _fixed_point_position));
+        act4_out.allocator()->init(TensorInfo(TensorShape(13U, 13U, 384U, _batches), 1, _data_type));
         act41_out = std::unique_ptr<SubTensorType>(new SubTensorType(&act4_out, TensorShape(13U, 13U, 192U, _batches), Coordinates()));
         act42_out = std::unique_ptr<SubTensorType>(new SubTensorType(&act4_out, TensorShape(13U, 13U, 192U, _batches), Coordinates(0, 0, 192)));
         // Layer 5
-        conv5_out.allocator()->init(TensorInfo(TensorShape(13U, 13U, 256U, _batches), 1, _data_type, _fixed_point_position));
+        conv5_out.allocator()->init(TensorInfo(TensorShape(13U, 13U, 256U, _batches), 1, _data_type));
         conv51_out = std::unique_ptr<SubTensorType>(new SubTensorType(&conv5_out, TensorShape(13U, 13U, 128U, _batches), Coordinates()));
         conv52_out = std::unique_ptr<SubTensorType>(new SubTensorType(&conv5_out, TensorShape(13U, 13U, 128U, _batches), Coordinates(0, 0, 128)));
-        act5_out.allocator()->init(TensorInfo(TensorShape(13U, 13U, 256U, _batches), 1, _data_type, _fixed_point_position));
-        pool5_out.allocator()->init(TensorInfo(TensorShape(6U, 6U, 256U, _batches), 1, _data_type, _fixed_point_position));
+        act5_out.allocator()->init(TensorInfo(TensorShape(13U, 13U, 256U, _batches), 1, _data_type));
+        pool5_out.allocator()->init(TensorInfo(TensorShape(6U, 6U, 256U, _batches), 1, _data_type));
         // Layer 6
-        fc6_out.allocator()->init(TensorInfo(TensorShape(4096U, _batches), 1, _data_type, _fixed_point_position));
-        act6_out.allocator()->init(TensorInfo(TensorShape(4096U, _batches), 1, _data_type, _fixed_point_position));
+        fc6_out.allocator()->init(TensorInfo(TensorShape(4096U, _batches), 1, _data_type));
+        act6_out.allocator()->init(TensorInfo(TensorShape(4096U, _batches), 1, _data_type));
         // Layer 7
-        fc7_out.allocator()->init(TensorInfo(TensorShape(4096U, _batches), 1, _data_type, _fixed_point_position));
-        act7_out.allocator()->init(TensorInfo(TensorShape(4096U, _batches), 1, _data_type, _fixed_point_position));
+        fc7_out.allocator()->init(TensorInfo(TensorShape(4096U, _batches), 1, _data_type));
+        act7_out.allocator()->init(TensorInfo(TensorShape(4096U, _batches), 1, _data_type));
         // Layer 8
-        fc8_out.allocator()->init(TensorInfo(TensorShape(1000U, _batches), 1, _data_type, _fixed_point_position));
+        fc8_out.allocator()->init(TensorInfo(TensorShape(1000U, _batches), 1, _data_type));
 
         // Configure Layers
         // Layer 1
@@ -606,7 +604,6 @@ private:
     };
 
     DataType     _data_type{ DataType::UNKNOWN };
-    int          _fixed_point_position{ 0 };
     unsigned int _batches{ 0 };
     bool         _reshaped_weights{ false };
     bool         _is_direct_conv{ !std::is_same<ConvolutionLayerFunction, DirectConvolutionLayerFunction>::value };

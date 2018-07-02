@@ -159,8 +159,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
     shape_scaled.set(idx_height, src_shape[idx_height] * scale_y);
 
     // Create tensors
-    Tensor src = create_tensor<Tensor>(src_shape, data_type, 1, 0, QuantizationInfo(), data_layout);
-    Tensor dst = create_tensor<Tensor>(shape_scaled, data_type, 1, 0, QuantizationInfo(), data_layout);
+    Tensor src = create_tensor<Tensor>(src_shape, data_type, 1, QuantizationInfo(), data_layout);
+    Tensor dst = create_tensor<Tensor>(shape_scaled, data_type, 1, QuantizationInfo(), data_layout);
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);

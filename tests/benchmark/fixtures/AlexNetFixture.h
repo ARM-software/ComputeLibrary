@@ -53,10 +53,9 @@ public:
     template <typename...>
     void setup(DataType data_type, int batches)
     {
-        constexpr bool weights_reshaped     = false;
-        constexpr int  fixed_point_position = 4;
+        constexpr bool weights_reshaped = false;
 
-        network.init(data_type, fixed_point_position, batches, weights_reshaped);
+        network.init(data_type, batches, weights_reshaped);
         network.build();
         network.allocate();
     }

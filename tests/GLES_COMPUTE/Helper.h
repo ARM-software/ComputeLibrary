@@ -37,17 +37,16 @@ namespace test
 {
 /** Helper to create an empty tensor.
  *
- * @param[in] shape                Desired shape.
- * @param[in] data_type            Desired data type.
- * @param[in] num_channels         (Optional) It indicates the number of channels for each tensor element
- * @param[in] fixed_point_position (Optional) Fixed point position that expresses the number of bits for the fractional part of the number when the tensor's data type is QS8 or QS16.
+ * @param[in] shape        Desired shape.
+ * @param[in] data_type    Desired data type.
+ * @param[in] num_channels (Optional) It indicates the number of channels for each tensor element
  *
  * @return Empty @ref GCTensor with the specified shape and data type.
  */
-inline GCTensor create_tensor(const TensorShape &shape, DataType data_type, int num_channels = 1, int fixed_point_position = 0)
+inline GCTensor create_tensor(const TensorShape &shape, DataType data_type, int num_channels = 1)
 {
     GCTensor tensor;
-    tensor.allocator()->init(TensorInfo(shape, num_channels, data_type, fixed_point_position));
+    tensor.allocator()->init(TensorInfo(shape, num_channels, data_type));
 
     return tensor;
 }

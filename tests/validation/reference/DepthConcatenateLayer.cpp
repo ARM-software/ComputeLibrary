@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -95,8 +95,6 @@ SimpleTensor<T> depthconcatenate_layer(const std::vector<SimpleTensor<T>> &srcs)
 
 template SimpleTensor<float> depthconcatenate_layer(const std::vector<SimpleTensor<float>> &srcs);
 template SimpleTensor<half> depthconcatenate_layer(const std::vector<SimpleTensor<half>> &srcs);
-template SimpleTensor<qint8_t> depthconcatenate_layer(const std::vector<SimpleTensor<qint8_t>> &srcs);
-template SimpleTensor<qint16_t> depthconcatenate_layer(const std::vector<SimpleTensor<qint16_t>> &srcs);
 } // namespace reference
 } // namespace validation
 } // namespace test

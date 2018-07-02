@@ -50,11 +50,6 @@ const auto PoolingLayerDatasetFP = combine(combine(combine(datasets::PoolingType
                                                    framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) })),
                                            framework::dataset::make("ExcludePadding", { true, false }));
 
-/** Input data set for quantized data types */
-const auto PoolingLayerDatasetQS = combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }), framework::dataset::make("PoolingSize", { Size2D(2, 2), Size2D(3, 3) })),
-                                                   framework::dataset::make("PadStride", { PadStrideInfo(1, 1, 0, 0), PadStrideInfo(2, 1, 0, 0), PadStrideInfo(1, 2, 1, 1), PadStrideInfo(2, 2, 1, 0) })),
-                                           framework::dataset::make("ExcludePadding", { false }));
-
 /** Input data set for asymmetric data type */
 
 const auto PoolingLayerDatasetQASYMM8 = combine(combine(combine(framework::dataset::make("PoolingType", { PoolingType::MAX, PoolingType::AVG }), framework::dataset::make("PoolingSize", { Size2D(2, 2), Size2D(3, 3), Size2D(4, 4), Size2D(9, 9), Size2D(3, 7), Size2D(7, 8) })),
@@ -158,9 +153,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEPoolingLayerFixture<half>, framework::Dataset
 TEST_SUITE_END() // FP16
 #endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 TEST_SUITE_END() // Float
-
-template <typename T>
-using NEPoolingLayerFixedPointFixture = PoolingLayerValidationFixedPointFixture<Tensor, Accessor, NEPoolingLayer, T>;
 
 TEST_SUITE(Quantized)
 

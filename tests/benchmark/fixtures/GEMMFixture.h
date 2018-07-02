@@ -44,13 +44,11 @@ public:
     template <typename...>
     void setup(TensorShape shape_a, TensorShape shape_b, TensorShape shape_c, TensorShape shape_dst, float alpha, float beta, DataType data_type, bool reshape_b_only_on_first_run)
     {
-        constexpr int fixed_point_position = 4;
-
         // Create tensors
-        a   = create_tensor<TensorType>(shape_a, data_type, 1, fixed_point_position);
-        b   = create_tensor<TensorType>(shape_b, data_type, 1, fixed_point_position);
-        c   = create_tensor<TensorType>(shape_c, data_type, 1, fixed_point_position);
-        dst = create_tensor<TensorType>(shape_dst, data_type, 1, fixed_point_position);
+        a   = create_tensor<TensorType>(shape_a, data_type, 1);
+        b   = create_tensor<TensorType>(shape_b, data_type, 1);
+        c   = create_tensor<TensorType>(shape_c, data_type, 1);
+        dst = create_tensor<TensorType>(shape_dst, data_type, 1);
 
         // Create and configure function
         gemm.configure(&a, &b, &c, &dst, alpha, beta, GEMMInfo(false, false, reshape_b_only_on_first_run));

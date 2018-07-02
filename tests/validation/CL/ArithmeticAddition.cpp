@@ -202,9 +202,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLArithmeticAdditionFixture<int16_t>, framework
 }
 TEST_SUITE_END()
 
-template <typename T>
-using CLArithmeticAdditionFixedPointFixture = ArithmeticAdditionValidationFixedPointFixture<CLTensor, CLAccessor, CLArithmeticAddition, T>;
-
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticAdditionFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ArithmeticAdditionFP16Dataset),

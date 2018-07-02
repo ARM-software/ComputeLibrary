@@ -231,9 +231,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLAriSubU8S16ToS16Fixture, framework::DatasetMo
 TEST_SUITE_END()
 TEST_SUITE_END()
 
-template <typename T1, typename T2 = T1, typename T3 = T1>
-using CLArithmeticSubtractionFixedPointFixture = ArithmeticSubtractionValidationFixedPointFixture<CLTensor, CLAccessor, CLArithmeticSubtraction, T1, T2, T3>;
-
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLArithmeticSubtractionFixture<half>, framework::DatasetMode::ALL, combine(combine(datasets::SmallShapes(), ArithmeticSubtractionFP16Dataset),

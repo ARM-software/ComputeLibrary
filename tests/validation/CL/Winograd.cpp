@@ -169,7 +169,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
     TensorShape shape_out = compute_winograd_input_transform_shape(tensor_info_in, winograd_info);
 
     // Create tensors
-    CLTensor in  = create_tensor<CLTensor>(shape_in, data_type, 1, 0, QuantizationInfo(), data_layout);
+    CLTensor in  = create_tensor<CLTensor>(shape_in, data_type, 1, QuantizationInfo(), data_layout);
     CLTensor out = create_tensor<CLTensor>(shape_out, data_type);
 
     ARM_COMPUTE_EXPECT(in.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -216,7 +216,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
     TensorShape shape_out = compute_winograd_input_transform_shape(tensor_info_in, winograd_info);
 
     // Create tensors
-    CLTensor in  = create_tensor<CLTensor>(shape_in_nhwc, data_type, 1, 0, QuantizationInfo(), data_layout);
+    CLTensor in  = create_tensor<CLTensor>(shape_in_nhwc, data_type, 1, QuantizationInfo(), data_layout);
     CLTensor out = create_tensor<CLTensor>(shape_out, data_type);
 
     ARM_COMPUTE_EXPECT(in.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -296,8 +296,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL,
     TensorShape shape_b = compute_winograd_filter_transform_shape(TensorInfo(shape_a, 1, data_type), winograd_info);
 
     // Create tensors
-    CLTensor a = create_tensor<CLTensor>(shape_a, data_type, 1, 0, QuantizationInfo(), data_layout);
-    CLTensor b = create_tensor<CLTensor>(shape_b, data_type, 1, 0, QuantizationInfo(), data_layout);
+    CLTensor a = create_tensor<CLTensor>(shape_a, data_type, 1, QuantizationInfo(), data_layout);
+    CLTensor b = create_tensor<CLTensor>(shape_b, data_type, 1, QuantizationInfo(), data_layout);
 
     ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -348,8 +348,8 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL,
     TensorShape shape_b = compute_winograd_filter_transform_shape(tensor_info_in, winograd_info);
 
     // Create tensors
-    CLTensor a = create_tensor<CLTensor>(shape_in_nhwc, data_type, 1, 0, QuantizationInfo(), data_layout);
-    CLTensor b = create_tensor<CLTensor>(shape_b, data_type, 1, 0, QuantizationInfo(), data_layout);
+    CLTensor a = create_tensor<CLTensor>(shape_in_nhwc, data_type, 1, QuantizationInfo(), data_layout);
+    CLTensor b = create_tensor<CLTensor>(shape_b, data_type, 1, QuantizationInfo(), data_layout);
 
     ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -444,7 +444,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
 
     // Create tensors
     CLTensor a = create_tensor<CLTensor>(shape_a, data_type);
-    CLTensor b = create_tensor<CLTensor>(shape_b, data_type, 1, 0, QuantizationInfo(), winograd_info.output_data_layout);
+    CLTensor b = create_tensor<CLTensor>(shape_b, data_type, 1, QuantizationInfo(), winograd_info.output_data_layout);
 
     ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -481,7 +481,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::da
 
     // Create tensors
     CLTensor a = create_tensor<CLTensor>(shape_a, data_type);
-    CLTensor b = create_tensor<CLTensor>(shape_b, data_type, 1, 0, QuantizationInfo(), winograd_info.output_data_layout);
+    CLTensor b = create_tensor<CLTensor>(shape_b, data_type, 1, QuantizationInfo(), winograd_info.output_data_layout);
 
     ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);

@@ -221,9 +221,6 @@ TEST_SUITE_END()
 TEST_SUITE_END()
 
 template <typename T>
-using CLActivationLayerFixedPointFixture = ActivationValidationFixedPointFixture<CLTensor, CLAccessor, CLActivationLayer, T>;
-
-template <typename T>
 using CLActivationLayerQuantizedFixture = ActivationValidationQuantizedFixture<CLTensor, CLAccessor, CLActivationLayer, T>;
 
 /** Input data sets. */

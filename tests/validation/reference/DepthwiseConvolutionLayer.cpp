@@ -53,7 +53,7 @@ template <typename T, typename TB>
 SimpleTensor<T> depthwise_convolution(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &biases, const TensorShape &dst_shape, const PadStrideInfo &conv_info,
                                       unsigned int depth_multiplier)
 {
-    SimpleTensor<T> dst{ dst_shape, src.data_type(), 1, src.fixed_point_position() };
+    SimpleTensor<T> dst{ dst_shape, src.data_type(), 1 };
 
     // Compute reference
     const int filter_width  = weights.shape().x();
@@ -122,7 +122,7 @@ template <>
 SimpleTensor<uint8_t> depthwise_convolution(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &biases, const TensorShape &dst_shape,
                                             const PadStrideInfo &conv_info, unsigned int depth_multiplier)
 {
-    SimpleTensor<uint8_t> dst{ dst_shape, src.data_type(), 1, src.fixed_point_position(), src.quantization_info() };
+    SimpleTensor<uint8_t> dst{ dst_shape, src.data_type(), 1, src.quantization_info() };
 
     // Create reference
     const int   input_offset   = -src.quantization_info().offset;

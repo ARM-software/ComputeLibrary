@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,11 +45,10 @@ class ArithmeticSubtractionValidationFixedPointFixture : public framework::Fixtu
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy, int fractional_bits)
+    void setup(TensorShape shape, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy)
     {
-        _fractional_bits = fractional_bits;
-        _target          = compute_target(shape, data_type0, data_type1, output_data_type, convert_policy, fractional_bits);
-        _reference       = compute_reference(shape, data_type0, data_type1, output_data_type, convert_policy, fractional_bits);
+        _target    = compute_target(shape, data_type0, data_type1, output_data_type, convert_policy);
+        _reference = compute_reference(shape, data_type0, data_type1, output_data_type, convert_policy);
     }
 
 protected:
@@ -59,12 +58,12 @@ protected:
         library->fill_tensor_uniform(tensor, i);
     }
 
-    TensorType compute_target(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy, int fixed_point_position)
+    TensorType compute_target(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy)
     {
         // Create tensors
-        TensorType ref_src1 = create_tensor<TensorType>(shape, data_type0, 1, fixed_point_position);
-        TensorType ref_src2 = create_tensor<TensorType>(shape, data_type1, 1, fixed_point_position);
-        TensorType dst      = create_tensor<TensorType>(shape, output_data_type, 1, fixed_point_position);
+        TensorType ref_src1 = create_tensor<TensorType>(shape, data_type0, 1);
+        TensorType ref_src2 = create_tensor<TensorType>(shape, data_type1, 1);
+        TensorType dst      = create_tensor<TensorType>(shape, output_data_type, 1);
 
         // Create and configure function
         FunctionType sub;
@@ -93,11 +92,11 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T3> compute_reference(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy, int fixed_point_position)
+    SimpleTensor<T3> compute_reference(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy)
     {
         // Create reference
-        SimpleTensor<T1> ref_src1{ shape, data_type0, 1, fixed_point_position };
-        SimpleTensor<T2> ref_src2{ shape, data_type1, 1, fixed_point_position };
+        SimpleTensor<T1> ref_src1{ shape, data_type0, 1 };
+        SimpleTensor<T2> ref_src2{ shape, data_type1, 1 };
 
         // Fill reference
         fill(ref_src1, 0);
@@ -108,7 +107,6 @@ protected:
 
     TensorType       _target{};
     SimpleTensor<T3> _reference{};
-    int              _fractional_bits{};
 };
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T1, typename T2 = T1, typename T3 = T1>
 class ArithmeticSubtractionValidationFixture : public ArithmeticSubtractionValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T1, T2, T3>
@@ -117,7 +115,7 @@ public:
     template <typename...>
     void setup(TensorShape shape, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy)
     {
-        ArithmeticSubtractionValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T1, T2, T3>::setup(shape, data_type0, data_type1, output_data_type, convert_policy, 0);
+        ArithmeticSubtractionValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T1, T2, T3>::setup(shape, data_type0, data_type1, output_data_type, convert_policy);
     }
 };
 } // namespace validation

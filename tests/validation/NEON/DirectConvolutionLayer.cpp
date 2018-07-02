@@ -173,9 +173,6 @@ FIXTURE_DATA_TEST_CASE(Run, NEDirectConvolutionLayerFixture<float>, framework::D
 TEST_SUITE_END()
 TEST_SUITE_END()
 
-template <typename T>
-using NEDirectConvolutionLayerFixedPointFixture = DirectConvolutionValidationFixedPointFixture<Tensor, Accessor, NEDirectConvolutionLayer, T>;
-
 const auto QuantizedActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
 {
     ActivationLayerInfo(),

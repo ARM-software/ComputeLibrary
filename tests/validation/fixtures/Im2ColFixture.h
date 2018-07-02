@@ -81,8 +81,8 @@ protected:
     TensorType compute_target(const TensorShape &input_shape, const TensorShape &output_shape, DataType data_type)
     {
         // Create tensors
-        TensorType src = create_tensor<TensorType>(input_shape, data_type, 1, 0, _quant_info, _data_layout);
-        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1, 0, _quant_info);
+        TensorType src = create_tensor<TensorType>(input_shape, data_type, 1, _quant_info, _data_layout);
+        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1, _quant_info);
 
         // Create and configure function
         FunctionType im2col_func;
@@ -110,8 +110,8 @@ protected:
     void compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, DataType data_type)
     {
         // Create reference
-        SimpleTensor<T> src{ input_shape, data_type, 1, 0, _quant_info, _data_layout };
-        _reference = SimpleTensor<T>(output_shape, data_type, 1, 0, _quant_info, DataLayout::NCHW);
+        SimpleTensor<T> src{ input_shape, data_type, 1, _quant_info, _data_layout };
+        _reference = SimpleTensor<T>(output_shape, data_type, 1, _quant_info, DataLayout::NCHW);
         // Fill reference
         fill(src);
         reference::im2col<T>(src, _reference, _kernel_dims, _conv_info, _has_bias);

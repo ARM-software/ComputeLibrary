@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -112,12 +112,9 @@ TEST_SUITE(ActivationLayer)
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), CNNDataTypes), framework::dataset::make("InPlace", { false, true })),
                shape, data_type, in_place)
 {
-    // Set fixed point position data type allowed
-    const int fixed_point_position = 0;
-
     // Create tensors
-    GCTensor src = create_tensor<GCTensor>(shape, data_type, 1, fixed_point_position);
-    GCTensor dst = create_tensor<GCTensor>(shape, data_type, 1, fixed_point_position);
+    GCTensor src = create_tensor<GCTensor>(shape, data_type, 1);
+    GCTensor dst = create_tensor<GCTensor>(shape, data_type, 1);
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);

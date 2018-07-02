@@ -66,19 +66,15 @@ template <typename T>
 using NEDepthConvertLayerToU8Fixture = DepthConvertLayerValidationFixture<Tensor, Accessor, NEDepthConvertLayer, T, uint8_t>;
 template <typename T>
 using NEDepthConvertLayerToU32Fixture = DepthConvertLayerValidationFixture<Tensor, Accessor, NEDepthConvertLayer, T, uint32_t>;
-template <typename T>
-using NEDepthConvertLayerToFP32FixedPointFixture = DepthConvertLayerValidationFractionalBitsFixture<Tensor, Accessor, NEDepthConvertLayer, T, float>;
 
 TEST_SUITE(U8_to_U16)
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                    DepthConvertLayerShiftDataset),
                shape, policy, shift)
 {
-    int fixed_point_position = 0;
-
     // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, DataType::U8, 1, fixed_point_position);
-    Tensor dst = create_tensor<Tensor>(shape, DataType::U16, 1, fixed_point_position);
+    Tensor src = create_tensor<Tensor>(shape, DataType::U8, 1);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::U16, 1);
 
     // Create and Configure function
     NEDepthConvertLayer depth_convert;
@@ -116,11 +112,9 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
                                                                    DepthConvertLayerShiftDataset),
                shape, policy, shift)
 {
-    int fixed_point_position = 0;
-
     // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, DataType::U8, 1, fixed_point_position);
-    Tensor dst = create_tensor<Tensor>(shape, DataType::S16, 1, fixed_point_position);
+    Tensor src = create_tensor<Tensor>(shape, DataType::U8, 1);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::S16, 1);
 
     // Create and Configure function
     NEDepthConvertLayer depth_convert;
@@ -157,11 +151,9 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
                                                                    DepthConvertLayerShiftDataset),
                shape, policy, shift)
 {
-    int fixed_point_position = 0;
-
     // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, DataType::U8, 1, fixed_point_position);
-    Tensor dst = create_tensor<Tensor>(shape, DataType::S32, 1, fixed_point_position);
+    Tensor src = create_tensor<Tensor>(shape, DataType::U8, 1);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::S32, 1);
 
     // Create and Configure function
     NEDepthConvertLayer depth_convert;
@@ -199,11 +191,9 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
                                                                    DepthConvertLayerShiftDataset),
                shape, policy, shift)
 {
-    int fixed_point_position = 0;
-
     // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, DataType::U16, 1, fixed_point_position);
-    Tensor dst = create_tensor<Tensor>(shape, DataType::U8, 1, fixed_point_position);
+    Tensor src = create_tensor<Tensor>(shape, DataType::U16, 1);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::U8, 1);
 
     // Create and Configure function
     NEDepthConvertLayer depth_convert;
@@ -240,11 +230,9 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
                                                                    DepthConvertLayerShiftDataset),
                shape, policy, shift)
 {
-    int fixed_point_position = 0;
-
     // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, DataType::U16, 1, fixed_point_position);
-    Tensor dst = create_tensor<Tensor>(shape, DataType::U32, 1, fixed_point_position);
+    Tensor src = create_tensor<Tensor>(shape, DataType::U16, 1);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::U32, 1);
 
     // Create and Configure function
     NEDepthConvertLayer depth_convert;
@@ -281,11 +269,9 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
                                                                    DepthConvertLayerShiftDataset),
                shape, policy, shift)
 {
-    int fixed_point_position = 0;
-
     // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, DataType::S16, 1, fixed_point_position);
-    Tensor dst = create_tensor<Tensor>(shape, DataType::U8, 1, fixed_point_position);
+    Tensor src = create_tensor<Tensor>(shape, DataType::S16, 1);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::U8, 1);
 
     // Create and Configure function
     NEDepthConvertLayer depth_convert;
@@ -322,11 +308,9 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
                                                                    DepthConvertLayerShiftDataset),
                shape, policy, shift)
 {
-    int fixed_point_position = 0;
-
     // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, DataType::S16, 1, fixed_point_position);
-    Tensor dst = create_tensor<Tensor>(shape, DataType::S32, 1, fixed_point_position);
+    Tensor src = create_tensor<Tensor>(shape, DataType::S16, 1);
+    Tensor dst = create_tensor<Tensor>(shape, DataType::S32, 1);
 
     // Create and Configure function
     NEDepthConvertLayer depth_convert;

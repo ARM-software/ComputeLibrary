@@ -46,11 +46,9 @@ public:
         TensorShape shape_flatten(shape);
         shape_flatten.collapse(3);
 
-        const unsigned int fixed_point_position = is_data_type_fixed_point(data_type) ? 4 : 0;
-
         // Create tensors
-        src = create_tensor<TensorType>(shape, data_type, 1, fixed_point_position);
-        dst = create_tensor<TensorType>(shape_flatten, data_type, 1, fixed_point_position);
+        src = create_tensor<TensorType>(shape, data_type, 1);
+        dst = create_tensor<TensorType>(shape_flatten, data_type, 1);
 
         // Create and configure function
         flatten_func.configure(&src, &dst);

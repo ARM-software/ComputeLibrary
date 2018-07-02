@@ -47,18 +47,18 @@ public:
                PadStrideInfo pad_stride_depthwise_info, PadStrideInfo pad_stride_pointwise_info, DataType data_type, int batches)
     {
         // Set batched in source and destination shapes
-        const unsigned int fixed_point_position = 4;
+
         src_shape.set(3 /* batch */, batches);
         depthwise_out_shape.set(3 /* batch */, batches);
         dst_shape.set(3 /* batch */, batches);
 
-        src               = create_tensor<TensorType>(src_shape, data_type, 1, fixed_point_position);
-        depthwise_weights = create_tensor<TensorType>(depthwise_weights_shape, data_type, 1, fixed_point_position);
-        depthwise_biases  = create_tensor<TensorType>(depthwise_biases_shape, data_type, 1, fixed_point_position);
-        depthwise_out     = create_tensor<TensorType>(depthwise_out_shape, data_type, 1, fixed_point_position);
-        pointwise_weights = create_tensor<TensorType>(pointwise_weights_shape, data_type, 1, fixed_point_position);
-        pointwise_biases  = create_tensor<TensorType>(pointwise_biases_shape, data_type, 1, fixed_point_position);
-        dst               = create_tensor<TensorType>(dst_shape, data_type, 1, fixed_point_position);
+        src               = create_tensor<TensorType>(src_shape, data_type, 1);
+        depthwise_weights = create_tensor<TensorType>(depthwise_weights_shape, data_type, 1);
+        depthwise_biases  = create_tensor<TensorType>(depthwise_biases_shape, data_type, 1);
+        depthwise_out     = create_tensor<TensorType>(depthwise_out_shape, data_type, 1);
+        pointwise_weights = create_tensor<TensorType>(pointwise_weights_shape, data_type, 1);
+        pointwise_biases  = create_tensor<TensorType>(pointwise_biases_shape, data_type, 1);
+        dst               = create_tensor<TensorType>(dst_shape, data_type, 1);
 
         // Create and configure function
         depth_sep_conv_layer.configure(&src, &depthwise_weights, &depthwise_biases, &depthwise_out, &pointwise_weights, &pointwise_biases, &dst, pad_stride_depthwise_info, pad_stride_pointwise_info);

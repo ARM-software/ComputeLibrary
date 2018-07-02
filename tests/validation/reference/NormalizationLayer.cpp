@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,7 +38,7 @@ template <typename T, typename std::enable_if<is_floating_point<T>::value, int>:
 SimpleTensor<T> normalization_layer(const SimpleTensor<T> &src, NormalizationLayerInfo info)
 {
     // Create reference
-    SimpleTensor<T> dst{ src.shape(), src.data_type(), 1, src.fixed_point_position() };
+    SimpleTensor<T> dst{ src.shape(), src.data_type(), 1 };
 
     // Compute reference
     const uint32_t norm_size = info.norm_size();
@@ -152,7 +152,7 @@ SimpleTensor<T> normalization_layer(const SimpleTensor<T> &src, NormalizationLay
     using namespace fixed_point_arithmetic;
 
     // Create reference
-    SimpleTensor<T> dst{ src.shape(), src.data_type(), 1, src.fixed_point_position() };
+    SimpleTensor<T> dst{ src.shape(), src.data_type(), 1 };
 
     // Compute reference
     const int fixed_point_position = src.fixed_point_position();
@@ -267,8 +267,6 @@ SimpleTensor<T> normalization_layer(const SimpleTensor<T> &src, NormalizationLay
 
 template SimpleTensor<float> normalization_layer(const SimpleTensor<float> &src, NormalizationLayerInfo info);
 template SimpleTensor<half> normalization_layer(const SimpleTensor<half> &src, NormalizationLayerInfo info);
-template SimpleTensor<qint8_t> normalization_layer(const SimpleTensor<qint8_t> &src, NormalizationLayerInfo info);
-template SimpleTensor<qint16_t> normalization_layer(const SimpleTensor<qint16_t> &src, NormalizationLayerInfo info);
 } // namespace reference
 } // namespace validation
 } // namespace test

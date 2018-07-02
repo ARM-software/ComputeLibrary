@@ -45,12 +45,12 @@ public:
     void setup(TensorShape shape, NormalizationLayerInfo info, DataType data_type, int batches)
     {
         // Set batched in source and destination shapes
-        const unsigned int fixed_point_position = 4;
+
         shape.set(shape.num_dimensions(), batches);
 
         // Create tensors
-        src = create_tensor<TensorType>(shape, data_type, 1, fixed_point_position);
-        dst = create_tensor<TensorType>(shape, data_type, 1, fixed_point_position);
+        src = create_tensor<TensorType>(shape, data_type, 1);
+        dst = create_tensor<TensorType>(shape, data_type, 1);
 
         // Create and configure function
         norm_layer.configure(&src, &dst, info);

@@ -201,10 +201,10 @@ protected:
         }
 
         // Create tensors
-        TensorType src     = create_tensor<TensorType>(input_shape, data_type, 1, 0, QuantizationInfo(), data_layout);
-        TensorType weights = create_tensor<TensorType>(weights_shape, data_type, 1, 0, QuantizationInfo(), data_layout);
-        TensorType bias    = create_tensor<TensorType>(bias_shape, data_type, 1, 0, QuantizationInfo(), data_layout);
-        TensorType dst     = create_tensor<TensorType>(output_shape, data_type, 1, 0, QuantizationInfo(), data_layout);
+        TensorType src     = create_tensor<TensorType>(input_shape, data_type, 1, QuantizationInfo(), data_layout);
+        TensorType weights = create_tensor<TensorType>(weights_shape, data_type, 1, QuantizationInfo(), data_layout);
+        TensorType bias    = create_tensor<TensorType>(bias_shape, data_type, 1, QuantizationInfo(), data_layout);
+        TensorType dst     = create_tensor<TensorType>(output_shape, data_type, 1, QuantizationInfo(), data_layout);
 
         // Create and configure function
         FunctionType conv;
@@ -340,8 +340,8 @@ protected:
             permute(input_shape, PermutationVector(2U, 0U, 1U));
         }
 
-        TensorType src = create_tensor<TensorType>(input_shape, data_type, 1, 0, QuantizationInfo(), data_layout);
-        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1, 0, QuantizationInfo());
+        TensorType src = create_tensor<TensorType>(input_shape, data_type, 1, QuantizationInfo(), data_layout);
+        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1, QuantizationInfo());
 
         // Create and configure function
         FunctionType transf;
@@ -369,7 +369,7 @@ protected:
     SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, const WinogradInfo &winograd_info, DataLayout data_layout, DataType data_type)
     {
         // Create reference
-        SimpleTensor<T> src{ input_shape, data_type, 1, 0, QuantizationInfo() };
+        SimpleTensor<T> src{ input_shape, data_type, 1, QuantizationInfo() };
 
         // Fill reference
         fill(src, 0, -1.f, 1.f);
@@ -424,8 +424,8 @@ protected:
         }
 
         // Create tensors
-        TensorType src = create_tensor<TensorType>(input_shape, data_type, 1, 0, QuantizationInfo(), data_layout);
-        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1, 0, QuantizationInfo());
+        TensorType src = create_tensor<TensorType>(input_shape, data_type, 1, QuantizationInfo(), data_layout);
+        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1, QuantizationInfo());
 
         // Create and configure function
         FunctionType filter_transform;
@@ -452,7 +452,7 @@ protected:
     SimpleTensor<T> compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, const WinogradInfo &winograd_info, DataLayout data_layout, DataType data_type)
     {
         // Create reference
-        SimpleTensor<T> src{ input_shape, data_type, 1, 0, QuantizationInfo() };
+        SimpleTensor<T> src{ input_shape, data_type, 1, QuantizationInfo() };
 
         // Fill reference
         fill(src, 0, -1.f, 1.f);
@@ -502,7 +502,7 @@ protected:
 
         // Create tensors
         TensorType src = create_tensor<TensorType>(input_shape, data_type);
-        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1, 0, QuantizationInfo(), winograd_info.output_data_layout);
+        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1, QuantizationInfo(), winograd_info.output_data_layout);
 
         // Create and configure function
         FunctionType output_transform;

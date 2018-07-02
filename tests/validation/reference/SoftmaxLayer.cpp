@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,7 +38,7 @@ template <typename T, typename std::enable_if<is_floating_point<T>::value, int>:
 SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta)
 {
     // Create reference
-    SimpleTensor<T> dst{ src.shape(), src.data_type(), 1, src.fixed_point_position() };
+    SimpleTensor<T> dst{ src.shape(), src.data_type(), 1 };
 
     // Compute reference
     const int cols       = src.shape()[0];
@@ -79,7 +79,7 @@ SimpleTensor<T> softmax_layer(const SimpleTensor<T> &src, float beta)
     using namespace fixed_point_arithmetic;
 
     // Create reference
-    SimpleTensor<T> dst{ src.shape(), src.data_type(), 1, src.fixed_point_position() };
+    SimpleTensor<T> dst{ src.shape(), src.data_type(), 1 };
 
     // Compute reference
     const int cols       = src.shape()[0];
@@ -128,8 +128,6 @@ SimpleTensor<uint8_t> softmax_layer<uint8_t>(const SimpleTensor<uint8_t> &src, f
 
 template SimpleTensor<float> softmax_layer(const SimpleTensor<float> &src, float beta);
 template SimpleTensor<half> softmax_layer(const SimpleTensor<half> &src, float beta);
-template SimpleTensor<qint8_t> softmax_layer(const SimpleTensor<qint8_t> &src, float beta);
-template SimpleTensor<qint16_t> softmax_layer(const SimpleTensor<qint16_t> &src, float beta);
 } // namespace reference
 } // namespace validation
 } // namespace test

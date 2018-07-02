@@ -39,7 +39,7 @@ template <typename T>
 SimpleTensor<T> channel_shuffle(const SimpleTensor<T> &src, int num_groups)
 {
     // Create reference
-    SimpleTensor<T> dst{ src.shape(), src.data_type(), src.num_channels(), src.fixed_point_position(), src.quantization_info() };
+    SimpleTensor<T> dst{ src.shape(), src.data_type(), src.num_channels(), src.quantization_info() };
 
     const int M                 = src.shape()[0];
     const int N                 = src.shape()[1];

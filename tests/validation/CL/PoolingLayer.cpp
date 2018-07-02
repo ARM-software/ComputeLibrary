@@ -148,9 +148,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLPoolingLayerFixture<half>, framework::Dataset
 TEST_SUITE_END() // FP16
 TEST_SUITE_END() // Float
 
-template <typename T>
-using CLPoolingLayerFixedPointFixture = PoolingLayerValidationFixedPointFixture<CLTensor, CLAccessor, CLPoolingLayer, T>;
-
 TEST_SUITE(Quantized)
 
 template <typename T>

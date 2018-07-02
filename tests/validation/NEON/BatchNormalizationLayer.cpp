@@ -68,9 +68,6 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                shape0, shape1, epsilon, use_beta, use_gamma, dt, data_layout)
 {
-    // Set fixed point position data type allowed
-    const int fixed_point_position = (arm_compute::is_data_type_fixed_point(dt)) ? 3 : 0;
-
     TensorShape src_dst_shapes = shape0;
     if(data_layout == DataLayout::NHWC)
     {
@@ -78,12 +75,12 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
     }
 
     // Create tensors
-    Tensor src   = create_tensor<Tensor>(src_dst_shapes, dt, 1, fixed_point_position, QuantizationInfo(), data_layout);
-    Tensor dst   = create_tensor<Tensor>(src_dst_shapes, dt, 1, fixed_point_position, QuantizationInfo(), data_layout);
-    Tensor mean  = create_tensor<Tensor>(shape1, dt, 1, fixed_point_position);
-    Tensor var   = create_tensor<Tensor>(shape1, dt, 1, fixed_point_position);
-    Tensor beta  = create_tensor<Tensor>(shape1, dt, 1, fixed_point_position);
-    Tensor gamma = create_tensor<Tensor>(shape1, dt, 1, fixed_point_position);
+    Tensor src   = create_tensor<Tensor>(src_dst_shapes, dt, 1, QuantizationInfo(), data_layout);
+    Tensor dst   = create_tensor<Tensor>(src_dst_shapes, dt, 1, QuantizationInfo(), data_layout);
+    Tensor mean  = create_tensor<Tensor>(shape1, dt, 1);
+    Tensor var   = create_tensor<Tensor>(shape1, dt, 1);
+    Tensor beta  = create_tensor<Tensor>(shape1, dt, 1);
+    Tensor gamma = create_tensor<Tensor>(shape1, dt, 1);
 
     // Create and Configure function
     NEBatchNormalizationLayer norm;

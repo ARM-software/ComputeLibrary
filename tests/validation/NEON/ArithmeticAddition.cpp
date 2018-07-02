@@ -163,9 +163,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEArithmeticAdditionFixture<int16_t>, framework
 }
 TEST_SUITE_END()
 
-template <typename T>
-using NEArithmeticAdditionFixedPointFixture = ArithmeticAdditionValidationFixedPointFixture<Tensor, Accessor, NEArithmeticAddition, T>;
-
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(F16)

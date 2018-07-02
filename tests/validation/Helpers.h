@@ -52,14 +52,13 @@ struct is_floating_point<half> : public std::true_type
 
 /** Helper function to get the testing range for each activation layer.
  *
- * @param[in] activation           Activation function to test.
- * @param[in] data_type            Data type.
- * @param[in] fixed_point_position Number of bits for the fractional part. Defaults to 1.
+ * @param[in] activation Activation function to test.
+ * @param[in] data_type  Data type.
  *
  * @return A pair containing the lower upper testing bounds for a given function.
  */
 template <typename T>
-std::pair<T, T> get_activation_layer_test_bounds(ActivationLayerInfo::ActivationFunction activation, DataType data_type, int fixed_point_position = 0)
+std::pair<T, T> get_activation_layer_test_bounds(ActivationLayerInfo::ActivationFunction activation, DataType data_type)
 {
     std::pair<T, T> bounds;
 
@@ -178,12 +177,12 @@ void fill_lookuptable(T &&table)
 
 /** Helper function to get the testing range for batch normalization layer.
  *
- * @param[in] fixed_point_position (Optional) Number of bits for the fractional part. Defaults to 1.
+ * @param[in] fixed_point_position (Optional) Number of bits for the fractional part. Defaults to 0.
  *
  * @return A pair containing the lower upper testing bounds.
  */
 template <typename T>
-std::pair<T, T> get_batchnormalization_layer_test_bounds(int fixed_point_position = 1)
+std::pair<T, T> get_batchnormalization_layer_test_bounds(int fixed_point_position = 0)
 {
     const bool is_float = std::is_floating_point<T>::value;
     std::pair<T, T> bounds;

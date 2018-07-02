@@ -53,10 +53,8 @@ public:
     template <typename...>
     void setup(TensorShape shape, DataType data_type)
     {
-        _fractional_bits = is_data_type_fixed_point(data_type) ? 4 : 0;
-
         TensorShape shape_flatten;
-        TensorInfo  input_info(shape, 1, data_type, _fractional_bits);
+        TensorInfo  input_info(shape, 1, data_type);
         shape_flatten = compute_im2col_flatten_shape(&input_info);
 
         _target    = compute_target(shape, shape_flatten, data_type);
@@ -68,24 +66,15 @@ protected:
     template <typename U>
     void fill(U &&tensor)
     {
-        if(_fractional_bits == 0)
-        {
-            std::uniform_real_distribution<> distribution(-1.f, 1.f);
-            library->fill(tensor, distribution, 0);
-        }
-        else
-        {
-            const int                       one_fixed = 1 << _fractional_bits;
-            std::uniform_int_distribution<> distribution(-one_fixed, one_fixed);
-            library->fill(tensor, distribution, 0);
-        }
+        std::uniform_real_distribution<> distribution(-1.f, 1.f);
+        library->fill(tensor, distribution, 0);
     }
 
     TensorType compute_target(const TensorShape &shape, const TensorShape &shape_flatten, DataType data_type)
     {
         // Create tensors
-        TensorType src = create_tensor<TensorType>(shape, data_type, 1, _fractional_bits);
-        TensorType dst = create_tensor<TensorType>(shape_flatten, data_type, 1, _fractional_bits);
+        TensorType src = create_tensor<TensorType>(shape, data_type, 1);
+        TensorType dst = create_tensor<TensorType>(shape_flatten, data_type, 1);
 
         // Create and configure function
         FunctionType flatten_layer;
@@ -113,7 +102,7 @@ protected:
     SimpleTensor<T> compute_reference(const TensorShape &shape, const TensorShape &shape_flatten, DataType data_type)
     {
         // Create reference
-        SimpleTensor<T> src{ shape, data_type, 1, _fractional_bits };
+        SimpleTensor<T> src{ shape, data_type, 1 };
 
         // Fill reference
         fill(src);
@@ -123,7 +112,6 @@ protected:
 
     TensorType      _target{};
     SimpleTensor<T> _reference{};
-    int             _fractional_bits{};
 };
 } // namespace validation
 } // namespace test

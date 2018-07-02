@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -80,7 +80,7 @@ std::vector<unsigned int> compute_alexnet(DataType dt, unsigned int batches, std
                                           };
     NEAlexNetModel network{};
 
-    network.init(dt, 4, batches);
+    network.init(dt, batches);
     network.build();
     network.allocate();
     network.fill(weight_files, bias_files);

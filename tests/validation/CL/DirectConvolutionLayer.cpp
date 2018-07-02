@@ -200,9 +200,6 @@ TEST_SUITE_END()
 TEST_SUITE_END()
 
 template <typename T>
-using CLDirectConvolutionLayerFixedPointFixture = DirectConvolutionValidationFixedPointFixture<CLTensor, CLAccessor, CLDirectConvolutionLayer, T>;
-
-template <typename T>
 using CLDirectConvolutionLayerQuantizedFixture = DirectConvolutionValidationQuantizedFixture<CLTensor, CLAccessor, CLDirectConvolutionLayer, T>;
 template <typename T>
 using CLDirectConvolutionValidationWithTensorShapesQuantizedFixture = DirectConvolutionValidationWithTensorShapesQuantizedFixture<CLTensor, CLAccessor, CLDirectConvolutionLayer, T>;

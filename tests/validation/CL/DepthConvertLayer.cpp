@@ -67,19 +67,15 @@ template <typename T>
 using CLDepthConvertLayerToU8Fixture = DepthConvertLayerValidationFixture<CLTensor, CLAccessor, CLDepthConvertLayer, T, uint8_t>;
 template <typename T>
 using CLDepthConvertLayerToU32Fixture = DepthConvertLayerValidationFixture<CLTensor, CLAccessor, CLDepthConvertLayer, T, uint32_t>;
-template <typename T>
-using CLDepthConvertLayerToFP32FixedPointFixture = DepthConvertLayerValidationFractionalBitsFixture<CLTensor, CLAccessor, CLDepthConvertLayer, T, float>;
 
 TEST_SUITE(U8_to_U16)
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                    DepthConvertLayerShiftDataset),
                shape, policy, shift)
 {
-    int fixed_point_position = 0;
-
     // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, DataType::U8, 1, fixed_point_position);
-    CLTensor dst = create_tensor<CLTensor>(shape, DataType::U16, 1, fixed_point_position);
+    CLTensor src = create_tensor<CLTensor>(shape, DataType::U8, 1);
+    CLTensor dst = create_tensor<CLTensor>(shape, DataType::U16, 1);
 
     // Create and Configure function
     CLDepthConvertLayer depth_convert;
@@ -117,11 +113,9 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
                                                                    DepthConvertLayerShiftDataset),
                shape, policy, shift)
 {
-    int fixed_point_position = 0;
-
     // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, DataType::U8, 1, fixed_point_position);
-    CLTensor dst = create_tensor<CLTensor>(shape, DataType::S16, 1, fixed_point_position);
+    CLTensor src = create_tensor<CLTensor>(shape, DataType::U8, 1);
+    CLTensor dst = create_tensor<CLTensor>(shape, DataType::S16, 1);
 
     // Create and Configure function
     CLDepthConvertLayer depth_convert;
@@ -158,11 +152,9 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
                                                                    DepthConvertLayerShiftDataset),
                shape, policy, shift)
 {
-    int fixed_point_position = 0;
-
     // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, DataType::U8, 1, fixed_point_position);
-    CLTensor dst = create_tensor<CLTensor>(shape, DataType::S32, 1, fixed_point_position);
+    CLTensor src = create_tensor<CLTensor>(shape, DataType::U8, 1);
+    CLTensor dst = create_tensor<CLTensor>(shape, DataType::S32, 1);
 
     // Create and Configure function
     CLDepthConvertLayer depth_convert;
@@ -200,11 +192,9 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
                                                                    DepthConvertLayerShiftDataset),
                shape, policy, shift)
 {
-    int fixed_point_position = 0;
-
     // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, DataType::U16, 1, fixed_point_position);
-    CLTensor dst = create_tensor<CLTensor>(shape, DataType::U8, 1, fixed_point_position);
+    CLTensor src = create_tensor<CLTensor>(shape, DataType::U16, 1);
+    CLTensor dst = create_tensor<CLTensor>(shape, DataType::U8, 1);
 
     // Create and Configure function
     CLDepthConvertLayer depth_convert;
@@ -241,11 +231,9 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
                                                                    DepthConvertLayerShiftDataset),
                shape, policy, shift)
 {
-    int fixed_point_position = 0;
-
     // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, DataType::U16, 1, fixed_point_position);
-    CLTensor dst = create_tensor<CLTensor>(shape, DataType::U32, 1, fixed_point_position);
+    CLTensor src = create_tensor<CLTensor>(shape, DataType::U16, 1);
+    CLTensor dst = create_tensor<CLTensor>(shape, DataType::U32, 1);
 
     // Create and Configure function
     CLDepthConvertLayer depth_convert;
@@ -282,11 +270,9 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
                                                                    DepthConvertLayerShiftDataset),
                shape, policy, shift)
 {
-    int fixed_point_position = 0;
-
     // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, DataType::S16, 1, fixed_point_position);
-    CLTensor dst = create_tensor<CLTensor>(shape, DataType::U8, 1, fixed_point_position);
+    CLTensor src = create_tensor<CLTensor>(shape, DataType::S16, 1);
+    CLTensor dst = create_tensor<CLTensor>(shape, DataType::U8, 1);
 
     // Create and Configure function
     CLDepthConvertLayer depth_convert;
@@ -323,11 +309,9 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
                                                                    DepthConvertLayerShiftDataset),
                shape, policy, shift)
 {
-    int fixed_point_position = 0;
-
     // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, DataType::S16, 1, fixed_point_position);
-    CLTensor dst = create_tensor<CLTensor>(shape, DataType::S32, 1, fixed_point_position);
+    CLTensor src = create_tensor<CLTensor>(shape, DataType::S16, 1);
+    CLTensor dst = create_tensor<CLTensor>(shape, DataType::S32, 1);
 
     // Create and Configure function
     CLDepthConvertLayer depth_convert;

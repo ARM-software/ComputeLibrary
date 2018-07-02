@@ -98,14 +98,11 @@ TEST_SUITE_END() // INTERLEAVE_4X4
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallGEMMDataset(), datasets::LargeGEMMDataset()), CNNDataTypes),
                shape_a, shape_b, shape_c, output_shape, alpha, beta, data_type)
 {
-    // Set fixed point position data type allowed
-    const int fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
-
     // Create tensors
-    Tensor a   = create_tensor<Tensor>(shape_a, data_type, 1, fixed_point_position);
-    Tensor b   = create_tensor<Tensor>(shape_b, data_type, 1, fixed_point_position);
-    Tensor c   = create_tensor<Tensor>(shape_c, data_type, 1, fixed_point_position);
-    Tensor dst = create_tensor<Tensor>(output_shape, data_type, 1, fixed_point_position);
+    Tensor a   = create_tensor<Tensor>(shape_a, data_type, 1);
+    Tensor b   = create_tensor<Tensor>(shape_b, data_type, 1);
+    Tensor c   = create_tensor<Tensor>(shape_c, data_type, 1);
+    Tensor dst = create_tensor<Tensor>(output_shape, data_type, 1);
 
     ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -152,9 +149,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMFixture<float>, framework::DatasetMode::N
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
-
-template <typename T>
-using NEGEMMFixedPointFixture = GEMMValidationFixedPointFixture<Tensor, Accessor, NEGEMM, T>;
 
 TEST_SUITE_END()
 TEST_SUITE_END()

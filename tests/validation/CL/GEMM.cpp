@@ -86,14 +86,11 @@ TEST_SUITE_END() // INTERLEAVE_4X4
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(framework::dataset::concat(datasets::SmallGEMMDataset(), datasets::LargeGEMMDataset()), CNNDataTypes),
                shape_a, shape_b, shape_c, output_shape, alpha, beta, data_type)
 {
-    // Set fixed point position data type allowed
-    const int fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
-
     // Create tensors
-    CLTensor a   = create_tensor<CLTensor>(shape_a, data_type, 1, fixed_point_position);
-    CLTensor b   = create_tensor<CLTensor>(shape_b, data_type, 1, fixed_point_position);
-    CLTensor c   = create_tensor<CLTensor>(shape_c, data_type, 1, fixed_point_position);
-    CLTensor dst = create_tensor<CLTensor>(output_shape, data_type, 1, fixed_point_position);
+    CLTensor a   = create_tensor<CLTensor>(shape_a, data_type, 1);
+    CLTensor b   = create_tensor<CLTensor>(shape_b, data_type, 1);
+    CLTensor c   = create_tensor<CLTensor>(shape_c, data_type, 1);
+    CLTensor dst = create_tensor<CLTensor>(output_shape, data_type, 1);
 
     ARM_COMPUTE_EXPECT(a.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(b.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -151,9 +148,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMFixture<float>, framework::DatasetMode::N
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
-
-template <typename T>
-using CLGEMMFixedPointFixture = GEMMValidationFixedPointFixture<CLTensor, CLAccessor, CLGEMM, T>;
 
 TEST_SUITE(OUTPUT_3D)
 TEST_SUITE(Float)

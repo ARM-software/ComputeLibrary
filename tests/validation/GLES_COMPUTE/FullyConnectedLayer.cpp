@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -66,9 +66,6 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
                                                                    CNNDataTypes),
                src_shape, weights_shape, bias_shape, dst_shape, transpose_weights, reshape_weights, data_type)
 {
-    // Set fixed point position data type allowed
-    int fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
-
     TensorShape ws(weights_shape);
 
     // Transpose weights if not done in the function
@@ -80,10 +77,10 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
     }
 
     // Create tensors
-    GCTensor src     = create_tensor<GCTensor>(src_shape, data_type, 1, fixed_point_position);
-    GCTensor weights = create_tensor<GCTensor>(ws, data_type, 1, fixed_point_position);
-    GCTensor bias    = create_tensor<GCTensor>(bias_shape, data_type, 1, fixed_point_position);
-    GCTensor dst     = create_tensor<GCTensor>(dst_shape, data_type, 1, fixed_point_position);
+    GCTensor src     = create_tensor<GCTensor>(src_shape, data_type, 1);
+    GCTensor weights = create_tensor<GCTensor>(ws, data_type, 1);
+    GCTensor bias    = create_tensor<GCTensor>(bias_shape, data_type, 1);
+    GCTensor dst     = create_tensor<GCTensor>(dst_shape, data_type, 1);
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);

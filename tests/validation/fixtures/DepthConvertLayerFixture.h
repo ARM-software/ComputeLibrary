@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,12 +45,11 @@ class DepthConvertLayerValidationFixedPointFixture : public framework::Fixture
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift, uint32_t fractional_bits)
+    void setup(TensorShape shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift)
     {
-        _shift           = shift;
-        _fractional_bits = fractional_bits;
-        _target          = compute_target(shape, dt_in, dt_out, policy, shift, fractional_bits);
-        _reference       = compute_reference(shape, dt_in, dt_out, policy, shift, fractional_bits);
+        _shift     = shift;
+        _target    = compute_target(shape, dt_in, dt_out, policy, shift);
+        _reference = compute_reference(shape, dt_in, dt_out, policy, shift);
     }
 
 protected:
@@ -60,11 +59,11 @@ protected:
         library->fill_tensor_uniform(tensor, i);
     }
 
-    TensorType compute_target(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift, uint32_t fixed_point_position)
+    TensorType compute_target(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift)
     {
         // Create tensors
-        TensorType src = create_tensor<TensorType>(shape, dt_in, 1, static_cast<int>(fixed_point_position));
-        TensorType dst = create_tensor<TensorType>(shape, dt_out, 1, static_cast<int>(fixed_point_position));
+        TensorType src = create_tensor<TensorType>(shape, dt_in, 1);
+        TensorType dst = create_tensor<TensorType>(shape, dt_out, 1);
 
         // Create and configure function
         FunctionType depth_convert;
@@ -89,10 +88,10 @@ protected:
         return dst;
     }
 
-    SimpleTensor<T2> compute_reference(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift, uint32_t fixed_point_position)
+    SimpleTensor<T2> compute_reference(const TensorShape &shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift)
     {
         // Create reference
-        SimpleTensor<T1> src{ shape, dt_in, 1, static_cast<int>(fixed_point_position) };
+        SimpleTensor<T1> src{ shape, dt_in, 1 };
 
         // Fill reference
         fill(src, 0);
@@ -102,7 +101,6 @@ protected:
 
     TensorType       _target{};
     SimpleTensor<T2> _reference{};
-    int              _fractional_bits{};
     int              _shift{};
 };
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T1, typename T2>
@@ -112,7 +110,7 @@ public:
     template <typename...>
     void setup(TensorShape shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift)
     {
-        DepthConvertLayerValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T1, T2>::setup(shape, dt_in, dt_out, policy, shift, 0);
+        DepthConvertLayerValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T1, T2>::setup(shape, dt_in, dt_out, policy, shift);
     }
 };
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T1, typename T2>
@@ -120,9 +118,9 @@ class DepthConvertLayerValidationFractionalBitsFixture : public DepthConvertLaye
 {
 public:
     template <typename...>
-    void setup(TensorShape shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t fractional_bits)
+    void setup(TensorShape shape, DataType dt_in, DataType dt_out, ConvertPolicy policy)
     {
-        DepthConvertLayerValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T1, T2>::setup(shape, dt_in, dt_out, policy, 0, fractional_bits);
+        DepthConvertLayerValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T1, T2>::setup(shape, dt_in, dt_out, policy, 0);
     }
 };
 } // namespace validation

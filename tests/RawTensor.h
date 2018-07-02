@@ -40,20 +40,18 @@ class RawTensor : public SimpleTensor<uint8_t>
 public:
     /** Create an uninitialised tensor of the given @p shape and @p format.
      *
-     * @param[in] shape                Shape of the new raw tensor.
-     * @param[in] format               Format of the new raw tensor.
-     * @param[in] fixed_point_position (Optional) Number of bits for the fractional part of the fixed point numbers
+     * @param[in] shape  Shape of the new raw tensor.
+     * @param[in] format Format of the new raw tensor.
      */
-    RawTensor(TensorShape shape, Format format, int fixed_point_position = 0);
+    RawTensor(TensorShape shape, Format format);
 
     /** Create an uninitialised tensor of the given @p shape and @p data type.
      *
-     * @param[in] shape                Shape of the new raw tensor.
-     * @param[in] data_type            Data type of the new raw tensor.
-     * @param[in] num_channels         (Optional) Number of channels (default = 1).
-     * @param[in] fixed_point_position (Optional) Number of bits for the fractional part of the fixed point numbers (default = 0).
+     * @param[in] shape        Shape of the new raw tensor.
+     * @param[in] data_type    Data type of the new raw tensor.
+     * @param[in] num_channels (Optional) Number of channels (default = 1).
      */
-    RawTensor(TensorShape shape, DataType data_type, int num_channels = 1, int fixed_point_position = 0);
+    RawTensor(TensorShape shape, DataType data_type, int num_channels = 1);
 
     /** Conversion constructor from SimpleTensor.
      *
@@ -65,13 +63,12 @@ public:
     template <typename T>
     RawTensor(SimpleTensor<T> &&tensor)
     {
-        _buffer               = std::unique_ptr<uint8_t[]>(reinterpret_cast<uint8_t *>(tensor._buffer.release()));
-        _shape                = std::move(tensor._shape);
-        _format               = tensor._format;
-        _data_type            = tensor._data_type;
-        _num_channels         = tensor._num_channels;
-        _fixed_point_position = tensor._fixed_point_position;
-        _data_layout          = tensor._data_layout;
+        _buffer       = std::unique_ptr<uint8_t[]>(reinterpret_cast<uint8_t *>(tensor._buffer.release()));
+        _shape        = std::move(tensor._shape);
+        _format       = tensor._format;
+        _data_type    = tensor._data_type;
+        _num_channels = tensor._num_channels;
+        _data_layout  = tensor._data_layout;
     }
 
     /** Conversion operator to SimpleTensor.
@@ -84,13 +81,12 @@ public:
     operator SimpleTensor<T>()
     {
         SimpleTensor<T> cast;
-        cast._buffer               = std::unique_ptr<T[]>(reinterpret_cast<T *>(_buffer.release()));
-        cast._shape                = std::move(_shape);
-        cast._format               = _format;
-        cast._data_type            = _data_type;
-        cast._num_channels         = _num_channels;
-        cast._fixed_point_position = _fixed_point_position;
-        cast._data_layout          = _data_layout;
+        cast._buffer       = std::unique_ptr<T[]>(reinterpret_cast<T *>(_buffer.release()));
+        cast._shape        = std::move(_shape);
+        cast._format       = _format;
+        cast._data_type    = _data_type;
+        cast._num_channels = _num_channels;
+        cast._data_layout  = _data_layout;
 
         return cast;
     }

@@ -64,13 +64,11 @@ TEST_SUITE(SoftmaxLayer)
 
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datasets::SoftmaxLayerSmallShapes(), datasets::SoftmaxLayerLargeShapes()), CNNDataTypes), shape, data_type)
 {
-    // Set fixed point position and quantization info if is allowed
-    const int              fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
-    const QuantizationInfo quantization_info    = is_data_type_quantized_asymmetric(data_type) ? QuantizationInfo(1.f / 255.f, 0) : QuantizationInfo();
+    const QuantizationInfo quantization_info = is_data_type_quantized_asymmetric(data_type) ? QuantizationInfo(1.f / 255.f, 0) : QuantizationInfo();
 
     // Create tensors
-    CLTensor src = create_tensor<CLTensor>(shape, data_type, 1, fixed_point_position, quantization_info);
-    CLTensor dst = create_tensor<CLTensor>(shape, data_type, 1, fixed_point_position, QuantizationInfo(1.f / 256.f, 0));
+    CLTensor src = create_tensor<CLTensor>(shape, data_type, 1, quantization_info);
+    CLTensor dst = create_tensor<CLTensor>(shape, data_type, 1, QuantizationInfo(1.f / 256.f, 0));
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -165,9 +163,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLSoftmaxLayerFixture<float>, framework::Datase
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
-
-template <typename T>
-using CLSoftmaxLayerFixedPointFixture = SoftmaxValidationFixedPointFixture<CLTensor, CLAccessor, CLSoftmaxLayer, T>;
 
 template <typename T>
 using CLSoftmaxLayerQuantizedFixture = SoftmaxValidationQuantizedFixture<CLTensor, CLAccessor, CLSoftmaxLayer, T>;

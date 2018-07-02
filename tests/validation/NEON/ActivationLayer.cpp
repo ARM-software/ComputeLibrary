@@ -90,12 +90,9 @@ TEST_SUITE(ActivationLayer)
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(concat(datasets::SmallShapes(), datasets::LargeShapes()), CNNDataTypes), framework::dataset::make("InPlace", { false, true })),
                shape, data_type, in_place)
 {
-    // Set fixed point position data type allowed
-    const int fixed_point_position = is_data_type_fixed_point(data_type) ? 3 : 0;
-
     // Create tensors
-    Tensor src = create_tensor<Tensor>(shape, data_type, 1, fixed_point_position);
-    Tensor dst = create_tensor<Tensor>(shape, data_type, 1, fixed_point_position);
+    Tensor src = create_tensor<Tensor>(shape, data_type, 1);
+    Tensor dst = create_tensor<Tensor>(shape, data_type, 1);
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
@@ -194,9 +191,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerFixture<float>, framework::Dat
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
-
-template <typename T>
-using NEActivationLayerFixedPointFixture = ActivationValidationFixedPointFixture<Tensor, Accessor, NEActivationLayer, T>;
 
 template <typename T>
 using NEActivationLayerQuantizedFixture = ActivationValidationQuantizedFixture<Tensor, Accessor, NEActivationLayer, T>;

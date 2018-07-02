@@ -67,9 +67,6 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
                                                                    framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
                shape0, shape1, epsilon, use_gamma, use_beta, dt, data_layout)
 {
-    // Set fixed point position data type allowed
-    const int fixed_point_position = (arm_compute::is_data_type_fixed_point(dt)) ? 3 : 0;
-
     TensorShape src_dst_shapes = shape0;
     if(data_layout == DataLayout::NHWC)
     {
@@ -77,12 +74,12 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
     }
 
     // Create tensors
-    CLTensor src   = create_tensor<CLTensor>(src_dst_shapes, dt, 1, fixed_point_position, QuantizationInfo(), data_layout);
-    CLTensor dst   = create_tensor<CLTensor>(src_dst_shapes, dt, 1, fixed_point_position, QuantizationInfo(), data_layout);
-    CLTensor mean  = create_tensor<CLTensor>(shape1, dt, 1, fixed_point_position);
-    CLTensor var   = create_tensor<CLTensor>(shape1, dt, 1, fixed_point_position);
-    CLTensor beta  = create_tensor<CLTensor>(shape1, dt, 1, fixed_point_position);
-    CLTensor gamma = create_tensor<CLTensor>(shape1, dt, 1, fixed_point_position);
+    CLTensor src   = create_tensor<CLTensor>(src_dst_shapes, dt, 1, QuantizationInfo(), data_layout);
+    CLTensor dst   = create_tensor<CLTensor>(src_dst_shapes, dt, 1, QuantizationInfo(), data_layout);
+    CLTensor mean  = create_tensor<CLTensor>(shape1, dt, 1);
+    CLTensor var   = create_tensor<CLTensor>(shape1, dt, 1);
+    CLTensor beta  = create_tensor<CLTensor>(shape1, dt, 1);
+    CLTensor gamma = create_tensor<CLTensor>(shape1, dt, 1);
 
     // Create and Configure function
     CLBatchNormalizationLayer norm;

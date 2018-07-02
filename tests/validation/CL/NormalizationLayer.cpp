@@ -52,10 +52,6 @@ const auto NormalizationDataset = combine(combine(combine(combine(datasets::Smal
                                                           framework::dataset::make("NormalizationSize", 3, 9, 2)),
                                                   framework::dataset::make("Beta", { 0.5f, 1.f, 2.f })),
                                           framework::dataset::make("IsScaled", { true }));
-const auto NormalizationDatasetQS = combine(combine(combine(combine(datasets::TinyShapes(), datasets::NormalizationTypes()),
-                                                            framework::dataset::make("NormalizationSize", 3, 9, 2)),
-                                                    framework::dataset::make("Beta", { 0.5f, 1.f, 2.f })),
-                                            framework::dataset::make("IsScaled", { true }));
 const auto NormalizationDatasetFP16 = combine(combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("NormType", { NormType::IN_MAP_1D, NormType::CROSS_MAP })),
                                                               framework::dataset::make("NormalizationSize", 3, 9, 2)),
                                                       framework::dataset::make("Beta", { 0.5f, 1.f, 2.f })),
@@ -134,9 +130,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLNormalizationLayerFixture<float>, framework::
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
-
-template <typename T>
-using CLNormalizationLayerFixedPointFixture = NormalizationValidationFixedPointFixture<CLTensor, CLAccessor, CLNormalizationLayer, T>;
 
 TEST_SUITE_END()
 TEST_SUITE_END()

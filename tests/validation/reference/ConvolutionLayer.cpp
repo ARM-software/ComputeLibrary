@@ -108,7 +108,7 @@ SimpleTensor<T> convolution_layer(const SimpleTensor<T> &src, const SimpleTensor
                                   const Size2D &dilation)
 {
     // Create reference
-    SimpleTensor<T> dst{ output_shape, src.data_type(), 1, src.fixed_point_position(), src.quantization_info() };
+    SimpleTensor<T> dst{ output_shape, src.data_type(), 1, src.quantization_info() };
 
     if(src.data_layout() == DataLayout::NHWC)
     {
@@ -128,10 +128,6 @@ template SimpleTensor<float> convolution_layer(const SimpleTensor<float> &src, c
                                                const PadStrideInfo &info, const Size2D &dilation);
 template SimpleTensor<half> convolution_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &weights, const SimpleTensor<half> &bias, const TensorShape &output_shape,
                                               const PadStrideInfo &info, const Size2D &dilation);
-template SimpleTensor<qint8_t> convolution_layer(const SimpleTensor<qint8_t> &src, const SimpleTensor<qint8_t> &weights, const SimpleTensor<qint8_t> &bias, const TensorShape &output_shape,
-                                                 const PadStrideInfo &info, const Size2D &dilation);
-template SimpleTensor<qint16_t> convolution_layer(const SimpleTensor<qint16_t> &src, const SimpleTensor<qint16_t> &weights, const SimpleTensor<qint16_t> &bias, const TensorShape &output_shape,
-                                                  const PadStrideInfo &info, const Size2D &dilation);
 template SimpleTensor<uint8_t> convolution_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &bias, const TensorShape &output_shape,
                                                  const PadStrideInfo &info, const Size2D &dilation);
 } // namespace reference

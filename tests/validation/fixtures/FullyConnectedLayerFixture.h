@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,14 +54,13 @@ public:
 public:
     template <typename...>
     void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, bool transpose_weights, bool reshape_weights,
-               DataType data_type, int fractional_bits, QuantizationInfo quantization_info)
+               DataType data_type, QuantizationInfo quantization_info)
     {
         ARM_COMPUTE_UNUSED(weights_shape);
         ARM_COMPUTE_UNUSED(bias_shape);
 
         _data_type         = data_type;
         _bias_data_type    = is_data_type_quantized_asymmetric(data_type) ? DataType::S32 : data_type;
-        _fractional_bits   = fractional_bits;
         _quantization_info = quantization_info;
 
         _target    = compute_target(input_shape, weights_shape, bias_shape, output_shape, transpose_weights, reshape_weights);
@@ -126,10 +125,10 @@ protected:
         }
 
         // Create tensors
-        TensorType src     = create_tensor<TensorType>(input_shape, _data_type, 1, _fractional_bits, _quantization_info);
-        TensorType weights = create_tensor<TensorType>(reshaped_weights_shape, _data_type, 1, _fractional_bits, _quantization_info);
-        TensorType bias    = create_tensor<TensorType>(bias_shape, _bias_data_type, 1, _fractional_bits, _quantization_info);
-        TensorType dst     = create_tensor<TensorType>(output_shape, _data_type, 1, _fractional_bits, _quantization_info);
+        TensorType src     = create_tensor<TensorType>(input_shape, _data_type, 1, _quantization_info);
+        TensorType weights = create_tensor<TensorType>(reshaped_weights_shape, _data_type, 1, _quantization_info);
+        TensorType bias    = create_tensor<TensorType>(bias_shape, _bias_data_type, 1, _quantization_info);
+        TensorType dst     = create_tensor<TensorType>(output_shape, _data_type, 1, _quantization_info);
 
         // Create and configure function.
         FunctionType fc;
@@ -158,7 +157,7 @@ protected:
         if(!reshape_weights || !transpose_weights)
         {
             TensorShape tmp_shape(weights_shape);
-            RawTensor   tmp(tmp_shape, _data_type, 1, _fractional_bits);
+            RawTensor   tmp(tmp_shape, _data_type, 1);
 
             // Fill with original shape
             fill(tmp, 1);
@@ -199,9 +198,9 @@ protected:
                                       bool reshape_weights)
     {
         // Create reference
-        SimpleTensor<T>     src{ input_shape, _data_type, 1, _fractional_bits, _quantization_info };
-        SimpleTensor<T>     weights{ weights_shape, _data_type, 1, _fractional_bits, _quantization_info };
-        SimpleTensor<TBias> bias{ bias_shape, _bias_data_type, 1, _fractional_bits, _quantization_info };
+        SimpleTensor<T>     src{ input_shape, _data_type, 1, _quantization_info };
+        SimpleTensor<T>     weights{ weights_shape, _data_type, 1, _quantization_info };
+        SimpleTensor<TBias> bias{ bias_shape, _bias_data_type, 1, _quantization_info };
 
         // Fill reference
         fill(src, 0);
@@ -215,7 +214,6 @@ protected:
     SimpleTensor<T>  _reference{};
     DataType         _data_type{};
     DataType         _bias_data_type{};
-    int              _fractional_bits{};
     QuantizationInfo _quantization_info{};
 };
 
@@ -228,7 +226,7 @@ public:
     {
         FullyConnectedLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T, run_interleave>::setup(input_shape, weights_shape, bias_shape, output_shape, transpose_weights,
                                                                                                                       reshape_weights, data_type,
-                                                                                                                      0, QuantizationInfo());
+                                                                                                                      QuantizationInfo());
     }
 };
 
@@ -237,11 +235,11 @@ class FullyConnectedLayerValidationFixedPointFixture : public FullyConnectedLaye
 {
 public:
     template <typename...>
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, bool transpose_weights, bool reshape_weights, DataType data_type, int fractional_bits)
+    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, bool transpose_weights, bool reshape_weights, DataType data_type)
     {
         FullyConnectedLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T, run_interleave>::setup(input_shape, weights_shape, bias_shape, output_shape, transpose_weights,
                                                                                                                       reshape_weights, data_type,
-                                                                                                                      fractional_bits, QuantizationInfo());
+                                                                                                                      QuantizationInfo());
     }
 };
 
@@ -255,7 +253,7 @@ public:
     {
         FullyConnectedLayerValidationGenericFixture<TensorType, AccessorType, FunctionType, T, run_interleave>::setup(input_shape, weights_shape, bias_shape, output_shape, transpose_weights,
                                                                                                                       reshape_weights, data_type,
-                                                                                                                      0, quantization_info);
+                                                                                                                      quantization_info);
     }
 };
 } // namespace validation
