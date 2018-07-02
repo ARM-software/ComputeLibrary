@@ -48,7 +48,7 @@ Status NENodeValidator::validate(INode *node)
     switch(type)
     {
         case NodeType::ChannelShuffleLayer:
-            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Channel Shuffle is unsupported for NEON");
+            return ARM_COMPUTE_CREATE_ERROR(arm_compute::ErrorCode::RUNTIME_ERROR, "Unsupported operation : ChannelShuffleLayer");
         case NodeType::ConvolutionLayer:
             return detail::validate_convolution_layer<NEConvolutionLayer,
                    NEDirectConvolutionLayer,
