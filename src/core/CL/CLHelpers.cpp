@@ -117,6 +117,11 @@ bool dot8_supported(const cl::Device &device)
     return device_supports_extension(device, "cl_arm_integer_dot_product_int8");
 }
 
+bool dot8_acc_supported(const cl::Device &device)
+{
+    return device_supports_extension(device, "cl_arm_integer_dot_product_accumulate_int8");
+}
+
 CLVersion get_cl_version(const cl::Device &device)
 {
     std::string version_str = device.getInfo<CL_DEVICE_VERSION>();

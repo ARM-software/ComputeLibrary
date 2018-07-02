@@ -82,23 +82,26 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *weights, ITensorInfo *bias, ITensorInfo *output,
                                                         const PadStrideInfo &conv_info)
 {
+    // Get convolved dimensions
+    const TensorShape output_shape = compute_depthwise_convolution_shape(*input, *weights, conv_info, 1 /* depth_multiplier */);
+
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output,
+                       output_shape,
+                       1,
+                       input->data_type(),
+                       input->quantization_info());
+
     const bool is_qasymm   = is_data_type_quantized_asymmetric(input->data_type());
     const bool is_stride_1 = ((conv_info.stride().first == conv_info.stride().second) && (conv_info.stride().first == 1));
 
-    const unsigned int num_rows_processed_per_iteration = is_qasymm ? 4 : (is_stride_1 ? 2 : 1);
+    const unsigned int num_rows_processed_per_iteration = is_stride_1 ? 2 : 1;
     const unsigned int num_elems_accessed_per_iteration = is_qasymm ? 4 : 2;
     const unsigned int num_rows_read_per_iteration      = num_rows_processed_per_iteration + 2;
     const unsigned int num_rows_written_per_iteration   = std::ceil(num_rows_processed_per_iteration / static_cast<float>(conv_info.stride().first));
 
     BorderSize border_size;
-    if(is_qasymm)
-    {
-        border_size = BorderSize(std::max(conv_info.pad_left(), conv_info.pad_top()), 0, std::max(conv_info.pad_right(), conv_info.pad_bottom()), 0);
-    }
-    else
-    {
-        border_size = BorderSize(conv_info.pad_left(), 0, std::max(std::max(conv_info.pad_right(), conv_info.pad_bottom()), conv_info.pad_top()), 0);
-    }
+    border_size = BorderSize(conv_info.pad_left(), 0, std::max(std::max(conv_info.pad_right(), conv_info.pad_bottom()), conv_info.pad_top()), 0);
 
     // Configure kernel window
     Window win = calculate_max_window(*output, Steps(num_elems_accessed_per_iteration, num_rows_written_per_iteration));
@@ -163,19 +166,11 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
     _weights                            = weights;
     _biases                             = biases;
     _conv_stride_y                      = conv_info.stride().second;
-    _num_rows_processed_per_iteration   = is_qasymm ? 4 : (is_stride_1 ? 2 : 1);
-    _num_planes_processed_per_iteration = (is_stride_1 && !is_qasymm) ? 2 : 1;
+    _num_rows_processed_per_iteration   = is_stride_1 ? 2 : 1;
+    _num_planes_processed_per_iteration = is_stride_1 ? 2 : 1;
+    _border_size                        = BorderSize(conv_info.pad_left(), 0, std::max(std::max(conv_info.pad_right(), conv_info.pad_bottom()), conv_info.pad_top()), 0);
 
     const unsigned int num_elems_accessed_per_iteration = is_qasymm ? 4 : 2;
-
-    if(is_qasymm)
-    {
-        _border_size = BorderSize(std::max(conv_info.pad_left(), conv_info.pad_top()), 0, std::max(conv_info.pad_right(), conv_info.pad_bottom()), 0);
-    }
-    else
-    {
-        _border_size = BorderSize(conv_info.pad_left(), 0, std::max(std::max(conv_info.pad_right(), conv_info.pad_bottom()), conv_info.pad_top()), 0);
-    }
 
     CLBuildOptions build_opts;
     build_opts.add_option_if(_biases != nullptr, "-DHAS_BIAS");
@@ -226,7 +221,8 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
             }
         }
     }
-    else if(is_stride_1)
+
+    if(is_stride_1)
     {
         build_opts.add_option("-DNUM_ROWS_PROCESSED=" + support::cpp11::to_string(_num_rows_processed_per_iteration));
         build_opts.add_option("-DNUM_PLANES_PROCESSED=" + support::cpp11::to_string(_num_planes_processed_per_iteration));
@@ -239,11 +235,9 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
     }
 
     // Create kernel
-    std::string kernel_name = std::string("depthwise_convolution_3x3") + (is_qasymm ? std::string("_quantized") : std::string()) + std::string("_nhwc");
-    if(is_qasymm || is_stride_1)
-    {
-        kernel_name += std::string("_stride") + support::cpp11::to_string(conv_stride_x);
-    }
+    const bool  is_dot8_supported = dot8_supported(CLKernelLibrary::get().get_device());
+    std::string kernel_name       = std::string("depthwise_convolution_3x3") + (is_qasymm ? std::string("_quantized") + ((is_dot8_supported
+                                                                                                                          && is_stride_1 /* FIXME (COMPMID-1424) */) ? "_dot8" : "") : "") + "_nhwc" + (is_stride_1 ? "_stride1" : "");
 
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
@@ -299,23 +293,19 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::run(const Window &window, cl::Com
     Window slice_in  = win_in.first_slice_window_3D();
     Window slice_out = win.first_slice_window_3D();
 
+    unsigned int idx = 3 * num_arguments_per_3D_tensor();
+
     if(_biases != nullptr)
     {
-        unsigned int idx = 3 * num_arguments_per_3D_tensor();
-        Window       win_biases;
+        Window win_biases;
         win_biases.use_tensor_dimensions(_biases->info()->tensor_shape());
         win_biases.set_dimension_step(Window::DimX, window.x().step());
         add_1D_tensor_argument(idx, _biases, win_biases);
     }
 
-    if(!(is_data_type_quantized_asymmetric(_input->info()->data_type())))
-    {
-        unsigned int idx        = 3 * num_arguments_per_3D_tensor() + ((_biases != nullptr) ? num_arguments_per_1D_tensor() : 0);
-        const int    max_offset = _input->info()->strides_in_bytes().z() * _input->info()->dimension(2) - (_input->info()->padding().bottom + _input->info()->padding().top) *
-                                  _input->info()->strides_in_bytes().y();
-
-        _kernel.setArg(idx, max_offset);
-    }
+    const int max_offset = _input->info()->strides_in_bytes().z() * _input->info()->dimension(2) - (_input->info()->padding().bottom + _input->info()->padding().top) *
+                           _input->info()->strides_in_bytes().y();
+    _kernel.setArg(idx, max_offset);
 
     do
     {

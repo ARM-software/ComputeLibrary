@@ -200,8 +200,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "depthwise_convolution_3x3_nhwc", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_nhwc_stride1", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_quantized_nchw", "depthwise_convolution_quantized.cl" },
+    { "depthwise_convolution_3x3_quantized_nhwc", "depthwise_convolution_quantized.cl" },
     { "depthwise_convolution_3x3_quantized_nhwc_stride1", "depthwise_convolution_quantized.cl" },
-    { "depthwise_convolution_3x3_quantized_nhwc_stride2", "depthwise_convolution_quantized.cl" },
+    { "depthwise_convolution_3x3_quantized_dot8_nchw", "depthwise_convolution_quantized.cl" },
+    { "depthwise_convolution_3x3_quantized_dot8_nhwc_stride1", "depthwise_convolution_quantized.cl" },
     { "depthwise_convolution_3x3_stridex1_stridey1_bifrost_f16", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_stridex2_stridey2_bifrost_f16", "depthwise_convolution.cl" },
     { "depthwise_convolution_3x3_stridex1_stridey1_bifrost_f32", "depthwise_convolution.cl" },
@@ -808,6 +810,11 @@ Kernel CLKernelLibrary::create_kernel(const std::string &kernel_name, const Stri
     if(dot8_supported(_device))
     {
         concat_str += " -DARM_COMPUTE_OPENCL_DOT8_ENABLED=1 ";
+    }
+
+    if(dot8_acc_supported(_device))
+    {
+        concat_str += " -DARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED=1 ";
     }
 
     if(get_cl_version(_device) == CLVersion::CL20)
