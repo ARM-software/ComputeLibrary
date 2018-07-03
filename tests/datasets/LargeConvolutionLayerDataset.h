@@ -122,6 +122,42 @@ public:
     }
 };
 
+class LargeWinogradConvolutionLayer5x1Dataset final : public ConvolutionLayerDataset
+{
+public:
+    LargeWinogradConvolutionLayer5x1Dataset()
+    {
+        // Batch size 1
+        add_config(TensorShape(224U, 224U, 3U), TensorShape(5U, 1U, 3U, 64U), TensorShape(64U), TensorShape(222U, 224U, 64U), PadStrideInfo(1, 1, 1, 0));
+        add_config(TensorShape(123U, 134U, 16U), TensorShape(5U, 1U, 16U, 7U), TensorShape(7U), TensorShape(121U, 134U, 7U), PadStrideInfo(1, 1, 1, 0));
+        add_config(TensorShape(181U, 152U, 42U), TensorShape(5U, 1U, 42U, 100U), TensorShape(100U), TensorShape(177U, 152U, 100U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(200U, 201U, 24U), TensorShape(5U, 1U, 24U, 61), TensorShape(61U), TensorShape(200U, 201U, 61), PadStrideInfo(1, 1, 2, 0));
+
+        // Batch size 2, 3 and 4
+        add_config(TensorShape(224U, 224U, 3U, 2U), TensorShape(5U, 1U, 3U, 64U), TensorShape(64U), TensorShape(222U, 224U, 64U, 2U), PadStrideInfo(1, 1, 1, 0));
+        add_config(TensorShape(123U, 134U, 16U, 3U), TensorShape(5U, 1U, 16U, 7U), TensorShape(7U), TensorShape(121U, 134U, 7U, 3U), PadStrideInfo(1, 1, 1, 0));
+        add_config(TensorShape(181U, 152U, 42U, 4U), TensorShape(5U, 1U, 42U, 100U), TensorShape(100U), TensorShape(177U, 152U, 100U, 4U), PadStrideInfo(1, 1, 0, 0));
+    }
+};
+
+class LargeWinogradConvolutionLayer1x5Dataset final : public ConvolutionLayerDataset
+{
+public:
+    LargeWinogradConvolutionLayer1x5Dataset()
+    {
+        // Batch size 1
+        add_config(TensorShape(224U, 224U, 3U), TensorShape(1U, 5U, 3U, 64U), TensorShape(64U), TensorShape(224U, 222U, 64U), PadStrideInfo(1, 1, 0, 1));
+        add_config(TensorShape(123U, 134U, 16U), TensorShape(1U, 5U, 16U, 7U), TensorShape(7U), TensorShape(123U, 130U, 7U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(181U, 152U, 42U), TensorShape(1U, 5U, 42U, 100U), TensorShape(100U), TensorShape(181U, 148U, 100U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(200U, 201U, 24U), TensorShape(1U, 5U, 24U, 61), TensorShape(61U), TensorShape(200U, 201U, 61), PadStrideInfo(1, 1, 0, 2));
+
+        // Batch size 2, 3 and 4
+        add_config(TensorShape(224U, 224U, 3U, 2U), TensorShape(1U, 5U, 3U, 64U), TensorShape(64U), TensorShape(224U, 222U, 64U, 2U), PadStrideInfo(1, 1, 0, 1));
+        add_config(TensorShape(123U, 134U, 16U, 3U), TensorShape(1U, 5U, 16U, 7U), TensorShape(7U), TensorShape(123U, 130U, 7U, 3U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(181U, 152U, 42U, 4U), TensorShape(1U, 5U, 42U, 100U), TensorShape(100U), TensorShape(181U, 148U, 100U, 4U), PadStrideInfo(1, 1, 0, 0));
+    }
+};
+
 class LargeConvolutionLayerDataset final : public ConvolutionLayerDataset
 {
 public:

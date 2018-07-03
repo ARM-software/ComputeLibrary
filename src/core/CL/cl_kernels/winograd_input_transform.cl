@@ -71,10 +71,10 @@ __kernel void winograd_input_transform_2x2_3x3_stepz1_nchw(
                               *((__global float *)(src_addr + 2 * src_stride_y)),
                               *((__global float *)(src_addr + 3 * src_stride_y)));
 #else                                            // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
-    float4 in_row0 = vload4(0, (__global float *)(src_addr + 0 * src_stride_y));
-    float4 in_row1 = vload4(0, (__global float *)(src_addr + 1 * src_stride_y));
-    float4 in_row2 = vload4(0, (__global float *)(src_addr + 2 * src_stride_y));
-    float4 in_row3 = vload4(0, (__global float *)(src_addr + 3 * src_stride_y));
+    float4       in_row0 = vload4(0, (__global float *)(src_addr + 0 * src_stride_y));
+    float4       in_row1 = vload4(0, (__global float *)(src_addr + 1 * src_stride_y));
+    float4       in_row2 = vload4(0, (__global float *)(src_addr + 2 * src_stride_y));
+    float4       in_row3 = vload4(0, (__global float *)(src_addr + 3 * src_stride_y));
 #endif                                           // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 
     float4 tmp0 = in_row0;
@@ -179,10 +179,10 @@ __kernel void winograd_input_transform_2x2_3x3_stepz2_nchw(
                               *((__global float *)(src_addr + 2 * src_stride_y)),
                               *((__global float *)(src_addr + 3 * src_stride_y)));
 #else                                            // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
-    float4 in_row0 = vload4(0, (__global float *)(src_addr + 0 * src_stride_y));
-    float4 in_row1 = vload4(0, (__global float *)(src_addr + 1 * src_stride_y));
-    float4 in_row2 = vload4(0, (__global float *)(src_addr + 2 * src_stride_y));
-    float4 in_row3 = vload4(0, (__global float *)(src_addr + 3 * src_stride_y));
+    float4       in_row0 = vload4(0, (__global float *)(src_addr + 0 * src_stride_y));
+    float4       in_row1 = vload4(0, (__global float *)(src_addr + 1 * src_stride_y));
+    float4       in_row2 = vload4(0, (__global float *)(src_addr + 2 * src_stride_y));
+    float4       in_row3 = vload4(0, (__global float *)(src_addr + 3 * src_stride_y));
 #endif                                           // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 
     src_addr += src_stride_z;
@@ -194,10 +194,10 @@ __kernel void winograd_input_transform_2x2_3x3_stepz2_nchw(
                               *((__global float *)(src_addr + 2 * src_stride_y)),
                               *((__global float *)(src_addr + 3 * src_stride_y)));
 #else                                            // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
-    float4 in_row4 = vload4(0, (__global float *)(src_addr + 0 * src_stride_y));
-    float4 in_row5 = vload4(0, (__global float *)(src_addr + 1 * src_stride_y));
-    float4 in_row6 = vload4(0, (__global float *)(src_addr + 2 * src_stride_y));
-    float4 in_row7 = vload4(0, (__global float *)(src_addr + 3 * src_stride_y));
+    float4       in_row4 = vload4(0, (__global float *)(src_addr + 0 * src_stride_y));
+    float4       in_row5 = vload4(0, (__global float *)(src_addr + 1 * src_stride_y));
+    float4       in_row6 = vload4(0, (__global float *)(src_addr + 2 * src_stride_y));
+    float4       in_row7 = vload4(0, (__global float *)(src_addr + 3 * src_stride_y));
 #endif                                           // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 
     float4 tmp0 = in_row0;
@@ -261,7 +261,7 @@ __kernel void winograd_input_transform_2x2_3x3_stepz2_nchw(
 #endif // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 }
 
-/** This OpenCL kernel computes the input transform when the output tile is 4x4, the filter size 3x3 and the data layout is NCHW
+/** This OpenCL kernel computes the input transform when the output tile is 4x4/4x1 or 1x4, the filter size 3x3/3x1 or 1x3 and the data layout is NCHW
  *
  * @note The number of tiles in the x axis must be passed at compile time using -DNUM_TILES_X (i.e.-DNUM_TILES_X=5).
  * @note The pad left and pad top must be passed at compile time using -DPAD_LEFT and -DPAD_TOP (i.e.-DPAD_LEFT=1 and -DPAD_TOP=0).
@@ -310,8 +310,8 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nchw(
                           *((__global float *)(src_addr + 5 * src_stride_y)));
 #else  // defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
     // Row0
-    float4 d00 = vload4(0, (__global float *)(src_addr + 0 * src_stride_y));
-    float2 d01 = vload2(2, (__global float *)(src_addr + 0 * src_stride_y));
+    float4       d00     = vload4(0, (__global float *)(src_addr + 0 * src_stride_y));
+    float2       d01     = vload2(2, (__global float *)(src_addr + 0 * src_stride_y));
 #endif // defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 
     float out0 = 0.0f;
@@ -918,10 +918,14 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
         out.s7 = tmp.s7 - tmp.s1 + 5.25f * tmp.s3 - 5.25f * tmp.s5; \
     })
 
-/** This OpenCL kernel computes the input transform when the kernel size is 5x5 and the output tile is 4x4 when the data layout is NCHW
+/** This OpenCL kernel computes the input transform when the kernel size is 5x5/5x1 or 1x5 and the output tile is 4x4/4x1 or 1x4 when the data layout is NCHW
  *
  * @note The number of tiles in the x axis must be passed at compile time using -DNUM_TILES_X (i.e.-DNUM_TILES_X=5).
  * @note The pad left and pad top must be passed at compile time using -DPAD_LEFT and -DPAD_TOP (i.e.-DPAD_LEFT=1 and -DPAD_TOP=0).
+ * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=2
+ * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=2
+ * @note If this kernel is used to perform Winograd input transform 5x1, -DWINOGRAD_INPUT_TRANSFORM_HORIZONTAL has to be passed at compile time
+ * @note If this kernel is used to perform Winograd input transform 1x5, -DWINOGRAD_INPUT_TRANSFORM_VERTICAL has to be passed at compile time
  *
  * @param[in] src_ptr                           Pointer to the source image. Supported data types: F32
  * @param[in] src_stride_x                      Stride of the source image in X dimension (in bytes)
@@ -949,11 +953,23 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nchw(
     int z = get_global_id(2);
 
     // Compute input address
-    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * 4 * src_stride_x + y * 4 * src_stride_y + z * src_stride_z;
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * OUTPUT_TILE_W * sizeof(float) + y * OUTPUT_TILE_H * src_stride_y + z * src_stride_z;
 
-    src_addr = src_addr - ((int)PAD_LEFT * src_stride_x) - ((int)PAD_TOP * src_stride_y);
+    src_addr = src_addr - ((int)PAD_LEFT * sizeof(float)) - ((int)PAD_TOP * src_stride_y);
 
-    // Load 8x8 input tile
+    // Load input tile
+#if defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL)
+    const float8 in_row0 = vload8(0, (__global float *)(src_addr));
+#elif defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL) // !defined(WINOGRAD_FILTER_TRANSFORM_HORIZONTAL)
+    const float8 in_row0 = (float8)(*((__global float *)(src_addr + 0 * src_stride_y)),
+                                    *((__global float *)(src_addr + 1 * src_stride_y)),
+                                    *((__global float *)(src_addr + 2 * src_stride_y)),
+                                    *((__global float *)(src_addr + 3 * src_stride_y)),
+                                    *((__global float *)(src_addr + 4 * src_stride_y)),
+                                    *((__global float *)(src_addr + 5 * src_stride_y)),
+                                    *((__global float *)(src_addr + 6 * src_stride_y)),
+                                    *((__global float *)(src_addr + 7 * src_stride_y)));
+#else                                            // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
     const float8 in_row0 = vload8(0, (__global float *)(src_addr + 0 * src_stride_y));
     const float8 in_row1 = vload8(0, (__global float *)(src_addr + 1 * src_stride_y));
     const float8 in_row2 = vload8(0, (__global float *)(src_addr + 2 * src_stride_y));
@@ -962,14 +978,19 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nchw(
     const float8 in_row5 = vload8(0, (__global float *)(src_addr + 5 * src_stride_y));
     const float8 in_row6 = vload8(0, (__global float *)(src_addr + 6 * src_stride_y));
     const float8 in_row7 = vload8(0, (__global float *)(src_addr + 7 * src_stride_y));
+#endif                                           // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 
     // Calculate common factors for intermediate tensor
-    float8 comm_fact0 = in_row2 + in_row6 - 4.25f * in_row4;
+    float8 tmp0       = in_row0;
+    float8 comm_fact0 = 0.0f;
+
+#if !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
+    comm_fact0 += in_row2 + in_row6 - 4.25f * in_row4;
+    tmp0 += -in_row6 + 5.25f * in_row4 - 5.25f * in_row2;
+
     float8 comm_fact1 = in_row1 + in_row5 - 4.25f * in_row3;
     float8 comm_fact2 = 0.25f * in_row2 - 1.25f * in_row4 + in_row6;
 
-    // Calculate intermediate tensor and reuse common factor vectors
-    const float8 tmp0 = in_row0 - in_row6 + 5.25f * in_row4 - 5.25f * in_row2;
     const float8 tmp1 = comm_fact0 + comm_fact1;
     const float8 tmp2 = comm_fact0 - comm_fact1;
 
@@ -985,11 +1006,16 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nchw(
     const float8 tmp5 = comm_fact1 + comm_fact2;
     const float8 tmp6 = comm_fact2 - comm_fact1;
     const float8 tmp7 = in_row7 - in_row1 + 5.25f * in_row3 - 5.25f * in_row5;
+#endif // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 
     // Calculate output rows (reuse comm_fact0 vector)
-    float8 out0, out1, out2, out3, out4, out5, out6, out7;
+    float8 out0;
 
     OUTPUT_ROW_4x4_5x5(out0, tmp0, comm_fact0);
+
+#if !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
+    float8 out1, out2, out3, out4, out5, out6, out7;
+
     OUTPUT_ROW_4x4_5x5(out1, tmp1, comm_fact0);
     OUTPUT_ROW_4x4_5x5(out2, tmp2, comm_fact0);
     OUTPUT_ROW_4x4_5x5(out3, tmp3, comm_fact0);
@@ -997,18 +1023,21 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nchw(
     OUTPUT_ROW_4x4_5x5(out5, tmp5, comm_fact0);
     OUTPUT_ROW_4x4_5x5(out6, tmp6, comm_fact0);
     OUTPUT_ROW_4x4_5x5(out7, tmp7, comm_fact0);
+#endif // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 
-    // Store values across the 64 channels
-    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + z * dst_stride_x + (x + y * (int)NUM_TILES_X) * dst_stride_y;
+    // Store values across the channels
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + z * sizeof(float) + (x + y * (int)NUM_TILES_X) * dst_stride_y;
 
-    *((__global float *)(dst_addr + 0 * dst_stride_z))  = out0.s0;
-    *((__global float *)(dst_addr + 1 * dst_stride_z))  = out0.s1;
-    *((__global float *)(dst_addr + 2 * dst_stride_z))  = out0.s2;
-    *((__global float *)(dst_addr + 3 * dst_stride_z))  = out0.s3;
-    *((__global float *)(dst_addr + 4 * dst_stride_z))  = out0.s4;
-    *((__global float *)(dst_addr + 5 * dst_stride_z))  = out0.s5;
-    *((__global float *)(dst_addr + 6 * dst_stride_z))  = out0.s6;
-    *((__global float *)(dst_addr + 7 * dst_stride_z))  = out0.s7;
+    *((__global float *)(dst_addr + 0 * dst_stride_z)) = out0.s0;
+    *((__global float *)(dst_addr + 1 * dst_stride_z)) = out0.s1;
+    *((__global float *)(dst_addr + 2 * dst_stride_z)) = out0.s2;
+    *((__global float *)(dst_addr + 3 * dst_stride_z)) = out0.s3;
+    *((__global float *)(dst_addr + 4 * dst_stride_z)) = out0.s4;
+    *((__global float *)(dst_addr + 5 * dst_stride_z)) = out0.s5;
+    *((__global float *)(dst_addr + 6 * dst_stride_z)) = out0.s6;
+    *((__global float *)(dst_addr + 7 * dst_stride_z)) = out0.s7;
+
+#if !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
     *((__global float *)(dst_addr + 8 * dst_stride_z))  = out1.s0;
     *((__global float *)(dst_addr + 9 * dst_stride_z))  = out1.s1;
     *((__global float *)(dst_addr + 10 * dst_stride_z)) = out1.s2;
@@ -1065,6 +1094,7 @@ __kernel void winograd_input_transform_4x4_5x5_stepz1_nchw(
     *((__global float *)(dst_addr + 61 * dst_stride_z)) = out7.s5;
     *((__global float *)(dst_addr + 62 * dst_stride_z)) = out7.s6;
     *((__global float *)(dst_addr + 63 * dst_stride_z)) = out7.s7;
+#endif // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 }
 
 #if defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL)
@@ -1208,6 +1238,54 @@ __kernel void winograd_input_transform_4x1_3x1_stepz1_nchw(
                                                  dst_step_z,
                                                  dst_offset_first_element_in_bytes);
 }
+
+/** This OpenCL kernel computes the input transform when the kernel size is 5x1 and the output tile is 4x1 when the data layout is NCHW
+ *
+ * @note The number of tiles in the x axis must be passed at compile time using -DNUM_TILES_X (i.e.-DNUM_TILES_X=5).
+ * @note The pad left and pad top must be passed at compile time using -DPAD_LEFT and -DPAD_TOP (i.e.-DPAD_LEFT=1 and -DPAD_TOP=0).
+ * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=2
+ * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=2
+ * @note -DWINOGRAD_INPUT_TRANSFORM_HORIZONTAL has to be passed at compile time
+ *
+ * @param[in] src_ptr                           Pointer to the source image. Supported data types: F32
+ * @param[in] src_stride_x                      Stride of the source image in X dimension (in bytes)
+ * @param[in] src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] src_stride_y                      Stride of the source image in Y dimension (in bytes)
+ * @param[in] src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] src_offset_first_element_in_bytes The offset of the first element in the source image
+ * @param[in] src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in] src_step_z                        src_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_ptr                           Pointer to the destination tensor. Supported data types: as @p src_ptr
+ * @param[in] dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
+ * @param[in] dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in] dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in] dst_step_z                        dst_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ */
+__kernel void winograd_input_transform_4x1_5x1_stepz1_nchw(
+    TENSOR3D_DECLARATION(src),
+    TENSOR3D_DECLARATION(dst))
+{
+    winograd_input_transform_4x4_5x5_stepz1_nchw(src_ptr,
+                                                 src_stride_x,
+                                                 src_step_x,
+                                                 src_stride_y,
+                                                 src_step_y,
+                                                 src_stride_z,
+                                                 src_step_z,
+                                                 src_offset_first_element_in_bytes,
+                                                 dst_ptr,
+                                                 dst_stride_x,
+                                                 dst_step_x,
+                                                 dst_stride_y,
+                                                 dst_step_y,
+                                                 dst_stride_z,
+                                                 dst_step_z,
+                                                 dst_offset_first_element_in_bytes);
+}
+
 #endif // defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL)
 
 #if defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
@@ -1335,6 +1413,53 @@ __kernel void winograd_input_transform_1x4_1x3_stepz1_nchw(
     TENSOR3D_DECLARATION(dst))
 {
     winograd_input_transform_4x4_3x3_stepz1_nchw(src_ptr,
+                                                 src_stride_x,
+                                                 src_step_x,
+                                                 src_stride_y,
+                                                 src_step_y,
+                                                 src_stride_z,
+                                                 src_step_z,
+                                                 src_offset_first_element_in_bytes,
+                                                 dst_ptr,
+                                                 dst_stride_x,
+                                                 dst_step_x,
+                                                 dst_stride_y,
+                                                 dst_step_y,
+                                                 dst_stride_z,
+                                                 dst_step_z,
+                                                 dst_offset_first_element_in_bytes);
+}
+
+/** This OpenCL kernel computes the input transform when the kernel size is 1x5 and the output tile is 1x4
+ *
+ * @note The number of tiles in the x axis must be passed at compile time using -DNUM_TILES_X (i.e.-DNUM_TILES_X=5).
+ * @note The pad left and pad top must be passed at compile time using -DPAD_LEFT and -DPAD_TOP (i.e.-DPAD_LEFT=1 and -DPAD_TOP=0).
+ * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=1
+ * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=4
+ * @note -DWINOGRAD_INPUT_TRANSFORM_VERTICAL has to be passed at compile time
+ *
+ * @param[in] src_ptr                           Pointer to the source image. Supported data types: F32
+ * @param[in] src_stride_x                      Stride of the source image in X dimension (in bytes)
+ * @param[in] src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] src_stride_y                      Stride of the source image in Y dimension (in bytes)
+ * @param[in] src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] src_offset_first_element_in_bytes The offset of the first element in the source image
+ * @param[in] src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in] src_step_z                        src_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_ptr                           Pointer to the destination tensor. Supported data types: as @p src_ptr
+ * @param[in] dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
+ * @param[in] dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in] dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in] dst_step_z                        dst_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ */
+__kernel void winograd_input_transform_1x4_1x5_stepz1_nchw(
+    TENSOR3D_DECLARATION(src),
+    TENSOR3D_DECLARATION(dst))
+{
+    winograd_input_transform_4x4_5x5_stepz1_nchw(src_ptr,
                                                  src_stride_x,
                                                  src_step_x,
                                                  src_stride_y,

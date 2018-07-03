@@ -500,6 +500,70 @@ public:
     }
 };
 
+/** Data set containing small 5x1 tensor shapes. */
+class Small5x1Shapes final : public ShapeDataset
+{
+public:
+    Small5x1Shapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 5U, 1U, 7U, 4U },
+                     TensorShape{ 5U, 1U, 4U, 13U },
+                     TensorShape{ 5U, 1U, 9U, 2U },
+                     TensorShape{ 5U, 1U, 3U, 5U },
+    })
+    {
+    }
+};
+
+/** Data set containing large 5x1 tensor shapes. */
+class Large5x1Shapes final : public ShapeDataset
+{
+public:
+    Large5x1Shapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 5U, 1U, 32U, 64U },
+                     TensorShape{ 5U, 1U, 51U, 13U },
+                     TensorShape{ 5U, 1U, 53U, 47U },
+                     TensorShape{ 5U, 1U, 128U, 384U },
+    })
+    {
+    }
+};
+
+/** Data set containing small 1x5 tensor shapes. */
+class Small1x5Shapes final : public ShapeDataset
+{
+public:
+    Small1x5Shapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 1U, 5U, 7U, 4U },
+                     TensorShape{ 1U, 5U, 4U, 13U },
+                     TensorShape{ 1U, 5U, 9U, 2U },
+                     TensorShape{ 1U, 5U, 3U, 5U },
+    })
+    {
+    }
+};
+
+/** Data set containing large 1x5 tensor shapes. */
+class Large1x5Shapes final : public ShapeDataset
+{
+public:
+    Large1x5Shapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 1U, 5U, 32U, 64U },
+                     TensorShape{ 1U, 5U, 51U, 13U },
+                     TensorShape{ 1U, 5U, 53U, 47U },
+                     TensorShape{ 1U, 5U, 128U, 384U },
+    })
+    {
+    }
+};
+
 /** Data set containing small tensor shapes for deconvolution. */
 class SmallDeconvolutionShapes final : public ShapeDataset
 {

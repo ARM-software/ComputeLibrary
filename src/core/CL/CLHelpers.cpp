@@ -161,7 +161,9 @@ bool cl_winograd_convolution_layer_supported(const Size2D &output_tile, const Si
         WinogradConfiguration(std::pair<int, int>(4, 1), std::pair<int, int>(3, 1)),
         WinogradConfiguration(std::pair<int, int>(2, 2), std::pair<int, int>(3, 3)),
         WinogradConfiguration(std::pair<int, int>(4, 4), std::pair<int, int>(3, 3)),
-        WinogradConfiguration(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5))
+        WinogradConfiguration(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5)),
+        WinogradConfiguration(std::pair<int, int>(4, 1), std::pair<int, int>(5, 1)),
+        WinogradConfiguration(std::pair<int, int>(1, 4), std::pair<int, int>(1, 5))
     };
 
     std::vector<WinogradConfiguration> winograd_filter_transform_nhwc =

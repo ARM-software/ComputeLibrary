@@ -59,7 +59,8 @@ Size2D winograd_output_tile(const Size2D &input_dims, const Size2D &kernel_dims)
     }
     else if(kernel_max_dim == 5U)
     {
-        output_tile = Size2D(4U, 4U);
+        output_tile = Size2D(kernel_dims.width == 1 ? 1U : 4U,
+                             kernel_dims.height == 1 ? 1U : 4U);
     }
 
     return output_tile;
