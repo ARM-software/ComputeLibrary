@@ -25,43 +25,41 @@
 
 #ifdef __aarch64__
 
-namespace arm_gemm
-{
+namespace arm_gemm {
+
 // Load the actual kernel
 void a64_gemm_s8_4x4(const int8_t *, const int8_t *, int32_t *, int, int, int);
 
 #include "arm_gemm.hpp"
 
-class gemm_s8_4x4
-{
+class gemm_s8_4x4 {
 public:
-    typedef int8_t  operand_type;
+    typedef int8_t operand_type;
     typedef int32_t result_type;
 
     typedef void (*kern_type)(const int8_t *, const int8_t *, int32_t *, int, int, int);
 
     /* Describes the data layout for A input */
-    static const int  A_interleave = 4;
-    static const int  A_block      = 16;
-    static const bool A_transpose  = false;
+    static const int A_interleave = 4;
+    static const int A_block = 16;
+    static const bool A_transpose = false;
 
     /* Same for B input */
-    static const int  B_interleave = 4;
-    static const int  B_block      = 16;
-    static const bool B_transpose  = true;
+    static const int B_interleave = 4;
+    static const int B_block = 16;
+    static const bool B_transpose = true;
 
     /* Kernel blocking parameters */
-    static const int out_width  = 4;
+    static const int out_width = 4;
     static const int out_height = 4;
-    static const int k_unroll   = 16;
+    static const int k_unroll = 16;
 
-    kern_type kernel = a64_gemm_s8_4x4;
+    kern_type kernel=a64_gemm_s8_4x4;
 
-    gemm_s8_4x4(const CPUInfo *ci)
-    {
-    }
+    gemm_s8_4x4(const CPUInfo *ci) { }
 };
 
 } // namespace arm_gemm
 
 #endif // __aarch64__
+

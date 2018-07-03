@@ -25,8 +25,8 @@
 
 #ifdef __aarch64__
 
-namespace arm_gemm
-{
+namespace arm_gemm {
+
 // Actual kernel implementations
 void a64_sgemm_asimd_12x8(const float *, const float *, float *, int, int, int);
 void a64_sgemm_asimd_12x8_a53(const float *, const float *, float *, int, int, int);
@@ -41,8 +41,7 @@ void a64_sgemm_asimd_12x8_a55r1(const float *, const float *, float *, int, int,
 // All kernels in the family must share these characteristics.  The actual
 // kernel to be used can be chosen at runtime, based on the CPU_type
 // structure.
-class sgemm_12x8
-{
+class sgemm_12x8 {
 public:
     typedef float operand_type;
     typedef float result_type;
@@ -51,26 +50,24 @@ public:
 
     /* Describes the data layout for A input */
     static const int A_interleave = 8;
-    static const int A_block      = 1;
-    static const int A_transpose  = 0;
+    static const int A_block = 1;
+    static const int A_transpose = 0;
 
     /* Same for B input */
     static const int B_interleave = 12;
-    static const int B_block      = 1;
-    static const int B_transpose  = 1;
+    static const int B_block = 1;
+    static const int B_transpose = 1;
 
     /* Kernel blocking parameters */
-    static const int out_width  = 12;
+    static const int out_width = 12;
     static const int out_height = 8;
-    static const int k_unroll   = 1;
+    static const int k_unroll = 1;
 
-    kern_type kernel = a64_sgemm_asimd_12x8;
+    kern_type kernel=a64_sgemm_asimd_12x8;
 
-    sgemm_12x8(const CPUInfo *ci)
-    {
+    sgemm_12x8(const CPUInfo *ci) {
         // Select specific kernel if available
-        switch(ci->get_cpu_model())
-        {
+        switch(ci->get_cpu_model()) {
             case CPUModel::A53:
                 kernel = a64_sgemm_asimd_12x8_a53;
                 break;

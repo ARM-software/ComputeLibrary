@@ -53,10 +53,11 @@ public:
     /* Pass in the pointers to the arrays to be operated on and their
      * strides.  This has a default implementation that just captures them
      * all in protected members.  If B is pretransposed (see below) then the
-     * settings for B here are ignored.  */
+     * settings for B here are ignored.
+     */
     virtual void set_arrays(const To *A, const int lda, const int A_batch_stride, const int A_multi_stride,
                             const To *B, const int ldb, /* batches share B */     const int B_multi_stride,
-                            Tr *C, const int ldc, const int C_batch_stride, const int C_multi_stride) {
+                                  Tr *C, const int ldc, const int C_batch_stride, const int C_multi_stride) {
         _Aptr = A;
         _lda = lda;
         _A_batch_stride = A_batch_stride;

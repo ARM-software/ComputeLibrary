@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,14 +25,13 @@
 
 #ifdef __aarch64__
 
-namespace arm_gemm
-{
+namespace arm_gemm {
+
 // Actual kernel implementations
 void a64_sgemv_pretransposed(const float *, int, const float *, float *, float, int, int);
 
 // Pretransposed SGEMV strategy class.
-class sgemv_pretransposed
-{
+class sgemv_pretransposed {
 public:
     typedef float operand_type;
     typedef float result_type;
@@ -47,19 +46,17 @@ public:
      * terms of this standard arrangement, so if the A matrix is in fact the
      * B matrix from a GEMM call, the sense of the transpose needs to be
      * reversed.  */
-    static const int  A_interleave = 32;
-    static const int  A_block      = 1;
-    static const bool A_transpose  = false;
+    static const int A_interleave = 32;
+    static const int A_block = 1;
+    static const bool A_transpose = false;
 
     /* Kernel blocking parameters */
     static const int out_width = 32;
-    static const int k_unroll  = 1;
+    static const int k_unroll = 1;
 
     kern_type kernel = a64_sgemv_pretransposed;
 
-    sgemv_pretransposed(const CPUInfo *ci)
-    {
-    }
+    sgemv_pretransposed(const CPUInfo *ci) { }
 };
 
 } // namespace arm_gemm

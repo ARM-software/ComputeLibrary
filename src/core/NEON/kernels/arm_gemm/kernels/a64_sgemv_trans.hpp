@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,14 +25,13 @@
 
 #ifdef __aarch64__
 
-namespace arm_gemm
-{
+namespace arm_gemm {
+
 // Actual kernel implementations
 void a64_sgemv_trans(const float *, const float *, float *, float, int, int, int);
 
 // Transposed SGEMV strategy class.
-class sgemv_trans
-{
+class sgemv_trans {
 public:
     typedef float operand_type;
     typedef float result_type;
@@ -41,13 +40,11 @@ public:
 
     /* Kernel blocking parameters */
     static const int out_width = 96;
-    static const int k_unroll  = 1;
+    static const int k_unroll = 1;
 
-    kern_type kernel = a64_sgemv_trans;
+    kern_type kernel=a64_sgemv_trans;
 
-    sgemv_trans(const CPUInfo *ci)
-    {
-    }
+    sgemv_trans(const CPUInfo *ci) { }
 };
 
 } // namespace arm_gemm

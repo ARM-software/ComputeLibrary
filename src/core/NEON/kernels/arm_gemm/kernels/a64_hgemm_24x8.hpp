@@ -27,8 +27,8 @@
 
 #include "arm_gemm.hpp"
 
-namespace arm_gemm
-{
+namespace arm_gemm {
+
 // Actual kernel implementations
 void a64_hgemm_asimd_24x8(const __fp16 *, const __fp16 *, __fp16 *, int, int, int);
 void a64_hgemm_asimd_24x8_a55r1(const __fp16 *, const __fp16 *, __fp16 *, int, int, int);
@@ -37,33 +37,30 @@ void a64_hgemm_asimd_24x8_a55r1(const __fp16 *, const __fp16 *, __fp16 *, int, i
 //
 // The generic "gemm_opt" function will instantiate one of these (allowing
 // the constructor to pick a kernel implementation).
-class hgemm_24x8
-{
+class hgemm_24x8 {
 public:
     typedef __fp16 operand_type;
     typedef __fp16 result_type;
 
     typedef void (*kern_type)(const __fp16 *, const __fp16 *, __fp16 *, int, int, int);
 
-    static const int  A_block      = 1;
-    static const int  A_interleave = 8;
-    static const bool A_transpose  = false;
+    static const int A_block = 1;
+    static const int A_interleave = 8;
+    static const bool A_transpose = false;
 
-    static const int  B_block      = 1;
-    static const int  B_interleave = 24;
-    static const bool B_transpose  = true;
+    static const int B_block = 1;
+    static const int B_interleave = 24;
+    static const bool B_transpose = true;
 
-    static const int out_width  = 24;
+    static const int out_width = 24;
     static const int out_height = 8;
-    static const int k_unroll   = 1;
+    static const int k_unroll = 1;
 
     // Default to the generic kernel
     kern_type kernel = a64_hgemm_asimd_24x8;
 
-    hgemm_24x8(const CPUInfo *ci)
-    {
-        if(ci->get_cpu_model() == CPUModel::A55r1)
-        {
+    hgemm_24x8(const CPUInfo *ci) {
+        if (ci->get_cpu_model() == CPUModel::A55r1) {
             kernel = a64_hgemm_asimd_24x8_a55r1;
         }
     }

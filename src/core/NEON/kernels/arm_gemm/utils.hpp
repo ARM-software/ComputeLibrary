@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2017 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -25,27 +25,22 @@
 #pragma once
 
 // Macro for unreachable code (e.g. impossible default cases on switch)
-#define UNREACHABLE(why) __builtin_unreachable()
+#define UNREACHABLE(why)  __builtin_unreachable()
 
 // Paranoid option for the above with assert
 // #define UNREACHABLE(why)   assert(0 && why)
 
-inline int iceildiv(const int a, const int b)
-{
-    return (a + b - 1) / b;
+inline int iceildiv(const int a, const int b) {
+  return (a + b - 1) / b;
 }
 
 template <typename T>
-inline T roundup(const T a, const T b)
-{
-    T rem = a % b;
+inline T roundup(const T a, const T b) {
+  T rem = a % b;
 
-    if(rem)
-    {
-        return a + b - rem;
-    }
-    else
-    {
-        return a;
-    }
+  if (rem) {
+    return a + b - rem;
+  } else {
+    return a;
+  }
 }
