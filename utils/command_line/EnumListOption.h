@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_ENUMLISTOPTION
-#define ARM_COMPUTE_TEST_ENUMLISTOPTION
+#ifndef ARM_COMPUTE_UTILS_ENUMLISTOPTION
+#define ARM_COMPUTE_UTILS_ENUMLISTOPTION
 
 #include "Option.h"
 
@@ -35,9 +35,7 @@
 
 namespace arm_compute
 {
-namespace test
-{
-namespace framework
+namespace utils
 {
 /** Implementation of an option that accepts any number of values from a fixed set. */
 template <typename T>
@@ -147,7 +145,6 @@ inline const std::vector<T> &EnumListOption<T>::value() const
 {
     return _values;
 }
-} // namespace framework
-} // namespace test
+} // namespace utils
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_ENUMLISTOPTION */
+#endif /* ARM_COMPUTE_UTILS_ENUMLISTOPTION */

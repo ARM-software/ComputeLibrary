@@ -25,8 +25,9 @@
 
 #include "../Framework.h"
 #include "../printers/Printers.h"
-#include "CommandLineParser.h"
 #include <unistd.h>
+
+using namespace arm_compute::utils;
 
 namespace arm_compute
 {

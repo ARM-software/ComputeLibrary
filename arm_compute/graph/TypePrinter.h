@@ -28,89 +28,12 @@
 #include "arm_compute/core/Types.h"
 #include "arm_compute/graph/Types.h"
 
+#include "utils/TypePrinter.h"
+
 namespace arm_compute
 {
 namespace graph
 {
-/** Formatted output of the Dimensions type. */
-template <typename T>
-inline ::std::ostream &operator<<(::std::ostream &os, const arm_compute::Dimensions<T> &dimensions)
-{
-    if(dimensions.num_dimensions() > 0)
-    {
-        os << dimensions[0];
-
-        for(unsigned int d = 1; d < dimensions.num_dimensions(); ++d)
-        {
-            os << "x" << dimensions[d];
-        }
-    }
-
-    return os;
-}
-
-/** Formatted output of the Size2D type. */
-inline ::std::ostream &operator<<(::std::ostream &os, const Size2D &size)
-{
-    os << size.width << "x" << size.height;
-
-    return os;
-}
-
-/** Formatted output of the DataType type. */
-inline ::std::ostream &operator<<(::std::ostream &os, const DataType &data_type)
-{
-    switch(data_type)
-    {
-        case DataType::UNKNOWN:
-            os << "UNKNOWN";
-            break;
-        case DataType::U8:
-            os << "U8";
-            break;
-        case DataType::QASYMM8:
-            os << "QASYMM8";
-            break;
-        case DataType::S8:
-            os << "S8";
-            break;
-        case DataType::U16:
-            os << "U16";
-            break;
-        case DataType::S16:
-            os << "S16";
-            break;
-        case DataType::U32:
-            os << "U32";
-            break;
-        case DataType::S32:
-            os << "S32";
-            break;
-        case DataType::U64:
-            os << "U64";
-            break;
-        case DataType::S64:
-            os << "S64";
-            break;
-        case DataType::F16:
-            os << "F16";
-            break;
-        case DataType::F32:
-            os << "F32";
-            break;
-        case DataType::F64:
-            os << "F64";
-            break;
-        case DataType::SIZET:
-            os << "SIZET";
-            break;
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
-
-    return os;
-}
-
 /** Formatted output of the Target. */
 inline ::std::ostream &operator<<(::std::ostream &os, const Target &target)
 {
@@ -127,24 +50,6 @@ inline ::std::ostream &operator<<(::std::ostream &os, const Target &target)
             break;
         case Target::GC:
             os << "GC";
-            break;
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
-
-    return os;
-}
-
-/** Formatted output of the DataLayout */
-inline ::std::ostream &operator<<(::std::ostream &os, const DataLayout &data_layout)
-{
-    switch(data_layout)
-    {
-        case DataLayout::NCHW:
-            os << "NCHW";
-            break;
-        case DataLayout::NHWC:
-            os << "NHWC";
             break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
@@ -216,100 +121,6 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
             break;
         case NodeType::Dummy:
             os << "Dummy";
-            break;
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
-
-    return os;
-}
-
-/** Formatted output of the activation function type. */
-inline ::std::ostream &operator<<(::std::ostream &os, const ActivationLayerInfo::ActivationFunction &act_function)
-{
-    switch(act_function)
-    {
-        case ActivationLayerInfo::ActivationFunction::ABS:
-            os << "ABS";
-            break;
-        case ActivationLayerInfo::ActivationFunction::LINEAR:
-            os << "LINEAR";
-            break;
-        case ActivationLayerInfo::ActivationFunction::LOGISTIC:
-            os << "LOGISTIC";
-            break;
-        case ActivationLayerInfo::ActivationFunction::RELU:
-            os << "RELU";
-            break;
-        case ActivationLayerInfo::ActivationFunction::BOUNDED_RELU:
-            os << "BOUNDED_RELU";
-            break;
-        case ActivationLayerInfo::ActivationFunction::LEAKY_RELU:
-            os << "LEAKY_RELU";
-            break;
-        case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
-            os << "SOFT_RELU";
-            break;
-        case ActivationLayerInfo::ActivationFunction::SQRT:
-            os << "SQRT";
-            break;
-        case ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU:
-            os << "LU_BOUNDED_RELU";
-            break;
-        case ActivationLayerInfo::ActivationFunction::SQUARE:
-            os << "SQUARE";
-            break;
-        case ActivationLayerInfo::ActivationFunction::TANH:
-            os << "TANH";
-            break;
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
-
-    return os;
-}
-
-inline std::string to_string(const ActivationLayerInfo::ActivationFunction &act_function)
-{
-    std::stringstream str;
-    str << act_function;
-    return str.str();
-}
-
-/** Formatted output of the PoolingType type. */
-inline ::std::ostream &operator<<(::std::ostream &os, const PoolingType &pool_type)
-{
-    switch(pool_type)
-    {
-        case PoolingType::AVG:
-            os << "AVG";
-            break;
-        case PoolingType::MAX:
-            os << "MAX";
-            break;
-        case PoolingType::L2:
-            os << "L2";
-            break;
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
-
-    return os;
-}
-
-/** Formatted output of the NormType type. */
-inline ::std::ostream &operator<<(::std::ostream &os, const NormType &norm_type)
-{
-    switch(norm_type)
-    {
-        case NormType::CROSS_MAP:
-            os << "CROSS_MAP";
-            break;
-        case NormType::IN_MAP_1D:
-            os << "IN_MAP_1D";
-            break;
-        case NormType::IN_MAP_2D:
-            os << "IN_MAP_2D";
             break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
@@ -394,52 +205,6 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DepthwiseConvolution
             break;
         case DepthwiseConvolutionMethod::OPTIMIZED_3x3:
             os << "OPTIMIZED_3x3";
-            break;
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
-
-    return os;
-}
-
-/** Formatted output of the PadStrideInfo type. */
-inline ::std::ostream &operator<<(::std::ostream &os, const PadStrideInfo &pad_stride_info)
-{
-    os << pad_stride_info.stride().first << "," << pad_stride_info.stride().second;
-    os << ";";
-    os << pad_stride_info.pad_left() << "," << pad_stride_info.pad_right() << ","
-       << pad_stride_info.pad_top() << "," << pad_stride_info.pad_bottom();
-
-    return os;
-}
-
-/** Formatted output of the QuantizationInfo type. */
-inline ::std::ostream &operator<<(::std::ostream &os, const QuantizationInfo &quantization_info)
-{
-    os << "Scale:" << quantization_info.scale << "~"
-       << "Offset:" << quantization_info.offset;
-    return os;
-}
-
-/** Formatted output of the Interpolation policy type.
- *
- * @param[out] os     Output stream.
- * @param[in]  policy Interpolation policy to output.
- *
- * @return Modified output stream.
- */
-inline ::std::ostream &operator<<(::std::ostream &os, const InterpolationPolicy &policy)
-{
-    switch(policy)
-    {
-        case InterpolationPolicy::NEAREST_NEIGHBOR:
-            os << "NEAREST NEIGHBOR";
-            break;
-        case InterpolationPolicy::BILINEAR:
-            os << "BILINEAR";
-            break;
-        case InterpolationPolicy::AREA:
-            os << "AREA";
             break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");

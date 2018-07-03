@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,17 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "ToggleOption.h"
+#ifndef ARM_COMPUTE_UTILS_TOGGLEOPTION
+#define ARM_COMPUTE_UTILS_TOGGLEOPTION
 
-#include <utility>
+#include "SimpleOption.h"
+
+#include <string>
 
 namespace arm_compute
 {
-namespace test
+namespace utils
 {
-namespace framework
+/** Implementation of an option that can be either true or false. */
+class ToggleOption : public SimpleOption<bool>
 {
-ToggleOption::ToggleOption(std::string name, bool default_value)
+public:
+    using SimpleOption::SimpleOption;
+
+    /** Construct the option with the given default value.
+     *
+     * @param[in] name          Name of the option.
+     * @param[in] default_value Default value.
+     */
+    ToggleOption(std::string name, bool default_value);
+
+    bool parse(std::string value) override;
+    std::string help() const override;
+};
+
+inline ToggleOption::ToggleOption(std::string name, bool default_value)
     : SimpleOption<bool>
 {
     std::move(name), default_value
@@ -39,7 +57,7 @@ ToggleOption::ToggleOption(std::string name, bool default_value)
 {
 }
 
-bool ToggleOption::parse(std::string value)
+inline bool ToggleOption::parse(std::string value)
 {
     if(value == "true")
     {
@@ -55,10 +73,10 @@ bool ToggleOption::parse(std::string value)
     return _is_set;
 }
 
-std::string ToggleOption::help() const
+inline std::string ToggleOption::help() const
 {
     return "--" + name() + ", --no-" + name() + " - " + _help;
 }
-} // namespace framework
-} // namespace test
+} // namespace utils
 } // namespace arm_compute
+#endif /* ARM_COMPUTE_UTILS_TOGGLEOPTION */

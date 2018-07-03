@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_LISTOPTION
-#define ARM_COMPUTE_TEST_LISTOPTION
+#ifndef ARM_COMPUTE_UTILS_LISTOPTION
+#define ARM_COMPUTE_UTILS_LISTOPTION
 
 #include "Option.h"
 
@@ -34,9 +34,7 @@
 
 namespace arm_compute
 {
-namespace test
-{
-namespace framework
+namespace utils
 {
 /** Implementation of an option that accepts any number of values. */
 template <typename T>
@@ -115,7 +113,6 @@ inline const std::vector<T> &ListOption<T>::value() const
 {
     return _values;
 }
-} // namespace framework
-} // namespace test
+} // namespace utils
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_LISTOPTION */
+#endif /* ARM_COMPUTE_UTILS_LISTOPTION */

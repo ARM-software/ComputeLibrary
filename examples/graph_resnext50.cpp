@@ -23,10 +23,9 @@
  */
 #include "arm_compute/graph.h"
 #include "support/ToolchainSupport.h"
+#include "utils/CommonGraphOptions.h"
 #include "utils/GraphUtils.h"
 #include "utils/Utils.h"
-
-#include <cstdlib>
 
 using namespace arm_compute::utils;
 using namespace arm_compute::graph::frontend;
@@ -35,67 +34,43 @@ using namespace arm_compute::graph_utils;
 /** Example demonstrating how to implement ResNeXt50 network using the Compute Library's graph API
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL, 2 = OpenCL with Tuner), [optional] Path to the weights folder, [optional] npy_in, [optional] npy_out, [optional] Fast math for convolution layer (0 = DISABLED, 1 = ENABLED) )
+ * @param[in] argv Arguments
  */
 class GraphResNeXt50Example : public Example
 {
 public:
-    void do_setup(int argc, char **argv) override
+    GraphResNeXt50Example()
+        : cmd_parser(), common_opts(cmd_parser), common_params(), graph(0, "ResNeXt50")
     {
-        std::string data_path; /* Path to the trainable data */
-        std::string npy_in;    /* Input npy data */
-        std::string npy_out;   /* Output npy data */
-
-        // Set target. 0 (NEON), 1 (OpenCL), 2 (OpenCL with Tuner). By default it is NEON
-        const int    target         = argc > 1 ? std::strtol(argv[1], nullptr, 10) : 0;
-        Target       target_hint    = set_target_hint(target);
-        FastMathHint fast_math_hint = FastMathHint::DISABLED;
-
+    }
+    bool do_setup(int argc, char **argv) override
+    {
         // Parse arguments
-        if(argc < 2)
+        cmd_parser.parse(argc, argv);
+
+        // Consume common parameters
+        common_params = consume_common_graph_parameters(common_opts);
+
+        // Return when help menu is requested
+        if(common_params.help)
         {
-            // Print help
-            std::cout << "Usage: " << argv[0] << " [target] [path_to_data] [npy_in] [npy_out] [fast_math_hint]\n\n";
-            std::cout << "No data folder provided: using random values\n\n";
-        }
-        else if(argc == 2)
-        {
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " [path_to_data] [npy_in] [npy_out] [fast_math_hint]\n\n";
-            std::cout << "No data folder provided: using random values\n\n";
-        }
-        else if(argc == 3)
-        {
-            data_path = argv[2];
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " [npy_in] [npy_out] [fast_math_hint]\n\n";
-            std::cout << "No input npy file provided: using random values\n\n";
-        }
-        else if(argc == 4)
-        {
-            data_path = argv[2];
-            npy_in    = argv[3];
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " [npy_out] [fast_math_hint]\n\n";
-            std::cout << "No output npy file provided: skipping output accessor\n\n";
-        }
-        else if(argc == 5)
-        {
-            data_path = argv[2];
-            npy_in    = argv[3];
-            npy_out   = argv[4];
-            std::cout << "Usage: " << argv[0] << " " << argv[1] << " " << argv[2] << " " << argv[3] << " " << argv[4] << " [fast_math_hint]\n\n";
-            std::cout << "No fast math info provided: disabling fast math\n\n";
-        }
-        else
-        {
-            data_path      = argv[2];
-            npy_in         = argv[3];
-            npy_out        = argv[4];
-            fast_math_hint = (std::strtol(argv[5], nullptr, 1) == 0) ? FastMathHint::DISABLED : FastMathHint::ENABLED;
+            cmd_parser.print_help(argv[0]);
+            return false;
         }
 
-        graph << target_hint
-              << fast_math_hint
-              << InputLayer(TensorDescriptor(TensorShape(224U, 224U, 3U, 1U), DataType::F32),
-                            get_input_accessor(npy_in))
+        // Checks
+        ARM_COMPUTE_ERROR_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type), "Unsupported data type!");
+
+        // Print parameter values
+        std::cout << common_params << std::endl;
+
+        // Get trainable parameters data path
+        std::string data_path = common_params.data_path;
+
+        graph << common_params.target
+              << common_params.fast_math_hint
+              << InputLayer(TensorDescriptor(TensorShape(224U, 224U, 3U, 1U), common_params.data_type),
+                            get_input_accessor(common_params))
               << ScaleLayer(get_weights_accessor(data_path, "/cnn_data/resnext50_model/bn_data_mul.npy"),
                             get_weights_accessor(data_path, "/cnn_data/resnext50_model/bn_data_add.npy"))
               .set_name("bn_data/Scale")
@@ -115,12 +90,15 @@ public:
 
         graph << PoolingLayer(PoolingLayerInfo(PoolingType::AVG)).set_name("pool1")
               << FlattenLayer().set_name("predictions/Reshape")
-              << OutputLayer(get_npy_output_accessor(npy_out, TensorShape(2048U), DataType::F32));
+              << OutputLayer(get_npy_output_accessor(common_params.labels, TensorShape(2048U), DataType::F32));
 
         // Finalize graph
         GraphConfig config;
-        config.use_tuner = (target == 2);
-        graph.finalize(target_hint, config);
+        config.num_threads = common_params.threads;
+        config.use_tuner   = common_params.enable_tuner;
+        graph.finalize(common_params.target, config);
+
+        return true;
     }
 
     void do_run() override
@@ -130,7 +108,10 @@ public:
     }
 
 private:
-    Stream graph{ 0, "ResNeXt50" };
+    CommandLineParser  cmd_parser;
+    CommonGraphOptions common_opts;
+    CommonGraphParams  common_params;
+    Stream             graph;
 
     void add_residual_block(const std::string &data_path, unsigned int base_depth, unsigned int stage, unsigned int num_units, unsigned int stride_conv_unit1)
     {
@@ -200,7 +181,7 @@ private:
 /** Main program for ResNeXt50
  *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [[optional] Target (0 = NEON, 1 = OpenCL, 2 = OpenCL with Tuner), [optional] Path to the weights folder, [optional] npy_in, [optional] npy_out )
+ * @param[in] argv Arguments
  */
 int main(int argc, char **argv)
 {

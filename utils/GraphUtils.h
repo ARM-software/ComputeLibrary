@@ -31,6 +31,8 @@
 #include "arm_compute/graph/Types.h"
 #include "arm_compute/runtime/Tensor.h"
 
+#include "utils/CommonGraphOptions.h"
+
 #include <array>
 #include <random>
 #include <string>
@@ -150,25 +152,25 @@ private:
     std::ostream     &_output_stream;
 };
 
-/** PPM accessor class */
-class PPMAccessor final : public graph::ITensorAccessor
+/** Image accessor class */
+class ImageAccessor final : public graph::ITensorAccessor
 {
 public:
     /** Constructor
      *
-     * @param[in] ppm_path     Path to PPM file
+     * @param[in] filename     Image file
      * @param[in] bgr          (Optional) Fill the first plane with blue channel (default = false - RGB format)
-     * @param[in] preprocessor (Optional) PPM pre-processing object
+     * @param[in] preprocessor (Optional) Image pre-processing object
      */
-    PPMAccessor(std::string ppm_path, bool bgr = true, std::unique_ptr<IPreprocessor> preprocessor = nullptr);
+    ImageAccessor(std::string filename, bool bgr = true, std::unique_ptr<IPreprocessor> preprocessor = nullptr);
     /** Allow instances of this class to be move constructed */
-    PPMAccessor(PPMAccessor &&) = default;
+    ImageAccessor(ImageAccessor &&) = default;
 
     // Inherited methods overriden:
     bool access_tensor(ITensor &tensor) override;
 
 private:
-    const std::string              _ppm_path;
+    const std::string              _filename;
     const bool                     _bgr;
     std::unique_ptr<IPreprocessor> _preprocessor;
 };
@@ -179,28 +181,31 @@ class ValidationInputAccessor final : public graph::ITensorAccessor
 public:
     /** Constructor
      *
-     * @param[in] image_list  File containing all the images to validate
-     * @param[in] images_path Path to images.
-     * @param[in] bgr         (Optional) Fill the first plane with blue channel (default = false - RGB format)
-     * @param[in] start       (Optional) Start range
-     * @param[in] end         (Optional) End range
+     * @param[in] image_list   File containing all the images to validate
+     * @param[in] images_path  Path to images.
+     * @param[in] bgr          (Optional) Fill the first plane with blue channel (default = false - RGB format)
+     * @param[in] preprocessor (Optional) Image pre-processing object  (default = nullptr)
+     * @param[in] start        (Optional) Start range
+     * @param[in] end          (Optional) End range
      *
      * @note Range is defined as [start, end]
      */
-    ValidationInputAccessor(const std::string &image_list,
-                            std::string        images_path,
-                            bool               bgr   = true,
-                            unsigned int       start = 0,
-                            unsigned int       end   = 0);
+    ValidationInputAccessor(const std::string             &image_list,
+                            std::string                    images_path,
+                            std::unique_ptr<IPreprocessor> preprocessor = nullptr,
+                            bool                           bgr          = true,
+                            unsigned int                   start        = 0,
+                            unsigned int                   end          = 0);
 
     // Inherited methods overriden:
     bool access_tensor(ITensor &tensor) override;
 
 private:
-    std::string              _path;
-    std::vector<std::string> _images;
-    bool                     _bgr;
-    size_t                   _offset;
+    std::string                    _path;
+    std::vector<std::string>       _images;
+    std::unique_ptr<IPreprocessor> _preprocessor;
+    bool                           _bgr;
+    size_t                         _offset;
 };
 
 /** Output Accessor used for network validation */
@@ -210,7 +215,6 @@ public:
     /** Default Constructor
      *
      * @param[in]  image_list    File containing all the images and labels results
-     * @param[in]  top_n         (Optional) Top N accuracy (Defaults to 5)
      * @param[out] output_stream (Optional) Output stream (Defaults to the standard output stream)
      * @param[in]  start         (Optional) Start range
      * @param[in]  end           (Optional) End range
@@ -218,7 +222,6 @@ public:
      * @note Range is defined as [start, end]
      */
     ValidationOutputAccessor(const std::string &image_list,
-                             size_t             top_n         = 5,
                              std::ostream      &output_stream = std::cout,
                              unsigned int       start         = 0,
                              unsigned int       end           = 0);
@@ -237,13 +240,28 @@ private:
      */
     template <typename T>
     std::vector<size_t> access_predictions_tensor(ITensor &tensor);
+    /** Aggregates the results of a sample
+     *
+     * @param[in]     res              Vector containing the results of a graph
+     * @param[in,out] positive_samples Positive samples to be updated
+     * @param[in]     top_n            Top n accuracy to measure
+     * @param[in]     correct_label    Correct label of the current sample
+     */
+    void aggregate_sample(const std::vector<size_t> &res, size_t &positive_samples, size_t top_n, size_t correct_label);
+    /** Reports top N accuracy
+     *
+     * @param[in] top_n            Top N accuracy that is being reported
+     * @param[in] total_samples    Total number of samples
+     * @param[in] positive_samples Positive samples
+     */
+    void report_top_n(size_t top_n, size_t total_samples, size_t positive_samples);
 
 private:
     std::vector<int> _results;
     std::ostream    &_output_stream;
-    size_t           _top_n;
     size_t           _offset;
-    size_t           _positive_samples;
+    size_t           _positive_samples_top1;
+    size_t           _positive_samples_top5;
 };
 
 /** Result accessor class */
@@ -359,56 +377,78 @@ inline std::unique_ptr<graph::ITensorAccessor> get_weights_accessor(const std::s
     }
 }
 
-/** Generates appropriate input accessor according to the specified ppm_path
+/** Generates appropriate input accessor according to the specified graph parameters
  *
- * @note If ppm_path is empty will generate a DummyAccessor else will generate a PPMAccessor
- *
- * @param[in] ppm_path     Path to PPM file
- * @param[in] preprocessor Preproccessor object
- * @param[in] bgr          (Optional) Fill the first plane with blue channel (default = true)
+ * @param[in] graph_parameters Graph parameters
+ * @param[in] preprocessor     (Optional) Preproccessor object
+ * @param[in] bgr              (Optional) Fill the first plane with blue channel (default = true)
  *
  * @return An appropriate tensor accessor
  */
-inline std::unique_ptr<graph::ITensorAccessor> get_input_accessor(const std::string             &ppm_path,
-                                                                  std::unique_ptr<IPreprocessor> preprocessor = nullptr,
-                                                                  bool                           bgr          = true)
+inline std::unique_ptr<graph::ITensorAccessor> get_input_accessor(const arm_compute::utils::CommonGraphParams &graph_parameters,
+                                                                  std::unique_ptr<IPreprocessor>               preprocessor = nullptr,
+                                                                  bool                                         bgr          = true)
 {
-    if(ppm_path.empty())
+    if(!graph_parameters.validation_file.empty())
     {
-        return arm_compute::support::cpp14::make_unique<DummyAccessor>();
+        return arm_compute::support::cpp14::make_unique<ValidationInputAccessor>(graph_parameters.validation_file,
+                                                                                 graph_parameters.validation_path,
+                                                                                 std::move(preprocessor),
+                                                                                 bgr,
+                                                                                 graph_parameters.validation_range_start,
+                                                                                 graph_parameters.validation_range_end);
     }
     else
     {
-        if(arm_compute::utility::endswith(ppm_path, ".npy"))
+        const std::string &image_file = graph_parameters.image;
+        if(arm_compute::utility::endswith(image_file, ".npy"))
         {
-            return arm_compute::support::cpp14::make_unique<NumPyBinLoader>(ppm_path);
+            return arm_compute::support::cpp14::make_unique<NumPyBinLoader>(image_file);
+        }
+        else if(arm_compute::utility::endswith(image_file, ".jpeg")
+                || arm_compute::utility::endswith(image_file, ".jpg")
+                || arm_compute::utility::endswith(image_file, ".ppm"))
+        {
+            return arm_compute::support::cpp14::make_unique<ImageAccessor>(image_file, bgr, std::move(preprocessor));
         }
         else
         {
-            return arm_compute::support::cpp14::make_unique<PPMAccessor>(ppm_path, bgr, std::move(preprocessor));
+            return arm_compute::support::cpp14::make_unique<DummyAccessor>();
         }
     }
 }
 
-/** Generates appropriate output accessor according to the specified labels_path
+/** Generates appropriate output accessor according to the specified graph parameters
  *
- * @note If labels_path is empty will generate a DummyAccessor else will generate a TopNPredictionsAccessor
+ * @note If the output accessor is requested to validate the graph then ValidationOutputAccessor is generated
+ *       else if output_accessor_file is empty will generate a DummyAccessor else will generate a TopNPredictionsAccessor
  *
- * @param[in]  labels_path   Path to labels text file
- * @param[in]  top_n         (Optional) Number of output classes to print
- * @param[out] output_stream (Optional) Output stream
+ * @param[in]  graph_parameters Graph parameters
+ * @param[in]  top_n            (Optional) Number of output classes to print (default = 5)
+ * @param[in]  is_validation    (Optional) Validation flag (default = false)
+ * @param[out] output_stream    (Optional) Output stream (default = std::cout)
  *
  * @return An appropriate tensor accessor
  */
-inline std::unique_ptr<graph::ITensorAccessor> get_output_accessor(const std::string &labels_path, size_t top_n = 5, std::ostream &output_stream = std::cout)
+inline std::unique_ptr<graph::ITensorAccessor> get_output_accessor(const arm_compute::utils::CommonGraphParams &graph_parameters,
+                                                                   size_t                                       top_n         = 5,
+                                                                   bool                                         is_validation = false,
+                                                                   std::ostream                                &output_stream = std::cout)
 {
-    if(labels_path.empty())
+    if(!graph_parameters.validation_file.empty())
+    {
+        return arm_compute::support::cpp14::make_unique<ValidationOutputAccessor>(graph_parameters.validation_file,
+                                                                                  output_stream,
+                                                                                  graph_parameters.validation_range_start,
+                                                                                  graph_parameters.validation_range_end);
+    }
+    else if(graph_parameters.labels.empty())
     {
         return arm_compute::support::cpp14::make_unique<DummyAccessor>(0);
     }
     else
     {
-        return arm_compute::support::cpp14::make_unique<TopNPredictionsAccessor>(labels_path, top_n, output_stream);
+        return arm_compute::support::cpp14::make_unique<TopNPredictionsAccessor>(graph_parameters.labels, top_n, output_stream);
     }
 }
 /** Generates appropriate npy output accessor according to the specified npy_path

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,36 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_TOGGLEOPTION
-#define ARM_COMPUTE_TEST_TOGGLEOPTION
+#ifndef ARM_COMPUTE_UTILS_COMMANDLINEOPTIONS
+#define ARM_COMPUTE_UTILS_COMMANDLINEOPTIONS
 
-#include "SimpleOption.h"
+#include "EnumListOption.h"
+#include "EnumOption.h"
+#include "ListOption.h"
+#include "Option.h"
+#include "ToggleOption.h"
 
-#include <string>
-
-namespace arm_compute
-{
-namespace test
-{
-namespace framework
-{
-/** Implementation of an option that can be either true or false. */
-class ToggleOption : public SimpleOption<bool>
-{
-public:
-    using SimpleOption::SimpleOption;
-
-    /** Construct the option with the given default value.
-     *
-     * @param[in] name          Name of the option.
-     * @param[in] default_value Default value.
-     */
-    ToggleOption(std::string name, bool default_value);
-
-    bool parse(std::string value) override;
-    std::string help() const override;
-};
-} // namespace framework
-} // namespace test
-} // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_TOGGLEOPTION */
+#endif /* ARM_COMPUTE_UTILS_COMMANDLINEOPTIONS */

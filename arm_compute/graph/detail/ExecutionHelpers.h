@@ -95,13 +95,17 @@ void call_all_const_node_accessors(Graph &g);
 /** Call all input node accessors
  *
  * @param[in] workload Workload to execute
+ *
+ * @return  True if all the accesses were valid
  */
-void call_all_input_node_accessors(ExecutionWorkload &workload);
+bool call_all_input_node_accessors(ExecutionWorkload &workload);
 /** Call all output node accessors
  *
  * @param[in] workload Workload to execute
+ *
+ * @return  True if all the accessors expect more data
  */
-void call_all_output_node_accessors(ExecutionWorkload &workload);
+bool call_all_output_node_accessors(ExecutionWorkload &workload);
 /** Prepares all tasks for execution
  *
  * @param[in] workload Workload to prepare

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2018 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -36,7 +36,7 @@ using namespace utils;
 class NEONCopyObjectsExample : public Example
 {
 public:
-    void do_setup(int argc, char **argv) override
+    bool do_setup(int argc, char **argv) override
     {
         ARM_COMPUTE_UNUSED(argc);
         ARM_COMPUTE_UNUSED(argv);
@@ -135,6 +135,8 @@ public:
         output_it);
 
         /** [Copy objects example] */
+
+        return true;
     }
     void do_run() override
     {

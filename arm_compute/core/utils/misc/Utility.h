@@ -192,6 +192,21 @@ inline bool check_aligned(void *ptr, const size_t alignment)
 {
     return (reinterpret_cast<std::uintptr_t>(ptr) % alignment) == 0;
 }
+
+/** Convert string to lower case.
+ *
+ * @param[in] string To be converted string.
+ *
+ * @return Lower case string.
+ */
+inline std::string tolower(std::string string)
+{
+    std::transform(string.begin(), string.end(), string.begin(), [](unsigned char c)
+    {
+        return std::tolower(c);
+    });
+    return string;
+}
 } // namespace utility
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_MISC_UTILITY_H__ */

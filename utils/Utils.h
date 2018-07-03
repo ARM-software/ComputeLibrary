@@ -55,6 +55,14 @@ namespace arm_compute
 {
 namespace utils
 {
+/** Supported image types */
+enum class ImageType
+{
+    UNKNOWN,
+    PPM,
+    JPEG
+};
+
 /** Abstract Example class.
  *
  * All examples have to inherit from this class.
@@ -66,8 +74,13 @@ public:
      *
      * @param[in] argc Argument count.
      * @param[in] argv Argument values.
+     *
+     * @return True in case of no errors in setup else false
      */
-    virtual void do_setup(int argc, char **argv) {};
+    virtual bool do_setup(int argc, char **argv)
+    {
+        return true;
+    };
     /** Run the example. */
     virtual void do_run() {};
     /** Teardown the example. */
@@ -100,6 +113,14 @@ int run_example(int argc, char **argv)
  * @param[in]      b      Blue colour to use
  */
 void draw_detection_rectangle(arm_compute::ITensor *tensor, const arm_compute::DetectionWindow &rect, uint8_t r, uint8_t g, uint8_t b);
+
+/** Gets image type given a file
+ *
+ * @param[in] filename File to identify its image type
+ *
+ * @return Image type
+ */
+ImageType get_image_type_from_file(const std::string &filename);
 
 /** Parse the ppm header from an input file stream. At the end of the execution,
  *  the file position pointer will be located at the first pixel stored in the ppm file
@@ -167,7 +188,7 @@ inline std::string get_typestring(DataType data_type)
         case DataType::SIZET:
             return endianness + "u" + support::cpp11::to_string(sizeof(size_t));
         default:
-            ARM_COMPUTE_ERROR("NOT SUPPORTED!");
+            ARM_COMPUTE_ERROR("Data type not supported");
     }
 }
 

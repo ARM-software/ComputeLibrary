@@ -43,7 +43,7 @@ using namespace utils;
 class NEONCLScaleMedianGaussianExample : public Example
 {
 public:
-    void do_setup(int argc, char **argv) override
+    bool do_setup(int argc, char **argv) override
     {
         /** [NEON / OpenCL Interop] */
         PPMLoader ppm;
@@ -88,6 +88,8 @@ public:
             const std::string output_filename = std::string(argv[1]) + "_out.ppm";
         }
         /** [NEON / OpenCL Interop] */
+
+        return true;
     }
     void do_run() override
     {

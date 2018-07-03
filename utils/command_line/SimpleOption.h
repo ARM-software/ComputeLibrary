@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_SIMPLEOPTION
-#define ARM_COMPUTE_TEST_SIMPLEOPTION
+#ifndef ARM_COMPUTE_UTILS_SIMPLEOPTION
+#define ARM_COMPUTE_UTILS_SIMPLEOPTION
 
 #include "Option.h"
 
@@ -32,9 +32,7 @@
 
 namespace arm_compute
 {
-namespace test
-{
-namespace framework
+namespace utils
 {
 /** Implementation of an option that accepts a single value. */
 template <typename T>
@@ -115,7 +113,6 @@ inline const T &SimpleOption<T>::value() const
 {
     return _value;
 }
-} // namespace framework
-} // namespace test
+} // namespace utils
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_SIMPLEOPTION */
+#endif /* ARM_COMPUTE_UTILS_SIMPLEOPTION */

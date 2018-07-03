@@ -37,7 +37,7 @@ using namespace utils;
 class CLEventsExample : public Example
 {
 public:
-    void do_setup(int argc, char **argv) override
+    bool do_setup(int argc, char **argv) override
     {
         /** [OpenCL events] **/
         PPMLoader     ppm;
@@ -84,6 +84,8 @@ public:
             output_filename = std::string(argv[1]) + "_out.ppm";
         }
         /** [OpenCL events] **/
+
+        return true;
     }
     void do_run() override
     {

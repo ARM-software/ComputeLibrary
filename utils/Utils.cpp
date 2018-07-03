@@ -74,7 +74,11 @@ int run_example(int argc, char **argv, std::unique_ptr<Example> example)
 
     try
     {
-        example->do_setup(argc, argv);
+        bool status = example->do_setup(argc, argv);
+        if(!status)
+        {
+            return 1;
+        }
         example->do_run();
         example->do_teardown();
 
@@ -139,6 +143,41 @@ void draw_detection_rectangle(ITensor *tensor, const DetectionWindow &rect, uint
         left += stride;
         right += stride;
     }
+}
+
+ImageType get_image_type_from_file(const std::string &filename)
+{
+    ImageType type = ImageType::UNKNOWN;
+
+    try
+    {
+        // Open file
+        std::ifstream fs;
+        fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+        fs.open(filename, std::ios::in | std::ios::binary);
+
+        // Identify type from magic number
+        std::array<unsigned char, 2> magic_number{ { 0 } };
+        fs >> magic_number[0] >> magic_number[1];
+
+        // PPM check
+        if(static_cast<char>(magic_number[0]) == 'P' && static_cast<char>(magic_number[1]) == '6')
+        {
+            type = ImageType::PPM;
+        }
+        else if(magic_number[0] == 0xFF && magic_number[1] == 0xD8)
+        {
+            type = ImageType::JPEG;
+        }
+
+        fs.close();
+    }
+    catch(std::runtime_error &e)
+    {
+        ARM_COMPUTE_ERROR("Accessing %s: %s", filename.c_str(), e.what());
+    }
+
+    return type;
 }
 
 std::tuple<unsigned int, unsigned int, int> parse_ppm_header(std::ifstream &fs)

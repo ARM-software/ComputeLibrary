@@ -47,6 +47,7 @@ else:
 
 # Build graph examples
 graph_utils = examples_env.Object("../utils/GraphUtils.cpp")
+graph_utils += examples_env.Object("../utils/CommonGraphOptions.cpp")
 examples_libs = examples_env.get("LIBS",[])
 for file in Glob("./graph_*.cpp"):
     example = os.path.basename(os.path.splitext(str(file))[0])

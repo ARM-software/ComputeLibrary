@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,16 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_OPTIONBASE
-#define ARM_COMPUTE_TEST_OPTIONBASE
+#ifndef ARM_COMPUTE_UTILS_OPTIONBASE
+#define ARM_COMPUTE_UTILS_OPTIONBASE
 
 #include <string>
 
 namespace arm_compute
 {
-namespace test
-{
-namespace framework
+namespace utils
 {
 /** Abstract base class for a command line option. */
 class Option
@@ -103,7 +101,41 @@ protected:
     bool        _is_set{ false };
     std::string _help{};
 };
-} // namespace framework
-} // namespace test
+
+inline Option::Option(std::string name)
+    : _name{ std::move(name) }
+{
+}
+
+inline Option::Option(std::string name, bool is_required, bool is_set)
+    : _name{ std::move(name) }, _is_required{ is_required }, _is_set{ is_set }
+{
+}
+
+inline std::string Option::name() const
+{
+    return _name;
+}
+
+inline void Option::set_required(bool is_required)
+{
+    _is_required = is_required;
+}
+
+inline void Option::set_help(std::string help)
+{
+    _help = std::move(help);
+}
+
+inline bool Option::is_required() const
+{
+    return _is_required;
+}
+
+inline bool Option::is_set() const
+{
+    return _is_set;
+}
+} // namespace utils
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_OPTIONBASE */
+#endif /* ARM_COMPUTE_UTILS_OPTIONBASE */

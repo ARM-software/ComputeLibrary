@@ -486,6 +486,32 @@ private:
     bool _is_loaded;
     std::unique_ptr<uint8_t, malloc_deleter> _data;
 };
+
+/** Factory for generating appropriate image loader**/
+class ImageLoaderFactory final
+{
+public:
+    /** Create an image loader depending on the image type
+     *
+     * @param[in] filename File than needs to be loaded
+     *
+     * @return Image loader
+     */
+    static std::unique_ptr<IImageLoader> create(const std::string &filename)
+    {
+        ImageType type = arm_compute::utils::get_image_type_from_file(filename);
+        switch(type)
+        {
+            case ImageType::PPM:
+                return support::cpp14::make_unique<PPMLoader>();
+            case ImageType::JPEG:
+                return support::cpp14::make_unique<JPEGLoader>();
+            case ImageType::UNKNOWN:
+            default:
+                return nullptr;
+        }
+    }
+};
 } // namespace utils
 } // namespace arm_compute
 #endif /* __UTILS_IMAGE_LOADER_H__*/

@@ -206,15 +206,12 @@ void call_all_const_node_accessors(Graph &g)
     }
 }
 
-void call_all_input_node_accessors(ExecutionWorkload &workload)
+bool call_all_input_node_accessors(ExecutionWorkload &workload)
 {
-    for(auto &input : workload.inputs)
+    return !std::any_of(std::begin(workload.inputs), std::end(workload.inputs), [](Tensor * input_tensor)
     {
-        if(input != nullptr)
-        {
-            input->call_accessor();
-        }
-    }
+        return (input_tensor == nullptr) || !input_tensor->call_accessor();
+    });
 }
 
 void prepare_all_tasks(ExecutionWorkload &workload)
@@ -256,15 +253,15 @@ void call_all_tasks(ExecutionWorkload &workload)
     }
 }
 
-void call_all_output_node_accessors(ExecutionWorkload &workload)
+bool call_all_output_node_accessors(ExecutionWorkload &workload)
 {
-    for(auto &output : workload.outputs)
+    bool is_valid = true;
+    std::for_each(std::begin(workload.outputs), std::end(workload.outputs), [&](Tensor * output_tensor)
     {
-        if(output != nullptr)
-        {
-            output->call_accessor();
-        }
-    }
+        is_valid = is_valid && (output_tensor != nullptr) && output_tensor->call_accessor();
+    });
+
+    return is_valid;
 }
 } // namespace detail
 } // namespace graph

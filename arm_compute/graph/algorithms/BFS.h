@@ -85,7 +85,7 @@ inline std::vector<NodeID> bfs(Graph &g)
     std::list<NodeID> queue;
 
     // Push inputs and mark as visited
-    for(auto &input : g.inputs())
+    for(auto &input : g.nodes(NodeType::Input))
     {
         if(input != EmptyNodeID)
         {

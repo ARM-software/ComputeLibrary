@@ -26,11 +26,13 @@
 
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/graph/Logger.h"
 #include "arm_compute/runtime/SubTensor.h"
 #include "utils/ImageLoader.h"
 #include "utils/Utils.h"
 
 #include <iomanip>
+#include <limits>
 
 using namespace arm_compute::graph_utils;
 
@@ -169,17 +171,18 @@ bool NumPyAccessor::access_tensor(ITensor &tensor)
     return false;
 }
 
-PPMAccessor::PPMAccessor(std::string ppm_path, bool bgr, std::unique_ptr<IPreprocessor> preprocessor)
-    : _ppm_path(std::move(ppm_path)), _bgr(bgr), _preprocessor(std::move(preprocessor))
+ImageAccessor::ImageAccessor(std::string filename, bool bgr, std::unique_ptr<IPreprocessor> preprocessor)
+    : _filename(std::move(filename)), _bgr(bgr), _preprocessor(std::move(preprocessor))
 {
 }
 
-bool PPMAccessor::access_tensor(ITensor &tensor)
+bool ImageAccessor::access_tensor(ITensor &tensor)
 {
-    utils::PPMLoader ppm;
+    auto image_loader = utils::ImageLoaderFactory::create(_filename);
+    ARM_COMPUTE_ERROR_ON_MSG(image_loader == nullptr, "Unsupported image type");
 
-    // Open PPM file
-    ppm.open(_ppm_path);
+    // Open image file
+    image_loader->open(_filename);
 
     // Get permutated shape and permutation parameters
     TensorShape                    permuted_shape = tensor.info()->tensor_shape();
@@ -188,11 +191,12 @@ bool PPMAccessor::access_tensor(ITensor &tensor)
     {
         std::tie(permuted_shape, perm) = compute_permutation_paramaters(tensor.info()->tensor_shape(), tensor.info()->data_layout());
     }
-    ARM_COMPUTE_ERROR_ON_MSG(ppm.width() != permuted_shape.x() || ppm.height() != permuted_shape.y(),
-                             "Failed to load image file: dimensions [%d,%d] not correct, expected [%d,%d].", ppm.width(), ppm.height(), permuted_shape.x(), permuted_shape.y());
+    ARM_COMPUTE_ERROR_ON_MSG(image_loader->width() != permuted_shape.x() || image_loader->height() != permuted_shape.y(),
+                             "Failed to load image file: dimensions [%d,%d] not correct, expected [%d,%d].",
+                             image_loader->width(), image_loader->height(), permuted_shape.x(), permuted_shape.y());
 
     // Fill the tensor with the PPM content (BGR)
-    ppm.fill_planar_tensor(tensor, _bgr);
+    image_loader->fill_planar_tensor(tensor, _bgr);
 
     // Preprocess tensor
     if(_preprocessor)
@@ -203,12 +207,13 @@ bool PPMAccessor::access_tensor(ITensor &tensor)
     return true;
 }
 
-ValidationInputAccessor::ValidationInputAccessor(const std::string &image_list,
-                                                 std::string        images_path,
-                                                 bool               bgr,
-                                                 unsigned int       start,
-                                                 unsigned int       end)
-    : _path(std::move(images_path)), _images(), _bgr(bgr), _offset(0)
+ValidationInputAccessor::ValidationInputAccessor(const std::string             &image_list,
+                                                 std::string                    images_path,
+                                                 std::unique_ptr<IPreprocessor> preprocessor,
+                                                 bool                           bgr,
+                                                 unsigned int                   start,
+                                                 unsigned int                   end)
+    : _path(std::move(images_path)), _images(), _preprocessor(std::move(preprocessor)), _bgr(bgr), _offset(0)
 {
     ARM_COMPUTE_ERROR_ON_MSG(start > end, "Invalid validation range!");
 
@@ -247,7 +252,9 @@ bool ValidationInputAccessor::access_tensor(arm_compute::ITensor &tensor)
         utils::JPEGLoader jpeg;
 
         // Open JPEG file
-        jpeg.open(_path + _images[_offset++]);
+        std::string image_name = _path + _images[_offset++];
+        jpeg.open(image_name);
+        ARM_COMPUTE_LOG_GRAPH_INFO("Validating " << image_name << std::endl);
 
         // Get permutated shape and permutation parameters
         TensorShape                    permuted_shape = tensor.info()->tensor_shape();
@@ -261,22 +268,26 @@ bool ValidationInputAccessor::access_tensor(arm_compute::ITensor &tensor)
                                  "Failed to load image file: dimensions [%d,%d] not correct, expected [%d,%d].",
                                  jpeg.width(), jpeg.height(), permuted_shape.x(), permuted_shape.y());
 
-        // Fill the tensor with the PPM content (BGR)
+        // Fill the tensor with the JPEG content (BGR)
         jpeg.fill_planar_tensor(tensor, _bgr);
+
+        // Preprocess tensor
+        if(_preprocessor)
+        {
+            _preprocessor->preprocess(tensor);
+        }
     }
 
     return ret;
 }
 
 ValidationOutputAccessor::ValidationOutputAccessor(const std::string &image_list,
-                                                   size_t             top_n,
                                                    std::ostream      &output_stream,
                                                    unsigned int       start,
                                                    unsigned int       end)
-    : _results(), _output_stream(output_stream), _top_n(top_n), _offset(0), _positive_samples(0)
+    : _results(), _output_stream(output_stream), _offset(0), _positive_samples_top1(0), _positive_samples_top5(0)
 {
     ARM_COMPUTE_ERROR_ON_MSG(start > end, "Invalid validation range!");
-    ARM_COMPUTE_ERROR_ON(top_n == 0);
 
     std::ifstream ifs;
     try
@@ -308,13 +319,15 @@ ValidationOutputAccessor::ValidationOutputAccessor(const std::string &image_list
 
 void ValidationOutputAccessor::reset()
 {
-    _offset           = 0;
-    _positive_samples = 0;
+    _offset                = 0;
+    _positive_samples_top1 = 0;
+    _positive_samples_top5 = 0;
 }
 
 bool ValidationOutputAccessor::access_tensor(arm_compute::ITensor &tensor)
 {
-    if(_offset < _results.size())
+    bool ret = _offset < _results.size();
+    if(ret)
     {
         // Get results
         std::vector<size_t> tensor_results;
@@ -332,30 +345,16 @@ bool ValidationOutputAccessor::access_tensor(arm_compute::ITensor &tensor)
 
         // Check if tensor results are within top-n accuracy
         size_t correct_label = _results[_offset++];
-        auto is_valid_label  = [&](size_t label)
-        {
-            return label == correct_label;
-        };
 
-        if(std::any_of(std::begin(tensor_results), std::begin(tensor_results) + _top_n - 1, is_valid_label))
-        {
-            ++_positive_samples;
-        }
+        aggregate_sample(tensor_results, _positive_samples_top1, 1, correct_label);
+        aggregate_sample(tensor_results, _positive_samples_top5, 5, correct_label);
     }
 
     // Report top_n accuracy
-    bool ret = _offset >= _results.size();
-    if(ret)
+    if(_offset >= _results.size())
     {
-        size_t total_samples    = _results.size();
-        size_t negative_samples = total_samples - _positive_samples;
-        float  accuracy         = _positive_samples / static_cast<float>(total_samples);
-
-        _output_stream << "----------Top " << _top_n << " accuracy ----------" << std::endl
-                       << std::endl;
-        _output_stream << "Positive samples : " << _positive_samples << std::endl;
-        _output_stream << "Negative samples : " << negative_samples << std::endl;
-        _output_stream << "Accuracy : " << accuracy << std::endl;
+        report_top_n(1, _results.size(), _positive_samples_top1);
+        report_top_n(5, _results.size(), _positive_samples_top5);
     }
 
     return ret;
@@ -381,6 +380,31 @@ std::vector<size_t> ValidationOutputAccessor::access_predictions_tensor(arm_comp
     });
 
     return index;
+}
+
+void ValidationOutputAccessor::aggregate_sample(const std::vector<size_t> &res, size_t &positive_samples, size_t top_n, size_t correct_label)
+{
+    auto is_valid_label = [correct_label](size_t label)
+    {
+        return label == correct_label;
+    };
+
+    if(std::any_of(std::begin(res), std::begin(res) + top_n, is_valid_label))
+    {
+        ++positive_samples;
+    }
+}
+
+void ValidationOutputAccessor::report_top_n(size_t top_n, size_t total_samples, size_t positive_samples)
+{
+    size_t negative_samples = total_samples - positive_samples;
+    float  accuracy         = positive_samples / static_cast<float>(total_samples);
+
+    _output_stream << "----------Top " << top_n << " accuracy ----------" << std::endl
+                   << std::endl;
+    _output_stream << "Positive samples : " << positive_samples << std::endl;
+    _output_stream << "Negative samples : " << negative_samples << std::endl;
+    _output_stream << "Accuracy : " << accuracy << std::endl;
 }
 
 TopNPredictionsAccessor::TopNPredictionsAccessor(const std::string &labels_path, size_t top_n, std::ostream &output_stream)

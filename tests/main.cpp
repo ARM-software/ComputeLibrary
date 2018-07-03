@@ -28,11 +28,11 @@
 #include "tests/framework/Framework.h"
 #include "tests/framework/Macros.h"
 #include "tests/framework/Profiler.h"
-#include "tests/framework/command_line/CommandLineOptions.h"
-#include "tests/framework/command_line/CommandLineParser.h"
 #include "tests/framework/command_line/CommonOptions.h"
 #include "tests/framework/instruments/Instruments.h"
 #include "tests/framework/printers/Printers.h"
+#include "utils/command_line/CommandLineOptions.h"
+#include "utils/command_line/CommandLineParser.h"
 
 #ifdef ARM_COMPUTE_CL
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -72,7 +72,7 @@ int main(int argc, char **argv)
 
     framework::Framework &framework = framework::Framework::get();
 
-    framework::CommandLineParser parser;
+    utils::CommandLineParser parser;
 
     std::set<framework::DatasetMode> allowed_modes
     {
@@ -83,23 +83,23 @@ int main(int argc, char **argv)
 
     framework::CommonOptions options(parser);
 
-    auto dataset_mode = parser.add_option<framework::EnumOption<framework::DatasetMode>>("mode", allowed_modes, framework::DatasetMode::PRECOMMIT);
+    auto dataset_mode = parser.add_option<utils::EnumOption<framework::DatasetMode>>("mode", allowed_modes, framework::DatasetMode::PRECOMMIT);
     dataset_mode->set_help("For managed datasets select which group to use");
-    auto filter = parser.add_option<framework::SimpleOption<std::string>>("filter", ".*");
+    auto filter = parser.add_option<utils::SimpleOption<std::string>>("filter", ".*");
     filter->set_help("Regular expression to select test cases");
-    auto filter_id = parser.add_option<framework::SimpleOption<std::string>>("filter-id");
+    auto filter_id = parser.add_option<utils::SimpleOption<std::string>>("filter-id");
     filter_id->set_help("List of test ids. ... can be used to define a range.");
-    auto stop_on_error = parser.add_option<framework::ToggleOption>("stop-on-error");
+    auto stop_on_error = parser.add_option<utils::ToggleOption>("stop-on-error");
     stop_on_error->set_help("Abort execution after the first failed test (useful for debugging)");
-    auto seed = parser.add_option<framework::SimpleOption<std::random_device::result_type>>("seed", std::random_device()());
+    auto seed = parser.add_option<utils::SimpleOption<std::random_device::result_type>>("seed", std::random_device()());
     seed->set_help("Global seed for random number generation");
-    auto list_tests = parser.add_option<framework::ToggleOption>("list-tests", false);
+    auto list_tests = parser.add_option<utils::ToggleOption>("list-tests", false);
     list_tests->set_help("List all test names");
-    auto test_instruments = parser.add_option<framework::ToggleOption>("test-instruments", false);
+    auto test_instruments = parser.add_option<utils::ToggleOption>("test-instruments", false);
     test_instruments->set_help("Test if the instruments work on the platform");
-    auto error_on_missing_assets = parser.add_option<framework::ToggleOption>("error-on-missing-assets", false);
+    auto error_on_missing_assets = parser.add_option<utils::ToggleOption>("error-on-missing-assets", false);
     error_on_missing_assets->set_help("Mark a test as failed instead of skipping it when assets are missing");
-    auto assets = parser.add_positional_option<framework::SimpleOption<std::string>>("assets");
+    auto assets = parser.add_positional_option<utils::SimpleOption<std::string>>("assets");
     assets->set_help("Path to the assets directory");
 
     try

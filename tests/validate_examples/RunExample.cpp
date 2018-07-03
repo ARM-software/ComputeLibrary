@@ -33,9 +33,9 @@
 #include "tests/Globals.h"
 #include "tests/framework/Framework.h"
 #include "tests/framework/Macros.h"
-#include "tests/framework/command_line/CommandLineParser.h"
 #include "tests/framework/command_line/CommonOptions.h"
 #include "tests/framework/instruments/Instruments.h"
+#include "utils/command_line/CommandLineParser.h"
 
 #ifdef ARM_COMPUTE_CL
 #include "arm_compute/runtime/CL/CLScheduler.h"
@@ -87,13 +87,13 @@ public:
 
 int run_example(int argc, char **argv, std::unique_ptr<ValidateExample> example)
 {
-    framework::CommandLineParser parser;
-    framework::CommonOptions     options(parser);
-    auto                         example_args = parser.add_option<framework::ListOption<std::string>>("example_args");
+    utils::CommandLineParser parser;
+    framework::CommonOptions options(parser);
+    auto                     example_args = parser.add_option<utils::ListOption<std::string>>("example_args");
     example_args->set_help("Arguments to pass to the example separated by commas (e.g: arg0,arg1,arg2)");
-    auto seed = parser.add_option<framework::SimpleOption<std::random_device::result_type>>("seed", std::random_device()());
+    auto seed = parser.add_option<utils::SimpleOption<std::random_device::result_type>>("seed", std::random_device()());
     seed->set_help("Global seed for random number generation");
-    auto validate = parser.add_option<framework::SimpleOption<int>>("validate", 1);
+    auto validate = parser.add_option<utils::SimpleOption<int>>("validate", 1);
     validate->set_help("Enable / disable output validation (0/1)");
 
     framework::Framework &framework = framework::Framework::get();

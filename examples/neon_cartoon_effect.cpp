@@ -34,7 +34,7 @@ using namespace utils;
 class NEONCartoonEffectExample : public Example
 {
 public:
-    void do_setup(int argc, char **argv) override
+    bool do_setup(int argc, char **argv) override
     {
         // Open PPM file
         PPMLoader ppm;
@@ -75,6 +75,8 @@ public:
             ppm.fill_image(src_img);
             output_filename = std::string(argv[1]) + "_out.ppm";
         }
+
+        return true;
     }
 
     void do_run() override

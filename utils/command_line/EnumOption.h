@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef ARM_COMPUTE_TEST_ENUMOPTION
-#define ARM_COMPUTE_TEST_ENUMOPTION
+#ifndef ARM_COMPUTE_UTILS_ENUMOPTION
+#define ARM_COMPUTE_UTILS_ENUMOPTION
 
 #include "SimpleOption.h"
 
@@ -33,9 +33,7 @@
 
 namespace arm_compute
 {
-namespace test
-{
-namespace framework
+namespace utils
 {
 /** Implementation of a simple option that accepts a value from a fixed set. */
 template <typename T>
@@ -133,7 +131,6 @@ inline const T &EnumOption<T>::value() const
 {
     return this->_value;
 }
-} // namespace framework
-} // namespace test
+} // namespace utils
 } // namespace arm_compute
-#endif /* ARM_COMPUTE_TEST_ENUMOPTION */
+#endif /* ARM_COMPUTE_UTILS_ENUMOPTION */

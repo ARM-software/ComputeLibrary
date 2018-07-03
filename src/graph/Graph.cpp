@@ -41,9 +41,9 @@ bool Graph::remove_node(NodeID nid)
 
     std::unique_ptr<INode> &node = _nodes[nid];
 
-    // Remove node connections
     if(node)
     {
+        // Remove node connections
         for(auto &input_eid : node->_input_edges)
         {
             remove_connection(input_eid);
@@ -52,6 +52,10 @@ bool Graph::remove_node(NodeID nid)
         {
             remove_connection(outpud_eid);
         }
+
+        // Remove nid from tagged nodes
+        std::vector<NodeID> &tnodes = _tagged_nodes.at(node->type());
+        tnodes.erase(std::remove(tnodes.begin(), tnodes.end(), nid), tnodes.end());
     }
 
     node = nullptr;
@@ -164,9 +168,9 @@ GraphID Graph::id() const
     return _id;
 }
 
-const std::vector<NodeID> &Graph::inputs()
+const std::vector<NodeID> &Graph::nodes(NodeType type)
 {
-    return _tagged_nodes[NodeType::Input];
+    return _tagged_nodes[type];
 }
 
 std::vector<std::unique_ptr<INode>> &Graph::nodes()

@@ -57,7 +57,7 @@ const int16_t gaussian5x5[] =
 class CLConvolutionExample : public Example
 {
 public:
-    void do_setup(int argc, char **argv) override
+    bool do_setup(int argc, char **argv) override
     {
         PPMLoader ppm;
 
@@ -95,6 +95,8 @@ public:
             ppm.fill_image(src);
             output_filename = std::string(argv[1]) + "_out.ppm";
         }
+
+        return true;
     }
     void do_run() override
     {

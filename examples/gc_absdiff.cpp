@@ -38,7 +38,7 @@ using namespace utils;
 class GCAbsDiffExample : public Example
 {
 public:
-    void do_setup(int argc, char **argv) override
+    bool do_setup(int argc, char **argv) override
     {
         PPMLoader ppm1, ppm2;
 
@@ -90,6 +90,8 @@ public:
         {
             ppm2.fill_image(src2);
         }
+
+        return true;
     }
     void do_run() override
     {

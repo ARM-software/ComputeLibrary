@@ -53,7 +53,7 @@ const int16_t gaussian5x5[] =
 class NEONConvolutionExample : public Example
 {
 public:
-    void do_setup(int argc, char **argv) override
+    bool do_setup(int argc, char **argv) override
     {
         /** [Accurate padding] **/
         PPMLoader ppm;
@@ -94,6 +94,8 @@ public:
             output_filename = std::string(argv[1]) + "_out.ppm";
         }
         /** [Accurate padding] **/
+
+        return true;
     }
     void do_run() override
     {
