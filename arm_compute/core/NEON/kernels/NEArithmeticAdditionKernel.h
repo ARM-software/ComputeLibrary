@@ -57,26 +57,24 @@ public:
      * Valid configurations (Input1,Input2) -> Output :
      *
      *   - (U8,U8)     -> U8
-     *   - (QS8,QS8)   -> QS8
      *   - (U8,U8)     -> S16
      *   - (S16,U8)    -> S16
      *   - (U8,S16)    -> S16
      *   - (S16,S16)   -> S16
-     *   - (QS16,QS16) -> QS16
      *   - (F16,F16)   -> F16
      *   - (F32,F32)   -> F32
      *
-     * @param[in]  input1 An input tensor. Data types supported: U8/QS8/QS16/S16/F16/F32
-     * @param[in]  input2 An input tensor. Data types supported: U8/QS8/QS16/S16/F16/F32
-     * @param[out] output The output tensor. Data types supported: U8/QS8/QS16/S16/F16/F32.
+     * @param[in]  input1 An input tensor. Data types supported: U8/S16/F16/F32
+     * @param[in]  input2 An input tensor. Data types supported: U8/S16/F16/F32
+     * @param[out] output The output tensor. Data types supported: U8/S16/F16/F32.
      * @param[in]  policy Overflow policy.
      */
     void configure(const ITensor *input1, const ITensor *input2, ITensor *output, ConvertPolicy policy);
     /** Static function to check if given info will lead to a valid configuration of @ref NEArithmeticAdditionKernel
      *
-     * @param[in] input1 An input tensor. Data types supported: U8/QS8/QS16/S16/F16/F32
-     * @param[in] input2 An input tensor. Data types supported: U8/QS8/QS16/S16/F16/F32
-     * @param[in] output The output tensor. Data types supported: U8/QS8/QS16/S16/F16/F32.
+     * @param[in] input1 An input tensor. Data types supported: U8/S16/F16/F32
+     * @param[in] input2 An input tensor. Data types supported: U8/S16/F16/F32
+     * @param[in] output The output tensor. Data types supported: U8/S16/F16/F32.
      * @param[in] policy Overflow policy.
      *
      * @return a status
@@ -90,9 +88,9 @@ public:
 private:
     /** Common signature for all the specialised add functions
      *
-     * @param[in]  input1 An input tensor. Data types supported: U8/QS8/QS16/S16/F16/F32
-     * @param[in]  input2 An input tensor. Data types supported: U8/QS8/QS16/S16/F16/F32
-     * @param[out] output The output tensor. Data types supported: U8/QS8/QS16/S16/F16/F32.
+     * @param[in]  input1 An input tensor. Data types supported: U8/S16/F16/F32
+     * @param[in]  input2 An input tensor. Data types supported: U8/S16/F16/F32
+     * @param[out] output The output tensor. Data types supported: U8/S16/F16/F32.
      * @param[in]  window Region on which to execute the kernel.
      */
     using AddFunction = void(const ITensor *input1, const ITensor *input2, ITensor *output, const Window &window);

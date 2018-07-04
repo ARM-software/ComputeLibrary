@@ -23,10 +23,6 @@
  */
 #include "helpers.h"
 
-#if defined(FIXED_POINT_POSITION)
-#include "fixed_point.h"
-#endif /* FIXED_POINT_POSITION */
-
 #ifdef SATURATE
 #define ADD(x, y) add_sat((x), (y))
 #define SUB(x, y) sub_sat((x), (y))
@@ -43,7 +39,7 @@
  * e.g. -DDATA_TYPE_IN1=uchar -DDATA_TYPE_IN2=uchar -DDATA_TYPE_OUT=short
  * @attention To perform saturating operation -DSATURATE has to be passed to the compiler otherwise wrapping policy will be used.
  *
- * @param[in]  in1_ptr                           Pointer to the source tensor. Supported data types: U8/QS8/QS16/S16/F16/F32
+ * @param[in]  in1_ptr                           Pointer to the source tensor. Supported data types: U8/S16/F16/F32
  * @param[in]  in1_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  in1_step_x                        in1_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  in1_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -51,7 +47,7 @@
  * @param[in]  in1_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  in1_step_z                        in1_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  in1_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[in]  in2_ptr                           Pointer to the source tensor. Supported data types: U8/QS8 (only if @p in1_ptr is QS8), QS16 (only if @p in1_ptr is QS16), S16/F16/F32
+ * @param[in]  in2_ptr                           Pointer to the source tensor. Supported data types: U8/S16/F16/F32
  * @param[in]  in2_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  in2_step_x                        in2_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  in2_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -59,7 +55,7 @@
  * @param[in]  in2_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  in2_step_z                        in2_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  in2_offset_first_element_in_bytes The offset of the first element in the source tensor
- * @param[out] out_ptr                           Pointer to the destination tensor. Supported data types: U8 (only if both inputs are U8), QS8 (only if both inputs are QS8), QS16 (only if both inputs are QS16), S16/F16/F32
+ * @param[out] out_ptr                           Pointer to the destination tensor. Supported data types: U8 (only if both inputs are U8), S16/F16/F32
  * @param[in]  out_stride_x                      Stride of the destination tensor in X dimension (in bytes)
  * @param[in]  out_step_x                        out_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  out_stride_y                      Stride of the destination tensor in Y dimension (in bytes)

@@ -62,7 +62,7 @@ void CLConvolutionLayerReshapeWeights::configure(const ICLTensor *weights, const
 Status CLConvolutionLayerReshapeWeights::validate(const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(weights);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
 
     if(biases != nullptr)
@@ -77,7 +77,6 @@ Status CLConvolutionLayerReshapeWeights::validate(const ITensorInfo *weights, co
     if((output != nullptr) && (output->total_size() != 0))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(weights, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(weights, output);
 
         CLWeightsReshapeKernel::validate(weights, biases, output);
     }
@@ -233,7 +232,7 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
         shape_im2col.set(1, conv_w * conv_h);
 
         // FIXME: input->clone() doesn't work with subtensors for grouped convolutions.
-        TensorInfo im2col_reshaped_info(shape_im2col, 1, data_type, input->info()->fixed_point_position());
+        TensorInfo im2col_reshaped_info(shape_im2col, 1, data_type);
         im2col_reshaped_info.set_quantization_info(input->info()->quantization_info());
         _im2col_output.allocator()->init(im2col_reshaped_info);
         _memory_group.manage(&_im2col_output);
@@ -257,7 +256,7 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
         // GEMM output should be S32 for acquiring raw integer accumulator without quantized postprocessing for quantized asymmetric input.
         const DataType gemm_data_type = _is_quantized ? DataType::S32 : data_type;
         // FIXME: input->clone() doesn't work with subtensors for grouped convolutions.
-        TensorInfo info_gemm(shape_gemm, 1, gemm_data_type, input->info()->fixed_point_position());
+        TensorInfo info_gemm(shape_gemm, 1, gemm_data_type);
         info_gemm.set_quantization_info(output->info()->quantization_info());
         _gemm_output.allocator()->init(info_gemm);
         _memory_group.manage(&_gemm_output);
@@ -326,10 +325,9 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights_info.are_reshaped(), "Weights already reshaped are not supported!");
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, weights);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::QASYMM8 && input->data_layout() == DataLayout::NHWC,
                                     "NHWC is unsupported for QASYMM8!");
 
@@ -369,7 +367,6 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
         }
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, biases);
         ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != weights->dimension(idx_kernels));
         ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
     }
@@ -395,7 +392,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 
     // Output tensor auto inizialitation if not yet initialized
     ARM_COMPUTE_RETURN_ON_ERROR(CLConvolutionLayerReshapeWeights::validate(weights, is_quantized ? nullptr : biases, nullptr));
-    weights_reshaped_info = TensorInfo(compute_weights_reshaped_shape(*weights, append_bias), 1, data_type, weights->fixed_point_position());
+    weights_reshaped_info = TensorInfo(compute_weights_reshaped_shape(*weights, append_bias), 1, data_type);
     weights_to_use        = &weights_reshaped_info;
 
     if(!skip_im2col)
@@ -408,7 +405,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
         }
         shape_im2col.set(0, mat_weights_rows);
         shape_im2col.set(1, conv_w * conv_h);
-        im2col_reshaped_info = TensorInfo(shape_im2col, 1, data_type, input->fixed_point_position());
+        im2col_reshaped_info = TensorInfo(shape_im2col, 1, data_type);
         im2col_reshaped_info.set_quantization_info(input->quantization_info());
         ARM_COMPUTE_RETURN_ON_ERROR(CLIm2ColKernel::validate(input, &im2col_reshaped_info, Size2D(kernel_width, kernel_height), conv_info, append_bias, dilation));
         gemm_input_to_use = &im2col_reshaped_info;
@@ -422,7 +419,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
         shape_gemm.set(1, conv_w * conv_h);
         const DataType gemm_data_type = is_quantized ? DataType::S32 : data_type;
         // GEMM output should be S32 for acquiring raw integer accumulator without quantized postprocessing for quantized asymmetric input.
-        info_gemm = TensorInfo(shape_gemm, 1, gemm_data_type, input->fixed_point_position());
+        info_gemm = TensorInfo(shape_gemm, 1, gemm_data_type);
         info_gemm.set_quantization_info(output->quantization_info());
         gemm_output_to_use = &info_gemm;
     }
@@ -436,7 +433,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
         quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
         if(!is_nhwc)
         {
-            tmp_info = TensorInfo(gemm_output_to_use->tensor_shape(), 1, DataType::QASYMM8, input->fixed_point_position());
+            tmp_info = TensorInfo(gemm_output_to_use->tensor_shape(), 1, DataType::QASYMM8);
             tmp_info.set_quantization_info(output->quantization_info());
             gemm_output_staged_to_use = &tmp_info;
         }

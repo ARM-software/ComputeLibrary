@@ -249,58 +249,6 @@ inline std::string to_string(const QuantizationInfo &quantization_info)
     return str.str();
 }
 
-/** Formatted output of the FixedPointOp type.
- *
- * @param[out] os Output stream.
- * @param[in]  op Type to output.
- *
- * @return Modified output stream.
- */
-inline ::std::ostream &operator<<(::std::ostream &os, const FixedPointOp &op)
-{
-    switch(op)
-    {
-        case FixedPointOp::ADD:
-            os << "ADD";
-            break;
-        case FixedPointOp::SUB:
-            os << "SUB";
-            break;
-        case FixedPointOp::MUL:
-            os << "MUL";
-            break;
-        case FixedPointOp::EXP:
-            os << "EXP";
-            break;
-        case FixedPointOp::LOG:
-            os << "LOG";
-            break;
-        case FixedPointOp::INV_SQRT:
-            os << "INV_SQRT";
-            break;
-        case FixedPointOp::RECIPROCAL:
-            os << "RECIPROCAL";
-            break;
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
-
-    return os;
-}
-
-/** Formatted output of the FixedPointOp type.
- *
- * @param[in] op Type to output.
- *
- * @return Formatted string.
- */
-inline std::string to_string(const FixedPointOp &op)
-{
-    std::stringstream str;
-    str << op;
-    return str.str();
-}
-
 /** Formatted output of the activation function type.
  *
  * @param[out] os           Output stream.
@@ -856,8 +804,7 @@ inline std::string to_string(const TensorInfo &info)
     std::stringstream str;
     str << "{Shape=" << info.tensor_shape() << ","
         << "Type=" << info.data_type() << ","
-        << "Channels=" << info.num_channels() << ","
-        << "FixedPointPos=" << info.fixed_point_position() << "}";
+        << "Channels=" << info.num_channels() << "}";
     return str.str();
 }
 

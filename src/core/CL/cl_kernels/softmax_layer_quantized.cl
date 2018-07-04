@@ -230,10 +230,9 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_serial(
  * then gets the exponent of each element as sums all elements across each row.
  *
  * @note Datatype must be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=short
- * @note Fixed point position must be given as a preprocessor argument using -DFIXED_POINT_POSITION=pos. e.g. DFIXED_POINT_POSITION=4
  * @note In case the input is not a multiple of VECTOR_SIZE (2,4,8,16) -DNON_MULTIPLE_OF_VECTOR_SIZE must be passed.
  *
- * @param[in]  src_ptr                            Pointer to the source tensor slice. Supported data types: QS8/QS16/F16/F32
+ * @param[in]  src_ptr                            Pointer to the source tensor slice. Supported data types: F16/F32
  * @param[in]  src_stride_x                       Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                         src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                       Stride of the source tensor in Y dimension (in bytes)
@@ -519,7 +518,6 @@ __kernel void softmax_layer_max_shift_exp_sum_quantized_parallel(
 
 /** Divides all the values of the input tensor by the sum calculated from softmax_layer_shift_exp_sum kernel.
  *
- * @note Fixed point position must be given as a preprocessor argument using -DFIXED_POINT_POSITION=pos. e.g. DFIXED_POINT_POSITION=4
  * @note Quantized beta can be optionally passed at compile time using -DINPUT_BETA_MULTIPLIER and -DINPUT_BETA_LEFT_SHIFT (if undefined, assume beta equals 1.0)
  * @note -DDIFF_MIN must be passed at compile time. It is threshold difference between maximum value of input data and current processed value, it defines whether the value will be taken into account or not.
  *

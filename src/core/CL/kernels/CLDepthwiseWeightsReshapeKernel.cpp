@@ -46,7 +46,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_asymmetric(input->data_type()) && (biases != nullptr));
     ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(idx_c) != output->dimension(1));
     ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(0) != (input->dimension(idx_w) * input->dimension(idx_h) + ((biases != nullptr) ? 1 : 0)));
@@ -54,7 +53,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     if(biases != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, biases);
         ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != input->dimension(idx_c));
         ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
     }

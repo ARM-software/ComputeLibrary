@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,23 +23,11 @@
  */
 #include "helpers.h"
 
-#if defined(FIXED_POINT_POSITION)
-#include "fixed_point.h"
-
-#define ADD_OP(a, b) ADD_SAT_OP_EXPAND((a), (b), DATA_TYPE_PROMOTED, 8)
-#define MUL_OP(a, b) MUL_SAT_OP_EXPAND(CONVERT((a), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 8)), CONVERT((b), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 8)), DATA_TYPE_PROMOTED, 8, FIXED_POINT_POSITION)
-
-// There is no need to have a larger intermediate type for qs32 because all the arguments are already promoted
-MULQ_SAT_IMPL(qs32x8, qs32x8)
-
-#else /* FIXED_POINT_POSITION */
 #undef CONVERT_SAT
 
 #define ADD_OP(a, b) ((a) + (b))
 #define MUL_OP(a, b) ((a) * (b))
 #define CONVERT_SAT(a, b) ((a))
-
-#endif /* FIXED_POINT_POSITION */
 
 #if defined(DATA_TYPE) && defined(DATA_SIZE) && defined(STRIDE_X) && defined(WEIGHTS_DEPTH)
 

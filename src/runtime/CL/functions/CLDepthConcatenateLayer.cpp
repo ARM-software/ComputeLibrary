@@ -55,7 +55,7 @@ void CLDepthConcatenateLayer::configure(std::vector<ICLTensor *> inputs_vector, 
     TensorShape output_shape = calculate_depth_concatenate_shape(inputs_vector);
 
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), output_shape, 1, inputs_vector[0]->info()->data_type(), inputs_vector[0]->info()->fixed_point_position());
+    auto_init_if_empty(*output->info(), output_shape, 1, inputs_vector[0]->info()->data_type());
 
     for(unsigned int i = 0; i < _num_inputs; i++)
     {

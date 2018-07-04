@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,22 +46,14 @@ public:
     /** Initialize the function's source, destination
      *
      * Valid conversions Input -> Output :
-     *    QS8 -> QS8, F32
      *    U8 -> U16, S16, S32
      *    U16 -> U8, U32
      *    S16 -> U8, S32
-     *    QS16 -> QS16, F32
-     *    F32 -> QS8, QS16
      *
-     * @warning In case of in-place fixed point position conversion make sure that configure has been called
-     *          before the updated tensor is used in other functions, as the TensorInfo of the tensor will be
-     *          altered. In-place is only supported for QS8 -> QS8, QS16 -> QS16.
-     *
-     * @param[in, out] input  The input tensor to convert (Written in case of in-place computation). Data types supported: U8/QS8/U16/S16/F32.
-     * @param[out]     output The output tensor. Can be null in case of in-place computation. Data types supported: U8/QS8/U16/S16/U32/S32/F32.
+     * @param[in, out] input  The input tensor to convert (Written in case of in-place computation). Data types supported: U8/U16/S16/F32.
+     * @param[out]     output The output tensor. Can be null in case of in-place computation. Data types supported: U8/U16/S16/U32/S32/F32.
      * @param[in]      policy Conversion policy.
      * @param[in]      shift  (Optional) Value for down/up conversions. Must be 0 <= shift < 8.
-     *                        In case of fixed point position conversion, it specifies the new fixed point position, if operation is in-place.
      */
     void configure(ITensor *input, ITensor *output, ConvertPolicy policy, uint32_t shift = 0);
 };

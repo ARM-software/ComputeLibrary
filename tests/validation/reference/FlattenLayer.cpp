@@ -23,8 +23,6 @@
  */
 #include "FlattenLayer.h"
 
-#include "tests/validation/FixedPoint.h"
-
 namespace arm_compute
 {
 namespace test

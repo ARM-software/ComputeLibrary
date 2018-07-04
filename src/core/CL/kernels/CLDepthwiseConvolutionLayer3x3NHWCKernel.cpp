@@ -146,7 +146,6 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
                        output_shape,
                        1,
                        input->info()->data_type(),
-                       input->info()->fixed_point_position(),
                        input->info()->quantization_info());
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), weights->info(), (biases != nullptr) ? biases->info() : nullptr, output->info(), conv_info, depth_multiplier, act_info));

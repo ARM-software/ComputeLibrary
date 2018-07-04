@@ -23,10 +23,6 @@
  */
 #include "helpers.h"
 
-#if defined(FIXED_POINT_POSITION)
-#include "fixed_point.h"
-#endif /* FIXED_POINT_POSITION */
-
 /** Fill N pixel of the padding edge of a single channel image by replicating the closest valid pixel.
  *
  * @attention  The DATA_TYPE needs to be passed at the compile time.

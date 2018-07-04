@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -62,9 +62,8 @@ void CLDepthConcatenateLayerKernel::configure(const ICLTensor *input, unsigned i
     };
 
     ARM_COMPUTE_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, output);
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(2) + depth_offset > output->info()->dimension(2));
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(0) > output->info()->dimension(0));
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(1) > output->info()->dimension(1));

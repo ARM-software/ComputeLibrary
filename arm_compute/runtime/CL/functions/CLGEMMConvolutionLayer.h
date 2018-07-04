@@ -59,7 +59,7 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  weights Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
-     *                     Data type supported: QS8/QASYMM8/QS16/F16/F32.
+     *                     Data type supported: QASYMM8/F16/F32.
      * @param[in]  biases  Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
      * @param[out] output  Destination tensor. Data types supported: Same as @p weights.
      */
@@ -67,7 +67,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLConvolutionLayerReshapeWeights
      *
      * @param[in] weights Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM].
-     *                    Data type supported: QS8/QASYMM8/QS16/F16/F32.
+     *                    Data type supported: QASYMM8/F16/F32.
      * @param[in] biases  Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM]. Data type supported: Same as @p weights.
      * @param[in] output  Destination tensor. Data types supported: Same as @p weights.
      *
@@ -116,7 +116,7 @@ public:
      *
      * @param[in]  input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
      *                          while every optional dimension from 4 and above represent a batch of inputs.
-     *                          Data types supported: QS8/QASYMM8/QS16/F16/F32.
+     *                          Data types supported: QASYMM8/F16/F32.
      * @param[in]  weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: Same as @p input.
      * @param[in]  biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
      *                          Data type supported: Should match @p input data type, except for input of QASYMM8 type where biases should be of S32 type.
@@ -134,7 +134,7 @@ public:
      *
      * @param[in]  input        Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
      *                          while every optional dimension from 4 and above represent a batch of inputs.
-     *                          Data types supported: QS8/QASYMM8/QS16/F16/F32.
+     *                          Data types supported: QASYMM8/F16/F32.
      * @param[in]  weights      Weights tensor. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM]. Data type supported: Same as @p input.
      * @param[in]  biases       Biases tensor. Shared biases supported. Biases are 1D tensor with dimensions [OFM].
      *                          Data type supported: Should match @p input data type, except for input of QASYMM8 type where biases should be of S32 type.
@@ -158,7 +158,7 @@ public:
 private:
     /** Configures the appropriate matrix multiply routine
      *
-     * @param[in]      input         Input tensor. Data types supported: QS8/QASYMM8/QS16/F16/F32.
+     * @param[in]      input         Input tensor. Data types supported: QASYMM8/F16/F32.
      * @param[in]      weights       Weights tensor. Data type supported: Same as @p input.
      * @param[in, out] output        Output tensor. Data types supported: Same as @p input,
      *                               except for input of QASYMM8 type where output should be of S32 type.
@@ -167,7 +167,7 @@ private:
     void configure_mm(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, int gemm_3d_depth = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMConvolutionLayer matrix multiply routines
      *
-     * @param[in] input         Input tensor. Data types supported: QS8/QASYMM8/QS16/F16/F32.
+     * @param[in] input         Input tensor. Data types supported: QASYMM8/F16/F32.
      * @param[in] weights       Weights tensor. Data type supported: Same as @p input.
      * @param[in] output        Output tensor. Data types supported: Same as @p input,
      *                          except for input of QASYMM8 type where output should be of S32 type.

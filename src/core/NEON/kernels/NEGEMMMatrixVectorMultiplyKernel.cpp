@@ -177,7 +177,6 @@ void NEGEMMMatrixVectorMultiplyKernel::configure(const ITensor *input0, const IT
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input0, 1, DataType::QASYMM8, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input0, input1);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input0, input1, output);
     ARM_COMPUTE_ERROR_ON(is_data_type_quantized_asymmetric(input0->info()->data_type()) && (output->info()->data_type() != DataType::S32));
     ARM_COMPUTE_ERROR_ON(input0->info()->dimension(2) != input1->info()->dimension(1));
 

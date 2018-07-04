@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,23 +23,6 @@
  */
 #include "helpers.h"
 
-#if defined(FIXED_POINT_POSITION)
-
-#include "fixed_point.h"
-
-#ifdef SATURATE
-#define CONVERT_DOWN(x, in_type, out_type, fixed_point_position) CONVERT_DOWN1_SAT(x, in_type, out_type, fixed_point_position)
-#define CONVERT_DOWN1_SAT(x, in_type, out_type, fixed_point_position) convert_##out_type##_##in_type##_sat(x, fixed_point_position)
-#else /* SATURATE */
-#define CONVERT_DOWN(x, in_type, out_type, fixed_point_position) CONVERT_DOWN1(x, in_type, out_type, fixed_point_position)
-#define CONVERT_DOWN1(x, in_type, out_type, fixed_point_position) convert_##out_type##_##in_type(x, fixed_point_position)
-#endif /* SATURATE */
-
-#define CONVERT_UP(x, in_type, out_type, fixed_point_position) CONVERT_UP1(x, in_type, out_type, fixed_point_position)
-#define CONVERT_UP1(x, in_type, out_type, fixed_point_position) convert_##out_type##_##in_type(x, fixed_point_position)
-
-#else /* FIXED_POINT_POSITION */
-
 #ifdef SATURATE
 #define CONVERT_DOWN(x, type) CONVERT_SAT(x, type)
 #else /* SATURATE */
@@ -48,14 +31,10 @@
 
 #define CONVERT_UP(x, type) CONVERT(x, type)
 
-#endif /* FIXED_POINT_POSITION */
-
 /** This function performs a down-scaling depth conversion.
  *
  * @attention The input and output data_types need to be passed at compile time using -DDATA_TYPE_IN and -DDATA_TYPE_OUT:
  * e.g. -DDATA_TYPE_IN=uchar -DDATA_TYPE_OUT=short
- *
- * @note In case of fixed-point operation -DFIXED_POINT_POSITION=fixed_point_position must be provided: e.g. -DFIXED_POINT_POSITION=3
  *
  * @param[in]  in_ptr                            Pointer to the source image. Supported data types: U8, U16, S16, U32, S32, F16, F32
  * @param[in]  in_stride_x                       Stride of the source image in X dimension (in bytes)
@@ -63,7 +42,7 @@
  * @param[in]  in_stride_y                       Stride of the source image in Y dimension (in bytes)
  * @param[in]  in_step_y                         in_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  in_offset_first_element_in_bytes  The offset of the first element in the source image
- * @param[out] out_ptr                           Pointer to the destination image. Supported data types: QS8, U8, QS16, U16, S16, U32, S32
+ * @param[out] out_ptr                           Pointer to the destination image. Supported data types: U8, U16, S16, U32, S32
  * @param[in]  out_stride_x                      Stride of the destination image in X dimension (in bytes)
  * @param[in]  out_step_x                        out_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  out_stride_y                      Stride of the destination image in Y dimension (in bytes)
@@ -84,11 +63,7 @@ __kernel void convert_depth_down(
     VEC_DATA_TYPE(DATA_TYPE_IN, 16)
     in_data = vload16(0, (__global DATA_TYPE_IN *)in.ptr);
 
-#if defined(FIXED_POINT_POSITION)
-    vstore16(CONVERT_DOWN(in_data, VEC_DATA_TYPE(DATA_TYPE_IN, 16), VEC_DATA_TYPE(DATA_TYPE_OUT, 16), FIXED_POINT_POSITION), 0, (__global DATA_TYPE_OUT *)out.ptr);
-#else  /* FIXED_POINT_POSITION */
     vstore16(CONVERT_DOWN(in_data >> shift, VEC_DATA_TYPE(DATA_TYPE_OUT, 16)), 0, (__global DATA_TYPE_OUT *)out.ptr);
-#endif /* FIXED_POINT_POSITION */
 }
 
 /** This function performs a up-scaling depth conversion.
@@ -96,9 +71,7 @@ __kernel void convert_depth_down(
  * @attention The input and output data_types need to be passed at compile time using -DDATA_TYPE_IN and -DDATA_TYPE_OUT:
  * e.g. -DDATA_TYPE_IN=uchar -DDATA_TYPE_OUT=short
  *
- * @note In case of fixed-point operation -DFIXED_POINT_POSITION=fixed_point_position must be provided: e.g. -DFIXED_POINT_POSITION=3
- *
- * @param[in]  in_ptr                            Pointer to the source image. Supported data types: U8, QS8, U16, S16, QS16, U32 or S32
+ * @param[in]  in_ptr                            Pointer to the source image. Supported data types: U8, U16, S16, U32 or S32
  * @param[in]  in_stride_x                       Stride of the source image in X dimension (in bytes)
  * @param[in]  in_step_x                         in_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  in_stride_y                       Stride of the source image in Y dimension (in bytes)
@@ -125,9 +98,5 @@ __kernel void convert_depth_up(
     VEC_DATA_TYPE(DATA_TYPE_IN, 16)
     in_data = vload16(0, (__global DATA_TYPE_IN *)in.ptr);
 
-#if defined(FIXED_POINT_POSITION)
-    vstore16(CONVERT_UP(in_data, VEC_DATA_TYPE(DATA_TYPE_IN, 16), VEC_DATA_TYPE(DATA_TYPE_OUT, 16), FIXED_POINT_POSITION), 0, (__global DATA_TYPE_OUT *)out.ptr);
-#else  /* FIXED_POINT_POSITION */
     vstore16(CONVERT_UP(in_data, VEC_DATA_TYPE(DATA_TYPE_OUT, 16)) << shift, 0, (__global DATA_TYPE_OUT *)out.ptr);
-#endif /* FIXED_POINT_POSITION */
 }

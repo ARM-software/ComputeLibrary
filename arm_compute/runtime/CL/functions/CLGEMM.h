@@ -69,7 +69,7 @@ public:
      *
      * @note Whilst the first input tensor can be a vector, the second input tensor must be at least a matrix
      *
-     * @param[in]  a         First input tensor  (Matrix or Vector A). Data types supported: QS8/QS16/F16/F32
+     * @param[in]  a         First input tensor  (Matrix or Vector A). Data types supported: F16/F32
      * @param[in]  b         Second input tensor (Matrix B). Data type supported: same as @p a.
      * @param[in]  c         Third input tensor  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a.
      * @param[out] output    Output tensor. Data type supported: same as @p a
@@ -82,7 +82,7 @@ public:
     void configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *c, ICLTensor *output, float alpha, float beta, const GEMMInfo &gemm_info = GEMMInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMM.
      *
-     * @param[in]  a         First input tensor info  (Matrix or Vector A). Data types supported: QS8/QS16/F16/F32
+     * @param[in]  a         First input tensor info  (Matrix or Vector A). Data types supported: F16/F32
      * @param[in]  b         Second input tensor info (Matrix B). Data type supported: same as @p a.
      * @param[in]  c         Third input tensor info  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a.
      * @param[out] output    Output tensor info. Data type supported: same as @p a

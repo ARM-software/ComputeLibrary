@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -24,7 +24,6 @@
 #include "GEMM.h"
 
 #include "arm_compute/core/Types.h"
-#include "tests/validation/FixedPoint.h"
 
 namespace arm_compute
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -46,13 +46,13 @@ public:
     CLGEMMMatrixAccumulateBiasesKernel &operator=(CLGEMMMatrixAccumulateBiasesKernel &&) = default;
     /** Set the accumulate buffer and the biases of the kernel.
      *
-     * @param[in, out] accum  The accumulate tensor to convert. Data types supported: QS8/QS16/F16/F32
+     * @param[in, out] accum  The accumulate tensor to convert. Data types supported: F16/F32
      * @param[in]      biases The shared biases tensor to append. It must be 1D tensor. Data types supported: Same as @p input
      */
     void configure(ICLTensor *accum, const ICLTensor *biases);
     /** Static function to check if given info will lead to a valid configuration of @ref CLGEMMMatrixAccumulateBiasesKernel
      *
-     * @param[in] accum      The accumulate tensor to convert. Data types supported: QS8/QS16/F16/F32
+     * @param[in] accum      The accumulate tensor to convert. Data types supported: F16/F32
      * @param[in] biases     The shared biases tensor to append. It must be 1D tensor. Data types supported: Same as @p input
      * @param[in] gpu_target GPU target
      *

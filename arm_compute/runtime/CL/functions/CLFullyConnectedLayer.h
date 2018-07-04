@@ -48,13 +48,13 @@ class CLFullyConnectedLayerReshapeWeights : public ICLSimpleFunction
 public:
     /** Set the input and output tensors.
      *
-     * @param[in]  input  Weights tensor. The weights must be 2 dimensional. Data types supported: QS8/QASYMM8/QS16/F16/F32.
+     * @param[in]  input  Weights tensor. The weights must be 2 dimensional. Data types supported: QASYMM8/F16/F32.
      * @param[out] output Destination tensor which stores the transposed input tensor. Data type supported: Same as @p input.
      */
     void configure(const ICLTensor *input, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLFullyConnectedLayerReshapeWeights
      *
-     * @param[in] input  Weights tensor. The weights must be 2 dimensional. Data types supported: QS8/QASYMM8/QS16/F16/F32.
+     * @param[in] input  Weights tensor. The weights must be 2 dimensional. Data types supported: QASYMM8/F16/F32.
      * @param[in] output Destination tensor which stores the transposed input tensor. Data type supported: Same as @p input.
      *
      * @return a status
@@ -86,7 +86,7 @@ public:
     CLFullyConnectedLayer &operator=(CLFullyConnectedLayer &&) = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input                   Source tensor. Data type supported: QS8/QASYMM8/QS16/F16/F32.
+     * @param[in]  input                   Source tensor. Data type supported: QASYMM8/F16/F32.
      * @param[in]  weights                 Weights tensor. The weights must be 2 dimensional. Data type supported: Same as @p input
      * @param[in]  biases                  Bias tensor. It can be nullptr. Data type supported:Same as @p input.
      * @param[out] output                  Destination tensor. Data type supported: Same as @p input.
@@ -99,7 +99,7 @@ public:
                    bool retain_internal_weights = false);
     /** Static function to check if given info will lead to a valid configuration of @ref CLFullyConnectedLayer
      *
-     * @param[in] input                   Source tensor. Data type supported: QS8/QASYMM8/QS16/F16/F32.
+     * @param[in] input                   Source tensor. Data type supported: QASYMM8/F16/F32.
      * @param[in] weights                 Weights tensor. The weights must be 2 dimensional. Data type supported: Same as @p input
      * @param[in] biases                  Bias tensor. It can be nullptr. Data type supported:Same as @p input.
      * @param[in] output                  Destination tensor. Data type supported: Same as @p input.

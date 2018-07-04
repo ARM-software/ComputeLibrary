@@ -115,7 +115,7 @@ public:
                     in_top += delta_input, in_mid += delta_input, in_low += delta_input,
                     p_out += num_elems_written_per_iteration)
                 {
-                    auto vres = convolve_3x3<stridex>(in_top, in_mid, in_low, vw_r0, vw_r1, vw_r2, 0, input_offset);
+                    auto vres = convolve_3x3<stridex>(in_top, in_mid, in_low, vw_r0, vw_r1, vw_r2, input_offset);
                     store_results<stridex>(p_out, vres);
                 }
             }

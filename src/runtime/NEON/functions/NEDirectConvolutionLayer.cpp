@@ -34,7 +34,7 @@
 using namespace arm_compute;
 
 NEDirectConvolutionLayer::NEDirectConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _output_stage_kernel(), _conv_kernel(), _input_border_handler(), _activationlayer_function(), _accumulator(), _has_bias(false), _is_fixed_point(false),
+    : _memory_group(std::move(memory_manager)), _output_stage_kernel(), _conv_kernel(), _input_border_handler(), _activationlayer_function(), _accumulator(), _has_bias(false),
       _is_activationlayer_enabled(false), _dim_split(Window::DimZ)
 {
 }
@@ -54,26 +54,10 @@ void NEDirectConvolutionLayer::configure(ITensor *input, const ITensor *weights,
     // Check if bias should be added in the convolution result
     _has_bias = (bias != nullptr);
 
-    // Allocate the intermediate accumulator tensor in case of fixed point input
-    _is_fixed_point = is_data_type_fixed_point(input->info()->data_type());
-    if(_is_fixed_point)
+    _conv_kernel.configure(input, weights, output, conv_info);
+    if(_has_bias)
     {
-        const DataType promoted_dt = (input->info()->data_type() == DataType::QS8) ? DataType::QS16 : DataType::QS32;
-        _accumulator.allocator()->init(TensorInfo(output->info()->tensor_shape(), 1, promoted_dt, output->info()->fixed_point_position()));
-        _memory_group.manage(&_accumulator);
-        _conv_kernel.configure(input, weights, &_accumulator, conv_info);
-
-        // When no bias is provided, we need to downscale the accumulator tensor
-        _output_stage_kernel.configure(&_accumulator, bias, output);
-        _accumulator.allocator()->allocate();
-    }
-    else
-    {
-        _conv_kernel.configure(input, weights, output, conv_info);
-        if(_has_bias)
-        {
-            _output_stage_kernel.configure(output, bias);
-        }
+        _output_stage_kernel.configure(output, bias);
     }
 
     // Add zero padding XY
@@ -92,12 +76,7 @@ Status NEDirectConvolutionLayer::validate(const ITensorInfo *input, const ITenso
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
 
-    DataType data_type = output->data_type();
-    if(is_data_type_fixed_point(data_type))
-    {
-        // Promote data type in case of fixed point
-        data_type = ((data_type == DataType::QS8) ? DataType::QS16 : DataType::QS32);
-    }
+    DataType   data_type = output->data_type();
     TensorInfo accumulator(output->clone()->set_is_resizable(true).reset_padding().set_data_type(data_type));
 
     // Validate Convolution kernel
@@ -129,7 +108,7 @@ void NEDirectConvolutionLayer::run()
     _memory_group.acquire();
 
     NEScheduler::get().schedule(&_conv_kernel, _dim_split);
-    if(_has_bias || _is_fixed_point)
+    if(_has_bias)
     {
         NEScheduler::get().schedule(&_output_stage_kernel, Window::DimY);
     }

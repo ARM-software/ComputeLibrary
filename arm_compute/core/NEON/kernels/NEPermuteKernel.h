@@ -58,7 +58,7 @@ public:
      *
      * @note Supported permutation vectors : [2, 0, 1], [1, 2, 0]
      *
-     * @param[in]  input  The input tensor to permute. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32
+     * @param[in]  input  The input tensor to permute. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
      * @param[out] output The output tensor. Data types supported: Same as @p input
      * @param[in]  perm   Permutation vector
      */
@@ -67,7 +67,7 @@ public:
      *
      * @note Supported permutation vectors : [2, 0, 1], [1, 2, 0]
      *
-     * @param[in] input  The input tensor to permute. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32
+     * @param[in] input  The input tensor to permute. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
      * @param[in] output The output tensor. Data types supported: Same as @p input
      * @param[in] perm   Permutation vector
      *

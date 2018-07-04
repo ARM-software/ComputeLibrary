@@ -582,21 +582,19 @@ inline void permute(TensorShape &shape, const PermutationVector &perm)
     }
 }
 
-/** Auto initialize the tensor info (shape, number of channels, data type and fixed point position) if the current assignment is empty.
+/** Auto initialize the tensor info (shape, number of channels and data type) if the current assignment is empty.
  *
- * @param[in,out] info                 Tensor info used to check and assign.
- * @param[in]     shape                New shape.
- * @param[in]     num_channels         New number of channels.
- * @param[in]     data_type            New data type
- * @param[in]     fixed_point_position New fixed point position
- * @param[in]     quantization_info    (Optional) New quantization info
+ * @param[in,out] info              Tensor info used to check and assign.
+ * @param[in]     shape             New shape.
+ * @param[in]     num_channels      New number of channels.
+ * @param[in]     data_type         New data type
+ * @param[in]     quantization_info (Optional) New quantization info
  *
  * @return True if the tensor info has been initialized
  */
 bool auto_init_if_empty(ITensorInfo       &info,
                         const TensorShape &shape,
                         int num_channels, DataType data_type,
-                        int              fixed_point_position,
                         QuantizationInfo quantization_info = QuantizationInfo());
 
 /** Auto initialize the tensor info using another tensor info.
@@ -646,16 +644,6 @@ bool set_data_type_if_unknown(ITensorInfo &info, DataType data_type);
  * @return True if the data type has been changed.
  */
 bool set_data_layout_if_unknown(ITensorInfo &info, DataLayout data_layout);
-
-/** Set the fixed point position to the specified value if
- * the current fixed point position is 0 and the data type is QS8 or QS16
- *
- * @param[in,out] info                 Tensor info used to check and assign.
- * @param[in]     fixed_point_position New fixed point position
- *
- * @return True if the fixed point position has been changed.
- */
-bool set_fixed_point_position_if_zero(ITensorInfo &info, int fixed_point_position);
 
 /** Set the quantization info to the specified value if
  * the current quantization info is empty and the data type of asymmetric quantized type

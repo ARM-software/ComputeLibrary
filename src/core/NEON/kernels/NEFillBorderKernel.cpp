@@ -105,8 +105,8 @@ NEFillBorderKernel::NEFillBorderKernel()
 
 void NEFillBorderKernel::configure(ITensor *tensor, BorderSize border_size, BorderMode border_mode, const PixelValue &constant_border_value)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(tensor, 1, DataType::U8, DataType::QS8, DataType::QASYMM8,
-                                                  DataType::QS16, DataType::U16, DataType::S16,
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(tensor, 1, DataType::U8, DataType::QASYMM8,
+                                                  DataType::U16, DataType::S16,
                                                   DataType::U32, DataType::S32,
                                                   DataType::F16, DataType::F32);
 
@@ -147,7 +147,6 @@ void NEFillBorderKernel::run(const Window &window, const ThreadInfo &info)
                 case DataType::U8:
                     fill_constant_value_single_channel<uint8_t>(window);
                     break;
-                case DataType::QS8:
                 case DataType::S8:
                     fill_constant_value_single_channel<int8_t>(window);
                     break;
@@ -155,7 +154,6 @@ void NEFillBorderKernel::run(const Window &window, const ThreadInfo &info)
                     fill_constant_value_single_channel<uint16_t>(window);
                     break;
                 case DataType::S16:
-                case DataType::QS16:
                     fill_constant_value_single_channel<int16_t>(window);
                     break;
                 case DataType::U32:
@@ -192,7 +190,6 @@ void NEFillBorderKernel::run(const Window &window, const ThreadInfo &info)
                 case DataType::U8:
                     fill_replicate_single_channel<uint8_t>(window);
                     break;
-                case DataType::QS8:
                 case DataType::S8:
                     fill_replicate_single_channel<int8_t>(window);
                     break;
@@ -200,7 +197,6 @@ void NEFillBorderKernel::run(const Window &window, const ThreadInfo &info)
                     fill_replicate_single_channel<uint16_t>(window);
                     break;
                 case DataType::S16:
-                case DataType::QS16:
                     fill_replicate_single_channel<int16_t>(window);
                     break;
                 case DataType::U32:

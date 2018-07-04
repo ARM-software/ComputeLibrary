@@ -24,7 +24,6 @@
 #include "FullyConnectedLayer.h"
 
 #include "arm_compute/core/Types.h"
-#include "tests/validation/FixedPoint.h"
 #include "tests/validation/reference/UtilsQuantizedAsymm.h"
 
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"

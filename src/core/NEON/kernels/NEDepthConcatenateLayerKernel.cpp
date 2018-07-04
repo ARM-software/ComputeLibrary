@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, 2018 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,10 +41,6 @@ using namespace arm_compute;
 namespace
 {
 // Overloads of 128-bit vector loads
-uint8x16_t loadq(const uint8_t *ptr)
-{
-    return vld1q_u8(ptr);
-}
 uint16x8_t loadq(const uint16_t *ptr)
 {
     return vld1q_u16(ptr);
@@ -54,10 +50,6 @@ uint32x4_t loadq(const uint32_t *ptr)
     return vld1q_u32(ptr);
 }
 // Overloads of 128-bit vector stores
-void storeq(uint8_t *ptr, uint8x16_t val)
-{
-    return vst1q_u8(ptr, val);
-}
 void storeq(uint16_t *ptr, uint16x8_t val)
 {
     return vst1q_u16(ptr, val);
@@ -107,9 +99,8 @@ BorderSize NEDepthConcatenateLayerKernel::border_size() const
 
 void NEDepthConcatenateLayerKernel::configure(const ITensor *input, unsigned int depth_offset, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, output);
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(2) + depth_offset > output->info()->dimension(2));
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(0) > output->info()->dimension(0));
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(1) > output->info()->dimension(1));
@@ -129,10 +120,6 @@ void NEDepthConcatenateLayerKernel::configure(const ITensor *input, unsigned int
 
     switch(input->info()->data_type())
     {
-        case DataType::QS8:
-            _func = &depth_concat<uint8_t>;
-            break;
-        case DataType::QS16:
         case DataType::F16:
             _func = &depth_concat<uint16_t>;
             break;

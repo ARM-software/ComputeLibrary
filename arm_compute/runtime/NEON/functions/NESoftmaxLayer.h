@@ -51,18 +51,18 @@ public:
     NESoftmaxLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
-     * @param[in,out] input  Source tensor. Data types supported: QASYMM8/QS8/QS16/F16/F32. If the width is not a
+     * @param[in,out] input  Source tensor. Data types supported: QASYMM8/F16/F32. If the width is not a
      *                       multiple of the internal processing block size, @ref NEFillBorderKernel replicates the
      *                       last value of each row to the nearest multiple.
      * @param[out]    output Destination tensor. Data types supported: same as @p input.
-     * @param[in]     beta   (Optional) A scaling factor for the exponent. QS8/QS16 only support a beta value of 1.
+     * @param[in]     beta   (Optional) A scaling factor for the exponent.
      */
     void configure(ITensor *input, ITensor *output, float beta = 1.0f);
     /** Static function to check if given info will lead to a valid configuration of @ref NESoftmaxLayer
      *
-     * @param[in] input  Source tensor. Data types supported: QASYMM8/QS8/QS16/F16/F32.
+     * @param[in] input  Source tensor. Data types supported: QASYMM8/F16/F32.
      * @param[in] output Destination tensor. Data types supported: same as @p input
-     * @param[in] beta   (Optional) A scaling factor for the exponent. QS8/QS16 only support a beta value of 1.
+     * @param[in] beta   (Optional) A scaling factor for the exponent.
      *
      * @return a status
      */

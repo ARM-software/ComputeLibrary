@@ -64,15 +64,9 @@ protected:
             std::uniform_real_distribution<> distribution(-1000.f, 1000.f);
             library->fill(tensor, distribution, 0);
         }
-        else if(is_data_type_quantized_asymmetric(tensor.data_type()))
+        else // data type is quantized_asymmetric
         {
             std::uniform_int_distribution<> distribution(0, 100);
-            library->fill(tensor, distribution, 0);
-        }
-        else
-        {
-            const int                       one_fixed = 1;
-            std::uniform_int_distribution<> distribution(-one_fixed, one_fixed);
             library->fill(tensor, distribution, 0);
         }
     }
@@ -135,20 +129,6 @@ public:
                                                                                           data_type,
                                                                                           QuantizationInfo(),
                                                                                           beta);
-    }
-};
-
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class SoftmaxValidationFixedPointFixture : public SoftmaxValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
-{
-public:
-    template <typename...>
-    void setup(TensorShape shape, DataType data_type)
-    {
-        SoftmaxValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape,
-                                                                                          data_type,
-                                                                                          QuantizationInfo(),
-                                                                                          1.0f);
     }
 };
 

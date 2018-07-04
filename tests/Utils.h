@@ -26,7 +26,6 @@
 
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/HOGInfo.h"
 #include "arm_compute/core/PyramidInfo.h"
 #include "arm_compute/core/Size2D.h"

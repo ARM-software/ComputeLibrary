@@ -23,23 +23,6 @@
  */
 #include "helpers.h"
 
-#ifdef FIXED_POINT_POSITION
-
-#include "fixed_point.h"
-#define MAX_OP(x, y, type, size) MAX_OP_EXPAND(x, y, type, size)
-#define ADD_OP(x, y, type, size) ADD_SAT_OP_EXPAND((x), (y), type, size)
-#define SUB_OP(x, y, type, size) SUB_SAT_OP_EXPAND((x), (y), type, size)
-#define MUL_OP(x, y, type, size) MUL_SAT_OP_EXPAND((x), (y), type, size, FIXED_POINT_POSITION)
-#define DIV_OP(x, y, type, size) DIV_SAT_OP_VEC_EXPAND((x), (y), type, size, FIXED_POINT_POSITION)
-#define EXP_OP(x, type, size) EXP_OP_EXPAND((x), type, size, FIXED_POINT_POSITION)
-
-#define MIN_VAL_EXPAND(type) type##_MIN
-#define MIN_VAL(type) MIN_VAL_EXPAND(type)
-#define MINVAL MIN_VAL(DATA_TYPE)
-#define SELECT_DATA_TYPE EXPAND(DATA_TYPE)
-
-#else /* FIXED_POINT_POSITION */
-
 #define MAX_OP(x, y, type, size) max((x), (y))
 #define ADD_OP(x, y, type, size) ((x) + (y))
 #define SUB_OP(x, y, type, size) ((x) - (y))
@@ -54,8 +37,6 @@
 #define MINVAL -FLT_MAX
 #define SELECT_DATA_TYPE int
 #endif /* USE_F16 */
-
-#endif /* FIXED_POINT_POSITION */
 
 /* Number of workitems in dimension 0. */
 #if !defined(GRID_SIZE)
@@ -91,9 +72,8 @@ __constant uint4 idx4   = (uint4)(0, 1, 2, 3);
 /** Divides all the values of the input tensor by the sum calculated from softmax_layer_shift_exp_sum kernel.
  *
  * @note Datatype must be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=short
- * @note Fixed point position must be given as a preprocessor argument using -DFIXED_POINT_POSITION=pos. e.g. DFIXED_POINT_POSITION=4
  *
- * @param[in]  src_ptr                           Pointer to the source tensor slice. Supported data types: QS8/QS16/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor slice. Supported data types: F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -138,11 +118,10 @@ __kernel void softmax_layer_norm(
  * then gets the exponent of each element as sums all elements across each row.
  *
  * @note Datatype must be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=short
- * @note Fixed point position must be given as a preprocessor argument using -DFIXED_POINT_POSITION=pos. e.g. DFIXED_POINT_POSITION=4
  * @note In case the input is not a multiple of VECTOR_SIZE (2,4,8,16) -DNON_MULTIPLE_OF_VECTOR_SIZE must be passed.
  * @note Beta can be optionally passed at compile time using -DBETA (by default, it is 1.0).
  *
- * @param[in]  src_ptr                            Pointer to the source tensor slice. Supported data types: QS8/QS16/F16/F32
+ * @param[in]  src_ptr                            Pointer to the source tensor slice. Supported data types: F16/F32
  * @param[in]  src_stride_x                       Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                         src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                       Stride of the source tensor in Y dimension (in bytes)
@@ -288,11 +267,10 @@ __kernel void softmax_layer_max_shift_exp_sum_serial(
  * then gets the exponent of each element as sums all elements across each row.
  *
  * @note Datatype must be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=short
- * @note Fixed point position must be given as a preprocessor argument using -DFIXED_POINT_POSITION=pos. e.g. DFIXED_POINT_POSITION=4
  * @note In case the input is not a multiple of VECTOR_SIZE (2,4,8,16) -DNON_MULTIPLE_OF_VECTOR_SIZE must be passed.
  * @note Beta can be optionally passed at compile time using -DBETA (by default, it is 1.0).
  *
- * @param[in]  src_ptr                            Pointer to the source tensor slice. Supported data types: QS8/QS16/F16/F32
+ * @param[in]  src_ptr                            Pointer to the source tensor slice. Supported data types: F16/F32
  * @param[in]  src_stride_x                       Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                         src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                       Stride of the source tensor in Y dimension (in bytes)

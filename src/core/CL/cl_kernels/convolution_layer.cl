@@ -23,10 +23,6 @@
  */
 #include "helpers.h"
 
-#if defined(FIXED_POINT_POSITION)
-#include "fixed_point.h"
-#endif // FIXED_POINT_POSITION
-
 #if defined(DATA_TYPE)
 /** This kernel reshapes the tensor's low three dimensions to single column
  *

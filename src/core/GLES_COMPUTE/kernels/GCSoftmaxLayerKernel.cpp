@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,7 +49,7 @@ void GCLogits1DMaxKernel::configure(const IGCTensor *input, IGCTensor *output)
     output_shape.set(0, 1);
 
     // Output auto initialization if not yet initialized
-    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->fixed_point_position());
+    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type());
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
@@ -110,8 +110,8 @@ void GCLogits1DShiftExpSumKernel::configure(const IGCTensor *input, const IGCTen
     ARM_COMPUTE_ERROR_ON_NULLPTR(max, sum, output);
 
     // Output auto initialization if not yet initialized
-    auto_init_if_empty(*sum->info(), max->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
-    auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
+    auto_init_if_empty(*sum->info(), max->info()->tensor_shape(), 1, input->info()->data_type());
+    auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type());
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output, max, sum);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
@@ -204,10 +204,9 @@ void GCLogits1DNormKernel::configure(const IGCTensor *input, const IGCTensor *su
     ARM_COMPUTE_ERROR_ON_NULLPTR(sum, output);
 
     // Output auto initialization if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type(), input->info()->fixed_point_position());
+    auto_init_if_empty(*output->info(), input->info()->tensor_shape(), 1, input->info()->data_type());
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, sum, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, sum, output);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
 
     _input  = input;

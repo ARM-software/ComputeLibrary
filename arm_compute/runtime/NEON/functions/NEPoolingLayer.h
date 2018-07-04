@@ -46,18 +46,18 @@ public:
     NEPoolingLayer();
     /** Set the input and output tensors.
      *
-     * @note QS8, QS16 and F16 are supported for pool sizes 2 and 3 only
+     * @note F16 is supported for pool sizes 2 and 3 only
      *
-     * @param[in, out] input     Source tensor. (Written to only when padding != 0) Data types supported: QS8/QASYMM8/QS16/F16/F32.
+     * @param[in, out] input     Source tensor. (Written to only when padding != 0) Data types supported: QASYMM8/F16/F32.
      * @param[out]     output    Destination tensor. Data types supported: Same as @p input.
      * @param[in]      pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      */
     void configure(ITensor *input, ITensor *output, const PoolingLayerInfo &pool_info);
     /** Static function to check if given info will lead to a valid configuration of @ref NEPoolingLayer
      *
-     * @note QS8, QS16 and F16 are supported for pool sizes 2 and 3 only
+     * @note F16 is supported for pool sizes 2 and 3 only
      *
-     * @param[in] input     Source tensor. (Written to only when padding != 0) Data types supported: QS8/QASYMM8/QS16/F16/F32.
+     * @param[in] input     Source tensor. (Written to only when padding != 0) Data types supported: QASYMM8/F16/F32.
      * @param[in] output    Destination tensor. Data types supported: Same as @p input.
      * @param[in] pool_info Contains pooling operation information described in @ref PoolingLayerInfo.
      *

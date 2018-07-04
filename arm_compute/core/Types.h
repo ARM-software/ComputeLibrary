@@ -74,11 +74,9 @@ enum class DataType
     UNKNOWN, /**< Unknown data type */
     U8,      /**< unsigned 8-bit number */
     S8,      /**< signed 8-bit number */
-    QS8,     /**< quantized, symmetric fixed-point 8-bit number */
     QASYMM8, /**< quantized, asymmetric fixed-point 8-bit number */
     U16,     /**< unsigned 16-bit number */
     S16,     /**< signed 16-bit number */
-    QS16,    /**< quantized, symmetric fixed-point 16-bit number */
     U32,     /**< unsigned 32-bit number */
     S32,     /**< signed 32-bit number */
     QS32,    /**< quantized, symmetric fixed-point 32-bit number */

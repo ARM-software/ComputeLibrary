@@ -194,56 +194,7 @@ T sqadd(T a, T b);
 template <typename T>
 T sqsub(T a, T b);
 template <typename T>
-T sqmul(T a, T b, int fixed_point_position);
-
-#define DECLARE_NEON_FUNCTIONS_FOR_FIXED_POINT(TYPET, TYPEU, TAGT, TAGU)                                        \
-    inline vec_8_byte_t<TYPET> vqsub(vec_8_byte_t<TYPET> a, vec_8_byte_t<TYPET> b)                              \
-    {                                                                                                           \
-        return vqsub_##TAGT(a, b);                                                                              \
-    }                                                                                                           \
-    inline vec_8_byte_t<TYPEU> vqadd(vec_8_byte_t<TYPEU> a, vec_8_byte_t<TYPEU> b)                              \
-    {                                                                                                           \
-        return vqadd_##TAGU(a, b);                                                                              \
-    }                                                                                                           \
-    inline vec_16_byte_t<TYPEU> vqadd(vec_16_byte_t<TYPEU> a, vec_16_byte_t<TYPEU> b)                           \
-    {                                                                                                           \
-        return vqaddq_##TAGU(a, b);                                                                             \
-    }                                                                                                           \
-    inline vec_8_byte_t<TYPET> vqexp(vec_8_byte_t<TYPET> vec, int fixed_point_position)                         \
-    {                                                                                                           \
-        return vqexp_q##TAGT(vec, fixed_point_position);                                                        \
-    }                                                                                                           \
-    inline auto vmovl(vec_8_byte_t<TYPET> vec)->decltype(vmovl_##TAGT(vec))                                     \
-    {                                                                                                           \
-        return vmovl_##TAGT(vec);                                                                               \
-    }                                                                                                           \
-    inline vec_16_byte_t<TYPET> vqrecip(vec_16_byte_t<TYPET> vec, int fixed_point_position)                     \
-    {                                                                                                           \
-        return vqrecipq_q##TAGT(vec, fixed_point_position);                                                     \
-    }                                                                                                           \
-    inline vec_16_byte_t<TYPET> vqmul(vec_16_byte_t<TYPET> a, vec_16_byte_t<TYPET> b, int fixed_point_position) \
-    {                                                                                                           \
-        return vqmulq_q##TAGT(a, b, fixed_point_position);                                                      \
-    }                                                                                                           \
-    template <>                                                                                                 \
-    inline TYPEU sqadd<TYPEU>(TYPEU a, TYPEU b)                                                                 \
-    {                                                                                                           \
-        return sqadd_q##TAGU(a, b);                                                                             \
-    }                                                                                                           \
-    inline TYPET sqexp(TYPET val, int fixed_point_position)                                                     \
-    {                                                                                                           \
-        return sqexp_q##TAGT(val, fixed_point_position);                                                        \
-    }                                                                                                           \
-    template <>                                                                                                 \
-    inline TYPET sqsub<TYPET>(TYPET a, TYPET b)                                                                 \
-    {                                                                                                           \
-        return sqsub_q##TAGT(a, b);                                                                             \
-    }                                                                                                           \
-    template <>                                                                                                 \
-    inline TYPET sqmul<TYPET>(TYPET a, TYPET b, int fixed_point_position)                                       \
-    {                                                                                                           \
-        return sqmul_q##TAGT(a, b, fixed_point_position);                                                       \
-    }
+T sqmul(T a, T b);
 
 #define DECLARE_NEON_FUNCTIONS_FOR_FLOAT(TYPE, TAG)                               \
     inline vec_8_byte_t<TYPE> vadd(vec_8_byte_t<TYPE> a, vec_8_byte_t<TYPE> b)    \
@@ -277,9 +228,6 @@ DECLARE_NEON_FUNCTIONS_FOR_TYPE(int32_t, s32)
 DECLARE_NEON_FUNCTIONS_FOR_TYPE(float16_t, f16)
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 DECLARE_NEON_FUNCTIONS_FOR_TYPE(float, f32)
-
-DECLARE_NEON_FUNCTIONS_FOR_FIXED_POINT(int8_t, int16_t, s8, s16)
-DECLARE_NEON_FUNCTIONS_FOR_FIXED_POINT(int16_t, int32_t, s16, s32)
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 DECLARE_NEON_FUNCTIONS_FOR_FLOAT(float16_t, f16)
@@ -373,16 +321,15 @@ namespace
 Status validate_arguments_logits_1d_max(const ITensorInfo &input, const ITensorInfo &output)
 {
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::QASYMM8, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
 #else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::QASYMM8, DataType::QS8, DataType::QS16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::QASYMM8, DataType::F32);
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
     // Validate in case of configured output
     if(output.total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&input, &output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(&input, &output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(&input, &output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output.tensor_shape(), TensorShape(input.tensor_shape()).set(0, 1));
     }
@@ -395,7 +342,7 @@ std::pair<Status, Window> validate_and_configure_window_logits_1d_max(ITensorInf
     // Softmax across the x dimension
     const TensorShape output_shape = TensorShape(input.tensor_shape()).set(0, 1);
     // Output auto initialization if not yet initialized
-    auto_init_if_empty(output, output_shape, 1, input.data_type(), input.fixed_point_position(), input.quantization_info());
+    auto_init_if_empty(output, output_shape, 1, input.data_type(), input.quantization_info());
 
     // Configure kernel window
     const int input_width                       = input.valid_region().shape.x();
@@ -488,12 +435,6 @@ void NELogits1DMaxKernel::configure(const ITensor *input, ITensor *output)
         case DataType::QASYMM8:
             _func = &logits_1d_max<qasymm8_t>;
             break;
-        case DataType::QS8:
-            _func = &logits_1d_max<qint8_t>;
-            break;
-        case DataType::QS16:
-            _func = &logits_1d_max<qint16_t>;
-            break;
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
             _func = &logits_1d_max<float16_t>;
@@ -543,11 +484,12 @@ namespace
 Status validate_arguments_logits_softmax(const ITensorInfo &input, const ITensorInfo &max,
                                          const ITensorInfo &output, const float beta, const ITensorInfo &tmp)
 {
+    ARM_COMPUTE_UNUSED(beta);
     // Check input
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::QASYMM8, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
 #else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::QASYMM8, DataType::QS8, DataType::QS16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::QASYMM8, DataType::F32);
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
     const bool is_quantized_asymmetric = is_data_type_quantized_asymmetric(input.data_type());
@@ -555,7 +497,6 @@ Status validate_arguments_logits_softmax(const ITensorInfo &input, const ITensor
     // Check max
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&input, &max);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(TensorShape(input.tensor_shape()).set(0, 1), max.tensor_shape());
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(&input, &max);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(&input, &max);
 
     // Check output if configured
@@ -564,19 +505,14 @@ Status validate_arguments_logits_softmax(const ITensorInfo &input, const ITensor
         const QuantizationInfo output_quantization = is_quantized_asymmetric ? QuantizationInfo(1.f / 256.f, 0) : output.quantization_info();
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(&input, &output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&input, &output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(&input, &output);
         ARM_COMPUTE_RETURN_ERROR_ON(output.quantization_info() != output_quantization);
     }
-
-    // Check beta
-    ARM_COMPUTE_RETURN_ERROR_ON((beta != 1.0f) && is_data_type_fixed_point(input.data_type()));
 
     // Check tmp if configured
     if(tmp.total_size() != 0)
     {
         const DataType tmp_data_type = is_quantized_asymmetric ? DataType::F32 : input.data_type();
         ARM_COMPUTE_RETURN_ERROR_ON(tmp.data_type() != tmp_data_type);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(&input, &tmp);
         // We could potentially reduce tmp memory if we could predict or make an assumption
         // on the maximum number of threads that will run in parallel.
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(&input, &tmp);
@@ -727,88 +663,6 @@ void logits_1d_softmax_qasymm8(const ITensor &in, const ITensor &max, void *cons
     in_it, max_it, out_it);
 }
 
-template <typename T, typename U>
-void logits_1d_softmax_fixed_point(const ITensor &in, const ITensor &max, void *const tmp,
-                                   ITensor &out, const float /*beta*/, const Window &window)
-{
-    const int start_x     = in.info()->valid_region().anchor.x();
-    const int input_width = in.info()->valid_region().shape.x();
-
-    const int fixed_point_position = in.info()->fixed_point_position();
-
-    Iterator in_it(&in, window);
-    Iterator max_it(&max, window);
-    Iterator out_it(&out, window);
-
-    execute_window_loop(window, [&](const Coordinates &)
-    {
-        /* Get pointers */
-        const auto in_ptr  = reinterpret_cast<const T *>(in_it.ptr()) + start_x;
-        const auto out_ptr = reinterpret_cast<T *>(out_it.ptr()) + start_x;
-        const auto tmp_ptr = reinterpret_cast<T *>(tmp);
-
-        vec_16_byte_t<T> vec_sum_inversed;
-
-        /* Compute exponentials and sum */
-        {
-            /* Get max value */
-            const auto max_val = *reinterpret_cast<const T *>(max_it.ptr());
-            const auto vec_max = vdup_n<vec_8_byte_t<T>>(max_val);
-
-            /* Init sum to zero */
-            auto vec_sum = vdup_n<vec_16_byte_t<U>>(0);
-
-            /* Loop over row and compute exponentials and sum */
-            int           i        = 0;
-            constexpr int vec_size = vec_size_of(vec_sum);
-            for(; i <= (input_width - vec_size); i += vec_size)
-            {
-                auto vec_elements = vld<vec_8_byte_t<T>>(in_ptr + i);
-                vec_elements      = vqsub(vec_elements, vec_max);
-                vec_elements      = vqexp(vec_elements, fixed_point_position);
-                vec_sum           = vqadd(vec_sum, vmovl(vec_elements));
-                vst(tmp_ptr + i, vec_elements);
-            }
-            /* Reduce sum */
-            const vec_8_byte_t<U> sum_8_byte = vqadd(vget_high(vec_sum), vget_low(vec_sum));
-            U                     sum        = reduce_add(sqadd<U>, sum_8_byte);
-
-            /* Run remaining elements */
-            for(; i < input_width; ++i)
-            {
-                T element  = sqexp(sqsub(in_ptr[i], max_val), fixed_point_position);
-                sum        = sqadd<U>(sum, element);
-                tmp_ptr[i] = element;
-            }
-
-            const auto qsum  = utility::saturate_cast<T>(sum);
-            vec_sum_inversed = vqrecip(vdup_n<vec_16_byte_t<T>>(qsum), fixed_point_position);
-        }
-
-        /* Normalize exponentials */
-        {
-            /* Loop over row and compute softmax */
-            int           i        = 0;
-            constexpr int vec_size = vec_size_of(vec_sum_inversed);
-            for(; i <= (input_width - vec_size); i += vec_size)
-            {
-                const auto             vec_in           = vld<vec_16_byte_t<T>>(tmp_ptr + i);
-                const vec_16_byte_t<T> normalized_value = vqmul(vec_in, vec_sum_inversed, fixed_point_position);
-                vst(out_ptr + i, normalized_value);
-            }
-
-            const T sum_inversed = vget_lane<0>(vec_sum_inversed);
-
-            /* Run remaining elements */
-            for(; i < input_width; ++i)
-            {
-                out_ptr[i] = sqmul(tmp_ptr[i], sum_inversed, fixed_point_position);
-            }
-        }
-    },
-    in_it, max_it, out_it);
-}
-
 template <typename T>
 void logits_1d_softmax_float(const ITensor &in, const ITensor &max, void *const tmp,
                              ITensor &out, const float beta, const Window &window)
@@ -907,12 +761,6 @@ void NELogits1DSoftmaxKernel::configure(const ITensor *input, const ITensor *max
     {
         case DataType::QASYMM8:
             _func = &logits_1d_softmax_qasymm8;
-            break;
-        case DataType::QS8:
-            _func = &logits_1d_softmax_fixed_point<qint8_t, qint16_t>;
-            break;
-        case DataType::QS16:
-            _func = &logits_1d_softmax_fixed_point<qint16_t, qint32_t>;
             break;
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:

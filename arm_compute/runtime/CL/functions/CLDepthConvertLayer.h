@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,20 +43,16 @@ public:
      *
      * Valid conversions Input -> Output :
      *
-     *   - QS8 -> F32
-     *   - QS16 -> F32
      *   - U8 -> U16, S16, U32, S32
      *   - U16 -> U8, U32, S32
      *   - S16 -> U8, U32, S32
      *   - U32 -> U8, U16, S16
      *   - S32 -> U8, U16, S16
-     *   - F32 -> QS8, QS16
      *
-     * @param[in]  input  The input tensor to convert. Data types supported: QS8/U8/U16/S16/Q16/U32/S32/F32.
-     * @param[out] output The output tensor. Data types supported: QS8/U8/U16/S16/QS16/U32/S32/F32.
+     * @param[in]  input  The input tensor to convert. Data types supported: U8/U16/S16/Q16/U32/S32/F32.
+     * @param[out] output The output tensor. Data types supported: U8/U16/S16/U32/S32/F32.
      * @param[in]  policy Conversion policy.
      * @param[in]  shift  Value for down/up conversions. Must be 0 <= shift < 8.
-     *                    It is not used on fixed point conversion.
      */
     void configure(const ICLTensor *input, ICLTensor *output, ConvertPolicy policy, uint32_t shift);
 };

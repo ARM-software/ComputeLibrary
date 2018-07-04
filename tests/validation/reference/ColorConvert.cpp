@@ -24,7 +24,6 @@
 #include "ColorConvert.h"
 
 #include "arm_compute/core/Types.h"
-#include "tests/validation/FixedPoint.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/ColorConvertHelper.h"
 

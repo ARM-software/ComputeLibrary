@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,38 +45,6 @@ class Coordinates;
 
 namespace
 {
-void sub_wrap_QS8_QS8_QS8(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
-{
-    Iterator input1(in1, window);
-    Iterator input2(in2, window);
-    Iterator output(out, window);
-
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        const qint8x16_t a = vld1q_qs8(reinterpret_cast<const qint8_t *>(input1.ptr()));
-        const qint8x16_t b = vld1q_qs8(reinterpret_cast<const qint8_t *>(input2.ptr()));
-
-        vst1q_qs8(reinterpret_cast<qint8_t *>(output.ptr()), vsubq_qs8(a, b));
-    },
-    input1, input2, output);
-}
-
-void sub_saturate_QS8_QS8_QS8(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
-{
-    Iterator input1(in1, window);
-    Iterator input2(in2, window);
-    Iterator output(out, window);
-
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        const qint8x16_t a = vld1q_qs8(reinterpret_cast<const qint8_t *>(input1.ptr()));
-        const qint8x16_t b = vld1q_qs8(reinterpret_cast<const qint8_t *>(input2.ptr()));
-
-        vst1q_qs8(reinterpret_cast<qint8_t *>(output.ptr()), vqsubq_qs8(a, b));
-    },
-    input1, input2, output);
-}
-
 void sub_wrap_U8_U8_U8(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
     Iterator input1(in1, window);
@@ -353,23 +321,15 @@ inline Status validate_arguments(const ITensorInfo *input1, const ITensorInfo *i
 {
     ARM_COMPUTE_UNUSED(policy);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input1, input2, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::QS8, DataType::U8, DataType::QS16, DataType::S16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, 1, DataType::QS8, DataType::U8, DataType::QS16, DataType::S16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::QS8, DataType::U8, DataType::QS16, DataType::S16, DataType::F16, DataType::F32);
-
-    if(is_data_type_fixed_point(input1->data_type()) || is_data_type_fixed_point(input2->data_type()) || is_data_type_fixed_point(output->data_type()))
-    {
-        // Check that all data types are the same and all fixed-point positions are the same
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input1, input2, output);
-    }
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input1, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input2, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(
-        !(input1->data_type() == DataType::QS8 && input2->data_type() == DataType::QS8 && output->data_type() == DataType::QS8)
-        && !(input1->data_type() == DataType::U8 && input2->data_type() == DataType::U8 && output->data_type() == DataType::U8)
+        !(input1->data_type() == DataType::U8 && input2->data_type() == DataType::U8 && output->data_type() == DataType::U8)
         && !(input1->data_type() == DataType::U8 && input2->data_type() == DataType::U8 && output->data_type() == DataType::S16)
         && !(input1->data_type() == DataType::U8 && input2->data_type() == DataType::S16 && output->data_type() == DataType::S16)
         && !(input1->data_type() == DataType::S16 && input2->data_type() == DataType::U8 && output->data_type() == DataType::S16)
-        && !(input1->data_type() == DataType::QS16 && input2->data_type() == DataType::QS16 && output->data_type() == DataType::QS16)
         && !(input1->data_type() == DataType::S16 && input2->data_type() == DataType::S16 && output->data_type() == DataType::S16)
         && !(input1->data_type() == DataType::F32 && input2->data_type() == DataType::F32 && output->data_type() == DataType::F32)
         && !(input1->data_type() == DataType::F16 && input2->data_type() == DataType::F16 && output->data_type() == DataType::F16),
@@ -432,8 +392,6 @@ void NEArithmeticSubtractionKernel::configure(const ITensor *input1, const ITens
 
     static std::map<std::string, NEArithmeticSubtractionKernel::SubFunction *> map_function =
     {
-        { "sub_wrap_QS8_QS8_QS8", &sub_wrap_QS8_QS8_QS8 },
-        { "sub_saturate_QS8_QS8_QS8", &sub_saturate_QS8_QS8_QS8 },
         { "sub_wrap_U8_U8_U8", &sub_wrap_U8_U8_U8 },
         { "sub_wrap_U8_U8_S16", &sub_wrap_U8_U8_S16 },
         { "sub_saturate_U8_U8_U8", &sub_saturate_U8_U8_U8 },
@@ -442,8 +400,6 @@ void NEArithmeticSubtractionKernel::configure(const ITensor *input1, const ITens
         { "sub_wrap_S16_U8_S16", &sub_wrap_S16_U8_S16 },
         { "sub_saturate_U8_S16_S16", &sub_saturate_U8_S16_S16 },
         { "sub_saturate_S16_U8_S16", &sub_saturate_S16_U8_S16 },
-        { "sub_wrap_QS16_QS16_QS16", &sub_wrap_S16_S16_S16 },
-        { "sub_saturate_QS16_QS16_QS16", &sub_saturate_S16_S16_S16 },
         { "sub_wrap_S16_S16_S16", &sub_wrap_S16_S16_S16 },
         { "sub_saturate_S16_S16_S16", &sub_saturate_S16_S16_S16 },
         { "sub_wrap_F32_F32_F32", &sub_F32_F32_F32 },

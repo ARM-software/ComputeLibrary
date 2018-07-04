@@ -69,7 +69,7 @@ public:
     /** Set the input and output of the kernel.
      *
      * @param[in]  input  The input tensor to convert. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] if shared,
-     *                    and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM,  num_patches] if unshared. Data types supported: QS8/QS16/QASYMM8/F16/F32
+     *                    and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM,  num_patches] if unshared. Data types supported: QASYMM8/F16/F32
      * @param[in]  biases The shared biases tensor to append.  Bias is 1D tensor with dimensions [OFM] if shared and 2D tensor with
      *                    dimensions [OFM, num_patches] if unshared. Data types supported: Same as @p input
      *                    @warning Appending biases to weights reshaped matrix is not supported for quantized asymmetric types.
@@ -79,7 +79,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLWeightsReshapeKernel
      *
      * @param[in] input  The input tensor to convert. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] if shared,
-     *                   and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM,  num_patches] if unshared. Data types supported: QS8/QS16/QASYMM8/F16/F32
+     *                   and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM,  num_patches] if unshared. Data types supported: QASYMM8/F16/F32
      * @param[in] biases The shared biases tensor to append.  Bias is 1D tensor with dimensions [OFM] if shared and 2D tensor with
      *                   dimensions [OFM, num_patches] if unshared. Data types supported: Same as @p input
      *                   @warning Appending biases to weights reshaped matrix is not supported for quantized asymmetric types.

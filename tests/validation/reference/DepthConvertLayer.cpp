@@ -23,7 +23,6 @@
  */
 #include "DepthConvertLayer.h"
 
-#include "tests/validation/FixedPoint.h"
 #include "tests/validation/Helpers.h"
 
 #include "tests/Types.h"
@@ -58,33 +57,6 @@ SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, Con
             result[i] = (policy == ConvertPolicy::SATURATE) ? saturate_cast<T2>(val) : static_cast<T2>(val);
         }
     }
-    return result;
-}
-
-template < typename T1, typename T2, typename std::enable_if < std::is_integral<T1>::value &&std::is_integral<T2>::value &&std::is_same<T1, T2>::value, int >::type >
-SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift)
-{
-    ARM_COMPUTE_UNUSED(policy);
-
-    using namespace fixed_point_arithmetic;
-
-    SimpleTensor<T2> result(src.shape(), dt_out);
-
-    bool is_in_place = (&src == &result);
-
-    const int fixed_point_position_in  = src.fixed_point_position();
-    const int fixed_point_position_out = (is_in_place) ? static_cast<int>(shift) : result.fixed_point_position();
-
-    if(!is_in_place || (fixed_point_position_in != fixed_point_position_out))
-    {
-        for(int i = 0; i < src.num_elements(); ++i)
-        {
-            auto x = fixed_point<T2>(src[i], fixed_point_position_in, true);
-            x.resacle(fixed_point_position_out);
-            result[i] = x.raw();
-        }
-    }
-
     return result;
 }
 

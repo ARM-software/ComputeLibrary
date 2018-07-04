@@ -29,7 +29,6 @@
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/CL/OpenCL.h"
 #include "arm_compute/core/Error.h"
-#include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Window.h"
@@ -64,7 +63,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, f
     ARM_COMPUTE_UNUSED(input, output, beta);
 
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
 
@@ -88,19 +87,7 @@ void CLGEMMMatrixAdditionKernel::configure(const ICLTensor *input, ICLTensor *ou
     _output = output;
 
     std::ostringstream ma_arguments;
-    if(is_data_type_fixed_point(input->info()->data_type()))
-    {
-        ma_arguments << "-DBETA=" << (input->info()->data_type() == DataType::QS8 ?
-                                      sqcvt_qs8_f32(beta, input->info()->fixed_point_position()) :
-                                      sqcvt_qs16_f32(beta, input->info()->fixed_point_position()))
-                     << " ";
-        ma_arguments << "-DFIXED_POINT_POSITION=" << input->info()->fixed_point_position();
-    }
-    else
-    {
-        ma_arguments << "-DBETA=" << beta;
-    }
-
+    ma_arguments << "-DBETA=" << beta;
     std::set<std::string> build_opts;
     build_opts.emplace(ma_arguments.str());
 

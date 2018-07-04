@@ -25,7 +25,6 @@
 
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "tests/validation/FixedPoint.h"
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute
@@ -44,7 +43,7 @@ SimpleTensor<T> pooling_layer(const SimpleTensor<T> &src, const PoolingLayerInfo
     ARM_COMPUTE_ERROR_ON(info.is_global_pooling() && (src.shape().x() != src.shape().y()));
 
     // Create reference
-    SimpleTensor<T> dst{ compute_pool_shape(TensorInfo(src.shape(), 1, src.data_type(), src.fixed_point_position()), info), src.data_type(), 1 };
+    SimpleTensor<T> dst{ compute_pool_shape(TensorInfo(src.shape(), 1, src.data_type()), info), src.data_type(), 1 };
 
     const int   pool_size_x     = info.is_global_pooling() ? src.shape().x() : info.pool_size().width;
     const int   pool_size_y     = info.is_global_pooling() ? src.shape().y() : info.pool_size().height;

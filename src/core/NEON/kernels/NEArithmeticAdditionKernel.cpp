@@ -48,38 +48,6 @@ namespace
 {
 constexpr unsigned int num_elems_processed_per_iteration = 16;
 
-void add_wrap_QS8_QS8_QS8(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
-{
-    Iterator input1(in1, window.broadcast_if_dimension_le_one(in1->info()->tensor_shape()));
-    Iterator input2(in2, window.broadcast_if_dimension_le_one(in2->info()->tensor_shape()));
-    Iterator output(out, window);
-
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        const qint8x16_t a = vld1q_qs8(reinterpret_cast<const qint8_t *>(input1.ptr()));
-        const qint8x16_t b = vld1q_qs8(reinterpret_cast<const qint8_t *>(input2.ptr()));
-
-        vst1q_qs8(reinterpret_cast<qint8_t *>(output.ptr()), vaddq_qs8(a, b));
-    },
-    input1, input2, output);
-}
-
-void add_saturate_QS8_QS8_QS8(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
-{
-    Iterator input1(in1, window.broadcast_if_dimension_le_one(in1->info()->tensor_shape()));
-    Iterator input2(in2, window.broadcast_if_dimension_le_one(in2->info()->tensor_shape()));
-    Iterator output(out, window);
-
-    execute_window_loop(window, [&](const Coordinates & id)
-    {
-        const qint8x16_t a = vld1q_qs8(reinterpret_cast<const qint8_t *>(input1.ptr()));
-        const qint8x16_t b = vld1q_qs8(reinterpret_cast<const qint8_t *>(input2.ptr()));
-
-        vst1q_qs8(reinterpret_cast<qint8_t *>(output.ptr()), vqaddq_qs8(a, b));
-    },
-    input1, input2, output);
-}
-
 void add_wrap_U8_U8_U8(const ITensor *in1, const ITensor *in2, ITensor *out, const Window &window)
 {
     Iterator input1(in1, window.broadcast_if_dimension_le_one(in1->info()->tensor_shape()));
@@ -362,28 +330,21 @@ Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, 
 {
     ARM_COMPUTE_UNUSED(policy);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::QS8, DataType::QS16, DataType::S16, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::QS8, DataType::QS16, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input1, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input2, 1, DataType::U8, DataType::S16, DataType::F16, DataType::F32);
 
     const TensorShape out_shape = TensorShape::broadcast_shape(input1.tensor_shape(), input2.tensor_shape());
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(out_shape.total_size() == 0, "Inputs are not broadcast compatible");
 
-    if(is_data_type_fixed_point(input1.data_type()) || is_data_type_fixed_point(input2.data_type()))
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(&input1, &input2);
-    }
-
     // Validate in case of configured output
     if(output.total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(
-            !(input1.data_type() == DataType::QS8 && input2.data_type() == DataType::QS8 && output.data_type() == DataType::QS8)
-            && !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::U8 && output.data_type() == DataType::U8)
+            !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::U8 && output.data_type() == DataType::U8)
             && !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::U8 && output.data_type() == DataType::S16)
             && !(input1.data_type() == DataType::U8 && input2.data_type() == DataType::S16 && output.data_type() == DataType::S16)
             && !(input1.data_type() == DataType::S16 && input2.data_type() == DataType::U8 && output.data_type() == DataType::S16)
-            && !(input1.data_type() == DataType::QS16 && input2.data_type() == DataType::QS16 && output.data_type() == DataType::QS16)
             && !(input1.data_type() == DataType::S16 && input2.data_type() == DataType::S16 && output.data_type() == DataType::S16)
             && !(input1.data_type() == DataType::F32 && input2.data_type() == DataType::F32 && output.data_type() == DataType::F32)
             && !(input1.data_type() == DataType::F16 && input2.data_type() == DataType::F16 && output.data_type() == DataType::F16),
@@ -391,11 +352,6 @@ Status validate_arguments(const ITensorInfo &input1, const ITensorInfo &input2, 
 
         ARM_COMPUTE_RETURN_ERROR_ON_MSG(detail::have_different_dimensions(out_shape, output.tensor_shape(), 0),
                                         "Wrong shape for output");
-
-        if(is_data_type_fixed_point(input1.data_type()) || is_data_type_fixed_point(output.data_type()))
-        {
-            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(&input1, &output);
-        }
     }
 
     return Status{};
@@ -460,8 +416,6 @@ void NEArithmeticAdditionKernel::configure(const ITensor *input1, const ITensor 
 
     static std::map<std::string, AddFunction *> map_function =
     {
-        { "add_wrap_QS8_QS8_QS8", &add_wrap_QS8_QS8_QS8 },
-        { "add_saturate_QS8_QS8_QS8", &add_saturate_QS8_QS8_QS8 },
         { "add_wrap_U8_U8_U8", &add_wrap_U8_U8_U8 },
         { "add_saturate_U8_U8_U8", &add_saturate_U8_U8_U8 },
         { "add_wrap_S16_U8_S16", &add_wrap_S16_U8_S16 },
@@ -470,8 +424,6 @@ void NEArithmeticAdditionKernel::configure(const ITensor *input1, const ITensor 
         { "add_saturate_U8_S16_S16", &add_saturate_U8_S16_S16 },
         { "add_wrap_U8_U8_S16", &add_wrap_U8_U8_S16 },
         { "add_saturate_U8_U8_S16", &add_saturate_U8_U8_S16 },
-        { "add_wrap_QS16_QS16_QS16", &add_wrap_S16_S16_S16 },
-        { "add_saturate_QS16_QS16_QS16", &add_saturate_S16_S16_S16 },
         { "add_wrap_S16_S16_S16", &add_wrap_S16_S16_S16 },
         { "add_saturate_S16_S16_S16", &add_saturate_S16_S16_S16 },
         { "add_wrap_F32_F32_F32", &add_F32_F32_F32 },

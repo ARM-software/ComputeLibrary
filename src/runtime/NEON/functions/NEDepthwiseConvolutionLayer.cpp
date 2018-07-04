@@ -88,7 +88,7 @@ void NEDepthwiseConvolutionLayer3x3::configure(ITensor *input, const ITensor *we
     }
     else
     {
-        // Allocate the intermediate accumulator tensor in case of fixed point input
+        // Allocate the intermediate accumulator tensor in case of quantized input
         if(_is_quantized)
         {
             _accumulator.allocator()->init(TensorInfo(output->info()->tensor_shape(), 1, DataType::S32));

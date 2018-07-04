@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -91,10 +91,6 @@ void CLFillBorderKernel::configure(ICLTensor *tensor, BorderSize border_size, Bo
     build_opts.emplace(("-DBORDER_SIZE_BOTTOM=" + support::cpp11::to_string(border_size.bottom)));
     build_opts.emplace(("-DBORDER_SIZE_LEFT=" + support::cpp11::to_string(border_size.left)));
     build_opts.emplace(("-DBORDER_SIZE_RIGHT=" + support::cpp11::to_string(border_size.right)));
-    if(is_data_type_fixed_point(tensor->info()->data_type()))
-    {
-        build_opts.emplace("-DFIXED_POINT_POSITION");
-    }
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
@@ -125,14 +121,12 @@ void CLFillBorderKernel::configure(ICLTensor *tensor, BorderSize border_size, Bo
             case DataType::QASYMM8:
                 set_constant_border<uint8_t>(idx, constant_border_value);
                 break;
-            case DataType::QS8:
             case DataType::S8:
                 set_constant_border<int8_t>(idx, constant_border_value);
                 break;
             case DataType::U16:
                 set_constant_border<uint16_t>(idx, constant_border_value);
                 break;
-            case DataType::QS16:
             case DataType::S16:
                 set_constant_border<int16_t>(idx, constant_border_value);
                 break;

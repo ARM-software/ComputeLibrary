@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -51,7 +51,7 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in, out] input     Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
-     *                           and an optional 4th dimension for batch of inputs. Data types supported: QS8/QS16/F16/F32 (Written to by the border handler)
+     *                           and an optional 4th dimension for batch of inputs. Data types supported: F16/F32 (Written to by the border handler)
      * @param[out]     output    Destination tensor. Dimensions, data type and number of channels must match the input ones.
      * @param[in]      norm_info Normalization layer information like the normalization type, normalization size and other parameters.
      */
@@ -59,7 +59,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLNormalizationLayer
      *
      * @param[in] input     Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
-     *                      and an optional 4th dimension for batch of inputs. Data types supported: QS8/QS16/F16/F32
+     *                      and an optional 4th dimension for batch of inputs. Data types supported: F16/F32
      * @param[in] output    Destination tensor. Dimensions, data type and number of channels must match the input ones.
      * @param[in] norm_info Normalization layer information like the normalization type, normalization size and other parameters.
      *

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,7 @@ class CLFlattenLayer : public ICLSimpleFunction
 public:
     /** Initialise the kernel's input and output.
      *
-     * @param[in]  input  First input tensor to flatten with at least 3 dimensions. The dimensions over the third will be interpreted as batches. Data types supported: QS8/QS16/F16/F32
+     * @param[in]  input  First input tensor to flatten with at least 3 dimensions. The dimensions over the third will be interpreted as batches. Data types supported: F16/F32
      * @param[out] output Output tensor with shape [w*h*d, input_batches] where:
      *             w = width input tensor, h = height input tensor and d = depth input tensor. Data type supported: same as @p input
      */

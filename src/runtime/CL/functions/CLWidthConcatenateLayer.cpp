@@ -48,7 +48,7 @@ Status CLWidthConcatenateLayer::validate(const std::vector<ITensorInfo *> &input
     // Output auto inizialitation if not yet initialized
     TensorInfo  tmp_output_info = *output->clone();
     TensorShape output_shape    = arm_compute::misc::shape_calculator::calculate_width_concatenate_shape(inputs_vector);
-    auto_init_if_empty(tmp_output_info, output_shape, 1, inputs_vector[0]->data_type(), inputs_vector[0]->fixed_point_position());
+    auto_init_if_empty(tmp_output_info, output_shape, 1, inputs_vector[0]->data_type());
 
     unsigned int width_offset = 0;
     for(const auto &input : inputs_vector)
@@ -73,7 +73,7 @@ void CLWidthConcatenateLayer::configure(std::vector<ICLTensor *> inputs_vector, 
     TensorShape output_shape = arm_compute::misc::shape_calculator::calculate_width_concatenate_shape(inputs_vector);
 
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), output_shape, 1, inputs_vector[0]->info()->data_type(), inputs_vector[0]->info()->fixed_point_position());
+    auto_init_if_empty(*output->info(), output_shape, 1, inputs_vector[0]->info()->data_type());
     ARM_COMPUTE_ERROR_THROW_ON(CLWidthConcatenateLayer::validate(inputs_vector_info, output->info()));
 
     unsigned int width_offset = 0;

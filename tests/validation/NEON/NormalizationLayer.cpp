@@ -66,19 +66,19 @@ TEST_SUITE(NormalizationLayer)
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
-    framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Mismatching data type input/output
-                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Mismatching shapes
-                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Even normalization
-                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Non implemented IN_MAP_2D
-                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0), // Window shrink
-                                            TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32, 0),
+    framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Mismatching data type input/output
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Mismatching shapes
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Even normalization
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Non implemented IN_MAP_2D
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32), // Window shrink
+                                            TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                           }),
-    framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16, 0),
-                                            TensorInfo(TensorShape(27U, 11U, 2U), 1, DataType::F32, 0),
-                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),
-                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),
-                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),
-                                            TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32, 0),
+    framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),
+                                            TensorInfo(TensorShape(27U, 11U, 2U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(32U, 13U, 2U), 1, DataType::F32),
                                           })),
     framework::dataset::make("NormInfo",  { NormalizationLayerInfo(NormType::IN_MAP_1D, 5),
                                             NormalizationLayerInfo(NormType::IN_MAP_1D, 5),

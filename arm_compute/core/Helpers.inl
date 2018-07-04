@@ -202,7 +202,6 @@ inline bool auto_init_if_empty(ITensorInfo       &info,
                                const TensorShape &shape,
                                int                num_channels,
                                DataType           data_type,
-                               int                fixed_point_position,
                                QuantizationInfo   quantization_info)
 {
     if(info.tensor_shape().total_size() == 0)
@@ -210,7 +209,6 @@ inline bool auto_init_if_empty(ITensorInfo       &info,
         info.set_data_type(data_type);
         info.set_num_channels(num_channels);
         info.set_tensor_shape(shape);
-        info.set_fixed_point_position(fixed_point_position);
         info.set_quantization_info(quantization_info);
         return true;
     }
@@ -225,7 +223,6 @@ inline bool auto_init_if_empty(ITensorInfo &info_sink, const ITensorInfo &info_s
         info_sink.set_data_type(info_source.data_type());
         info_sink.set_num_channels(info_source.num_channels());
         info_sink.set_tensor_shape(info_source.tensor_shape());
-        info_sink.set_fixed_point_position(info_source.fixed_point_position());
         info_sink.set_quantization_info(info_source.quantization_info());
         info_sink.set_data_layout(info_source.data_layout());
         return true;
@@ -272,17 +269,6 @@ inline bool set_data_layout_if_unknown(ITensorInfo &info, DataLayout data_layout
     if(info.data_layout() == DataLayout::UNKNOWN)
     {
         info.set_data_layout(data_layout);
-        return true;
-    }
-
-    return false;
-}
-
-inline bool set_fixed_point_position_if_zero(ITensorInfo &info, int fixed_point_position)
-{
-    if(info.fixed_point_position() == 0 && (info.data_type() == DataType::QS8 || info.data_type() == DataType::QS16))
-    {
-        info.set_fixed_point_position(fixed_point_position);
         return true;
     }
 

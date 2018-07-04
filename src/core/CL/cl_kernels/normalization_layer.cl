@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,22 +23,6 @@
  */
 #include "helpers.h"
 
-#if defined(FIXED_POINT_POSITION)
-
-#include "fixed_point.h"
-#define MUL_OP(x, y) MUL_SAT_OP_EXPAND((x), (y), DATA_TYPE, VEC_SIZE, FIXED_POINT_POSITION)
-#define ADD_OP(x, y) ADD_SAT_OP_EXPAND((x), (y), DATA_TYPE, VEC_SIZE)
-#define DIV_OP(x, y) DIV_SAT_OP_VEC_EXPAND((x), (y), DATA_TYPE, VEC_SIZE, FIXED_POINT_POSITION)
-#define EXP_OP(x) EXP_OP_EXPAND((x), DATA_TYPE, VEC_SIZE, FIXED_POINT_POSITION)
-#define LOG_OP(x) LOG_OP_EXPAND((x), DATA_TYPE, VEC_SIZE, FIXED_POINT_POSITION)
-#define POW_OP(x, y) EXP_OP(MUL_OP(LOG_OP((x)), (y)))
-#define SQCVT_SAT(a) SQCVT_SAT_OP_EXPAND((a), DATA_TYPE, FIXED_POINT_POSITION)
-
-#define LOAD_OP(offset, ptr) vload16(offset, ptr)
-#define STORE_OP(data, offset, ptr) vstore16(data, offset, ptr)
-
-#else // FIXED_POINT_POSITION
-
 #define MUL_OP(x, y) ((x) * (y))
 #define ADD_OP(x, y) ((x) + (y))
 #define DIV_OP(x, y) ((x) / (y))
@@ -48,18 +32,15 @@
 #define LOAD_OP(offset, ptr) vload4(offset, ptr)
 #define STORE_OP(data, offset, ptr) vstore4(data, offset, ptr)
 
-#endif // FIXED_POINT_POSITION
-
 /** Apply cross-map normalization.
  *
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=short
  * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size, e.g. -DVEC_SIZE=16
  * @note The radius should be given as a preprocessor argument using -DRADIUS=size. e.g. -DRADIUS=5
  * @note The number of slices should be given as a preprocessor argument using -DNUM_SLICES=size. e.g. -DNUM_SLICES=192
- * @note In case of fixed-point operation -DFIXED_POINT_POSITION=fixed_point_position must be provided: e.g. -DFIXED_POINT_POSITION=3
  * @note Scaling coefficient (= alpha/norm_size), beta and kappa need to be passed at compile time using -DCOEFF, -DALPHA and -DKAPPA
  *
- * @param[in]  input_ptr                            Pointer to the first source tensor. Supported data types: QS8/QS16/F16/F32
+ * @param[in]  input_ptr                            Pointer to the first source tensor. Supported data types: F16/F32
  * @param[in]  input_stride_x                       Stride of the first source tensor in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the first source tensor in Y dimension (in bytes)
@@ -116,10 +97,9 @@ __kernel void normalization_layer_cross_map(TENSOR3D_DECLARATION(input),
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=short
  * @note Vector size should be given as a preprocessor argument using -DVEC_SIZE=size, e.g. -DVEC_SIZE=16
  * @note The radius should be given as a preprocessor argument using -DRADIUS=size. e.g. -DRADIUS=5
- * @note In case of fixed-point operation -DFIXED_POINT_POSITION=fixed_point_position must be provided: e.g. -DFIXED_POINT_POSITION=3
  * @note Scaling coefficient (= alpha/norm_size), beta and kappa need to be passed at compile time using -DCOEFF, -DALPHA and -DKAPPA
  *
- * @param[in]  input_ptr                            Pointer to the first source tensor. Supported data types: QS8/F16/F32
+ * @param[in]  input_ptr                            Pointer to the first source tensor. Supported data types: F16/F32
  * @param[in]  input_stride_x                       Stride of the first source tensor in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the first source tensor in Y dimension (in bytes)

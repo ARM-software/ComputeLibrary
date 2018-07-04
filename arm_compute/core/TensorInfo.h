@@ -86,20 +86,18 @@ public:
      *
      * Can be used for automatic derivation of the shape by the function.
      *
-     * @param[in] num_channels         It indicates the number of channels for each tensor element
-     * @param[in] data_type            Data type to use for each tensor element
-     * @param[in] fixed_point_position (Optional) It specifies the fixed point position when the tensor data type is QS8, QS16 or QS32.
+     * @param[in] num_channels It indicates the number of channels for each tensor element
+     * @param[in] data_type    Data type to use for each tensor element
      */
-    TensorInfo(size_t num_channels, DataType data_type, size_t fixed_point_position = 0);
+    TensorInfo(size_t num_channels, DataType data_type);
 
     /** Constructor
      *
-     * @param[in] tensor_shape         It specifies the size for each dimension of the tensor in number of elements.
-     * @param[in] num_channels         It indicates the number of channels for each tensor element
-     * @param[in] data_type            Data type to use for each tensor element
-     * @param[in] fixed_point_position (Optional) Fixed point position that expresses the number of bits for the fractional part of the number when the tensor's data type is QS8 or QS16.
+     * @param[in] tensor_shape It specifies the size for each dimension of the tensor in number of elements.
+     * @param[in] num_channels It indicates the number of channels for each tensor element
+     * @param[in] data_type    Data type to use for each tensor element
      */
-    TensorInfo(const TensorShape &tensor_shape, size_t num_channels, DataType data_type, int fixed_point_position = 0);
+    TensorInfo(const TensorShape &tensor_shape, size_t num_channels, DataType data_type);
 
     /** Constructor
      *
@@ -146,20 +144,18 @@ public:
      *
      * Can be used for automatic derivation of the shape by the function.
      *
-     * @param[in] num_channels         Desired number of channels for each tensor element.
-     * @param[in] data_type            Data type to use for each tensor element.
-     * @param[in] fixed_point_position (Optional) Fixed point position when the tensor data type is QS8, QS16 or QS32.
+     * @param[in] num_channels Desired number of channels for each tensor element.
+     * @param[in] data_type    Data type to use for each tensor element.
      */
-    void init(size_t num_channels, DataType data_type, size_t fixed_point_position = 0);
+    void init(size_t num_channels, DataType data_type);
 
     /** Initialize the metadata structure with the given parameters
      *
-     * @param[in] tensor_shape         Size for each dimension of the tensor in number of elements.
-     * @param[in] num_channels         Desired number of channels for each tensor element.
-     * @param[in] data_type            Data type to use for each tensor element.
-     * @param[in] fixed_point_position (Optional) Fixed point position that expresses the number of bits for the fractional part of the number when the tensor's data type is QS8 or QS16.
+     * @param[in] tensor_shape Size for each dimension of the tensor in number of elements.
+     * @param[in] num_channels Desired number of channels for each tensor element.
+     * @param[in] data_type    Data type to use for each tensor element.
      */
-    void init(const TensorShape &tensor_shape, size_t num_channels, DataType data_type, int fixed_point_position = 0);
+    void init(const TensorShape &tensor_shape, size_t num_channels, DataType data_type);
 
     /** Initialize the metadata structure with the given parameters
      *
@@ -169,10 +165,9 @@ public:
      * @param[in] strides_in_bytes              Stride in bytes for accessing each dimension of the tensor.
      * @param[in] offset_first_element_in_bytes Offset in bytes from the beginning of memory allocation to access the first element.
      * @param[in] total_size_in_bytes           Size in bytes of the memory allocation (including the offset to the first element).
-     * @param[in] fixed_point_position          (Optional) Fixed point position that expresses the number of bits for the fractional part of the number when the tensor's data type is QS8 or QS16.
      */
     void init(const TensorShape &tensor_shape, size_t num_channels, DataType data_type, const Strides &strides_in_bytes, size_t offset_first_element_in_bytes,
-              size_t total_size_in_bytes, int fixed_point_position = 0);
+              size_t total_size_in_bytes);
     /** Initialize the metadata structure for the given HOG's metadata
      *
      * @param[in] hog_info HOG's metadata used to allocate normalized HOG space
@@ -190,19 +185,18 @@ public:
      * @return Total allocation size including padding in bytes.
      */
     size_t init_auto_padding(const TensorShape &tensor_shape, Format format);
-    /** Initialize the metadata structure for the given tensor shape, number of channels,
-     *  data type and fixed point position. (Padding is automatically calculated)
+    /** Initialize the metadata structure for the given tensor shape, number of channels and
+     *  data type. (Padding is automatically calculated)
      *
      * @note The padding used by this method is really conservative so that the tensor can be used for most functions.
      *
-     * @param[in] tensor_shape         It specifies the size for each dimension of the tensor in number of elements
-     * @param[in] num_channels         It indicates the number of channels for each tensor element
-     * @param[in] data_type            Data type to use for each tensor element
-     * @param[in] fixed_point_position (Optional) Fixed point position that expresses the number of bits for the fractional part of the number when the tensor's data type is QS8 or QS16.
+     * @param[in] tensor_shape It specifies the size for each dimension of the tensor in number of elements
+     * @param[in] num_channels It indicates the number of channels for each tensor element
+     * @param[in] data_type    Data type to use for each tensor element
      *
      * @return Total allocation size including padding in bytes.
      */
-    size_t init_auto_padding(const TensorShape &tensor_shape, size_t num_channels, DataType data_type, int fixed_point_position = 0);
+    size_t init_auto_padding(const TensorShape &tensor_shape, size_t num_channels, DataType data_type);
     /** Initialize the metadata structure for the given HOG's metadata
      *
      * @note init_auto_padding will be used for the tensor initialization.
@@ -221,7 +215,6 @@ public:
     ITensorInfo &set_num_channels(int num_channels) override;
     ITensorInfo &set_format(Format format) override;
     ITensorInfo &set_tensor_shape(const TensorShape &shape) override;
-    ITensorInfo &set_fixed_point_position(int fixed_point_position) override;
     ITensorInfo &set_quantization_info(const QuantizationInfo &quantization_info) override;
     ITensorInfo &set_data_layout(const DataLayout &data_layout) override;
     ITensorInfo &reset_padding() override;
@@ -244,10 +237,6 @@ public:
         return _offset_first_element_in_bytes;
     }
     size_t offset_element_in_bytes(const Coordinates &pos) const override;
-    int fixed_point_position() const override
-    {
-        return _fixed_point_position;
-    }
     size_t element_size() const override
     {
         return data_size_from_type(_data_type) * _num_channels;
@@ -318,7 +307,6 @@ private:
     std::tuple<Strides, size_t, size_t> calculate_padding_requirements(const PaddingSize &padding);
 
     size_t           _total_size;
-    int              _fixed_point_position;
     size_t           _offset_first_element_in_bytes;
     Strides          _strides_in_bytes;
     size_t           _num_channels;

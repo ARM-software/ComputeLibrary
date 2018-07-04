@@ -42,11 +42,11 @@ void GCSoftmaxLayer::configure(const IGCTensor *input, IGCTensor *output, float 
     ARM_COMPUTE_ERROR_ON(beta != 1.0f);
 
     // Create intermediate tensors shapes
-    _tmp.allocator()->init(TensorInfo(input->info()->tensor_shape(), input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position()));
+    _tmp.allocator()->init(TensorInfo(input->info()->tensor_shape(), input->info()->num_channels(), input->info()->data_type()));
 
     TensorShape shape = input->info()->tensor_shape();
     shape.set(0, 1);
-    TensorInfo tensor_info_max_sum(shape, input->info()->num_channels(), input->info()->data_type(), input->info()->fixed_point_position());
+    TensorInfo tensor_info_max_sum(shape, input->info()->num_channels(), input->info()->data_type());
     _max.allocator()->init(tensor_info_max_sum);
     _sum.allocator()->init(tensor_info_max_sum);
 

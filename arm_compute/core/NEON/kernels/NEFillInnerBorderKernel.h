@@ -57,7 +57,7 @@ public:
      *
      * @note This kernel fills the borders within the XY-planes.
      *
-     * @param[in,out] input                 Tensor to process. Data types supported: U8/QS8/S16/S32/F32.
+     * @param[in,out] input                 Tensor to process. Data types supported: U8/S16/S32/F32.
      * @param[in]     border_size           Size of the border to fill in elements.
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      *

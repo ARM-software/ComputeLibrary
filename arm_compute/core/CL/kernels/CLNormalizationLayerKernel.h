@@ -48,7 +48,7 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  input     Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
-     *                       and an optional 4th dimension for batch of inputs. Data types supported: QS8/QS16/F16/F32.
+     *                       and an optional 4th dimension for batch of inputs. Data types supported: F16/F32.
      * @param[out] output    Destination tensor. Output will have the same number of dimensions as input. Data types supported: same as @p input.
      * @param[in]  norm_info Normalization layer information like the normalization type, normalization size and other parameters.
      */
@@ -56,7 +56,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref CLNormalizationLayerKernel
      *
      * @param[in] input     Source tensor. 3 lower dims represent a single input with dimensions [width, height, IFM],
-     *                      and an optional 4th dimension for batch of inputs. Data types supported: QS8/QS16/F16/F32.
+     *                      and an optional 4th dimension for batch of inputs. Data types supported: F16/F32.
      * @param[in] output    Destination tensor. Output will have the same number of dimensions as input. Data types supported: same as @p input.
      * @param[in] norm_info Normalization layer information like the normalization type, normalization size and other parameters.
      *

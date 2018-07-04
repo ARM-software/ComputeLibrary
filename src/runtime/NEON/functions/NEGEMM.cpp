@@ -46,7 +46,7 @@ NEGEMM::NEGEMM(std::shared_ptr<IMemoryManager> memory_manager)
 
 void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITensor *d, float alpha, float beta, const GEMMInfo &gemm_info)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::F32, DataType::F16, DataType::QS8, DataType::QS16);
+    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::F32, DataType::F16);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(a, b, d);
     ARM_COMPUTE_ERROR_ON_MSG(a->info()->dimension(0) != b->info()->dimension(1), "The product AB is defined only if the number of columns in A is equal to the number of rows in B");
     ARM_COMPUTE_ERROR_ON_MSG(gemm_info.is_a_reshaped(), "Matrix A already reshaped is not supported");
@@ -54,7 +54,7 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
 
     if(c != nullptr)
     {
-        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(c, 1, DataType::F32, DataType::F16, DataType::QS8, DataType::QS16);
+        ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(c, 1, DataType::F32, DataType::F16);
         ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(a, c);
         ARM_COMPUTE_ERROR_ON_MSG(a->info()->dimension(1) != c->info()->dimension(1), "The C matrix must have the same number of rows as the matrix A");
         ARM_COMPUTE_ERROR_ON_MSG(b->info()->dimension(0) != c->info()->dimension(0), "The C matrix must have the same number of columns as the matrix B");
@@ -103,8 +103,8 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
             shape_tmp_b.set(0, b->info()->dimension(1) * transpose_w);
             shape_tmp_b.set(1, std::ceil(b->info()->dimension(0) / static_cast<float>(transpose_w)));
 
-            TensorInfo info_a(shape_tmp_a, 1, a->info()->data_type(), a->info()->fixed_point_position());
-            TensorInfo info_b(shape_tmp_b, 1, b->info()->data_type(), a->info()->fixed_point_position());
+            TensorInfo info_a(shape_tmp_a, 1, a->info()->data_type());
+            TensorInfo info_b(shape_tmp_b, 1, b->info()->data_type());
 
             _tmp_a.allocator()->init(info_a);
             _tmp_b.allocator()->init(info_b);

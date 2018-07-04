@@ -45,7 +45,7 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->dimension(0) != weights->dimension(1),
                                     "Weights should have same width as length");
@@ -84,7 +84,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(),
                                                            misc::shape_calculator::compute_deep_convolution_shape(*input, *weights, conv_info));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
 
     return Status{};
@@ -103,7 +102,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     auto_init_if_empty(*output, output_shape,
                        1,
                        input->data_type(),
-                       input->fixed_point_position(),
                        input->quantization_info());
 
     unsigned int conv_stride_x = std::get<0>(conv_info.stride());
@@ -265,7 +263,6 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
                        output_shape,
                        1,
                        input->info()->data_type(),
-                       input->info()->fixed_point_position(),
                        input->info()->quantization_info());
 
     // Perform validation step
@@ -302,18 +299,14 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     }
     else
     {
-        bool     is_quantized_fixed_point = is_data_type_fixed_point(data_type);
-        bool     is_quantized_asymm       = is_data_type_quantized_asymmetric(data_type);
-        DataType promoted_type            = (is_quantized_fixed_point) ? get_promoted_data_type(data_type) : data_type;
+        bool is_quantized_asymm = is_data_type_quantized_asymmetric(data_type);
 
         build_options.add_option_if(is_quantized_asymm, std::string("-DKERNEL_SIZE=" + support::cpp11::to_string(kernel_size)));
         build_options.add_option(std::string("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type)));
         build_options.add_option(std::string("-DDATA_SIZE=" + get_data_size_from_data_type(data_type)));
         build_options.add_option(std::string("-DWEIGHTS_DEPTH=" + support::cpp11::to_string(_weights->info()->dimension(2))));
         build_options.add_option(std::string("-DSTRIDE_X=" + support::cpp11::to_string(_conv_stride_x)));
-        build_options.add_option_if(is_quantized_fixed_point,
-                                    std::string("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position())));
-        build_options.add_option(std::string("-DDATA_TYPE_PROMOTED=" + get_cl_type_from_data_type(promoted_type)));
+        build_options.add_option(std::string("-DDATA_TYPE_PROMOTED=" + get_cl_type_from_data_type(data_type)));
 
         // Create kernel
         _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(is_quantized_asymm ? "direct_convolution_1x1_3x3_5x5_quantized" : kernel_name.str(),

@@ -40,7 +40,7 @@ public:
     }
     /** Set the input and output of the kernel
      *
-     * @param[in]  input  Source tensor. Data type supported: U8/S8/QS8/U16/S16/QS16/QASYMM8/U32/S32/F16/F32
+     * @param[in]  input  Source tensor. Data type supported: U8/S8/U16/S16/QASYMM8/U32/S32/F16/F32
      * @param[out] output Destination tensor. Data type supported: Same as @p input
      */
     void configure(const ITensor *input, ITensor *output);

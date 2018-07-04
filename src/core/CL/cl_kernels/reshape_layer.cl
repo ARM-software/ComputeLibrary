@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,7 +27,7 @@
  *
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=short
  *
- * @param[in]  input_ptr                            Pointer to the first source tensor. Supported data types: U8/S8/QS8/U16/S16/QS16/U32/S32/F16/F32
+ * @param[in]  input_ptr                            Pointer to the first source tensor. Supported data types: U8/S8/U16/S16/U32/S32/F16/F32
  * @param[in]  input_stride_x                       Stride of the first source tensor in X dimension (in bytes)
  * @param[in]  input_step_x                         input_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  input_stride_y                       Stride of the first source tensor in Y dimension (in bytes)

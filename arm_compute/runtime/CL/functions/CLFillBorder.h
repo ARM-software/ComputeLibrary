@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -38,7 +38,7 @@ class CLFillBorder : public ICLSimpleFunction
 public:
     /** Initialize the function
      *
-     * @param[in,out] tensor                Source tensor. Data types supported: QS8/U8/S16/QS16
+     * @param[in,out] tensor                Source tensor. Data types supported: U8/S16
      * @param[in]     border_width          The border width
      * @param[in]     border_mode           Strategy to use for borders.
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.

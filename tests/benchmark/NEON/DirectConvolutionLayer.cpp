@@ -47,7 +47,7 @@ namespace benchmark
 {
 namespace
 {
-// Special data types for networks that need 5x5 direct convolution, which does not support Fixed Point
+// Special data types for networks that need 5x5 direct convolution
 #ifdef ARM_COMPUTE_ENABLE_F16
 const auto data_types = framework::dataset::make("DataType", { DataType::F16, DataType::F32 });
 #else  /* ARM_COMPUTE_ENABLE_F16 */

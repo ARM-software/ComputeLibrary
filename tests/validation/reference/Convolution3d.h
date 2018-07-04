@@ -25,7 +25,6 @@
 #define __ARM_COMPUTE_TEST_VALIDATION_CONVOLUTION_H__
 
 #include "arm_compute/core/utils/quantization/AsymmHelpers.h"
-#include "tests/validation/FixedPoint.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/UtilsQuantizedAsymm.h"
 
@@ -91,74 +90,16 @@ inline void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<T> &weig
     *out_ptr = acc + (*b_ptr);
 }
 
-// 3D convolution for fixed point type
-template < typename T, typename TB, typename std::enable_if < std::is_integral<T>::value &&std::is_integral<TB>::value, int >::type = 0 >
+// 3D convolution for QASYMM8 type
+template < typename T, typename TB, typename std::enable_if < std::is_same<T, uint8_t>::value &&std::is_same<TB, int32_t>::value, int >::type = 0 >
 inline void convolution3d(const SimpleTensor<T> &in, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, SimpleTensor<T> &out,
                           int i_offset, int w_offset, int b_offset, int o_offset,
                           int xi, int yi, int width_in, int height_in, int depth_in, int width_weights, int height_weights, int dilation_x = 1, int dilation_y = 1)
 {
-    const T *in_ptr               = in.data() + i_offset;
-    const T *w_ptr                = weights.data() + w_offset;
-    const T *b_ptr                = bias.data() + b_offset;
-    T       *out_ptr              = out.data() + o_offset;
-    int      fixed_point_position = in.fixed_point_position();
-
-    const int half_width_weights_start  = width_weights / 2;
-    const int half_width_weights_end    = ((width_weights % 2) == 0) ? (half_width_weights_start - 1) : half_width_weights_start;
-    const int half_height_weights_start = height_weights / 2;
-    const int half_height_weights_end   = ((height_weights % 2) == 0) ? (half_height_weights_start - 1) : half_height_weights_start;
-
-    using namespace fixed_point_arithmetic;
-    using promoted_type = fixed_point_arithmetic::traits::promote_t<T>;
-
-    // Reset accumulator
-    fixed_point<promoted_type> acc(0, fixed_point_position);
-
-    // Compute a 2D convolution for each IFM and accumulate the result
-    for(int ifm = 0; ifm < depth_in; ++ifm)
-    {
-        // Compute the offset for the input slice
-        const int offset_slice_in = xi + yi * width_in + ifm * width_in * height_in;
-
-        // Compute 2D convolution
-        for(int yk = -half_height_weights_start; yk <= half_height_weights_end; ++yk)
-        {
-            for(int xk = -half_width_weights_start; xk <= half_width_weights_end; ++xk)
-            {
-                // Check if the pixel is out-of-bound
-                if(is_valid_pixel(xi + xk * dilation_x, 0, width_in) && is_valid_pixel(yi + yk * dilation_y, 0, height_in))
-                {
-                    const int idx = xk + half_width_weights_start;
-                    const int idy = yk + half_height_weights_start;
-
-                    const fixed_point<promoted_type> i_value(in_ptr[offset_slice_in + xk * dilation_x + yk * dilation_y * width_in], fixed_point_position, true);
-                    const fixed_point<promoted_type> w_value(w_ptr[idx + idy * width_weights + ifm * width_weights * height_weights], fixed_point_position, true);
-                    const fixed_point<promoted_type> iw = i_value * w_value;
-                    acc                                 = iw + acc;
-                }
-            }
-        }
-    }
-
-    // Get the bias
-    const fixed_point<promoted_type> b(*b_ptr, fixed_point_position, true);
-
-    // Accumulate the bias and covert back
-    acc = acc + b;
-    fixed_point<T> res(acc);
-    *out_ptr = res.raw();
-}
-
-// 3D convolution for QASYMM8 type
-template <>
-inline void convolution3d(const SimpleTensor<uint8_t> &in, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &bias, SimpleTensor<uint8_t> &out,
-                          int i_offset, int w_offset, int b_offset, int o_offset,
-                          int xi, int yi, int width_in, int height_in, int depth_in, int width_weights, int height_weights, int dilation_x, int dilation_y)
-{
-    const uint8_t *in_ptr  = in.data() + i_offset;
-    const uint8_t *w_ptr   = weights.data() + w_offset;
-    const int32_t *b_ptr   = bias.data() + b_offset;
-    uint8_t       *out_ptr = out.data() + o_offset;
+    const T *in_ptr  = in.data() + i_offset;
+    const T *w_ptr   = weights.data() + w_offset;
+    const TB *b_ptr   = bias.data() + b_offset;
+    T        *out_ptr = out.data() + o_offset;
 
     const int   input_offset   = -in.quantization_info().offset;
     const float input_scale    = in.quantization_info().scale;

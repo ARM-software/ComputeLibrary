@@ -100,33 +100,33 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, (combine(datasets::Sm
 // *INDENT-OFF*
 // clang-format off
 DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zip(
-    framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),   // Mismatching data type
-                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 0),   // Invalid weights shape
-                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16, 4),   // Non supported data type
-                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32, 11),  // Invalid bias shape
-                                            TensorInfo(TensorShape(13U, 11U, 4U, 3U), 1, DataType::F32, 0), // Window shrink
-                                            TensorInfo(TensorShape(32U, 16U, 2U), 1, DataType::F32, 0),
+    framework::dataset::make("InputInfo", { TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),   // Mismatching data type
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),   // Invalid weights shape
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F16),   // Non supported data type
+                                            TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),  // Invalid bias shape
+                                            TensorInfo(TensorShape(13U, 11U, 4U, 3U), 1, DataType::F32), // Window shrink
+                                            TensorInfo(TensorShape(32U, 16U, 2U), 1, DataType::F32),
                                           }),
-    framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::F16, 0),
-                                            TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32, 0),
-                                            TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::F16, 5),
-                                            TensorInfo(TensorShape(3U, 2U, 2U, 2U), 1, DataType::F32, 11),
-                                            TensorInfo(TensorShape(3U, 3U, 4U), 1, DataType::F32, 0),
-                                              TensorInfo(TensorShape(1U, 1U, 2U, 4U), 1, DataType::F32, 0),
+    framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::F16),
+                                            TensorInfo(TensorShape(3U, 3U, 2U, 4U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::F16),
+                                            TensorInfo(TensorShape(3U, 2U, 2U, 2U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(3U, 3U, 4U), 1, DataType::F32),
+                                              TensorInfo(TensorShape(1U, 1U, 2U, 4U), 1, DataType::F32),
                                           })),
-    framework::dataset::make("BiasInfo",  { TensorInfo(TensorShape(1U), 1, DataType::F16, 0),
-                                            TensorInfo(TensorShape(1U), 1, DataType::F32, 0),
-                                            TensorInfo(TensorShape(1U), 1, DataType::F32, 5),
-                                            TensorInfo(TensorShape(25U, 11U), 1, DataType::F32, 11),
-                                            TensorInfo(TensorShape(1U), 1, DataType::F32, 0),
-                                            TensorInfo(TensorShape(4U), 1, DataType::F32, 0),
+    framework::dataset::make("BiasInfo",  { TensorInfo(TensorShape(1U), 1, DataType::F16),
+                                            TensorInfo(TensorShape(1U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(1U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(25U, 11U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(1U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(4U), 1, DataType::F32),
                                           })),
-    framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F16, 0),
-                                            TensorInfo(TensorShape(25U, 10U, 2U), 1, DataType::F32, 0),
-                                            TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32, 5),
-                                            TensorInfo(TensorShape(13U, 13U, 2U), 1, DataType::F32, 0),
-                                            TensorInfo(TensorShape(11U, 9U, 1U, 3U), 1, DataType::F32, 0),
-                                            TensorInfo(TensorShape(32U, 16U, 4U), 1, DataType::F32, 0),
+    framework::dataset::make("OutputInfo",{ TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F16),
+                                            TensorInfo(TensorShape(25U, 10U, 2U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(25U, 11U, 2U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(13U, 13U, 2U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(11U, 9U, 1U, 3U), 1, DataType::F32),
+                                            TensorInfo(TensorShape(32U, 16U, 4U), 1, DataType::F32),
                                           })),
     framework::dataset::make("PadStrideInfo", { PadStrideInfo(1, 1, 0, 0),
                                                 PadStrideInfo(1, 1, 0, 0),

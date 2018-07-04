@@ -48,7 +48,7 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, bool has_bias, const Size2D &dilation)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::QASYMM8 && has_bias);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_RETURN_ERROR_ON((dilation.x() < 1) || (dilation.y() < 1));
@@ -58,7 +58,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, b
     if(output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
 
     return Status{};
@@ -136,7 +135,7 @@ CLIm2ColKernel::configure_window(const ICLTensor *input, ICLTensor *output, cons
 
         if(dilation == Size2D(1U, 1U))
         {
-            if(squared_im2col && !is_data_type_fixed_point(data_type))
+            if(squared_im2col)
             {
                 // Check if we can run an optimized im2col
                 switch(kernel_dims.width)
@@ -304,7 +303,6 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     build_opts.add_option(("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type)));
     build_opts.add_option("-DELEMENT_SIZE=" + support::cpp11::to_string(input->info()->element_size()));
     build_opts.add_option_if(has_bias, "-DHAS_BIAS");
-    build_opts.add_option_if(is_data_type_fixed_point(data_type), "-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
 
     _num_elems_processed_per_iteration = 1;
 

@@ -48,27 +48,23 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output,
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, mean, var);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, mean, var);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(mean, var);
 
     if(output->total_size() != 0)
     {
         ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(input, output);
         ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
 
     if(beta != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mean, beta);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, beta);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, beta);
     }
     if(gamma != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(mean, gamma);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, gamma);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, gamma);
     }
     if(act_info.enabled())
     {
@@ -86,7 +82,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
                                                         ITensorInfo *beta, ITensorInfo *gamma)
 {
     // Output tensor auto initialization if not yet initialized
-    auto_init_if_empty(*output, input->tensor_shape(), 1, input->data_type(), input->fixed_point_position());
+    auto_init_if_empty(*output, input->tensor_shape(), 1, input->data_type());
 
     unsigned int num_elems_processed_per_iteration = 1;
     if(input->data_type() == DataType::F16)

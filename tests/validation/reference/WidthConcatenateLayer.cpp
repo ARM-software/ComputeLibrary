@@ -23,7 +23,6 @@
  */
 #include "WidthConcatenateLayer.h"
 
-#include "tests/validation/FixedPoint.h"
 #include "tests/validation/Helpers.h"
 
 namespace arm_compute

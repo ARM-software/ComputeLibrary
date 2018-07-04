@@ -38,7 +38,7 @@
  * @note The number of channels in each group should be given as a preprocessor argument using -DK=num. e.g. -DK=1
  *       K is equal to num_channels / num_groups.
  *
- * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: U8/S8/QS8/QASYMM8/U16/S16/QS16/F16/U32/S32/F32
+ * @param[in]  src_ptr                           Pointer to the source matrix. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
  * @param[in]  src_stride_x                      Stride of the first source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the first source tensor in Y dimension (in bytes)

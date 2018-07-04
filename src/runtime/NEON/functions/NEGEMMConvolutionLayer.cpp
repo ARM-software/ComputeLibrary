@@ -90,12 +90,11 @@ void NEConvolutionLayerReshapeWeights::configure(const ITensor *weights, const I
 
 Status NEConvolutionLayerReshapeWeights::validate(const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, bool transpose1xW)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
     if(!is_data_type_quantized_asymmetric(weights->data_type()))
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(weights, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(weights, output);
     }
     // Check if bias are present, if yes they will be embedded to the weights matrix
     const bool append_bias = (biases != nullptr);
@@ -104,7 +103,6 @@ Status NEConvolutionLayerReshapeWeights::validate(const ITensorInfo *weights, co
     {
         ARM_COMPUTE_RETURN_ERROR_ON(is_data_type_quantized_asymmetric(weights->data_type()));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(weights, biases);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(weights, biases);
         ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != weights->dimension(3));
         ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
     }
@@ -173,9 +171,8 @@ Status validate_and_initialize_values(const ITensorInfo *input, const ITensorInf
                                       unsigned int &mat_weights_cols, unsigned int &mat_weights_rows,
                                       unsigned int &conv_w, unsigned int &conv_h, const Size2D &dilation)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QASYMM8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, weights);
 
     DataLayout data_layout = input->data_layout();
@@ -201,7 +198,6 @@ Status validate_and_initialize_values(const ITensorInfo *input, const ITensorInf
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
         }
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, biases);
         ARM_COMPUTE_RETURN_ERROR_ON(!weights_info.are_reshaped() && biases->dimension(0) != weights->dimension(3));
         ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
     }
@@ -287,10 +283,9 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
 
     ARM_COMPUTE_ERROR_THROW_ON(status);
 
-    _is_prepared                            = false;
-    _original_weights                       = weights;
-    const unsigned int fixed_point_position = input->info()->fixed_point_position();
-    const ITensor     *biases_to_use        = (_append_bias) ? biases : nullptr;
+    _is_prepared                 = false;
+    _original_weights            = weights;
+    const ITensor *biases_to_use = (_append_bias) ? biases : nullptr;
 
     bool run_optimised = dt == DataType::F32;
 
@@ -300,7 +295,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
         TensorShape reshaped_weights_shape{ mat_weights_cols, mat_weights_rows };
 
         // Create tensor to store the reshaped weights
-        _weights_reshaped.allocator()->init(TensorInfo(reshaped_weights_shape, 1, dt, fixed_point_position));
+        _weights_reshaped.allocator()->init(TensorInfo(reshaped_weights_shape, 1, dt));
         _reshape_weights.configure(weights, biases, &_weights_reshaped, false /* 1xW transpose */);
         weights = &_weights_reshaped;
     }
@@ -336,7 +331,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
             }
 
             // Create tensor to store the reshaped weights
-            _weights_reshaped.allocator()->init(TensorInfo(reshaped_weights_shape, 1, dt, fixed_point_position));
+            _weights_reshaped.allocator()->init(TensorInfo(reshaped_weights_shape, 1, dt));
             _reshape_weights.configure(weights, biases_to_use, &_weights_reshaped, _is_interleaved /* 1xW transpose */);
             weights = &_weights_reshaped;
         }
@@ -372,7 +367,7 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
         shape_gemm.set(1, mat_input_rows);
         const DataType gemm_data_type = _is_quantized ? DataType::S32 : dt;
         // GEMM output should be S32 for acquiring raw integer accumulator without quantized postprocessing for quantized asymmetric input.
-        TensorInfo info_gemm(shape_gemm, 1, gemm_data_type, input->info()->fixed_point_position());
+        TensorInfo info_gemm(shape_gemm, 1, gemm_data_type);
         info_gemm.set_quantization_info(output->info()->quantization_info());
         _gemm_output.allocator()->init(info_gemm);
         _memory_group.manage(&_gemm_output);

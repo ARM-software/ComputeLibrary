@@ -110,13 +110,11 @@ inline size_t data_size_from_type(DataType data_type)
     {
         case DataType::U8:
         case DataType::S8:
-        case DataType::QS8:
         case DataType::QASYMM8:
             return 1;
         case DataType::U16:
         case DataType::S16:
         case DataType::F16:
-        case DataType::QS16:
             return 2;
         case DataType::F32:
         case DataType::U32:
@@ -185,12 +183,10 @@ inline size_t element_size_from_data_type(DataType dt)
     {
         case DataType::S8:
         case DataType::U8:
-        case DataType::QS8:
         case DataType::QASYMM8:
             return 1;
         case DataType::U16:
         case DataType::S16:
-        case DataType::QS16:
         case DataType::F16:
             return 2;
         case DataType::U32:
@@ -522,14 +518,10 @@ inline DataType get_promoted_data_type(DataType dt)
             return DataType::U16;
         case DataType::S8:
             return DataType::S16;
-        case DataType::QS8:
-            return DataType::QS16;
         case DataType::U16:
             return DataType::U32;
         case DataType::S16:
             return DataType::S32;
-        case DataType::QS16:
-            return DataType::QS32;
         case DataType::QASYMM8:
         case DataType::F16:
         case DataType::U32:
@@ -1018,29 +1010,7 @@ inline bool is_data_type_quantized(DataType dt)
 {
     switch(dt)
     {
-        case DataType::QS8:
         case DataType::QASYMM8:
-        case DataType::QS16:
-        case DataType::QS32:
-            return true;
-        default:
-            return false;
-    }
-}
-
-/** Check if a given data type is of fixed point type
- *
- * @param[in] dt Input data type.
- *
- * @return True if data type is of fixed point type, else false.
- */
-inline bool is_data_type_fixed_point(DataType dt)
-{
-    switch(dt)
-    {
-        case DataType::QS8:
-        case DataType::QS16:
-        case DataType::QS32:
             return true;
         default:
             return false;

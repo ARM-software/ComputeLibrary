@@ -65,15 +65,9 @@ protected:
             std::uniform_real_distribution<> distribution(-1.f, 1.f);
             library->fill(tensor, distribution, 0);
         }
-        else if(is_data_type_quantized_asymmetric(tensor.data_type()))
+        else // data type is quantized_asymmetric
         {
             library->fill_tensor_uniform(tensor, 0);
-        }
-        else
-        {
-            const int                       one_fixed = 1;
-            std::uniform_int_distribution<> distribution(-one_fixed, one_fixed);
-            library->fill(tensor, distribution, 0);
         }
     }
 

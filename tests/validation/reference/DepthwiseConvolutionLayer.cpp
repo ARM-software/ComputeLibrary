@@ -26,7 +26,6 @@
 #include "ConvolutionLayer.h"
 #include "Utils.h"
 
-#include "tests/validation/FixedPoint.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/Utils.h"
 #include "tests/validation/reference/UtilsQuantizedAsymm.h"

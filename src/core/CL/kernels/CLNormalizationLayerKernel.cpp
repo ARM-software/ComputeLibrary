@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -27,7 +27,6 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
@@ -40,24 +39,16 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, NormalizationLayerInfo norm_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(norm_info.norm_size() % 2), "Normalization size should be odd");
-
-    if(is_data_type_fixed_point(input->data_type()))
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(norm_info.beta(), input);
-        ARM_COMPUTE_RETURN_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(norm_info.kappa(), input);
-        ARM_COMPUTE_RETURN_ERROR_ON_VALUE_NOT_REPRESENTABLE_IN_FIXED_POINT(norm_info.scale_coeff(), input);
-    }
 
     // Checks performed when output is configured
     if(output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
 
     return Status{};
@@ -74,7 +65,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     const unsigned int border_width = is_in_map ? std::min(norm_size / 2, 3U) : 0;
     const BorderSize   border_size  = BorderSize(0, border_width);
 
-    const unsigned int num_elems_processed_per_iteration = (is_data_type_fixed_point(input->data_type())) ? 16 : 4;
+    const unsigned int num_elems_processed_per_iteration = 4;
     const unsigned int num_elems_read_per_iteration      = is_in_map ? (num_elems_processed_per_iteration + 2 * (norm_size / 2)) : num_elems_processed_per_iteration;
 
     Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
@@ -119,14 +110,12 @@ void CLNormalizationLayerKernel::configure(const ICLTensor *input, ICLTensor *ou
     const unsigned int border_width = _is_in_map ? std::min(norm_info.norm_size() / 2, 3U) : 0;
     _border_size                    = BorderSize(0, border_width);
 
-    const unsigned int num_elems_processed_per_iteration = (is_data_type_fixed_point(input->info()->data_type())) ? 16 : 4;
+    const unsigned int num_elems_processed_per_iteration = 4;
     const bool         is_in_map_2D                      = (norm_info.type() == NormType::IN_MAP_2D);
 
     // Set build options
     CLBuildOptions build_opts;
     build_opts.add_option(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
-    build_opts.add_option_if(is_data_type_fixed_point(input->info()->data_type()),
-                             "-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
     build_opts.add_option(("-DCOEFF=" + float_to_string_with_full_precision(norm_info.scale_coeff())));
     build_opts.add_option(("-DBETA=" + float_to_string_with_full_precision(norm_info.beta())));
     build_opts.add_option(("-DKAPPA=" + float_to_string_with_full_precision(norm_info.kappa())));

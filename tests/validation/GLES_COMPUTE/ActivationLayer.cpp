@@ -61,35 +61,14 @@ AbsoluteTolerance<float> tolerance(ActivationLayerInfo::ActivationFunction activ
         case ActivationLayerInfo::ActivationFunction::SQUARE:
             return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.1f : epsilon);
         case ActivationLayerInfo::ActivationFunction::LOGISTIC:
-            if(is_data_type_fixed_point(data_type))
-            {
-                return AbsoluteTolerance<float>(5.f);
-            }
-            else
-            {
-                return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.001f : epsilon);
-            }
+            return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.001f : epsilon);
         case ActivationLayerInfo::ActivationFunction::LEAKY_RELU:
             return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.00001f : epsilon);
         case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
         case ActivationLayerInfo::ActivationFunction::SQRT:
-            if(is_data_type_fixed_point(data_type))
-            {
-                return AbsoluteTolerance<float>(5.f);
-            }
-            else
-            {
-                return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.01f : 0.00001f);
-            }
+            return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.01f : 0.00001f);
         case ActivationLayerInfo::ActivationFunction::TANH:
-            if(is_data_type_fixed_point(data_type))
-            {
-                return AbsoluteTolerance<float>(5.f);
-            }
-            else
-            {
-                return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.001f : 0.00001f);
-            }
+            return AbsoluteTolerance<float>(data_type == DataType::F16 ? 0.001f : 0.00001f);
         default:
             return AbsoluteTolerance<float>(epsilon);
     }

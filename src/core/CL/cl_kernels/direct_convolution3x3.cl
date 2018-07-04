@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -23,24 +23,11 @@
  */
 #include "helpers.h"
 
-#if defined(FIXED_POINT_POSITION)
-#include "fixed_point.h"
-
-#define ADD_OP(a, b) ADD_SAT_OP_EXPAND((a), (b), DATA_TYPE_PROMOTED, 8)
-#define MUL_OP(a, b) MUL_SAT_OP_EXPAND(CONVERT((a), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 8)), CONVERT((b), VEC_DATA_TYPE(DATA_TYPE_PROMOTED, 8)), DATA_TYPE_PROMOTED, 8, FIXED_POINT_POSITION)
-
-// There is no need to have a larger intermediate type for qs32 because all the arguments are already promoted
-MULQ_SAT_IMPL(qs32x8, qs32x8)
-
-#else /* FIXED_POINT_POSITION */
-
 #undef CONVERT_SAT
 
 #define ADD_OP(a, b) ((a) + (b))
 #define MUL_OP(a, b) ((a) * (b))
 #define CONVERT_SAT(a, b) ((a))
-
-#endif /* FIXED_POINT_POSITION */
 
 #if defined(DATA_TYPE) && defined(STRIDE_X) && defined(WEIGHTS_DEPTH)
 
@@ -86,7 +73,7 @@ MULQ_SAT_IMPL(qs32x8, qs32x8)
  * @note The third dimensions of the weights tensors must be passed at compile time using -DWEIGHTS_DEPTH
  * @note If biases are used then -DHAS_BIAS has to be passed at compile time
  *
- * @param[in]  src_ptr                               Pointer to the source tensor. Supported data types: QS8/QS16/F16/F32
+ * @param[in]  src_ptr                               Pointer to the source tensor. Supported data types: F16/F32
  * @param[in]  src_stride_x                          Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                            src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                          Stride of the source tensor in Y dimension (in bytes)

@@ -82,11 +82,10 @@ CLBuildOptions prepare_quantized_softmax_build_options(float input_scale, float 
 Status validate_arguments_1DMaxShiftExpSum(const ITensorInfo *input, const ITensorInfo *max, const ITensorInfo *output, const ITensorInfo *sum)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(max, sum, output);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, max);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, max);
 
     const bool is_quantized_asymmetric = is_data_type_quantized_asymmetric(input->data_type());
 
@@ -102,7 +101,6 @@ Status validate_arguments_1DMaxShiftExpSum(const ITensorInfo *input, const ITens
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         }
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, output);
     }
 
     // Checks performed when sum is configured
@@ -117,7 +115,6 @@ Status validate_arguments_1DMaxShiftExpSum(const ITensorInfo *input, const ITens
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(max, sum);
         }
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(max, sum);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(max, sum);
     }
 
     return Status{};
@@ -126,10 +123,9 @@ Status validate_arguments_1DMaxShiftExpSum(const ITensorInfo *input, const ITens
 Status validate_arguments_1DNorm(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::S32, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::S32, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(sum, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, sum);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, sum);
 
     // Note: output should always have a scale of 1/256 and offset 0
     const QuantizationInfo allowed_quantization_info = QuantizationInfo(1.f / 256, 0);
@@ -139,7 +135,6 @@ Status validate_arguments_1DNorm(const ITensorInfo *input, const ITensorInfo *su
     if(output->total_size() != 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT_POSITION(input, output);
         if(!is_quantized_asymmetric)
         {
             ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
@@ -239,15 +234,11 @@ void CLLogits1DMaxShiftExpSumKernel::configure(const ICLTensor *input, ICLTensor
 
     const DataType dt                 = input->info()->data_type();
     const size_t   reduction_dim_size = input->info()->dimension(0);
-    auto           beta_int           = static_cast<int>(lround(beta * (1 << input->info()->fixed_point_position())));
 
     // Set build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(dt));
-    build_opts.add_option_if(is_data_type_fixed_point(dt),
-                             "-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
     build_opts.add_option_if(dt == DataType::F16, "-DUSE_F16");
-    build_opts.add_option_if(is_data_type_fixed_point(dt) && (beta != 1.0f), "-DBETA=" + support::cpp11::to_string(beta_int));
     build_opts.add_option_if(is_data_type_float(dt) && (beta != 1.0f), "-DBETA=" + float_to_string_with_full_precision(beta));
     build_opts.add_options_if(is_data_type_quantized_asymmetric(dt), prepare_quantized_softmax_build_options(input->info()->quantization_info().scale, beta).options());
 
@@ -364,8 +355,6 @@ void CLLogits1DNormKernel::configure(const ICLTensor *input, const ICLTensor *su
     // Set build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()));
-    build_opts.add_option_if(is_data_type_fixed_point(input->info()->data_type()),
-                             "-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
     build_opts.add_options_if(is_quantized_asymmetric,
                               prepare_quantized_softmax_build_options(input->info()->quantization_info().scale, beta).options());
 

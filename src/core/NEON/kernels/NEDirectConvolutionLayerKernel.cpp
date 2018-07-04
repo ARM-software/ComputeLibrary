@@ -43,34 +43,6 @@ using namespace arm_compute::detail;
 
 namespace
 {
-template <unsigned int stridex>
-qint16x8_t internal_vld1q(const qint16_t *in);
-
-template <>
-qint16x8_t internal_vld1q<1>(const qint16_t *in)
-{
-    return vld1q_qs16(in);
-}
-
-template <>
-qint16x8_t internal_vld1q<2>(const qint16_t *in)
-{
-    const int16x8x2_t tmp = vld2q_s16(in);
-    return tmp.val[0];
-}
-
-template <>
-qint16x8_t internal_vld1q<3>(const qint16_t *in)
-{
-    const int16x8x3_t tmp = vld3q_s16(in);
-    return tmp.val[0];
-}
-
-inline qint16x8_t internal_vdupq_n(qint16_t v)
-{
-    return vdupq_n_qs16(v);
-}
-
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 template <unsigned int stridex>
 float16x8_t internal_vld1q(const float16_t *in);
@@ -105,15 +77,13 @@ inline void internal_vst1q(float16_t *p, const float16x8_t &v)
     vst1q_f16(p, v);
 }
 
-float16x8_t internal_vmull(const float16x8_t &x, const float16x8_t &y, int fixed_point_position)
+float16x8_t internal_vmull(const float16x8_t &x, const float16x8_t &y)
 {
-    ARM_COMPUTE_UNUSED(fixed_point_position);
     return vmulq_f16(x, y);
 }
 
-inline float16x8_t internal_vmlal(const float16x8_t &x, const float16x8_t &y, const float16x8_t &z, int fixed_point_position)
+inline float16x8_t internal_vmlal(const float16x8_t &x, const float16x8_t &y, const float16x8_t &z)
 {
-    ARM_COMPUTE_UNUSED(fixed_point_position);
     return vaddq_f16(x, vmulq_f16(y, z));
 }
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
@@ -151,105 +121,14 @@ inline void internal_vst1q(float *p, const float32x4_t &v)
     vst1q_f32(p, v);
 }
 
-float32x4_t internal_vmull(const float32x4_t &x, const float32x4_t &y, int fixed_point_position)
+float32x4_t internal_vmull(const float32x4_t &x, const float32x4_t &y)
 {
-    ARM_COMPUTE_UNUSED(fixed_point_position);
     return vmulq_f32(x, y);
 }
 
-inline float32x4_t internal_vmlal(const float32x4_t &x, const float32x4_t &y, const float32x4_t &z, int fixed_point_position)
+inline float32x4_t internal_vmlal(const float32x4_t &x, const float32x4_t &y, const float32x4_t &z)
 {
-    ARM_COMPUTE_UNUSED(fixed_point_position);
     return vmlaq_f32(x, y, z);
-}
-
-template <unsigned int stridex>
-qint8x8_t internal_vld1q(const qint8_t *in);
-
-template <>
-qint8x8_t internal_vld1q<1>(const qint8_t *in)
-{
-    return vld1_qs8(in);
-}
-
-template <>
-qint8x8_t internal_vld1q<2>(const qint8_t *in)
-{
-    const qint8x8x2_t tmp = vld2_s8(in);
-    return tmp.val[0];
-}
-
-template <>
-qint8x8_t internal_vld1q<3>(const qint8_t *in)
-{
-    const qint8x8x3_t tmp = vld3_s8(in);
-    return tmp.val[0];
-}
-
-inline qint8x8_t internal_vdupq_n(qint8_t v)
-{
-    return vdup_n_qs8(v);
-}
-
-inline qint16x8_t internal_vmull(const qint8x8_t &x, const qint8x8_t &y, int fixed_point_position)
-{
-    return vmull_qs8(x, y, fixed_point_position);
-}
-
-inline qint16x8_t internal_vmlal(const qint16x8_t &x, const qint8x8_t &y, const qint8x8_t &z, int fixed_point_position)
-{
-    return vqmlal_qs8(x, y, z, fixed_point_position);
-}
-
-inline void internal_vst1q(qint16_t *p, const qint16x8_t &v)
-{
-    vst1q_qs16(p, v);
-}
-
-inline void internal_vst1q(int32_t *p, const qint32x4x2_t &v)
-{
-    vst1q_s32(p, v.val[0]);
-    vst1q_s32(p + 4, v.val[1]);
-}
-
-template <unsigned int stridex>
-qint32x4x2_t internal_vld1q(const qint32_t *in);
-
-template <>
-qint32x4x2_t internal_vld1q<1>(const qint32_t *in)
-{
-    const qint32x4x2_t r =
-    {
-        {
-            vld1q_s32(in),
-            vld1q_s32(in + 4)
-        }
-    };
-    return r;
-}
-
-inline qint32x4x2_t internal_vmull(const qint16x8_t &x, const qint16x8_t &y, int fixed_point_position)
-{
-    const qint32x4x2_t r =
-    {
-        {
-            vmull_qs16(vget_low_s16(x), vget_low_s16(y), fixed_point_position),
-            vmull_qs16(vget_high_s16(x), vget_high_s16(y), fixed_point_position),
-        }
-    };
-    return r;
-}
-
-inline qint32x4x2_t internal_vmlal(const qint32x4x2_t &x, const qint16x8_t &y, const qint16x8_t &z, int fixed_point_position)
-{
-    const qint32x4x2_t r =
-    {
-        {
-            vqmlal_qs16(x.val[0], vget_low_s16(y), vget_low_s16(z), fixed_point_position),
-            vqmlal_qs16(x.val[1], vget_high_s16(y), vget_high_s16(z), fixed_point_position)
-        }
-    };
-    return r;
 }
 
 constexpr int small_tensor_size_optim = 8;
@@ -355,21 +234,20 @@ public:
     static void convolve(const Window &window, unsigned int num_elems_read_per_iteration, unsigned int num_elems_written_per_iteration,
                          const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info)
     {
-        const int          input_stride_x       = input->info()->strides_in_bytes().x();
-        const int          input_stride_y       = input->info()->strides_in_bytes().y();
-        const int          input_stride_z       = input->info()->strides_in_bytes().z();
-        const int          output_stride_y      = output->info()->strides_in_bytes().y();
-        const int          output_stride_z      = output->info()->strides_in_bytes().z();
-        const int          kernel_stride_z      = weights->info()->strides_in_bytes().z();
-        const int          kernel_stride_w      = weights->info()->strides_in_bytes()[3];
-        const int          output_w             = output->info()->dimension(0);
-        const int          output_h             = output->info()->dimension(1);
-        const int          range_z              = window.z().end() - window.z().start();
-        const int          kernel_depth         = weights->info()->dimension(Window::DimZ);
-        const unsigned int conv_stride_y        = std::get<1>(conv_info.stride());
-        const unsigned int conv_pad_left        = conv_info.pad_left();
-        const unsigned int conv_pad_top         = conv_info.pad_top();
-        const int          fixed_point_position = input->info()->fixed_point_position();
+        const int          input_stride_x  = input->info()->strides_in_bytes().x();
+        const int          input_stride_y  = input->info()->strides_in_bytes().y();
+        const int          input_stride_z  = input->info()->strides_in_bytes().z();
+        const int          output_stride_y = output->info()->strides_in_bytes().y();
+        const int          output_stride_z = output->info()->strides_in_bytes().z();
+        const int          kernel_stride_z = weights->info()->strides_in_bytes().z();
+        const int          kernel_stride_w = weights->info()->strides_in_bytes()[3];
+        const int          output_w        = output->info()->dimension(0);
+        const int          output_h        = output->info()->dimension(1);
+        const int          range_z         = window.z().end() - window.z().start();
+        const int          kernel_depth    = weights->info()->dimension(Window::DimZ);
+        const unsigned int conv_stride_y   = std::get<1>(conv_info.stride());
+        const unsigned int conv_pad_left   = conv_info.pad_left();
+        const unsigned int conv_pad_top    = conv_info.pad_top();
 
         // setup output window for the iterator
         Window window_out = window;
@@ -414,7 +292,7 @@ public:
                         auto      p_out     = reinterpret_cast<T2 *>(p_out_base + oh * output_stride_y);
                         for(int ow = 0; ow < output_w; ow += num_elems_written_per_iteration, in_val += num_elems_read_per_iteration, p_out += num_elems_written_per_iteration)
                         {
-                            internal_vst1q(p_out, internal_vmull(vk, internal_vld1q<stridex>(in_val), fixed_point_position));
+                            internal_vst1q(p_out, internal_vmull(vk, internal_vld1q<stridex>(in_val)));
                         }
                     }
                 }
@@ -431,7 +309,7 @@ public:
                         auto      p_out     = reinterpret_cast<T2 *>(p_out_base + oh * output_stride_y);
                         for(int ow = 0; ow < output_w; ow += num_elems_written_per_iteration, in_val += num_elems_read_per_iteration, p_out += num_elems_written_per_iteration)
                         {
-                            internal_vst1q(p_out, internal_vmlal(internal_vld1q<1>(p_out), vk, internal_vld1q<stridex>(in_val), fixed_point_position));
+                            internal_vst1q(p_out, internal_vmlal(internal_vld1q<1>(p_out), vk, internal_vld1q<stridex>(in_val)));
                         }
                     }
                 }
@@ -469,7 +347,7 @@ void accumulate_results<3>(float16_t *buffer, const float16x8x2_t &values)
 
 template <unsigned int stridex>
 float32x4x2_t convolve_5x5(const float *in_0, const float *in_1, const float *in_2, const float *in_3, const float *in_4,
-                           const float *m0, const float *m1, const float *m2, const float *m3, const float *m4, int fixed_point_position);
+                           const float *m0, const float *m1, const float *m2, const float *m3, const float *m4);
 
 inline float32x4x3_t load_matrix_hi(const float *const m0, const float *const m1, const float *const m2)
 {
@@ -511,9 +389,8 @@ inline float32x4x3_t load_input(const float *const in)
 
 template <>
 inline float32x4x2_t convolve_5x5<1>(const float *in_0, const float *in_1, const float *in_2, const float *in_3, const float *in_4,
-                                     const float *m0, const float *m1, const float *m2, const float *m3, const float *m4, int fixed_point_position)
+                                     const float *m0, const float *m1, const float *m2, const float *m3, const float *m4)
 {
-    ARM_COMPUTE_UNUSED(fixed_point_position);
     const float32x4x3_t vin0 = load_input(in_0);
     const float32x4x3_t vin1 = load_input(in_1);
     const float32x4x3_t vin2 = load_input(in_2);
@@ -601,10 +478,9 @@ inline float32x4x2_t convolve_5x5<1>(const float *in_0, const float *in_1, const
 
 template <>
 inline float32x4x2_t convolve_5x5<2>(const float *in_0, const float *in_1, const float *in_2, const float *in_3, const float *in_4,
-                                     const float *m0, const float *m1, const float *m2, const float *m3, const float *m4, int fixed_point_position)
+                                     const float *m0, const float *m1, const float *m2, const float *m3, const float *m4)
 {
-    ARM_COMPUTE_UNUSED(fixed_point_position);
-    float32x4x2_t out = convolve_5x5<1>(in_0, in_1, in_2, in_3, in_4, m0, m1, m2, m3, m4, fixed_point_position);
+    float32x4x2_t out = convolve_5x5<1>(in_0, in_1, in_2, in_3, in_4, m0, m1, m2, m3, m4);
     out.val[0]        = vsetq_lane_f32(vgetq_lane_f32(out.val[0], 2), out.val[0], 1);
     out.val[0]        = vsetq_lane_f32(vgetq_lane_f32(out.val[1], 0), out.val[0], 2);
     out.val[0]        = vsetq_lane_f32(vgetq_lane_f32(out.val[1], 2), out.val[0], 3);
@@ -613,9 +489,9 @@ inline float32x4x2_t convolve_5x5<2>(const float *in_0, const float *in_1, const
 
 template <>
 inline float32x4x2_t convolve_5x5<3>(const float *in_0, const float *in_1, const float *in_2, const float *in_3, const float *in_4,
-                                     const float *m0, const float *m1, const float *m2, const float *m3, const float *m4, int fixed_point_position)
+                                     const float *m0, const float *m1, const float *m2, const float *m3, const float *m4)
 {
-    float32x4x2_t out = convolve_5x5<1>(in_0, in_1, in_2, in_3, in_4, m0, m1, m2, m3, m4, fixed_point_position);
+    float32x4x2_t out = convolve_5x5<1>(in_0, in_1, in_2, in_3, in_4, m0, m1, m2, m3, m4);
     out.val[0]        = vsetq_lane_f32(vgetq_lane_f32(out.val[0], 3), out.val[0], 1);
     return out;
 }
@@ -640,28 +516,6 @@ template <>
 void accumulate_results<3>(float *buffer, const float32x4x2_t &values)
 {
     vst1_f32(buffer, vadd_f32(vld1_f32(buffer), vget_low_f32(values.val[0])));
-}
-
-template <unsigned int stridex>
-void accumulate_results(qint16_t *buffer, const qint16x8x2_t &values);
-
-template <>
-void accumulate_results<1>(qint16_t *buffer, const qint16x8x2_t &values)
-{
-    vst1q_qs16(buffer, vqaddq_qs16(vld1q_qs16(buffer), values.val[0]));
-    vst1q_qs16(buffer + 8, vqaddq_qs16(vld1q_qs16(buffer + 8), values.val[1]));
-}
-
-template <>
-void accumulate_results<2>(qint16_t *buffer, const qint16x8x2_t &values)
-{
-    vst1q_qs16(buffer, vqaddq_qs16(vld1q_qs16(buffer), values.val[0]));
-}
-
-template <>
-void accumulate_results<3>(qint16_t *buffer, const qint16x8x2_t &values)
-{
-    vst1_qs16(buffer, vqadd_qs16(vld1_qs16(buffer), vget_low_s16(values.val[0])));
 }
 
 template <typename T1>
@@ -745,7 +599,7 @@ public:
                                 const auto we_addr   = reinterpret_cast<const T1 *>(we_addr_base1 + x * kernel_stride_x);
                                 const auto we_values = internal_vld1q<1>(we_addr);
 
-                                out_values = internal_vmlal(out_values, in_values, we_values, 0);
+                                out_values = internal_vmlal(out_values, in_values, we_values);
                             }
 
                             out_val += out_values[0];
@@ -784,24 +638,23 @@ public:
                          const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info)
     {
         ARM_COMPUTE_UNUSED(num_elems_read_per_iteration);
-        const int          input_stride_x       = input->info()->strides_in_bytes().x();
-        const int          input_stride_y       = input->info()->strides_in_bytes().y();
-        const int          input_stride_z       = input->info()->strides_in_bytes().z();
-        const int          output_stride_y      = output->info()->strides_in_bytes().y();
-        const int          output_stride_z      = output->info()->strides_in_bytes().z();
-        const int          kernel_stride_x      = weights->info()->strides_in_bytes().x();
-        const int          kernel_stride_y      = weights->info()->strides_in_bytes().y();
-        const int          kernel_stride_z      = weights->info()->strides_in_bytes().z();
-        const int          kernel_stride_w      = weights->info()->strides_in_bytes()[3];
-        const int          output_w             = output->info()->dimension(0);
-        const int          output_h             = output->info()->dimension(1);
-        const int          num_planes_z         = window.z().end() - window.z().start();
-        const int          delta_input          = get_input_num_elems_processed<stridex>(num_elems_written_per_iteration);
-        const int          kernel_depth         = weights->info()->dimension(Window::DimZ);
-        const unsigned int conv_stride_y        = std::get<1>(conv_info.stride());
-        const unsigned int conv_pad_left        = conv_info.pad_left();
-        const unsigned int conv_pad_top         = conv_info.pad_top();
-        const int          fixed_point_position = input->info()->fixed_point_position();
+        const int          input_stride_x  = input->info()->strides_in_bytes().x();
+        const int          input_stride_y  = input->info()->strides_in_bytes().y();
+        const int          input_stride_z  = input->info()->strides_in_bytes().z();
+        const int          output_stride_y = output->info()->strides_in_bytes().y();
+        const int          output_stride_z = output->info()->strides_in_bytes().z();
+        const int          kernel_stride_x = weights->info()->strides_in_bytes().x();
+        const int          kernel_stride_y = weights->info()->strides_in_bytes().y();
+        const int          kernel_stride_z = weights->info()->strides_in_bytes().z();
+        const int          kernel_stride_w = weights->info()->strides_in_bytes()[3];
+        const int          output_w        = output->info()->dimension(0);
+        const int          output_h        = output->info()->dimension(1);
+        const int          num_planes_z    = window.z().end() - window.z().start();
+        const int          delta_input     = get_input_num_elems_processed<stridex>(num_elems_written_per_iteration);
+        const int          kernel_depth    = weights->info()->dimension(Window::DimZ);
+        const unsigned int conv_stride_y   = std::get<1>(conv_info.stride());
+        const unsigned int conv_pad_left   = conv_info.pad_left();
+        const unsigned int conv_pad_top    = conv_info.pad_top();
 
         // setup output window for the iterator
         Window window_out = window;
@@ -864,7 +717,7 @@ public:
                         for(int ow = 0; ow < output_w; ow += num_elems_written_per_iteration,
                             in_top += delta_input, in_mid += delta_input, in_low += delta_input, p_out += num_elems_written_per_iteration)
                         {
-                            auto vres = convolve_3x3<stridex>(in_top, in_mid, in_low, vk_r0, vk_r1, vk_r2, fixed_point_position);
+                            auto vres = convolve_3x3<stridex>(in_top, in_mid, in_low, vk_r0, vk_r1, vk_r2);
                             store_results<stridex>(p_out, vres);
                         }
                     }
@@ -889,7 +742,7 @@ public:
                         for(int ow = 0; ow < output_w; ow += num_elems_written_per_iteration,
                             in_top += delta_input, in_mid += delta_input, in_low += delta_input, p_out += num_elems_written_per_iteration)
                         {
-                            auto vres = convolve_3x3<stridex>(in_top, in_mid, in_low, vk_r0, vk_r1, vk_r2, fixed_point_position);
+                            auto vres = convolve_3x3<stridex>(in_top, in_mid, in_low, vk_r0, vk_r1, vk_r2);
                             accumulate_results<stridex>(p_out, vres);
                         }
                     }
@@ -908,24 +761,23 @@ public:
                          const ITensor *input, const ITensor *weights, ITensor *output, const PadStrideInfo &conv_info)
     {
         ARM_COMPUTE_UNUSED(num_elems_read_per_iteration);
-        const int          input_stride_x       = input->info()->strides_in_bytes().x();
-        const int          input_stride_y       = input->info()->strides_in_bytes().y();
-        const int          input_stride_z       = input->info()->strides_in_bytes().z();
-        const int          output_stride_y      = output->info()->strides_in_bytes().y();
-        const int          output_stride_z      = output->info()->strides_in_bytes().z();
-        const int          kernel_stride_x      = weights->info()->strides_in_bytes().x();
-        const int          kernel_stride_y      = weights->info()->strides_in_bytes().y();
-        const int          kernel_stride_z      = weights->info()->strides_in_bytes().z();
-        const int          kernel_stride_w      = weights->info()->strides_in_bytes()[3];
-        const int          output_w             = output->info()->dimension(0);
-        const int          output_h             = output->info()->dimension(1);
-        const int          num_planes_z         = window.z().end() - window.z().start();
-        const int          delta_input          = get_input_num_elems_processed<stridex>(num_elems_written_per_iteration);
-        const int          kernel_depth         = weights->info()->dimension(Window::DimZ);
-        const unsigned int conv_stride_y        = std::get<1>(conv_info.stride());
-        const unsigned int conv_pad_left        = conv_info.pad_left();
-        const unsigned int conv_pad_top         = conv_info.pad_top();
-        const int          fixed_point_position = input->info()->fixed_point_position();
+        const int          input_stride_x  = input->info()->strides_in_bytes().x();
+        const int          input_stride_y  = input->info()->strides_in_bytes().y();
+        const int          input_stride_z  = input->info()->strides_in_bytes().z();
+        const int          output_stride_y = output->info()->strides_in_bytes().y();
+        const int          output_stride_z = output->info()->strides_in_bytes().z();
+        const int          kernel_stride_x = weights->info()->strides_in_bytes().x();
+        const int          kernel_stride_y = weights->info()->strides_in_bytes().y();
+        const int          kernel_stride_z = weights->info()->strides_in_bytes().z();
+        const int          kernel_stride_w = weights->info()->strides_in_bytes()[3];
+        const int          output_w        = output->info()->dimension(0);
+        const int          output_h        = output->info()->dimension(1);
+        const int          num_planes_z    = window.z().end() - window.z().start();
+        const int          delta_input     = get_input_num_elems_processed<stridex>(num_elems_written_per_iteration);
+        const int          kernel_depth    = weights->info()->dimension(Window::DimZ);
+        const unsigned int conv_stride_y   = std::get<1>(conv_info.stride());
+        const unsigned int conv_pad_left   = conv_info.pad_left();
+        const unsigned int conv_pad_top    = conv_info.pad_top();
 
         // setup output window for the iterator
         Window window_out = window;
@@ -976,7 +828,7 @@ public:
                         for(int ow = 0; ow < output_w; ow += num_elems_written_per_iteration,
                             in_0 += delta_input, in_1 += delta_input, in_2 += delta_input, in_3 += delta_input, in_4 += delta_input, p_out += num_elems_written_per_iteration)
                         {
-                            auto vres = convolve_5x5<stridex>(in_0, in_1, in_2, in_3, in_4, ptr_k_r0, ptr_k_r1, ptr_k_r2, ptr_k_r3, ptr_k_r4, fixed_point_position);
+                            auto vres = convolve_5x5<stridex>(in_0, in_1, in_2, in_3, in_4, ptr_k_r0, ptr_k_r1, ptr_k_r2, ptr_k_r3, ptr_k_r4);
                             store_results<stridex>(p_out, vres);
                         }
                     }
@@ -1001,7 +853,7 @@ public:
                         for(int ow = 0; ow < output_w; ow += num_elems_written_per_iteration,
                             in_0 += delta_input, in_1 += delta_input, in_2 += delta_input, in_3 += delta_input, in_4 += delta_input, p_out += num_elems_written_per_iteration)
                         {
-                            auto vres = convolve_5x5<stridex>(in_0, in_1, in_2, in_3, in_4, ptr_k_r0, ptr_k_r1, ptr_k_r2, ptr_k_r3, ptr_k_r4, fixed_point_position);
+                            auto vres = convolve_5x5<stridex>(in_0, in_1, in_2, in_3, in_4, ptr_k_r0, ptr_k_r1, ptr_k_r2, ptr_k_r3, ptr_k_r4);
                             accumulate_results<stridex>(p_out, vres);
                         }
                     }
@@ -1120,7 +972,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
 
     const DataLayout data_layout = input->data_layout();
@@ -1140,11 +992,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
         TensorShape output_shape = misc::shape_calculator::compute_deep_convolution_shape(*input, *weights, conv_info);
 
         DataType data_type = input->data_type();
-        if(is_data_type_fixed_point(data_type))
-        {
-            // Promote data type in case of fixed point
-            data_type = ((data_type == DataType::QS8) ? DataType::QS16 : DataType::QS32);
-        }
 
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
         ARM_COMPUTE_RETURN_ERROR_ON(output->data_type() != data_type);
@@ -1180,11 +1027,9 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
                 {
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
                     case DataType::F16:
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-                    case DataType::QS8:
-                    case DataType::QS16:
                         num_elems_written_per_iteration = 8;
                         break;
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
                     case DataType::F32:
                         if(run_optim_small_tensor_info(input))
                         {
@@ -1215,13 +1060,11 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
                         break;
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
                     case DataType::F16:
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-                    case DataType::QS8:
-                    case DataType::QS16:
                         num_weight_elems_read_per_row   = 8 + kernel_size - 1;
                         num_elems_read_per_iteration    = 24;
                         num_elems_written_per_iteration = 32 >> conv_stride_x;
                         break;
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
                     default:
                         ARM_COMPUTE_ERROR("Data type not supported.");
                         break;
@@ -1315,14 +1158,8 @@ void NEDirectConvolutionLayerKernel::configure(const ITensor *input, const ITens
 
     DataType data_type = input->info()->data_type();
 
-    if(is_data_type_fixed_point(data_type))
-    {
-        // Promote data type in case of fixed point
-        data_type = ((data_type == DataType::QS8) ? DataType::QS16 : DataType::QS32);
-    }
-
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), output_shape, 1, data_type, input->info()->fixed_point_position());
+    auto_init_if_empty(*output->info(), output_shape, 1, data_type);
 
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), weights->info(), output->info(), conv_info));
@@ -1371,12 +1208,6 @@ void NEDirectConvolutionLayerKernel::run(const Window &window, const ThreadInfo 
             {
                 switch(_input->info()->data_type())
                 {
-                    case DataType::QS8:
-                        convolve_1x1<qint8_t, qint16_t>(window, _num_elems_read_per_iteration, _num_elems_written_per_iteration, _input, _weights, _output, _conv_info);
-                        break;
-                    case DataType::QS16:
-                        convolve_1x1<qint16_t, qint32_t>(window, _num_elems_read_per_iteration, _num_elems_written_per_iteration, _input, _weights, _output, _conv_info);
-                        break;
                     case DataType::F32:
                         convolve_1x1<float, float>(window, _num_elems_read_per_iteration, _num_elems_written_per_iteration, _input, _weights, _output, _conv_info);
                         break;
@@ -1395,9 +1226,6 @@ void NEDirectConvolutionLayerKernel::run(const Window &window, const ThreadInfo 
             {
                 switch(_input->info()->data_type())
                 {
-                    case DataType::QS8:
-                        convolve_3x3<qint8_t, qint16_t>(window, _num_elems_read_per_iteration, _num_elems_written_per_iteration, _input, _weights, _output, _conv_info);
-                        break;
                     case DataType::F32:
                         convolve_3x3<float, float>(window, _num_elems_read_per_iteration, _num_elems_written_per_iteration, _input, _weights, _output, _conv_info);
                         break;

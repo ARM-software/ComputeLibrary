@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,13 +41,13 @@ class NETranspose : public INESimpleFunction
 public:
     /** Initialise the kernel's inputs and output
      *
-     * @param[in]  input  Input tensor. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in]  input  Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
      * @param[out] output Output tensor. Data type supported: Same as @p input
      */
     void configure(const ITensor *input, ITensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref NETranspose
      *
-     * @param[in] input  The input tensor. Data types supported: U8/S8/QS8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] input  The input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
      * @param[in] output The output tensor. Data types supported: Same as @p input
      *
      * @return a status

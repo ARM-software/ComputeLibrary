@@ -27,7 +27,6 @@
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/TensorInfo.h"
@@ -47,7 +46,7 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const ActivationLayerInfo &act_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QASYMM8, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->data_type() == DataType::QASYMM8) && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
                                     && (act_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
                                     && (act_info.activation() != ActivationLayerInfo::ActivationFunction::RELU),
@@ -58,7 +57,6 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
     }
 
     return Status{};
@@ -118,7 +116,6 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
 
     const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
     const DataType     dt                                = input->info()->data_type();
-    const int          fixed_point_position              = input->info()->fixed_point_position();
     float              a_const                           = act_info.a();
     float              b_const                           = act_info.b();
     int                a_const_int                       = 0;
@@ -127,16 +124,8 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
     // Create quantized version of constants a, b if needed
     if(is_data_type_quantized(dt))
     {
-        if(is_data_type_fixed_point(dt))
-        {
-            a_const_int = static_cast<int>(lround(a_const * (1 << fixed_point_position)));
-            b_const_int = static_cast<int>(lround(b_const * (1 << fixed_point_position)));
-        }
-        else
-        {
-            a_const_int = input->info()->quantization_info().quantize(a_const, RoundingPolicy::TO_NEAREST_UP);
-            b_const_int = input->info()->quantization_info().quantize(b_const, RoundingPolicy::TO_NEAREST_UP);
-        }
+        a_const_int = input->info()->quantization_info().quantize(a_const, RoundingPolicy::TO_NEAREST_UP);
+        b_const_int = input->info()->quantization_info().quantize(b_const, RoundingPolicy::TO_NEAREST_UP);
     }
 
     // Set build options
@@ -177,10 +166,6 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
     }
 
     build_opts.emplace((_run_in_place) ? "-DIN_PLACE" : "");
-    if(is_data_type_fixed_point(dt))
-    {
-        build_opts.emplace(("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(fixed_point_position)));
-    }
 
     // Create kernel
     std::string kernel_name = is_data_type_quantized_asymmetric(dt) ? std::string("activation_layer_qa8") : std::string("activation_layer");

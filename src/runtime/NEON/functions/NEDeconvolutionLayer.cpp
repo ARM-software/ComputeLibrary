@@ -63,18 +63,15 @@ Status NEDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
                                                     info.pad().first, info.pad().second, inner_border_right, inner_border_top, stride_x, stride_y);
 
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights, bias);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, weights, bias);
 
     if(bias != nullptr)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, bias);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, bias);
     }
 
     if(output->tensor_shape().total_size() > 0)
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
 
         const TensorShape output_shape = deconvolution_output_shape(out_dims, input->tensor_shape(), weights->tensor_shape());
 
@@ -117,8 +114,7 @@ void NEDeconvolutionLayer::configure(ITensor *input, const ITensor *weights, con
 
     // configure scale function
     // Init and allocate intermmidiate tensor for output, same size as input but the first two axis are the same as the output tensor
-    const TensorInfo scale_out_info(compute_deconvolution_shape(*input->info(), stride_x, stride_y, inner_border_right, inner_border_top, info), 1, input->info()->data_type(),
-                                    input->info()->fixed_point_position());
+    const TensorInfo scale_out_info(compute_deconvolution_shape(*input->info(), stride_x, stride_y, inner_border_right, inner_border_top, info), 1, input->info()->data_type());
     _scaled_output.allocator()->init(scale_out_info);
 
     // setup the function to convolve the upscaled output

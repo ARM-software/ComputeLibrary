@@ -77,7 +77,6 @@ public:
     int              num_channels() const override;
     int              num_elements() const override;
     PaddingSize      padding() const override;
-    int              fixed_point_position() const override;
     QuantizationInfo quantization_info() const override;
     const void *operator()(const Coordinates &coord) const override;
     void *operator()(const Coordinates &coord) override;
@@ -140,11 +139,6 @@ inline int CLAccessor::num_elements() const
 inline PaddingSize CLAccessor::padding() const
 {
     return _tensor.info()->padding();
-}
-
-inline int CLAccessor::fixed_point_position() const
-{
-    return _tensor.info()->fixed_point_position();
 }
 
 inline QuantizationInfo CLAccessor::quantization_info() const

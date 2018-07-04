@@ -62,7 +62,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     switch(data_layout)
     {
         case DataLayout::NCHW:
-            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
             break;
         case DataLayout::NHWC:
             ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
@@ -78,8 +78,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, output);
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
-        TensorInfo out_info(TensorInfo(compute_pool_shape(*input, pool_info), 1, output->data_type(), output->fixed_point_position()));
+        TensorInfo out_info(TensorInfo(compute_pool_shape(*input, pool_info), 1, output->data_type()));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &out_info);
     }
 
@@ -214,8 +213,6 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
     build_opts.add_option("-DPOOL_" + string_from_pooling_type(pool_type));
-    build_opts.add_option_if(is_data_type_fixed_point(data_type),
-                             "-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
     build_opts.add_option("-DSTRIDE_X=" + support::cpp11::to_string(pool_stride_x));
     build_opts.add_option("-DSTRIDE_Y=" + support::cpp11::to_string(pool_stride_y));
     build_opts.add_option("-DPAD_X=" + support::cpp11::to_string(pool_pad_left));
@@ -240,7 +237,7 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
             {
                 // Check if we have pool3x3 with stride_x less equal than 3. In these cases, run an optimized OpenCL kernel where
                 // each thread computes 4 output elements
-                const bool is_pool3x3_stride_le3 = (pool_size_x == 3) && (pool_size_y == 3) && (pool_stride_x <= 3) && !is_data_type_fixed_point(data_type);
+                const bool is_pool3x3_stride_le3 = (pool_size_x == 3) && (pool_size_y == 3) && (pool_stride_x <= 3);
 
                 std::string kernel_name = ((is_pool3x3_stride_le3) ? "pooling_layer_optimized_" : "pooling_layer_")
                                           + support::cpp11::to_string(pool_size_x);

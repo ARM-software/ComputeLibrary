@@ -23,7 +23,6 @@
  */
 #include "ConvolutionLayer.h"
 
-#include "tests/validation/FixedPoint.h"
 #include "tests/validation/Helpers.h"
 #include "tests/validation/reference/Convolution3d.h"
 #include "tests/validation/reference/Permute.h"

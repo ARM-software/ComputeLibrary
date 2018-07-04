@@ -27,7 +27,6 @@
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
-#include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
@@ -65,7 +64,7 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
     // Output tensor auto initialization if not yet initialized
     TensorShape output_shape{ input->tensor_shape() };
     output_shape.set(axis, 1);
-    auto_init_if_empty(*output, output_shape, 1, input->data_type(), input->fixed_point_position());
+    auto_init_if_empty(*output, output_shape, 1, input->data_type());
 
     const unsigned int num_elems_processed_per_iteration = 16;
 
@@ -118,10 +117,6 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
     std::set<std::string> build_opts;
     build_opts.emplace(("-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type())));
     build_opts.emplace(("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration)));
-    if(is_data_type_fixed_point(input->info()->data_type()))
-    {
-        build_opts.emplace("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(input->info()->fixed_point_position()));
-    }
 
     switch(op)
     {

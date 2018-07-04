@@ -24,7 +24,6 @@
 #ifndef __ARM_COMPUTE_TEST_VALIDATION_H__
 #define __ARM_COMPUTE_TEST_VALIDATION_H__
 
-#include "arm_compute/core/FixedPoint.h"
 #include "arm_compute/core/IArray.h"
 #include "arm_compute/core/Types.h"
 #include "support/ToolchainSupport.h"

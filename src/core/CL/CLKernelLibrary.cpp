@@ -231,22 +231,16 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "gemm_interleave4x4", "gemm.cl" },
     { "gemm_ma_f16", "gemm.cl" },
     { "gemm_ma_f32", "gemm.cl" },
-    { "gemm_ma_qs8", "gemm.cl" },
-    { "gemm_ma_qs16", "gemm.cl" },
     { "gemm_mv", "gemv.cl" },
     { "gemm_mv_quantized", "gemv.cl" },
     { "gemm_mm_interleaved_transposed_f16", "gemm.cl" },
     { "gemm_mm_interleaved_transposed_f16_bifrost", "gemm.cl" },
     { "gemm_mm_interleaved_transposed_f32", "gemm.cl" },
     { "gemm_mm_interleaved_transposed_f32_bifrost", "gemm.cl" },
-    { "gemm_mm_interleaved_transposed_qs8", "gemm.cl" },
-    { "gemm_mm_interleaved_transposed_qs16", "gemm.cl" },
     { "gemm_mm_floating_point", "gemm.cl" },
     { "gemm_mm_floating_point_f16_bifrost", "gemm.cl" },
     { "gemm_mm_floating_point_f32_bifrost", "gemm.cl" },
     { "gemm_mm_floating_point_f32_bifrost_1000", "gemm.cl" },
-    { "gemm_mm_qs8", "gemm.cl" },
-    { "gemm_mm_qs16", "gemm.cl" },
     { "gemm_lc_vm_f32", "gemm.cl" },
     { "gemm_transpose1xW", "gemm.cl" },
     { "gemmlowp_matrix_a_reduction", "gemmlowp.cl" },
@@ -555,10 +549,6 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "fill_border.cl",
 #include "./cl_kernels/fill_border.clembed"
-    },
-    {
-        "fixed_point.h",
-#include "./cl_kernels/fixed_point.hembed"
     },
     {
         "floor.cl",

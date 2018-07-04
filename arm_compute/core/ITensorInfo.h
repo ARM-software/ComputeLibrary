@@ -81,15 +81,6 @@ public:
      * @return Reference to this ITensorInfo object
      */
     virtual ITensorInfo &set_tensor_shape(const TensorShape &shape) = 0;
-    /** Set the fixed point position to the specified value
-     *
-     * @warning The fixed point position must be set once the data type has been configured
-     *
-     * @param[in] fixed_point_position The new fixed point position
-     *
-     * @return Reference to this ITensorInfo object
-     */
-    virtual ITensorInfo &set_fixed_point_position(int fixed_point_position) = 0;
     /** Set the quantization settings (scale and offset) of the tensor.
      *
      * @param[in] quantization_info QuantizationInfo containing the scale and offset
@@ -158,11 +149,7 @@ public:
      * @return Offset in bytes from the beginning of the memory allocation to access the element (x, y, z, ...)
      */
     virtual size_t offset_element_in_bytes(const Coordinates &pos) const = 0;
-    /** Fixed point position used when the tensor data type is QS8 or QS16
-     *
-     * @return The fixed point position that expresses the number of bits for the fractional part of the number
-     */
-    virtual int fixed_point_position() const = 0;
+
     /** Element size in bytes calculated as data_size() * num_channels()
      *
      * @return The size of one element in bytes

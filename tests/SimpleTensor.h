@@ -168,11 +168,6 @@ public:
      * @return the available padding around the tensor.
      */
     PaddingSize padding() const override;
-    /** Number of bits for the fractional part.
-     *
-     * @return the number of bits for the fractional part.
-     */
-    int fixed_point_position() const override;
     /** Quantization info in case of asymmetric quantized type
      *
      * @return
@@ -293,12 +288,6 @@ template <typename T>
 size_t SimpleTensor<T>::element_size() const
 {
     return num_channels() * element_size_from_data_type(data_type());
-}
-
-template <typename T>
-int SimpleTensor<T>::fixed_point_position() const
-{
-    return 0;
 }
 
 template <typename T>

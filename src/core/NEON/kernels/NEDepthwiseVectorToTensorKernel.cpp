@@ -89,7 +89,6 @@ void NEDepthwiseVectorToTensorKernel::configure(const ITensor *input, ITensor *o
 
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DIMENSIONS(output->info()->tensor_shape(), output_shape);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_FIXED_POINT(input, output);
 
     _input     = input;
     _output    = output;

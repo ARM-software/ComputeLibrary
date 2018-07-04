@@ -23,12 +23,7 @@
  */
 #include "helpers.h"
 
-#if defined(FIXED_POINT_POSITION)
-#include "fixed_point.h"
-#endif // FIXED_POINT_POSITION
-
 #if defined(DATA_TYPE) && defined(ELEMENT_SIZE)
-#if !defined(FIXED_POINT_POSITION)
 
 #if ELEMENT_SIZE == 1
 #define COND_DATA_TYPE char
@@ -50,7 +45,7 @@
  * @note The stride along the Y direction must be passed at compile time using -DSTRIDE_Y: e.g. -DSTRIDE_Y=1
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/QASYMM8/QS16/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -139,7 +134,7 @@ __kernel void im2col1x1_stridex1_dchw(
  * @note The dilation_x and dilation_y must be passed at compile time using -DDILATION_X and -DDILATION_Y: e.g. -DDILATION_X=1, -DDILATION_Y=1
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/QASYMM8/QS16/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -232,7 +227,7 @@ __kernel void im2col_generic_nhwc(
  * @note The stride along the X and Y directions must be passed at compile time using -DSTRIDE_X and -DSTRIDE_Y: e.g. -DSTRIDE_X=1 and -DSTRIDE_Y=1
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/QASYMM8/QS16/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -338,7 +333,7 @@ __kernel void im2col3x3_nhwc(
  * @note The stride along the X and Y directions must be passed at compile time using -DSTRIDE_X and -DSTRIDE_Y: e.g. -DSTRIDE_X=1 and -DSTRIDE_Y=1
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/QASYMM8/QS16/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -425,7 +420,7 @@ __kernel void im2col3x3_dchw(
  * @note The stride along the X and Y directions must be passed at compile time using -DSTRIDE_X and -DSTRIDE_Y: e.g. -DSTRIDE_X=1 and -DSTRIDE_Y=1
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/QASYMM8/QS16/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -598,7 +593,7 @@ __kernel void im2col5x5_dchw(
  * @note The stride along the X and Y directions must be passed at compile time using -DSTRIDE_X and -DSTRIDE_Y: e.g. -DSTRIDE_X=1 and -DSTRIDE_Y=1
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/QASYMM8/QS16/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -788,7 +783,6 @@ __kernel void im2col11x11_padx0_pady0_dchw(
 #endif // HAS_BIAS
 }
 #endif // defined(CONVOLVED_WIDTH) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(KERNEL_DEPTH)
-#endif // !defined(FIXED_POINT_POSITION)
 
 #if defined(CONVOLVED_WIDTH) && defined(STRIDE_X) && defined(STRIDE_Y) && defined(KERNEL_WIDTH) && defined(KERNEL_HEIGHT) && defined(KERNEL_DEPTH) && defined(SRC_WIDTH) && defined(SRC_HEIGHT) && defined(VECTOR_SIZE) && defined(WIDTH_MOD_VECTOR_SIZE)
 /** This kernel reshapes the input tensor to a tensor used to perform convolution using GEMM when
@@ -799,7 +793,7 @@ __kernel void im2col11x11_padx0_pady0_dchw(
  * @note The width modulo vector size must be passed at compile time using -DWIDTH_MOD_VECTOR_SIZE e.g. -DWIDTH_MOD_VECTOR_SIZE=3.
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/QS16/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -863,11 +857,7 @@ __kernel void im2col_generic_padx0_pady0_dchw(
 #ifdef HAS_BIAS
     if(ch == (KERNEL_DEPTH - 1))
     {
-#ifdef FIXED_POINT_POSITION
-        *output_ptr = (DATA_TYPE)(1 << FIXED_POINT_POSITION);
-#else  // FIXED_POINT_POSITION
         *output_ptr = 1.0f;
-#endif // FIXED_POINT_POSITION
     }
 #endif // HAS_BIAS
 }
@@ -886,7 +876,7 @@ __kernel void im2col_generic_padx0_pady0_dchw(
  * @note The dilation_x and dilation_y must be passed at compile time using -DDILATION_X and -DDILATION_Y: e.g. -DDILATION_X=1, -DDILATION_Y=1
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/QASYMM8/QS16/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -950,11 +940,7 @@ __kernel void im2col_generic_dchw(
 #ifdef HAS_BIAS
     if(ch == (KERNEL_DEPTH - 1))
     {
-#ifdef FIXED_POINT_POSITION
-        *output_ptr = (DATA_TYPE)(1 << FIXED_POINT_POSITION);
-#else  // FIXED_POINT_POSITION
         *output_ptr = 1.0f;
-#endif // FIXED_POINT_POSITION
     }
 #endif // HAS_BIAS
 }
@@ -966,7 +952,7 @@ __kernel void im2col_generic_dchw(
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=float
  * @note In case biases will be added in late stage, -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8/QASYMM8/QS16/F16/F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -999,11 +985,7 @@ __kernel void im2col_reduced_dchw(
     if(get_global_id(0) == (get_global_size(0) - 1) && get_global_id(1) == (get_global_size(1) - 1) && get_global_id(2) == (get_global_size(2) - 1))
     {
         tmp_out_ptr += dst_stride_x;
-#ifdef FIXED_POINT_POSITION
-        *((__global DATA_TYPE *)tmp_out_ptr) = (DATA_TYPE)(1 << FIXED_POINT_POSITION);
-#else  // FIXED_POINT_POSITION
         *((__global DATA_TYPE *)tmp_out_ptr) = (DATA_TYPE)1.0f;
-#endif // FIXED_POINT_POSITION
     }
 #endif // HAS_BIAS
 }

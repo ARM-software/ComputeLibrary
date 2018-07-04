@@ -64,20 +64,20 @@ TEST_SUITE(NEON)
 
 TEST_SUITE(DilatedConvolutionLayer)
 DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
-                                                                                           framework::dataset::make("InputInfo", { TensorInfo(TensorShape(8U, 8U, 2U), 1, DataType::F32, 0),
-                                                                                                                    TensorInfo(TensorShape(23U, 27U, 5U, 4U), 1, DataType::F32, 0),
-                                                                                                                    TensorInfo(TensorShape(3U, 3U, 2U, 1U), 1, DataType::F32, 0),
-                                                                                                                    TensorInfo(TensorShape(33U, 27U, 7U, 4U), 1, DataType::F32, 0)
+                                                                                           framework::dataset::make("InputInfo", { TensorInfo(TensorShape(8U, 8U, 2U), 1, DataType::F32),
+                                                                                                                    TensorInfo(TensorShape(23U, 27U, 5U, 4U), 1, DataType::F32),
+                                                                                                                    TensorInfo(TensorShape(3U, 3U, 2U, 1U), 1, DataType::F32),
+                                                                                                                    TensorInfo(TensorShape(33U, 27U, 7U, 4U), 1, DataType::F32)
                                                                                                                                  }),
-                                                                                           framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
-                                                                                                                    TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
-                                                                                                                    TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32, 0),
-                                                                                                                    TensorInfo(TensorShape(5U, 5U, 7U, 16U), 1, DataType::F16, 0)
+                                                                                           framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32),
+                                                                                                                    TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32),
+                                                                                                                    TensorInfo(TensorShape(3U, 3U, 5U, 21U), 1, DataType::F32),
+                                                                                                                    TensorInfo(TensorShape(5U, 5U, 7U, 16U), 1, DataType::F16)
                                                                                                                                    })),
-                                                                                       framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(6U, 6U, 1U), 1, DataType::F32, 0),
-                                                                                                                TensorInfo(TensorShape(21U, 25U, 21U, 4U), 1, DataType::F32, 0),
-                                                                                                                TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32, 0),
-                                                                                                                TensorInfo(TensorShape(11U, 12U, 16U, 4U), 1, DataType::F32, 0)
+                                                                                       framework::dataset::make("OutputInfo", { TensorInfo(TensorShape(6U, 6U, 1U), 1, DataType::F32),
+                                                                                                                TensorInfo(TensorShape(21U, 25U, 21U, 4U), 1, DataType::F32),
+                                                                                                                TensorInfo(TensorShape(11U, 25U, 21U), 1, DataType::F32),
+                                                                                                                TensorInfo(TensorShape(11U, 12U, 16U, 4U), 1, DataType::F32)
                                                                                                                               })),
                                                                                    framework::dataset::make("ConvInfo", { PadStrideInfo(1, 1, 0, 0),
                                                                                                             PadStrideInfo(1, 1, 0, 0),

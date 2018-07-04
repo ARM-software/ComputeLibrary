@@ -25,7 +25,7 @@
 
 /** This kernel concatenates the input tensor into the output tensor along the first dimension
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8, QASYMM8, QS16, F16, F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8, F16, F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)
@@ -60,7 +60,7 @@ __kernel void concatenate_width(
 
 /** This kernel concatenates the input tensor into the output tensor along the third dimension
  *
- * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QS8, QS16, F16, F32
+ * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16, F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source tensor in Y dimension (in bytes)

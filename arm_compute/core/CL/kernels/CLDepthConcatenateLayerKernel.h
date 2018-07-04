@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -52,7 +52,7 @@ public:
     ~CLDepthConcatenateLayerKernel() = default;
     /** Initialise the kernel's inputs and output
      *
-     * @param[in]     input        Input tensor. Data types supported: QS8/QS16/F16/F32.
+     * @param[in]     input        Input tensor. Data types supported: F16/F32.
      * @param[in]     depth_offset The offset on the Z axis.
      * @param[in,out] output       Output tensor. Data types supported: Same as @p input.
      *

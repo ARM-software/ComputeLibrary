@@ -51,7 +51,7 @@ public:
     NEFullyConnectedLayerReshapeWeights(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input and output tensors.
      *
-     * @param[in]  input               Weights tensor. The weights must be 2 dimensional. Data types supported: QS8/QS16/F32.
+     * @param[in]  input               Weights tensor. The weights must be 2 dimensional. Data types supported: F32.
      * @param[out] output              Destination tensor. Data type supported: Same as @p input.
      * @param[in]  transpose_weights   True if the weights must be transposed. Data types supported: Same as @p weights.
      * @param[in]  is_batched_fc_layer True if it is a batched fully connected layer
@@ -59,7 +59,7 @@ public:
     void configure(const ITensor *input, ITensor *output, bool transpose_weights, bool is_batched_fc_layer);
     /** Static function to check if given info will lead to a valid configuration of @ref CLFullyConnectedLayerReshapeWeights
      *
-     * @param[in] input               Weights tensor info. The weights must be 2 dimensional. Data types supported: QS8/QS16/F32.
+     * @param[in] input               Weights tensor info. The weights must be 2 dimensional. Data types supported: F32.
      * @param[in] output              Destination tensor info. Data type supported: Same as @p input.
      * @param[in] transpose_weights   True if the weights must be transposed. Data types supported: Same as @p weights.
      * @param[in] is_batched_fc_layer True if it is a batched fully connected layer
@@ -104,7 +104,7 @@ public:
     NEFullyConnectedLayer &operator=(NEFullyConnectedLayer &&) = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input                Source tensor. Data type supported: QS8/QS16/F16/F32.
+     * @param[in]  input                Source tensor. Data type supported: F16/F32.
      * @param[in]  weights              Weights tensor. The weights must be 2 dimensional. Data type supported: Same as @p input.
      * @param[in]  biases               Bias tensor. Can be nullptr. Data type supported:Same as @p input.
      * @param[out] output               Destination tensor. Data type supported: Same as @p input.
@@ -114,7 +114,7 @@ public:
     void configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, bool transpose_weights = true, bool are_weights_reshaped = false);
     /** Static function to check if given info will lead to a valid configuration of @ref CLFullyConnectedLayer
      *
-     * @param[in] input                Source tensor info. Data type supported: QS8/QS16/F16/F32.
+     * @param[in] input                Source tensor info. Data type supported: F16/F32.
      * @param[in] weights              Weights tensor info. The weights must be 2 dimensional. Data type supported: Same as @p input
      * @param[in] biases               Bias tensor info. It can be nullptr. Data type supported:Same as @p input.
      * @param[in] output               Destination tensor info. Data type supported: Same as @p input.

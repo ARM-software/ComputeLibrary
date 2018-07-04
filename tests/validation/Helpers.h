@@ -177,12 +177,10 @@ void fill_lookuptable(T &&table)
 
 /** Helper function to get the testing range for batch normalization layer.
  *
- * @param[in] fixed_point_position (Optional) Number of bits for the fractional part. Defaults to 0.
- *
  * @return A pair containing the lower upper testing bounds.
  */
 template <typename T>
-std::pair<T, T> get_batchnormalization_layer_test_bounds(int fixed_point_position = 0)
+std::pair<T, T> get_batchnormalization_layer_test_bounds()
 {
     const bool is_float = std::is_floating_point<T>::value;
     std::pair<T, T> bounds;
@@ -194,7 +192,7 @@ std::pair<T, T> get_batchnormalization_layer_test_bounds(int fixed_point_positio
     }
     else
     {
-        bounds = std::make_pair(1, 1 << (fixed_point_position));
+        bounds = std::make_pair(1, 1);
     }
 
     return bounds;

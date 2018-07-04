@@ -172,7 +172,7 @@ void CLGEMMLowpMatrixMultiplyKernel::configure(const ICLTensor *input0, const IC
     tensor_shape.set(0, is_interleaved_transposed ? reshape_info.n() : input1->info()->dimension(0));
     tensor_shape.set(1, is_interleaved_transposed ? reshape_info.m() : input0->info()->dimension(1));
 
-    auto_init_if_empty(*output->info(), tensor_shape, 1, DataType::S32, 1, QuantizationInfo());
+    auto_init_if_empty(*output->info(), tensor_shape, 1, DataType::S32, QuantizationInfo());
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input0->info(), input1->info(), output->info(), is_interleaved_transposed, reshape_info));
 

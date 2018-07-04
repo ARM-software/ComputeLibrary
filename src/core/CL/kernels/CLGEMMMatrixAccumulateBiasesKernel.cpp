@@ -41,9 +41,8 @@ namespace
 Status validate_arguments(const ITensorInfo *accum, const ITensorInfo *biases)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(accum);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(accum, 1, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(accum, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(biases, accum);
-    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_FIXED_POINT(biases, accum);
     ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() != 1);
 
     return Status{};
@@ -95,8 +94,6 @@ void CLGEMMMatrixAccumulateBiasesKernel::configure(ICLTensor *accum, const ICLTe
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(accum->info()->data_type()));
     build_opts.add_option("-DVECTOR_SIZE=" + support::cpp11::to_string(vector_size));
-    build_opts.add_option_if(is_data_type_fixed_point(accum->info()->data_type()),
-                             "-DFIXED_POINT_POSITION=" + support::cpp11::to_string(accum->info()->fixed_point_position()));
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("gemm_accumulate_biases", build_opts.options()));

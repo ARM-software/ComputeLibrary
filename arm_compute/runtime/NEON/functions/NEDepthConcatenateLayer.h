@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -49,7 +49,7 @@ public:
     NEDepthConcatenateLayer();
     /** Initialise the kernel's inputs vector and output.
      *
-     * @param[in,out] inputs_vector The vectors containing all the tensors to concatenate. Data types supported:  QS8/QS16/F16/F32.
+     * @param[in,out] inputs_vector The vectors containing all the tensors to concatenate. Data types supported:  F16/F32.
      * @param[out]    output        Output tensor. Data types supported: Same as @p inputs_vector.
      */
     void configure(std::vector<ITensor *> inputs_vector, ITensor *output);
