@@ -74,7 +74,7 @@ public:
      *                      The 3rd dimension must be the same as the input's volume 3rd dimension.
      *                      Data type supported:Same as @p input.
      * @param[in] output    Output tensor.
-     *                      The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: QS32/F16/F32
+     *                      The 3rd dimensions must be equal to the 4th dimension of the @p kernels tensor. Data types supported: F16/F32
      * @param[in] conv_info Contains padding and stride information described in @ref PadStrideInfo.
      *
      * @return a status

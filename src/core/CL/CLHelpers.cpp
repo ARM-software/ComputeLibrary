@@ -50,8 +50,6 @@ std::string get_cl_type_from_data_type(const DataType &dt)
             return "uint";
         case DataType::S32:
             return "int";
-        case DataType::QS32:
-            return "qs32";
         case DataType::U64:
             return "ulong";
         case DataType::S64:
@@ -93,13 +91,7 @@ std::string get_data_size_from_data_type(const DataType &dt)
 
 std::string get_underlying_cl_type_from_data_type(const DataType &dt)
 {
-    switch(dt)
-    {
-        case DataType::QS32:
-            return "int";
-        default:
-            return get_cl_type_from_data_type(dt);
-    }
+    return get_cl_type_from_data_type(dt);
 }
 
 GPUTarget get_target_from_device(cl::Device &device)

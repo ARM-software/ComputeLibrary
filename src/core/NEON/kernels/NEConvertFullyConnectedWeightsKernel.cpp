@@ -66,7 +66,7 @@ Status NEConvertFullyConnectedWeightsKernel::validate(const ITensorInfo *input, 
                                                       DataLayout data_layout)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QASYMM8, DataType::U16, DataType::S16, DataType::U32, DataType::S32,
-                                                         DataType::QS32, DataType::F16, DataType::F32);
+                                                         DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() != 2);

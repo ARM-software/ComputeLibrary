@@ -55,7 +55,7 @@ public:
     /** Set the accumulate buffer and the biases of the kernel.
      *
      * @param[in, out] input                        Input to add the bias to. If @p output is not specified then accumulation is done in-place.
-     *                                              Data type supported: QS32/F16/F32
+     *                                              Data type supported: F16/F32
      * @param[in]      bias                         (Optional) The shared bias tensor to add. It must be 1D Tensor. Data type supported: Same as @p input
      * @param[out]     output                       (Optional) If the output tensor is specified the accumulation is done out-of-place. (Defaults to nullptr)
      *                                              Data type supported: F16/F32
@@ -68,7 +68,7 @@ public:
     /** Static function to check if given info will lead to a valid configuration of @ref NEDirectConvolutionLayerOutputStageKernel
      *
      * @param[in] input  Input to add the bias to. If @p output is not specified then accumulation is done in-place.
-     *                   Data type supported: QS32/F16/F32
+     *                   Data type supported: F16/F32
      * @param[in] bias   (Optional) The shared bias tensor to add. It must be 1D Tensor. Data type supported: Same as @p input
      * @param[in] output (Optional) If the output tensor is specified the accumulation is done out-of-place. (Defaults to nullptr)
      *                         Data type supported: F16/F32

@@ -47,11 +47,11 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *bias, con
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8,
                                                          DataType::F16,
-                                                         DataType::QS32, DataType::S32, DataType::F32);
+                                                         DataType::S32, DataType::F32);
 
     if(bias != nullptr)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::F16, DataType::QS32, DataType::S32, DataType::F32);
+        ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::F16, DataType::S32, DataType::F32);
 
         if(is_data_type_quantized_asymmetric(input->data_type()))
         {
