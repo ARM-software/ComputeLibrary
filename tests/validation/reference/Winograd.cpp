@@ -194,20 +194,6 @@ void initialize_matrix_transform(SimpleTensor<T> &src, const Size2D &output_tile
 } // namespace
 
 template <typename T>
-void print_tile(SimpleTensor<T> &in)
-{
-    for(int y = 0; y < in.shape()[1]; y++)
-    {
-        for(int x = 0; x < in.shape()[0]; x++)
-        {
-            std::cout << in[x + y * in.shape()[0]] << " ";
-        }
-
-        std::cout << std::endl;
-    }
-}
-
-template <typename T>
 SimpleTensor<T> winograd_input_transform(const SimpleTensor<T> &in, const TensorShape &output_shape, const WinogradInfo &winograd_info)
 {
     ARM_COMPUTE_ERROR_ON(in.data_layout() != DataLayout::NCHW);

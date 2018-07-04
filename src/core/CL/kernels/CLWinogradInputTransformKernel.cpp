@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/CL/kernels/CLWinogradInputTransformKernel.h"
 
+#include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
 #include "arm_compute/core/CL/ICLTensor.h"
@@ -68,34 +69,27 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 {
     ARM_COMPUTE_UNUSED(output);
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    const PadStrideInfo conv_info        = winograd_info.convolution_info;
-    const Size2D        output_tile_size = winograd_info.output_tile_size;
-    const Size2D        kernel_size      = winograd_info.kernel_size;
 
-    unsigned int num_elems_read_per_iteration_x = 0;
-    unsigned int num_elems_read_per_iteration_y = 0;
-    unsigned int pad_left                       = 0;
-    unsigned int pad_top                        = 0;
+    bool   window_changed = false;
+    Window win            = calculate_max_window(*input, Steps(1, 1));
 
     if(input->data_layout() == DataLayout::NCHW)
     {
-        num_elems_read_per_iteration_x = output_tile_size.width + kernel_size.width - 1;
-        num_elems_read_per_iteration_y = output_tile_size.height + kernel_size.height - 1;
-        pad_left                       = conv_info.pad_left();
-        pad_top                        = conv_info.pad_top();
+        const PadStrideInfo conv_info        = winograd_info.convolution_info;
+        const Size2D        output_tile_size = winograd_info.output_tile_size;
+        const Size2D        kernel_size      = winograd_info.kernel_size;
+
+        unsigned int num_elems_read_per_iteration_x = output_tile_size.width + kernel_size.width - 1;
+        unsigned int num_elems_read_per_iteration_y = output_tile_size.height + kernel_size.height - 1;
+
+        AccessWindowRectangle input_access(input, -conv_info.pad_left(), -conv_info.pad_top(), num_elems_read_per_iteration_x, num_elems_read_per_iteration_y);
+        window_changed = update_window_and_padding(win, input_access);
     }
     else
     {
-        num_elems_read_per_iteration_x = 1;
-        num_elems_read_per_iteration_y = output_tile_size.width + kernel_size.width - 1;
-        pad_top                        = 1;
+        AccessWindowStatic input_access(input, 0, -1, input->dimension(0), input->dimension(1) + 1);
+        window_changed = update_window_and_padding(win, input_access);
     }
-
-    Window win = calculate_max_window(*input, Steps(1, 1));
-
-    AccessWindowRectangle input_access(input, -pad_left, -pad_top, num_elems_read_per_iteration_x, num_elems_read_per_iteration_y);
-
-    bool window_changed = update_window_and_padding(win, input_access);
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);

@@ -178,6 +178,20 @@ class SmallWinogradOutputTransformDatasetNHWC final : public WinogradOutputTrans
 public:
     SmallWinogradOutputTransformDatasetNHWC()
     {
+        // (4x1, 3x1)
+        add_config(TensorShape(13U, 12U, 6U), WinogradInfo(Size2D(4U, 1U), Size2D(3U, 1U), Size2D(7U, 6U), PadStrideInfo(1, 1, 0, 0), DataLayout::NHWC));
+        add_config(TensorShape(7U, 22U, 6U), WinogradInfo(Size2D(4U, 1U), Size2D(3U, 1U), Size2D(10U, 11U), PadStrideInfo(1, 1, 0, 0), DataLayout::NHWC));
+        add_config(TensorShape(1U, 462U, 6U), WinogradInfo(Size2D(4U, 1U), Size2D(3U, 1U), Size2D(53U, 33U), PadStrideInfo(1, 1, 1, 0), DataLayout::NHWC));
+        add_config(TensorShape(7U, 20U, 6U, 3U), WinogradInfo(Size2D(4U, 1U), Size2D(3U, 1U), Size2D(8U, 10U), PadStrideInfo(1, 1, 0, 0), DataLayout::NHWC));
+        add_config(TensorShape(24U, 56U, 6U, 2U), WinogradInfo(Size2D(4U, 1U), Size2D(3U, 1U), Size2D(14U, 14U), PadStrideInfo(1, 1, 1, 0), DataLayout::NHWC));
+
+        // (1x4, 1x3)
+        add_config(TensorShape(13U, 7U, 6U), WinogradInfo(Size2D(1U, 4U), Size2D(1U, 3U), Size2D(7U, 6U), PadStrideInfo(1, 1, 0, 0), DataLayout::NHWC));
+        add_config(TensorShape(7U, 30U, 6U), WinogradInfo(Size2D(1U, 4U), Size2D(1U, 3U), Size2D(10U, 11U), PadStrideInfo(1, 1, 0, 0), DataLayout::NHWC));
+        add_config(TensorShape(1U, 477U, 6U), WinogradInfo(Size2D(1U, 4U), Size2D(1U, 3U), Size2D(53U, 33U), PadStrideInfo(1, 1, 0, 1), DataLayout::NHWC));
+        add_config(TensorShape(7U, 16U, 6U, 3U), WinogradInfo(Size2D(1U, 4U), Size2D(1U, 3U), Size2D(8U, 10U), PadStrideInfo(1, 1, 0, 0), DataLayout::NHWC));
+        add_config(TensorShape(24U, 56U, 6U, 2U), WinogradInfo(Size2D(1U, 4U), Size2D(1U, 3U), Size2D(14U, 14U), PadStrideInfo(1, 1, 0, 1), DataLayout::NHWC));
+
         // (4x4, 3x3)
         add_config(TensorShape(13U, 4U, 36U), WinogradInfo(Size2D(4U, 4U), Size2D(3U, 3U), Size2D(10U, 9U), PadStrideInfo(1, 1, 0, 0), DataLayout::NHWC));
         add_config(TensorShape(13U, 6U, 36U), WinogradInfo(Size2D(4U, 4U), Size2D(3U, 3U), Size2D(10U, 11U), PadStrideInfo(1, 1, 0, 0), DataLayout::NHWC));
@@ -200,7 +214,6 @@ class LargeWinogradOutputTransformDatasetNCHW final : public WinogradOutputTrans
 public:
     LargeWinogradOutputTransformDatasetNCHW()
     {
-        // NCHW
         // (2x2, 3x3)
         add_config(TensorShape(64U, 12544U, 16U), WinogradInfo(Size2D(2U, 2U), Size2D(3U, 3U), Size2D(224U, 224U), PadStrideInfo(1, 1, 1, 1), DataLayout::NCHW));
         add_config(TensorShape(32U, 3080U, 16U), WinogradInfo(Size2D(2U, 2U), Size2D(3U, 3U), Size2D(112U, 112U), PadStrideInfo(1, 1, 1, 0), DataLayout::NCHW));
@@ -274,6 +287,22 @@ class LargeWinogradOutputTransformDatasetNHWC final : public WinogradOutputTrans
 public:
     LargeWinogradOutputTransformDatasetNHWC()
     {
+        // (4x1, 3x1)
+        add_config(TensorShape(64U, 12488U, 6U), WinogradInfo(Size2D(4U, 1U), Size2D(3U, 1U), Size2D(224U, 223U), PadStrideInfo(1, 1, 1, 0), DataLayout::NHWC));
+        add_config(TensorShape(32U, 3080U, 6U), WinogradInfo(Size2D(4U, 1U), Size2D(3U, 1U), Size2D(112U, 110U), PadStrideInfo(1, 1, 1, 0), DataLayout::NHWC));
+        add_config(TensorShape(13U, 784U, 6U), WinogradInfo(Size2D(4U, 1U), Size2D(3U, 1U), Size2D(56U, 56U), PadStrideInfo(1, 1, 1, 0), DataLayout::NHWC));
+        add_config(TensorShape(64U, 12488U, 6U, 3U), WinogradInfo(Size2D(4U, 1U), Size2D(3U, 1U), Size2D(224U, 223U), PadStrideInfo(1, 1, 0, 0), DataLayout::NHWC));
+        add_config(TensorShape(32U, 3080U, 6U, 2U), WinogradInfo(Size2D(4U, 1U), Size2D(3U, 1U), Size2D(112U, 110U), PadStrideInfo(1, 1, 0, 0), DataLayout::NHWC));
+        add_config(TensorShape(13U, 784U, 6U, 5U), WinogradInfo(Size2D(4U, 1U), Size2D(3U, 1U), Size2D(56U, 56U), PadStrideInfo(1, 1, 0, 0), DataLayout::NHWC));
+
+        // (1x4, 1x3)
+        add_config(TensorShape(64U, 12544U, 6U), WinogradInfo(Size2D(1U, 4U), Size2D(1U, 3U), Size2D(224U, 223U), PadStrideInfo(1, 1, 0, 1), DataLayout::NHWC));
+        add_config(TensorShape(32U, 3136U, 6U), WinogradInfo(Size2D(1U, 4U), Size2D(1U, 3U), Size2D(112U, 110U), PadStrideInfo(1, 1, 0, 1), DataLayout::NHWC));
+        add_config(TensorShape(13U, 784U, 6U), WinogradInfo(Size2D(1U, 4U), Size2D(1U, 3U), Size2D(56U, 56U), PadStrideInfo(1, 1, 0, 1), DataLayout::NHWC));
+        add_config(TensorShape(64U, 12544U, 6U, 3U), WinogradInfo(Size2D(1U, 4U), Size2D(1U, 3U), Size2D(224U, 223U), PadStrideInfo(1, 1, 0, 0), DataLayout::NHWC));
+        add_config(TensorShape(32U, 3024U, 6U, 2U), WinogradInfo(Size2D(1U, 4U), Size2D(1U, 3U), Size2D(112U, 110U), PadStrideInfo(1, 1, 0, 0), DataLayout::NHWC));
+        add_config(TensorShape(13U, 784U, 6U, 5U), WinogradInfo(Size2D(1U, 4U), Size2D(1U, 3U), Size2D(56U, 56U), PadStrideInfo(1, 1, 0, 0), DataLayout::NHWC));
+
         // (4x4, 3x3)
         add_config(TensorShape(64U, 3136U, 36U), WinogradInfo(Size2D(4U, 4U), Size2D(3U, 3U), Size2D(224U, 224U), PadStrideInfo(1, 1, 1, 1), DataLayout::NHWC));
         add_config(TensorShape(32U, 784U, 36U), WinogradInfo(Size2D(4U, 4U), Size2D(3U, 3U), Size2D(112U, 112U), PadStrideInfo(1, 1, 1, 0), DataLayout::NHWC));
