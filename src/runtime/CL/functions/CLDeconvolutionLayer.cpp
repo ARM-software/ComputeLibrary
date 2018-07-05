@@ -93,7 +93,7 @@ void CLDeconvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights,
     const unsigned int stride_y = info.stride().second;
 
     auto out_dims = deconvolution_output_dimensions(input->info()->dimension(0), input->info()->dimension(1), weights->info()->dimension(0), weights->info()->dimension(1),
-                                                    info.pad().first, info.pad().second, inner_border_top, inner_border_right, stride_x, stride_y);
+                                                    info.pad().first, info.pad().second, inner_border_right, inner_border_top, stride_x, stride_y);
 
     const TensorShape output_shape = deconvolution_output_shape(out_dims, input->info()->tensor_shape(), weights->info()->tensor_shape());
 
