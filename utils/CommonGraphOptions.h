@@ -79,10 +79,16 @@ public:
      * @param[in,out] parser A parser on which "parse()" hasn't been called yet.
      */
     CommonGraphOptions(CommandLineParser &parser);
-    /** Prevent instances of this class from being copy constructed */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CommonGraphOptions(const CommonGraphOptions &) = delete;
-    /** Prevent instances of this class from being copied */
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
     CommonGraphOptions &operator=(const CommonGraphOptions &) = delete;
+    /** Allow instances of this class to be moved */
+    CommonGraphOptions(CommonGraphOptions &&) = default;
+    /** Allow instances of this class to be moved */
+    CommonGraphOptions &operator=(CommonGraphOptions &&) = default;
+    /** Default destructor */
+    ~CommonGraphOptions() = default;
 
     ToggleOption                           *help;             /**< Show help option */
     SimpleOption<int>                      *threads;          /**< Number of threads option */
