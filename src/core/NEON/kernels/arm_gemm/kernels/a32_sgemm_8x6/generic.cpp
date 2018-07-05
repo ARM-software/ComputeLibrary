@@ -345,7 +345,8 @@ void a32_sgemm_8x6(const float *Apanel, const float *Bpanel, float *Cpanel, int 
                 "vst1.32	{d30-d31}, [%[c_ptr] :128]!\n"
             : [a_ptr] "+r" (a_ptr), [b_ptr] "+r" (b_ptr), [c_ptr] "+r" (c_ptr), [k] "+r" (k), [tails] "+r" (tails)
             :
-            : "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "q12", "q13", "q14", "q15", "cc"
+            : "q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "q12", "q13", "q14", "q15",
+              "cc", "memory"
             );
         }
     }
