@@ -51,7 +51,7 @@ TEST_SUITE(LocallyConnectedLayer)
 
 // *INDENT-OFF*
 // clang-format off
-REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, CLLocallyConnectedLayerFixture, framework::DatasetMode::ALL,
+REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, CLLocallyConnectedLayerFixture, framework::DatasetMode::PRECOMMIT,
                                 combine(combine(
                                 datasets::SmallLocallyConnectedDataset(),
                                 data_types),

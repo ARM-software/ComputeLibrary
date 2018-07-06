@@ -129,8 +129,8 @@ protected:
 
             if(1U == _dst_num_planes)
             {
-                TensorType *dst_plane = static_cast<TensorType *>(ref_dst.plane(0));
-                color_convert.configure(plane_src, dst_plane);
+                TensorType *plane_dst = static_cast<TensorType *>(ref_dst.plane(0));
+                color_convert.configure(plane_src, plane_dst);
             }
             else
             {
@@ -141,8 +141,8 @@ protected:
         {
             if(1U == _dst_num_planes)
             {
-                TensorType *dst_plane = static_cast<TensorType *>(ref_dst.plane(0));
-                color_convert.configure(&ref_src, dst_plane);
+                TensorType *plane_dst = static_cast<TensorType *>(ref_dst.plane(0));
+                color_convert.configure(&ref_src, plane_dst);
             }
             else
             {
