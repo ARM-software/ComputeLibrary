@@ -24,15 +24,14 @@
 #include "arm_compute/runtime/NEON/functions/NEWinogradConvolutionLayer.h"
 
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/NEON/kernels/NEWinogradConvolutionLayerKernel.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
-#include "arm_compute/runtime/NEON/AssemblyHelper.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 #include "support/ToolchainSupport.h"
-
-#include "arm_compute/core/NEON/kernels/NEWinogradConvolutionLayerKernel.h"
 
 #include "arm_compute/core/NEON/kernels/convolution/winograd/winograd_gemm.hpp"
 
@@ -292,7 +291,7 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     _arm_gemm->set_arrays(reinterpret_cast<float *>(_input_workspace.buffer()), input_matrix_row_stride, 0, input_matrix_stride, reinterpret_cast<float *>(_kernel_storage.buffer()),
                           kernel_matrix_row_stride, kernel_matrix_stride, reinterpret_cast<float *>(_output_workspace.buffer()), output_matrix_row_stride, 0, output_matrix_stride);
 
-    auto acl_gemm_wrapper = support::cpp14::make_unique<NEGEMMAssemblyWrapper<arm_gemm::GemmCommon<float, float>>>();
+    auto acl_gemm_wrapper = support::cpp14::make_unique<NEGEMMAssemblyWrapperKernel<float, float>>();
     acl_gemm_wrapper->configure(_arm_gemm.get());
     const size_t workspace_size = _arm_gemm->get_working_size();
 
@@ -302,7 +301,8 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
         const unsigned int alignment = 4096;
         // TODO (COMPMID-1248) : Add support for memory manager in NEWinogradConvolutionLayer
         // Warning : Do not set a memory group in allocate_workspace, should be done under COMPMID-1248
-        allocate_workspace(workspace_size, _workspace, nullptr, alignment);
+        _workspace.allocator()->init(TensorInfo(TensorShape{ (workspace_size + alignment /* FIXME: remove alignment after COMPMID-1088 */) }, 1, DataType::S8), alignment);
+        _workspace.allocator()->allocate();
         _arm_gemm->set_working_space(reinterpret_cast<float *>(_workspace.buffer()));
     }
 

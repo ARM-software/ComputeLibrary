@@ -29,8 +29,8 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/core/Validate.h"
-#include "arm_compute/runtime/NEON/AssemblyHelper.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
+#include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 #include "arm_compute/runtime/TensorAllocator.h"
 #include "support/ToolchainSupport.h"
 
@@ -39,8 +39,8 @@
 namespace arm_compute
 {
 NEGEMM::NEGEMM(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _asm_glue(), _ma_kernel(), _tmp_a(), _tmp_b(), _workspace(), _B_pretransposed(),
-      _original_b(nullptr), _run_vector_matrix_multiplication(false), _run_addition(false), _reshape_b_only_on_first_run(false), _is_prepared(false)
+    : _memory_group(memory_manager), _interleave_kernel(), _transpose_kernel(), _mm_kernel(), _asm_glue(memory_manager), _ma_kernel(), _tmp_a(), _tmp_b(), _original_b(nullptr),
+      _run_vector_matrix_multiplication(false), _run_addition(false), _reshape_b_only_on_first_run(false), _is_prepared(false)
 {
 }
 
@@ -67,10 +67,13 @@ void NEGEMM::configure(const ITensor *a, const ITensor *b, const ITensor *c, ITe
     _reshape_b_only_on_first_run      = gemm_info.reshape_b_only_on_first_run();
     _run_vector_matrix_multiplication = a->info()->dimension(1) < 2;
     _original_b                       = b;
-    _asm_glue._optimised_kernel       = nullptr;
 
-    const bool run_optimised = a->info()->data_type() == DataType::F32 && (c == nullptr || beta == 0.f)
-                               && setup_assembly_kernel(a, b, d, alpha, beta, _reshape_b_only_on_first_run, _workspace, _B_pretransposed, _memory_group, _asm_glue);
+    bool run_optimised = a->info()->data_type() == DataType::F32 && (c == nullptr || beta == 0.f);
+    if(run_optimised)
+    {
+        _asm_glue.configure(a, b, d, alpha, beta, _reshape_b_only_on_first_run);
+        run_optimised = _asm_glue.is_configured();
+    }
 
     // Check if the first input tensor is a vector.
     // If so, all the kernels for reshaping the tensors can be skipped
@@ -150,7 +153,7 @@ void NEGEMM::run()
 {
     prepare();
 
-    if(_asm_glue._optimised_kernel != nullptr)
+    if(_asm_glue.is_configured())
     {
         _memory_group.acquire();
         _asm_glue.run();
@@ -188,14 +191,14 @@ void NEGEMM::prepare()
 {
     if(!_is_prepared)
     {
-        if(_asm_glue._optimised_kernel)
+        if(_asm_glue.is_configured())
         {
             ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
 
             _asm_glue.prepare();
             _original_b->mark_as_unused();
         }
-        else if(_reshape_b_only_on_first_run && !_run_vector_matrix_multiplication && !_asm_glue._optimised_kernel)
+        else if(_reshape_b_only_on_first_run && !_run_vector_matrix_multiplication && !_asm_glue.is_configured())
         {
             ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
 

@@ -26,6 +26,7 @@
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
+#include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "support/ToolchainSupport.h"
 
 #include <cmath>

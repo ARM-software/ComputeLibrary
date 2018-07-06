@@ -32,9 +32,8 @@
 #include "arm_compute/runtime/IFunction.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 #include "arm_compute/runtime/MemoryGroup.h"
+#include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 #include "arm_compute/runtime/Tensor.h"
-
-#include "arm_compute/runtime/NEON/AssemblyHelper.h"
 
 #include <memory>
 
@@ -86,12 +85,10 @@ private:
     NEGEMMInterleave4x4Kernel  _interleave_kernel;
     NEGEMMTranspose1xWKernel   _transpose_kernel;
     NEGEMMMatrixMultiplyKernel _mm_kernel;
-    AssemblyKernelGlueF32      _asm_glue;
+    NEGEMMAssemblyDispatchF32  _asm_glue;
     NEGEMMMatrixAdditionKernel _ma_kernel;
     Tensor                     _tmp_a;
     Tensor                     _tmp_b;
-    Tensor                     _workspace;
-    Tensor                     _B_pretransposed;
     const ITensor             *_original_b;
     bool                       _run_vector_matrix_multiplication;
     bool                       _run_addition;

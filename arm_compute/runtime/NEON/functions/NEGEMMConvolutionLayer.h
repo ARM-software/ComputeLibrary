@@ -37,8 +37,8 @@
 #include "arm_compute/core/NEON/kernels/NEWeightsReshapeKernel.h"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/MemoryGroup.h"
-#include "arm_compute/runtime/NEON/AssemblyHelper.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/NEON/functions/NEGEMMLowpOutputStage.h"
 #include "arm_compute/runtime/Tensor.h"
@@ -168,8 +168,8 @@ private:
     void configure_mm(const ITensor *input, const ITensor *weights, ITensor *output, bool is_interleaved, const GEMMReshapeInfo &reshape_info = GEMMReshapeInfo());
 
 private:
-    AssemblyKernelGlueF32                               _asm_glue;
     MemoryGroup                                         _memory_group;
+    NEGEMMAssemblyDispatchF32                           _asm_glue;
     NEIm2ColKernel                                      _input_im2col_kernel;
     NEGEMMInterleave4x4Kernel                           _input_interleave_kernel;
     NEConvolutionLayerReshapeWeights                    _reshape_weights;
@@ -187,8 +187,6 @@ private:
     Tensor _weights_reshaped;
     Tensor _gemm_output;
     Tensor _tmp_output;
-    Tensor _workspace;
-    Tensor _B_pretransposed;
 
     DataLayout _data_layout;
     bool       _append_bias;

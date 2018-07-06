@@ -41,8 +41,8 @@ using namespace arm_compute;
 using namespace arm_compute::misc::shape_calculator;
 
 NEGEMMLowpMatrixMultiplyCore::NEGEMMLowpMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _asm_glue_unsigned(), _asm_glue_signed(), _mm_kernel(nullptr), _mtx_a_reshape_kernel(nullptr), _mtx_b_reshape_kernel(nullptr), _mtx_a_reduction_kernel(),
-      _mtx_b_reduction_kernel(), _offset_contribution_kernel(), _vector_sum_col(), _vector_sum_row(), _tmp_a(), _tmp_b(), _workspace(), _B_pretranspose(), _original_b(nullptr), _a_offset(0), _b_offset(0),
+    : _memory_group(memory_manager), _asm_glue_unsigned(memory_manager), _asm_glue_signed(memory_manager), _mm_kernel(nullptr), _mtx_a_reshape_kernel(nullptr), _mtx_b_reshape_kernel(nullptr),
+      _mtx_a_reduction_kernel(), _mtx_b_reduction_kernel(), _offset_contribution_kernel(), _vector_sum_col(), _vector_sum_row(), _tmp_a(), _tmp_b(), _original_b(nullptr), _a_offset(0), _b_offset(0),
       _run_vector_matrix_multiplication(false), _dot_product_path(false), _reshape_b_only_on_first_run(false), _is_prepared(false)
 {
 }
@@ -53,10 +53,8 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
     ARM_COMPUTE_ERROR_THROW_ON(NEGEMMLowpMatrixMultiplyCore::validate(a->info(), b->info(), output->info(), gemm_info));
 
     // Clear state
-    _mtx_a_reshape_kernel                = nullptr;
-    _mtx_b_reshape_kernel                = nullptr;
-    _asm_glue_signed._optimised_kernel   = nullptr;
-    _asm_glue_unsigned._optimised_kernel = nullptr;
+    _mtx_a_reshape_kernel = nullptr;
+    _mtx_b_reshape_kernel = nullptr;
 
     // Set internal variables
     _a_offset                         = a->info()->quantization_info().offset;
@@ -71,13 +69,15 @@ void NEGEMMLowpMatrixMultiplyCore::configure(const ITensor *a, const ITensor *b,
     {
         case DataType::S8:
         {
-            _dot_product_path = setup_assembly_kernel(a, b, output, 1.f, 0.f, _reshape_b_only_on_first_run, _workspace, _B_pretranspose, _memory_group, _asm_glue_signed);
+            _asm_glue_signed.configure(a, b, output, 1.f, 0.f, _reshape_b_only_on_first_run);
+            _dot_product_path = _asm_glue_signed.is_configured();
             break;
         }
         case DataType::QASYMM8:
         case DataType::U8:
         {
-            _dot_product_path = setup_assembly_kernel(a, b, output, 1.f, 0.f, _reshape_b_only_on_first_run, _workspace, _B_pretranspose, _memory_group, _asm_glue_unsigned);
+            _asm_glue_unsigned.configure(a, b, output, 1.f, 0.f, _reshape_b_only_on_first_run);
+            _dot_product_path = _asm_glue_unsigned.is_configured();
             break;
         }
         default:
@@ -275,11 +275,11 @@ void NEGEMMLowpMatrixMultiplyCore::run()
     }
 
     // Run GEMM
-    if(_asm_glue_unsigned._optimised_kernel != nullptr)
+    if(_asm_glue_unsigned.is_configured())
     {
         _asm_glue_unsigned.run();
     }
-    else if(_asm_glue_signed._optimised_kernel != nullptr)
+    else if(_asm_glue_signed.is_configured())
     {
         _asm_glue_signed.run();
     }
@@ -311,15 +311,15 @@ void NEGEMMLowpMatrixMultiplyCore::prepare()
     if(!_is_prepared)
     {
         // Run assembly reshape
-        if((_asm_glue_signed._optimised_kernel || _asm_glue_signed._optimised_kernel) && _reshape_b_only_on_first_run)
+        if((_asm_glue_signed.is_configured() || _asm_glue_signed.is_configured()) && _reshape_b_only_on_first_run)
         {
             ARM_COMPUTE_ERROR_ON(!_original_b->is_used());
 
-            if(_asm_glue_unsigned._optimised_kernel != nullptr)
+            if(_asm_glue_unsigned.is_configured())
             {
                 _asm_glue_unsigned.prepare();
             }
-            else if(_asm_glue_signed._optimised_kernel != nullptr)
+            else if(_asm_glue_signed.is_configured())
             {
                 _asm_glue_signed.prepare();
             }

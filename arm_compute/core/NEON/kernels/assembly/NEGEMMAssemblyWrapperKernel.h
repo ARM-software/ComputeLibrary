@@ -21,12 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_ASSEMBLY_GEMM_KERNEL_WRAPPER_H__
-#define __ARM_COMPUTE_ASSEMBLY_GEMM_KERNEL_WRAPPER_H__
+#ifndef __ARM_COMPUTE_ASSEMBLY_GEMM_KERNEL_WRAPPER_KERNEL_H__
+#define __ARM_COMPUTE_ASSEMBLY_GEMM_KERNEL_WRAPPER_KERNEL_H__
 
 #include "arm_compute/core/NEON/INEKernel.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Utils.h"
+
+#include "gemm_common.hpp"
 
 namespace arm_compute
 {
@@ -36,7 +38,7 @@ class ITensor;
   *
   * Some kernels were written in assembly and highly optimised for specific CPUs like A53 or A55.
   * This class works as a wrapper for these assembly kernels. The arm compute library creates an instance
-  * of NEGEMMAssemblyWrapper and other auxiliary data structures to execute a single assembly kernel
+  * of NEGEMMAssemblyWrapperKernel and other auxiliary data structures to execute a single assembly kernel
   * in the context of an NEFunctions.
   *
   * The type T is the type of the actual kernel implemented in assembly which is of type
@@ -44,21 +46,21 @@ class ITensor;
   *
   *
   */
-template<typename T>
-class NEGEMMAssemblyWrapper final : public INEKernel
+template <typename TypeInput, typename TypeOutput>
+class NEGEMMAssemblyWrapperKernel final : public INEKernel
 {
 public:
     /** Constructor
      */
-    NEGEMMAssemblyWrapper() : _kernel(nullptr) {}
+    NEGEMMAssemblyWrapperKernel() : _kernel(nullptr) {}
 
-    NEGEMMAssemblyWrapper(NEGEMMAssemblyWrapper &) = delete;
-    NEGEMMAssemblyWrapper(NEGEMMAssemblyWrapper &&) = default;
-    NEGEMMAssemblyWrapper & operator=(NEGEMMAssemblyWrapper &) = delete;
+    NEGEMMAssemblyWrapperKernel(NEGEMMAssemblyWrapperKernel &) = delete;
+    NEGEMMAssemblyWrapperKernel(NEGEMMAssemblyWrapperKernel &&) = default;
+    NEGEMMAssemblyWrapperKernel & operator=(NEGEMMAssemblyWrapperKernel &) = delete;
 
     const char *name() const override
     {
-        return "NEGEMMAssemblyWrapper";
+        return "NEGEMMAssemblyWrapperKernel";
     }
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override
@@ -74,7 +76,7 @@ public:
      * @param[in] kernel      Pointer to an assembly kernel implementation.
      * @param[in] num_threads Number of concurrent threads which will execute the kernel.
      */
-    void configure(T *kernel)
+    void configure(arm_gemm::GemmCommon<TypeInput, TypeOutput> *kernel)
     {
         ARM_COMPUTE_ERROR_ON_NULLPTR((reinterpret_cast<void*>(kernel)));
         _kernel = kernel;
@@ -84,8 +86,8 @@ public:
         INEKernel::configure(win);
     }
 private:
-    T* _kernel;
+    arm_gemm::GemmCommon<TypeInput, TypeOutput>* _kernel;
 };
 
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_NEGEMMAARCH64KERNEL_H__*/
+#endif /* __ARM_COMPUTE_ASSEMBLY_GEMM_KERNEL_WRAPPER_KERNEL_H__ */

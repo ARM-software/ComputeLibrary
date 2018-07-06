@@ -224,9 +224,9 @@ Status validate_and_initialize_values(const ITensorInfo *input, const ITensorInf
 } // namespace
 
 NEGEMMConvolutionLayer::NEGEMMConvolutionLayer(const std::shared_ptr<IMemoryManager> &memory_manager)
-    : _asm_glue(), _memory_group(memory_manager), _input_im2col_kernel(), _input_interleave_kernel(), _reshape_weights(), _mm_kernel(), _mm_gemmlowp(memory_manager), _gemmlowp_output_stage(),
-      _output_col2im_kernel(), _activationlayer_function(), _add_bias_kernel(), _original_weights(nullptr), _input_im2col_reshaped(), _input_interleaved_reshaped(), _weights_reshaped(), _gemm_output(),
-      _tmp_output(), _workspace(), _B_pretransposed(), _data_layout(DataLayout::NCHW), _append_bias(false), _is_fully_connected_convolution(false), _are_weights_reshaped(false), _is_quantized(false),
+    : _memory_group(memory_manager), _asm_glue(memory_manager), _input_im2col_kernel(), _input_interleave_kernel(), _reshape_weights(), _mm_kernel(), _mm_gemmlowp(memory_manager),
+      _gemmlowp_output_stage(), _output_col2im_kernel(), _activationlayer_function(), _add_bias_kernel(), _original_weights(nullptr), _input_im2col_reshaped(), _input_interleaved_reshaped(),
+      _weights_reshaped(), _gemm_output(), _tmp_output(), _data_layout(DataLayout::NCHW), _append_bias(false), _is_fully_connected_convolution(false), _are_weights_reshaped(false), _is_quantized(false),
       _is_interleaved(false), _is_activationlayer_enabled(false), _skip_im2col(false), _is_prepared(false)
 {
 }
@@ -384,7 +384,8 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     // Configure matrix multiply
     if(run_optimised)
     {
-        if(!setup_assembly_kernel(_skip_im2col ? input : &_input_im2col_reshaped, weights, is_nhwc ? output : &_gemm_output, 1.f, 0.f, true, _workspace, _B_pretransposed, _memory_group, _asm_glue))
+        _asm_glue.configure(_skip_im2col ? input : &_input_im2col_reshaped, weights, is_nhwc ? output : &_gemm_output, 1.f, 0.f, true);
+        if(!_asm_glue.is_configured())
         {
             ARM_COMPUTE_ERROR("setup_assembly_kernel failed.");
         }
@@ -587,7 +588,7 @@ void NEGEMMConvolutionLayer::run()
     }
 
     // Runs matrix multiply on reshaped matrices
-    if(_asm_glue._optimised_kernel != nullptr)
+    if(_asm_glue.is_configured())
     {
         _asm_glue.run();
     }
@@ -652,7 +653,7 @@ void NEGEMMConvolutionLayer::prepare()
         }
 
         // Run GEMM prepare stage
-        if(_asm_glue._optimised_kernel)
+        if(_asm_glue.is_configured())
         {
             _asm_glue.prepare();
         }
