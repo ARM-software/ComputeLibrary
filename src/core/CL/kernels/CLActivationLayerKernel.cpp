@@ -49,8 +49,9 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->data_type() == DataType::QASYMM8) && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
                                     && (act_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
-                                    && (act_info.activation() != ActivationLayerInfo::ActivationFunction::RELU),
-                                    "For QASYMM8 only relu, lower bounded relu and lower-upper bounded relu are supported");
+                                    && (act_info.activation() != ActivationLayerInfo::ActivationFunction::RELU)
+                                    && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LOGISTIC),
+                                    "For QASYMM8 only logistic, relu, lower bounded relu and lower-upper bounded relu are supported");
 
     // Checks performed when output is configured
     if((output != nullptr) && (output->total_size() != 0))
@@ -139,22 +140,22 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
         build_opts.emplace(("-DA_VAL=" + support::cpp11::to_string(a_const_int)));
         build_opts.emplace(("-DB_VAL=" + support::cpp11::to_string(b_const_int)));
 
-        const int o1 = input->info()->quantization_info().offset;
+        const int   o1 = input->info()->quantization_info().offset;
+        const float s1 = input->info()->quantization_info().scale;
         // Quantized value of 0 corresponds to the offset o1
         build_opts.emplace(("-DCONST_0=" + support::cpp11::to_string(o1)));
+        build_opts.emplace(("-DS1_VAL=" + float_to_string_with_full_precision(s1)));
+        build_opts.emplace(("-DO1_VAL=" + support::cpp11::to_string(o1)));
 
         // Set scale and offset of the input and output if they have different quantization info
         if(is_data_type_quantized_asymmetric(dt) && output != nullptr)
         {
-            const float s1 = input->info()->quantization_info().scale;
             const float s2 = output->info()->quantization_info().scale;
             const int   o2 = output->info()->quantization_info().offset;
 
             if(o1 != o2 || s1 != s2)
             {
-                build_opts.emplace(("-DS1_VAL=" + float_to_string_with_full_precision(s1)));
                 build_opts.emplace(("-DS2_VAL=" + float_to_string_with_full_precision(s2)));
-                build_opts.emplace(("-DO1_VAL=" + support::cpp11::to_string(o1)));
                 build_opts.emplace(("-DO2_VAL=" + support::cpp11::to_string(o2)));
             }
         }

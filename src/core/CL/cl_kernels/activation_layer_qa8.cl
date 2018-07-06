@@ -24,7 +24,18 @@
 #include "helpers.h"
 
 #define TYPE VEC_DATA_TYPE(DATA_TYPE, VEC_SIZE)
+#define VEC_FLOAT VEC_DATA_TYPE(float, VEC_SIZE)
 
+// Logistic Activation
+inline TYPE logistic_op(TYPE x)
+{
+    VEC_FLOAT x_flt = CONVERT(x, VEC_FLOAT);
+    x_flt           = round(x_flt - (float)O1_VAL) * ((float)S1_VAL);
+    x_flt           = 1.f / (1.f + exp(-x_flt));
+
+    const TYPE x_u8 = CONVERT_SAT(round(x_flt / ((float)S1_VAL)) + (float)O1_VAL, TYPE);
+    return x_u8;
+}
 // RELU Activation
 inline TYPE relu_op(TYPE x)
 {

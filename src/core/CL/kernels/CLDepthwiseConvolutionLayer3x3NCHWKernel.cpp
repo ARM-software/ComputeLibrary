@@ -49,8 +49,9 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(act_info.enabled() && ((input->data_type() != DataType::QASYMM8) || ((act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
                                                                                                          && (act_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
-                                                                                                         && (act_info.activation() != ActivationLayerInfo::ActivationFunction::RELU))),
-                                    "For QASYMM8 only relu, lower bounded relu and lower-upper bounded relu are supported");
+                                                                                                         && (act_info.activation() != ActivationLayerInfo::ActivationFunction::RELU)
+                                                                                                         && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LOGISTIC))),
+                                    "For QASYMM8 only logistic, relu, lower bounded relu and lower-upper bounded relu are supported");
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(0) != 3 || weights->dimension(1) != 3);
     ARM_COMPUTE_RETURN_ERROR_ON((input->dimension(2) * depth_multiplier) != output->dimension(2));

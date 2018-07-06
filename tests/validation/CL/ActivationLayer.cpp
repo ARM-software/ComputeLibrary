@@ -205,6 +205,7 @@ using CLActivationLayerQuantizedFixture = ActivationValidationQuantizedFixture<C
 /** Input data sets. */
 const auto QuantizedActivationFunctionsDataset = framework::dataset::make("ActivationFunction", { ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU,
                                                                                                   ActivationLayerInfo::ActivationFunction::RELU,
+                                                                                                  ActivationLayerInfo::ActivationFunction::LOGISTIC,
                                                                                                   ActivationLayerInfo::ActivationFunction::BOUNDED_RELU
                                                                                                 });
 
