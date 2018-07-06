@@ -72,7 +72,9 @@ const auto SmallWinogradInputTransformDatasetNCHW =
 const auto SmallWinogradInputTransformDatasetNHWC = framework::dataset::concat(datasets::SmallWinogradInputTransformDataset4x4_3x3(),
                                                     framework::dataset::concat(datasets::SmallWinogradInputTransformDataset4x1_3x1(),
                                                     framework::dataset::concat(datasets::SmallWinogradInputTransformDataset1x4_1x3(),
-                                                                               datasets::SmallWinogradInputTransformDataset4x4_5x5())));
+                                                    framework::dataset::concat(datasets::SmallWinogradInputTransformDataset4x4_5x5(),
+                                                    framework::dataset::concat(datasets::SmallWinogradInputTransformDataset4x1_5x1(),
+                                                                               datasets::SmallWinogradInputTransformDataset1x4_1x5())))));
 
 const auto LargeWinogradInputTransformDatasetNCHW =
            framework::dataset::concat(datasets::LargeWinogradInputTransformDataset2x2_3x3(),
@@ -87,7 +89,9 @@ const auto LargeWinogradInputTransformDatasetNCHW =
 
 const auto LargeWinogradInputTransformDatasetNHWC =
            framework::dataset::concat(datasets::LargeWinogradInputTransformDataset4x4_3x3(),
-                                      datasets::LargeWinogradInputTransformDataset4x4_5x5());
+           framework::dataset::concat(datasets::LargeWinogradInputTransformDataset4x4_5x5(),
+           framework::dataset::concat(datasets::LargeWinogradInputTransformDataset4x1_5x1(),
+                                      datasets::LargeWinogradInputTransformDataset1x4_1x5())));
 
 // Filter transform
 const auto SmallWinogradFilterTransformDatasetNCHW =
@@ -102,7 +106,9 @@ const auto SmallWinogradFilterTransformDatasetNHWC =
            framework::dataset::concat(combine(datasets::Small3x3Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 4U) })),
            framework::dataset::concat(combine(datasets::Small3x1Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 1U) })),
            framework::dataset::concat(combine(datasets::Small1x3Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 4U) })),
-                                      combine(datasets::Small5x5Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 4U) })))));
+           framework::dataset::concat(combine(datasets::Small5x5Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 4U) })),
+           framework::dataset::concat(combine(datasets::Small5x1Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 1U) })),
+                                      combine(datasets::Small1x5Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 4U) })))))));
 
 const auto LargeWinogradFilterTransformDatasetNCHW =
            framework::dataset::concat(combine(datasets::Large3x3Shapes(), framework::dataset::make("OutputTile", { Size2D(2U, 2U), Size2D(4U, 4U) })),
@@ -114,7 +120,11 @@ const auto LargeWinogradFilterTransformDatasetNCHW =
 
 const auto LargeWinogradFilterTransformDatasetNHWC =
            framework::dataset::concat(combine(datasets::Large3x3Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 4U) })),
-                                      combine(datasets::Large5x5Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 4U) })));
+           framework::dataset::concat(combine(datasets::Large3x1Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 1U) })),
+           framework::dataset::concat(combine(datasets::Large1x3Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 4U) })),
+           framework::dataset::concat(combine(datasets::Large5x5Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 4U) })),
+           framework::dataset::concat(combine(datasets::Large5x1Shapes(), framework::dataset::make("OutputTile", { Size2D(4U, 1U) })),
+                                      combine(datasets::Large1x5Shapes(), framework::dataset::make("OutputTile", { Size2D(1U, 4U) })))))));
 
 // Output transform
 const auto SmallWinogradOutputTransformDatasetNCHW = datasets::SmallWinogradOutputTransformDatasetNCHW();

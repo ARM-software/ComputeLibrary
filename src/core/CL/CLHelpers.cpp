@@ -172,7 +172,9 @@ bool cl_winograd_convolution_layer_supported(const Size2D &output_tile, const Si
         WinogradConfiguration(std::pair<int, int>(1, 4), std::pair<int, int>(1, 3)),
         WinogradConfiguration(std::pair<int, int>(4, 1), std::pair<int, int>(3, 1)),
         WinogradConfiguration(std::pair<int, int>(4, 4), std::pair<int, int>(3, 3)),
-        WinogradConfiguration(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5))
+        WinogradConfiguration(std::pair<int, int>(4, 4), std::pair<int, int>(5, 5)),
+        WinogradConfiguration(std::pair<int, int>(4, 1), std::pair<int, int>(5, 1)),
+        WinogradConfiguration(std::pair<int, int>(1, 4), std::pair<int, int>(1, 5))
     };
 
     auto p = std::make_pair(std::pair<int, int>(output_tile.width, output_tile.height),

@@ -23,6 +23,26 @@
  */
 #include "helpers.h"
 
+#define OUTPUT_ROW_4x4_5x5(out, tmp, comm_fact)                     \
+    ({                                                              \
+        comm_fact.s0 = tmp.s2 - 4.25f * tmp.s4 + tmp.s6;            \
+        comm_fact.s1 = tmp.s1 - 4.25f * tmp.s3 + tmp.s5;            \
+        comm_fact.s2 = 2.5f * tmp.s3;                               \
+        comm_fact.s3 = 0.5f * tmp.s1 + 2.f * tmp.s5 - comm_fact.s2; \
+        comm_fact.s4 = 0.25f * tmp.s2 - 1.25f * tmp.s4 + tmp.s6;    \
+        comm_fact.s5 = 4.f * tmp.s2 + tmp.s6 - 5.f * tmp.s4;        \
+        comm_fact.s6 = 2.f * tmp.s1 + 0.5f * tmp.s5 - comm_fact.s2; \
+        \
+        out.s0 = tmp.s0 - tmp.s6 + 5.25f * tmp.s4 - 5.25f * tmp.s2; \
+        out.s1 = comm_fact.s0 + comm_fact.s1;                       \
+        out.s2 = comm_fact.s0 - comm_fact.s1;                       \
+        out.s3 = comm_fact.s3 + comm_fact.s4;                       \
+        out.s4 = comm_fact.s4 - comm_fact.s3;                       \
+        out.s5 = comm_fact.s5 + comm_fact.s6;                       \
+        out.s6 = comm_fact.s5 - comm_fact.s6;                       \
+        out.s7 = tmp.s7 - tmp.s1 + 5.25f * tmp.s3 - 5.25f * tmp.s5; \
+    })
+
 #if defined(NUM_TILES_X) && defined(PAD_LEFT) && defined(PAD_TOP) && defined(OUTPUT_TILE_W) && defined(OUTPUT_TILE_H)
 /** This OpenCL kernel computes the input transform when the kernel size is 3x3/3x1 or 1x3 and the output tile is 2x2/2x1 or 1x2
  *
@@ -936,63 +956,16 @@ __kernel void winograd_input_transform_4x4_3x3_stepz1_nhwc(
 #endif // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 }
 
-#if defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL)
-/** This OpenCL kernel computes the input transform when the kernel size is 3x1 and the output tile is 4x1 for data layout NHWC
+/** This OpenCL kernel computes the input transform when the kernel size is 5x5/5x1 or 1x5 and the output tile is 4x4/4x1 or 1x4 when the data layout is NHWC
  *
  * @note The number of tiles in the x axis must be passed at compile time using -DNUM_TILES_X (i.e.-DNUM_TILES_X=5).
  * @note The pad left and pad top must be passed at compile time using -DPAD_LEFT and -DPAD_TOP (i.e.-DPAD_LEFT=1 and -DPAD_TOP=0).
+ * @note Dimension one of the input tensor (width for NHWC data layout) must be passed at compile time using -DSRC_DIM1 (e.g. -DSRC_DIM_1=112)
+ * @note Dimension two of the input tensor (height for NHWC data layout) must be passed at compile time using -DSRC_DIM2 (e.g. -DSRC_DIM_2=112)
  * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=4
- * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=1
- * @note -DWINOGRAD_INPUT_TRANSFORM_HORIZONTAL has to be passed at compile time
- *
- * @param[in] src_ptr                           Pointer to the source image. Supported data types: F32
- * @param[in] src_stride_x                      Stride of the source image in X dimension (in bytes)
- * @param[in] src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] src_stride_y                      Stride of the source image in Y dimension (in bytes)
- * @param[in] src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] src_offset_first_element_in_bytes The offset of the first element in the source image
- * @param[in] src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
- * @param[in] src_step_z                        src_stride_z * number of elements along Y processed per workitem(in bytes)
- * @param[in] dst_ptr                           Pointer to the destination tensor. Supported data types: as @p src_ptr
- * @param[in] dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
- * @param[in] dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
- * @param[in] dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
- * @param[in] dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
- * @param[in] dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
- * @param[in] dst_step_z                        dst_stride_z * number of elements along Y processed per workitem(in bytes)
- * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
- */
-__kernel void winograd_input_transform_4x1_3x1_stepz1_nhwc(
-    TENSOR3D_DECLARATION(src),
-    TENSOR3D_DECLARATION(dst))
-{
-    winograd_input_transform_4x4_3x3_stepz1_nhwc(src_ptr,
-                                                 src_stride_x,
-                                                 src_step_x,
-                                                 src_stride_y,
-                                                 src_step_y,
-                                                 src_stride_z,
-                                                 src_step_z,
-                                                 src_offset_first_element_in_bytes,
-                                                 dst_ptr,
-                                                 dst_stride_x,
-                                                 dst_step_x,
-                                                 dst_stride_y,
-                                                 dst_step_y,
-                                                 dst_stride_z,
-                                                 dst_step_z,
-                                                 dst_offset_first_element_in_bytes);
-}
-#endif // defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL)
-
-#if defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
-/** This OpenCL kernel computes the input transform when the kernel size is 1x3 and the output tile is 1x4 for data layout NHWC
- *
- * @note The number of tiles in the x axis must be passed at compile time using -DNUM_TILES_X (i.e.-DNUM_TILES_X=5).
- * @note The pad left and pad top must be passed at compile time using -DPAD_LEFT and -DPAD_TOP (i.e.-DPAD_LEFT=1 and -DPAD_TOP=0).
- * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=1
  * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=4
- * @note -DWINOGRAD_INPUT_TRANSFORM_VERTICAL has to be passed at compile time
+ * @note If this kernel is used to perform Winograd input transform 5x1, -DWINOGRAD_INPUT_TRANSFORM_HORIZONTAL has to be passed at compile time
+ * @note If this kernel is used to perform Winograd input transform 1x5, -DWINOGRAD_INPUT_TRANSFORM_VERTICAL has to be passed at compile time
  *
  * @param[in] src_ptr                           Pointer to the source image. Supported data types: F32
  * @param[in] src_stride_x                      Stride of the source image in X dimension (in bytes)
@@ -1011,50 +984,308 @@ __kernel void winograd_input_transform_4x1_3x1_stepz1_nhwc(
  * @param[in] dst_step_z                        dst_stride_z * number of elements along Y processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
-__kernel void winograd_input_transform_1x4_1x3_stepz1_nhwc(
+__kernel void winograd_input_transform_4x4_5x5_stepz1_nhwc(
     TENSOR3D_DECLARATION(src),
     TENSOR3D_DECLARATION(dst))
 {
-    winograd_input_transform_4x4_3x3_stepz1_nhwc(src_ptr,
-                                                 src_stride_x,
-                                                 src_step_x,
-                                                 src_stride_y,
-                                                 src_step_y,
-                                                 src_stride_z,
-                                                 src_step_z,
-                                                 src_offset_first_element_in_bytes,
-                                                 dst_ptr,
-                                                 dst_stride_x,
-                                                 dst_step_x,
-                                                 dst_stride_y,
-                                                 dst_step_y,
-                                                 dst_stride_z,
-                                                 dst_step_z,
-                                                 dst_offset_first_element_in_bytes);
+    int x = get_global_id(0);
+    int y = get_global_id(1);
+    int z = get_global_id(2);
+
+    // Compute input address
+    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(float);
+
+#if defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL)
+    // Clamp coordinates. This clamp is valid for all rows
+    int8 y_coord = (int8)(y * OUTPUT_TILE_W) + (int8)(0, 1, 2, 3, 4, 5, 6, 7) - (int8)PAD_LEFT;
+    y_coord      = clamp(y_coord, -1, SRC_DIM_1);
+
+    // Row0
+    // We can skip the border clamping along the z dimension as we cannot read out-of-bound in case of 5x1 kernels
+    int z_coord = z * OUTPUT_TILE_H;
+
+    // Load the input tile
+    float8 in_row0;
+    in_row0.s0 = *(__global float *)(src_addr + y_coord.s0 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row0.s1 = *(__global float *)(src_addr + y_coord.s1 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row0.s2 = *(__global float *)(src_addr + y_coord.s2 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row0.s3 = *(__global float *)(src_addr + y_coord.s3 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row0.s4 = *(__global float *)(src_addr + y_coord.s4 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row0.s5 = *(__global float *)(src_addr + y_coord.s5 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row0.s6 = *(__global float *)(src_addr + y_coord.s6 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row0.s7 = *(__global float *)(src_addr + y_coord.s7 * (int)src_stride_y + z_coord * src_stride_z);
+
+    // Calculate common factors for intermediate tensor
+    float8 comm_fact0 = 0.0f;
+    float8 tmp0       = in_row0;
+
+    float8 out0 = (float8)0.0f;
+
+    OUTPUT_ROW_4x4_5x5(out0, tmp0, comm_fact0);
+
+#elif defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL) // defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL)
+    // We can skip the border clamping along the y dimension as we cannot read out-of-bound in case of 1x5 kernels
+    int y_coord = y * OUTPUT_TILE_W;
+
+    // Row0
+    // We can skip the border clamping along the z dimension as we cannot read out-of-bound in case of 5x1 kernels
+    int8 z_coord = (int8)(z * OUTPUT_TILE_H) + (int8)(0, 1, 2, 3, 4, 5, 6, 7) - (int8)PAD_TOP;
+    int8 valid_y = select((int8)y_coord, (int8) - 1, z_coord < (int8)0);   // If z < 0, set y to -1
+    valid_y      = select(valid_y, SRC_DIM_1, z_coord >= (int8)SRC_DIM_2); // If z >= SRC_DIM_2, set y to SRC_DIM_2
+    z_coord      = clamp(z_coord, 0, SRC_DIM_2 - 1);                       // Clamp z coordinate
+
+    // Load the input tile
+    float8 in_row0;
+    in_row0.s0 = *(__global float *)(src_addr + valid_y.s0 * (int)src_stride_y + z_coord.s0 * src_stride_z);
+    in_row0.s1 = *(__global float *)(src_addr + valid_y.s1 * (int)src_stride_y + z_coord.s1 * src_stride_z);
+    in_row0.s2 = *(__global float *)(src_addr + valid_y.s2 * (int)src_stride_y + z_coord.s2 * src_stride_z);
+    in_row0.s3 = *(__global float *)(src_addr + valid_y.s3 * (int)src_stride_y + z_coord.s3 * src_stride_z);
+    in_row0.s4 = *(__global float *)(src_addr + valid_y.s4 * (int)src_stride_y + z_coord.s4 * src_stride_z);
+    in_row0.s5 = *(__global float *)(src_addr + valid_y.s5 * (int)src_stride_y + z_coord.s5 * src_stride_z);
+    in_row0.s6 = *(__global float *)(src_addr + valid_y.s6 * (int)src_stride_y + z_coord.s6 * src_stride_z);
+    in_row0.s7 = *(__global float *)(src_addr + valid_y.s7 * (int)src_stride_y + z_coord.s7 * src_stride_z);
+
+    // Calculate common factors for intermediate tensor
+    float8 comm_fact0 = 0.0f;
+    float8 tmp0       = in_row0;
+
+    float8 out0 = (float8)0.0f;
+
+    OUTPUT_ROW_4x4_5x5(out0, tmp0, comm_fact0);
+#else                                            // defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL)
+    float8 in_row0, in_row1, in_row2, in_row3, in_row4, in_row5, in_row6, in_row7;
+
+    // Clamp coordinates. This clamp is valid for all rows
+    int8 y_coord = (int8)(y * OUTPUT_TILE_W) + (int8)(0, 1, 2, 3, 4, 5, 6, 7) - (int8)PAD_LEFT;
+    y_coord      = clamp(y_coord, -1, SRC_DIM_1);
+
+    // Row0
+    int  z_coord = (z * OUTPUT_TILE_H) - PAD_TOP + 0;
+    int8 valid_y = select(y_coord, -1, (int8)z_coord < 0);                 // If z < 0, set y to -1
+    valid_y      = select(valid_y, SRC_DIM_1, (int8)z_coord >= SRC_DIM_2); // If z >= SRC_DIM_2, set y to SRC_DIM_2
+    z_coord      = clamp(z_coord, 0, SRC_DIM_2 - 1);                       // Clamp z coordinate
+
+    // Load the input tile
+    in_row0.s0 = *(__global float *)(src_addr + valid_y.s0 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row0.s1 = *(__global float *)(src_addr + valid_y.s1 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row0.s2 = *(__global float *)(src_addr + valid_y.s2 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row0.s3 = *(__global float *)(src_addr + valid_y.s3 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row0.s4 = *(__global float *)(src_addr + valid_y.s4 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row0.s5 = *(__global float *)(src_addr + valid_y.s5 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row0.s6 = *(__global float *)(src_addr + valid_y.s6 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row0.s7 = *(__global float *)(src_addr + valid_y.s7 * (int)src_stride_y + z_coord * src_stride_z);
+
+    // Row1
+    z_coord = (z * OUTPUT_TILE_H) - PAD_TOP + 1;
+    valid_y = select(y_coord, -1, (int8)z_coord < 0);
+    valid_y = select(valid_y, SRC_DIM_1, (int8)z_coord >= SRC_DIM_2);
+    z_coord = clamp(z_coord, 0, SRC_DIM_2 - 1);
+
+    in_row1.s0 = *(__global float *)(src_addr + valid_y.s0 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row1.s1 = *(__global float *)(src_addr + valid_y.s1 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row1.s2 = *(__global float *)(src_addr + valid_y.s2 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row1.s3 = *(__global float *)(src_addr + valid_y.s3 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row1.s4 = *(__global float *)(src_addr + valid_y.s4 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row1.s5 = *(__global float *)(src_addr + valid_y.s5 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row1.s6 = *(__global float *)(src_addr + valid_y.s6 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row1.s7 = *(__global float *)(src_addr + valid_y.s7 * (int)src_stride_y + z_coord * src_stride_z);
+
+    // Row2
+    z_coord = (z * OUTPUT_TILE_H) - PAD_TOP + 2;
+    valid_y = select(y_coord, -1, (int8)z_coord < 0);
+    valid_y = select(valid_y, SRC_DIM_1, (int8)z_coord >= SRC_DIM_2);
+    z_coord = clamp(z_coord, 0, SRC_DIM_2 - 1);
+
+    in_row2.s0 = *(__global float *)(src_addr + valid_y.s0 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row2.s1 = *(__global float *)(src_addr + valid_y.s1 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row2.s2 = *(__global float *)(src_addr + valid_y.s2 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row2.s3 = *(__global float *)(src_addr + valid_y.s3 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row2.s4 = *(__global float *)(src_addr + valid_y.s4 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row2.s5 = *(__global float *)(src_addr + valid_y.s5 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row2.s6 = *(__global float *)(src_addr + valid_y.s6 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row2.s7 = *(__global float *)(src_addr + valid_y.s7 * (int)src_stride_y + z_coord * src_stride_z);
+
+    // Row3
+    z_coord = (z * OUTPUT_TILE_H) - PAD_TOP + 3;
+    valid_y = select(y_coord, -1, (int8)z_coord < 0);
+    valid_y = select(valid_y, SRC_DIM_1, (int8)z_coord >= SRC_DIM_2);
+    z_coord = clamp(z_coord, 0, SRC_DIM_2 - 1);
+
+    in_row3.s0 = *(__global float *)(src_addr + valid_y.s0 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row3.s1 = *(__global float *)(src_addr + valid_y.s1 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row3.s2 = *(__global float *)(src_addr + valid_y.s2 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row3.s3 = *(__global float *)(src_addr + valid_y.s3 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row3.s4 = *(__global float *)(src_addr + valid_y.s4 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row3.s5 = *(__global float *)(src_addr + valid_y.s5 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row3.s6 = *(__global float *)(src_addr + valid_y.s6 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row3.s7 = *(__global float *)(src_addr + valid_y.s7 * (int)src_stride_y + z_coord * src_stride_z);
+
+    // Row4
+    z_coord = (z * OUTPUT_TILE_H) - PAD_TOP + 4;
+    valid_y = select(y_coord, -1, (int8)z_coord < 0);
+    valid_y = select(valid_y, SRC_DIM_1, (int8)z_coord >= SRC_DIM_2);
+    z_coord = clamp(z_coord, 0, SRC_DIM_2 - 1);
+
+    in_row4.s0 = *(__global float *)(src_addr + valid_y.s0 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row4.s1 = *(__global float *)(src_addr + valid_y.s1 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row4.s2 = *(__global float *)(src_addr + valid_y.s2 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row4.s3 = *(__global float *)(src_addr + valid_y.s3 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row4.s4 = *(__global float *)(src_addr + valid_y.s4 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row4.s5 = *(__global float *)(src_addr + valid_y.s5 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row4.s6 = *(__global float *)(src_addr + valid_y.s6 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row4.s7 = *(__global float *)(src_addr + valid_y.s7 * (int)src_stride_y + z_coord * src_stride_z);
+
+    // Row5
+    z_coord = (z * OUTPUT_TILE_H) - PAD_TOP + 5;
+    valid_y = select(y_coord, -1, (int8)z_coord < 0);
+    valid_y = select(valid_y, SRC_DIM_1, (int8)z_coord >= SRC_DIM_2);
+    z_coord = clamp(z_coord, 0, SRC_DIM_2 - 1);
+
+    in_row5.s0 = *(__global float *)(src_addr + valid_y.s0 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row5.s1 = *(__global float *)(src_addr + valid_y.s1 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row5.s2 = *(__global float *)(src_addr + valid_y.s2 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row5.s3 = *(__global float *)(src_addr + valid_y.s3 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row5.s4 = *(__global float *)(src_addr + valid_y.s4 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row5.s5 = *(__global float *)(src_addr + valid_y.s5 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row5.s6 = *(__global float *)(src_addr + valid_y.s6 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row5.s7 = *(__global float *)(src_addr + valid_y.s7 * (int)src_stride_y + z_coord * src_stride_z);
+
+    // Row6
+    z_coord = (z * OUTPUT_TILE_H) - PAD_TOP + 6;
+    valid_y = select(y_coord, -1, (int8)z_coord < 0);
+    valid_y = select(valid_y, SRC_DIM_1, (int8)z_coord >= SRC_DIM_2);
+    z_coord = clamp(z_coord, 0, SRC_DIM_2 - 1);
+
+    in_row6.s0 = *(__global float *)(src_addr + valid_y.s0 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row6.s1 = *(__global float *)(src_addr + valid_y.s1 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row6.s2 = *(__global float *)(src_addr + valid_y.s2 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row6.s3 = *(__global float *)(src_addr + valid_y.s3 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row6.s4 = *(__global float *)(src_addr + valid_y.s4 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row6.s5 = *(__global float *)(src_addr + valid_y.s5 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row6.s6 = *(__global float *)(src_addr + valid_y.s6 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row6.s7 = *(__global float *)(src_addr + valid_y.s7 * (int)src_stride_y + z_coord * src_stride_z);
+
+    // Row7
+    z_coord = (z * OUTPUT_TILE_H) - PAD_TOP + 7;
+    valid_y = select(y_coord, -1, (int8)z_coord < 0);
+    valid_y = select(valid_y, SRC_DIM_1, (int8)z_coord >= SRC_DIM_2);
+    z_coord = clamp(z_coord, 0, SRC_DIM_2 - 1);
+
+    in_row7.s0 = *(__global float *)(src_addr + valid_y.s0 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row7.s1 = *(__global float *)(src_addr + valid_y.s1 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row7.s2 = *(__global float *)(src_addr + valid_y.s2 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row7.s3 = *(__global float *)(src_addr + valid_y.s3 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row7.s4 = *(__global float *)(src_addr + valid_y.s4 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row7.s5 = *(__global float *)(src_addr + valid_y.s5 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row7.s6 = *(__global float *)(src_addr + valid_y.s6 * (int)src_stride_y + z_coord * src_stride_z);
+    in_row7.s7 = *(__global float *)(src_addr + valid_y.s7 * (int)src_stride_y + z_coord * src_stride_z);
+
+    float8 comm_fact0 = in_row2 + in_row6 - 4.25f * in_row4;
+    float8 comm_fact1 = in_row1 + in_row5 - 4.25f * in_row3;
+    float8 comm_fact2 = 0.25f * in_row2 - 1.25f * in_row4 + in_row6;
+
+    // Calculate intermediate tensor and reuse common factor vectors
+    const float8 tmp0 = in_row0 - in_row6 + 5.25f * in_row4 - 5.25f * in_row2;
+    const float8 tmp1 = comm_fact0 + comm_fact1;
+    const float8 tmp2 = comm_fact0 - comm_fact1;
+
+    comm_fact0 = 2.5f * in_row3;
+    comm_fact1 = 0.5f * in_row1 - comm_fact0 + 2.f * in_row5;
+
+    const float8 tmp3 = comm_fact1 + comm_fact2;
+    const float8 tmp4 = comm_fact2 - comm_fact1;
+
+    comm_fact1 = 2.f * in_row1 - comm_fact0 + 0.5f * in_row5;
+    comm_fact2 = 4.f * in_row2 - 5.f * in_row4 + in_row6;
+
+    const float8 tmp5 = comm_fact1 + comm_fact2;
+    const float8 tmp6 = comm_fact2 - comm_fact1;
+    const float8 tmp7 = in_row7 - in_row1 + 5.25f * in_row3 - 5.25f * in_row5;
+
+    // Calculate output rows (reuse comm_fact0 vector)
+    float8 out0, out1, out2, out3, out4, out5, out6, out7;
+    OUTPUT_ROW_4x4_5x5(out0, tmp0, comm_fact0);
+    OUTPUT_ROW_4x4_5x5(out1, tmp1, comm_fact0);
+    OUTPUT_ROW_4x4_5x5(out2, tmp2, comm_fact0);
+    OUTPUT_ROW_4x4_5x5(out3, tmp3, comm_fact0);
+    OUTPUT_ROW_4x4_5x5(out4, tmp4, comm_fact0);
+    OUTPUT_ROW_4x4_5x5(out5, tmp5, comm_fact0);
+    OUTPUT_ROW_4x4_5x5(out6, tmp6, comm_fact0);
+    OUTPUT_ROW_4x4_5x5(out7, tmp7, comm_fact0);
+#endif                                           // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
+
+    // Store values across the channels
+    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * sizeof(float) + (y + z * (int)NUM_TILES_X) * dst_stride_y;
+
+    *((__global float *)(dst_addr + 0 * dst_stride_z)) = out0.s0;
+    *((__global float *)(dst_addr + 1 * dst_stride_z)) = out0.s1;
+    *((__global float *)(dst_addr + 2 * dst_stride_z)) = out0.s2;
+    *((__global float *)(dst_addr + 3 * dst_stride_z)) = out0.s3;
+    *((__global float *)(dst_addr + 4 * dst_stride_z)) = out0.s4;
+    *((__global float *)(dst_addr + 5 * dst_stride_z)) = out0.s5;
+    *((__global float *)(dst_addr + 6 * dst_stride_z)) = out0.s6;
+    *((__global float *)(dst_addr + 7 * dst_stride_z)) = out0.s7;
+
+#if !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
+    *((__global float *)(dst_addr + 8 * dst_stride_z))  = out1.s0;
+    *((__global float *)(dst_addr + 9 * dst_stride_z))  = out1.s1;
+    *((__global float *)(dst_addr + 10 * dst_stride_z)) = out1.s2;
+    *((__global float *)(dst_addr + 11 * dst_stride_z)) = out1.s3;
+    *((__global float *)(dst_addr + 12 * dst_stride_z)) = out1.s4;
+    *((__global float *)(dst_addr + 13 * dst_stride_z)) = out1.s5;
+    *((__global float *)(dst_addr + 14 * dst_stride_z)) = out1.s6;
+    *((__global float *)(dst_addr + 15 * dst_stride_z)) = out1.s7;
+    *((__global float *)(dst_addr + 16 * dst_stride_z)) = out2.s0;
+    *((__global float *)(dst_addr + 17 * dst_stride_z)) = out2.s1;
+    *((__global float *)(dst_addr + 18 * dst_stride_z)) = out2.s2;
+    *((__global float *)(dst_addr + 19 * dst_stride_z)) = out2.s3;
+    *((__global float *)(dst_addr + 20 * dst_stride_z)) = out2.s4;
+    *((__global float *)(dst_addr + 21 * dst_stride_z)) = out2.s5;
+    *((__global float *)(dst_addr + 22 * dst_stride_z)) = out2.s6;
+    *((__global float *)(dst_addr + 23 * dst_stride_z)) = out2.s7;
+    *((__global float *)(dst_addr + 24 * dst_stride_z)) = out3.s0;
+    *((__global float *)(dst_addr + 25 * dst_stride_z)) = out3.s1;
+    *((__global float *)(dst_addr + 26 * dst_stride_z)) = out3.s2;
+    *((__global float *)(dst_addr + 27 * dst_stride_z)) = out3.s3;
+    *((__global float *)(dst_addr + 28 * dst_stride_z)) = out3.s4;
+    *((__global float *)(dst_addr + 29 * dst_stride_z)) = out3.s5;
+    *((__global float *)(dst_addr + 30 * dst_stride_z)) = out3.s6;
+    *((__global float *)(dst_addr + 31 * dst_stride_z)) = out3.s7;
+    *((__global float *)(dst_addr + 32 * dst_stride_z)) = out4.s0;
+    *((__global float *)(dst_addr + 33 * dst_stride_z)) = out4.s1;
+    *((__global float *)(dst_addr + 34 * dst_stride_z)) = out4.s2;
+    *((__global float *)(dst_addr + 35 * dst_stride_z)) = out4.s3;
+    *((__global float *)(dst_addr + 36 * dst_stride_z)) = out4.s4;
+    *((__global float *)(dst_addr + 37 * dst_stride_z)) = out4.s5;
+    *((__global float *)(dst_addr + 38 * dst_stride_z)) = out4.s6;
+    *((__global float *)(dst_addr + 39 * dst_stride_z)) = out4.s7;
+    *((__global float *)(dst_addr + 40 * dst_stride_z)) = out5.s0;
+    *((__global float *)(dst_addr + 41 * dst_stride_z)) = out5.s1;
+    *((__global float *)(dst_addr + 42 * dst_stride_z)) = out5.s2;
+    *((__global float *)(dst_addr + 43 * dst_stride_z)) = out5.s3;
+    *((__global float *)(dst_addr + 44 * dst_stride_z)) = out5.s4;
+    *((__global float *)(dst_addr + 45 * dst_stride_z)) = out5.s5;
+    *((__global float *)(dst_addr + 46 * dst_stride_z)) = out5.s6;
+    *((__global float *)(dst_addr + 47 * dst_stride_z)) = out5.s7;
+    *((__global float *)(dst_addr + 48 * dst_stride_z)) = out6.s0;
+    *((__global float *)(dst_addr + 49 * dst_stride_z)) = out6.s1;
+    *((__global float *)(dst_addr + 50 * dst_stride_z)) = out6.s2;
+    *((__global float *)(dst_addr + 51 * dst_stride_z)) = out6.s3;
+    *((__global float *)(dst_addr + 52 * dst_stride_z)) = out6.s4;
+    *((__global float *)(dst_addr + 53 * dst_stride_z)) = out6.s5;
+    *((__global float *)(dst_addr + 54 * dst_stride_z)) = out6.s6;
+    *((__global float *)(dst_addr + 55 * dst_stride_z)) = out6.s7;
+    *((__global float *)(dst_addr + 56 * dst_stride_z)) = out7.s0;
+    *((__global float *)(dst_addr + 57 * dst_stride_z)) = out7.s1;
+    *((__global float *)(dst_addr + 58 * dst_stride_z)) = out7.s2;
+    *((__global float *)(dst_addr + 59 * dst_stride_z)) = out7.s3;
+    *((__global float *)(dst_addr + 60 * dst_stride_z)) = out7.s4;
+    *((__global float *)(dst_addr + 61 * dst_stride_z)) = out7.s5;
+    *((__global float *)(dst_addr + 62 * dst_stride_z)) = out7.s6;
+    *((__global float *)(dst_addr + 63 * dst_stride_z)) = out7.s7;
+#endif // !defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL) && !defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 }
-#endif // defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
-
 #endif // defined(SRC_DIM_1) && defined(SRC_DIM_2)
-
-#define OUTPUT_ROW_4x4_5x5(out, tmp, comm_fact)                     \
-    ({                                                              \
-        comm_fact.s0 = tmp.s2 - 4.25f * tmp.s4 + tmp.s6;            \
-        comm_fact.s1 = tmp.s1 - 4.25f * tmp.s3 + tmp.s5;            \
-        comm_fact.s2 = 2.5f * tmp.s3;                               \
-        comm_fact.s3 = 0.5f * tmp.s1 + 2.f * tmp.s5 - comm_fact.s2; \
-        comm_fact.s4 = 0.25f * tmp.s2 - 1.25f * tmp.s4 + tmp.s6;    \
-        comm_fact.s5 = 4.f * tmp.s2 + tmp.s6 - 5.f * tmp.s4;        \
-        comm_fact.s6 = 2.f * tmp.s1 + 0.5f * tmp.s5 - comm_fact.s2; \
-        \
-        out.s0 = tmp.s0 - tmp.s6 + 5.25f * tmp.s4 - 5.25f * tmp.s2; \
-        out.s1 = comm_fact.s0 + comm_fact.s1;                       \
-        out.s2 = comm_fact.s0 - comm_fact.s1;                       \
-        out.s3 = comm_fact.s3 + comm_fact.s4;                       \
-        out.s4 = comm_fact.s4 - comm_fact.s3;                       \
-        out.s5 = comm_fact.s5 + comm_fact.s6;                       \
-        out.s6 = comm_fact.s5 - comm_fact.s6;                       \
-        out.s7 = tmp.s7 - tmp.s1 + 5.25f * tmp.s3 - 5.25f * tmp.s5; \
-    })
 
 /** This OpenCL kernel computes the input transform when the kernel size is 5x5/5x1 or 1x5 and the output tile is 4x4/4x1 or 1x4 when the data layout is NCHW
  *
@@ -1424,6 +1655,105 @@ __kernel void winograd_input_transform_4x1_5x1_stepz1_nchw(
                                                  dst_offset_first_element_in_bytes);
 }
 
+#if defined(SRC_DIM_1) && defined(SRC_DIM_2)
+/** This OpenCL kernel computes the input transform when the kernel size is 3x1 and the output tile is 4x1 for data layout NHWC
+ *
+ * @note The number of tiles in the x axis must be passed at compile time using -DNUM_TILES_X (i.e.-DNUM_TILES_X=5).
+ * @note Dimension one of the input tensor (width for NHWC data layout) must be passed at compile time using -DSRC_DIM1 (e.g. -DSRC_DIM_1=112)
+ * @note Dimension two of the input tensor (height for NHWC data layout) must be passed at compile time using -DSRC_DIM2 (e.g. -DSRC_DIM_2=112)
+ * @note The pad left and pad top must be passed at compile time using -DPAD_LEFT and -DPAD_TOP (i.e.-DPAD_LEFT=1 and -DPAD_TOP=0).
+ * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=4
+ * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=1
+ * @note -DWINOGRAD_INPUT_TRANSFORM_HORIZONTAL has to be passed at compile time
+ *
+ * @param[in] src_ptr                           Pointer to the source image. Supported data types: F32
+ * @param[in] src_stride_x                      Stride of the source image in X dimension (in bytes)
+ * @param[in] src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] src_stride_y                      Stride of the source image in Y dimension (in bytes)
+ * @param[in] src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] src_offset_first_element_in_bytes The offset of the first element in the source image
+ * @param[in] src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in] src_step_z                        src_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_ptr                           Pointer to the destination tensor. Supported data types: as @p src_ptr
+ * @param[in] dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
+ * @param[in] dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in] dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in] dst_step_z                        dst_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ */
+__kernel void winograd_input_transform_4x1_3x1_stepz1_nhwc(
+    TENSOR3D_DECLARATION(src),
+    TENSOR3D_DECLARATION(dst))
+{
+    winograd_input_transform_4x4_3x3_stepz1_nhwc(src_ptr,
+                                                 src_stride_x,
+                                                 src_step_x,
+                                                 src_stride_y,
+                                                 src_step_y,
+                                                 src_stride_z,
+                                                 src_step_z,
+                                                 src_offset_first_element_in_bytes,
+                                                 dst_ptr,
+                                                 dst_stride_x,
+                                                 dst_step_x,
+                                                 dst_stride_y,
+                                                 dst_step_y,
+                                                 dst_stride_z,
+                                                 dst_step_z,
+                                                 dst_offset_first_element_in_bytes);
+}
+
+/** This OpenCL kernel computes the input transform when the kernel size is 5x1 and the output tile is 4x1 for data layout NHWC
+ *
+ * @note The number of tiles in the x axis must be passed at compile time using -DNUM_TILES_X (i.e.-DNUM_TILES_X=5).
+ * @note Dimension one of the input tensor (width for NHWC data layout) must be passed at compile time using -DSRC_DIM1 (e.g. -DSRC_DIM_1=112)
+ * @note Dimension two of the input tensor (height for NHWC data layout) must be passed at compile time using -DSRC_DIM2 (e.g. -DSRC_DIM_2=112)
+ * @note The pad left and pad top must be passed at compile time using -DPAD_LEFT and -DPAD_TOP (i.e.-DPAD_LEFT=1 and -DPAD_TOP=0).
+ * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=4
+ * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=1
+ * @note -DWINOGRAD_INPUT_TRANSFORM_HORIZONTAL has to be passed at compile time
+ *
+ * @param[in] src_ptr                           Pointer to the source image. Supported data types: F32
+ * @param[in] src_stride_x                      Stride of the source image in X dimension (in bytes)
+ * @param[in] src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] src_stride_y                      Stride of the source image in Y dimension (in bytes)
+ * @param[in] src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] src_offset_first_element_in_bytes The offset of the first element in the source image
+ * @param[in] src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in] src_step_z                        src_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_ptr                           Pointer to the destination tensor. Supported data types: as @p src_ptr
+ * @param[in] dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
+ * @param[in] dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in] dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in] dst_step_z                        dst_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ */
+__kernel void winograd_input_transform_4x1_5x1_stepz1_nhwc(
+    TENSOR3D_DECLARATION(src),
+    TENSOR3D_DECLARATION(dst))
+{
+    winograd_input_transform_4x4_5x5_stepz1_nhwc(src_ptr,
+                                                 src_stride_x,
+                                                 src_step_x,
+                                                 src_stride_y,
+                                                 src_step_y,
+                                                 src_stride_z,
+                                                 src_step_z,
+                                                 src_offset_first_element_in_bytes,
+                                                 dst_ptr,
+                                                 dst_stride_x,
+                                                 dst_step_x,
+                                                 dst_stride_y,
+                                                 dst_step_y,
+                                                 dst_stride_z,
+                                                 dst_step_z,
+                                                 dst_offset_first_element_in_bytes);
+}
+#endif // defined(SRC_DIM_1) && defined(SRC_DIM_2)
 #endif // defined(WINOGRAD_INPUT_TRANSFORM_HORIZONTAL)
 
 #if defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
@@ -1614,15 +1944,17 @@ __kernel void winograd_input_transform_1x4_1x5_stepz1_nchw(
                                                  dst_step_z,
                                                  dst_offset_first_element_in_bytes);
 }
-#endif // defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 
 #if defined(SRC_DIM_1) && defined(SRC_DIM_2)
-/** This OpenCL kernel computes the input transform when the kernel size is 5x5 and the output tile is 4x4 when the data layout is NHWC
+/** This OpenCL kernel computes the input transform when the kernel size is 1x3 and the output tile is 1x4 for data layout NHWC
  *
  * @note The number of tiles in the x axis must be passed at compile time using -DNUM_TILES_X (i.e.-DNUM_TILES_X=5).
+ * @note Dimension one of the input tensor (width for NHWC data layout) must be passed at compile time using -DSRC_DIM1 (e.g. -DSRC_DIM_1=112)
+ * @note Dimension two of the input tensor (height for NHWC data layout) must be passed at compile time using -DSRC_DIM2 (e.g. -DSRC_DIM_2=112)
  * @note The pad left and pad top must be passed at compile time using -DPAD_LEFT and -DPAD_TOP (i.e.-DPAD_LEFT=1 and -DPAD_TOP=0).
- * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=4
+ * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=1
  * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=4
+ * @note -DWINOGRAD_INPUT_TRANSFORM_VERTICAL has to be passed at compile time
  *
  * @param[in] src_ptr                           Pointer to the source image. Supported data types: F32
  * @param[in] src_stride_x                      Stride of the source image in X dimension (in bytes)
@@ -1641,246 +1973,76 @@ __kernel void winograd_input_transform_1x4_1x5_stepz1_nchw(
  * @param[in] dst_step_z                        dst_stride_z * number of elements along Y processed per workitem(in bytes)
  * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  */
-__kernel void winograd_input_transform_4x4_5x5_stepz1_nhwc(
+__kernel void winograd_input_transform_1x4_1x3_stepz1_nhwc(
     TENSOR3D_DECLARATION(src),
     TENSOR3D_DECLARATION(dst))
 {
-    int x = get_global_id(0);
-    int y = get_global_id(1);
-    int z = get_global_id(2);
+    winograd_input_transform_4x4_3x3_stepz1_nhwc(src_ptr,
+                                                 src_stride_x,
+                                                 src_step_x,
+                                                 src_stride_y,
+                                                 src_step_y,
+                                                 src_stride_z,
+                                                 src_step_z,
+                                                 src_offset_first_element_in_bytes,
+                                                 dst_ptr,
+                                                 dst_stride_x,
+                                                 dst_step_x,
+                                                 dst_stride_y,
+                                                 dst_step_y,
+                                                 dst_stride_z,
+                                                 dst_step_z,
+                                                 dst_offset_first_element_in_bytes);
+}
 
-    // Compute input address
-    __global uchar *src_addr = src_ptr + src_offset_first_element_in_bytes + x * sizeof(float);
-
-    // Clamp coordinates. This clamp is valid for all rows
-    int8 y_coord = (int8)(y * 4) + (int8)(0, 1, 2, 3, 4, 5, 6, 7) - (int8)PAD_LEFT;
-    y_coord      = clamp(y_coord, -1, SRC_DIM_1);
-
-    // Load 8x8 input tile
-    float8 in_row0, in_row1, in_row2, in_row3, in_row4, in_row5, in_row6, in_row7;
-
-    // Row0
-    int  z_coord = (z * 4) - PAD_TOP + 0;
-    int8 valid_y = select(y_coord, -1, (int8)z_coord < 0);                 // If z < 0, set y to -1
-    valid_y      = select(valid_y, SRC_DIM_1, (int8)z_coord >= SRC_DIM_2); // If z >= SRC_DIM_2, set y to SRC_DIM_2
-    z_coord      = clamp(z_coord, 0, SRC_DIM_2 - 1);                       // Clamp z coordinate
-
-    in_row0.s0 = *(__global float *)(src_addr + valid_y.s0 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row0.s1 = *(__global float *)(src_addr + valid_y.s1 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row0.s2 = *(__global float *)(src_addr + valid_y.s2 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row0.s3 = *(__global float *)(src_addr + valid_y.s3 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row0.s4 = *(__global float *)(src_addr + valid_y.s4 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row0.s5 = *(__global float *)(src_addr + valid_y.s5 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row0.s6 = *(__global float *)(src_addr + valid_y.s6 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row0.s7 = *(__global float *)(src_addr + valid_y.s7 * (int)src_stride_y + z_coord * src_stride_z);
-
-    // Row1
-    z_coord = (z * 4) - PAD_TOP + 1;
-    valid_y = select(y_coord, -1, (int8)z_coord < 0);
-    valid_y = select(valid_y, SRC_DIM_1, (int8)z_coord >= SRC_DIM_2);
-    z_coord = clamp(z_coord, 0, SRC_DIM_2 - 1);
-
-    in_row1.s0 = *(__global float *)(src_addr + valid_y.s0 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row1.s1 = *(__global float *)(src_addr + valid_y.s1 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row1.s2 = *(__global float *)(src_addr + valid_y.s2 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row1.s3 = *(__global float *)(src_addr + valid_y.s3 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row1.s4 = *(__global float *)(src_addr + valid_y.s4 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row1.s5 = *(__global float *)(src_addr + valid_y.s5 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row1.s6 = *(__global float *)(src_addr + valid_y.s6 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row1.s7 = *(__global float *)(src_addr + valid_y.s7 * (int)src_stride_y + z_coord * src_stride_z);
-
-    // Row2
-    z_coord = (z * 4) - PAD_TOP + 2;
-    valid_y = select(y_coord, -1, (int8)z_coord < 0);
-    valid_y = select(valid_y, SRC_DIM_1, (int8)z_coord >= SRC_DIM_2);
-    z_coord = clamp(z_coord, 0, SRC_DIM_2 - 1);
-
-    in_row2.s0 = *(__global float *)(src_addr + valid_y.s0 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row2.s1 = *(__global float *)(src_addr + valid_y.s1 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row2.s2 = *(__global float *)(src_addr + valid_y.s2 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row2.s3 = *(__global float *)(src_addr + valid_y.s3 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row2.s4 = *(__global float *)(src_addr + valid_y.s4 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row2.s5 = *(__global float *)(src_addr + valid_y.s5 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row2.s6 = *(__global float *)(src_addr + valid_y.s6 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row2.s7 = *(__global float *)(src_addr + valid_y.s7 * (int)src_stride_y + z_coord * src_stride_z);
-
-    // Row3
-    z_coord = (z * 4) - PAD_TOP + 3;
-    valid_y = select(y_coord, -1, (int8)z_coord < 0);
-    valid_y = select(valid_y, SRC_DIM_1, (int8)z_coord >= SRC_DIM_2);
-    z_coord = clamp(z_coord, 0, SRC_DIM_2 - 1);
-
-    in_row3.s0 = *(__global float *)(src_addr + valid_y.s0 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row3.s1 = *(__global float *)(src_addr + valid_y.s1 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row3.s2 = *(__global float *)(src_addr + valid_y.s2 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row3.s3 = *(__global float *)(src_addr + valid_y.s3 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row3.s4 = *(__global float *)(src_addr + valid_y.s4 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row3.s5 = *(__global float *)(src_addr + valid_y.s5 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row3.s6 = *(__global float *)(src_addr + valid_y.s6 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row3.s7 = *(__global float *)(src_addr + valid_y.s7 * (int)src_stride_y + z_coord * src_stride_z);
-
-    // Row4
-    z_coord = (z * 4) - PAD_TOP + 4;
-    valid_y = select(y_coord, -1, (int8)z_coord < 0);
-    valid_y = select(valid_y, SRC_DIM_1, (int8)z_coord >= SRC_DIM_2);
-    z_coord = clamp(z_coord, 0, SRC_DIM_2 - 1);
-
-    in_row4.s0 = *(__global float *)(src_addr + valid_y.s0 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row4.s1 = *(__global float *)(src_addr + valid_y.s1 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row4.s2 = *(__global float *)(src_addr + valid_y.s2 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row4.s3 = *(__global float *)(src_addr + valid_y.s3 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row4.s4 = *(__global float *)(src_addr + valid_y.s4 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row4.s5 = *(__global float *)(src_addr + valid_y.s5 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row4.s6 = *(__global float *)(src_addr + valid_y.s6 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row4.s7 = *(__global float *)(src_addr + valid_y.s7 * (int)src_stride_y + z_coord * src_stride_z);
-
-    // Row5
-    z_coord = (z * 4) - PAD_TOP + 5;
-    valid_y = select(y_coord, -1, (int8)z_coord < 0);
-    valid_y = select(valid_y, SRC_DIM_1, (int8)z_coord >= SRC_DIM_2);
-    z_coord = clamp(z_coord, 0, SRC_DIM_2 - 1);
-
-    in_row5.s0 = *(__global float *)(src_addr + valid_y.s0 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row5.s1 = *(__global float *)(src_addr + valid_y.s1 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row5.s2 = *(__global float *)(src_addr + valid_y.s2 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row5.s3 = *(__global float *)(src_addr + valid_y.s3 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row5.s4 = *(__global float *)(src_addr + valid_y.s4 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row5.s5 = *(__global float *)(src_addr + valid_y.s5 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row5.s6 = *(__global float *)(src_addr + valid_y.s6 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row5.s7 = *(__global float *)(src_addr + valid_y.s7 * (int)src_stride_y + z_coord * src_stride_z);
-
-    // Row6
-    z_coord = (z * 4) - PAD_TOP + 6;
-    valid_y = select(y_coord, -1, (int8)z_coord < 0);
-    valid_y = select(valid_y, SRC_DIM_1, (int8)z_coord >= SRC_DIM_2);
-    z_coord = clamp(z_coord, 0, SRC_DIM_2 - 1);
-
-    in_row6.s0 = *(__global float *)(src_addr + valid_y.s0 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row6.s1 = *(__global float *)(src_addr + valid_y.s1 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row6.s2 = *(__global float *)(src_addr + valid_y.s2 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row6.s3 = *(__global float *)(src_addr + valid_y.s3 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row6.s4 = *(__global float *)(src_addr + valid_y.s4 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row6.s5 = *(__global float *)(src_addr + valid_y.s5 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row6.s6 = *(__global float *)(src_addr + valid_y.s6 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row6.s7 = *(__global float *)(src_addr + valid_y.s7 * (int)src_stride_y + z_coord * src_stride_z);
-
-    // Row7
-    z_coord = (z * 4) - PAD_TOP + 7;
-    valid_y = select(y_coord, -1, (int8)z_coord < 0);
-    valid_y = select(valid_y, SRC_DIM_1, (int8)z_coord >= SRC_DIM_2);
-    z_coord = clamp(z_coord, 0, SRC_DIM_2 - 1);
-
-    in_row7.s0 = *(__global float *)(src_addr + valid_y.s0 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row7.s1 = *(__global float *)(src_addr + valid_y.s1 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row7.s2 = *(__global float *)(src_addr + valid_y.s2 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row7.s3 = *(__global float *)(src_addr + valid_y.s3 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row7.s4 = *(__global float *)(src_addr + valid_y.s4 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row7.s5 = *(__global float *)(src_addr + valid_y.s5 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row7.s6 = *(__global float *)(src_addr + valid_y.s6 * (int)src_stride_y + z_coord * src_stride_z);
-    in_row7.s7 = *(__global float *)(src_addr + valid_y.s7 * (int)src_stride_y + z_coord * src_stride_z);
-
-    // Calculate common factors for intermediate tensor
-    float8 comm_fact0 = in_row2 + in_row6 - 4.25f * in_row4;
-    float8 comm_fact1 = in_row1 + in_row5 - 4.25f * in_row3;
-    float8 comm_fact2 = 0.25f * in_row2 - 1.25f * in_row4 + in_row6;
-
-    // Calculate intermediate tensor and reuse common factor vectors
-    const float8 tmp0 = in_row0 - in_row6 + 5.25f * in_row4 - 5.25f * in_row2;
-    const float8 tmp1 = comm_fact0 + comm_fact1;
-    const float8 tmp2 = comm_fact0 - comm_fact1;
-
-    comm_fact0 = 2.5f * in_row3;
-    comm_fact1 = 0.5f * in_row1 - comm_fact0 + 2.f * in_row5;
-
-    const float8 tmp3 = comm_fact1 + comm_fact2;
-    const float8 tmp4 = comm_fact2 - comm_fact1;
-
-    comm_fact1 = 2.f * in_row1 - comm_fact0 + 0.5f * in_row5;
-    comm_fact2 = 4.f * in_row2 - 5.f * in_row4 + in_row6;
-
-    const float8 tmp5 = comm_fact1 + comm_fact2;
-    const float8 tmp6 = comm_fact2 - comm_fact1;
-    const float8 tmp7 = in_row7 - in_row1 + 5.25f * in_row3 - 5.25f * in_row5;
-
-    // Calculate output rows (reuse comm_fact0 vector)
-    float8 out0, out1, out2, out3, out4, out5, out6, out7;
-
-    OUTPUT_ROW_4x4_5x5(out0, tmp0, comm_fact0);
-    OUTPUT_ROW_4x4_5x5(out1, tmp1, comm_fact0);
-    OUTPUT_ROW_4x4_5x5(out2, tmp2, comm_fact0);
-    OUTPUT_ROW_4x4_5x5(out3, tmp3, comm_fact0);
-    OUTPUT_ROW_4x4_5x5(out4, tmp4, comm_fact0);
-    OUTPUT_ROW_4x4_5x5(out5, tmp5, comm_fact0);
-    OUTPUT_ROW_4x4_5x5(out6, tmp6, comm_fact0);
-    OUTPUT_ROW_4x4_5x5(out7, tmp7, comm_fact0);
-
-    // Store values across the 64 channels
-    __global uchar *dst_addr = dst_ptr + dst_offset_first_element_in_bytes + x * sizeof(float) + (y + z * (int)NUM_TILES_X) * dst_stride_y;
-
-    *((__global float *)(dst_addr + 0 * dst_stride_z))  = out0.s0;
-    *((__global float *)(dst_addr + 1 * dst_stride_z))  = out0.s1;
-    *((__global float *)(dst_addr + 2 * dst_stride_z))  = out0.s2;
-    *((__global float *)(dst_addr + 3 * dst_stride_z))  = out0.s3;
-    *((__global float *)(dst_addr + 4 * dst_stride_z))  = out0.s4;
-    *((__global float *)(dst_addr + 5 * dst_stride_z))  = out0.s5;
-    *((__global float *)(dst_addr + 6 * dst_stride_z))  = out0.s6;
-    *((__global float *)(dst_addr + 7 * dst_stride_z))  = out0.s7;
-    *((__global float *)(dst_addr + 8 * dst_stride_z))  = out1.s0;
-    *((__global float *)(dst_addr + 9 * dst_stride_z))  = out1.s1;
-    *((__global float *)(dst_addr + 10 * dst_stride_z)) = out1.s2;
-    *((__global float *)(dst_addr + 11 * dst_stride_z)) = out1.s3;
-    *((__global float *)(dst_addr + 12 * dst_stride_z)) = out1.s4;
-    *((__global float *)(dst_addr + 13 * dst_stride_z)) = out1.s5;
-    *((__global float *)(dst_addr + 14 * dst_stride_z)) = out1.s6;
-    *((__global float *)(dst_addr + 15 * dst_stride_z)) = out1.s7;
-    *((__global float *)(dst_addr + 16 * dst_stride_z)) = out2.s0;
-    *((__global float *)(dst_addr + 17 * dst_stride_z)) = out2.s1;
-    *((__global float *)(dst_addr + 18 * dst_stride_z)) = out2.s2;
-    *((__global float *)(dst_addr + 19 * dst_stride_z)) = out2.s3;
-    *((__global float *)(dst_addr + 20 * dst_stride_z)) = out2.s4;
-    *((__global float *)(dst_addr + 21 * dst_stride_z)) = out2.s5;
-    *((__global float *)(dst_addr + 22 * dst_stride_z)) = out2.s6;
-    *((__global float *)(dst_addr + 23 * dst_stride_z)) = out2.s7;
-    *((__global float *)(dst_addr + 24 * dst_stride_z)) = out3.s0;
-    *((__global float *)(dst_addr + 25 * dst_stride_z)) = out3.s1;
-    *((__global float *)(dst_addr + 26 * dst_stride_z)) = out3.s2;
-    *((__global float *)(dst_addr + 27 * dst_stride_z)) = out3.s3;
-    *((__global float *)(dst_addr + 28 * dst_stride_z)) = out3.s4;
-    *((__global float *)(dst_addr + 29 * dst_stride_z)) = out3.s5;
-    *((__global float *)(dst_addr + 30 * dst_stride_z)) = out3.s6;
-    *((__global float *)(dst_addr + 31 * dst_stride_z)) = out3.s7;
-    *((__global float *)(dst_addr + 32 * dst_stride_z)) = out4.s0;
-    *((__global float *)(dst_addr + 33 * dst_stride_z)) = out4.s1;
-    *((__global float *)(dst_addr + 34 * dst_stride_z)) = out4.s2;
-    *((__global float *)(dst_addr + 35 * dst_stride_z)) = out4.s3;
-    *((__global float *)(dst_addr + 36 * dst_stride_z)) = out4.s4;
-    *((__global float *)(dst_addr + 37 * dst_stride_z)) = out4.s5;
-    *((__global float *)(dst_addr + 38 * dst_stride_z)) = out4.s6;
-    *((__global float *)(dst_addr + 39 * dst_stride_z)) = out4.s7;
-    *((__global float *)(dst_addr + 40 * dst_stride_z)) = out5.s0;
-    *((__global float *)(dst_addr + 41 * dst_stride_z)) = out5.s1;
-    *((__global float *)(dst_addr + 42 * dst_stride_z)) = out5.s2;
-    *((__global float *)(dst_addr + 43 * dst_stride_z)) = out5.s3;
-    *((__global float *)(dst_addr + 44 * dst_stride_z)) = out5.s4;
-    *((__global float *)(dst_addr + 45 * dst_stride_z)) = out5.s5;
-    *((__global float *)(dst_addr + 46 * dst_stride_z)) = out5.s6;
-    *((__global float *)(dst_addr + 47 * dst_stride_z)) = out5.s7;
-    *((__global float *)(dst_addr + 48 * dst_stride_z)) = out6.s0;
-    *((__global float *)(dst_addr + 49 * dst_stride_z)) = out6.s1;
-    *((__global float *)(dst_addr + 50 * dst_stride_z)) = out6.s2;
-    *((__global float *)(dst_addr + 51 * dst_stride_z)) = out6.s3;
-    *((__global float *)(dst_addr + 52 * dst_stride_z)) = out6.s4;
-    *((__global float *)(dst_addr + 53 * dst_stride_z)) = out6.s5;
-    *((__global float *)(dst_addr + 54 * dst_stride_z)) = out6.s6;
-    *((__global float *)(dst_addr + 55 * dst_stride_z)) = out6.s7;
-    *((__global float *)(dst_addr + 56 * dst_stride_z)) = out7.s0;
-    *((__global float *)(dst_addr + 57 * dst_stride_z)) = out7.s1;
-    *((__global float *)(dst_addr + 58 * dst_stride_z)) = out7.s2;
-    *((__global float *)(dst_addr + 59 * dst_stride_z)) = out7.s3;
-    *((__global float *)(dst_addr + 60 * dst_stride_z)) = out7.s4;
-    *((__global float *)(dst_addr + 61 * dst_stride_z)) = out7.s5;
-    *((__global float *)(dst_addr + 62 * dst_stride_z)) = out7.s6;
-    *((__global float *)(dst_addr + 63 * dst_stride_z)) = out7.s7;
+/** This OpenCL kernel computes the input transform when the kernel size is 1x5 and the output tile is 1x4 for data layout NHWC
+ *
+ * @note The number of tiles in the x axis must be passed at compile time using -DNUM_TILES_X (i.e.-DNUM_TILES_X=5).
+ * @note Dimension one of the input tensor (width for NHWC data layout) must be passed at compile time using -DSRC_DIM1 (e.g. -DSRC_DIM_1=112)
+ * @note Dimension two of the input tensor (height for NHWC data layout) must be passed at compile time using -DSRC_DIM2 (e.g. -DSRC_DIM_2=112)
+ * @note The pad left and pad top must be passed at compile time using -DPAD_LEFT and -DPAD_TOP (i.e.-DPAD_LEFT=1 and -DPAD_TOP=0).
+ * @note The width of the output tile must be passed at compile time using -DOUTPUT_TILE_W: e.g. -DOUTPUT_TILE_W=1
+ * @note The height of the output tile must be passed at compile time using -DOUTPUT_TILE_H: e.g. -DOUTPUT_TILE_H=4
+ * @note -DWINOGRAD_INPUT_TRANSFORM_VERTICAL has to be passed at compile time
+ *
+ * @param[in] src_ptr                           Pointer to the source image. Supported data types: F32
+ * @param[in] src_stride_x                      Stride of the source image in X dimension (in bytes)
+ * @param[in] src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] src_stride_y                      Stride of the source image in Y dimension (in bytes)
+ * @param[in] src_step_y                        src_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] src_offset_first_element_in_bytes The offset of the first element in the source image
+ * @param[in] src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
+ * @param[in] src_step_z                        src_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_ptr                           Pointer to the destination tensor. Supported data types: as @p src_ptr
+ * @param[in] dst_stride_x                      Stride of the destination tensor in X dimension (in bytes)
+ * @param[in] dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
+ * @param[in] dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
+ * @param[in] dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in] dst_step_z                        dst_stride_z * number of elements along Y processed per workitem(in bytes)
+ * @param[in] dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
+ */
+__kernel void winograd_input_transform_1x4_1x5_stepz1_nhwc(
+    TENSOR3D_DECLARATION(src),
+    TENSOR3D_DECLARATION(dst))
+{
+    winograd_input_transform_4x4_5x5_stepz1_nhwc(src_ptr,
+                                                 src_stride_x,
+                                                 src_step_x,
+                                                 src_stride_y,
+                                                 src_step_y,
+                                                 src_stride_z,
+                                                 src_step_z,
+                                                 src_offset_first_element_in_bytes,
+                                                 dst_ptr,
+                                                 dst_stride_x,
+                                                 dst_step_x,
+                                                 dst_stride_y,
+                                                 dst_step_y,
+                                                 dst_stride_z,
+                                                 dst_step_z,
+                                                 dst_offset_first_element_in_bytes);
 }
 #endif // defined(SRC_DIM_1) && defined(SRC_DIM_2)
+#endif // defined(WINOGRAD_INPUT_TRANSFORM_VERTICAL)
 #endif // defined(NUM_TILES_X) && defined(PAD_LEFT) && defined(PAD_TOP) && defined(OUTPUT_TILE_W) && defined(OUTPUT_TILE_H)

@@ -59,8 +59,7 @@ public:
     CLWinogradConvolutionLayer &operator=(CLWinogradConvolutionLayer &&) = default;
     /** Set the input and output tensors.
      *
-     * @note: This function only works with 3x3,3x1,1x3,5x5,5x1 and 1x5 kernels along with unit strides for NCHW data layout
-     * @note: This function only works with 3x3, 3x1, 1x3 and 5x5 kernels along with unit strides for NHWC data layout
+     * @note: This function only works with 3x3,3x1,1x3,5x5,5x1 and 1x5 kernels along with unit strides for both NCHW and NHWC data layout
      * @note  Some Winograd configurations (i.e. F(4x4, 5x5)) are supported only with enable_fast_math = true
      *
      * @param[in]  input            Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
@@ -79,8 +78,7 @@ public:
                    const ActivationLayerInfo &act_info = ActivationLayerInfo(), bool enable_fast_math = false);
     /** Static function to check if given info will lead to a valid configuration of @ref CLWinogradConvolutionLayer
      *
-     * @note: This function only works with 3x3,3x1,1x3,5x5,5x1 and 1x5 kernels along with unit strides for NCHW data layout
-     * @note: This function only works with 3x3 and 5x5 kernels along with unit strides for NHWC data layout
+     * @note: This function only works with 3x3,3x1,1x3,5x5,5x1 and 1x5 kernels along with unit strides for both NCHW and NHWC data layout
      * @note  Some Winograd configurations (i.e. F(4x4, 5x5)) are supported only with enable_fast_math = true
      *
      * @param[in]  input            Source tensor. 3 lower dimensions represent a single input [width, height, IFM],
