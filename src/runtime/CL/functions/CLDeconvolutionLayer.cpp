@@ -47,7 +47,7 @@ Status CLDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
                                       unsigned int inner_border_right, unsigned int inner_border_top, const WeightsInfo &weights_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(0) != weights->dimension(1));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(0) < 1);
     ARM_COMPUTE_RETURN_ERROR_ON(!info.padding_is_symmetric());
@@ -67,7 +67,14 @@ Status CLDeconvolutionLayer::validate(const ITensorInfo *input, const ITensorInf
 
     if(bias != nullptr)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, bias);
+        if(is_data_type_quantized_asymmetric(input->data_type()))
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(bias, 1, DataType::S32);
+        }
+        else
+        {
+            ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, bias);
+        }
     }
 
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->dimension(Window::DimX) != output_shape.x(), "Output's width is invalid.");
@@ -98,7 +105,7 @@ void CLDeconvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights,
     const TensorShape output_shape = deconvolution_output_shape(out_dims, input->info()->tensor_shape(), weights->info()->tensor_shape());
 
     // Output auto initialization if not yet initialized
-    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type());
+    auto_init_if_empty(*output->info(), output_shape, 1, input->info()->data_type(), input->info()->quantization_info());
 
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(CLDeconvolutionLayer::validate(input->info(), weights->info(), bias == nullptr ? nullptr : bias->info(), output->info(), info, inner_border_right, inner_border_top));
@@ -108,13 +115,13 @@ void CLDeconvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights,
     _memory_group.manage(&_scaled_output);
 
     // configure scale function
-    // Init and allocate intermmidiate tensor for output, same size as input but the first two axis are the same as the output tensor
+    // Init and allocate intermediate tensor for output, same size as input but the first two axis are the same as the output tensor
     TensorShape        scale_out_shape(input->info()->tensor_shape());
     const unsigned int out_x = input->info()->dimension(0) + (input->info()->dimension(0) - 1) * (stride_x - 1) + inner_border_right + 2 * info.pad().first;
     const unsigned int out_y = input->info()->dimension(1) + (input->info()->dimension(1) - 1) * (stride_y - 1) + inner_border_top + 2 * info.pad().second;
     scale_out_shape.set(0, out_x);
     scale_out_shape.set(1, out_y);
-    TensorInfo scale_out_info(scale_out_shape, 1, input->info()->data_type());
+    TensorInfo scale_out_info(scale_out_shape, 1, input->info()->data_type(), input->info()->quantization_info());
     _scaled_output.allocator()->init(scale_out_info);
 
     _scale_f.configure(input, &_scaled_output, BorderSize(inner_border_top, inner_border_right), info);

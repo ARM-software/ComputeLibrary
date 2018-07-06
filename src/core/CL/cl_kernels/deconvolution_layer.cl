@@ -25,7 +25,7 @@
 
 /** This function applies upsample on an input image.
  *
- * @param[in]  src_ptr                           Pointer to the source image. Supported data types: F16/F32
+ * @param[in]  src_ptr                           Pointer to the source image. Supported data types: QASYMM8/F16/F32
  * @param[in]  src_stride_x                      Stride of the source image in X dimension (in bytes)
  * @param[in]  src_step_x                        src_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  src_stride_y                      Stride of the source image in Y dimension (in bytes)
@@ -33,7 +33,7 @@
  * @param[in]  src_stride_z                      Stride of the source tensor in Z dimension (in bytes)
  * @param[in]  src_step_z                        src_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  src_offset_first_element_in_bytes The offset of the first element in the source image
- * @param[out] dst_ptr                           Pointer to the destination image. Supported data types: F16/F32
+ * @param[out] dst_ptr                           Pointer to the destination image. Supported data types: same as @p src_ptr
  * @param[in]  dst_stride_x                      Stride of the destination image in X dimension (in bytes)
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination image in Y dimension (in bytes)

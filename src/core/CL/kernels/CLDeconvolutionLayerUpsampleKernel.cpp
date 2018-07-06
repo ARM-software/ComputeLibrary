@@ -43,7 +43,7 @@ Status CLDeconvolutionLayerUpsampleKernel::validate(const ITensorInfo *input, co
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
 
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(0) == 0);
     ARM_COMPUTE_RETURN_ERROR_ON(output->dimension(1) == 0);

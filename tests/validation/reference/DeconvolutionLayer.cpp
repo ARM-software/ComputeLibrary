@@ -33,8 +33,8 @@ namespace validation
 {
 namespace reference
 {
-template <typename T>
-SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<T> &bias, const TensorShape &output_shape,
+template <typename T, typename TB>
+SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTensor<T> &weights, const SimpleTensor<TB> &bias, const TensorShape &output_shape,
                                     const PadStrideInfo &info, const std::pair<unsigned int, unsigned int> &a)
 {
     // Create reference
@@ -45,7 +45,7 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
     int         out_y        = src.shape().y() + (src.shape().y() - 1) * (stride_y - 1) + a.second + 2 * info.pad().second;
     scaled_shape.set(0, out_x);
     scaled_shape.set(1, out_y);
-    SimpleTensor<T> scaled{ scaled_shape, src.data_type(), 1 };
+    SimpleTensor<T> scaled{ scaled_shape, src.data_type(), 1, src.quantization_info() };
 
     const int width_in      = src.shape().x();
     const int height_in     = src.shape().y();
@@ -59,9 +59,14 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
     ARM_COMPUTE_ERROR_ON_MSG(ax > stride_x - 1, "ax must be smaller than stride_x");
     ARM_COMPUTE_ERROR_ON_MSG(ay > stride_y - 1, "ay must be smaller than stride_y");
 
-    for(int j = 0; j < scaled.num_elements(); ++j)
+    if(src.data_type() == DataType::QASYMM8)
     {
-        scaled[j] = T(0);
+        const uint8_t quantized_zero = src.quantization_info().offset;
+        std::fill_n(scaled.data(), scaled.num_elements(), quantized_zero);
+    }
+    else
+    {
+        std::fill_n(scaled.data(), scaled.num_elements(), T(0));
     }
 
     for(int slice = 0; slice < num_2d_slices; ++slice)
@@ -88,6 +93,8 @@ SimpleTensor<T> deconvolution_layer(const SimpleTensor<T> &src, const SimpleTens
     return convolution_layer(scaled, weights, bias, output_shape, conv_info);
 }
 
+template SimpleTensor<uint8_t> deconvolution_layer(const SimpleTensor<uint8_t> &src, const SimpleTensor<uint8_t> &weights, const SimpleTensor<int32_t> &bias, const TensorShape &output_shape,
+                                                   const PadStrideInfo &info, const std::pair<unsigned int, unsigned int> &a);
 template SimpleTensor<float> deconvolution_layer(const SimpleTensor<float> &src, const SimpleTensor<float> &weights, const SimpleTensor<float> &bias, const TensorShape &output_shape,
                                                  const PadStrideInfo &info, const std::pair<unsigned int, unsigned int> &a);
 template SimpleTensor<half> deconvolution_layer(const SimpleTensor<half> &src, const SimpleTensor<half> &weights, const SimpleTensor<half> &bias, const TensorShape &output_shape,

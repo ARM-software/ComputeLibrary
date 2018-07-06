@@ -64,7 +64,7 @@ public:
     CLDeconvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Set the input, weights, biases and output tensors.
      *
-     * @param[in,out] input              Input tensor. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: F16/F32.
+     * @param[in,out] input              Input tensor. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: QASYMM8/F16/F32.
      * @param[in]     weights            The 4d weights with dimensions [width, height, IFM, OFM]. Data type supported: Same as @p input.
      * @param[in]     bias               (Optional) The biases have one dimension. Data type supported: Same as @p input.
      * @param[out]    output             Output tensor. The output has the same number of dimensions as the @p input.
@@ -78,7 +78,7 @@ public:
                    unsigned int inner_border_right, unsigned int inner_border_top, const WeightsInfo &weights_info = WeightsInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLDeconvolutionLayer
      *
-     * @param[in] input              Input tensor info. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: F16/F32.
+     * @param[in] input              Input tensor info. 3 lower dimensions represent a single input, and an optional 4th dimension for batch of inputs. Data types supported: QASYMM8/F16/F32.
      * @param[in] weights            The 4d weights info with dimensions [width, height, IFM, OFM]. Data type supported: Same as @p input.
      * @param[in] bias               (Optional) The biases have one dimension. Data type supported: Same as @p input.
      * @param[in] output             Output tensor info. The output has the same number of dimensions as the @p input.
