@@ -25,7 +25,7 @@
 #define ARM_COMPUTE_TEST_DATASET_LIST
 
 #include "Dataset.h"
-#include "support/ToolchainSupport.h"
+#include "utils/TypePrinter.h"
 
 #include <initializer_list>
 #include <string>
@@ -84,8 +84,7 @@ public:
          */
         std::string description() const
         {
-            using support::cpp11::to_string;
-            return _name + "=" + to_string(*_iterator);
+            return _name + "=" + arm_compute::to_string(*_iterator);
         }
 
         /** Get the current value.

@@ -247,4 +247,24 @@ inline void Window::use_tensor_dimensions(const TensorShape &shape, size_t first
         set(n, Window::Dimension(0, std::max(shape[n], static_cast<size_t>(1))));
     }
 }
+
+inline TensorShape Window::shape() const
+{
+    TensorShape shape;
+    for(size_t d = 0; d < TensorShape::num_max_dimensions; ++d)
+    {
+        shape.set(d, (_dims[d].end() - _dims[d].start()) / _dims[d].step());
+    }
+    return shape;
+}
+
+inline size_t Window::num_iterations_total() const
+{
+    size_t total = 1;
+    for(size_t d = 0; d < Coordinates::num_max_dimensions; ++d)
+    {
+        total *= num_iterations(d);
+    }
+    return total;
+}
 }

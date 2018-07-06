@@ -60,7 +60,6 @@ std::string to_string_if_not_null(T *arg)
         return to_string(*arg);
     }
 }
-
 /** Formatted output of the Dimensions type.
  *
  * @param[out] os         Output stream.
@@ -1627,6 +1626,48 @@ inline std::string to_string(const Termination &termination)
     return str.str();
 }
 
+/** Formatted output of a vector of objects.
+ *
+ * @param[out] os   Output stream
+ * @param[in]  args Vector of objects to print
+ *
+ * @return Modified output stream.
+ */
+template <typename T>
+inline ::std::ostream &operator<<(::std::ostream &os, const std::vector<T> &args)
+{
+    os << "[";
+    bool first = true;
+    for(auto &arg : args)
+    {
+        if(first)
+        {
+            first = false;
+        }
+        else
+        {
+            os << ", ";
+        }
+        os << arg;
+    }
+    os << "]";
+    return os;
+}
+
+/** Formatted output of a vector of objects.
+ *
+ * @param[in] args Vector of objects to print
+ *
+ * @return String representing args.
+ */
+template <typename T>
+std::string to_string(const std::vector<T> &args)
+{
+    std::stringstream str;
+    str << args;
+    return str.str();
+}
+
 /** Formatted output of the WinogradInfo type. */
 inline ::std::ostream &operator<<(::std::ostream &os, const WinogradInfo &info)
 {
@@ -1644,5 +1685,18 @@ inline std::string to_string(const WinogradInfo &type)
     str << type;
     return str.str();
 }
+
+/** Fallback method: try to use std::to_string:
+ *
+ * @param[in] val Value to convert to string
+ *
+ * @return String representing val.
+ */
+template <typename T>
+inline std::string to_string(const T &val)
+{
+    return support::cpp11::to_string(val);
+}
+
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_TEST_TYPE_PRINTER_H__ */
