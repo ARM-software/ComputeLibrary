@@ -25,19 +25,35 @@
 
 #include "arm_gemm.hpp"
 #include "gemm_common.hpp"
+#include "gemm_implementation.hpp"
 #include "gemm_interleaved.hpp"
 
 #include "kernels/a64_gemm_s16_12x8.hpp"
 
 namespace arm_gemm {
 
+class GemmImpl_gemm_s16_interleaved : public GemmImplementation<int16_t, int32_t> {
+public:
+    UniqueGemmCommon<int16_t, int32_t> instantiate(const GemmArgs<int32_t> &args) override {
+        return UniqueGemmCommon<int16_t, int32_t>(new GemmInterleaved<gemm_s16_12x8, int16_t, int32_t>(args));
+    }
+
+    GemmImpl_gemm_s16_interleaved() : GemmImplementation<int16_t, int32_t>(GemmMethod::GEMM_INTERLEAVED) { }
+};
+
+static std::vector<GemmImplementation<int16_t, int32_t> *> gemm_s16_methods = {
+    new GemmImpl_gemm_s16_interleaved()
+};
+
 template<>
-UniqueGemmCommon<int16_t, int32_t> gemm<int16_t, int32_t>(const CPUInfo &ci, const unsigned int M, const unsigned int N, const unsigned int K,
-                                                          const unsigned int nbatches, const unsigned int nmulti,
-                                                          const bool trA, const bool trB, const int32_t alpha, const int32_t beta,
-                                                          const int maxthreads, const bool pretransposed_hint) {
-    return UniqueGemmCommon<int16_t, int32_t>(new GemmInterleaved<gemm_s16_12x8, int16_t, int32_t>(&ci, M, N, K, nbatches, nmulti, trA, trB, alpha, beta, maxthreads, pretransposed_hint));
+std::vector<GemmImplementation<int16_t, int32_t> *> &gemm_implementation_list<int16_t, int32_t>() {
+    return gemm_s16_methods;
 }
+
+/* Explicitly instantiate the external functions for these types. */
+template UniqueGemmCommon<int16_t, int32_t> gemm<int16_t, int32_t>(GemmArgs<int32_t> &args, GemmConfig *cfg);
+template GemmMethod get_gemm_method<int16_t, int32_t>(GemmArgs<int32_t> &args);
+template bool method_is_compatible<int16_t, int32_t>(GemmMethod method, GemmArgs<int32_t> &args);
 
 } // namespace arm_gemm
 

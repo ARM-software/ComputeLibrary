@@ -46,9 +46,17 @@ public:
     typedef void (*kern_type)(const float *, int, const float *, int, float *, int, float, int, int, int);
 
     /* Kernel blocking parameters */
-    static const int out_width = 16;
-    static const int out_height = 4;
-    static const int k_unroll = 1;
+    static int out_width() {
+        return 16;
+    }
+
+    static int out_height() {
+        return 4;
+    }
+
+    static int k_unroll() {
+        return 1;
+    }
 
     // Default to the generic kernel
     kern_type kernel=a64_sgemm_native_16x4;
