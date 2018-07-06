@@ -76,14 +76,8 @@ UniqueGemmCommon<float, float> gemm<float, float>(const CPUInfo &ci, const unsig
 
 // Instantiate static class variables.
 #ifdef __aarch64__
-const int sgemm_12x8::out_width;
-const int sgemm_12x8::out_height;
-
 const int sgemm_native_16x4::out_width;
 const int sgemm_native_16x4::out_height;
-#else
-const int sgemm_8x6::out_width;
-const int sgemm_8x6::out_height;
 #endif
 
 } // namespace arm_gemm

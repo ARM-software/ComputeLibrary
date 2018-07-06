@@ -29,7 +29,7 @@
 #include <arm_neon.h>
 
 template<>
-inline void MergeResults<12,8>(__fp16 *out, const float *in, int ldout, int y0, int ymax, int x0, int xmax, const __fp16 alpha, const __fp16 beta) {
+inline void MergeResults<12,8,false>(__fp16 *out, const float *in, int ldout, int y0, int ymax, int x0, int xmax, const __fp16 alpha, const __fp16 beta) {
     const float *inptr = in;
     prefetch_6x(inptr);
     prefetch_6x(inptr + 24);

@@ -31,7 +31,7 @@
 
 template<>
 template<typename T>
-inline void TransformImpl<6, 1, false, 4, 4>::Transform(T *out, const T *in, int ldin, int y0, int ymax, int k0, int kmax) {
+inline void TransformImpl<6, 1, false, 4, 4, false>::Transform(T *out, const T *in, int ldin, int y0, int ymax, int k0, int kmax) {
     uint32_t *outptr = reinterpret_cast<uint32_t *>(out);
     const uint32_t *inptr = reinterpret_cast<const uint32_t *>(in);
 

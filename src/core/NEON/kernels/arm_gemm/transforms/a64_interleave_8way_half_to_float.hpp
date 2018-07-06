@@ -31,7 +31,7 @@
 
 template<>
 template<>
-inline void TransformImpl<8, 1, false, 4, 2>::Transform(float *out, const __fp16 *in, int ldin, int y0, int ymax, int k0, int kmax) {
+inline void TransformImpl<8, 1, false, 4, 2, false>::Transform(float *out, const __fp16 *in, int ldin, int y0, int ymax, int k0, int kmax) {
     float *outptr = out;
     const __fp16 *inptr = in;
 

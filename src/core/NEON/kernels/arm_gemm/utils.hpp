@@ -44,3 +44,10 @@ inline T roundup(const T a, const T b) {
     return a;
   }
 }
+
+template <typename T>
+inline unsigned long get_vector_length() {
+    const unsigned long length = 16;
+
+    return length / sizeof(T);
+}

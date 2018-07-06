@@ -25,6 +25,8 @@
 
 #ifdef __aarch64__
 
+#include "../std_transforms_fixed.hpp"
+
 namespace arm_gemm {
 
 // Kernel definition
@@ -48,14 +50,24 @@ public:
     static const bool B_transpose = true;
 
     /* Kernel blocking parameters */
-    static const int out_width = 4;
-    static const int out_height = 4;
-    static const int k_unroll = 16;
+    static int out_width() {
+        return 4;
+    }
 
-    kern_type kernel = nullptr;
+    static int out_height() {
+        return 4;
+    }
+
+    static int k_unroll() {
+        return 16;
+    }
+
+    // Use the standard fixed size transforms.
+    StdTransformsFixed<operand_type, result_type, 4, 4, 16> transforms = {};
+
+    kern_type kernel = a64_gemm_u8_4x4;
 
     gemm_u8_4x4(const CPUInfo *ci) {
-        kernel = a64_gemm_u8_4x4;
     }
 };
 

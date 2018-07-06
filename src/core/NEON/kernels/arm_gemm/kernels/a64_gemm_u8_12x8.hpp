@@ -27,6 +27,8 @@
 
 #include "arm_gemm.hpp"
 
+#include "../std_transforms_fixed.hpp"
+
 namespace arm_gemm {
 
 // Load the actual kernel
@@ -51,9 +53,20 @@ public:
     static const bool B_transpose = true;
 
     /* Kernel blocking parameters */
-    static const int out_width = 12;
-    static const int out_height = 8;
-    static const int k_unroll = 4;
+    static int out_width() {
+        return 12;
+    }
+
+    static int out_height() {
+        return 8;
+    }
+
+    static int k_unroll() {
+        return 4;
+    }
+
+    // Use the standard fixed sized transforms.
+    StdTransformsFixed<operand_type, result_type, 8, 12, 4> transforms = {};
 
     kern_type kernel = a64_gemm_u8_12x8;
 

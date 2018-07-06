@@ -27,6 +27,8 @@
 
 #include "arm_gemm.hpp"
 
+#include "../std_transforms_fixed.hpp"
+
 namespace arm_gemm {
 
 // Actual kernel implementations
@@ -44,17 +46,21 @@ public:
 
     typedef void (*kern_type)(const __fp16 *, const __fp16 *, __fp16 *, int, int, int);
 
-    static const int A_block = 1;
-    static const int A_interleave = 8;
-    static const bool A_transpose = false;
+    /* Kernel blocking parameters */
+    static int out_width() {
+        return 24;
+    }
 
-    static const int B_block = 1;
-    static const int B_interleave = 24;
-    static const bool B_transpose = true;
+    static int out_height() {
+        return 8;
+    }
 
-    static const int out_width = 24;
-    static const int out_height = 8;
-    static const int k_unroll = 1;
+    static int k_unroll() {
+        return 1;
+    }
+
+    // Use the standard fixed size transforms.
+    StdTransformsFixed<operand_type, result_type, 8, 24> transforms = {};
 
     // Default to the generic kernel
     kern_type kernel = a64_hgemm_asimd_24x8;

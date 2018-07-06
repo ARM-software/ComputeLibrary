@@ -110,7 +110,7 @@ inline void TransposeInterleaveCommon<12, __fp16, float>::moveblock_1x4(const __
 
 template <>
 template <>
-inline void TransformImpl<12, 1, true, 4, 2>::Transform(
+inline void TransformImpl<12, 1, true, 4, 2, false>::Transform(
     float* out, const __fp16* const in, const int stride,
     const int x0, const int xmax, const int k0, const int kmax
 ) {

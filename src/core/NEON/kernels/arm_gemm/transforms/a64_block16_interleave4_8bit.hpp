@@ -32,7 +32,7 @@
 
 template<>
 template<typename T>
-void TransformImpl<4, 16, false, 1, 1>::Transform(T *out, const T *in, int ldin, int y0, int ymax, int k0, int kmax) {
+void TransformImpl<4, 16, false, 1, 1, false>::Transform(T *out, const T *in, int ldin, int y0, int ymax, int k0, int kmax) {
     uint8_t *outptr = (uint8_t *)out;
     const uint8_t *inptr = (uint8_t *)in;
 

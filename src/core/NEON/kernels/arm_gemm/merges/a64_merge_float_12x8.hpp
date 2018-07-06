@@ -26,7 +26,7 @@
 #ifdef __aarch64__
 
 template<>
-inline void MergeResults<12, 8>(float *out, const float *in, const int ldout, const int y0, const int ymax, const int x0, const int xmax, const float alpha, const float beta) {
+inline void MergeResults<12, 8, false>(float *out, const float *in, const int ldout, const int y0, const int ymax, const int x0, const int xmax, const float alpha, const float beta) {
     const float *inptr = in;
     prefetch_6x(inptr);
     prefetch_6x(inptr + 96);

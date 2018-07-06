@@ -39,10 +39,6 @@ UniqueGemmCommon<uint16_t, uint32_t> gemm<uint16_t, uint32_t>(const CPUInfo &ci,
     return UniqueGemmCommon<uint16_t, uint32_t>(new GemmInterleaved<gemm_u16_12x8, uint16_t, uint32_t>(&ci, M, N, K, nbatches, nmulti, trA, trB, alpha, beta, maxthreads, pretransposed_hint));
 }
 
-// Instantiate static class members
-const int gemm_u16_12x8::out_width;
-const int gemm_u16_12x8::out_height;
-
 } // namespace arm_gemm
 
 #endif // __aarch64__

@@ -34,11 +34,14 @@
  * Need to cope with the work requested in either dimension not actually
  * being a multiple of the block sizes.
  */
-template <unsigned IntBy, unsigned int BlockBy, bool Transposed, size_t TOutSize, size_t TInSize>
+template <unsigned int tIntBy, unsigned int BlockBy, bool Transposed, size_t TOutSize, size_t TInSize, bool sve>
 struct TransformImpl {
     template <typename TOut, typename TIn>
     static void Transform(TOut* out, const TIn* const in, const int stride,
                           const int y0, const int ymax, const int x0, const int xmax) {
+        // For SVE cases we multiply the interleave factor by the vector length.
+        const unsigned int IntBy = tIntBy * (sve ? get_vector_length<TOut>() : 1);
+
         const int n_whole_y_blocks = (ymax - y0) / IntBy;
         const int y_remainders = (ymax - y0) % IntBy;
         const int n_y_blocks = n_whole_y_blocks + (y_remainders ? 1 : 0);
@@ -95,17 +98,16 @@ struct TransformImpl {
 };
 
 /*****************************************************************************/
-template <unsigned int IntBy, unsigned int BlockBy, bool Transposed, typename TOut, typename TIn>
+template <unsigned int IntBy, unsigned int BlockBy, bool Transposed, bool sve=false, typename TOut, typename TIn>
 void Transform(
   TOut* out, const TIn* const in, const int stride,
   const int k0, const int kmax, const int x0, const int xmax
 ) {
   // Redirect to a specialised implementation predicated on argument size.
-  TransformImpl<IntBy, BlockBy, Transposed, sizeof(TOut), sizeof(TIn)>::Transform(
+  TransformImpl<IntBy, BlockBy, Transposed, sizeof(TOut), sizeof(TIn), sve>::Transform(
     out, in, stride, k0, kmax, x0, xmax
   );
 }
 /*****************************************************************************/
 
 #include "transforms/list.hpp"
-

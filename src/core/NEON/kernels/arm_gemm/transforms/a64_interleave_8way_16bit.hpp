@@ -31,7 +31,7 @@
 
 template<>
 template<typename T>
-void TransformImpl<8, 1, false, 2, 2>::Transform(T *out, const T *in, int ldin, int y0, int ymax, int k0, int kmax) {
+void TransformImpl<8, 1, false, 2, 2, false>::Transform(T *out, const T *in, int ldin, int y0, int ymax, int k0, int kmax) {
     uint16_t *outptr = (uint16_t *)out;
     const uint16_t *inptr = (const uint16_t *)in;
 

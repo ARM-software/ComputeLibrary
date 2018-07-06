@@ -67,12 +67,6 @@ UniqueGemmCommon<__fp16, __fp16> gemm(const CPUInfo &ci, const unsigned int M, c
 #endif
 }
 
-// Instantiate static class members if necessary.
-#if defined(__aarch64__) && (defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) || defined(FP16_KERNELS))
-const int hgemm_24x8::out_width;
-const int hgemm_24x8::out_height;
-#endif
-
 } // namespace arm_gemm
 
 #endif // __ARM_FP16_ARGS
