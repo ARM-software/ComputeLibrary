@@ -252,7 +252,11 @@ NodeID GraphBuilder::add_convolution_node(Graph &g, NodeParams params, NodeIdxPa
     {
         TensorDescriptor b_desc = input_tensor_desc;
         b_desc.shape            = TensorShape(depth);
-        b_nid                   = add_const_node_with_name(g, params, "Bias", b_desc, std::move(bias_accessor));
+        if(is_data_type_quantized_asymmetric(input_tensor_desc.data_type))
+        {
+            b_desc.data_type = DataType::S32;
+        }
+        b_nid = add_const_node_with_name(g, params, "Bias", b_desc, std::move(bias_accessor));
     }
 
     if(num_groups == 1)
@@ -305,7 +309,11 @@ NodeID GraphBuilder::add_deconvolution_node(Graph &g, NodeParams params, NodeIdx
     {
         TensorDescriptor b_desc = input_tensor_desc;
         b_desc.shape            = TensorShape(depth);
-        b_nid                   = add_const_node_with_name(g, params, "Bias", b_desc, std::move(bias_accessor));
+        if(is_data_type_quantized_asymmetric(input_tensor_desc.data_type))
+        {
+            b_desc.data_type = DataType::S32;
+        }
+        b_nid = add_const_node_with_name(g, params, "Bias", b_desc, std::move(bias_accessor));
     }
 
     // Create convolution node and connect
@@ -431,7 +439,11 @@ NodeID GraphBuilder::add_fully_connected_layer(Graph &g, NodeParams params, Node
     {
         TensorDescriptor b_desc = input_tensor_desc;
         b_desc.shape            = TensorShape(num_outputs);
-        b_nid                   = add_const_node_with_name(g, params, "Bias", b_desc, std::move(bias_accessor));
+        if(is_data_type_quantized_asymmetric(input_tensor_desc.data_type))
+        {
+            b_desc.data_type = DataType::S32;
+        }
+        b_nid = add_const_node_with_name(g, params, "Bias", b_desc, std::move(bias_accessor));
     }
 
     // Create convolution node and connect
