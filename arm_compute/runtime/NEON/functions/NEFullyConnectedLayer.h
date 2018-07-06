@@ -57,7 +57,7 @@ public:
      * @param[in]  is_batched_fc_layer True if it is a batched fully connected layer
      */
     void configure(const ITensor *input, ITensor *output, bool transpose_weights, bool is_batched_fc_layer);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLFullyConnectedLayerReshapeWeights
+    /** Static function to check if given info will lead to a valid configuration of @ref NEFullyConnectedLayerReshapeWeights
      *
      * @param[in] input               Weights tensor info. The weights must be 2 dimensional. Data types supported: F32.
      * @param[in] output              Destination tensor info. Data type supported: Same as @p input.

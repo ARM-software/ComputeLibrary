@@ -277,6 +277,12 @@ public:
         return _context;
     }
 
+    /** Gets the CL device for which the programs are created. */
+    cl::Device &get_device()
+    {
+        return _device;
+    }
+
     /** Sets the CL device for which the programs are created.
      *
      * @param[in] device A CL device.

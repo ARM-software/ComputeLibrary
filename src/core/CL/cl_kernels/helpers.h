@@ -30,6 +30,7 @@
 
 #if defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED)
 #pragma OPENCL EXTENSION cl_arm_integer_dot_product_int8 : enable
+#pragma OPENCL EXTENSION cl_arm_integer_dot_product_accumulate_int8 : enable
 #endif // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED)
 
 #if defined(ARM_COMPUTE_DEBUG_ENABLED)
