@@ -38,16 +38,15 @@ using namespace arm_compute;
 using namespace arm_compute::misc::shape_calculator;
 
 CLLSTMLayer::CLLSTMLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _fully_connected_input_gate(), _gemm_input_gate1(), _gemm_input_gate2(), _transpose_input_gate1(), _transpose_input_gate2(), _accum_input_gate1(),
-      _accum_input_gate2(), _subtract_input_gate(), _activation_input_gate(), _fully_connected_forget_gate(), _gemm_forget_gate1(), _gemm_forget_gate2(), _transpose_forget_gate1(),
-      _transpose_forget_gate2(), _accum_forget_gate1(), _accum_forget_gate2(), _activation_forget_gate(), _fully_connected_cell_state(), _gemm_cell_state1(), _gemm_cell_state2(), _transpose_cell_state1(),
-      _accum_cell_state1(), _accum_cell_state2(), _pixelwise_mul_cell_state1(), _activation_cell_state(), _cell_clip(), _pixelwise_mul_cell_state2(), _fully_connected_output(), _gemm_output1(),
-      _gemm_output2(), _transpose_output1(), _transpose_output2(), _accum_output1(), _accum_output2(), _activation_output(), _activation_output_state(), _pixelwise_mul_output_state(),
-      _fully_connected_output_state(), _gemm_output_state(), _accum_output_state(), _projection_clip(), _copy_cell_state(), _copy_output(), _concat_scratch_buffer(), _input_gate_out1(), _input_gate_out2(),
-      _input_gate_out3(), _input_gate_out4(), _input_gate_out5(), _input_gate_out6(), _forget_gate_out1(), _forget_gate_out2(), _forget_gate_out3(), _forget_gate_out4(), _forget_gate_out5(),
-      _forget_gate_out6(), _cell_state_out1(), _cell_state_out2(), _cell_state_out3(), _cell_state_out4(), _cell_state_out5(), _output1(), _output2(), _output3(), _output4(), _output5(), _output6(),
-      _cell_state_activation(), _output_projection1(), _ones(), _run_peephole_opt(false), _run_cifg_opt(false), _perform_cell_clipping(false), _has_projection_weights(false),
-      _perform_projection_clipping(false)
+    : _memory_group(std::move(memory_manager)), _fully_connected_input_gate(), _gemm_input_gate(), _transpose_input_gate(), _accum_input_gate1(), _accum_input_gate2(), _subtract_input_gate(),
+      _pixelwise_mul_input_gate(), _activation_input_gate(), _fully_connected_forget_gate(), _gemm_forget_gate(), _transpose_forget_gate(), _accum_forget_gate1(), _accum_forget_gate2(),
+      _pixelwise_mul_forget_gate(), _activation_forget_gate(), _fully_connected_cell_state(), _gemm_cell_state1(), _gemm_cell_state2(), _transpose_cell_state(), _accum_cell_state1(), _accum_cell_state2(),
+      _pixelwise_mul_cell_state1(), _activation_cell_state(), _cell_clip(), _pixelwise_mul_cell_state2(), _fully_connected_output(), _gemm_output(), _pixelwise_mul_output_state1(), _transpose_output(),
+      _accum_output1(), _accum_output2(), _activation_output(), _activation_output_state(), _pixelwise_mul_output_state2(), _fully_connected_output_state(), _gemm_output_state(), _accum_output_state(),
+      _projection_clip(), _copy_cell_state(), _copy_output(), _concat_scratch_buffer(), _input_gate_out1(), _input_gate_out2(), _input_gate_out3(), _input_gate_out4(), _input_gate_out5(),
+      _forget_gate_out1(), _forget_gate_out2(), _forget_gate_out3(), _forget_gate_out4(), _forget_gate_out5(), _cell_state_out1(), _cell_state_out2(), _cell_state_out3(), _cell_state_out4(),
+      _cell_state_out5(), _output1(), _output2(), _output3(), _output4(), _output5(), _cell_state_activation(), _output_projection1(), _ones(), _run_peephole_opt(false), _run_cifg_opt(false),
+      _perform_cell_clipping(false), _has_projection_weights(false), _perform_projection_clipping(false)
 {
 }
 
@@ -83,40 +82,34 @@ void CLLSTMLayer::configure(const ICLTensor *input, const ICLTensor *input_to_fo
     const TensorShape cell_state_shape = cell_state->info()->tensor_shape();
 
     TensorShape forget_gate1_shape = compute_transposed_shape(*recurrent_to_output_weights->info());
-    TensorShape forget_gate2_shape = compute_transposed_shape(*forget_gate_bias->info());
-    TensorShape forget_gate3_shape{ 1, output_state->info()->dimension(1) };
     _forget_gate_out1.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
     _forget_gate_out2.allocator()->init(TensorInfo(forget_gate1_shape, 1, input->info()->data_type()));
     _forget_gate_out3.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
-    _forget_gate_out6.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
+    _forget_gate_out5.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
 
     // Configure block that calculates the forget gate
-    // forget_gate = Activation(input * input_to_forget_weights + output_state * recurrent_to_forget_weights + cell_state * cell_to_forget_weights + forget_gate_bias)
+    // forget_gate = Activation(input * input_to_forget_weights + output_state * recurrent_to_forget_weights + PixelWiseMul(cell_state, cell_to_forget_weights) + forget_gate_bias)
     _memory_group.manage(&_forget_gate_out1);
     _fully_connected_forget_gate.configure(input, input_to_forget_weights, forget_gate_bias, &_forget_gate_out1, true, false);
     _memory_group.manage(&_forget_gate_out2);
-    _transpose_forget_gate1.configure(recurrent_to_forget_weights, &_forget_gate_out2);
+    _transpose_forget_gate.configure(recurrent_to_forget_weights, &_forget_gate_out2);
     _memory_group.manage(&_forget_gate_out3);
-    _gemm_forget_gate1.configure(output_state, &_forget_gate_out2, nullptr, &_forget_gate_out3, 1.f, 0.f);
+    _gemm_forget_gate.configure(output_state, &_forget_gate_out2, nullptr, &_forget_gate_out3, 1.f, 0.f);
     _forget_gate_out2.allocator()->allocate();
-    _memory_group.manage(&_forget_gate_out6);
-    _accum_forget_gate1.configure(&_forget_gate_out1, &_forget_gate_out3, &_forget_gate_out6, ConvertPolicy::SATURATE);
-    CLTensor *forget_gate_out = &_forget_gate_out6;
+    _memory_group.manage(&_forget_gate_out5);
+    _accum_forget_gate1.configure(&_forget_gate_out1, &_forget_gate_out3, &_forget_gate_out5, ConvertPolicy::SATURATE);
+    CLTensor *forget_gate_out = &_forget_gate_out5;
 
     if(lstm_params.has_peephole_opt())
     {
-        _forget_gate_out4.allocator()->init(TensorInfo(forget_gate2_shape, 1, input->info()->data_type()));
-        _forget_gate_out5.allocator()->init(TensorInfo(forget_gate3_shape, 1, input->info()->data_type()));
+        _forget_gate_out4.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
 
         _run_peephole_opt = true;
         _memory_group.manage(&_forget_gate_out4);
-        _transpose_forget_gate2.configure(lstm_params.cell_to_forget_weights(), &_forget_gate_out4);
-        _memory_group.manage(&_forget_gate_out5);
-        _gemm_forget_gate2.configure(cell_state, &_forget_gate_out4, nullptr, &_forget_gate_out5, 1.f, 0.f);
+        _pixelwise_mul_forget_gate.configure(cell_state, lstm_params.cell_to_forget_weights(), &_forget_gate_out4, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
+        _accum_forget_gate2.configure(&_forget_gate_out5, &_forget_gate_out4, &_forget_gate_out3, ConvertPolicy::SATURATE);
         _forget_gate_out4.allocator()->allocate();
-        _accum_forget_gate2.configure(&_forget_gate_out6, &_forget_gate_out5, &_forget_gate_out3, ConvertPolicy::SATURATE);
         _forget_gate_out5.allocator()->allocate();
-        _forget_gate_out6.allocator()->allocate();
         forget_gate_out = &_forget_gate_out3;
     }
     else
@@ -126,12 +119,10 @@ void CLLSTMLayer::configure(const ICLTensor *input, const ICLTensor *input_to_fo
     _activation_forget_gate.configure(forget_gate_out, &_forget_gate_out1, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
     forget_gate_out->allocator()->allocate();
 
-    TensorShape input_gate3_shape{ 1, output_state->info()->dimension(1) };
     _input_gate_out1.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
-    _input_gate_out5.allocator()->init(TensorInfo(input_gate3_shape, 1, input->info()->data_type()));
 
     // Configure block that calculates the input gate
-    // input_gate = Activation(input * input_to_input_weights + output_state * recurrent_to_input_weights + cell_state * cell_to_input_weights + input_gate_bias), without CIFG
+    // input_gate = Activation(input * input_to_input_weights + output_state * recurrent_to_input_weights + PixelWiseMul(cell_state, cell_to_input_weights) + input_gate_bias), without CIFG
     // input_gate = 1 - forget_gate, with CIFG
     if(lstm_params.has_cifg_opt())
     {
@@ -143,32 +134,28 @@ void CLLSTMLayer::configure(const ICLTensor *input, const ICLTensor *input_to_fo
     }
     else
     {
-        TensorShape input_gate1_shape = compute_transposed_shape(*recurrent_to_output_weights->info());
-        TensorShape input_gate2_shape = compute_transposed_shape(*lstm_params.cell_to_input_weights()->info());
+        TensorShape input_gate_shape = compute_transposed_shape(*recurrent_to_output_weights->info());
 
-        _input_gate_out2.allocator()->init(TensorInfo(input_gate1_shape, 1, input->info()->data_type()));
+        _input_gate_out2.allocator()->init(TensorInfo(input_gate_shape, 1, input->info()->data_type()));
         _input_gate_out3.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
-        _input_gate_out4.allocator()->init(TensorInfo(input_gate2_shape, 1, input->info()->data_type()));
-        _input_gate_out6.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
+        _input_gate_out4.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
+        _input_gate_out5.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
 
         _memory_group.manage(&_input_gate_out1);
         _fully_connected_input_gate.configure(input, lstm_params.input_to_input_weights(), lstm_params.input_gate_bias(), &_input_gate_out1, true, false);
         _memory_group.manage(&_input_gate_out2);
-        _transpose_input_gate1.configure(lstm_params.recurrent_to_input_weights(), &_input_gate_out2);
+        _transpose_input_gate.configure(lstm_params.recurrent_to_input_weights(), &_input_gate_out2);
         _memory_group.manage(&_input_gate_out3);
-        _gemm_input_gate1.configure(output_state, &_input_gate_out2, nullptr, &_input_gate_out3, 1.f, 0.f);
+        _gemm_input_gate.configure(output_state, &_input_gate_out2, nullptr, &_input_gate_out3, 1.f, 0.f);
         _input_gate_out2.allocator()->allocate();
         _memory_group.manage(&_input_gate_out4);
-        _transpose_input_gate2.configure(lstm_params.cell_to_input_weights(), &_input_gate_out4);
+        _pixelwise_mul_input_gate.configure(cell_state, lstm_params.cell_to_input_weights(), &_input_gate_out4, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
         _memory_group.manage(&_input_gate_out5);
-        _gemm_input_gate2.configure(cell_state, &_input_gate_out4, nullptr, &_input_gate_out5, 1.f, 0.f);
-        _input_gate_out4.allocator()->allocate();
-        _memory_group.manage(&_input_gate_out6);
-        _accum_input_gate1.configure(&_input_gate_out1, &_input_gate_out3, &_input_gate_out6, ConvertPolicy::SATURATE);
+        _accum_input_gate1.configure(&_input_gate_out1, &_input_gate_out3, &_input_gate_out5, ConvertPolicy::SATURATE);
         _input_gate_out3.allocator()->allocate();
-        _accum_input_gate2.configure(&_input_gate_out6, &_input_gate_out5, &_input_gate_out1, ConvertPolicy::SATURATE);
+        _accum_input_gate2.configure(&_input_gate_out5, &_input_gate_out4, &_input_gate_out1, ConvertPolicy::SATURATE);
+        _input_gate_out4.allocator()->allocate();
         _input_gate_out5.allocator()->allocate();
-        _input_gate_out6.allocator()->allocate();
         _activation_input_gate.configure(&_input_gate_out1, nullptr, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LOGISTIC));
     }
 
@@ -180,11 +167,11 @@ void CLLSTMLayer::configure(const ICLTensor *input, const ICLTensor *input_to_fo
     _cell_state_out5.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
 
     // Configure block that calculates the cell state
-    // cell_state = Clip((RixelwiseMul(input_gate, Activation(input * input_to_cell_weights + output_state * recurrent_to_cell_weights + cell_bias)) + PixelwiseMul(forget_gate, cell_state)), cell_threshold)
+    // cell_state = Clip((PixelwiseMul(input_gate, Activation(input * input_to_cell_weights + output_state * recurrent_to_cell_weights + cell_bias)) + PixelwiseMul(forget_gate, cell_state)), cell_threshold)
     _memory_group.manage(&_cell_state_out1);
     _fully_connected_cell_state.configure(input, input_to_cell_weights, cell_bias, &_cell_state_out1, true, false);
     _memory_group.manage(&_cell_state_out2);
-    _transpose_cell_state1.configure(recurrent_to_cell_weights, &_cell_state_out2);
+    _transpose_cell_state.configure(recurrent_to_cell_weights, &_cell_state_out2);
     _memory_group.manage(&_cell_state_out3);
     _gemm_cell_state1.configure(output_state, &_cell_state_out2, nullptr, &_cell_state_out3, 1.f, 0.f);
     _cell_state_out2.allocator()->allocate();
@@ -209,42 +196,36 @@ void CLLSTMLayer::configure(const ICLTensor *input, const ICLTensor *input_to_fo
     }
 
     TensorShape output1_shape = compute_transposed_shape(*recurrent_to_output_weights->info());
-    TensorShape output2_shape = compute_transposed_shape(*cell_bias->info());
-    TensorShape output3_shape{ 1, output_state->info()->dimension(1) };
     _output1.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
     _output2.allocator()->init(TensorInfo(output1_shape, 1, input->info()->data_type()));
     _output3.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
-    _output6.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
+    _output5.allocator()->init(TensorInfo(cell_state_shape, 1, input->info()->data_type()));
 
     // Configure block that calculates the output
-    // output_gate = Activation(input * input_to_output_weights + output_state * recurrent_to_output_weights + cell_state * cell_to_output_weights + output_gate_bias)
+    // output_state = Activation(input * input_to_output_weights + output_state * recurrent_to_output_weights + PixelWiseMul(cell_state, cell_to_output_weights) + output_gate_bias)
     _memory_group.manage(&_output1);
     _fully_connected_output.configure(input, input_to_output_weights, output_gate_bias, &_output1, true, false);
     _memory_group.manage(&_output2);
-    _transpose_output1.configure(recurrent_to_output_weights, &_output2);
+    _transpose_output.configure(recurrent_to_output_weights, &_output2);
     _memory_group.manage(&_output3);
-    _gemm_output1.configure(output_state, &_output2, nullptr, &_output3, 1.f, 0.f);
+    _gemm_output.configure(output_state, &_output2, nullptr, &_output3, 1.f, 0.f);
     _output2.allocator()->allocate();
-    _memory_group.manage(&_output6);
-    _accum_output1.configure(&_output1, &_output3, &_output6, ConvertPolicy::SATURATE);
+    _memory_group.manage(&_output5);
+    _accum_output1.configure(&_output1, &_output3, &_output5, ConvertPolicy::SATURATE);
     _output3.allocator()->allocate();
-    CLTensor *output_gate_out = &_output6;
+    CLTensor *output_gate_out = &_output5;
     if(lstm_params.has_peephole_opt())
     {
-        _output4.allocator()->init(TensorInfo(output2_shape, 1, input->info()->data_type()));
-        _output5.allocator()->init(TensorInfo(output3_shape, 1, input->info()->data_type()));
+        _output4.allocator()->init(TensorInfo(_cell_state_out1.info()->tensor_shape(), 1, input->info()->data_type()));
 
         _memory_group.manage(&_output4);
-        _transpose_output2.configure(lstm_params.cell_to_output_weights(), &_output4);
-        _memory_group.manage(&_output5);
-        _gemm_output2.configure(&_cell_state_out1, &_output4, nullptr, &_output5, 1.f, 0.f);
-        _accum_output2.configure(&_output6, &_output5, &_output1, ConvertPolicy::SATURATE);
-        _output6.allocator()->allocate();
+        _pixelwise_mul_output_state1.configure(&_cell_state_out1, lstm_params.cell_to_output_weights(), &_output4, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
+        _accum_output2.configure(&_output5, &_output4, &_output1, ConvertPolicy::SATURATE);
+        _output5.allocator()->allocate();
         output_gate_out = &_output1;
 
         // Allocate intermediate buffers
         _output4.allocator()->allocate();
-        _output5.allocator()->allocate();
     }
     else
     {
@@ -266,7 +247,7 @@ void CLLSTMLayer::configure(const ICLTensor *input, const ICLTensor *input_to_fo
      */
     _memory_group.manage(&_cell_state_activation);
     _activation_output_state.configure(&_cell_state_out1, &_cell_state_activation, activation_info);
-    _pixelwise_mul_output_state.configure(&_cell_state_activation, output, output_state, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
+    _pixelwise_mul_output_state2.configure(&_cell_state_activation, output, output_state, 1, ConvertPolicy::SATURATE, RoundingPolicy::TO_NEAREST_EVEN);
     _cell_state_activation.allocator()->allocate();
 
     if(lstm_params.has_projection())
@@ -427,14 +408,13 @@ void CLLSTMLayer::run()
     _memory_group.acquire();
 
     _fully_connected_forget_gate.run();
-    CLScheduler::get().enqueue(_transpose_forget_gate1);
-    _gemm_forget_gate1.run();
+    CLScheduler::get().enqueue(_transpose_forget_gate);
+    _gemm_forget_gate.run();
     CLScheduler::get().enqueue(_accum_forget_gate1);
 
     if(_run_peephole_opt)
     {
-        CLScheduler::get().enqueue(_transpose_forget_gate2);
-        _gemm_forget_gate2.run();
+        CLScheduler::get().enqueue(_pixelwise_mul_forget_gate);
         _accum_forget_gate2.run();
     }
     CLScheduler::get().enqueue(_activation_forget_gate);
@@ -442,24 +422,30 @@ void CLLSTMLayer::run()
     if(_run_cifg_opt)
     {
         _ones.map(true);
-        std::fill_n(_ones.buffer(), _ones.info()->total_size(), 1);
+        if(_ones.info()->data_type() == DataType::F16)
+        {
+            std::fill_n(reinterpret_cast<half *>(_ones.buffer()), _ones.info()->total_size() / _ones.info()->element_size(), 1);
+        }
+        else
+        {
+            std::fill_n(reinterpret_cast<float *>(_ones.buffer()), _ones.info()->total_size() / _ones.info()->element_size(), 1);
+        }
         _ones.unmap();
         CLScheduler::get().enqueue(_subtract_input_gate);
     }
     else
     {
         _fully_connected_input_gate.run();
-        CLScheduler::get().enqueue(_transpose_input_gate1);
-        _gemm_input_gate1.run();
-        CLScheduler::get().enqueue(_transpose_input_gate2);
-        _gemm_input_gate2.run();
+        CLScheduler::get().enqueue(_transpose_input_gate);
+        _gemm_input_gate.run();
+        CLScheduler::get().enqueue(_pixelwise_mul_input_gate);
         CLScheduler::get().enqueue(_accum_input_gate1);
         _accum_input_gate2.run();
         CLScheduler::get().enqueue(_activation_input_gate);
     }
 
     _fully_connected_cell_state.run();
-    CLScheduler::get().enqueue(_transpose_cell_state1);
+    CLScheduler::get().enqueue(_transpose_cell_state);
     _gemm_cell_state1.run();
     CLScheduler::get().enqueue(_accum_cell_state1);
     CLScheduler::get().enqueue(_activation_cell_state);
@@ -473,21 +459,19 @@ void CLLSTMLayer::run()
     }
 
     _fully_connected_output.run();
-    CLScheduler::get().enqueue(_transpose_output1);
-    _gemm_output1.run();
+    CLScheduler::get().enqueue(_transpose_output);
+    _gemm_output.run();
     CLScheduler::get().enqueue(_accum_output1);
-    CLScheduler::get().enqueue(_pixelwise_mul_output_state);
 
     if(_run_peephole_opt)
     {
-        CLScheduler::get().enqueue(_transpose_output2);
-        _gemm_output2.run();
+        CLScheduler::get().enqueue(_pixelwise_mul_output_state1);
         _accum_output2.run();
     }
     CLScheduler::get().enqueue(_activation_output);
 
     CLScheduler::get().enqueue(_activation_output_state);
-    CLScheduler::get().enqueue(_pixelwise_mul_output_state);
+    CLScheduler::get().enqueue(_pixelwise_mul_output_state2);
 
     if(_has_projection_weights)
     {
