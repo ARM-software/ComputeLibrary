@@ -293,6 +293,25 @@ Here are a couple of examples of how to use the iterators to fill / read tensors
 
 @snippet examples/neon_copy_objects.cpp Copy objects example
 
+@subsection S4_6_5_sub_tensors Sub-tensors
+
+Sub-tensors are aliases to existing Tensors, as a result creating a sub-tensor does not result in any underlying memory allocation.
+
+Sub-tensors can be used to access a sub-set of the parent tensor, something that can be useful in case different operations need to be performed on different parts of a tensor.
+
+Moreover, sub-tensors can be used to perform zero copy tensor concatenation.
+
+The API for creating a sub-tensor is the following:
+@code{.cpp}
+SubTensor(ITensor *parent, const TensorShape &tensor_shape, const Coordinates &coords)
+@endcode
+
+Where \a parent is the parent tensor which we want to create an alias for, \a tensor_shape is the shape of the sub-tensor and \a coords are the starting indexing coordinates of the sub-tensor within the parent tensor.
+
+@note Two sub-tensor concrete classes for different targets are currently supported : @ref CLSubTensor and @ref SubTensor
+
+@warning Limitation of the sub-tensor is that it cannot be extracted spatially, meaning sub-tensors should have the same width and height as the parent tensor. The main reasons for this is the fact that individual kernels might need to operate with a step size that is not a multiple of the sub-tensor spatial dimension. This could lead to elements being overwritten by different kernels operating on different sub-tensors of the same underlying tensor.
+
 @section S4_7_memory_manager MemoryManager
 
 @ref IMemoryManager is a memory managing interface that can be used to reduce the memory requirements of a given pipeline by recycling temporary buffers.
