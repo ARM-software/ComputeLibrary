@@ -1083,7 +1083,7 @@ __kernel void depthwise_convolution_3x3_nhwc(
     z_coord = z * CONV_STRIDE_Y - (int)CONV_PAD_TOP;
     z_coord = min((uint)z_coord, (uint)SRC_DIM_2);
     offset  = y_offset + (int4)(z_coord * src_stride_z);
-    offset  = min(offset, max_offset);
+    offset  = min(offset, (int4)max_offset);
 
     VEC_FLOAT values0 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s0));
     VEC_FLOAT values1 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s1));
@@ -1102,7 +1102,7 @@ __kernel void depthwise_convolution_3x3_nhwc(
     // After z = 1 we can simply add src_stride_z to offset without updating z_coord
     // However offset can be out-of-bound so we need to check if it is greater than max_offset
     offset += (int4)src_stride_z;
-    offset            = min(offset, max_offset);
+    offset            = min(offset, (int4)max_offset);
     VEC_FLOAT values6 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s0));
     VEC_FLOAT values7 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s1));
     VEC_FLOAT values8 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s2));
@@ -1190,7 +1190,7 @@ __kernel void depthwise_convolution_3x3_nhwc_stride1(
 
     int  z_coord  = 0;
     int4 offset   = 0;
-    int4 y_offset = ((int4)(y * NUM_ROWS_PROCESSED) + (int4)(0, 1, 2, 3) - CONV_PAD_LEFT) * (int4)src_stride_y;
+    int4 y_offset = ((int4)(y * NUM_ROWS_PROCESSED) + (int4)(0, 1, 2, 3) - (int)CONV_PAD_LEFT) * (int4)src_stride_y;
 
     // We compute 2x2x2 [C,W,H] elements
     VEC_FLOAT acc0 = 0;
@@ -1214,10 +1214,10 @@ __kernel void depthwise_convolution_3x3_nhwc_stride1(
     // Clamp z_coord as for z = 0, it can be negative
     // z_coord is casted to unsigned int in order to use just a min() operation
     // A "-1" 32 bit signed variable converted to unsigned gives 4294967295
-    z_coord = z * NUM_PLANES_PROCESSED - (int)CONV_PAD_TOP;
+    z_coord = z * (int)NUM_PLANES_PROCESSED - (int)CONV_PAD_TOP;
     z_coord = min((uint)z_coord, (uint)SRC_DIM_2);
     offset  = y_offset + (int4)(z_coord * src_stride_z);
-    offset  = min(offset, max_offset);
+    offset  = min(offset, (int4)max_offset);
 
     VEC_FLOAT values0 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s0));
     VEC_FLOAT values1 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s1));
@@ -1227,7 +1227,7 @@ __kernel void depthwise_convolution_3x3_nhwc_stride1(
     // z == 1
     // z_coord can be only negative for z = 0 so we do not need to clamp it
     // Moreover z_coord cannot be out-of-bound for z = 1 so we do not need to clamp the offset
-    z_coord           = z * NUM_PLANES_PROCESSED - (int)CONV_PAD_TOP + 1;
+    z_coord           = z * (int)NUM_PLANES_PROCESSED - (int)CONV_PAD_TOP + 1;
     offset            = y_offset + (int4)(z_coord * src_stride_z);
     VEC_FLOAT values4 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s0));
     VEC_FLOAT values5 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s1));
@@ -1238,7 +1238,7 @@ __kernel void depthwise_convolution_3x3_nhwc_stride1(
     // After z = 1 we can simply add src_stride_z to offset without updating z_coord
     // However offset can be out-of-bound so we need to check if it is greater than max_offset
     offset += (int4)src_stride_z;
-    offset             = min(offset, max_offset);
+    offset             = min(offset, (int4)max_offset);
     VEC_FLOAT values8  = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s0));
     VEC_FLOAT values9  = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s1));
     VEC_FLOAT values10 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s2));
@@ -1247,8 +1247,8 @@ __kernel void depthwise_convolution_3x3_nhwc_stride1(
     // z == 3
     // After z = 1 we can simply add src_stride_z to offset without updating z_coord
     // However offset can be out-of-bound so we need to check if it is greater than max_offset
-    offset += (int4)(src_stride_z);
-    offset             = min(offset, max_offset);
+    offset += (int4)src_stride_z;
+    offset             = min(offset, (int4)max_offset);
     VEC_FLOAT values12 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s0));
     VEC_FLOAT values13 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s1));
     VEC_FLOAT values14 = VLOAD(VEC_SIZE)(0, (__global float *)(src_addr + offset.s2));
