@@ -69,6 +69,7 @@ if env['os'] in ['android', 'bare_metal'] or env['standalone']:
     arm_compute_lib = arm_compute_graph_a
 else:
     Import("arm_compute_graph_so")
+    Import("arm_compute_core_a")
     test_env.Append(LIBS = ["arm_compute_graph", "arm_compute", "arm_compute_core"])
     arm_compute_lib = arm_compute_graph_so
 
@@ -84,10 +85,6 @@ common_files = Glob('*.cpp')
 common_objects = [test_env.StaticObject(f) for f in common_files]
 
 files_benchmark = Glob('benchmark/*.cpp')
-files_validation_framework = [test_env.Object(f) for f in Glob('validation/*.cpp')]
-
-# Always compile reference for validation
-files_validation_framework += [ test_env.Object(f) for f in Glob('validation/reference/*.cpp')]
 
 # Add unit tests
 files_validation = Glob('validation/UNIT/*/*.cpp')
@@ -138,7 +135,12 @@ if test_env['benchmark_tests']:
     Export('arm_compute_benchmark')
 
 if test_env['validation_tests']:
-    arm_compute_validation = test_env.Program('arm_compute_validation', files_validation_framework + files_validation + common_objects)
+    arm_compute_validation_framework = env.StaticLibrary('arm_compute_validation_framework', Glob('validation/reference/*.cpp') + Glob('validation/*.cpp'), LIBS= [ arm_compute_test_framework])
+    Depends(arm_compute_validation_framework , arm_compute_test_framework)
+    Depends(arm_compute_validation_framework , arm_compute_core_a)
+
+    arm_compute_validation = test_env.Program('arm_compute_validation', files_validation + common_objects, LIBS=test_env['LIBS']+[arm_compute_validation_framework])
+    Depends(arm_compute_validation, arm_compute_validation_framework)
     Depends(arm_compute_validation, arm_compute_test_framework)
     Depends(arm_compute_validation, arm_compute_lib)
 
@@ -147,12 +149,12 @@ if test_env['validation_tests']:
 
     #FIXME: Remove before release!
     if test_env['validate_examples']:
-        files_validate_examples = [ test_env.Object('validate_examples/RunExample.cpp') ] + files_validation_framework + [ x for x in common_objects if not "main.o" in str(x)]
+        files_validate_examples = [ test_env.Object('validate_examples/RunExample.cpp') ] + [ x for x in common_objects if not "main.o" in str(x)]
         arm_compute_validate_examples = []
         if test_env['neon']:
             for file in Glob("validate_examples/neon_*.cpp"):
                 example = "validate_" + os.path.basename(os.path.splitext(str(file))[0])
-                arm_compute_validate_examples += [ test_env.Program(example, [ test_env.Object(source=file, target=example) ] + files_validate_examples) ]
+                arm_compute_validate_examples += [ test_env.Program(example, [ test_env.Object(source=file, target=example) ] + files_validate_examples, LIBS = [ arm_compute_validation_framework]) ]
         if test_env['opencl']:
             cl_examples = []
             files = Glob("validate_examples/cl_*.cpp")
@@ -160,19 +162,20 @@ if test_env['validation_tests']:
                 files += Glob("validate_examples/neoncl_*.cpp")
             for file in files:
                 example = "validate_" + os.path.basename(os.path.splitext(str(file))[0])
-                cl_examples += [ test_env.Program(example, [ test_env.Object(source=file, target=example) ] + files_validate_examples, LIBS = test_env["LIBS"]) ]
+                cl_examples += [ test_env.Program(example, [ test_env.Object(source=file, target=example) ] + files_validate_examples, LIBS = test_env["LIBS"] + [ arm_compute_validation_framework ]) ]
             arm_compute_validate_examples += cl_examples
             if test_env['opencl'] and test_env['neon']:
                 graph_utils = test_env.Object(source="../utils/GraphUtils.cpp", target="GraphUtils")
                 for file in Glob("validate_examples/graph_*.cpp"):
                     example = "validate_" + os.path.basename(os.path.splitext(str(file))[0])
                     if env['os'] in ['android', 'bare_metal'] or env['standalone']:
-                        prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils]+ files_validate_examples, LIBS = test_env["LIBS"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--whole-archive',arm_compute_lib,'-Wl,--no-whole-archive'])
+                        prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils]+ files_validate_examples, LIBS = test_env["LIBS"] + [ arm_compute_validation_framework ], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--whole-archive',arm_compute_lib,'-Wl,--no-whole-archive'])
                         arm_compute_validate_examples += [ prog ]
                     else:
                         #-Wl,--allow-shlib-undefined: Ignore dependencies of dependencies
-                        prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils]+ files_validate_examples, LIBS = test_env["LIBS"] + ["arm_compute_graph"], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--allow-shlib-undefined'] )
+                        prog = test_env.Program(example, [ test_env.Object(source=file, target=example), graph_utils]+ files_validate_examples, LIBS = test_env["LIBS"] + ["arm_compute_graph", arm_compute_validation_framework], LINKFLAGS=test_env["LINKFLAGS"]+['-Wl,--allow-shlib-undefined'] )
                         arm_compute_validate_examples += [ prog ]
+        Depends(arm_compute_validate_examples, arm_compute_validation_framework)
         Depends(arm_compute_validate_examples, arm_compute_test_framework)
         Depends(arm_compute_validate_examples, arm_compute_lib)
         Default(arm_compute_validate_examples)
