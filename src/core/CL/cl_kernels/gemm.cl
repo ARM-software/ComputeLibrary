@@ -188,7 +188,7 @@ __kernel void gemm_interleave4x4(TENSOR3D_DECLARATION(src),
  * @param[in]  src0_stride_z                      Stride of the source matrix in Z dimension (in bytes)
  * @param[in]  src1_stride_z                      Stride of the source matrix in Z dimension (in bytes)
  * @param[in]  dst_stride_z                       Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  pad_bottom                         Bottom paddings in unit of elements (only if defined REINTERPRET_OUTPUT_AS_3D)
+ * @param[in]  cross_plane_pad                    Bottom paddings in unit of elements (only if defined REINTERPRET_OUTPUT_AS_3D)
  */
 __kernel void gemm_mm_interleaved_transposed_f32(IMAGE_DECLARATION(src0),
                                                  IMAGE_DECLARATION(src1),
@@ -198,7 +198,7 @@ __kernel void gemm_mm_interleaved_transposed_f32(IMAGE_DECLARATION(src0),
                                                  uint dst_stride_z
 #if defined(REINTERPRET_OUTPUT_AS_3D)
                                                  ,
-                                                 uint pad_bottom
+                                                 uint cross_plane_pad
 #endif // REINTERPRET_OUTPUT_AS_3D
                                                 )
 {
@@ -286,26 +286,26 @@ __kernel void gemm_mm_interleaved_transposed_f32(IMAGE_DECLARATION(src0),
 
 #if defined(REINTERPRET_OUTPUT_AS_3D)
     // Since we store a 2D output tile in a 3D tensor, we need to check when the plane changes across the z dimension
-    // in order to take into account the presence of possible bottom paddings
+    // in order to take into account the presence of possible cross plane paddings
     //
-    //  |             |
-    //  |    plane0   |
-    //  |             |
-    //  |_____________|
-    //  |*************|
-    //  |  pad_bottom |
-    //  |*************|
-    //  |             |
-    //  |    plane1   |
-    //  |             |
-    //  |_____________|
+    //  |                  |
+    //  |      plane0      |
+    //  |                  |
+    //  |__________________|
+    //  |******************|
+    //  |  cross_plane_pad |
+    //  |******************|
+    //  |                  |
+    //  |      plane1      |
+    //  |                  |
+    //  |__________________|
 
     // The plane (zout) is calculated dividing M (get_global_id(1) * 4) by HEIGHT_GEMM3D
     uint4 zout = ((uint4)(0, 1, 2, 3) + (uint4)(get_global_id(1) * 4)) / (uint4)HEIGHT_GEMM3D;
     zout       = min(DEPTH_GEMM3D - 1, zout);
 
-    // Add offset due to the bottom paddings
-    zout *= (pad_bottom * dst_stride_y);
+    // Add offset due to the cross plane paddings
+    zout *= (cross_plane_pad * dst_stride_y);
 
     // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
     // multiply dst_stride_z by DEPTH_GEMM3D
@@ -366,7 +366,7 @@ __kernel void gemm_mm_interleaved_transposed_f32(IMAGE_DECLARATION(src0),
  * @param[in]  src0_stride_z                      Stride of the source matrix in Z dimension (in bytes)
  * @param[in]  src1_stride_z                      Stride of the source matrix in Z dimension (in bytes)
  * @param[in]  dst_stride_z                       Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  pad_bottom                         Bottom paddings in unit of elements (only if defined REINTERPRET_OUTPUT_AS_3D)
+ * @param[in]  cross_plane_pad                    Bottom paddings in unit of elements (only if defined REINTERPRET_OUTPUT_AS_3D)
  */
 __kernel void gemm_mm_interleaved_transposed_f32_bifrost(IMAGE_DECLARATION(src0),
                                                          IMAGE_DECLARATION(src1),
@@ -376,7 +376,7 @@ __kernel void gemm_mm_interleaved_transposed_f32_bifrost(IMAGE_DECLARATION(src0)
                                                          uint dst_stride_z
 #if defined(REINTERPRET_OUTPUT_AS_3D)
                                                          ,
-                                                         uint pad_bottom
+                                                         uint cross_plane_pad
 #endif // REINTERPRET_OUTPUT_AS_3D
                                                         )
 {
@@ -596,26 +596,26 @@ __kernel void gemm_mm_interleaved_transposed_f32_bifrost(IMAGE_DECLARATION(src0)
 
 #if defined(REINTERPRET_OUTPUT_AS_3D)
     // Since we store a 2D output tile in a 3D tensor, we need to check when the plane changes across the z dimension
-    // in order to take into account the presence of possible bottom paddings
+    // in order to take into account the presence of possible cross plane paddings
     //
-    //  |             |
-    //  |    plane0   |
-    //  |             |
-    //  |_____________|
-    //  |*************|
-    //  |  pad_bottom |
-    //  |*************|
-    //  |             |
-    //  |    plane1   |
-    //  |             |
-    //  |_____________|
+    //  |                  |
+    //  |      plane0      |
+    //  |                  |
+    //  |__________________|
+    //  |******************|
+    //  |  cross_plane_pad |
+    //  |******************|
+    //  |                  |
+    //  |      plane1      |
+    //  |                  |
+    //  |__________________|
 
     // The plane (zout) is calculated dividing M (get_global_id(1) * 4) by HEIGHT_GEMM3D
     uint4 zout = ((uint4)(0, 1, 2, 3) + (uint4)(get_global_id(1) * 4)) / (uint4)HEIGHT_GEMM3D;
     zout       = min(DEPTH_GEMM3D - 1, zout);
 
-    // Add offset due to the bottom paddings
-    zout *= (pad_bottom * dst_stride_y);
+    // Add offset due to the cross plane paddings
+    zout *= (cross_plane_pad * dst_stride_y);
 
     // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
     // multiply dst_stride_z by DEPTH_GEMM3D
@@ -679,7 +679,7 @@ __kernel void gemm_mm_interleaved_transposed_f32_bifrost(IMAGE_DECLARATION(src0)
  * @param[in]  src0_stride_z                      Stride of the source matrix in Z dimension (in bytes)
  * @param[in]  src1_stride_z                      Stride of the source matrix in Z dimension (in bytes)
  * @param[in]  dst_stride_z                       Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  pad_bottom                         Bottom paddings in unit of elements (only if defined REINTERPRET_OUTPUT_AS_3D)
+ * @param[in]  cross_plane_pad                    Bottom paddings in unit of elements (only if defined REINTERPRET_OUTPUT_AS_3D)
  */
 __kernel void gemm_mm_interleaved_transposed_f16(IMAGE_DECLARATION(src0),
                                                  IMAGE_DECLARATION(src1),
@@ -689,7 +689,7 @@ __kernel void gemm_mm_interleaved_transposed_f16(IMAGE_DECLARATION(src0),
                                                  uint dst_stride_z
 #if defined(REINTERPRET_OUTPUT_AS_3D)
                                                  ,
-                                                 uint pad_bottom
+                                                 uint cross_plane_pad
 #endif // REINTERPRET_OUTPUT_AS_3D
                                                 )
 {
@@ -777,26 +777,26 @@ __kernel void gemm_mm_interleaved_transposed_f16(IMAGE_DECLARATION(src0),
 
 #if defined(REINTERPRET_OUTPUT_AS_3D)
     // Since we store a 2D output tile in a 3D tensor, we need to check when the plane changes across the z dimension
-    // in order to take into account the presence of possible bottom paddings
+    // in order to take into account the presence of possible cross plane paddings
     //
-    //  |             |
-    //  |    plane0   |
-    //  |             |
-    //  |_____________|
-    //  |*************|
-    //  |  pad_bottom |
-    //  |*************|
-    //  |             |
-    //  |    plane1   |
-    //  |             |
-    //  |_____________|
+    //  |                  |
+    //  |      plane0      |
+    //  |                  |
+    //  |__________________|
+    //  |******************|
+    //  |  cross_plane_pad |
+    //  |******************|
+    //  |                  |
+    //  |      plane1      |
+    //  |                  |
+    //  |__________________|
 
     // The plane (zout) is calculated dividing M (get_global_id(1) * 4) by HEIGHT_GEMM3D
     uint4 zout = ((uint4)(0, 1, 2, 3) + (uint4)(get_global_id(1) * 4)) / (uint4)HEIGHT_GEMM3D;
     zout       = min(DEPTH_GEMM3D - 1, zout);
 
-    // Add offset due to the bottom paddings
-    zout *= (pad_bottom * dst_stride_y);
+    // Add offset due to the cross plane paddings
+    zout *= (cross_plane_pad * dst_stride_y);
 
     // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
     // multiply dst_stride_z by DEPTH_GEMM3D
@@ -853,7 +853,7 @@ __kernel void gemm_mm_interleaved_transposed_f16(IMAGE_DECLARATION(src0),
  * @param[in]  dst_stride_y                       Stride of the destination matrix in Y dimension (in bytes)
  * @param[in]  dst_step_y                         dst_stride_y * number of elements along Y processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes  The offset of the first element in the destination matrix
- * @param[in]  pad_bottom                         Bottom paddings in unit of elements (only if defined REINTERPRET_OUTPUT_AS_3D)
+ * @param[in]  cross_plane_pad                    Bottom paddings in unit of elements (only if defined REINTERPRET_OUTPUT_AS_3D)
  */
 __kernel void gemm_mm_interleaved_transposed_f16_bifrost(IMAGE_DECLARATION(src0),
                                                          IMAGE_DECLARATION(src1),
@@ -863,7 +863,7 @@ __kernel void gemm_mm_interleaved_transposed_f16_bifrost(IMAGE_DECLARATION(src0)
                                                          uint dst_stride_z
 #if defined(REINTERPRET_OUTPUT_AS_3D)
                                                          ,
-                                                         uint pad_bottom
+                                                         uint cross_plane_pad
 #endif // REINTERPRET_OUTPUT_AS_3D
                                                         )
 {
@@ -1033,26 +1033,26 @@ __kernel void gemm_mm_interleaved_transposed_f16_bifrost(IMAGE_DECLARATION(src0)
 
 #if defined(REINTERPRET_OUTPUT_AS_3D)
     // Since we store a 2D output tile in a 3D tensor, we need to check when the plane changes across the z dimension
-    // in order to take into account the presence of possible bottom paddings
+    // in order to take into account the presence of possible cross plane paddings
     //
-    //  |             |
-    //  |    plane0   |
-    //  |             |
-    //  |_____________|
-    //  |*************|
-    //  |  pad_bottom |
-    //  |*************|
-    //  |             |
-    //  |    plane1   |
-    //  |             |
-    //  |_____________|
+    //  |                  |
+    //  |      plane0      |
+    //  |                  |
+    //  |__________________|
+    //  |******************|
+    //  |  cross_plane_pad |
+    //  |******************|
+    //  |                  |
+    //  |      plane1      |
+    //  |                  |
+    //  |__________________|
 
     // The plane (zout) is calculated dividing M (get_global_id(1) * 4) by HEIGHT_GEMM3D
     uint4 zout = ((uint4)(0, 1, 2, 3) + (uint4)(get_global_id(1) * 4)) / (uint4)HEIGHT_GEMM3D;
     zout       = min(DEPTH_GEMM3D - 1, zout);
 
-    // Add offset due to the bottom paddings
-    zout *= (pad_bottom * dst_stride_y);
+    // Add offset due to the cross plane paddings
+    zout *= (cross_plane_pad * dst_stride_y);
 
     // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
     // multiply dst_stride_z by DEPTH_GEMM3D
@@ -1122,7 +1122,7 @@ __kernel void gemm_mm_interleaved_transposed_f16_bifrost(IMAGE_DECLARATION(src0)
  * @param[in]  src0_stride_z                      Stride of the source matrix in Z dimension (in bytes)
  * @param[in]  src1_stride_z                      Stride of the source matrix in Z dimension (in bytes)
  * @param[in]  dst_stride_z                       Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  pad_bottom                         Bottom paddings in unit of elements (only if defined REINTERPRET_OUTPUT_AS_3D)
+ * @param[in]  cross_plane_pad                    Bottom paddings in unit of elements (only if defined REINTERPRET_OUTPUT_AS_3D)
  */
 __kernel void gemm_mm_floating_point(IMAGE_DECLARATION(src0),
                                      IMAGE_DECLARATION(src1),
@@ -1132,7 +1132,7 @@ __kernel void gemm_mm_floating_point(IMAGE_DECLARATION(src0),
                                      uint dst_stride_z
 #if defined(REINTERPRET_OUTPUT_AS_3D)
                                      ,
-                                     uint pad_bottom
+                                     uint cross_plane_pad
 #endif // REINTERPRET_OUTPUT_AS_3D
                                     )
 {
@@ -1261,26 +1261,26 @@ __kernel void gemm_mm_floating_point(IMAGE_DECLARATION(src0),
 
 #if defined(REINTERPRET_OUTPUT_AS_3D)
     // Since we store a 2D output tile in a 3D tensor, we need to check when the plane changes across the z dimension
-    // in order to take into account the presence of possible bottom paddings
+    // in order to take into account the presence of possible cross plane paddings
     //
-    //  |             |
-    //  |    plane0   |
-    //  |             |
-    //  |_____________|
-    //  |*************|
-    //  |  pad_bottom |
-    //  |*************|
-    //  |             |
-    //  |    plane1   |
-    //  |             |
-    //  |_____________|
+    //  |                  |
+    //  |      plane0      |
+    //  |                  |
+    //  |__________________|
+    //  |******************|
+    //  |  cross_plane_pad |
+    //  |******************|
+    //  |                  |
+    //  |      plane1      |
+    //  |                  |
+    //  |__________________|
 
     // The plane (zout) is calculated dividing M (get_global_id(1) * NUM_ELEMS_PROCESSED_PER_THREAD_Y) by HEIGHT_GEMM3D
     uint4 zout = ((uint4)(0, 1, 2, 3) + (uint4)(get_global_id(1) * NUM_ELEMS_PROCESSED_PER_THREAD_Y)) / (uint4)HEIGHT_GEMM3D;
     zout       = min(DEPTH_GEMM3D - 1, zout);
 
-    // Add offset due to the bottom paddings
-    zout *= (pad_bottom * dst_stride_y);
+    // Add offset due to the cross plane paddings
+    zout *= (cross_plane_pad * dst_stride_y);
 
     // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
     // multiply dst_stride_z by DEPTH_GEMM3D
@@ -1362,7 +1362,7 @@ __kernel void gemm_mm_floating_point(IMAGE_DECLARATION(src0),
  * @param[in]  src0_stride_z                      Stride of the source matrix in Z dimension (in bytes)
  * @param[in]  src1_stride_z                      Stride of the source matrix in Z dimension (in bytes)
  * @param[in]  dst_stride_z                       Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  pad_bottom                         Bottom paddings in unit of elements (only if defined REINTERPRET_OUTPUT_AS_3D)
+ * @param[in]  cross_plane_pad                    Bottom paddings in unit of elements (only if defined REINTERPRET_OUTPUT_AS_3D)
  */
 __kernel void gemm_mm_floating_point_f32_bifrost(IMAGE_DECLARATION(src0),
                                                  IMAGE_DECLARATION(src1),
@@ -1372,7 +1372,7 @@ __kernel void gemm_mm_floating_point_f32_bifrost(IMAGE_DECLARATION(src0),
                                                  uint dst_stride_z
 #if defined(REINTERPRET_OUTPUT_AS_3D)
                                                  ,
-                                                 uint pad_bottom
+                                                 uint cross_plane_pad
 #endif // REINTERPRET_OUTPUT_AS_3D
                                                 )
 {
@@ -1657,26 +1657,26 @@ __kernel void gemm_mm_floating_point_f32_bifrost(IMAGE_DECLARATION(src0),
 
 #if defined(REINTERPRET_OUTPUT_AS_3D)
     // Since we store a 2D output tile in a 3D tensor, we need to check when the plane changes across the z dimension
-    // in order to take into account the presence of possible bottom paddings
+    // in order to take into account the presence of possible cross plane paddings
     //
-    //  |             |
-    //  |    plane0   |
-    //  |             |
-    //  |_____________|
-    //  |*************|
-    //  |  pad_bottom |
-    //  |*************|
-    //  |             |
-    //  |    plane1   |
-    //  |             |
-    //  |_____________|
+    //  |                  |
+    //  |      plane0      |
+    //  |                  |
+    //  |__________________|
+    //  |******************|
+    //  |  cross_plane_pad |
+    //  |******************|
+    //  |                  |
+    //  |      plane1      |
+    //  |                  |
+    //  |__________________|
 
     // The plane (zout) is calculated dividing M (get_global_id(1) * NUM_ELEMS_PROCESSED_PER_THREAD_Y) by HEIGHT_GEMM3D
     uint4 zout = ((uint4)(0, 1, 2, 3) + (uint4)(get_global_id(1) * NUM_ELEMS_PROCESSED_PER_THREAD_Y)) / (uint4)HEIGHT_GEMM3D;
     zout       = min(DEPTH_GEMM3D - 1, zout);
 
-    // Add offset due to the bottom paddings
-    zout *= (pad_bottom * dst_stride_y);
+    // Add offset due to the cross plane paddings
+    zout *= (cross_plane_pad * dst_stride_y);
 
     // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
     // multiply dst_stride_z by DEPTH_GEMM3D
@@ -1750,7 +1750,7 @@ __kernel void gemm_mm_floating_point_f32_bifrost(IMAGE_DECLARATION(src0),
  * @param[in]  src0_stride_z                      Stride of the source matrix in Z dimension (in bytes)
  * @param[in]  src1_stride_z                      Stride of the source matrix in Z dimension (in bytes)
  * @param[in]  dst_stride_z                       Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  pad_bottom                         Bottom paddings in unit of elements (only if defined REINTERPRET_OUTPUT_AS_3D)
+ * @param[in]  cross_plane_pad                    Bottom paddings in unit of elements (only if defined REINTERPRET_OUTPUT_AS_3D)
  */
 __kernel void gemm_mm_floating_point_f32_bifrost_1000(IMAGE_DECLARATION(src0),
                                                       IMAGE_DECLARATION(src1),
@@ -1760,7 +1760,7 @@ __kernel void gemm_mm_floating_point_f32_bifrost_1000(IMAGE_DECLARATION(src0),
                                                       uint dst_stride_z
 #if defined(REINTERPRET_OUTPUT_AS_3D)
                                                       ,
-                                                      uint pad_bottom
+                                                      uint cross_plane_pad
 #endif // REINTERPRET_OUTPUT_AS_3D
                                                      )
 {
@@ -1975,26 +1975,26 @@ __kernel void gemm_mm_floating_point_f32_bifrost_1000(IMAGE_DECLARATION(src0),
 
 #if defined(REINTERPRET_OUTPUT_AS_3D)
     // Since we store a 2D output tile in a 3D tensor, we need to check when the plane changes across the z dimension
-    // in order to take into account the presence of possible bottom paddings
+    // in order to take into account the presence of possible cross plane paddings
     //
-    //  |             |
-    //  |    plane0   |
-    //  |             |
-    //  |_____________|
-    //  |*************|
-    //  |  pad_bottom |
-    //  |*************|
-    //  |             |
-    //  |    plane1   |
-    //  |             |
-    //  |_____________|
+    //  |                  |
+    //  |      plane0      |
+    //  |                  |
+    //  |__________________|
+    //  |******************|
+    //  |  cross_plane_pad |
+    //  |******************|
+    //  |                  |
+    //  |      plane1      |
+    //  |                  |
+    //  |__________________|
 
     // The plane (zout) is calculated dividing M (get_global_id(1) * NUM_ELEMS_PROCESSED_PER_THREAD_Y) by HEIGHT_GEMM3D
     uint4 zout = ((uint4)(0, 1, 2, 3) + (uint4)(get_global_id(1) * NUM_ELEMS_PROCESSED_PER_THREAD_Y)) / (uint4)HEIGHT_GEMM3D;
     zout       = min(DEPTH_GEMM3D - 1, zout);
 
-    // Add offset due to the bottom paddings
-    zout *= (pad_bottom * dst_stride_y);
+    // Add offset due to the cross plane paddings
+    zout *= (cross_plane_pad * dst_stride_y);
 
     // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
     // multiply dst_stride_z by DEPTH_GEMM3D
@@ -2068,7 +2068,7 @@ __kernel void gemm_mm_floating_point_f32_bifrost_1000(IMAGE_DECLARATION(src0),
  * @param[in]  src0_stride_z                      Stride of the source matrix in Z dimension (in bytes)
  * @param[in]  src1_stride_z                      Stride of the source matrix in Z dimension (in bytes)
  * @param[in]  dst_stride_z                       Stride of the destination tensor in Z dimension (in bytes)
- * @param[in]  pad_bottom                         Bottom paddings in unit of elements (only if defined REINTERPRET_OUTPUT_AS_3D)
+ * @param[in]  cross_plane_pad                    Bottom paddings in unit of elements (only if defined REINTERPRET_OUTPUT_AS_3D)
  */
 __kernel void gemm_mm_floating_point_f16_bifrost(IMAGE_DECLARATION(src0),
                                                  IMAGE_DECLARATION(src1),
@@ -2078,7 +2078,7 @@ __kernel void gemm_mm_floating_point_f16_bifrost(IMAGE_DECLARATION(src0),
                                                  uint dst_stride_z
 #if defined(REINTERPRET_OUTPUT_AS_3D)
                                                  ,
-                                                 uint pad_bottom
+                                                 uint cross_plane_pad
 #endif // REINTERPRET_OUTPUT_AS_3D
                                                 )
 {
@@ -2241,26 +2241,26 @@ __kernel void gemm_mm_floating_point_f16_bifrost(IMAGE_DECLARATION(src0),
 
 #if defined(REINTERPRET_OUTPUT_AS_3D)
     // Since we store a 2D output tile in a 3D tensor, we need to check when the plane changes across the z dimension
-    // in order to take into account the presence of possible bottom paddings
+    // in order to take into account the presence of possible cross plane paddings
     //
-    //  |             |
-    //  |    plane0   |
-    //  |             |
-    //  |_____________|
-    //  |*************|
-    //  |  pad_bottom |
-    //  |*************|
-    //  |             |
-    //  |    plane1   |
-    //  |             |
-    //  |_____________|
+    //  |                  |
+    //  |      plane0      |
+    //  |                  |
+    //  |__________________|
+    //  |******************|
+    //  |  cross_plane_pad |
+    //  |******************|
+    //  |                  |
+    //  |      plane1      |
+    //  |                  |
+    //  |__________________|
 
     // The plane (zout) is calculated dividing M (get_global_id(1) * NUM_ELEMS_PROCESSED_PER_THREAD_Y) by HEIGHT_GEMM3D
     uint4 zout = ((uint4)(0, 1, 2, 3) + (uint4)(get_global_id(1) * NUM_ELEMS_PROCESSED_PER_THREAD_Y)) / (uint4)HEIGHT_GEMM3D;
     zout       = min(DEPTH_GEMM3D - 1, zout);
 
-    // Add offset due to the bottom paddings
-    zout *= (pad_bottom * dst_stride_y);
+    // Add offset due to the cross plane paddings
+    zout *= (cross_plane_pad * dst_stride_y);
 
     // Add offset for batched GEMM. The batches will be in the fourth dimension and for this reason we
     // multiply dst_stride_z by DEPTH_GEMM3D
