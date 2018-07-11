@@ -195,14 +195,16 @@ if not GetOption("help"):
 
 if env['standalone']:
     env.Append(CXXFLAGS = ['-fPIC'])
-    env.Append(LINKFLAGS = ['-static-libgcc','-static-libstdc++'])
+    if 'clang++' not in cpp_compiler:
+        env.Append(LINKFLAGS = ['-static-libgcc','-static-libstdc++'])
 
 if env['Werror']:
     env.Append(CXXFLAGS = ['-Werror'])
 
 if env['os'] == 'android':
     env.Append(CPPDEFINES = ['ANDROID'])
-    env.Append(LINKFLAGS = ['-pie', '-static-libstdc++'])
+    if 'clang++' not in cpp_compiler:
+        env.Append(LINKFLAGS = ['-pie', '-static-libstdc++'])
 elif env['os'] == 'bare_metal':
     env.Append(LINKFLAGS = ['-static'])
     env.Append(LINKFLAGS = ['-specs=rdimon.specs'])
