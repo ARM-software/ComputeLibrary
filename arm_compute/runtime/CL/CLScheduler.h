@@ -94,15 +94,6 @@ public:
         return CLKernelLibrary::get().context();
     }
 
-    /** Accessor to set the CL context to be used by the scheduler.
-     *
-     * @param[in] context A CL context.
-     */
-    void set_context(cl::Context context)
-    {
-        CLKernelLibrary::get().set_context(context);
-    }
-
     /** Accessor for the associated CL command queue.
      *
      * @return A CL command queue.
@@ -122,6 +113,15 @@ public:
         return _target;
     }
 
+    /** Accessor to set the CL context to be used by the scheduler.
+     *
+     * @param[in] context A CL context.
+     */
+    void set_context(cl::Context context)
+    {
+        CLKernelLibrary::get().set_context(context);
+    }
+
     /** Accessor to set the CL command queue to be used by the scheduler.
      *
      * @param[in] queue A CL command queue.
@@ -138,6 +138,15 @@ public:
     void set_target(GPUTarget target)
     {
         _target = target;
+    }
+
+    /** Accessor to set the CL tuner to be used by the scheduler.
+     *
+     * @param[in] tuner A CL tuner
+     */
+    void set_tuner(ICLTuner *tuner)
+    {
+        _cl_tuner = tuner;
     }
 
     /** Blocks until all commands in the associated command queue have finished. */
@@ -179,10 +188,11 @@ private:
     /** Flag to ensure symbols initialisation is happening before Scheduler creation */
     static std::once_flag _initialize_symbols;
 
-    cl::CommandQueue _queue;
-    GPUTarget        _target;
-    bool             _is_initialised;
-    ICLTuner        *_cl_tuner;
+    cl::CommandQueue          _queue;
+    GPUTarget                 _target;
+    bool                      _is_initialised;
+    ICLTuner                 *_cl_tuner;
+    std::unique_ptr<ICLTuner> _cl_default_static_tuner;
 };
 }
 #endif /* __ARM_COMPUTE_CLSCHEDULER_H__ */

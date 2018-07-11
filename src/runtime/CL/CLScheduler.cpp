@@ -25,6 +25,7 @@
 
 #include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/runtime/CL/CLTuner.h"
+#include "arm_compute/runtime/CL/tuners/Tuners.h"
 
 using namespace arm_compute;
 
@@ -41,7 +42,7 @@ void printf_callback(const char *buffer, unsigned int len, size_t complete, void
 std::once_flag CLScheduler::_initialize_symbols;
 
 CLScheduler::CLScheduler()
-    : _queue(), _target(GPUTarget::MIDGARD), _is_initialised(false), _cl_tuner()
+    : _queue(), _target(GPUTarget::MIDGARD), _is_initialised(false), _cl_tuner(nullptr), _cl_default_static_tuner(nullptr)
 {
 }
 
@@ -83,11 +84,13 @@ void CLScheduler::default_init(ICLTuner *cl_tuner)
         cl::CommandQueue queue = cl::CommandQueue(ctx, cl::Device::getDefault(), queue_properties);
         CLKernelLibrary::get().init("./cl_kernels/", ctx, cl::Device::getDefault());
         init(ctx, queue, cl::Device::getDefault(), cl_tuner);
+
+        // Create a default static tuner and set if none was provided
+        _cl_default_static_tuner = tuners::TunerFactory::create_tuner(_target);
     }
-    else
-    {
-        _cl_tuner = cl_tuner;
-    }
+
+    // Set CL tuner
+    _cl_tuner = (cl_tuner == nullptr) ? _cl_default_static_tuner.get() : cl_tuner;
 }
 
 void CLScheduler::enqueue(ICLKernel &kernel, bool flush)
