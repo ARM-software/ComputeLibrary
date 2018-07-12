@@ -580,7 +580,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, fram
                        combine(combine(combine(datasets::SmallWinogradConvolutionLayer3x3Dataset(),
                                                framework::dataset::make("DataType", { DataType::F32 })),
                                                framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
-                                               framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);
@@ -590,7 +590,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture, fram
                        combine(combine(combine(datasets::LargeWinogradConvolutionLayer3x3Dataset(),
                                                framework::dataset::make("DataType", { DataType::F32 })),
                                                framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
-                                               framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);
@@ -602,7 +602,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, fram
                        combine(combine(combine(datasets::SmallWinogradConvolutionLayer3x1Dataset(),
                                        framework::dataset::make("DataType", { DataType::F32 })),
                                        framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
-                                       framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);
@@ -612,7 +612,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture, fram
                        combine(combine(combine(datasets::LargeWinogradConvolutionLayer3x1Dataset(),
                                        framework::dataset::make("DataType", { DataType::F32 })),
                                        framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
-                                       framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);
@@ -624,7 +624,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, fram
                        combine(combine(combine(datasets::SmallWinogradConvolutionLayer1x3Dataset(),
                                        framework::dataset::make("DataType", { DataType::F32 })),
                                        framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
-                                       framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);
@@ -634,7 +634,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture, fram
                        combine(combine(combine(datasets::LargeWinogradConvolutionLayer1x3Dataset(),
                                        framework::dataset::make("DataType", { DataType::F32 })),
                                        framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
-                                       framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_convolution_layer_f32);
@@ -646,7 +646,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, fram
                        combine(combine(combine(datasets::SmallWinogradConvolutionLayer5x5Dataset(),
                                                framework::dataset::make("DataType", { DataType::F32 })),
                                                framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
-                                               framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 
 {
     // Validate output
@@ -657,7 +657,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture, fram
                        combine(combine(combine(datasets::LargeWinogradConvolutionLayer5x5Dataset(),
                                                framework::dataset::make("DataType", { DataType::F32 })),
                                                framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
-                                               framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 
 {
     // Validate output
@@ -670,7 +670,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, fram
                        combine(combine(combine(datasets::SmallWinogradConvolutionLayer5x1Dataset(),
                                                framework::dataset::make("DataType", { DataType::F32 })),
                                                framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
-                                               framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 
 {
     // Validate output
@@ -681,7 +681,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture, fram
                        combine(combine(combine(datasets::LargeWinogradConvolutionLayer5x1Dataset(),
                                                framework::dataset::make("DataType", { DataType::F32 })),
                                                framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
-                                               framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 
 {
     // Validate output
@@ -694,7 +694,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWinogradConvolutionLayerFastMathFixture, fram
                        combine(combine(combine(datasets::SmallWinogradConvolutionLayer1x5Dataset(),
                                                framework::dataset::make("DataType", { DataType::F32 })),
                                                framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
-                                               framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 
 {
     // Validate output
@@ -705,7 +705,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLWinogradConvolutionLayerFastMathFixture, fram
                        combine(combine(combine(datasets::LargeWinogradConvolutionLayer1x5Dataset(),
                                                framework::dataset::make("DataType", { DataType::F32 })),
                                                framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })),
-                                               framework::dataset::make("DataLayout", { DataLayout::NCHW })))
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 
 {
     // Validate output

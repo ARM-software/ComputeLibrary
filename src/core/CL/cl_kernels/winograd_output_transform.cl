@@ -507,7 +507,7 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
     // Add bias
     Vector bias = CONVERT_TO_VECTOR_STRUCT_NO_STEP(bias);
 
-    float b = (float) * ((__global float *)(vector_offset(&bias, z_out)));
+    float b = (float) * ((__global float *)(vector_offset(&bias, x_out)));
 
     out00 += (float)b;
     out01 += (float)b;
@@ -856,7 +856,7 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     // Add bias
     Vector bias = CONVERT_TO_VECTOR_STRUCT_NO_STEP(bias);
 
-    float b = (float) * ((__global float *)(vector_offset(&bias, z_out)));
+    float b = (float) * ((__global float *)(vector_offset(&bias, x_out)));
 
     out00 += (float)b;
     out01 += (float)b;
@@ -981,7 +981,7 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     // Add bias
     Vector bias = CONVERT_TO_VECTOR_STRUCT_NO_STEP(bias);
 
-    float b = (float) * ((__global float *)(vector_offset(&bias, z_out)));
+    float b = (float) * ((__global float *)(vector_offset(&bias, x_out)));
 
     out_col0 += (float4)b;
     out_col1 += (float4)b;

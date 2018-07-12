@@ -501,25 +501,30 @@ protected:
         TensorShape output_shape = compute_winograd_output_transform_shape(TensorInfo(input_shape, 1, data_type), winograd_info);
 
         // Create tensors
-        TensorType src = create_tensor<TensorType>(input_shape, data_type);
-        TensorType dst = create_tensor<TensorType>(output_shape, data_type, 1, QuantizationInfo(), winograd_info.output_data_layout);
+        TensorType src  = create_tensor<TensorType>(input_shape, data_type);
+        TensorType bias = create_tensor<TensorType>(output_shape[get_data_layout_dimension_index(winograd_info.output_data_layout, DataLayoutDimension::CHANNEL)], data_type);
+        TensorType dst  = create_tensor<TensorType>(output_shape, data_type, 1, QuantizationInfo(), winograd_info.output_data_layout);
 
         // Create and configure function
         FunctionType output_transform;
-        output_transform.configure(&src, nullptr, &dst, winograd_info);
+        output_transform.configure(&src, &bias, &dst, winograd_info);
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Allocate tensors
         src.allocator()->allocate();
+        bias.allocator()->allocate();
         dst.allocator()->allocate();
 
         ARM_COMPUTE_EXPECT(!src.info()->is_resizable(), framework::LogLevel::ERRORS);
+        ARM_COMPUTE_EXPECT(!bias.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(!dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
         // Fill tensors
         fill(AccessorType(src), 0, -1.f, 1.f);
+        fill(AccessorType(bias), 1, -1.f, 1.f);
 
         output_transform.run();
 
@@ -537,7 +542,7 @@ protected:
 
         // Fill reference
         fill(src, 0, -1.f, 1.f);
-        fill(bias, 1, 0.0f, 0.0f); // Fill with zeros as we validate just the output transform without bias contribution
+        fill(bias, 1, -1.f, 1.f);
 
         return reference::winograd_output_transform<T>(src, bias, output_shape, winograd_info);
     }
