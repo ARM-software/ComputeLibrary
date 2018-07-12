@@ -48,7 +48,10 @@ public:
      * @param[in] argc Argument count.
      * @param[in] argv Argument values.
      */
-    virtual void do_setup(int argc, char **argv) {};
+    virtual bool do_setup(int argc, char **argv)
+    {
+        return true;
+    };
     /** Run the example. */
     virtual void do_run() {};
     /** Run reference implementation and validate against the target output

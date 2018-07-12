@@ -59,8 +59,9 @@ constexpr float                     tolerance_num_f16 = 0.02f;  /**< F16 Toleran
 class CLGEMMValidateExample : public ValidateExample
 {
 public:
-    void do_setup(int argc, char **argv) override
+    bool do_setup(int argc, char **argv) override
     {
+        //TODO(antbar01): Update to use command line interface ?
         CLScheduler::get().default_init();
         if(argc == 2)
         {
@@ -215,6 +216,8 @@ public:
         fill(CLAccessor(src0), 0);
         fill(CLAccessor(src1), 1);
         fill(CLAccessor(src2), 2);
+
+        return true;
     }
 
     void print_parameters(framework::Printer &printer) override

@@ -68,21 +68,30 @@ public:
     void do_setup() override
     {
         ARM_COMPUTE_ERROR_ON_NULLPTR(g_example.get());
-        g_example->do_setup(g_example_argv.size(), &g_example_argv[0]);
+        _is_setup = g_example->do_setup(g_example_argv.size(), &g_example_argv[0]);
     }
     void do_run() override
     {
-        g_example->do_run();
+        if(_is_setup)
+        {
+            g_example->do_run();
+        }
     }
     void do_teardown() override
     {
-        if(validate)
+        if(_is_setup)
         {
-            g_example->do_validate();
+            if(validate)
+            {
+                g_example->do_validate();
+            }
+            g_example->do_teardown();
         }
-        g_example->do_teardown();
         g_example = nullptr;
     }
+
+private:
+    bool _is_setup{ false };
 };
 
 int run_example(int argc, char **argv, std::unique_ptr<ValidateExample> example)
