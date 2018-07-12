@@ -44,7 +44,7 @@ inline bool is_interleaved_transposed(int m, int n, int k, DataType data_type, b
 {
     bool flag = true;
 
-    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72))
+    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G76))
     {
         // COMPMID-852
         if(k > 256 && m > 4 && is_data_type_float(data_type) && reshape_b_only_on_first_run)

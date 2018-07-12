@@ -114,7 +114,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     unsigned int num_elems_written_per_iteration_x = 0;
     unsigned int num_elems_written_per_iteration_y = 0;
 
-    if(gpu_target_is_in(target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX) && (kernel_size <= 5) && (conv_stride_x == 1)
+    if(gpu_target_is_in(target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::G76) && (kernel_size <= 5) && (conv_stride_x == 1)
        && (conv_stride_y == 1) && (data_type == DataType::F32))
     {
         // Configure kernel window
@@ -289,7 +289,7 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     CLBuildOptions build_options;
     build_options.add_option_if(_biases != nullptr, std::string("-DHAS_BIAS"));
 
-    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX) && (kernel_size <= 5) && (_conv_stride_x == 1)
+    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::G76) && (kernel_size <= 5) && (_conv_stride_x == 1)
        && (_conv_stride_y == 1) && (data_type == DataType::F32))
     {
         build_options.add_option(std::string("-DWEIGHTS_DEPTH=" + support::cpp11::to_string(_weights->info()->dimension(2))));

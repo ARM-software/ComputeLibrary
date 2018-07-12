@@ -132,7 +132,7 @@ void tune_col2im_kernel(CLCol2ImKernel &k)
 
     // Configure the local work size for Bifrost with a value obtained
     // via exhaustive autotuning over 30 representative tensor shapes.
-    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX))
+    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::G76))
     {
         if((k._convolved_dims.first == 7) || (k._convolved_dims.first == 14))
         {
@@ -153,7 +153,7 @@ void tune_im2col_kernel(CLIm2ColKernel &k)
     const GPUTarget gpu_target = k.get_target();
 
     // Local work size optimized for the 11x11 AlexNet convolution on Bifrost.
-    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX) && k._kernel_dims.width == 11)
+    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::G76) && k._kernel_dims.width == 11)
     {
         const bool is_square_kernel = (k._kernel_dims.width == k._kernel_dims.height);
         if(!is_square_kernel && k._kernel_dims.width > 1 && !k._conv_info.has_padding())
@@ -171,7 +171,7 @@ void tune_depthwise_im2col_kernel(CLDepthwiseIm2ColKernel &k)
 
     // Configure the local work size for Bifrost with a value obtained
     // via exhaustive autotuning for the MobileNets tensor shapes.
-    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX))
+    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::G76))
     {
         lws_hint = cl::NDRange(1, 2, 1);
     }
@@ -186,7 +186,7 @@ void tune_gemv_kernel(CLGEMMMatrixVectorMultiplyKernel &k)
 
     // Configure the local work size for Bifrost with a value obtained
     // via exhaustive autotuning for the MobileNets tensor shapes.
-    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX))
+    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::G76))
     {
         lws_hint = cl::NDRange(1, 1, 1);
     }
@@ -207,7 +207,7 @@ void tune_gemm_kernel(CLGEMMMatrixMultiplyKernel &k)
         case GPUTarget::G51:
         case GPUTarget::G51BIG:
         case GPUTarget::G51LIT:
-        case GPUTarget::TNOX:
+        case GPUTarget::G76:
             if(k._input1->info()->dimension(1) == 24)
             {
                 // LWS optimized for the 11x11 AlexNet convolution on Bifrost.
@@ -240,7 +240,7 @@ void tune_pooling_kernel(CLPoolingLayerKernel &k)
     // invalid (e.g. exceeds the maximum workgroup size that the kernel can be launched with).
     if(k._input->info()->data_layout() == DataLayout::NCHW)
     {
-        if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX))
+        if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::G76))
         {
             cl::NDRange gws = ICLKernel::gws_from_window(k.window());
             lws_hint        = cl::NDRange(gws[0], gws[1], 1);

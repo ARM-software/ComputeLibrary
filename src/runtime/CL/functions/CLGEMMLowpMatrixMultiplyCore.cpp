@@ -41,7 +41,7 @@ inline bool is_interleaved_transposed(int m, int n, int k, bool reshape_b_only_o
 {
     bool flag = true;
 
-    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX))
+    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::G76))
     {
         // COMPMID-852
         if(k > 256 && m > 4 && reshape_b_only_on_first_run)

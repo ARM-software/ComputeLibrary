@@ -219,7 +219,7 @@ CLIm2ColKernel::configure_window(const ICLTensor *input, ICLTensor *output, cons
                     }
                     // Vector size optimized for the 11x11 AlexNet convolution on Bifrost.
                     const GPUTarget gpu_target = get_target();
-                    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::TNOX) && kernel_dims.width == 11)
+                    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::G76) && kernel_dims.width == 11)
                     {
                         vector_size = 8;
                     }
