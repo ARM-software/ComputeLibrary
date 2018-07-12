@@ -36,6 +36,7 @@
 
 #ifdef ARM_COMPUTE_CL
 #include "arm_compute/runtime/CL/CLScheduler.h"
+#include "arm_compute/runtime/CL/CLTuner.h"
 #endif /* ARM_COMPUTE_CL */
 #ifdef ARM_COMPUTE_GC
 #include "arm_compute/runtime/GLES_COMPUTE/GCScheduler.h"
@@ -63,7 +64,8 @@ std::unique_ptr<AssetsLibrary> library;
 int main(int argc, char **argv)
 {
 #ifdef ARM_COMPUTE_CL
-    CLScheduler::get().default_init();
+    CLTuner cl_tuner(false);
+    CLScheduler::get().default_init(&cl_tuner);
 #endif /* ARM_COMPUTE_CL */
 
 #ifdef ARM_COMPUTE_GC
@@ -101,6 +103,10 @@ int main(int argc, char **argv)
     error_on_missing_assets->set_help("Mark a test as failed instead of skipping it when assets are missing");
     auto assets = parser.add_positional_option<utils::SimpleOption<std::string>>("assets");
     assets->set_help("Path to the assets directory");
+#ifdef ARM_COMPUTE_CL
+    auto enable_tuner = parser.add_option<utils::ToggleOption>("enable-tuner");
+    enable_tuner->set_help("Enable OpenCL dynamic tuner");
+#endif /* ARM_COMPUTE_CL */
 
     try
     {
@@ -115,7 +121,12 @@ int main(int argc, char **argv)
         std::vector<std::unique_ptr<framework::Printer>> printers = options.create_printers();
 
         Scheduler::get().set_num_threads(options.threads->value());
-
+#ifdef ARM_COMPUTE_CL
+        if(enable_tuner->is_set())
+        {
+            cl_tuner.set_tune_new_kernels(enable_tuner->value());
+        }
+#endif /* ARM_COMPUTE_CL */
         if(options.log_level->value() > framework::LogLevel::NONE)
         {
             for(auto &p : printers)

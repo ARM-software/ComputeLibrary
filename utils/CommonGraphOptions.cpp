@@ -153,7 +153,7 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
     target->set_help("Target to execute on");
     data_type->set_help("Data type to use");
     data_layout->set_help("Data layout to use");
-    enable_tuner->set_help("Enable tuner");
+    enable_tuner->set_help("Enable OpenCL dynamic tuner");
     fast_math_hint->set_help("Enable fast math");
     data_path->set_help("Path where graph parameters reside");
     image->set_help("Input image for the graph");
