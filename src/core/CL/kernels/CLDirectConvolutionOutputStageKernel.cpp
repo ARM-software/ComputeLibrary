@@ -90,44 +90,29 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     bool         window_changed                    = false;
     unsigned int num_elems_processed_per_iteration = 16 / element_size_from_data_type(input->data_type());
 
-    // Update processed elements when input is S32 (comes from quantization input)
-    if(input->data_type() == DataType::S32)
+    // Configure kernel window
+    Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
+
+    // Input window
+    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
+    window_changed = window_changed || update_window_and_padding(win, input_access);
+
+    // Bias window
+    if(bias != nullptr)
     {
-        num_elems_processed_per_iteration = 16;
+        AccessWindowStatic bias_access(bias, 0, 0, ceil_to_multiple(bias->dimension(0), num_elems_processed_per_iteration), bias->dimension(1));
+        window_changed = window_changed || update_window_and_padding(win, bias_access);
     }
 
-    // Configure kernel window
-    Window                 win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
-    AccessWindowHorizontal input_access(input, 0, num_elems_processed_per_iteration);
-
+    // Output window
     if(output != nullptr && (output->total_size() != 0))
     {
         AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
-
-        if(bias == nullptr)
-        {
-            window_changed = update_window_and_padding(win, input_access, output_access);
-        }
-        else
-        {
-            AccessWindowStatic bias_access(bias, 0, 0, bias->dimension(0), bias->dimension(1));
-            window_changed = update_window_and_padding(win, input_access, output_access, bias_access);
-        }
-
+        window_changed = window_changed || update_window_and_padding(win, output_access);
         output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
     }
     else
     {
-        if(bias == nullptr)
-        {
-            window_changed = update_window_and_padding(win, input_access);
-        }
-        else
-        {
-            AccessWindowStatic bias_access(bias, 0, 0, bias->dimension(0), bias->dimension(1));
-            window_changed = update_window_and_padding(win, input_access, bias_access);
-        }
-
         input_access.set_valid_region(win, ValidRegion(Coordinates(), input->tensor_shape()));
     }
 
@@ -165,10 +150,13 @@ void CLDirectConvolutionLayerOutputStageKernel::configure(ICLTensor *input, cons
     _result_shift                 = result_shift;
     _result_offset_after_shift    = result_offset_after_shift;
 
+    const unsigned int num_elems_accessed_per_iteration = 16 / element_size_from_data_type(input->info()->data_type());
+
     // Create kernel
     CLBuildOptions build_opts;
     build_opts.add_option_if(bias != nullptr, "-DHAS_BIAS");
     build_opts.add_option("-D" + string_from_data_layout(input->info()->data_layout()));
+    build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_accessed_per_iteration));
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("output_stage_quantized", build_opts.options()));
 
     // Set static kernel arguments

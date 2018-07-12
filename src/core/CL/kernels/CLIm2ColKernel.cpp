@@ -262,7 +262,7 @@ CLIm2ColKernel::configure_window(const ICLTensor *input, ICLTensor *output, cons
             AccessWindowStatic input_access(input->info(),
                                             -border.left,
                                             -border.top,
-                                            ceil_to_multiple(input_width + border.right, kernel_dims.width),
+                                            ceil_to_multiple(input_width + border.right, kernel_dims.width * _num_elems_processed_per_iteration),
                                             input_height + border.bottom);
             update_window_and_padding(win, input_access);
         }
