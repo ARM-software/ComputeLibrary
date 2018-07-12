@@ -31,11 +31,11 @@
 #define SUB(x, y) (x) - (y)
 #endif /* SATURATE */
 
-#if defined(OFFSET)
+#if defined(OFFSET_IN1)
 
 /** This function adds two tensors.
  *
- * @attention The quantization offset must be passed at compile time using -DOFFSET, i.e. -DOFFSET=10
+ * @attention The quantization offset must be passed at compile time using -DOFFSET_IN1, i.e. -DOFFSET_IN1=10
  * @attention To perform saturating operation -DSATURATE has to be passed to the compiler otherwise wrapping policy will be used.
  *
  * @param[in]  in1_ptr                           Pointer to the source tensor. Supported data types: QASYMM8
@@ -73,17 +73,18 @@ __kernel void arithmetic_add_quantized(
     Tensor3D in2 = CONVERT_TO_TENSOR3D_STRUCT(in2);
     Tensor3D out = CONVERT_TO_TENSOR3D_STRUCT(out);
 
-    // Load values
-    const short16 in_a   = CONVERT(vload16(0, (__global uchar *)in1.ptr), short16);
-    const short16 in_b   = CONVERT(vload16(0, (__global uchar *)in2.ptr), short16);
-    const short16 offset = OFFSET;
+    int16 in_a = CONVERT(vload16(0, (__global uchar *)in1.ptr), int16);
+    int16 in_b = CONVERT(vload16(0, (__global uchar *)in2.ptr), int16);
 
-    // Calculate result
-    short16 res = ADD(in_a, SUB(in_b, offset));
+    in_a = SUB(in_a, (int16)((int)OFFSET_IN1));
+    in_b = SUB(in_b, (int16)((int)OFFSET_IN2));
 
-    res = max((short16)0, min(res, (short16)255));
+    const float16 in1f32  = convert_float16(in_a) * (float16)((float)SCALE_IN1);
+    const float16 in2f32  = convert_float16(in_b) * (float16)((float)SCALE_IN2);
+    const float16 qresf32 = (in1f32 + in2f32) / ((float16)(float)SCALE_OUT) + ((float16)((float16)OFFSET_OUT));
+    const uchar16 res     = convert_uchar16_sat(convert_int16_rte(qresf32));
 
     // Store result
-    vstore16(CONVERT(res, uchar16), 0, (__global uchar *)out.ptr);
+    vstore16(res, 0, (__global uchar *)out.ptr);
 }
 #endif /* defined(OFFSET) */

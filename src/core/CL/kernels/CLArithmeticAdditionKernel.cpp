@@ -142,7 +142,12 @@ void CLArithmeticAdditionKernel::configure(const ICLTensor *input1, const ICLTen
     build_opts.emplace("-DDATA_TYPE_OUT=" + get_cl_type_from_data_type(output->info()->data_type()));
     if(is_data_type_quantized_asymmetric(input1->info()->data_type()))
     {
-        build_opts.emplace("-DOFFSET=" + support::cpp11::to_string(input1->info()->quantization_info().offset));
+        build_opts.emplace("-DOFFSET_IN1=" + support::cpp11::to_string(input1->info()->quantization_info().offset));
+        build_opts.emplace("-DOFFSET_IN2=" + support::cpp11::to_string(input2->info()->quantization_info().offset));
+        build_opts.emplace("-DOFFSET_OUT=" + support::cpp11::to_string(output->info()->quantization_info().offset));
+        build_opts.emplace("-DSCALE_IN1=" + support::cpp11::to_string(input1->info()->quantization_info().scale));
+        build_opts.emplace("-DSCALE_IN2=" + support::cpp11::to_string(input2->info()->quantization_info().scale));
+        build_opts.emplace("-DSCALE_OUT=" + support::cpp11::to_string(output->info()->quantization_info().scale));
         kernel_name += "_quantized";
     }
 

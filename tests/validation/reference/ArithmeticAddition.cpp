@@ -85,10 +85,8 @@ struct BroadcastUnroll<0>
 } // namespace
 
 template <typename T>
-SimpleTensor<T> arithmetic_addition(const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, DataType dst_data_type, ConvertPolicy convert_policy)
+SimpleTensor<T> arithmetic_addition(const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, SimpleTensor<T> &dst, ConvertPolicy convert_policy)
 {
-    SimpleTensor<T> dst(TensorShape::broadcast_shape(src1.shape(), src2.shape()), dst_data_type);
-
     Coordinates id_src1, id_src2, id_dst;
 
     BroadcastUnroll<Coordinates::num_max_dimensions>::unroll(src1, src2, dst, convert_policy, id_src1, id_src2, id_dst);
@@ -97,26 +95,24 @@ SimpleTensor<T> arithmetic_addition(const SimpleTensor<T> &src1, const SimpleTen
 }
 
 template <>
-SimpleTensor<uint8_t> arithmetic_addition(const SimpleTensor<uint8_t> &src1, const SimpleTensor<uint8_t> &src2, DataType dst_data_type, ConvertPolicy convert_policy)
+SimpleTensor<uint8_t> arithmetic_addition(const SimpleTensor<uint8_t> &src1, const SimpleTensor<uint8_t> &src2, SimpleTensor<uint8_t> &dst, ConvertPolicy convert_policy)
 {
-    if(dst_data_type == DataType::QASYMM8)
+    if(dst.data_type() == DataType::QASYMM8)
     {
         SimpleTensor<float> src1_tmp = convert_from_asymmetric(src1);
         SimpleTensor<float> src2_tmp = convert_from_asymmetric(src2);
-        SimpleTensor<float> dst_tmp(TensorShape::broadcast_shape(src1.shape(), src2.shape()), dst_data_type);
+        SimpleTensor<float> dst_tmp(TensorShape::broadcast_shape(src1.shape(), src2.shape()), dst.data_type());
 
         Coordinates id_src1, id_src2, id_dst;
 
         BroadcastUnroll<Coordinates::num_max_dimensions>::unroll(src1_tmp, src2_tmp, dst_tmp, convert_policy, id_src1, id_src2, id_dst);
 
-        SimpleTensor<uint8_t> dst = convert_to_asymmetric(dst_tmp, src1.quantization_info());
+        dst = convert_to_asymmetric(dst_tmp, dst.quantization_info());
         return dst;
     }
     else
     {
         // DataType::U8
-        SimpleTensor<uint8_t> dst(TensorShape::broadcast_shape(src1.shape(), src2.shape()), dst_data_type);
-
         Coordinates id_src1, id_src2, id_dst;
 
         BroadcastUnroll<Coordinates::num_max_dimensions>::unroll(src1, src2, dst, convert_policy, id_src1, id_src2, id_dst);
@@ -125,10 +121,31 @@ SimpleTensor<uint8_t> arithmetic_addition(const SimpleTensor<uint8_t> &src1, con
     }
 }
 
+template SimpleTensor<int16_t> arithmetic_addition(const SimpleTensor<int16_t> &src1, const SimpleTensor<int16_t> &src2, SimpleTensor<int16_t> &dst, ConvertPolicy convert_policy);
+template SimpleTensor<int8_t> arithmetic_addition(const SimpleTensor<int8_t> &src1, const SimpleTensor<int8_t> &src2, SimpleTensor<int8_t> &dst, ConvertPolicy convert_policy);
+template SimpleTensor<half> arithmetic_addition(const SimpleTensor<half> &src1, const SimpleTensor<half> &src2, SimpleTensor<half> &dst, ConvertPolicy convert_policy);
+template SimpleTensor<float> arithmetic_addition(const SimpleTensor<float> &src1, const SimpleTensor<float> &src2, SimpleTensor<float> &dst, ConvertPolicy convert_policy);
+
+template <typename T>
+SimpleTensor<T> arithmetic_addition(const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, DataType dst_data_type, ConvertPolicy convert_policy)
+{
+    SimpleTensor<T> dst(TensorShape::broadcast_shape(src1.shape(), src2.shape()), dst_data_type);
+    arithmetic_addition<T>(src1, src2, dst, convert_policy);
+    return dst;
+}
+
+template <>
+SimpleTensor<uint8_t> arithmetic_addition(const SimpleTensor<uint8_t> &src1, const SimpleTensor<uint8_t> &src2, DataType dst_data_type, ConvertPolicy convert_policy)
+{
+    SimpleTensor<uint8_t> dst(TensorShape::broadcast_shape(src1.shape(), src2.shape()), dst_data_type);
+    return arithmetic_addition<uint8_t>(src1, src2, dst, convert_policy);
+}
+
 template SimpleTensor<int16_t> arithmetic_addition(const SimpleTensor<int16_t> &src1, const SimpleTensor<int16_t> &src2, DataType dst_data_type, ConvertPolicy convert_policy);
 template SimpleTensor<int8_t> arithmetic_addition(const SimpleTensor<int8_t> &src1, const SimpleTensor<int8_t> &src2, DataType dst_data_type, ConvertPolicy convert_policy);
 template SimpleTensor<half> arithmetic_addition(const SimpleTensor<half> &src1, const SimpleTensor<half> &src2, DataType dst_data_type, ConvertPolicy convert_policy);
 template SimpleTensor<float> arithmetic_addition(const SimpleTensor<float> &src1, const SimpleTensor<float> &src2, DataType dst_data_type, ConvertPolicy convert_policy);
+
 } // namespace reference
 } // namespace validation
 } // namespace test
