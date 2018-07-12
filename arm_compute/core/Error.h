@@ -269,6 +269,20 @@ Status create_error(ErrorCode error_code, const char *function, const char *file
  */
 #define ARM_COMPUTE_ERROR_LOC(func, file, line, ...) ::arm_compute::error(func, file, line, __VA_ARGS__) // NOLINT
 
+/** If the condition is true, the given message is printed and program exits
+ *
+ * @param[in] cond Condition to evaluate.
+ * @param[in] ...  Message to print if cond is false.
+ */
+#define ARM_COMPUTE_EXIT_ON_MSG(cond, ...)  \
+    do                                      \
+    {                                       \
+        if(cond)                            \
+        {                                   \
+            ARM_COMPUTE_ERROR(__VA_ARGS__); \
+        }                                   \
+    } while(false)
+
 #ifdef ARM_COMPUTE_ASSERTS_ENABLED
 /** Checks if a status value is valid if not throws an exception with the error
  *
@@ -283,13 +297,7 @@ Status create_error(ErrorCode error_code, const char *function, const char *file
  * @param[in] ...  Message to print if cond is false.
  */
 #define ARM_COMPUTE_ERROR_ON_MSG(cond, ...) \
-    do                                      \
-    {                                       \
-        if(cond)                            \
-        {                                   \
-            ARM_COMPUTE_ERROR(__VA_ARGS__); \
-        }                                   \
-    } while(0)
+    ARM_COMPUTE_EXIT_ON_MSG(cond, __VA_ARGS__)
 
 /** If the condition is true, the given message is printed and an exception is thrown
  *
@@ -306,7 +314,7 @@ Status create_error(ErrorCode error_code, const char *function, const char *file
         {                                                         \
             ARM_COMPUTE_ERROR_LOC(func, file, line, __VA_ARGS__); \
         }                                                         \
-    } while(0)
+    } while(false)
 
 /** If the condition is true, the given message is printed and an exception is thrown, otherwise value is returned
  *

@@ -58,7 +58,8 @@ public:
         }
 
         // Checks
-        ARM_COMPUTE_ERROR_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type), "Unsupported data type!");
+        ARM_COMPUTE_EXIT_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type), "Unsupported data type!");
+        ARM_COMPUTE_EXIT_ON_MSG(common_params.data_layout == DataLayout::NHWC, "Unsupported data layout!");
 
         // Print parameter values
         std::cout << common_params << std::endl;
