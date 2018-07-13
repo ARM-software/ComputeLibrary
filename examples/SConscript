@@ -36,12 +36,14 @@ if env['os'] in ['android', 'bare_metal'] or env['standalone']:
     Import('arm_compute_a')
     Import('arm_compute_core_a')
     arm_compute_libs = [ arm_compute_a, arm_compute_core_a ]
+    arm_compute_graph_libs = arm_compute_libs # The graph library needs to be linked separately with --whole-archive
     arm_compute_dependency = arm_compute_a
     graph_dependency = [arm_compute_graph_a]
 else:
     Import('arm_compute_graph_so')
     Import('arm_compute_so')
-    arm_compute_libs = ["arm_compute_graph", "arm_compute", "arm_compute_core"]
+    arm_compute_libs = ["arm_compute", "arm_compute_core"]
+    arm_compute_graph_libs = [ "arm_compute_graph" ] + arm_compute_libs
     arm_compute_dependency = arm_compute_so
     graph_dependency = [arm_compute_graph_so]
 
@@ -52,7 +54,6 @@ examples_libs = examples_env.get("LIBS",[])
 for file in Glob("./graph_*.cpp"):
     example = os.path.basename(os.path.splitext(str(file))[0])
     prog = None
-    arm_compute_graph_libs = arm_compute_libs
 
     if env['os'] in ['android', 'bare_metal'] or env['standalone']:
         prog = examples_env.Program(example, ["{}.cpp".format(example), utils, graph_utils], LIBS = examples_libs + arm_compute_graph_libs, LINKFLAGS=examples_env["LINKFLAGS"]+['-Wl,--whole-archive',graph_dependency,'-Wl,--no-whole-archive'])
