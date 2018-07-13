@@ -135,11 +135,11 @@ if test_env['benchmark_tests']:
     Export('arm_compute_benchmark')
 
 if test_env['validation_tests']:
-    arm_compute_validation_framework = env.StaticLibrary('arm_compute_validation_framework', Glob('validation/reference/*.cpp') + Glob('validation/*.cpp'), LIBS= [ arm_compute_test_framework])
+    arm_compute_validation_framework = env.StaticLibrary('arm_compute_validation_framework', Glob('validation/reference/*.cpp') + Glob('validation/*.cpp'), LIBS= [ arm_compute_test_framework, arm_compute_core_a])
     Depends(arm_compute_validation_framework , arm_compute_test_framework)
     Depends(arm_compute_validation_framework , arm_compute_core_a)
 
-    arm_compute_validation = test_env.Program('arm_compute_validation', files_validation + common_objects, LIBS=test_env['LIBS']+[arm_compute_validation_framework])
+    arm_compute_validation = test_env.Program('arm_compute_validation', files_validation + common_objects, LIBS=[arm_compute_validation_framework] + test_env['LIBS'])
     Depends(arm_compute_validation, arm_compute_validation_framework)
     Depends(arm_compute_validation, arm_compute_test_framework)
     Depends(arm_compute_validation, arm_compute_lib)
