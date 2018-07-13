@@ -62,7 +62,7 @@ void ITensor::copy_from(const ITensor &src)
     Iterator src_it(&src, win_src);
     Iterator dst_it(this, win_dst);
 
-    const size_t line_size = src_info->num_channels() * src_info->element_size() * src_info->dimension(0);
+    const size_t line_size = src_info->element_size() * src_info->dimension(0);
 
     execute_window_loop(win_src, [&](const Coordinates & id)
     {
