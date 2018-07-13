@@ -106,9 +106,6 @@ int run_example(int argc, char **argv, std::unique_ptr<Example> example)
         g_example_argv.emplace_back(const_cast<char *>(arg.c_str())); // NOLINT
     }
 
-    // Set number of threads in Scheduler
-    Scheduler::get().set_num_threads(options.threads->value());
-
     if(options.log_level->value() > framework::LogLevel::NONE)
     {
         for(auto &p : printers)
@@ -137,7 +134,6 @@ int run_example(int argc, char **argv, std::unique_ptr<Example> example)
             }
 #endif /* ARM_COMPUTE_CL */
             p->print_entry("Iterations", support::cpp11::to_string(options.iterations->value()));
-            p->print_entry("Threads", support::cpp11::to_string(options.threads->value()));
         }
     }
 

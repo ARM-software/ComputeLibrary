@@ -74,7 +74,6 @@ public:
     arm_compute::utils::ToggleOption                           *help;           /**< Show help option */
     arm_compute::utils::EnumListOption<InstrumentsDescription> *instruments;    /**< Instruments option */
     arm_compute::utils::SimpleOption<int>                      *iterations;     /**< Number of iterations option */
-    arm_compute::utils::SimpleOption<int>                      *threads;        /**< Number of threads option */
     arm_compute::utils::EnumOption<LogFormat>                  *log_format;     /**< Log format option */
     arm_compute::utils::SimpleOption<std::string>              *log_file;       /**< Log file option */
     arm_compute::utils::EnumOption<LogLevel>                   *log_level;      /**< Logging level option */

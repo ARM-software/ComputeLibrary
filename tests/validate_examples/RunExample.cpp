@@ -124,8 +124,6 @@ int run_example(int argc, char **argv, std::unique_ptr<ValidateExample> example)
         g_example_argv.emplace_back(const_cast<char *>(arg.c_str())); // NOLINT
     }
 
-    // Set number of threads in Scheduler
-    Scheduler::get().set_num_threads(options.threads->value());
     library = support::cpp14::make_unique<AssetsLibrary>("." /* Only using random values */, seed->value());
 
     if(options.log_level->value() > framework::LogLevel::NONE)
@@ -157,7 +155,6 @@ int run_example(int argc, char **argv, std::unique_ptr<ValidateExample> example)
             }
 #endif /* ARM_COMPUTE_CL */
             p->print_entry("Iterations", support::cpp11::to_string(options.iterations->value()));
-            p->print_entry("Threads", support::cpp11::to_string(options.threads->value()));
             g_example->print_parameters(*p);
         }
     }

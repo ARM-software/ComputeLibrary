@@ -107,6 +107,8 @@ int main(int argc, char **argv)
     auto enable_tuner = parser.add_option<utils::ToggleOption>("enable-tuner");
     enable_tuner->set_help("Enable OpenCL dynamic tuner");
 #endif /* ARM_COMPUTE_CL */
+    auto threads = parser.add_option<utils::SimpleOption<int>>("threads", 1);
+    threads->set_help("Number of threads to use");
 
     try
     {
@@ -120,7 +122,7 @@ int main(int argc, char **argv)
 
         std::vector<std::unique_ptr<framework::Printer>> printers = options.create_printers();
 
-        Scheduler::get().set_num_threads(options.threads->value());
+        Scheduler::get().set_num_threads(threads->value());
 #ifdef ARM_COMPUTE_CL
         if(enable_tuner->is_set())
         {
@@ -152,7 +154,7 @@ int main(int argc, char **argv)
                 }
 #endif /* ARM_COMPUTE_CL */
                 p->print_entry("Iterations", support::cpp11::to_string(options.iterations->value()));
-                p->print_entry("Threads", support::cpp11::to_string(options.threads->value()));
+                p->print_entry("Threads", support::cpp11::to_string(threads->value()));
                 {
                     using support::cpp11::to_string;
                     p->print_entry("Dataset mode", to_string(dataset_mode->value()));
