@@ -598,7 +598,7 @@ private:
                 0.001f)
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
-        SubStream i_b1(static_cast<IStream &>(i_b));
+        SubStream i_b1(i_b);
         i_b1 << ConvolutionLayer(
                  3U, 1U, 256U,
                  get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0b_1x3_weights.npy"),
@@ -612,7 +612,7 @@ private:
                  0.001f)
              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
-        SubStream i_b2(static_cast<IStream &>(i_b));
+        SubStream i_b2(i_b);
         i_b2 << ConvolutionLayer(
                  1U, 3U, 256U,
                  get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0c_3x1_weights.npy"),
@@ -667,7 +667,7 @@ private:
                 0.001f)
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
-        SubStream i_c1(static_cast<IStream &>(i_c));
+        SubStream i_c1(i_c);
         i_c1 << ConvolutionLayer(
                  3U, 1U, 256U,
                  get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0d_1x3_weights.npy"),
@@ -681,7 +681,7 @@ private:
                  0.001f)
              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
-        SubStream i_c2(static_cast<IStream &>(i_c));
+        SubStream i_c2(i_c);
         i_c2 << ConvolutionLayer(
                  1U, 3U, 256U,
                  get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0e_3x1_weights.npy"),

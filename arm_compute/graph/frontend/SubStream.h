@@ -52,14 +52,6 @@ public:
      * @param[in] s Parent stream
      */
     SubStream(IStream &s);
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    SubStream(const SubStream &) = delete;
-    /** Default move constructor */
-    SubStream(SubStream &&) = default;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    SubStream &operator=(const SubStream &) = delete;
-    /** Default move assignment operator */
-    SubStream &operator=(SubStream &&) = default;
 
     // Inherited overridden methods
     void add_layer(ILayer &layer) override;

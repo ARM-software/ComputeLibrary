@@ -719,7 +719,7 @@ private:
             .set_name(param_path + "/Branch_1/Conv2d_0a_1x1/BatchNorm/batchnorm")
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(param_path + "/Branch_1/Conv2d_0a_1x1/Relu");
 
-        SubStream i_b1(static_cast<IStream &>(i_b));
+        SubStream i_b1(i_b);
         i_b1 << ConvolutionLayer(
                  3U, 1U, std::get<1>(b_filters),
                  get_weights_accessor(data_path, total_path + "Branch_1_Conv2d_0b_1x3_weights.npy"),
@@ -735,7 +735,7 @@ private:
              .set_name(param_path + "/Branch_1/Conv2d_0b_1x3/BatchNorm/batchnorm")
              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(param_path + "/Branch_1/Conv2d_0b_1x3/Relu");
 
-        SubStream i_b2(static_cast<IStream &>(i_b));
+        SubStream i_b2(i_b);
         i_b2 << ConvolutionLayer(
                  1U, 3U, std::get<2>(b_filters),
                  get_weights_accessor(data_path, total_path + "Branch_1_Conv2d" + conv_id + "3x1_weights.npy"),
@@ -784,7 +784,7 @@ private:
             .set_name(param_path + "/Branch_2/Conv2d_0b_3x3/BatchNorm/batchnorm")
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(param_path + "/Branch_2/Conv2d_0b_3x3/Relu");
 
-        SubStream i_c1(static_cast<IStream &>(i_c));
+        SubStream i_c1(i_c);
         i_c1 << ConvolutionLayer(
                  3U, 1U, std::get<2>(c_filters),
                  get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0c_1x3_weights.npy"),
@@ -800,7 +800,7 @@ private:
              .set_name(param_path + "/Branch_2/Conv2d_0c_1x3/BatchNorm/batchnorm")
              << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(param_path + "/Branch_2/Conv2d_0c_1x3/Relu");
 
-        SubStream i_c2(static_cast<IStream &>(i_c));
+        SubStream i_c2(i_c);
         i_c2 << ConvolutionLayer(
                  1U, 3U, std::get<3>(c_filters),
                  get_weights_accessor(data_path, total_path + "Branch_2_Conv2d_0d_3x1_weights.npy"),
