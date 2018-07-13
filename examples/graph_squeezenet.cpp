@@ -156,6 +156,8 @@ public:
         GraphConfig config;
         config.num_threads = common_params.threads;
         config.use_tuner   = common_params.enable_tuner;
+        config.tuner_file  = common_params.tuner_file;
+
         graph.finalize(common_params.target, config);
 
         return true;

@@ -49,6 +49,7 @@ struct CommonGraphParams
     std::string                      labels{};
     std::string                      validation_file{};
     std::string                      validation_path{};
+    std::string                      tuner_file{};
     unsigned int                     validation_range_start{ 0 };
     unsigned int                     validation_range_end{ std::numeric_limits<unsigned int>::max() };
 };
@@ -103,6 +104,7 @@ public:
     SimpleOption<std::string>              *validation_file;  /**< Validation file */
     SimpleOption<std::string>              *validation_path;  /**< Validation data path */
     SimpleOption<std::string>              *validation_range; /**< Validation range */
+    SimpleOption<std::string>              *tuner_file;       /**< File to load/store the tuner's values from */
 };
 
 /** Consumes the common graph options and creates a structure containing any information

@@ -62,20 +62,17 @@ bool file_exists(const std::string &filename)
 /** Register CL backend */
 static detail::BackendRegistrar<CLDeviceBackend> CLDeviceBackend_registrar(Target::CL);
 
-/** Tuner export file */
-static const std::string tuner_data_filename = "acl_tuner.csv";
-
 CLDeviceBackend::CLDeviceBackend()
-    : _initialized(false), _tuner(), _allocator(nullptr)
+    : _initialized(false), _tuner(), _allocator(nullptr), _tuner_file()
 {
 }
 
 CLDeviceBackend::~CLDeviceBackend()
 {
     // TODO (geopin01) : Shouldn't call non exception safe stuff here
-    if(_tuner.tune_new_kernels() && !_tuner.lws_table().empty())
+    if(_tuner.tune_new_kernels() && !_tuner.lws_table().empty() && !_tuner_file.empty())
     {
-        _tuner.save_to_file(tuner_data_filename);
+        _tuner.save_to_file(_tuner_file);
     }
 }
 
@@ -86,12 +83,6 @@ void CLDeviceBackend::set_kernel_tuning(bool enable_tuning)
 
 void CLDeviceBackend::initialize_backend()
 {
-    // Load tuner data if available
-    if(_tuner.lws_table().empty() && file_exists(tuner_data_filename))
-    {
-        _tuner.load_from_file(tuner_data_filename);
-    }
-
     // Setup Scheduler
     CLScheduler::get().default_init(&_tuner);
 
@@ -109,6 +100,13 @@ void CLDeviceBackend::setup_backend_context(GraphContext &ctx)
     }
 
     // Setup tuner
+    _tuner_file = ctx.config().tuner_file;
+    // Load tuner data if available
+    if(file_exists(_tuner_file))
+    {
+        _tuner.load_from_file(_tuner_file);
+    }
+
     set_kernel_tuning(ctx.config().use_tuner);
 
     // Setup a management backend

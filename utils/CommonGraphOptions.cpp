@@ -83,6 +83,7 @@ namespace utils
     os << "Data type : " << common_params.data_type << std::endl;
     os << "Data layout : " << common_params.data_layout << std::endl;
     os << "Tuner enabled? : " << (common_params.enable_tuner ? true_str : false_str) << std::endl;
+    os << "Tuner file : " << common_params.tuner_file << std::endl;
     os << "Fast math enabled? : " << (common_params.fast_math_hint == FastMathHint::ENABLED ? true_str : false_str) << std::endl;
     if(!common_params.data_path.empty())
     {
@@ -122,7 +123,8 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
       labels(parser.add_option<SimpleOption<std::string>>("labels")),
       validation_file(parser.add_option<SimpleOption<std::string>>("validation-file")),
       validation_path(parser.add_option<SimpleOption<std::string>>("validation-path")),
-      validation_range(parser.add_option<SimpleOption<std::string>>("validation-range"))
+      validation_range(parser.add_option<SimpleOption<std::string>>("validation-range")),
+      tuner_file(parser.add_option<SimpleOption<std::string>>("tuner-file"))
 {
     std::set<arm_compute::graph::Target> supported_targets
     {
@@ -161,6 +163,7 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
     validation_file->set_help("File used to validate the graph");
     validation_path->set_help("Path to the validation data");
     validation_range->set_help("Range of the images to validate for (Format : start,end)");
+    tuner_file->set_help("File to load/save CLTuner values");
 }
 
 CommonGraphParams consume_common_graph_parameters(CommonGraphOptions &options)
@@ -183,6 +186,7 @@ CommonGraphParams consume_common_graph_parameters(CommonGraphOptions &options)
     common_params.validation_path        = options.validation_path->value();
     common_params.validation_range_start = validation_range.first;
     common_params.validation_range_end   = validation_range.second;
+    common_params.tuner_file             = options.tuner_file->value();
 
     return common_params;
 }

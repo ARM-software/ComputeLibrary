@@ -77,10 +77,11 @@ class TensorDescriptor;
 /** Graph configuration structure */
 struct GraphConfig
 {
-    bool use_function_memory_manager{ true };   /**< Use a memory manager to manage per-funcion auxilary memory */
-    bool use_transition_memory_manager{ true }; /**< Use a memory manager to manager transition buffer memory */
-    bool use_tuner{ false };                    /**< Use a tuner in tunable backends */
-    int  num_threads{ -1 };                     /**< Number of threads to use (thread capable backends), if 0 the backend will auto-initialize, if -1 the backend will stay as it is. */
+    bool        use_function_memory_manager{ true };   /**< Use a memory manager to manage per-funcion auxilary memory */
+    bool        use_transition_memory_manager{ true }; /**< Use a memory manager to manager transition buffer memory */
+    bool        use_tuner{ false };                    /**< Use a tuner in tunable backends */
+    int         num_threads{ -1 };                     /**< Number of threads to use (thread capable backends), if 0 the backend will auto-initialize, if -1 the backend will stay as it is. */
+    std::string tuner_file{ "acl_tuner.csv" };         /**< File to load/store tuning values from */
 };
 
 /**< Device target types */

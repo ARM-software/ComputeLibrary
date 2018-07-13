@@ -61,6 +61,17 @@ std::unique_ptr<AssetsLibrary> library;
 } // namespace test
 } // namespace arm_compute
 
+namespace
+{
+#ifdef ARM_COMPUTE_CL
+bool file_exists(const std::string &filename)
+{
+    std::ifstream file(filename);
+    return file.good();
+}
+#endif /* ARM_COMPUTE_CL */
+} //namespace
+
 int main(int argc, char **argv)
 {
 #ifdef ARM_COMPUTE_CL
@@ -106,6 +117,8 @@ int main(int argc, char **argv)
 #ifdef ARM_COMPUTE_CL
     auto enable_tuner = parser.add_option<utils::ToggleOption>("enable-tuner");
     enable_tuner->set_help("Enable OpenCL dynamic tuner");
+    auto tuner_file = parser.add_option<utils::SimpleOption<std::string>>("tuner-file", "");
+    tuner_file->set_help("File to load/save CLTuner values");
 #endif /* ARM_COMPUTE_CL */
     auto threads = parser.add_option<utils::SimpleOption<int>>("threads", 1);
     threads->set_help("Number of threads to use");
@@ -127,6 +140,16 @@ int main(int argc, char **argv)
         if(enable_tuner->is_set())
         {
             cl_tuner.set_tune_new_kernels(enable_tuner->value());
+            // If that's the first run then the file won't exist yet
+            if(file_exists(tuner_file->value()))
+            {
+                cl_tuner.load_from_file(tuner_file->value());
+            }
+        }
+        else if(!tuner_file->value().empty())
+        {
+            //If we're not tuning and the file doesn't exist then we should raise an error:
+            cl_tuner.load_from_file(tuner_file->value());
         }
 #endif /* ARM_COMPUTE_CL */
         if(options.log_level->value() > framework::LogLevel::NONE)
@@ -216,6 +239,10 @@ int main(int argc, char **argv)
 
 #ifdef ARM_COMPUTE_CL
         CLScheduler::get().sync();
+        if(enable_tuner->is_set() && enable_tuner->value() && tuner_file->is_set())
+        {
+            cl_tuner.save_to_file(tuner_file->value());
+        }
 #endif /* ARM_COMPUTE_CL */
 
         return (success ? 0 : 1);
