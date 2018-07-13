@@ -104,15 +104,23 @@ public:
     GemmImpl_sgemm_gemm_interleaved() : GemmImplementation<float, float>(GemmMethod::GEMM_INTERLEAVED) { }
 };
 
+static GemmImpl_gemv_batched<float, float> gemv_batched_impl{};
+#ifdef __aarch64__
+static GemmImpl_sgemm_gemv_pretransposed sgemm_gemv_pretransposed_impl{};
+static GemmImpl_sgemm_gemv_native_transposed sgemm_gemv_native_transposed_impl{};
+static GemmImpl_sgemm_gemm_native sgemm_gemm_native_impl{};
+#endif
+static GemmImpl_sgemm_gemm_interleaved sgemm_gemm_interleaved_impl{};
+
 /* List of implementations (order matters) */
 static std::vector<GemmImplementation<float, float> *> SGemmMethods = {
-    new GemmImpl_gemv_batched<float, float>(),
+    &gemv_batched_impl,
 #ifdef __aarch64__
-    new GemmImpl_sgemm_gemv_pretransposed(),
-    new GemmImpl_sgemm_gemv_native_transposed(),
-    new GemmImpl_sgemm_gemm_native(),
+    &sgemm_gemv_pretransposed_impl,
+    &sgemm_gemv_native_transposed_impl,
+    &sgemm_gemm_native_impl,
 #endif
-    new GemmImpl_sgemm_gemm_interleaved()
+    &sgemm_gemm_interleaved_impl
 };
 
 /* Templated function to return this list. */

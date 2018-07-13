@@ -41,8 +41,10 @@ public:
     GemmImpl_gemm_u16_interleaved() : GemmImplementation<uint16_t, uint32_t>(GemmMethod::GEMM_INTERLEAVED) { }
 };
 
+static GemmImpl_gemm_u16_interleaved gemm_u16_interleaved_impl{};
+
 static std::vector<GemmImplementation<uint16_t, uint32_t> *> gemm_u16_methods = {
-    new GemmImpl_gemm_u16_interleaved()
+    &gemm_u16_interleaved_impl
 };
 
 template<>

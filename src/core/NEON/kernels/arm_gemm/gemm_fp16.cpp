@@ -73,11 +73,16 @@ public:
     GemmImpl_gemm_fp16_interleaved() : GemmImplementation<__fp16, __fp16>(GemmMethod::GEMM_INTERLEAVED) { }
 };
 
+#if defined(__aarch64__) && (defined(__ARM_FEATURE_VECTOR_ARITHMETIC) || defined(FP16_KERNELS))
+static GemmImpl_gemm_fp16_interleaved_fp16 gemm_fp16_interleaved_fp16_impl{};
+#endif
+static GemmImpl_gemm_fp16_interleaved gemm_fp16_interleaved_impl{};
+
 static std::vector<GemmImplementation<__fp16, __fp16> *> gemm_fp16_methods = {
 #if defined(__aarch64__) && (defined(__ARM_FEATURE_VECTOR_ARITHMETIC) || defined(FP16_KERNELS))
-    new GemmImpl_gemm_fp16_interleaved_fp16(),
+    &gemm_fp16_interleaved_fp16_impl,
 #endif
-    new GemmImpl_gemm_fp16_interleaved()
+    &gemm_fp16_interleaved_impl
 };
 
 template<>

@@ -56,9 +56,12 @@ public:
     GemmImpl_gemm_u8_interleaved() : GemmImplementation<uint8_t, uint32_t>(GemmMethod::GEMM_INTERLEAVED) { }
 };
 
+static GemmImpl_gemm_u8_interleaved_dot gemm_u8_interleaved_dot_impl{};
+static GemmImpl_gemm_u8_interleaved gemm_u8_interleaved_impl{};
+
 static std::vector<GemmImplementation<uint8_t, uint32_t> *> gemm_u8_methods = {
-    new GemmImpl_gemm_u8_interleaved_dot(),
-    new GemmImpl_gemm_u8_interleaved()
+    &gemm_u8_interleaved_dot_impl,
+    &gemm_u8_interleaved_impl
 };
 
 template<>
