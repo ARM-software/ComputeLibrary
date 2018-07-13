@@ -75,6 +75,8 @@ void NEGEMMAssemblyDispatch<TypeInput, TypeOutput>::run()
 }
 
 #ifndef __aarch64__
+namespace arm_compute
+{
 template <>
 void NEGEMMAssemblyDispatch<uint8_t, uint32_t>::Fallback::configure(const ITensor *a, const ITensor *b, ITensor *d, float alpha, float beta, bool pretranspose_hint, MemoryGroup &memory_group)
 {
@@ -100,6 +102,8 @@ void NEGEMMAssemblyDispatch<int8_t, int32_t>::Fallback::configure(const ITensor 
     ARM_COMPUTE_UNUSED(pretranspose_hint);
     ARM_COMPUTE_UNUSED(memory_group);
 }
+
+} //namespace arm_compute
 #endif // aarch64
 template <typename TypeInput, typename TypeOutput>
 void NEGEMMAssemblyDispatch<TypeInput, TypeOutput>::Fallback::configure(const ITensor *a, const ITensor *b, ITensor *d, float alpha, float beta, bool pretranspose_hint, MemoryGroup &memory_group)
