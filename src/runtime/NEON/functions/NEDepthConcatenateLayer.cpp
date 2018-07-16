@@ -28,6 +28,7 @@
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "support/ToolchainSupport.h"
 
@@ -49,7 +50,12 @@ void NEDepthConcatenateLayer::configure(std::vector<ITensor *> inputs_vector, IT
     _concat_kernels_vector  = arm_compute::support::cpp14::make_unique<NEDepthConcatenateLayerKernel[]>(_num_inputs);
     _border_handlers_vector = arm_compute::support::cpp14::make_unique<NEFillBorderKernel[]>(_num_inputs);
 
-    TensorShape output_shape = calculate_depth_concatenate_shape(inputs_vector);
+    std::vector<ITensorInfo *> inputs_vector_info;
+    for(unsigned int i = 0; i < _num_inputs; i++)
+    {
+        inputs_vector_info.emplace_back(inputs_vector.at(i)->info());
+    }
+    TensorShape output_shape = arm_compute::misc::shape_calculator::calculate_depth_concatenate_shape(inputs_vector_info);
 
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output->info(), output_shape, 1, inputs_vector[0]->info()->data_type());

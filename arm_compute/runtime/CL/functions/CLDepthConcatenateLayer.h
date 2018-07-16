@@ -52,10 +52,34 @@ public:
     CLDepthConcatenateLayer();
     /** Initialise the kernel's inputs vector and output.
      *
-     * @param[in,out] inputs_vector The vectors containing all the tensors to concatenate. Data types supported: F16/F32.
+     * @param[in,out] inputs_vector The vectors containing all the tensors to concatenate. Data types supported: QASYMM8/F16/F32.
+     *                              Input dimensions might differ for each input for the first three dimensions (width, height, depth)
+     *                              and must match for the rest.
+     *                              Note that the difference between the minimum and maximum width and height among the input tensors
+     *                              must be divisible by 2 otherwise it is not clear how padding should be added on the inputs' width and
+     *                              height when they are less than the maximum input sizes.
      * @param[out]    output        Output tensor. Data types supported: Same as @p input.
+     *                              Output tensor dimensions match the inputs' ones from the fourth dimension and above,
+     *                              while width and height are the maximum width and height of the input tensors.
+     *                              Finally, depth is the sum of the input depths.
      */
     void configure(std::vector<ICLTensor *> inputs_vector, ICLTensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLDepthConcatenateLayer
+     *
+     * @param[in] inputs_vector The vectors containing all the tensors to concatenate. Data types supported: QASYMM8/F16/F32.
+     *                          Input dimensions might differ for each input for the first three dimensions (width, height, depth)
+     *                          and must match for the rest.
+     *                          Note that the difference between the minimum and maximum width and height among the input tensors
+     *                          must be divisible by 2 otherwise it is not clear how padding should be added on the inputs' width and
+     *                          height when they are less than the maximum input sizes.
+     * @param[in] output        Output tensor. Data types supported: Same as @p input.
+     *                          Output tensor dimensions match the inputs' ones from the fourth dimension and above,
+     *                          while width and height are the maximum width and height of the input tensors.
+     *                          Finally, depth is the sum of the input depths.
+     *
+     * @return a status
+     */
+    static Status validate(const std::vector<ITensorInfo *> &inputs_vector, const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run() override;

@@ -58,7 +58,7 @@ public:
      *
      */
     void configure(const ICLTensor *input, unsigned int width_offset, ICLTensor *output);
-    /**  Static function to check if given info will lead to a valid configuration of @ref CLDepthConcatenateLayerKernel
+    /**  Static function to check if given info will lead to a valid configuration of @ref CLWidthConcatenateLayerKernel
      *
      * @param[in] input        Input tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
      * @param[in] width_offset The offset on the X axis.

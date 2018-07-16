@@ -42,6 +42,44 @@ namespace validation
 TEST_SUITE(CL)
 TEST_SUITE(DepthConcatenateLayer)
 
+// *INDENT-OFF*
+// clang-format off
+DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
+        framework::dataset::make("InputInfo1", {  TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32), // Mismatching data type input/output
+                                                  TensorInfo(TensorShape(24U, 27U, 4U), 1, DataType::F32), // Mismatching x dimension
+                                                  TensorInfo(TensorShape(23U, 27U, 3U), 1, DataType::F32), // Mismatching total depth
+                                                  TensorInfo(TensorShape(16U, 27U, 6U), 1, DataType::F32)
+        }),
+        framework::dataset::make("InputInfo2", {  TensorInfo(TensorShape(23U, 27U, 4U), 1, DataType::F32),
+                                                  TensorInfo(TensorShape(23U, 27U, 5U), 1, DataType::F32),
+                                                  TensorInfo(TensorShape(23U, 27U, 4U), 1, DataType::F32),
+                                                  TensorInfo(TensorShape(16U, 27U, 6U), 1, DataType::F32)
+        })),
+        framework::dataset::make("OutputInfo", {  TensorInfo(TensorShape(23U, 27U, 9U), 1, DataType::F16),
+                                                  TensorInfo(TensorShape(25U, 12U, 9U), 1, DataType::F32),
+                                                  TensorInfo(TensorShape(23U, 27U, 8U), 1, DataType::F32),
+                                                  TensorInfo(TensorShape(16U, 27U, 12U), 1, DataType::F32)
+        })),
+        framework::dataset::make("Expected", { false, false, false, true })),
+        input_info1, input_info2, output_info,expected)
+{
+    std::vector<TensorInfo> inputs_vector_info;
+    inputs_vector_info.emplace_back(std::move(input_info1));
+    inputs_vector_info.emplace_back(std::move(input_info2));
+
+    std::vector<ITensorInfo *> inputs_vector_info_raw;
+    for(auto &input : inputs_vector_info)
+    {
+        inputs_vector_info_raw.emplace_back(&input);
+    }
+
+    bool is_valid = bool(CLDepthConcatenateLayer::validate(inputs_vector_info_raw,
+                                                           &output_info.clone()->set_is_resizable(false)));
+    ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
+}
+// clang-format on
+// *INDENT-ON*
+
 TEST_CASE(Configuration, framework::DatasetMode::ALL)
 {
     // Create tensors

@@ -27,7 +27,9 @@
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/PixelValue.h"
+#include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 #include "arm_compute/runtime/CL/CLScheduler.h"
 #include "support/ToolchainSupport.h"
 
@@ -43,20 +45,24 @@ CLDepthConcatenateLayer::CLDepthConcatenateLayer() // NOLINT
 
 void CLDepthConcatenateLayer::configure(std::vector<ICLTensor *> inputs_vector, ICLTensor *output) // NOLINT
 {
-    ARM_COMPUTE_ERROR_ON(inputs_vector.size() < 2);
-
     _num_inputs = inputs_vector.size();
 
-    unsigned int depth_offset = 0;
+    std::vector<ITensorInfo *> inputs_vector_info;
+    for(unsigned int i = 0; i < _num_inputs; i++)
+    {
+        inputs_vector_info.emplace_back(inputs_vector.at(i)->info());
+    }
 
     _concat_kernels_vector  = arm_compute::support::cpp14::make_unique<CLDepthConcatenateLayerKernel[]>(_num_inputs);
     _border_handlers_vector = arm_compute::support::cpp14::make_unique<CLFillBorderKernel[]>(_num_inputs);
 
-    TensorShape output_shape = calculate_depth_concatenate_shape(inputs_vector);
+    TensorShape output_shape = arm_compute::misc::shape_calculator::calculate_depth_concatenate_shape(inputs_vector_info);
 
     // Output auto inizialitation if not yet initialized
     auto_init_if_empty(*output->info(), output_shape, 1, inputs_vector[0]->info()->data_type());
+    ARM_COMPUTE_ERROR_THROW_ON(CLDepthConcatenateLayer::validate(inputs_vector_info, output->info()));
 
+    unsigned int depth_offset = 0;
     for(unsigned int i = 0; i < _num_inputs; i++)
     {
         _concat_kernels_vector[i].configure(inputs_vector.at(i), depth_offset, output);
@@ -67,6 +73,27 @@ void CLDepthConcatenateLayer::configure(std::vector<ICLTensor *> inputs_vector, 
 
     // Set valid region from shape
     output->info()->set_valid_region(ValidRegion(Coordinates(), output_shape));
+}
+
+Status CLDepthConcatenateLayer::validate(const std::vector<ITensorInfo *> &inputs_vector, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
+    ARM_COMPUTE_RETURN_ERROR_ON(inputs_vector.size() < 2);
+
+    // Output auto inizialitation if not yet initialized
+    TensorInfo  tmp_output_info = *output->clone();
+    TensorShape output_shape    = arm_compute::misc::shape_calculator::calculate_depth_concatenate_shape(inputs_vector);
+    auto_init_if_empty(tmp_output_info, output_shape, 1, inputs_vector[0]->data_type());
+
+    unsigned int depth_offset = 0;
+    for(const auto &input : inputs_vector)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input);
+        ARM_COMPUTE_RETURN_ON_ERROR(CLDepthConcatenateLayerKernel::validate(input, depth_offset, &tmp_output_info));
+        depth_offset += input->dimension(2);
+    }
+
+    return Status{};
 }
 
 void CLDepthConcatenateLayer::run()
