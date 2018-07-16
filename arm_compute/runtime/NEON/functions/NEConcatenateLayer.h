@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLCONCATENATELAYER_H__
-#define __ARM_COMPUTE_CLCONCATENATELAYER_H__
+#ifndef __ARM_COMPUTE_NECONCATENATELAYER_H__
+#define __ARM_COMPUTE_NECONCATENATELAYER_H__
 
 #include "arm_compute/runtime/IFunction.h"
 
@@ -34,34 +34,34 @@
 namespace arm_compute
 {
 // Forward declarations
-class ICLTensor;
+class ITensor;
 class ITensorInfo;
 class Status;
 
 /** Basic function to execute concatenate tensors along a given axis. This function calls the following kernels:
  *
- * -# @ref CLWidthConcatenateLayer (if underlying concatenation axis is 0).
- * -# @ref CLDepthConcatenateLayer (if underlying concatenation axis is 2).
+ * -# @ref NEWidthConcatenateLayer (if underlying concatenation axis is 0).
+ * -# @ref NEDepthConcatenateLayer (if underlying concatenation axis is 2).
  */
-class CLConcatenateLayer : public IFunction
+class NEConcatenateLayer : public IFunction
 {
 public:
     /** Default constructor */
-    CLConcatenateLayer();
+    NEConcatenateLayer();
     /** Initialise the kernel's inputs vector and output.
      *
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
-     * @note Preconditions can be found respectively at @ref CLWidthConcatenateLayer and @ref CLDepthConcatenateLayer.
+     * @note Preconditions can be found respectively at @ref NEWidthConcatenateLayer and @ref NEDepthConcatenateLayer.
      *
      * @param[in,out] inputs_vector The vectors containing all the tensors to concatenate. Data types supported: QASYMM8/F16/F32.
      * @param[out]    output        Output tensor. Data types supported: Same as @p input.
      * @param[in]     axis          Concatenation axis. Supported underlying concatenation axis are 0 and 2.
      */
-    void configure(const std::vector<ICLTensor *> &inputs_vector, ICLTensor *output, DataLayoutDimension axis);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLConcatenateLayer
+    void configure(const std::vector<ITensor *> &inputs_vector, ITensor *output, DataLayoutDimension axis);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEConcatenateLayer
      *
      * @note Input and output tensor dimensions preconditions defer depending on the concatenation axis.
-     * @note Preconditions can be found respectively at @ref CLWidthConcatenateLayer and @ref CLDepthConcatenateLayer.
+     * @note Preconditions can be found respectively at @ref NEWidthConcatenateLayer and @ref NEDepthConcatenateLayer.
      *
      * @param[in] inputs_vector The vectors containing all the tensors info to concatenate. Data types supported: QASYMM8/F16/F32.
      * @param[in] output        Output tensor info. Data types supported: Same as @p input.
@@ -78,4 +78,4 @@ private:
     std::unique_ptr<IFunction> _concat_function;
 };
 }
-#endif /* __ARM_COMPUTE_CLCONCATENATELAYER_H__ */
+#endif /* __ARM_COMPUTE_NECONCATENATELAYER_H__ */

@@ -21,25 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "arm_compute/runtime/CL/functions/CLConcatenateLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEConcatenateLayer.h"
 
-#include "arm_compute/runtime/CL/functions/CLDepthConcatenateLayer.h"
-#include "arm_compute/runtime/CL/functions/CLWidthConcatenateLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEDepthConcatenateLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEWidthConcatenateLayer.h"
 
-#include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
 #include "support/ToolchainSupport.h"
 
 namespace arm_compute
 {
-CLConcatenateLayer::CLConcatenateLayer()
+NEConcatenateLayer::NEConcatenateLayer()
     : _concat_function(nullptr)
 {
 }
 
-void CLConcatenateLayer::configure(const std::vector<ICLTensor *> &inputs_vector, ICLTensor *output, DataLayoutDimension axis)
+void NEConcatenateLayer::configure(const std::vector<ITensor *> &inputs_vector, ITensor *output, DataLayoutDimension axis)
 {
     ARM_COMPUTE_ERROR_ON(output == nullptr);
 
@@ -47,14 +47,14 @@ void CLConcatenateLayer::configure(const std::vector<ICLTensor *> &inputs_vector
     {
         case 0:
         {
-            auto func = support::cpp14::make_unique<CLWidthConcatenateLayer>();
+            auto func = support::cpp14::make_unique<NEWidthConcatenateLayer>();
             func->configure(inputs_vector, output);
             _concat_function = std::move(func);
             break;
         }
         case 2:
         {
-            auto func = support::cpp14::make_unique<CLDepthConcatenateLayer>();
+            auto func = support::cpp14::make_unique<NEDepthConcatenateLayer>();
             func->configure(inputs_vector, output);
             _concat_function = std::move(func);
             break;
@@ -64,17 +64,17 @@ void CLConcatenateLayer::configure(const std::vector<ICLTensor *> &inputs_vector
     }
 }
 
-Status CLConcatenateLayer::validate(const std::vector<ITensorInfo *> &inputs_vector, const ITensorInfo *output, DataLayoutDimension axis)
+Status NEConcatenateLayer::validate(const std::vector<ITensorInfo *> &inputs_vector, const ITensorInfo *output, DataLayoutDimension axis)
 {
     ARM_COMPUTE_RETURN_ERROR_ON(output == nullptr);
 
     switch(get_data_layout_dimension_index(output->data_layout(), axis))
     {
         case 0:
-            ARM_COMPUTE_RETURN_ON_ERROR(CLWidthConcatenateLayer::validate(inputs_vector, output));
+            ARM_COMPUTE_RETURN_ON_ERROR(NEWidthConcatenateLayer::validate(inputs_vector, output));
             break;
         case 2:
-            ARM_COMPUTE_RETURN_ON_ERROR(CLDepthConcatenateLayer::validate(inputs_vector, output));
+            ARM_COMPUTE_RETURN_ON_ERROR(NEDepthConcatenateLayer::validate(inputs_vector, output));
             break;
         default:
             ARM_COMPUTE_RETURN_ERROR_MSG("Concatenation is supported across width and depth only!");
@@ -82,7 +82,7 @@ Status CLConcatenateLayer::validate(const std::vector<ITensorInfo *> &inputs_vec
     return Status{};
 }
 
-void CLConcatenateLayer::run()
+void NEConcatenateLayer::run()
 {
     ARM_COMPUTE_ERROR_ON(_concat_function == nullptr);
     _concat_function->run();

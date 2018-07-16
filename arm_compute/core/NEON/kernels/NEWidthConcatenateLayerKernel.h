@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -22,72 +22,63 @@
  * SOFTWARE.
  */
 
-#ifndef __ARM_COMPUTE_NEDEPTHCONCATENATEKERNEL_H__
-#define __ARM_COMPUTE_NEDEPTHCONCATENATEKERNEL_H__
+#ifndef __ARM_COMPUTE_NEWIDTHCONCATENATELAYERKERNEL_H__
+#define __ARM_COMPUTE_NEWIDTHCONCATENATELAYERKERNEL_H__
 
 #include "arm_compute/core/NEON/INEKernel.h"
+#include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {
 class ITensor;
 
-/** Interface for the depth concatenate kernel.
+/** Interface for the width concatenate kernel.
  *  The input tensor will be concatenated into the output tensor.
  */
-class NEDepthConcatenateLayerKernel : public INEKernel
+class NEWidthConcatenateLayerKernel : public INEKernel
 {
 public:
     const char *name() const override
     {
-        return "NEDepthConcatenateLayerKernel";
+        return "NEWidthConcatenateLayerKernel";
     }
     /** Default constructor */
-    NEDepthConcatenateLayerKernel();
+    NEWidthConcatenateLayerKernel();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEDepthConcatenateLayerKernel(const NEDepthConcatenateLayerKernel &) = delete;
+    NEWidthConcatenateLayerKernel(const NEWidthConcatenateLayerKernel &) = delete;
     /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEDepthConcatenateLayerKernel &operator=(const NEDepthConcatenateLayerKernel &) = delete;
+    NEWidthConcatenateLayerKernel &operator=(const NEWidthConcatenateLayerKernel &) = delete;
     /** Allow instances of this class to be moved */
-    NEDepthConcatenateLayerKernel(NEDepthConcatenateLayerKernel &&) = default;
+    NEWidthConcatenateLayerKernel(NEWidthConcatenateLayerKernel &&) = default;
     /** Allow instances of this class to be moved */
-    NEDepthConcatenateLayerKernel &operator=(NEDepthConcatenateLayerKernel &&) = default;
+    NEWidthConcatenateLayerKernel &operator=(NEWidthConcatenateLayerKernel &&) = default;
     /** Default destructor */
-    ~NEDepthConcatenateLayerKernel() = default;
+    ~NEWidthConcatenateLayerKernel() = default;
     /** Initialise the kernel's inputs and output
      *
-     * @param[in]     input        Input tensor. Data types supported: QASYMM8/F16/F32.
-     * @param[in]     depth_offset The offset on the Z axis.
+     * @param[in]     input        Input tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in]     width_offset The offset on the X axis.
      * @param[in,out] output       Output tensor. Data types supported: Same as @p input.
      *
-     * @note: The output tensor's low two dimensions can't be smaller than the input one's.
-     * @note: The gaps between the two lowest dimensions of input and output need to be divisible by 2.
-     *
      */
-    void configure(const ITensor *input, unsigned int depth_offset, ITensor *output);
-    /**  Static function to check if given info will lead to a valid configuration of @ref NEDepthConcatenateLayerKernel
+    void configure(const ITensor *input, unsigned int width_offset, ITensor *output);
+    /**  Static function to check if given info will lead to a valid configuration of @ref NEWidthConcatenateLayerKernel
      *
-     * @param[in] input        Input tensor info. Data types supported: QASYMM8/F16/F32.
-     * @param[in] depth_offset The offset on the Z axis.
+     * @param[in] input        Input tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] width_offset The offset on the X axis.
      * @param[in] output       Output tensor info. Data types supported: Same as @p input.
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, unsigned int depth_offset, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input, unsigned int width_offset, const ITensorInfo *output);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;
-    BorderSize border_size() const override;
 
 private:
-    using DepthConcatFunction = void(const ITensor *in, ITensor *out, std::pair<int, int> start_xy, int depth_offset, const Window &window);
-
-private:
-    DepthConcatFunction *_func;
-    const ITensor       *_input;
-    ITensor             *_output;
-    int                  _top_bottom;
-    int                  _left_right;
-    unsigned int         _depth_offset;
+    const ITensor *_input;
+    ITensor       *_output;
+    unsigned int   _width_offset;
 };
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_NEDEPTHCONCATENATEKERNEL_H__ */
+#endif /* __ARM_COMPUTE_NEWIDTHCONCATENATELAYERKERNEL_H__ */

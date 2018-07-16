@@ -28,37 +28,18 @@
 #include "arm_compute/core/IAccessWindow.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/NEON/NEFixedPoint.h"
+#include "arm_compute/core/NEON/wrapper/wrapper.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
 
-#include <arm_neon.h>
 #include <cstdint>
 
 using namespace arm_compute;
 
 namespace
 {
-// Overloads of 128-bit vector loads
-uint16x8_t loadq(const uint16_t *ptr)
-{
-    return vld1q_u16(ptr);
-}
-uint32x4_t loadq(const uint32_t *ptr)
-{
-    return vld1q_u32(ptr);
-}
-// Overloads of 128-bit vector stores
-void storeq(uint16_t *ptr, uint16x8_t val)
-{
-    return vst1q_u16(ptr, val);
-}
-void storeq(uint32_t *ptr, uint32x4_t val)
-{
-    return vst1q_u32(ptr, val);
-}
-
 template <typename T>
 void depth_concat(const ITensor *in, ITensor *out, std::pair<int, int> start_xy, int depth_offset, const Window &window)
 {
@@ -81,9 +62,53 @@ void depth_concat(const ITensor *in, ITensor *out, std::pair<int, int> start_xy,
         const auto in_ptr  = reinterpret_cast<const T *>(input_ptr + input.offset());
         const auto out_ptr = reinterpret_cast<T *>(output_ptr + output.offset());
 
-        storeq(out_ptr, loadq(in_ptr));
+        wrapper::vstore(out_ptr, wrapper::vloadq(in_ptr));
     },
     input, output);
+}
+
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, unsigned int depth_offset, ITensorInfo *output)
+{
+    ARM_COMPUTE_UNUSED(depth_offset);
+
+    // Configure kernel window
+    const int left_right = (output->dimension(0) - input->dimension(0)) / 2;
+    const int top_bottom = (output->dimension(1) - input->dimension(1)) / 2;
+
+    const unsigned int num_elems_processed_per_iteration = 16 / input->element_size();
+    const unsigned int num_elems_read_per_iteration      = 16 / input->element_size();
+    const unsigned int num_rows_read_per_iteration       = 1;
+
+    // The window needs to be based on input as we copy all the depths of input
+    Window win = calculate_max_window(*output, Steps(num_elems_processed_per_iteration));
+    win.set(Window::DimZ, Window::Dimension(0, input->tensor_shape().z(), 1));
+
+    AccessWindowRectangle  input_access(input, -left_right, -top_bottom, num_elems_read_per_iteration, num_rows_read_per_iteration);
+    AccessWindowHorizontal output_access(output, 0, num_elems_processed_per_iteration);
+    bool                   window_changed = update_window_and_padding(win, input_access, output_access);
+    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->tensor_shape()));
+
+    Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
+    return std::make_pair(err, win);
+}
+
+Status validate_arguments(const ITensorInfo *input, unsigned int depth_offset, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+
+    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(2) + depth_offset > output->dimension(2));
+    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(0) > output->dimension(0));
+    ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(1) > output->dimension(1));
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(3, input, output);
+
+    // The gaps between the two lowest dimensions of input and output need to be divisible by 2
+    // Otherwise it is not clear how the padding should be added onto the input tensor
+    ARM_COMPUTE_RETURN_ERROR_ON((output->dimension(0) - input->dimension(0)) % 2);
+    ARM_COMPUTE_RETURN_ERROR_ON((output->dimension(1) - input->dimension(1)) % 2);
+
+    return Status{};
 }
 } // namespace
 
@@ -99,17 +124,8 @@ BorderSize NEDepthConcatenateLayerKernel::border_size() const
 
 void NEDepthConcatenateLayerKernel::configure(const ITensor *input, unsigned int depth_offset, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON(input->info()->dimension(2) + depth_offset > output->info()->dimension(2));
-    ARM_COMPUTE_ERROR_ON(input->info()->dimension(0) > output->info()->dimension(0));
-    ARM_COMPUTE_ERROR_ON(input->info()->dimension(1) > output->info()->dimension(1));
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_SHAPES(3, input, output);
-
-    // The gaps between the two lowest dimensions of input and output need to be divisible by 2
-    // Otherwise it is not clear how the padding should be added onto the input tensor
-    ARM_COMPUTE_ERROR_ON((output->info()->dimension(0) - input->info()->dimension(0)) % 2);
-    ARM_COMPUTE_ERROR_ON((output->info()->dimension(1) - input->info()->dimension(1)) % 2);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), depth_offset, output->info()));
 
     _func         = nullptr;
     _input        = input;
@@ -120,6 +136,9 @@ void NEDepthConcatenateLayerKernel::configure(const ITensor *input, unsigned int
 
     switch(input->info()->data_type())
     {
+        case DataType::QASYMM8:
+            _func = &depth_concat<uint8_t>;
+            break;
         case DataType::F16:
             _func = &depth_concat<uint16_t>;
             break;
@@ -130,20 +149,20 @@ void NEDepthConcatenateLayerKernel::configure(const ITensor *input, unsigned int
             ARM_COMPUTE_ERROR("Unsupported data type.");
     }
 
-    const unsigned int num_elems_processed_per_iteration = 16 / input->info()->element_size();
-    const unsigned int num_elems_read_per_iteration      = 16 / input->info()->element_size();
-    const unsigned int num_rows_read_per_iteration       = 1;
+    // Configure kernel window
+    auto win_config = validate_and_configure_window(input->info(), depth_offset, output->info());
+    ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
-    // The window needs to be based on input as we copy all the depths of input
-    Window win = calculate_max_window(*output->info(), Steps(num_elems_processed_per_iteration));
-    win.set(Window::DimZ, Window::Dimension(0, input->info()->tensor_shape().z(), 1));
+    INEKernel::configure(std::get<1>(win_config));
+}
 
-    AccessWindowRectangle  input_access(input->info(), -_left_right, -_top_bottom, num_elems_read_per_iteration, num_rows_read_per_iteration);
-    AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
-    update_window_and_padding(win, input_access, output_access);
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
-
-    INEKernel::configure(win);
+Status NEDepthConcatenateLayerKernel::validate(const arm_compute::ITensorInfo *input,
+                                               unsigned int                    depth_offset,
+                                               const arm_compute::ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, depth_offset, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), depth_offset, output->clone().get()).first);
+    return Status{};
 }
 
 void NEDepthConcatenateLayerKernel::run(const Window &window, const ThreadInfo &info)

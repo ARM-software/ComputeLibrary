@@ -43,7 +43,7 @@ CLDepthConcatenateLayer::CLDepthConcatenateLayer() // NOLINT
 {
 }
 
-void CLDepthConcatenateLayer::configure(std::vector<ICLTensor *> inputs_vector, ICLTensor *output) // NOLINT
+void CLDepthConcatenateLayer::configure(const std::vector<ICLTensor *> &inputs_vector, ICLTensor *output) // NOLINT
 {
     _num_inputs = inputs_vector.size();
 

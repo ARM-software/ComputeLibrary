@@ -84,6 +84,7 @@ SimpleTensor<T> widthconcatenate_layer(const std::vector<SimpleTensor<T>> &srcs)
 
 template SimpleTensor<float> widthconcatenate_layer(const std::vector<SimpleTensor<float>> &srcs);
 template SimpleTensor<half> widthconcatenate_layer(const std::vector<SimpleTensor<half>> &srcs);
+template SimpleTensor<uint8_t> widthconcatenate_layer(const std::vector<SimpleTensor<uint8_t>> &srcs);
 } // namespace reference
 } // namespace validation
 } // namespace test

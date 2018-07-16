@@ -63,7 +63,7 @@ public:
      *                              while width and height are the maximum width and height of the input tensors.
      *                              Finally, depth is the sum of the input depths.
      */
-    void configure(std::vector<ICLTensor *> inputs_vector, ICLTensor *output);
+    void configure(const std::vector<ICLTensor *> &inputs_vector, ICLTensor *output);
     /** Static function to check if given info will lead to a valid configuration of @ref CLDepthConcatenateLayer
      *
      * @param[in] inputs_vector The vectors containing all the tensors to concatenate. Data types supported: QASYMM8/F16/F32.
