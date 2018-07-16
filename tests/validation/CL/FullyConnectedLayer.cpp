@@ -162,7 +162,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
 // *INDENT-ON*
 
 template <typename T>
-using CLFullyConnectedLayerFixture = FullyConnectedLayerValidationFixture<CLTensor, CLAccessor, CLFullyConnectedLayer, T, false>;
+using CLFullyConnectedLayerFixture = FullyConnectedLayerValidationFixture<CLTensor, CLAccessor, CLFullyConnectedLayer, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
@@ -199,7 +199,7 @@ TEST_SUITE_END()
 TEST_SUITE_END()
 
 template <typename T>
-using CLFullyConnectedLayerQuantizedFixture = FullyConnectedLayerValidationQuantizedFixture<CLTensor, CLAccessor, CLFullyConnectedLayer, T, false>;
+using CLFullyConnectedLayerQuantizedFixture = FullyConnectedLayerValidationQuantizedFixture<CLTensor, CLAccessor, CLFullyConnectedLayer, T>;
 
 TEST_SUITE(Quantized)
 TEST_SUITE(QASYMM8)

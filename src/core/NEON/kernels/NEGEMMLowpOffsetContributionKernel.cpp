@@ -193,10 +193,13 @@ void NEGEMMLowpOffsetContributionKernel::run(const Window &window, const ThreadI
         Window win_vector_sum_row(collapsed_window);
         win_vector_sum_row.set(Window::DimX, Window::Dimension(0, 0, 0));
         win_vector_sum_row.set(Window::DimY, Window::Dimension(0, 0, 0));
+        win_vector_sum_row.set(Window::DimZ, Window::Dimension(0, 0, 0));
 
         Iterator vector_sum_col(_vector_sum_col, win_vector_sum_col);
         Iterator vector_sum_row(_vector_sum_row, win_vector_sum_row);
         Iterator mm_result(_mm_result, window);
+
+        const size_t sum_row_stride_y = _vector_sum_row->info()->strides_in_bytes().y();
 
         execute_window_loop(collapsed_window, [&](const Coordinates & id)
         {
@@ -217,7 +220,7 @@ void NEGEMMLowpOffsetContributionKernel::run(const Window &window, const ThreadI
             a_offset_term_s32.val[3] = vmulq_n_s32(a_offset_term_s32.val[3], _a_offset);
 
             // Compute the leftover term due to b_offset.
-            int32x4_t b_offset_term_s32 = vld1q_dup_s32(reinterpret_cast<const int32_t *>(vector_sum_row.ptr()) + id.y());
+            int32x4_t b_offset_term_s32 = vld1q_dup_s32(reinterpret_cast<const int32_t *>(vector_sum_row.ptr() + id.z() * sum_row_stride_y) + id.y());
             b_offset_term_s32           = vmulq_n_s32(b_offset_term_s32, _b_offset);
 
             // Add a_offset_term_s32 and b_offset_term_s32
@@ -266,14 +269,17 @@ void NEGEMMLowpOffsetContributionKernel::run(const Window &window, const ThreadI
         Window win_vector_sum_row(collapsed_window);
         win_vector_sum_row.set(Window::DimX, Window::Dimension(0, 0, 0));
         win_vector_sum_row.set(Window::DimY, Window::Dimension(0, 0, 0));
+        win_vector_sum_row.set(Window::DimZ, Window::Dimension(0, 0, 0));
 
         Iterator vector_sum_row(_vector_sum_row, win_vector_sum_row);
         Iterator mm_result(_mm_result, window);
 
+        const size_t sum_row_stride_y = _vector_sum_row->info()->strides_in_bytes().y();
+
         execute_window_loop(window, [&](const Coordinates & id)
         {
             // Compute the leftover term due to b_offset.
-            int32x4_t b_offset_term_s32 = vld1q_dup_s32(reinterpret_cast<const int32_t *>(vector_sum_row.ptr()) + id.y());
+            int32x4_t b_offset_term_s32 = vld1q_dup_s32(reinterpret_cast<const int32_t *>(vector_sum_row.ptr() + id.z() * sum_row_stride_y) + id.y());
             b_offset_term_s32           = vmulq_n_s32(b_offset_term_s32, _b_offset);
 
             int32x4x4_t in_s32 =

@@ -27,6 +27,7 @@
 #include "arm_compute/core/Size2D.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/utils/misc/ShapeCalculator.h"
+#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 
 #include <algorithm>
@@ -35,121 +36,107 @@
 using namespace arm_compute;
 using namespace arm_compute::misc::shape_calculator;
 
-NEFullyConnectedLayerReshapeWeights::NEFullyConnectedLayerReshapeWeights(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _transpose_kernel(), _transpose1xW_kernel(), _transpose_output(), _transpose_weights(false), _is_batched_fc_layer(false)
+namespace
 {
-}
-
-void NEFullyConnectedLayerReshapeWeights::configure(const ITensor *input, ITensor *output, bool transpose_weights, bool is_batched_fc_layer)
+Status validate_mm(const ITensorInfo &input, const ITensorInfo &weights, const ITensorInfo &output)
 {
-    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-
-    // Perform validate step
-    ARM_COMPUTE_ERROR_THROW_ON(NEFullyConnectedLayerReshapeWeights::validate(input->info(), output->info(), transpose_weights, is_batched_fc_layer));
-
-    _transpose_weights   = transpose_weights;
-    _is_batched_fc_layer = is_batched_fc_layer;
-
-    // Check if we need to transpose the weights
-    if(_transpose_weights)
+    if(is_data_type_quantized_asymmetric(input.data_type()))
     {
-        if(_is_batched_fc_layer)
-        {
-            // Initialize the output tensor for transpose
-            _transpose_output.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_transposed_shape(*input->info())));
-            _memory_group.manage(&_transpose_output);
-            _transpose_kernel.configure(input, &_transpose_output);
+        // Since we need negative offsets for computing convolution, we need to change QuantizationInfo()
+        // Extract and negate input and weights offset
+        const QuantizationInfo input_quantization_info(input.quantization_info().scale, -input.quantization_info().offset);
+        const QuantizationInfo weights_quantization_info(weights.quantization_info().scale, -weights.quantization_info().offset);
 
-            // Configure transpose 1xW kernel
-            _transpose1xW_kernel.configure(&_transpose_output, output);
-
-            // Allocate temporary tensor used for transposing the weights
-            _transpose_output.allocator()->allocate();
-        }
-        else
-        {
-            _transpose_kernel.configure(input, output);
-        }
+        // Validate gemmlowp function
+        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpMatrixMultiplyCore::validate(&input.clone()->set_quantization_info(input_quantization_info),
+                                                                           &weights.clone()->set_quantization_info(weights_quantization_info),
+                                                                           &output));
     }
     else
     {
-        if(_is_batched_fc_layer)
-        {
-            // Configure transpose 1xW kernel
-            _transpose1xW_kernel.configure(input, output);
-        }
-    }
-}
-
-Status NEFullyConnectedLayerReshapeWeights::validate(const ITensorInfo *input, const ITensorInfo *output, bool transpose_weights, bool is_batched_fc_layer)
-{
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 2);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(!transpose_weights && !is_batched_fc_layer, "Configuration transpose_weights=false & is_batched_fc_layer=false not supported");
-
-    if(transpose_weights)
-    {
-        if(is_batched_fc_layer)
-        {
-            std::unique_ptr<ITensorInfo> use_output = output->clone();
-            use_output->set_is_resizable(true).reset_padding().set_tensor_shape(compute_transposed_shape(*input));
-
-            ARM_COMPUTE_RETURN_ON_ERROR(NETransposeKernel::validate(input, use_output.get()));
-            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMTranspose1xWKernel::validate(use_output.get(), output));
-        }
-        else
-        {
-            ARM_COMPUTE_RETURN_ON_ERROR(NETransposeKernel::validate(input, output));
-        }
-    }
-    else
-    {
-        if(is_batched_fc_layer)
-        {
-            ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMTranspose1xWKernel::validate(input, output));
-        }
+        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMM::validate(&input, &weights, nullptr, &output, 1.f, 0.0f, GEMMInfo(false, false, true /* Reshape weights only for the first run */)));
     }
 
     return Status{};
 }
+} // namespace
 
-void NEFullyConnectedLayerReshapeWeights::run()
+void NEFullyConnectedLayerReshapeWeights::configure(const ITensor *input, ITensor *output)
 {
-    _memory_group.acquire();
+    auto k = arm_compute::support::cpp14::make_unique<NETransposeKernel>();
+    k->configure(input, output);
+    _kernel = std::move(k);
+}
 
-    if(_transpose_weights)
-    {
-        NEScheduler::get().schedule(&_transpose_kernel, Window::DimY);
-    }
-
-    if(_is_batched_fc_layer)
-    {
-        NEScheduler::get().schedule(&_transpose1xW_kernel, Window::DimY);
-    }
-
-    _memory_group.release();
+Status NEFullyConnectedLayerReshapeWeights::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    return NETransposeKernel::validate(input, output);
 }
 
 NEFullyConnectedLayer::NEFullyConnectedLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _im2col_kernel(), _reshape_weights_function(), _interleave4x4_kernel(), _mm_kernel(), _accumulate_biases_kernel(), _im2col_output(),
-      _interleave4x4_output(), _reshape_weights_output(), _original_weights(nullptr), _is_batched_fc_layer(false), _linearize_input(false), _accumulate_biases(false), _is_prepared(false)
+    : _memory_group(std::move(memory_manager)), _im2col_kernel(), _reshape_weights_function(), _mm_gemm(), _mm_gemmlowp(), _gemmlowp_output_stage(), _accumulate_biases_kernel(), _im2col_output(),
+      _gemmlowp_output(), _reshape_weights_output(), _original_weights(nullptr), _are_weights_reshaped(false), _is_fc_after_conv(false), _accumulate_biases(false), _is_quantized(false), _is_prepared(false)
 {
+}
+
+void NEFullyConnectedLayer::configure_mm(const ITensor *input, const ITensor *weights, ITensor *output)
+{
+    if(_is_quantized)
+    {
+        // Since we need negative offsets for computing convolution, we need to change QuantizationInfo()
+        // Extract and negate input and weights offset
+        const QuantizationInfo input_quantization_info   = input->info()->quantization_info();
+        const QuantizationInfo weights_quantization_info = weights->info()->quantization_info();
+
+        input->info()->set_quantization_info(QuantizationInfo(input_quantization_info.scale, -input_quantization_info.offset));
+        weights->info()->set_quantization_info(QuantizationInfo(weights_quantization_info.scale, -weights_quantization_info.offset));
+
+        // Configure gemmlowp function
+        _mm_gemmlowp.configure(input, weights, output);
+
+        // Revert back QuantizatioInfo as input and weights could be used in other fully connected layers
+        input->info()->set_quantization_info(input_quantization_info);
+        weights->info()->set_quantization_info(weights_quantization_info);
+    }
+    else
+    {
+        // Configure matrix multiply kernel
+        _mm_gemm.configure(input, weights, nullptr, output, 1.f, 0.0f, GEMMInfo(false, false, true /* Reshape weights only for the first run */));
+    }
+}
+
+void NEFullyConnectedLayer::configure_conv_fc(const ITensor *input, const ITensor *weights, ITensor *output)
+{
+    ARM_COMPUTE_ERROR_ON((weights->info()->dimension(1) != (input->info()->dimension(0) * input->info()->dimension(1) * input->info()->dimension(2))));
+
+    // If the fully connected layer is called after a convolution layer, the input tensor must be linearized
+
+    // Initialize output tensor for im2col
+    TensorShape shape_im2col = compute_im2col_fc_shape(input->info());
+    _im2col_output.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_im2col));
+
+    // Configure im2col kernel
+    _memory_group.manage(&_im2col_output);
+    _im2col_kernel.configure(input, &_im2col_output, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false, true);
+
+    // Configure matrix multiply kernel
+    configure_mm(&_im2col_output, weights, output);
+
+    // Allocate the output tensor for im2col once all the configure methods have been called
+    _im2col_output.allocator()->allocate();
+}
+
+void NEFullyConnectedLayer::configure_fc_fc(const ITensor *input, const ITensor *weights, ITensor *output)
+{
+    ARM_COMPUTE_ERROR_ON(input->info()->dimension(0) != weights->info()->dimension(1));
+
+    // Configure matrix multiply kernel
+    configure_mm(input, weights, output);
 }
 
 void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output,
                                       FullyConnectedLayerInfo fc_info)
 {
-    // With the Fully Connected layer we can have 4 different cases:
-    //  1) Convolution layer -> Fully Connected layer without batches
-    //  2) Fully Connected layer -> Fully Connected layer without batches
-    //  3) Convolution layer -> Fully Connected layer with batches
-    //  4) Fully Connected layer -> Fully Connected layer with batches
-
-    // Expected shape before transpose and reshaping
-    // Input: In x B (In and B can be multi-dimensional)
-    // Weights: flat(In) x Out
-    // Biases: Out
-    // Output: Out x B (B can be multi-dimensional)
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
 
     // Perform validate step
@@ -159,155 +146,158 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
                                                                output->info(),
                                                                fc_info));
 
-    const int    num_batch_dimensions = std::max(0, static_cast<int>(output->info()->tensor_shape().num_dimensions()) - 1);
-    const int    num_input_dimensions = input->info()->tensor_shape().num_dimensions() - num_batch_dimensions;
-    const size_t linear_input_size    = input->info()->tensor_shape().total_size_lower(num_input_dimensions);
+    _are_weights_reshaped = fc_info.transpose_weights ? fc_info.are_weights_reshaped : true;
+    _is_fc_after_conv     = true;
+    _accumulate_biases    = false;
+    _is_quantized         = is_data_type_quantized_asymmetric(input->info()->data_type());
+    _original_weights     = weights;
 
-    _original_weights    = weights;
-    _linearize_input     = (input->info()->tensor_shape().x() != linear_input_size) || (num_input_dimensions > 1 && linear_input_size == 1);
-    _accumulate_biases   = biases != nullptr;
-    _is_batched_fc_layer = num_batch_dimensions > 0;
-    _is_prepared         = fc_info.are_weights_reshaped || (!fc_info.transpose_weights && !_is_batched_fc_layer);
-
-    const size_t   interleave_width = 16 / input->info()->element_size();
-    const ITensor *weights_to_use   = weights;
-
-    if(!_is_prepared)
+    // Configure gemmlowp output
+    if(_is_quantized)
     {
-        weights_to_use = &_reshape_weights_output;
-
-        _reshape_weights_output.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_fully_connected_reshaped_weights_shape(weights->info(),
-                                                  fc_info.transpose_weights,
-                                                  _is_batched_fc_layer, interleave_width)));
-
-        // Reshape the weights
-        _reshape_weights_function.configure(weights, &_reshape_weights_output, fc_info.transpose_weights, _is_batched_fc_layer);
+        _gemmlowp_output.allocator()->init(output->info()->clone()->set_is_resizable(true).reset_padding().set_data_type(DataType::S32));
     }
 
-    const ITensor *multiply_input = input;
-
-    if(_linearize_input)
+    // Configure accumulate biases kernel for non quantized asymmetric types
+    if(biases != nullptr && !_is_quantized)
     {
-        _im2col_output.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_im2col_fc_shape(input->info(), num_input_dimensions)));
+        _accumulate_biases = true;
 
-        // Configure im2col kernel
-        _memory_group.manage(&_im2col_output);
-        _im2col_kernel.configure(input, &_im2col_output, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false, true);
-
-        multiply_input = &_im2col_output;
-    }
-
-    int m = multiply_input->info()->dimension(1);
-    int k = multiply_input->info()->dimension(0);
-
-    if(_is_batched_fc_layer)
-    {
-        _interleave4x4_output.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_interleaved_shape(*multiply_input->info())));
-
-        // Configure interleave4x4 kernel
-        _memory_group.manage(&_interleave4x4_output);
-        _interleave4x4_kernel.configure(multiply_input, &_interleave4x4_output);
-
-        multiply_input = &_interleave4x4_output;
-    }
-
-    // Configure matrix multiply kernel
-    _mm_kernel.configure(multiply_input, weights_to_use, output, 1.0f, _is_batched_fc_layer, GEMMReshapeInfo(m, 0 /* no transpose */, k));
-
-    if(_accumulate_biases)
-    {
         // Configure accumulate biases kernel
         _accumulate_biases_kernel.configure(output, biases);
     }
 
-    if(_linearize_input)
+    // With the Fully Connected layer we can have 4 different cases:
+    //  1) Convolution layer -> Fully Connected layer without batches
+    //  2) Fully Connected layer -> Fully Connected layer without batches
+    //  3) Convolution layer -> Fully Connected layer with batches
+    //  4) Fully Connected layer -> Fully Connected layer with batches
+
+    const ITensor *weights_to_use = weights;
+
+    if(!_are_weights_reshaped)
     {
-        _im2col_output.allocator()->allocate();
+        weights_to_use = &_reshape_weights_output;
+
+        // Reshape the weights
+        _reshape_weights_function.configure(weights, &_reshape_weights_output);
     }
 
-    if(_is_batched_fc_layer)
+    // Check if we have a fully connected layer with batches
+    const bool is_batched_fc_layer = output->info()->dimension(1) > 1;
+
+    if(is_batched_fc_layer)
     {
-        _interleave4x4_output.allocator()->allocate();
+        _is_fc_after_conv = (TensorShape::num_max_dimensions >= 4) && (std::equal(input->info()->tensor_shape().cbegin() + 3,
+                                                                                  input->info()->tensor_shape().cend(),
+                                                                                  output->info()->tensor_shape().cbegin() + 1));
     }
+    else
+    {
+        _is_fc_after_conv = input->info()->num_dimensions() > 1;
+    }
+
+    ITensor *tmp_output = (_is_quantized) ? &_gemmlowp_output : output;
+    if(_is_fc_after_conv)
+    {
+        // Fully Connected layer after a Convolution Layer without batches
+        configure_conv_fc(input, weights_to_use, tmp_output);
+    }
+    else
+    {
+        // Fully Connected layer after a Fully Connected Layer without batches
+        configure_fc_fc(input, weights_to_use, tmp_output);
+    }
+
+    // Configure output stage for asymmetric quantized types
+    if(_is_quantized)
+    {
+        float multiplier = input->info()->quantization_info().scale * weights->info()->quantization_info().scale / output->info()->quantization_info().scale;
+        int   output_multiplier, output_shift;
+        quantization::calculate_quantized_multiplier_less_than_one(multiplier, &output_multiplier, &output_shift);
+        _gemmlowp_output_stage.configure(&_gemmlowp_output, biases, output, output_multiplier, output_shift, output->info()->quantization_info().offset);
+        _gemmlowp_output.allocator()->allocate();
+    }
+
+    _are_weights_reshaped = _are_weights_reshaped || fc_info.retain_internal_weights;
 }
 
 Status NEFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,
                                        FullyConnectedLayerInfo fc_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
+    ARM_COMPUTE_UNUSED(fc_info.retain_internal_weights);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights, output);
-
-    const int    num_batch_dimensions = std::max(0, static_cast<int>(output->tensor_shape().num_dimensions()) - 1);
-    const int    num_input_dimensions = input->tensor_shape().num_dimensions() - num_batch_dimensions;
-    const size_t linear_input_size    = input->tensor_shape().total_size_lower(num_input_dimensions);
-
-    const bool linearize_input     = (input->tensor_shape().x() != linear_input_size) || (num_input_dimensions > 1 && linear_input_size == 1);
-    const bool accumulate_biases   = biases != nullptr;
-    const bool is_batched_fc_layer = num_batch_dimensions > 0;
-
-    ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape().total_size_upper(num_input_dimensions) != output->tensor_shape().total_size_upper(1));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 2);
 
-    const size_t                 interleave_width       = 16 / input->element_size();
-    const ITensorInfo           *weights_to_use         = weights;
-    std::unique_ptr<ITensorInfo> reshape_weights_output = input->clone();
+    bool weights_reshaped = fc_info.transpose_weights ? fc_info.are_weights_reshaped : true;
+    bool is_fc_after_conv = true;
+    bool is_quantized     = is_data_type_quantized_asymmetric(input->data_type());
 
-    if(!fc_info.are_weights_reshaped && (fc_info.transpose_weights || is_batched_fc_layer))
+    const ITensorInfo &im2col_input     = TensorInfo(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_im2col_fc_shape(input)));
+    const ITensorInfo &reshaped_weights = TensorInfo(weights->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_transposed_shape(*weights)));
+    const ITensorInfo &gemmlowp_output  = TensorInfo(output->clone()->set_is_resizable(true).reset_padding().set_data_type(DataType::S32));
+
+    // Configure accumulate biases kernel for non quantized asymmetric types
+    if(biases != nullptr && !is_quantized)
     {
-        reshape_weights_output->set_tensor_shape(compute_fully_connected_reshaped_weights_shape(weights, fc_info.transpose_weights, is_batched_fc_layer, interleave_width));
-
-        ARM_COMPUTE_RETURN_ON_ERROR(NEFullyConnectedLayerReshapeWeights::validate(weights, reshape_weights_output.get(), fc_info.transpose_weights, is_batched_fc_layer));
-
-        weights_to_use = reshape_weights_output.get();
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
+        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMMatrixAccumulateBiasesKernel::validate(output, biases));
     }
 
-    // Check correct shape of weights
+    // With the Fully Connected layer we can have 4 different cases:
+    //  1) Convolution layer -> Fully Connected layer without batches
+    //  2) Fully Connected layer -> Fully Connected layer without batches
+    //  3) Convolution layer -> Fully Connected layer with batches
+    //  4) Fully Connected layer -> Fully Connected layer with batches
+
+    const ITensorInfo *input_to_use   = input;
+    const ITensorInfo *weights_to_use = weights;
+    const ITensorInfo *tmp_output     = (is_quantized) ? &gemmlowp_output : output;
+
+    if(!weights_reshaped)
+    {
+        // Validate reshape weights kernel
+        ARM_COMPUTE_RETURN_ON_ERROR(NEFullyConnectedLayerReshapeWeights::validate(weights, &reshaped_weights));
+        weights_to_use = &reshaped_weights;
+    }
+
+    // Check if we have a fully connected layer with batches
+    const bool is_batched_fc_layer = output->dimension(1) > 1;
+
     if(is_batched_fc_layer)
     {
-        // Transpose + Transpose1xW
-        ARM_COMPUTE_RETURN_ERROR_ON(weights_to_use->tensor_shape().x() != linear_input_size * interleave_width);
-        ARM_COMPUTE_RETURN_ERROR_ON(weights_to_use->tensor_shape().y() != static_cast<unsigned int>(std::ceil(static_cast<float>(output->tensor_shape().x()) / interleave_width)));
+        is_fc_after_conv = (TensorShape::num_max_dimensions >= 4) && (std::equal(input->tensor_shape().cbegin() + 3,
+                                                                                 input->tensor_shape().cend(),
+                                                                                 output->tensor_shape().cbegin() + 1));
     }
     else
     {
-        // Transpose
-        ARM_COMPUTE_RETURN_ERROR_ON(weights_to_use->tensor_shape().x() != output->tensor_shape().x());
-        ARM_COMPUTE_RETURN_ERROR_ON(weights_to_use->tensor_shape().y() != linear_input_size);
+        is_fc_after_conv = input->num_dimensions() > 1;
     }
 
-    const ITensorInfo           *multiply_input       = input;
-    std::unique_ptr<ITensorInfo> im2col_output        = input->clone();
-    std::unique_ptr<ITensorInfo> interleave4x4_output = input->clone();
-
-    if(linearize_input)
+    if(is_fc_after_conv)
     {
-        im2col_output->set_tensor_shape(compute_im2col_fc_shape(input, num_input_dimensions));
+        // Fully Connected layer after a Convolution Layer without batches
+        ARM_COMPUTE_RETURN_ERROR_ON((weights_to_use->dimension(1) != (input->dimension(0) * input->dimension(1) * input->dimension(2))));
 
-        ARM_COMPUTE_RETURN_ON_ERROR(NEIm2ColKernel::validate(input, im2col_output.get(), Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false, true));
-
-        multiply_input = im2col_output.get();
+        // Validate im2col kernel
+        ARM_COMPUTE_RETURN_ON_ERROR(NEIm2ColKernel::validate(input, &im2col_input, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false, true));
+        input_to_use = &im2col_input;
     }
-
-    int m = multiply_input->dimension(1);
-    int k = multiply_input->dimension(0);
-
-    if(is_batched_fc_layer)
+    else
     {
-        interleave4x4_output->set_tensor_shape(compute_interleaved_shape(*multiply_input));
-
-        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMInterleave4x4Kernel::validate(multiply_input, interleave4x4_output.get()));
-
-        multiply_input = interleave4x4_output.get();
+        // Fully Connected layer after a Fully Connected Layer without batches
+        ARM_COMPUTE_RETURN_ERROR_ON(input->dimension(0) != weights_to_use->dimension(1));
     }
+    // Validate matrix multiply kernel
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_mm(*input_to_use, *weights_to_use, *tmp_output));
 
-    ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMMatrixMultiplyKernel::validate(multiply_input, weights_to_use, output, 1.0f, is_batched_fc_layer, GEMMReshapeInfo(m, 0 /* no transpose */, k)));
-
-    if(accumulate_biases)
+    // Validate output stage for asymmetric quantized types
+    if(is_quantized)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, biases);
-        ARM_COMPUTE_RETURN_ERROR_ON(biases->tensor_shape().x() != output->tensor_shape().x());
-
-        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMMatrixAccumulateBiasesKernel::validate(output, biases));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint::validate(&gemmlowp_output, biases, output));
     }
 
     return Status{};
@@ -320,24 +310,32 @@ void NEFullyConnectedLayer::run()
     _memory_group.acquire();
 
     // Linearize input if it comes from a convolutional layer
-    if(_linearize_input)
+    if(_is_fc_after_conv)
     {
         NEScheduler::get().schedule(&_im2col_kernel, Window::DimY);
     }
 
-    // Interleave input
-    if(_is_batched_fc_layer)
+    // Run matrix multiply
+    if(_is_quantized)
     {
-        NEScheduler::get().schedule(&_interleave4x4_kernel, Window::DimY);
+        _mm_gemmlowp.run();
+    }
+    else
+    {
+        _mm_gemm.run();
     }
 
-    // Run matrix multiply
-    NEScheduler::get().schedule(&_mm_kernel, _is_batched_fc_layer ? Window::DimY : Window::DimX);
-
     // Accumulate biases if provided
-    if(_accumulate_biases)
+    if(_is_quantized)
     {
-        NEScheduler::get().schedule(&_accumulate_biases_kernel, Window::DimY);
+        _gemmlowp_output_stage.run();
+    }
+    else
+    {
+        if(_accumulate_biases)
+        {
+            NEScheduler::get().schedule(&_accumulate_biases_kernel, Window::DimY);
+        }
     }
 
     _memory_group.release();
@@ -345,16 +343,30 @@ void NEFullyConnectedLayer::run()
 
 void NEFullyConnectedLayer::prepare()
 {
-    // Reshape of the weights (happens only once)
     if(!_is_prepared)
     {
-        ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
+        // Reshape of the weights (happens only once)
+        if(!_are_weights_reshaped)
+        {
+            ARM_COMPUTE_ERROR_ON(!_original_weights->is_used());
 
-        // Run weights reshape, clean internal tensors and mark original weights tensor as unused
-        _reshape_weights_output.allocator()->allocate();
-        _reshape_weights_function.run();
-        _reshape_weights_function = NEFullyConnectedLayerReshapeWeights();
-        _original_weights->mark_as_unused();
+            // Run reshape weights kernel and mark weights as unused
+            _reshape_weights_output.allocator()->allocate();
+            _reshape_weights_function.run();
+            _original_weights->mark_as_unused();
+
+            // Prepare GEMM prepare and release unused weights
+            if(!_is_quantized)
+            {
+                _mm_gemm.prepare();
+                if(!_reshape_weights_output.is_used())
+                {
+                    _reshape_weights_output.allocator()->free();
+                }
+            }
+
+            _are_weights_reshaped = true;
+        }
 
         _is_prepared = true;
     }

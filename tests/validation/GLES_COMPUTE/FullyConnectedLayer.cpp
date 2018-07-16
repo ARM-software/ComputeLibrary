@@ -102,7 +102,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
 }
 
 template <typename T>
-using GCFullyConnectedLayerFixture = FullyConnectedLayerValidationFixture<GCTensor, GCAccessor, GCFullyConnectedLayer, T, false>;
+using GCFullyConnectedLayerFixture = FullyConnectedLayerValidationFixture<GCTensor, GCAccessor, GCFullyConnectedLayer, T>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP16)

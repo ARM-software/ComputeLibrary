@@ -88,20 +88,32 @@ public:
     /** Set the input and output tensors.
      *
      * @param[in]  input   Source tensor. Data type supported: QASYMM8/F16/F32.
-     * @param[in]  weights Weights tensor. The weights must be 2 dimensional. Data type supported: Same as @p input
-     * @param[in]  biases  Bias tensor. It can be nullptr. Data type supported:Same as @p input.
-     * @param[out] output  Destination tensor. Data type supported: Same as @p input.
+     * @param[in]  weights Weights tensor. The weights must be 2 dimensional.
+     *                     If this function is called after a Convolution Layer, the (transposed) weights will have as many rows as the product of the first 3 input's dimensions.
+     *                     If it is called after another FullyConnected Layer, the (transposed) weights will have as many rows as the input's first dimension.
+     *                     Data type supported: Same as @p input.
+     * @param[in]  biases  Bias tensor. Can be nullptr. Data type supported:Same as @p input.
+     * @param[out] output  Destination tensor. Its shape should be equal to the output of a matrix multiplication between:
+     *                     - The output of im2col on the input and the (transposed) 2D weights, if the function is called after a Convolution Layer
+     *                     - The input tensor and the (transposed) 2D weights, if the function is called after another FullyConnected Layer.
+     *                     Data type supported: Same as @p input.
      * @param[in]  fc_info (Optional) Fully connected layer additional info
      */
     void configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
                    FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLFullyConnectedLayer
      *
-     * @param[in] input   Source tensor. Data type supported: QASYMM8/F16/F32.
-     * @param[in] weights Weights tensor. The weights must be 2 dimensional. Data type supported: Same as @p input
-     * @param[in] biases  Bias tensor. It can be nullptr. Data type supported:Same as @p input.
-     * @param[in] output  Destination tensor. Data type supported: Same as @p input.
-     * @param[in] fc_info (Optional) Fully connected layer additional info
+     * @param[in]  input   Source tensor info. Data type supported: QASYMM8/F16/F32.
+     * @param[in]  weights Weights tensor info. The weights must be 2 dimensional.
+     *                     If this function is called after a Convolution Layer, the (transposed) weights will have as many rows as the product of the first 3 input's dimensions.
+     *                     If it is called after another FullyConnected Layer, the (transposed) weights will have as many rows as the input's first dimension.
+     *                     Data type supported: Same as @p input.
+     * @param[in]  biases  Bias tensor info. Can be nullptr. Data type supported:Same as @p input.
+     * @param[out] output  Destination tensor info. Its shape should be equal to the output of a matrix multiplication between:
+     *                     - The output of im2col on the input and the (transposed) 2D weights, if the function is called after a Convolution Layer
+     *                     - The input tensor and the (transposed) 2D weights, if the function is called after another FullyConnected Layer.
+     *                     Data type supported: Same as @p input.
+     * @param[in]  fc_info (Optional) Fully connected layer additional info
      *
      * @return a status
      */
