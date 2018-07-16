@@ -1055,5 +1055,23 @@ To cross-compile the stub OpenGLES and EGL libraries simply run:
 	#Linux 64bit
 	aarch64-linux-gnu-gcc -o libEGL.so -Iinclude/linux opengles-3.1-stubs/EGL.c -fPIC -shared
 	aarch64-linux-gnu-gcc -o libGLESv2.so -Iinclude/linux opengles-3.1-stubs/GLESv2.c -fPIC -shared
+
+@subsection S3_8_cl_requirements OpenCL DDK Requirements
+
+@subsubsection S3_8_1_cl_hard_requirements Hard Requirements
+
+Compute Library requires OpenCL 1.1 and above with support of non uniform workgroup sizes, which is officially supported in the Mali OpenCL DDK r8p0 and above as an extension (respective extension flag is \a -cl-arm-non-uniform-work-group-size).
+
+Enabling 16-bit floating point calculations require \a cl_khr_fp16 extension to be supported. All Mali GPUs with compute capabilities have native support for half precision floating points.
+
+Use of @ref CLMeanStdDev function requires 64-bit atomics support, thus \a cl_khr_int64_base_atomics should be supported in order to use.
+
+@subsubsection S3_8_2_cl_performance_requirements Performance improvements
+
+Integer dot product built-in function extensions (and therefore optimized kernels) are available with Mali OpenCL DDK r22p0 and above for the following GPUs : G71, G76. The relevant extensions are \a cl_arm_integer_dot_product_int8, \a cl_arm_integer_dot_product_accumulate_int8 and \a cl_arm_integer_dot_product_accumulate_int16.
+
+OpenCL kernel level debugging can be simplified with the use of printf, this requires the \a cl_arm_printf extension to be supported.
+
+SVM allocations are supported for all the underlying allocations in Compute Library. To enable this OpenCL 2.0 and above is a requirement.
 */
 } // namespace arm_compute
