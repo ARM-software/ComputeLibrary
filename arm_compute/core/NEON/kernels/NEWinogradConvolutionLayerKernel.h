@@ -74,7 +74,7 @@ public:
      * @param[in]  matrix_stride Stride between output matrices.
      */
     virtual void configure(const ITensor *input_nhwc, const int num_batches, const int num_rows, const int num_cols, const int num_channels,
-                           const PaddingType padding, T *const output, const int matrix_stride) = 0;
+                           const PaddingType padding, ITensor *output, const int matrix_stride) = 0;
 
     /** Destructor */
     virtual ~INEWinogradLayerTransformInputKernel()
@@ -152,7 +152,7 @@ public:
         const int         num_cols,
         const int         num_channels,
         const PaddingType padding,
-        T *const          output,
+        ITensor          *output,
         const int         matrix_stride) override;
 
     // Inherited methods overridden:
@@ -181,7 +181,7 @@ private:
     int            _num_cols;      /**< Number of columns in input tensor. */
     int            _num_channels;  /**< Number of channels in input tensor. */
     PaddingType    _padding;       /**< Padding type. */
-    T             *_output;        /**< Base of output matrices. */
+    ITensor       *_output;        /**< Base of output matrices. */
     int            _matrix_stride; /**< Stride between output matrices. */
 };
 
@@ -236,9 +236,9 @@ public:
      */
     virtual void configure(
         const ITensor *biases,
-        const T *const output_workingspace,
+        const ITensor *output_workingspace,
         const int      matrix_stride,
-        ITensor *const output_nhwc,
+        ITensor       *output_nhwc,
         const int      num_batches,
         const int      num_rows,
         const int      num_cols,
@@ -318,9 +318,9 @@ public:
      */
     void configure(
         const ITensor *biases,
-        const T *const output_workingspace,
+        const ITensor *output_workingspace,
         const int      matrix_stride,
-        ITensor *const output_nhwc,
+        ITensor       *output_nhwc,
         const int      num_batches,
         const int      num_rows,
         const int      num_cols,
@@ -345,7 +345,7 @@ private:
     using OutputTransform = typename WinogradBase::template OutputTransform<T>;
 
     const ITensor *_biases;
-    const T       *_output_workspace;
+    const ITensor *_output_workspace;
     int            _matrix_stride;
     int            _matrix_row_stride;
     ITensor       *_output_nhwc;
@@ -379,14 +379,14 @@ public:
 
     /** Configure the weights transform kernel.
      *
-     * @param[in] weights_hwio        Pointer to the weights tensor
-     * @param[in] output              Pointer to working space for the output tensor in the Winograd domain.
-     * @param[in] matrix_stride       Stride across matrices in the output workspace.
-     * @param[in] num_output_channels Number of filters.
-     * @param[in] num_input_channels  Number of channels in each filter.
+     * @param[in]  weights_hwio        Pointer to the weights tensor
+     * @param[out] output              Pointer to working space for the output tensor in the Winograd domain.
+     * @param[in]  matrix_stride       Stride across matrices in the output workspace.
+     * @param[in]  num_output_channels Number of filters.
+     * @param[in]  num_input_channels  Number of channels in each filter.
      */
 
-    virtual void configure(const ITensor *weights_hwio, T *const output, const int matrix_stride, const int num_output_channels, const int num_input_channels) = 0;
+    virtual void configure(const ITensor *weights_hwio, ITensor *output, const int matrix_stride, const int num_output_channels, const int num_input_channels) = 0;
 
     virtual ~INEWinogradLayerTransformWeightsKernel()
     {
@@ -428,7 +428,7 @@ public:
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const WinogradInfo &winograd_info);
 
     // Inherited methods overridden:
-    void configure(const ITensor *weights_hwio, T *const output, const int matrix_stride, const int num_output_channels, const int num_input_channels) override;
+    void configure(const ITensor *weights_hwio, ITensor *output, const int matrix_stride, const int num_output_channels, const int num_input_channels) override;
     unsigned int get_weight_storage_size(int num_output_channels, int num_input_channels) const override;
     int get_matrix_stride(const KernelShape &kernel_shape) const override;
     void run(const Window &window, const ThreadInfo &info) override;
@@ -440,147 +440,26 @@ private:
     using WeightsTransform = typename WinogradBase::template WeightsTransform<T>;
 
     const ITensor *_weights_hwio;
-    T             *_output;
+    ITensor       *_output;
     int            _matrix_stride;
     int            _num_output_channels;
     int            _num_input_channels;
 };
 
-/** Interface for the NEON kernel to perform Winograd. */
-template <typename TIn, typename TOut>
-class INEWinogradLayerBatchedGEMMKernel : public INEKernel
-{
-public:
-    /** Get the number of GEMMs to compute
-     */
-    virtual unsigned int get_number_gemms() const = 0;
-    /** Initialise the kernel
-     *
-     * @param[in]  n_gemms         Number of GEMMs to compute.
-     * @param[in]  M               in_shape.num_batches * tile_rows * tile_cols.
-     * @param[in]  K               Number of channels in the input tensor.
-     * @param[in]  N               Number of channels in the output tensor.
-     * @param[in]  a_matrix_stride Stride between input matrices.
-     * @param[in]  a_row_stride    Row stride inside input matrix.
-     * @param[in]  b_matrix_stride Stride between weights matrices.
-     * @param[in]  b_row_stride    Row stride inside the weights matrix.
-     * @param[in]  c_matrix_stride Stride between output matrices.
-     * @param[in]  c_row_stride    Row stride inside the output matrix.
-     * @param[out] a_ptr           Input workspace.
-     * @param[out] b_ptr           Kernel workspace.
-     * @param[out] c_ptr           Output workspace.
-     */
-    virtual void configure(
-        const unsigned int n_gemms,
-        const int M, const int K, const int N,
-        const int        a_matrix_stride,
-        const int        a_row_stride,
-        const int        b_matrix_stride,
-        const int        b_row_stride,
-        const int        c_matrix_stride,
-        const int        c_row_stride,
-        const TIn *const a_ptr,
-        const TIn *const b_ptr,
-        TOut *const      c_ptr) = 0;
-
-    /** Get the number of tiles per row
-     */
-    virtual int get_output_tile_rows() const = 0;
-    /** Get the number of tiles per columns
-     */
-    virtual int get_output_tile_cols() const = 0;
-    /** Get the number of blocks
-     */
-    virtual int get_number_blocks() const = 0;
-};
-
 /** NEON kernel to perform Winograd. */
 template <typename TIn, typename TOut, int OutputTileRows, int OutputTileCols, int KernelRows, int KernelCols>
-class NEWinogradLayerBatchedGEMMKernel : public INEWinogradLayerBatchedGEMMKernel<TIn, TOut>
+class NEWinogradLayerConfiguration
 {
 public:
     /** Winograd base kernel */
     using WinogradBase = winograd::WinogradGEMM<OutputTileRows, OutputTileCols, KernelRows, KernelCols>;
     /** Winograd convolution kernel */
+
     using WinogradConv = typename WinogradBase::template Convolution<TIn, TOut>;
-    /** Winograd batched blocked GEMM operator */
-    using MultiGEMM = winograd::BatchedBlockedGemm<WinogradConv::M_BLOCK, WinogradConv::N_BLOCK, TIn, TOut>;
 
-    const char *name() const override
-    {
-        return "NEWinogradLayerBatchedGEMMKernel";
-    }
-    /** Constructor */
-    NEWinogradLayerBatchedGEMMKernel();
-
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEWinogradLayerBatchedGEMMKernel(const NEWinogradLayerBatchedGEMMKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers) */
-    NEWinogradLayerBatchedGEMMKernel &operator=(const NEWinogradLayerBatchedGEMMKernel &) = delete;
-    /** Allow instances of this class to be moved */
-    NEWinogradLayerBatchedGEMMKernel(NEWinogradLayerBatchedGEMMKernel &&) = default;
-    /** Allow instances of this class to be moved */
-    NEWinogradLayerBatchedGEMMKernel &operator=(NEWinogradLayerBatchedGEMMKernel &&) = default;
-    /** Default destructor. */
-    ~NEWinogradLayerBatchedGEMMKernel() = default;
-
-    // Inherited methods overridden:
-
-    unsigned int get_number_gemms() const override;
-    int          get_output_tile_rows() const override;
-    int          get_output_tile_cols() const override;
-    int          get_number_blocks() const override;
-
-    /** Initialise the kernel
-     *
-     * @param[in]  n_gemms         Number of GEMMs to compute.
-     * @param[in]  M               in_shape.num_batches * tile_rows * tile_cols.
-     * @param[in]  K               Number of channels in the input tensor.
-     * @param[in]  N               Number of channels in the output tensor.
-     * @param[in]  a_matrix_stride Stride between input matrices.
-     * @param[in]  a_row_stride    Row stride inside input matrix.
-     * @param[in]  b_matrix_stride Stride between weights matrices.
-     * @param[in]  b_row_stride    Row stride inside the weights matrix.
-     * @param[in]  c_matrix_stride Stride between output matrices.
-     * @param[in]  c_row_stride    Row stride inside the output matrix.
-     * @param[out] a_ptr           Input workspace.
-     * @param[out] b_ptr           Kernel workspace.
-     * @param[out] c_ptr           Output workspace.
-     */
-    void configure(
-        const unsigned int n_gemms,
-        const int M, const int K, const int N,
-        const int        a_matrix_stride,
-        const int        a_row_stride,
-        const int        b_matrix_stride,
-        const int        b_row_stride,
-        const int        c_matrix_stride,
-        const int        c_row_stride,
-        const TIn *const a_ptr,
-        const TIn *const b_ptr,
-        TOut *const      c_ptr) override;
-
-    void run(const Window &window, const ThreadInfo &info) override;
-
-    /** Static function to check if given info will lead to a valid configuration of @ref NEWinogradLayerBatchedGEMMKernel.
-     *
-     * @param[in]  a         First input tensor  (Matrix or Vector A). Data types supported: F32
-     * @param[in]  b         Second input tensor (Matrix B). Data type supported: same as @p a.
-     * @param[in]  c         Third input tensor  (Matrix C). It can be a nullptr if just the multiplication between @p a and @p b is needed. Data type supported: same as @p a.
-     * @param[out] output    Output tensor. Data type supported: same as @p a
-     * @param[in]  alpha     Weight of the matrix product
-     * @param[in]  beta      Weight of matrix C
-     * @param[in]  gemm_info (Optional) Specifies if the matrix A and/or matrix B have been reshaped and
-     *                       if the reshape of matrix B should happen only for the first run
-     *
-     * @return a status
-     */
-    static Status validate(const ITensorInfo *a, const ITensorInfo *b, const ITensor *c, const ITensorInfo *output, const float alpha, const float beta, const GEMMInfo &gemm_info = GEMMInfo());
-
-private:
-    static const int           _output_tile_rows = OutputTileRows;
-    static const int           _output_tile_cols = OutputTileCols;
-    std::unique_ptr<MultiGEMM> _gemms;
+    using TransformInputKernel   = NEWinogradLayerTransformInputKernel<TIn, OutputTileRows, OutputTileCols, KernelRows, KernelCols>;
+    using TransformWeightsKernel = NEWinogradLayerTransformWeightsKernel<TIn, OutputTileRows, OutputTileCols, KernelRows, KernelCols>;
+    using TransformOutputKernel  = NEWinogradLayerTransformOutputKernel<TOut, OutputTileRows, OutputTileCols, KernelRows, KernelCols>;
 };
 
 } // namespace arm_compute

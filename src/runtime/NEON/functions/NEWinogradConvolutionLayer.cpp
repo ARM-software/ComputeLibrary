@@ -155,29 +155,32 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
         {
             if(input->info()->dimension(width_idx) > 4 && input->info()->dimension(height_idx) > 4)
             {
-                transform_input_kernel   = support::cpp14::make_unique<NEWinogradLayerTransformInputKernel<float, 4, 4, 3, 3>>();
-                transform_weights_kernel = support::cpp14::make_unique<NEWinogradLayerTransformWeightsKernel<float, 4, 4, 3, 3>>();
-                transform_output_kernel  = support::cpp14::make_unique<NEWinogradLayerTransformOutputKernel<float, 4, 4, 3, 3>>();
-                n_gemms                  = NEWinogradLayerBatchedGEMMKernel<float, float, 4, 4, 3, 3>::WinogradBase::N_GEMMS;
-                N_BLOCK                  = NEWinogradLayerBatchedGEMMKernel<float, float, 4, 4, 3, 3>::WinogradConv::N_BLOCK;
+                using config             = NEWinogradLayerConfiguration<float, float, 4, 4, 3, 3>;
+                transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
+                transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
+                transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
+                n_gemms                  = config::WinogradBase::N_GEMMS;
+                N_BLOCK                  = config::WinogradConv::N_BLOCK;
             }
             else
             {
-                transform_input_kernel   = support::cpp14::make_unique<NEWinogradLayerTransformInputKernel<float, 2, 2, 3, 3>>();
-                transform_weights_kernel = support::cpp14::make_unique<NEWinogradLayerTransformWeightsKernel<float, 2, 2, 3, 3>>();
-                transform_output_kernel  = support::cpp14::make_unique<NEWinogradLayerTransformOutputKernel<float, 2, 2, 3, 3>>();
-                n_gemms                  = NEWinogradLayerBatchedGEMMKernel<float, float, 2, 2, 3, 3>::WinogradBase::N_GEMMS;
-                N_BLOCK                  = NEWinogradLayerBatchedGEMMKernel<float, float, 2, 2, 3, 3>::WinogradConv::N_BLOCK;
+                using config             = NEWinogradLayerConfiguration<float, float, 2, 2, 3, 3>;
+                transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
+                transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
+                transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
+                n_gemms                  = config::WinogradBase::N_GEMMS;
+                N_BLOCK                  = config::WinogradConv::N_BLOCK;
             }
             break;
         }
         case 5:
         {
-            transform_input_kernel   = support::cpp14::make_unique<NEWinogradLayerTransformInputKernel<float, 2, 2, 5, 5>>();
-            transform_weights_kernel = support::cpp14::make_unique<NEWinogradLayerTransformWeightsKernel<float, 2, 2, 5, 5>>();
-            transform_output_kernel  = support::cpp14::make_unique<NEWinogradLayerTransformOutputKernel<float, 2, 2, 5, 5>>();
-            n_gemms                  = NEWinogradLayerBatchedGEMMKernel<float, float, 2, 2, 5, 5>::WinogradBase::N_GEMMS;
-            N_BLOCK                  = NEWinogradLayerBatchedGEMMKernel<float, float, 2, 2, 5, 5>::WinogradConv::N_BLOCK;
+            using config             = NEWinogradLayerConfiguration<float, float, 2, 2, 5, 5>;
+            transform_input_kernel   = support::cpp14::make_unique<config::TransformInputKernel>();
+            transform_weights_kernel = support::cpp14::make_unique<config::TransformWeightsKernel>();
+            transform_output_kernel  = support::cpp14::make_unique<config::TransformOutputKernel>();
+            n_gemms                  = config::WinogradBase::N_GEMMS;
+            N_BLOCK                  = config::WinogradConv::N_BLOCK;
             break;
         }
         default:
@@ -195,21 +198,28 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     const int out_channels = output->info()->dimension(channel_idx);
 
     const Tensor4DShape in_shape(internal_get_input_shape(input));
+    const DataType      data_type      = input->info()->data_type();
     const size_t        data_type_size = input->info()->element_size();
     // Get the memory required to instantiate a new Winograd operator.
     constexpr size_t storage_alignment = 64;
 
     // Kernel Storage
     const size_t kernel_storage_size = transform_weights_kernel->get_weight_storage_size(out_channels,
-                                                                                         in_channels) * data_type_size + storage_alignment - 1; /* FIXME: remove alignment after COMPMID-1088 */
+                                                                                         in_channels)
+                                       * data_type_size
+                                       + storage_alignment - 1; /* FIXME: remove alignment after COMPMID-1088 */
 
     // Input storage
     const size_t input_storage_size = transform_input_kernel->get_input_storage_size(in_shape.n_batches, in_shape.n_channels, in_shape.n_rows, in_shape.n_cols,
-                                                                                     use_same_padding) * data_type_size + storage_alignment - 1; /* FIXME: remove alignment after COMPMID-1088 */
+                                                                                     use_same_padding)
+                                      * data_type_size
+                                      + storage_alignment - 1; /* FIXME: remove alignment after COMPMID-1088 */
 
     // Output storage
     const size_t output_storage_size = transform_output_kernel->get_output_storage_size(in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, out_channels,
-                                                                                        use_same_padding) * data_type_size + storage_alignment - 1; /* FIXME: remove alignment after COMPMID-1088 */
+                                                                                        use_same_padding)
+                                       * data_type_size
+                                       + storage_alignment - 1; /* FIXME: remove alignment after COMPMID-1088 */
     ;
     const KernelShape kernel_shape({ out_channels, static_cast<int>(kernel_size.height), static_cast<int>(kernel_size.width), in_channels });
     const int         kernel_matrix_stride = transform_weights_kernel->get_matrix_stride(kernel_shape);
@@ -229,28 +239,28 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     const int output_matrix_row_stride = kernel_matrix_row_stride;
 
     TensorShape a_shape(k, m, 1, n_gemms);
-    Strides     a_strides(element_size_from_data_type(DataType::F32));
+    Strides     a_strides(data_type_size);
     a_strides.set(1, a_strides[0] * k);
+    //a_strides.set(2, data_type_size * input_matrix_stride / n_gemms); FIXME: This is the real batch size, but RSH's code crashes if it's not 0.
     a_strides.set(2, 0);
-    //a_strides.set(2, element_size_from_data_type(DataType::F32) * input_matrix_stride / n_gemms);
-    a_strides.set(3, element_size_from_data_type(DataType::F32) * input_matrix_stride);
+    a_strides.set(3, data_type_size * input_matrix_stride);
 
     TensorShape b_shape(n, k, n_gemms);
-    Strides     b_strides(element_size_from_data_type(DataType::F32));
-    b_strides.set(1, element_size_from_data_type(DataType::F32) * kernel_matrix_row_stride);
-    b_strides.set(2, element_size_from_data_type(DataType::F32) * kernel_matrix_stride);
+    Strides     b_strides(data_type_size);
+    b_strides.set(1, data_type_size * kernel_matrix_row_stride);
+    b_strides.set(2, data_type_size * kernel_matrix_stride);
 
     TensorShape d_shape(n, m, 1, n_gemms);
-    Strides     d_strides(element_size_from_data_type(DataType::F32));
-    d_strides.set(1, element_size_from_data_type(DataType::F32) * output_matrix_row_stride);
+    Strides     d_strides(data_type_size);
+    d_strides.set(1, data_type_size * output_matrix_row_stride);
+    //d_strides.set(2, data_type_size * output_matrix_stride / n_gemms); FIXME: This is the real batch size, but RSH's code crashes if it's not 0.
     d_strides.set(2, 0);
-    //d_strides.set(2, element_size_from_data_type(DataType::F32) * output_matrix_stride / n_gemms);
-    d_strides.set(3, element_size_from_data_type(DataType::F32) * output_matrix_stride);
+    d_strides.set(3, data_type_size * output_matrix_stride);
 
     TensorInfo a_info, b_info, d_info;
-    a_info.init(a_shape, 1, DataType::F32, a_strides, 0, input_storage_size);
-    b_info.init(b_shape, 1, DataType::F32, b_strides, 0, kernel_storage_size);
-    d_info.init(d_shape, 1, DataType::F32, d_strides, 0, output_storage_size);
+    a_info.init(a_shape, 1, data_type, a_strides, 0, input_storage_size);
+    b_info.init(b_shape, 1, data_type, b_strides, 0, kernel_storage_size);
+    d_info.init(d_shape, 1, data_type, d_strides, 0, output_storage_size);
 
     _input_workspace.allocator()->init(a_info, storage_alignment);
     _input_workspace.allocator()->allocate();
@@ -276,12 +286,12 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
         _permute_input.configure(input, &_input_nhwc, PermutationVector(2U, 0U, 1U));
         _input_nhwc.allocator()->allocate();
         transform_input_kernel->configure(&_input_nhwc, in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, in_shape.n_channels, use_padding_type,
-                                          reinterpret_cast<float *>(_input_workspace.buffer()), input_matrix_stride);
+                                          &_input_workspace, input_matrix_stride);
     }
     else
     {
         transform_input_kernel->configure(_input, in_shape.n_batches, in_shape.n_rows, in_shape.n_cols, in_shape.n_channels, use_padding_type,
-                                          reinterpret_cast<float *>(_input_workspace.buffer()), input_matrix_stride);
+                                          &_input_workspace, input_matrix_stride);
     }
 
     // Configure WeightsTransform
@@ -290,14 +300,14 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
         // Re-order a weight tensor from [Output feature map x Input feature map x Height x Width] to [Height x Width x Input feature map x Output feature map]
         _permute_weights.configure(weights, &_weights_hwio, PermutationVector(3U, 2U, 0U, 1U));
 
-        transform_weights_kernel->configure(&_weights_hwio, reinterpret_cast<float *>(_kernel_storage.buffer()), kernel_matrix_stride, out_channels, in_channels);
+        transform_weights_kernel->configure(&_weights_hwio, &_kernel_storage, kernel_matrix_stride, out_channels, in_channels);
     }
     else
     {
         // Re-order a weight tensor from [Output feature map x Input feature map x Height x Width] to [Height x Width x Input feature map x Output feature map]
         _permute_weights.configure(weights, &_weights_hwio, PermutationVector(3U, 0U, 1U, 2U));
 
-        transform_weights_kernel->configure(&_weights_hwio, reinterpret_cast<float *>(_kernel_storage.buffer()), kernel_matrix_stride, out_channels, in_channels);
+        transform_weights_kernel->configure(&_weights_hwio, &_kernel_storage, kernel_matrix_stride, out_channels, in_channels);
     }
     _weights_hwio.allocator()->allocate();
 
@@ -306,13 +316,13 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
 
     if(data_layout == DataLayout::NCHW)
     {
-        transform_output_kernel->configure(biases, reinterpret_cast<float *>(_output_workspace.buffer()),
+        transform_output_kernel->configure(biases, &_output_workspace,
                                            output_matrix_stride, &_output_nhwc,
                                            in_shape.n_batches, output_shape.n_rows, output_shape.n_cols, out_channels);
     }
     else
     {
-        transform_output_kernel->configure(biases, reinterpret_cast<float *>(_output_workspace.buffer()),
+        transform_output_kernel->configure(biases, &_output_workspace,
                                            output_matrix_stride, _output,
                                            in_shape.n_batches, output_shape.n_rows, output_shape.n_cols, out_channels);
     }

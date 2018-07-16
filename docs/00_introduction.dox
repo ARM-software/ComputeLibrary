@@ -315,7 +315,7 @@ v18.02 Public major release
     - @ref NEWinogradLayerTransformInputKernel / NEWinogradLayer
     - @ref NEWinogradLayerTransformOutputKernel / NEWinogradLayer
     - @ref NEWinogradLayerTransformWeightsKernel / NEWinogradLayer
-    - Renamed NEWinogradLayerKernel into @ref NEWinogradLayerBatchedGEMMKernel
+    - Renamed NEWinogradLayerKernel into NEWinogradLayerBatchedGEMMKernel
  - New GLES kernels / functions:
     - @ref GCTensorShiftKernel / @ref GCTensorShift
 

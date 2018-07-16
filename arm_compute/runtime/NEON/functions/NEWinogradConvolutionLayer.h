@@ -43,7 +43,7 @@ class ITensor;
  * -# @ref NEWinogradLayerTransformWeightsKernel (executed only once in the first call to the run() method )
  * -# @ref NEWinogradLayerTransformInputKernel
  * -# @ref NEWinogradLayerTransformOutputKernel
- * -# @ref NEWinogradLayerBatchedGEMMKernel
+ * -# @ref NEGEMMAssemblyDispatchF32
  * -# @ref CPPPermute (three times: weights, input and output)
  *
  * @note  Some Winograd configurations (i.e. F(2x2, 5x5), F(4x4, 5x5)) are supported only with enable_fast_math = true
