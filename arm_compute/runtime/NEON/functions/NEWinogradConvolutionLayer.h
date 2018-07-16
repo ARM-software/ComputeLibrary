@@ -27,11 +27,11 @@
 #include "arm_compute/runtime/IFunction.h"
 
 #include "arm_compute/core/NEON/INEKernel.h"
-#include "arm_compute/core/NEON/kernels/assembly/arm_gemm.hpp"
 #include "arm_compute/core/Types.h"
 #include "arm_compute/runtime/CPP/functions/CPPPermute.h"
 #include "arm_compute/runtime/MemoryGroup.h"
 #include "arm_compute/runtime/NEON/functions/NEActivationLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 #include "arm_compute/runtime/Tensor.h"
 
 #include <memory>
@@ -102,9 +102,8 @@ public:
     NEWinogradConvolutionLayer &operator=(const NEWinogradConvolutionLayer &) = delete;
 
 private:
-    MemoryGroup _memory_group;
-    std::unique_ptr<arm_gemm::GemmCommon<float, float>> _arm_gemm;
-    std::unique_ptr<INEKernel> _gemm_kernel;
+    MemoryGroup                _memory_group;
+    NEGEMMAssemblyDispatchF32  _asm_glue;
     std::unique_ptr<INEKernel> _transform_input_kernel;
     std::unique_ptr<INEKernel> _transform_output_kernel;
     std::unique_ptr<INEKernel> _transform_weights_kernel;
@@ -119,7 +118,6 @@ private:
     Tensor         _input_nhwc;
     Tensor         _output_nhwc;
     Tensor         _weights_hwio;
-    Tensor         _workspace;
     const ITensor *_input;
     const ITensor *_weights;
     ITensor       *_output;
