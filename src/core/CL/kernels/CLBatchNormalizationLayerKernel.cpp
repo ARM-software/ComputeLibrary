@@ -64,7 +64,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output,
     {
         ActivationLayerInfo::ActivationFunction act = act_info.activation();
         ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() != DataType::F32 && input->data_type() != DataType::F16);
-        ARM_COMPUTE_RETURN_ERROR_ON(act != ActivationLayerInfo::ActivationLayerInfo::ActivationFunction::RELU && act != ActivationLayerInfo::ActivationLayerInfo::ActivationFunction::BOUNDED_RELU
+        ARM_COMPUTE_RETURN_ERROR_ON(act != ActivationLayerInfo::ActivationLayerInfo::ActivationFunction::RELU
+                                    && act != ActivationLayerInfo::ActivationLayerInfo::ActivationFunction::BOUNDED_RELU
                                     && act != ActivationLayerInfo::ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU);
         ARM_COMPUTE_RETURN_ERROR_ON(act_info.b() > act_info.a());
     }

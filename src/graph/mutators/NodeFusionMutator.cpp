@@ -29,6 +29,8 @@
 
 #include "arm_compute/core/utils/misc/Cast.h"
 
+#include <set>
+
 namespace arm_compute
 {
 namespace graph
@@ -37,6 +39,9 @@ namespace detail
 {
 void fuse_batch_norm_with_activation(Graph &g)
 {
+    // Supported activations when fusing
+    const std::set<Activation> supported_fused_activations = { Activation::RELU, Activation::BOUNDED_RELU, Activation::LU_BOUNDED_RELU };
+
     // Not interested in the order of nodes
     for(auto &node : g.nodes())
     {
@@ -48,13 +53,19 @@ void fuse_batch_norm_with_activation(Graph &g)
             // Check if following node is an activation layer node
             if((output_edge != nullptr) && (output_edge->consumer() != nullptr) && (output_edge->consumer()->type() == NodeType::ActivationLayer))
             {
-                ARM_COMPUTE_LOG_GRAPH_VERBOSE("Fusing Batch Normalization node with ID : " << output_edge->producer_id()
-                                              << " with Activation Layer node with ID : " << output_edge->consumer_id() << std::endl);
-
                 auto *bn_node  = arm_compute::utils::cast::polymorphic_downcast<BatchNormalizationLayerNode *>(output_edge->producer());
                 auto *act_node = arm_compute::utils::cast::polymorphic_downcast<ActivationLayerNode *>(output_edge->consumer());
 
                 ARM_COMPUTE_ERROR_ON(act_node->output(0) == nullptr || bn_node->output(0) == nullptr);
+
+                // Check if activation is supported for fusion
+                if(supported_fused_activations.count(act_node->activation_info().activation()) == 0)
+                {
+                    continue;
+                }
+
+                ARM_COMPUTE_LOG_GRAPH_VERBOSE("Fusing Batch Normalization node with ID : " << output_edge->producer_id()
+                                              << " with Activation Layer node with ID : " << output_edge->consumer_id() << std::endl);
 
                 // Prevent fusion if batch normalization node has an output accessor
                 if(bn_node->output(0)->accessor() == nullptr)
