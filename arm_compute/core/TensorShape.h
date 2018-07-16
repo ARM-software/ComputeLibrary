@@ -160,7 +160,7 @@ public:
     TensorShape collapsed_from(size_t start) const
     {
         TensorShape copy(*this);
-        copy.collapse(num_dimensions(), start);
+        copy.collapse(num_dimensions() - start, start);
         return copy;
     }
 
