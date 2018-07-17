@@ -21,53 +21,54 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLCOPYKERNEL_H__
-#define __ARM_COMPUTE_CLCOPYKERNEL_H__
+#ifndef __ARM_COMPUTE_CLMEMSETKERNEL_H__
+#define __ARM_COMPUTE_CLMEMSETKERNEL_H__
 
 #include "arm_compute/core/CL/ICLKernel.h"
+#include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Types.h"
 
 namespace arm_compute
 {
 class ICLTensor;
 
-/** OpenCL kernel to perform a copy between two tensors */
-class CLCopyKernel : public ICLKernel
+/** Interface for filling the planes of a tensor */
+class CLMemsetKernel : public ICLKernel
 {
 public:
     /** Default constructor */
-    CLCopyKernel();
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
-    CLCopyKernel(const CLCopyKernel &) = delete;
-    /** Prevent instances of this class from being copied (As this class contains pointers). */
-    CLCopyKernel &operator=(const CLCopyKernel &) = delete;
+    CLMemsetKernel();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLMemsetKernel(const CLMemsetKernel &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    CLMemsetKernel &operator=(const CLMemsetKernel &) = delete;
     /** Allow instances of this class to be moved */
-    CLCopyKernel(CLCopyKernel &&) = default;
+    CLMemsetKernel(CLMemsetKernel &&) = default;
     /** Allow instances of this class to be moved */
-    CLCopyKernel &operator=(CLCopyKernel &&) = default;
-    /** Initialize the kernel's input, output.
+    CLMemsetKernel &operator=(CLMemsetKernel &&) = default;
+    /** Default destructor */
+    ~CLMemsetKernel() = default;
+
+    /** Initialise the kernel's tensor and filling value
      *
-     * @param[in]  input   Source tensor. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
-     * @param[out] output  Destination tensor. Data types supported: same as @p input.
-     * @param[in]  padding (Optional) Padding to be applied to the input tensor
+     * @param[in,out] tensor         Input tensor to fill. Supported data types: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in]     constant_value The value used to fill the planes of the tensor
      */
-    void configure(const ICLTensor *input, ICLTensor *output, const PaddingList &padding = PaddingList());
-    /** Static function to check if given info will lead to a valid configuration of @ref CLCopyKernel
+    void configure(ICLTensor *tensor, const PixelValue &constant_value);
+    /** Static function to check if given info will lead to a valid configuration of @ref CLMemsetKernel
      *
-     * @param[in] input   Source tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32.
-     * @param[in] output  Destination tensor info. Data types supported: same as @p input.
-     * @param[in] padding (Optional) Padding to be applied to the input tensor
+     * @param[in] tensor         Source tensor info. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
+     * @param[in] constant_value The value used to fill the planes of the tensor
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, const PaddingList &padding = PaddingList());
+    static Status validate(const ITensorInfo *tensor, const PixelValue &constant_value);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
 
 private:
-    const ICLTensor *_input;
-    ICLTensor       *_output;
+    ICLTensor *_tensor;
 };
 } // namespace arm_compute
-#endif /*__ARM_COMPUTE_CLCOPYKERNEL_H__ */
+#endif /*__ARM_COMPUTE_CLMEMSETRKERNEL_H__ */

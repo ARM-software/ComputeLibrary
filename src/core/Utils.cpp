@@ -252,6 +252,55 @@ const std::string &arm_compute::string_from_pooling_type(PoolingType type)
     return pool_type_map[type];
 }
 
+std::string arm_compute::string_from_pixel_value(const PixelValue &value, const DataType data_type)
+{
+    std::stringstream ss;
+    std::string       converted_string;
+
+    switch(data_type)
+    {
+        case DataType::U8:
+        case DataType::QASYMM8:
+            // Needs conversion to 32 bit, otherwise interpreted as ASCII values
+            ss << uint32_t(value.get<uint8_t>());
+            converted_string = ss.str();
+            break;
+        case DataType::S8:
+            // Needs conversion to 32 bit, otherwise interpreted as ASCII values
+            ss << int32_t(value.get<int8_t>());
+            converted_string = ss.str();
+            break;
+        case DataType::U16:
+            ss << value.get<uint16_t>();
+            converted_string = ss.str();
+            break;
+        case DataType::S16:
+            ss << value.get<int16_t>();
+            converted_string = ss.str();
+            break;
+        case DataType::U32:
+            ss << value.get<uint32_t>();
+            converted_string = ss.str();
+            break;
+        case DataType::S32:
+            ss << value.get<int32_t>();
+            converted_string = ss.str();
+            break;
+        case DataType::F32:
+            converted_string = float_to_string_with_full_precision(value.get<float>());
+            break;
+        case DataType::F16:
+            static_assert(sizeof(half) == 2, "Half must be 16 bit");
+            ss << value.get<half>();
+            converted_string = ss.str();
+            break;
+        default:
+            ARM_COMPUTE_ERROR("Not handled");
+    }
+
+    return converted_string;
+}
+
 std::string arm_compute::lower_string(const std::string &val)
 {
     std::string res = val;

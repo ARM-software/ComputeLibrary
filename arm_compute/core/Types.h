@@ -470,6 +470,12 @@ struct Coordinates3D
     uint32_t z; /**< Z coordinates */
 };
 
+/** Padding information as a pair of unsigned int start/end */
+using PaddingInfo = std::pair<uint32_t, uint32_t>;
+
+/** List of padding information */
+using PaddingList = std::vector<PaddingInfo>;
+
 /** Region of interest */
 struct ROI
 {

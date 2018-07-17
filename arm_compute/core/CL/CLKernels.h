@@ -91,6 +91,7 @@
 #include "arm_compute/core/CL/kernels/CLMagnitudePhaseKernel.h"
 #include "arm_compute/core/CL/kernels/CLMeanStdDevKernel.h"
 #include "arm_compute/core/CL/kernels/CLMedian3x3Kernel.h"
+#include "arm_compute/core/CL/kernels/CLMemsetKernel.h"
 #include "arm_compute/core/CL/kernels/CLMinMaxLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLMinMaxLocationKernel.h"
 #include "arm_compute/core/CL/kernels/CLNonLinearFilterKernel.h"

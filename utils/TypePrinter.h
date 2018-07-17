@@ -769,6 +769,24 @@ inline ::std::ostream &operator<<(::std::ostream &os, const BorderSize &border)
     return os;
 }
 
+/** Formatted output of the PaddingList type.
+ *
+ * @param[out] os      Output stream.
+ * @param[in]  padding Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const PaddingList &padding)
+{
+    os << "{";
+    for(auto const &p : padding)
+    {
+        os << "{" << p.first << "," << p.second << "}";
+    }
+    os << "}";
+    return os;
+}
+
 /** Formatted output of the InterpolationPolicy type.
  *
  * @param[out] os     Output stream.
@@ -1105,6 +1123,19 @@ inline std::string to_string(const BorderSize &border)
 {
     std::stringstream str;
     str << border;
+    return str.str();
+}
+
+/** Formatted output of the PaddingList type.
+ *
+ * @param[in] padding Type to output.
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const PaddingList &padding)
+{
+    std::stringstream str;
+    str << padding;
     return str.str();
 }
 

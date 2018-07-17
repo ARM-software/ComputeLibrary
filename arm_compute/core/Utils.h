@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_UTILS_H__
 
 #include "arm_compute/core/Error.h"
+#include "arm_compute/core/PixelValue.h"
 #include "arm_compute/core/Rounding.h"
 #include "arm_compute/core/Types.h"
 
@@ -938,6 +939,14 @@ const std::string &string_from_norm_type(NormType type);
  * @return The string describing the pooling type.
  */
 const std::string &string_from_pooling_type(PoolingType type);
+/** Convert a PixelValue to a string, represented through the specific data type
+ *
+ * @param[in] value     The PixelValue to convert
+ * @param[in] data_type The type to be used to convert the @p value
+ *
+ * @return String representation of the PixelValue through the given data type.
+ */
+std::string string_from_pixel_value(const PixelValue &value, const DataType data_type);
 /** Lower a given string.
  *
  * @param[in] val Given string to lower.

@@ -573,6 +573,16 @@ inline TensorShape compute_space_to_batch_shape(const ITensorInfo *input, const 
     return output_shape;
 }
 
+inline TensorShape compute_padded_shape(const TensorShape &input_shape, const PaddingList &padding)
+{
+    TensorShape padded_shape = input_shape;
+    for(size_t dim = 0; dim < padding.size(); ++dim)
+    {
+        padded_shape.set(dim, padding[dim].first + input_shape[dim] + padding[dim].second);
+    }
+    return padded_shape;
+}
+
 template <typename T>
 inline TensorShape extract_shape(T *data)
 {
