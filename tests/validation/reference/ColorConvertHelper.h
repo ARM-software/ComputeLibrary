@@ -119,99 +119,71 @@ inline void rgb_to_yuv_calculation(const SimpleTensor<T> rvec, const SimpleTenso
         }
     }
 }
+inline float compute_rgb_value(int y_value, int v_value, int u_value, unsigned char channel_idx)
+{
+    float result = 0.f;
+    switch(channel_idx)
+    {
+        case 0:
+        {
+            const float red = (v_value - 128.f) * red_coef_bt709;
+            result          = y_value + red;
+            break;
+        }
+        case 1:
+        {
+            const float green = (u_value - 128.f) * green_coef_bt709 + (v_value - 128.f) * green_coef2_bt709;
+            result            = y_value + green;
+            break;
+        }
+        case 2:
+        {
+            const float blue = (u_value - 128.f) * blue_coef_bt709;
+            result           = y_value + blue;
+            break;
+        }
+        default:
+        {
+            //Assuming Alpha channel
+            return 255;
+        }
+    }
+    return std::min(std::max(0.f, result), 255.f);
+}
 
 template <typename T>
 inline void yuyv_to_rgb_calculation(const SimpleTensor<T> yvec, const SimpleTensor<T> vvec, const SimpleTensor<T> yyvec, const SimpleTensor<T> uvec, SimpleTensor<T> &dst)
 {
     const int dst_width  = dst.shape().x();
     const int dst_height = dst.shape().y();
-
     for(int y = 0; y < dst_height; ++y)
     {
         int x_coord = 0;
         for(int x = 0; x < dst_width; x += 2, ++x_coord)
         {
-            Coordinates dst_coord{ x, y };
-            auto       *dst_pixel = reinterpret_cast<T *>(dst(dst_coord));
-            float       result    = 0.f;
-
-            T           border_value(0);
-            const int   yvec_val  = validation::tensor_elem_at(yvec, { x_coord, y }, BorderMode::CONSTANT, border_value);
-            const int   vvec_val  = validation::tensor_elem_at(vvec, { x_coord, y }, BorderMode::CONSTANT, border_value);
-            const int   yyvec_val = validation::tensor_elem_at(yyvec, { x_coord, y }, BorderMode::CONSTANT, border_value);
-            const int   uvec_val  = validation::tensor_elem_at(uvec, { x_coord, y }, BorderMode::CONSTANT, border_value);
-            const float red       = (vvec_val - 128.f) * red_coef_bt709;
-            const float green     = (uvec_val - 128.f) * green_coef_bt709 + (vvec_val - 128.f) * green_coef2_bt709;
-            const float blue      = (uvec_val - 128.f) * blue_coef_bt709;
-
+            const Coordinates dst_coord{ x, y };
+            auto             *dst_pixel = reinterpret_cast<T *>(dst(dst_coord));
+            const T           border_value(0);
+            const int         yvec_val  = validation::tensor_elem_at(yvec, { x_coord, y }, BorderMode::CONSTANT, border_value);
+            const int         vvec_val  = validation::tensor_elem_at(vvec, { x_coord, y }, BorderMode::CONSTANT, border_value);
+            const int         yyvec_val = validation::tensor_elem_at(yyvec, { x_coord, y }, BorderMode::CONSTANT, border_value);
+            const int         uvec_val  = validation::tensor_elem_at(uvec, { x_coord, y }, BorderMode::CONSTANT, border_value);
+            //Compute first RGB value using Y plane
             for(int channel_idx = 0; channel_idx < dst.num_channels(); ++channel_idx)
             {
-                if(channel_idx == 0)
-                {
-                    // Channel 'R'
-                    result = yvec_val + red;
-                }
-                else if(channel_idx == 1)
-                {
-                    // Channel 'G'
-                    result = yvec_val + green;
-                }
-                else if(channel_idx == 2)
-                {
-                    // Channel 'B'
-                    result = yvec_val + blue;
-                }
-                else
-                {
-                    // Channel 'A'
-                    result = 255;
-                }
-
-                if(result < 0)
-                {
-                    result = 0;
-                }
-                else if(result > 255)
-                {
-                    result = 255;
-                }
-                dst_pixel[channel_idx] = result;
+                const float channel_value = compute_rgb_value(yvec_val, vvec_val, uvec_val, channel_idx);
+                dst_pixel[channel_idx]    = channel_value;
             }
-
-            dst_coord.set(0, x + 1);
-            dst_pixel = reinterpret_cast<T *>(dst(dst_coord));
+            //Compute second RGB value using YY plane
+            const Coordinates dst_coord2
+            {
+                x + 1, y
+            };
+            dst_pixel = reinterpret_cast<T *>(dst(dst_coord2));
             for(int channel_idx = 0; channel_idx < dst.num_channels(); ++channel_idx)
             {
-                if(channel_idx == 0)
-                {
-                    // Channel 'R'
-                    result = yyvec_val + red;
-                }
-                else if(channel_idx == 1)
-                {
-                    // Channel 'G'
-                    result = yyvec_val + green;
-                }
-                else if(channel_idx == 2)
-                {
-                    // Channel 'B'
-                    result = yyvec_val + blue;
-                }
-                else
-                {
-                    // Channel 'A'
-                    result = 255;
-                }
-
-                if(result < 0)
-                {
-                    result = 0;
-                }
-                else if(result > 255)
-                {
-                    result = 255;
-                }
-                dst_pixel[channel_idx] = result;
+                const float channel_value = compute_rgb_value(yyvec_val, vvec_val, uvec_val, channel_idx);
+                dst_pixel[channel_idx]    = channel_value;
             }
         }
     }

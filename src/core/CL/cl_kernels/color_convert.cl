@@ -149,9 +149,9 @@ __kernel void UYVY422_to_RGB888_bt709(
     f_g += lumav;
     f_b += lumav;
 
-    uchar8 r_0 = convert_uchar8_rtz(f_r);
-    uchar8 g_0 = convert_uchar8_rtz(f_g);
-    uchar8 b_0 = convert_uchar8_rtz(f_b);
+    uchar8 r_0 = convert_uchar8_sat_rtz(f_r);
+    uchar8 g_0 = convert_uchar8_sat_rtz(f_g);
+    uchar8 b_0 = convert_uchar8_sat_rtz(f_b);
 
     uchar16 rgb_0 = (uchar16)(r_0.s0, g_0.s0, b_0.s0, r_0.s1, g_0.s1, b_0.s1, r_0.s2, g_0.s2, b_0.s2,
                               r_0.s3, g_0.s3, b_0.s3, r_0.s4, g_0.s4, b_0.s4, r_0.s5);
@@ -207,9 +207,9 @@ __kernel void UYVY422_to_RGBA8888_bt709(
     f_g += lumav;
     f_b += lumav;
 
-    uchar8 r_0 = convert_uchar8_rtz(f_r);
-    uchar8 g_0 = convert_uchar8_rtz(f_g);
-    uchar8 b_0 = convert_uchar8_rtz(f_b);
+    uchar8 r_0 = convert_uchar8_sat_rtz(f_r);
+    uchar8 g_0 = convert_uchar8_sat_rtz(f_g);
+    uchar8 b_0 = convert_uchar8_sat_rtz(f_b);
 
     uchar16 rgba_0 = (uchar16)(r_0.s0, g_0.s0, b_0.s0, 255, r_0.s1, g_0.s1, b_0.s1, 255,
                                r_0.s2, g_0.s2, b_0.s2, 255, r_0.s3, g_0.s3, b_0.s3, 255);
@@ -266,9 +266,9 @@ __kernel void YUYV422_to_RGB888_bt709(
     f_g += lumav;
     f_b += lumav;
 
-    uchar8 r_0 = convert_uchar8_rtz(f_r);
-    uchar8 g_0 = convert_uchar8_rtz(f_g);
-    uchar8 b_0 = convert_uchar8_rtz(f_b);
+    uchar8 r_0 = convert_uchar8_sat_rtz(f_r);
+    uchar8 g_0 = convert_uchar8_sat_rtz(f_g);
+    uchar8 b_0 = convert_uchar8_sat_rtz(f_b);
 
     uchar16 rgb_0 = (uchar16)(r_0.s0, g_0.s0, b_0.s0, r_0.s1, g_0.s1, b_0.s1, r_0.s2, g_0.s2, b_0.s2,
                               r_0.s3, g_0.s3, b_0.s3, r_0.s4, g_0.s4, b_0.s4, r_0.s5);
@@ -324,9 +324,9 @@ __kernel void YUYV422_to_RGBA8888_bt709(
     f_g += lumav;
     f_b += lumav;
 
-    uchar8 r_0 = convert_uchar8_rtz(f_r);
-    uchar8 g_0 = convert_uchar8_rtz(f_g);
-    uchar8 b_0 = convert_uchar8_rtz(f_b);
+    uchar8 r_0 = convert_uchar8_sat_rtz(f_r);
+    uchar8 g_0 = convert_uchar8_sat_rtz(f_g);
+    uchar8 b_0 = convert_uchar8_sat_rtz(f_b);
 
     uchar16 rgba_0 = (uchar16)(r_0.s0, g_0.s0, b_0.s0, 255, r_0.s1, g_0.s1, b_0.s1, 255,
                                r_0.s2, g_0.s2, b_0.s2, 255, r_0.s3, g_0.s3, b_0.s3, 255);
@@ -471,9 +471,9 @@ __kernel void NV12_to_RGB888_bt709(
     float4 f_g = convert_float4(luma_0) + temp1;
     float4 f_b = convert_float4(luma_0) + temp2;
 
-    uchar4 r_0 = convert_uchar4_rtz(f_r);
-    uchar4 g_0 = convert_uchar4_rtz(f_g);
-    uchar4 b_0 = convert_uchar4_rtz(f_b);
+    uchar4 r_0 = convert_uchar4_sat_rtz(f_r);
+    uchar4 g_0 = convert_uchar4_sat_rtz(f_g);
+    uchar4 b_0 = convert_uchar4_sat_rtz(f_b);
 
     uchar8 rgb_0 = (uchar8)(r_0.s0, g_0.s0, b_0.s0, r_0.s1, g_0.s1, b_0.s1, r_0.s2, g_0.s2);
     uchar4 rgb_1 = (uchar4)(b_0.s2, r_0.s3, g_0.s3, b_0.s3);
@@ -484,9 +484,9 @@ __kernel void NV12_to_RGB888_bt709(
     f_g = convert_float4(luma_1) + temp1;
     f_b = convert_float4(luma_1) + temp2;
 
-    r_0 = convert_uchar4_rtz(f_r);
-    g_0 = convert_uchar4_rtz(f_g);
-    b_0 = convert_uchar4_rtz(f_b);
+    r_0 = convert_uchar4_sat_rtz(f_r);
+    g_0 = convert_uchar4_sat_rtz(f_g);
+    b_0 = convert_uchar4_sat_rtz(f_b);
 
     rgb_0 = (uchar8)(r_0.s0, g_0.s0, b_0.s0, r_0.s1, g_0.s1, b_0.s1, r_0.s2, g_0.s2);
     rgb_1 = (uchar4)(b_0.s2, r_0.s3, g_0.s3, b_0.s3);
@@ -927,9 +927,9 @@ __kernel void NV12_to_RGBA8888_bt709(
     float4 f_g = convert_float4(luma_0) + temp1;
     float4 f_b = convert_float4(luma_0) + temp2;
 
-    uchar4 r_0 = convert_uchar4_rtz(f_r);
-    uchar4 g_0 = convert_uchar4_rtz(f_g);
-    uchar4 b_0 = convert_uchar4_rtz(f_b);
+    uchar4 r_0 = convert_uchar4_sat_rtz(f_r);
+    uchar4 g_0 = convert_uchar4_sat_rtz(f_g);
+    uchar4 b_0 = convert_uchar4_sat_rtz(f_b);
 
     uchar8 rgb_0 = (uchar8)(r_0.s0, g_0.s0, b_0.s0, 255, r_0.s1, g_0.s1, b_0.s1, 255);
     uchar8 rgb_1 = (uchar8)(r_0.s2, g_0.s2, b_0.s2, 255, r_0.s3, g_0.s3, b_0.s3, 255);
@@ -940,9 +940,9 @@ __kernel void NV12_to_RGBA8888_bt709(
     f_g = convert_float4(luma_1) + temp1;
     f_b = convert_float4(luma_1) + temp2;
 
-    r_0 = convert_uchar4_rtz(f_r);
-    g_0 = convert_uchar4_rtz(f_g);
-    b_0 = convert_uchar4_rtz(f_b);
+    r_0 = convert_uchar4_sat_rtz(f_r);
+    g_0 = convert_uchar4_sat_rtz(f_g);
+    b_0 = convert_uchar4_sat_rtz(f_b);
 
     rgb_0 = (uchar8)(r_0.s0, g_0.s0, b_0.s0, 255, r_0.s1, g_0.s1, b_0.s1, 255);
     rgb_1 = (uchar8)(r_0.s2, g_0.s2, b_0.s2, 255, r_0.s3, g_0.s3, b_0.s3, 255);
@@ -1126,9 +1126,9 @@ __kernel void NV21_to_RGB888_bt709(
     float4 f_g = convert_float4(luma_0) + temp1;
     float4 f_b = convert_float4(luma_0) + temp2;
 
-    uchar4 r_0 = convert_uchar4_rtz(f_r);
-    uchar4 g_0 = convert_uchar4_rtz(f_g);
-    uchar4 b_0 = convert_uchar4_rtz(f_b);
+    uchar4 r_0 = convert_uchar4_sat_rtz(f_r);
+    uchar4 g_0 = convert_uchar4_sat_rtz(f_g);
+    uchar4 b_0 = convert_uchar4_sat_rtz(f_b);
 
     uchar8 rgb_0 = (uchar8)(r_0.s0, g_0.s0, b_0.s0, r_0.s1, g_0.s1, b_0.s1, r_0.s2, g_0.s2);
     uchar4 rgb_1 = (uchar4)(b_0.s2, r_0.s3, g_0.s3, b_0.s3);
@@ -1139,9 +1139,9 @@ __kernel void NV21_to_RGB888_bt709(
     f_g = convert_float4(luma_1) + temp1;
     f_b = convert_float4(luma_1) + temp2;
 
-    r_0 = convert_uchar4_rtz(f_r);
-    g_0 = convert_uchar4_rtz(f_g);
-    b_0 = convert_uchar4_rtz(f_b);
+    r_0 = convert_uchar4_sat_rtz(f_r);
+    g_0 = convert_uchar4_sat_rtz(f_g);
+    b_0 = convert_uchar4_sat_rtz(f_b);
 
     rgb_0 = (uchar8)(r_0.s0, g_0.s0, b_0.s0, r_0.s1, g_0.s1, b_0.s1, r_0.s2, g_0.s2);
     rgb_1 = (uchar4)(b_0.s2, r_0.s3, g_0.s3, b_0.s3);
@@ -1197,9 +1197,9 @@ __kernel void NV21_to_RGBA8888_bt709(
     float4 f_g = convert_float4(luma_0) + temp1;
     float4 f_b = convert_float4(luma_0) + temp2;
 
-    uchar4 r_0 = convert_uchar4_rtz(f_r);
-    uchar4 g_0 = convert_uchar4_rtz(f_g);
-    uchar4 b_0 = convert_uchar4_rtz(f_b);
+    uchar4 r_0 = convert_uchar4_sat_rtz(f_r);
+    uchar4 g_0 = convert_uchar4_sat_rtz(f_g);
+    uchar4 b_0 = convert_uchar4_sat_rtz(f_b);
 
     uchar8 rgb_0 = (uchar8)(r_0.s0, g_0.s0, b_0.s0, 255, r_0.s1, g_0.s1, b_0.s1, 255);
     uchar8 rgb_1 = (uchar8)(r_0.s2, g_0.s2, b_0.s2, 255, r_0.s3, g_0.s3, b_0.s3, 255);
@@ -1210,9 +1210,9 @@ __kernel void NV21_to_RGBA8888_bt709(
     f_g = convert_float4(luma_1) + temp1;
     f_b = convert_float4(luma_1) + temp2;
 
-    r_0 = convert_uchar4_rtz(f_r);
-    g_0 = convert_uchar4_rtz(f_g);
-    b_0 = convert_uchar4_rtz(f_b);
+    r_0 = convert_uchar4_sat_rtz(f_r);
+    g_0 = convert_uchar4_sat_rtz(f_g);
+    b_0 = convert_uchar4_sat_rtz(f_b);
 
     rgb_0 = (uchar8)(r_0.s0, g_0.s0, b_0.s0, 255, r_0.s1, g_0.s1, b_0.s1, 255);
     rgb_1 = (uchar8)(r_0.s2, g_0.s2, b_0.s2, 255, r_0.s3, g_0.s3, b_0.s3, 255);
@@ -1525,9 +1525,9 @@ __kernel void IYUV_to_RGB888_bt709(
     float4 f_g = convert_float4(luma_0) + temp1;
     float4 f_b = convert_float4(luma_0) + temp2;
 
-    uchar4 r_0 = convert_uchar4_rtz(f_r);
-    uchar4 g_0 = convert_uchar4_rtz(f_g);
-    uchar4 b_0 = convert_uchar4_rtz(f_b);
+    uchar4 r_0 = convert_uchar4_sat_rtz(f_r);
+    uchar4 g_0 = convert_uchar4_sat_rtz(f_g);
+    uchar4 b_0 = convert_uchar4_sat_rtz(f_b);
 
     uchar8 rgb_0 = (uchar8)(r_0.s0, g_0.s0, b_0.s0, r_0.s1, g_0.s1, b_0.s1, r_0.s2, g_0.s2);
     uchar4 rgb_1 = (uchar4)(b_0.s2, r_0.s3, g_0.s3, b_0.s3);
@@ -1538,9 +1538,9 @@ __kernel void IYUV_to_RGB888_bt709(
     f_g = convert_float4(luma_1) + temp1;
     f_b = convert_float4(luma_1) + temp2;
 
-    r_0 = convert_uchar4_rtz(f_r);
-    g_0 = convert_uchar4_rtz(f_g);
-    b_0 = convert_uchar4_rtz(f_b);
+    r_0 = convert_uchar4_sat_rtz(f_r);
+    g_0 = convert_uchar4_sat_rtz(f_g);
+    b_0 = convert_uchar4_sat_rtz(f_b);
 
     rgb_0 = (uchar8)(r_0.s0, g_0.s0, b_0.s0, r_0.s1, g_0.s1, b_0.s1, r_0.s2, g_0.s2);
     rgb_1 = (uchar4)(b_0.s2, r_0.s3, g_0.s3, b_0.s3);
@@ -1604,9 +1604,9 @@ __kernel void IYUV_to_RGBA8888_bt709(
     float4 f_g = convert_float4(luma_0) + temp1;
     float4 f_b = convert_float4(luma_0) + temp2;
 
-    uchar4 r_0 = convert_uchar4_rtz(f_r);
-    uchar4 g_0 = convert_uchar4_rtz(f_g);
-    uchar4 b_0 = convert_uchar4_rtz(f_b);
+    uchar4 r_0 = convert_uchar4_sat_rtz(f_r);
+    uchar4 g_0 = convert_uchar4_sat_rtz(f_g);
+    uchar4 b_0 = convert_uchar4_sat_rtz(f_b);
 
     uchar8 rgb_0 = (uchar8)(r_0.s0, g_0.s0, b_0.s0, 255, r_0.s1, g_0.s1, b_0.s1, 255);
     uchar8 rgb_1 = (uchar8)(r_0.s2, g_0.s2, b_0.s2, 255, r_0.s3, g_0.s3, b_0.s3, 255);
@@ -1617,9 +1617,9 @@ __kernel void IYUV_to_RGBA8888_bt709(
     f_g = convert_float4(luma_1) + temp1;
     f_b = convert_float4(luma_1) + temp2;
 
-    r_0 = convert_uchar4_rtz(f_r);
-    g_0 = convert_uchar4_rtz(f_g);
-    b_0 = convert_uchar4_rtz(f_b);
+    r_0 = convert_uchar4_sat_rtz(f_r);
+    g_0 = convert_uchar4_sat_rtz(f_g);
+    b_0 = convert_uchar4_sat_rtz(f_b);
 
     rgb_0 = (uchar8)(r_0.s0, g_0.s0, b_0.s0, 255, r_0.s1, g_0.s1, b_0.s1, 255);
     rgb_1 = (uchar8)(r_0.s2, g_0.s2, b_0.s2, 255, r_0.s3, g_0.s3, b_0.s3, 255);
