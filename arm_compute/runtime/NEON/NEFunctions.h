@@ -104,6 +104,7 @@
 #include "arm_compute/runtime/NEON/functions/NEReshapeLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEScale.h"
 #include "arm_compute/runtime/NEON/functions/NEScharr3x3.h"
+#include "arm_compute/runtime/NEON/functions/NESimpleAssemblyFunction.h"
 #include "arm_compute/runtime/NEON/functions/NESobel3x3.h"
 #include "arm_compute/runtime/NEON/functions/NESobel5x5.h"
 #include "arm_compute/runtime/NEON/functions/NESobel7x7.h"

@@ -54,6 +54,20 @@ private:
     /** ACL Function */
     std::unique_ptr<IFunction> _function;
 
+    /** If supported create the ACL function corresponding to the GemmMethod provided to process the other passed parameters
+     *
+     * @param[in]  method             GemmMethod to use to perform the matrix multiplication.
+     * @param[in]  a                  Input tensor (Matrix A).
+     * @param[in]  b                  Input tensor (Matrix B).
+     * @param[out] d                  Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0.
+     * @param[in]  alpha              Scalar multiplier to apply to AB matrix product.
+     * @param[in]  beta               Scalar multiplier to apply to input D matrix before adding product.
+     * @param[in]  pretransposed_hint Can the B tensor can be pretransposed (ie shared across invocations)?
+     *
+     * @return True if the method is supported and the function was successfully created, false otherwise.
+     */
+    bool create_function(arm_gemm::GemmMethod method, const ITensor *a, const ITensor *b, ITensor *d, float alpha, float beta, bool pretranspose_hint);
+
     //Fallback: use arm_gemm's AssemblyGemm:
     class Fallback
     {
@@ -63,7 +77,7 @@ private:
          *  The call to set_arrays is needed to deal with the input sizes containing batches (dims > 2)
          */
         void run();
-        void configure(const ITensor *a, const ITensor *b, ITensor *d, float alpha, float beta, bool pretranspose_hint, MemoryGroup &memory_group);
+        void configure(const ITensor *a, const ITensor *b, ITensor *d, arm_gemm::GemmArgs<TypeOutput> &args, MemoryGroup &memory_group);
         void prepare();
         bool is_configured() const;
 #endif /* DOXYGEN_SKIP_THIS */
@@ -102,7 +116,20 @@ private:
     } _arm_gemm;               /**< Fallback in case ACL doesn't have a function */
     MemoryGroup _memory_group; /**< Function memory group */
 public:
+    /** If supported create an ACL function else fallback to the arm_gemm function.
+     *
+     * @param[in]  a                 Input tensor (Matrix A)
+     * @param[in]  b                 Input tensor (Matrix B)
+     * @param[out] d                 Output tensor to store the result of matrix multiplication. Data type supported: same as @p input0.
+     * @param[in]  alpha             Scalar multiplier to apply to AB matrix product.
+     * @param[in]  beta              Scalar multiplier to apply to input D matrix before adding product.
+     * @param[in]  pretranspose_hint Can the B tensor can be pretransposed (ie shared across invocations)?
+     */
     void configure(const ITensor *a, const ITensor *b, ITensor *d, float alpha, float beta, bool pretranspose_hint);
+    /** Was the function successfully configured ?
+     *
+     * @return True if the function is configured and ready to run
+     */
     bool is_configured() const;
     // Inherited methods overridden:
     /** Runs a preparation step, usually for pre-transposing matrix b */
@@ -110,11 +137,11 @@ public:
     void run() override;
 };
 
-/** Float 32 assembly kernel glue */
+/** Float 32 assembly dispatch kernel */
 using NEGEMMAssemblyDispatchF32 = NEGEMMAssemblyDispatch<float, float>;
-/** Uint 8 to Uint 32 kernel glue */
+/** Uint 8 to Uint 32 assembly dispatch kernel */
 using NEGEMMAssemblyDispatchU8U32 = NEGEMMAssemblyDispatch<uint8_t, uint32_t>;
-/** Int 8 to Int 32 kernel glue */
+/** Int 8 to Int 32 assembly dispatch kernel */
 using NEGEMMAssemblyDispatchS8S32 = NEGEMMAssemblyDispatch<int8_t, int32_t>;
-}
+} // namespace arm_compute
 #endif /* __ARM_COMPUTE_NEGEMMASSEMBLYDISPATCH_H__ */

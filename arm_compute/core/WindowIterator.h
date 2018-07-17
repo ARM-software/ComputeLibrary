@@ -24,6 +24,7 @@
 #ifndef __ARM_COMPUTE_WINDOW_ITERATOR_H__
 #define __ARM_COMPUTE_WINDOW_ITERATOR_H__
 #include "arm_compute/core/Coordinates.h"
+#include "arm_compute/core/Error.h"
 #include "arm_compute/core/ITensor.h"
 #include "arm_compute/core/Window.h"
 
@@ -71,7 +72,18 @@ public:
      */
     inline size_t stride(size_t dim) const
     {
+        ARM_COMPUTE_ERROR_ON(_strides[dim] % sizeof(T) != 0);
         return _strides[dim] / sizeof(T);
+    }
+
+    /** Manually set the stride of a dimension
+     *
+     * @param[in] dim  Dimension of the stride to set.
+     * @param[in] size Value to set the stride to (in bytes).
+     */
+    void set_stride(size_t dim, size_t size)
+    {
+        _strides[dim] = size;
     }
 
     /** Returns a pointer to the element at coordinates (x,y,z,w)
@@ -99,8 +111,8 @@ public:
     }
 
 private:
-    uint8_t       *_first;   /**< Pointer to the first element of the tensor.*/
-    const Strides &_strides; /**< Strides in bytes of the tensor */
+    uint8_t *_first;   /**< Pointer to the first element of the tensor.*/
+    Strides  _strides; /**< Strides in bytes of the tensor */
 };
 
 /** Iterate over a portion of a Window */

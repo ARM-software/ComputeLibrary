@@ -157,7 +157,7 @@ Status create_error(ErrorCode error_code, const char *function, const char *file
  *
  * @param[in] ... Variables which are unused.
  */
-#define ARM_COMPUTE_UNUSED(...) arm_compute::ignore_unused(__VA_ARGS__) // NOLINT
+#define ARM_COMPUTE_UNUSED(...) ::arm_compute::ignore_unused(__VA_ARGS__) // NOLINT
 
 /** Creates an error with a given message
  *

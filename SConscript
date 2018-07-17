@@ -190,6 +190,7 @@ if env['opencl']:
 if env['neon']:
     core_files += Glob('src/core/NEON/*.cpp')
     core_files += Glob('src/core/NEON/kernels/*.cpp')
+    core_files += Glob('src/core/NEON/kernels/assembly/*.cpp')
 
     core_files += Glob('src/core/NEON/kernels/arm_gemm/*.cpp')
 
@@ -209,6 +210,7 @@ if env['neon']:
 
     runtime_files += Glob('src/runtime/NEON/*.cpp')
     runtime_files += Glob('src/runtime/NEON/functions/*.cpp')
+    runtime_files += Glob('src/runtime/NEON/functions/assembly/*.cpp')
 
 if env['gles_compute']:
     if env['os'] != 'android':
