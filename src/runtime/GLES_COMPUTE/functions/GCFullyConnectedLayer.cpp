@@ -80,14 +80,14 @@ void GCFullyConnectedLayer::configure_fc_fc(const IGCTensor *input, const IGCTen
 }
 
 void GCFullyConnectedLayer::configure(const IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output,
-                                      bool transpose_weights, bool are_weights_reshaped, bool retain_internal_weights)
+                                      FullyConnectedLayerInfo fc_info)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::F16);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights, output);
     ARM_COMPUTE_ERROR_ON(weights->info()->num_dimensions() > 2);
 
     _original_weights     = weights;
-    _are_weights_reshaped = transpose_weights ? are_weights_reshaped : true;
+    _are_weights_reshaped = fc_info.transpose_weights ? fc_info.are_weights_reshaped : true;
     _is_fc_after_conv     = true;
     _accumulate_biases    = false;
 
@@ -142,8 +142,8 @@ void GCFullyConnectedLayer::configure(const IGCTensor *input, const IGCTensor *w
         configure_fc_fc(input, weights_to_use, output);
     }
 
-    ARM_COMPUTE_ERROR_ON(retain_internal_weights && _reshape_weights_output.gc_buffer() == 0);
-    _are_weights_reshaped = _are_weights_reshaped || retain_internal_weights;
+    ARM_COMPUTE_ERROR_ON(fc_info.retain_internal_weights && _reshape_weights_output.gc_buffer() == 0);
+    _are_weights_reshaped = _are_weights_reshaped || fc_info.retain_internal_weights;
 }
 
 void GCFullyConnectedLayer::run()

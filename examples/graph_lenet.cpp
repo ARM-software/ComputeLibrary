@@ -60,7 +60,7 @@ public:
 
         // Checks
         ARM_COMPUTE_EXIT_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type), "Unsupported data type!");
-        ARM_COMPUTE_EXIT_ON_MSG(common_params.data_layout == DataLayout::NHWC, "Unsupported data layout!");
+        ARM_COMPUTE_EXIT_ON_MSG(common_params.data_layout == DataLayout::NHWC && common_params.target != Target::CL, "Unsupported data layout!");
 
         // Print parameter values
         std::cout << common_params << std::endl;
@@ -69,33 +69,40 @@ public:
         std::string  data_path = common_params.data_path;
         unsigned int batches   = 4; /** Number of batches */
 
+        // Create input descriptor
+        const TensorShape tensor_shape     = permute_shape(TensorShape(28U, 28U, 1U, batches), DataLayout::NCHW, common_params.data_layout);
+        TensorDescriptor  input_descriptor = TensorDescriptor(tensor_shape, common_params.data_type).set_layout(common_params.data_layout);
+
+        // Set weights trained layout
+        const DataLayout weights_layout = DataLayout::NCHW;
+
         //conv1 << pool1 << conv2 << pool2 << fc1 << act1 << fc2 << smx
         graph << common_params.target
               << common_params.fast_math_hint
-              << InputLayer(TensorDescriptor(TensorShape(28U, 28U, 1U, batches), common_params.data_type), get_input_accessor(common_params))
+              << InputLayer(input_descriptor, get_input_accessor(common_params))
               << ConvolutionLayer(
                   5U, 5U, 20U,
-                  get_weights_accessor(data_path, "/cnn_data/lenet_model/conv1_w.npy"),
+                  get_weights_accessor(data_path, "/cnn_data/lenet_model/conv1_w.npy", weights_layout),
                   get_weights_accessor(data_path, "/cnn_data/lenet_model/conv1_b.npy"),
                   PadStrideInfo(1, 1, 0, 0))
               .set_name("conv1")
               << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0))).set_name("pool1")
               << ConvolutionLayer(
                   5U, 5U, 50U,
-                  get_weights_accessor(data_path, "/cnn_data/lenet_model/conv2_w.npy"),
+                  get_weights_accessor(data_path, "/cnn_data/lenet_model/conv2_w.npy", weights_layout),
                   get_weights_accessor(data_path, "/cnn_data/lenet_model/conv2_b.npy"),
                   PadStrideInfo(1, 1, 0, 0))
               .set_name("conv2")
               << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 2, PadStrideInfo(2, 2, 0, 0))).set_name("pool2")
               << FullyConnectedLayer(
                   500U,
-                  get_weights_accessor(data_path, "/cnn_data/lenet_model/ip1_w.npy"),
+                  get_weights_accessor(data_path, "/cnn_data/lenet_model/ip1_w.npy", weights_layout),
                   get_weights_accessor(data_path, "/cnn_data/lenet_model/ip1_b.npy"))
               .set_name("ip1")
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("relu")
               << FullyConnectedLayer(
                   10U,
-                  get_weights_accessor(data_path, "/cnn_data/lenet_model/ip2_w.npy"),
+                  get_weights_accessor(data_path, "/cnn_data/lenet_model/ip2_w.npy", weights_layout),
                   get_weights_accessor(data_path, "/cnn_data/lenet_model/ip2_b.npy"))
               .set_name("ip2")
               << SoftmaxLayer().set_name("prob")

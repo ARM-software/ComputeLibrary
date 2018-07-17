@@ -104,26 +104,26 @@ public:
     NEFullyConnectedLayer &operator=(NEFullyConnectedLayer &&) = default;
     /** Set the input and output tensors.
      *
-     * @param[in]  input                Source tensor. Data type supported: F16/F32.
-     * @param[in]  weights              Weights tensor. The weights must be 2 dimensional. Data type supported: Same as @p input.
-     * @param[in]  biases               Bias tensor. Can be nullptr. Data type supported:Same as @p input.
-     * @param[out] output               Destination tensor. Data type supported: Same as @p input.
-     * @param[in]  transpose_weights    (Optional) Transpose the weights tensor if true. Defaults to true.
-     * @param[in]  are_weights_reshaped (Optional) Reshape the weights tensor if false. Defaults to false.
+     * @param[in]  input   Source tensor. Data type supported: F16/F32.
+     * @param[in]  weights Weights tensor. The weights must be 2 dimensional. Data type supported: Same as @p input.
+     * @param[in]  biases  Bias tensor. Can be nullptr. Data type supported:Same as @p input.
+     * @param[out] output  Destination tensor. Data type supported: Same as @p input.
+     * @param[in]  fc_info (Optional) Fully connected layer additional info
      */
-    void configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, bool transpose_weights = true, bool are_weights_reshaped = false);
+    void configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output,
+                   FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo());
     /** Static function to check if given info will lead to a valid configuration of @ref CLFullyConnectedLayer
      *
-     * @param[in] input                Source tensor info. Data type supported: F16/F32.
-     * @param[in] weights              Weights tensor info. The weights must be 2 dimensional. Data type supported: Same as @p input
-     * @param[in] biases               Bias tensor info. It can be nullptr. Data type supported:Same as @p input.
-     * @param[in] output               Destination tensor info. Data type supported: Same as @p input.
-     * @param[in] transpose_weights    (Optional) Transpose weights if true. Defaults to true.
-     * @param[in] are_weights_reshaped (Optional) Reshape the weights tensor if false. Defaults to false.
+     * @param[in] input   Source tensor info. Data type supported: F16/F32.
+     * @param[in] weights Weights tensor info. The weights must be 2 dimensional. Data type supported: Same as @p input
+     * @param[in] biases  Bias tensor info. It can be nullptr. Data type supported:Same as @p input.
+     * @param[in] output  Destination tensor info. Data type supported: Same as @p input.
+     * @param[in] fc_info (Optional) Fully connected layer additional info
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, bool transpose_weights = true, bool are_weights_reshaped = false);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,
+                           FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo());
 
     //Inherited methods override
     void run() override;

@@ -57,7 +57,7 @@ Status NERNNLayer::validate(const ITensorInfo *input, const ITensorInfo *weights
 
     auto shape_info = TensorInfo(misc::shape_calculator::compute_rnn_shape(recurrent_weights, hidden_state->dimension(idx_height)), 1, input->data_type());
 
-    ARM_COMPUTE_RETURN_ON_ERROR(NEFullyConnectedLayer::validate(input, weights, bias, &shape_info, true, false));
+    ARM_COMPUTE_RETURN_ON_ERROR(NEFullyConnectedLayer::validate(input, weights, bias, &shape_info));
     ARM_COMPUTE_RETURN_ON_ERROR(NEArithmeticAdditionKernel::validate(&shape_info, &shape_info, &shape_info, ConvertPolicy::SATURATE));
     ARM_COMPUTE_RETURN_ON_ERROR(NEActivationLayerKernel::validate(&shape_info, &shape_info, info));
 
@@ -79,7 +79,7 @@ void NERNNLayer::configure(const ITensor *input, const ITensor *weights, const I
     // Manage intermediate buffers and configure
     _fully_connected_out.allocator()->init(TensorInfo(shape, 1, input->info()->data_type()));
     _memory_group.manage(&_fully_connected_out);
-    _fully_connected_kernel.configure(input, weights, bias, &_fully_connected_out, true, false);
+    _fully_connected_kernel.configure(input, weights, bias, &_fully_connected_out);
 
     _gemm_output.allocator()->init(TensorInfo(shape, 1, input->info()->data_type()));
     _memory_group.manage(&_gemm_output);

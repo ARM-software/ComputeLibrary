@@ -136,7 +136,8 @@ NEFullyConnectedLayer::NEFullyConnectedLayer(std::shared_ptr<IMemoryManager> mem
 {
 }
 
-void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output, bool transpose_weights, bool are_weights_reshaped)
+void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weights, const ITensor *biases, ITensor *output,
+                                      FullyConnectedLayerInfo fc_info)
 {
     // With the Fully Connected layer we can have 4 different cases:
     //  1) Convolution layer -> Fully Connected layer without batches
@@ -156,8 +157,7 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
                                                                weights->info(),
                                                                biases != nullptr ? biases->info() : nullptr,
                                                                output->info(),
-                                                               transpose_weights,
-                                                               are_weights_reshaped));
+                                                               fc_info));
 
     const int    num_batch_dimensions = std::max(0, static_cast<int>(output->info()->tensor_shape().num_dimensions()) - 1);
     const int    num_input_dimensions = input->info()->tensor_shape().num_dimensions() - num_batch_dimensions;
@@ -167,7 +167,7 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
     _linearize_input     = (input->info()->tensor_shape().x() != linear_input_size) || (num_input_dimensions > 1 && linear_input_size == 1);
     _accumulate_biases   = biases != nullptr;
     _is_batched_fc_layer = num_batch_dimensions > 0;
-    _is_prepared         = are_weights_reshaped || (!transpose_weights && !_is_batched_fc_layer);
+    _is_prepared         = fc_info.are_weights_reshaped || (!fc_info.transpose_weights && !_is_batched_fc_layer);
 
     const size_t   interleave_width = 16 / input->info()->element_size();
     const ITensor *weights_to_use   = weights;
@@ -177,11 +177,11 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
         weights_to_use = &_reshape_weights_output;
 
         _reshape_weights_output.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_fully_connected_reshaped_weights_shape(weights->info(),
-                                                  transpose_weights,
+                                                  fc_info.transpose_weights,
                                                   _is_batched_fc_layer, interleave_width)));
 
         // Reshape the weights
-        _reshape_weights_function.configure(weights, &_reshape_weights_output, transpose_weights, _is_batched_fc_layer);
+        _reshape_weights_function.configure(weights, &_reshape_weights_output, fc_info.transpose_weights, _is_batched_fc_layer);
     }
 
     const ITensor *multiply_input = input;
@@ -231,7 +231,8 @@ void NEFullyConnectedLayer::configure(const ITensor *input, const ITensor *weigh
     }
 }
 
-Status NEFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, bool transpose_weights, bool are_weights_reshaped)
+Status NEFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,
+                                       FullyConnectedLayerInfo fc_info)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights, output);
@@ -251,11 +252,11 @@ Status NEFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
     const ITensorInfo           *weights_to_use         = weights;
     std::unique_ptr<ITensorInfo> reshape_weights_output = input->clone();
 
-    if(!are_weights_reshaped && (transpose_weights || is_batched_fc_layer))
+    if(!fc_info.are_weights_reshaped && (fc_info.transpose_weights || is_batched_fc_layer))
     {
-        reshape_weights_output->set_tensor_shape(compute_fully_connected_reshaped_weights_shape(weights, transpose_weights, is_batched_fc_layer, interleave_width));
+        reshape_weights_output->set_tensor_shape(compute_fully_connected_reshaped_weights_shape(weights, fc_info.transpose_weights, is_batched_fc_layer, interleave_width));
 
-        ARM_COMPUTE_RETURN_ON_ERROR(NEFullyConnectedLayerReshapeWeights::validate(weights, reshape_weights_output.get(), transpose_weights, is_batched_fc_layer));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEFullyConnectedLayerReshapeWeights::validate(weights, reshape_weights_output.get(), fc_info.transpose_weights, is_batched_fc_layer));
 
         weights_to_use = reshape_weights_output.get();
     }

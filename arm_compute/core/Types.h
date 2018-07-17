@@ -682,6 +682,15 @@ private:
     DimensionRoundingType _round_type;
 };
 
+/** Fully connected layer info */
+struct FullyConnectedLayerInfo
+{
+    DataLayout weights_trained_layout{ DataLayout::NCHW }; /**<  Layout that the weights have been trained with. */
+    bool       transpose_weights{ true };                  /**<  Transpose weights if true. */
+    bool       are_weights_reshaped{ false };              /**<  Reshape the weights tensor if false. */
+    bool       retain_internal_weights{ false };           /**<  Retain internal reshaped weights. */
+};
+
 /** Pooling Layer Information class */
 class PoolingLayerInfo
 {

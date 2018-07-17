@@ -474,6 +474,24 @@ inline std::unique_ptr<graph::ITensorAccessor> get_npy_output_accessor(const std
     }
 }
 
+/** Permutes a given tensor shape given the input and output data layout
+ *
+ * @param[in] tensor_shape    Tensor shape to permute
+ * @param[in] in_data_layout  Input tensor shape data layout
+ * @param[in] out_data_layout Output tensor shape data layout
+ *
+ * @return Permuted tensor shape
+ */
+inline TensorShape permute_shape(TensorShape tensor_shape, DataLayout in_data_layout, DataLayout out_data_layout)
+{
+    if(in_data_layout != out_data_layout)
+    {
+        arm_compute::PermutationVector perm_vec = (in_data_layout == DataLayout::NCHW) ? arm_compute::PermutationVector(2U, 0U, 1U) : arm_compute::PermutationVector(1U, 2U, 0U);
+        arm_compute::permute(tensor_shape, perm_vec);
+    }
+    return tensor_shape;
+}
+
 /** Utility function to return the TargetHint
  *
  * @param[in] target Integer value which expresses the selected target. Must be 0 for NEON or 1 for OpenCL or 2 (OpenCL with Tuner)

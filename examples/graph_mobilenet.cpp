@@ -78,12 +78,10 @@ public:
 
         // Create input descriptor
         unsigned int spatial_size = (model_id == 0 || common_params.data_type == DataType::QASYMM8) ? 224 : 160;
-        TensorShape  tensor_shape = TensorShape(spatial_size, spatial_size, 3U, 1U);
-        if(common_params.data_layout == DataLayout::NHWC)
-        {
-            arm_compute::permute(tensor_shape, arm_compute::PermutationVector(2U, 0U, 1U));
-        }
-        TensorDescriptor input_descriptor = TensorDescriptor(tensor_shape, common_params.data_type).set_layout(common_params.data_layout);
+
+        // Create input descriptor
+        const TensorShape tensor_shape     = permute_shape(TensorShape(spatial_size, spatial_size, 3U, 1U), DataLayout::NCHW, common_params.data_layout);
+        TensorDescriptor  input_descriptor = TensorDescriptor(tensor_shape, common_params.data_type).set_layout(common_params.data_layout);
 
         // Set graph hints
         graph << common_params.target

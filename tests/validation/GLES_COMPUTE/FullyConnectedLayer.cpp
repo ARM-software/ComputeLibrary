@@ -87,9 +87,14 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
     ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
     ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
 
+    // Create Fully Connected layer info
+    FullyConnectedLayerInfo fc_info;
+    fc_info.transpose_weights    = transpose_weights;
+    fc_info.are_weights_reshaped = !reshape_weights;
+
     // Create and configure function.
     GCFullyConnectedLayer fc;
-    fc.configure(&src, &weights, &bias, &dst, transpose_weights, !reshape_weights);
+    fc.configure(&src, &weights, &bias, &dst, fc_info);
 
     // Validate valid region
     const ValidRegion dst_valid_region = shape_to_valid_region(dst_shape);

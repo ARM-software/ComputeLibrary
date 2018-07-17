@@ -96,9 +96,14 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
     const QuantizationInfo src_quantization_info     = src.info()->quantization_info();
     const QuantizationInfo weights_quantization_info = weights.info()->quantization_info();
 
+    // Create Fully Connected layer info
+    FullyConnectedLayerInfo fc_info;
+    fc_info.transpose_weights    = transpose_weights;
+    fc_info.are_weights_reshaped = !reshape_weights;
+
     // Create and configure function.
     CLFullyConnectedLayer fc;
-    fc.configure(&src, &weights, &bias, &dst, transpose_weights, !reshape_weights);
+    fc.configure(&src, &weights, &bias, &dst, fc_info);
 
     // Validate valid region
     const ValidRegion dst_valid_region = shape_to_valid_region(dst_shape);
@@ -141,12 +146,16 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(
     framework::dataset::make("Expected", { false, true, true, false, false })),
     input_info, weights_info, bias_info, output_info, transpose_weights, reshaped_weights, expected)
 {
+    // Create Fully Connected layer info
+    FullyConnectedLayerInfo fc_info;
+    fc_info.transpose_weights = transpose_weights;
+    fc_info.are_weights_reshaped = reshaped_weights;
+
     Status status = CLFullyConnectedLayer::validate(&input_info.clone()->set_is_resizable(false),
                                                     &weights_info.clone()->set_is_resizable(false),
                                                     &bias_info.clone()->set_is_resizable(false),
                                                     &output_info.clone()->set_is_resizable(false),
-                                                    transpose_weights,
-                                                    reshaped_weights);
+                                                    fc_info);
     ARM_COMPUTE_EXPECT(bool(status) == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on

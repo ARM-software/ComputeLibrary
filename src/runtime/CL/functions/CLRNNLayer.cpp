@@ -58,7 +58,7 @@ Status CLRNNLayer::validate(const ITensorInfo *input, const ITensorInfo *weights
 
     auto shape_info = TensorInfo(compute_rnn_shape(recurrent_weights, hidden_state->dimension(idx_height)), 1, input->data_type());
 
-    ARM_COMPUTE_RETURN_ON_ERROR(CLFullyConnectedLayer::validate(input, weights, bias, &shape_info, true, false));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLFullyConnectedLayer::validate(input, weights, bias, &shape_info));
     ARM_COMPUTE_RETURN_ON_ERROR(CLGEMM::validate(hidden_state, recurrent_weights, nullptr, &shape_info, 1.f, 0.f));
     ARM_COMPUTE_RETURN_ON_ERROR(CLArithmeticAdditionKernel::validate(&shape_info, &shape_info, &shape_info, ConvertPolicy::SATURATE));
     ARM_COMPUTE_RETURN_ON_ERROR(CLActivationLayerKernel::validate(&shape_info, &shape_info, info));
@@ -82,7 +82,7 @@ void CLRNNLayer::configure(const ICLTensor *input, const ICLTensor *weights, con
 
     // Manage intermediate buffers and configure
     _memory_group.manage(&_fully_connected_out);
-    _fully_connected_kernel.configure(input, weights, bias, &_fully_connected_out, true, false);
+    _fully_connected_kernel.configure(input, weights, bias, &_fully_connected_out);
 
     _memory_group.manage(&_gemm_output);
     _gemm_state_f.configure(hidden_state, recurrent_weights, nullptr, &_gemm_output, 1.f, 0.f);

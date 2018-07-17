@@ -31,8 +31,8 @@ namespace arm_compute
 {
 namespace graph
 {
-FullyConnectedLayerNode::FullyConnectedLayerNode(unsigned int num_outputs)
-    : _num_outputs(num_outputs)
+FullyConnectedLayerNode::FullyConnectedLayerNode(unsigned int num_outputs, FullyConnectedLayerInfo fc_info)
+    : _num_outputs(num_outputs), _info(fc_info)
 {
     _input_edges.resize(3, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
@@ -73,6 +73,11 @@ TensorDescriptor FullyConnectedLayerNode::compute_output_descriptor(const Tensor
     output_descriptor.shape            = TensorShape(num_outputs, batches);
 
     return output_descriptor;
+}
+
+FullyConnectedLayerInfo FullyConnectedLayerNode::info() const
+{
+    return _info;
 }
 
 bool FullyConnectedLayerNode::forward_descriptors()

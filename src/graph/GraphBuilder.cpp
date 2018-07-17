@@ -446,8 +446,13 @@ NodeID GraphBuilder::add_fully_connected_layer(Graph &g, NodeParams params, Node
         b_nid = add_const_node_with_name(g, params, "Bias", b_desc, std::move(bias_accessor));
     }
 
-    // Create convolution node and connect
-    NodeID fc_nid = g.add_node<FullyConnectedLayerNode>(num_outputs);
+    // Add fully connected info
+    // FIXME (COMPMID-1367) : Expose weights layout
+    FullyConnectedLayerInfo fc_info;
+    fc_info.weights_trained_layout = DataLayout::NCHW;
+
+    // Create fully connected node and connect
+    NodeID fc_nid = g.add_node<FullyConnectedLayerNode>(num_outputs, fc_info);
     g.add_connection(input.node_id, input.index, fc_nid, 0);
     g.add_connection(w_nid, 0, fc_nid, 1);
     if(has_bias)

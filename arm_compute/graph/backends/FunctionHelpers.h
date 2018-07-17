@@ -524,10 +524,11 @@ std::unique_ptr<IFunction> create_fully_connected_layer(FullyConnectedLayerNode 
     typename TargetInfo::TensorType *weights = get_backing_tensor<TargetInfo>(node.input(1));
     typename TargetInfo::TensorType *biases  = get_backing_tensor<TargetInfo>(node.input(2));
     typename TargetInfo::TensorType *output  = get_backing_tensor<TargetInfo>(node.output(0));
+    const FullyConnectedLayerInfo    fc_info = node.info();
 
     // Create and configure function
     auto func = support::cpp14::make_unique<FullyConnectedLayerFunction>(get_memory_manager(ctx, TargetInfo::TargetType));
-    func->configure(input, weights, biases, output);
+    func->configure(input, weights, biases, output, fc_info);
     ARM_COMPUTE_ERROR_ON(input == nullptr);
     ARM_COMPUTE_ERROR_ON(weights == nullptr);
     ARM_COMPUTE_ERROR_ON(output == nullptr);

@@ -130,9 +130,14 @@ protected:
         TensorType bias    = create_tensor<TensorType>(bias_shape, _bias_data_type, 1, _quantization_info);
         TensorType dst     = create_tensor<TensorType>(output_shape, _data_type, 1, _quantization_info);
 
+        // Create Fully Connected layer info
+        FullyConnectedLayerInfo fc_info;
+        fc_info.transpose_weights    = transpose_weights;
+        fc_info.are_weights_reshaped = !reshape_weights;
+
         // Create and configure function.
         FunctionType fc;
-        fc.configure(&src, &weights, &bias, &dst, transpose_weights, !reshape_weights);
+        fc.configure(&src, &weights, &bias, &dst, fc_info);
 
         ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
         ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);

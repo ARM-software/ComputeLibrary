@@ -193,6 +193,9 @@ public:
     /** Build the network */
     void build()
     {
+        FullyConnectedLayerInfo fc_info;
+        fc_info.are_weights_reshaped = _reshaped_weights;
+
         input.allocator()->init(TensorInfo(TensorShape(227U, 227U, 3U, _batches), 1, _data_type));
         output.allocator()->init(TensorInfo(TensorShape(1000U, _batches), 1, _data_type));
 
@@ -265,13 +268,13 @@ public:
         act5.configure(&conv5_out, &act5_out, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
         pool5.configure(&act5_out, &pool5_out, PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0)));
         // Layer 6
-        fc6.configure(&pool5_out, &w[5], &b[5], &fc6_out, true, _reshaped_weights);
+        fc6.configure(&pool5_out, &w[5], &b[5], &fc6_out, fc_info);
         act6.configure(&fc6_out, &act6_out, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
         // Layer 7
-        fc7.configure(&act6_out, &w[6], &b[6], &fc7_out, true, _reshaped_weights);
+        fc7.configure(&act6_out, &w[6], &b[6], &fc7_out, fc_info);
         act7.configure(&fc7_out, &act7_out, ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
         // Layer 8
-        fc8.configure(&act7_out, &w[7], &b[7], &fc8_out, true, _reshaped_weights);
+        fc8.configure(&act7_out, &w[7], &b[7], &fc8_out, fc_info);
         // Softmax
         smx.configure(&fc8_out, &output);
     }

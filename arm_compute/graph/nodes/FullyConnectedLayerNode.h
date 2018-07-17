@@ -37,8 +37,9 @@ public:
     /** Constructor
      *
      * @param[in] num_outputs Number of neurons in the layer
+     * @param[in] fc_info     (Optional) Additional information about the fully connected layer
      */
-    FullyConnectedLayerNode(unsigned int num_outputs);
+    FullyConnectedLayerNode(unsigned int num_outputs, FullyConnectedLayerInfo fc_info = FullyConnectedLayerInfo());
     /** Computes weights descriptor
      *
      * @warning Works for inputs with 1D batch space
@@ -59,6 +60,11 @@ public:
      * @return Output descriptor
      */
     static TensorDescriptor compute_output_descriptor(const TensorDescriptor &input_descriptor, unsigned int num_outputs);
+    /** Fully connected layer addition information
+     *
+     * @return Additional information about the fully connected layer
+     */
+    FullyConnectedLayerInfo info() const;
 
     // Inherited overridden methods:
     NodeType         type() const override;
@@ -67,7 +73,8 @@ public:
     void accept(INodeVisitor &v) override;
 
 private:
-    unsigned int _num_outputs;
+    unsigned int            _num_outputs;
+    FullyConnectedLayerInfo _info;
 };
 } // namespace graph
 } // namespace arm_compute

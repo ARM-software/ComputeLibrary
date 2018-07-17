@@ -85,9 +85,11 @@ void CaffePreproccessor::preprocess(ITensor &tensor)
     Window window;
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
 
+    const int channel_idx = get_data_layout_dimension_index(tensor.info()->data_layout(), DataLayoutDimension::CHANNEL);
+
     execute_window_loop(window, [&](const Coordinates & id)
     {
-        const float value                                     = *reinterpret_cast<float *>(tensor.ptr_to_element(id)) - _mean[id.z()];
+        const float value                                     = *reinterpret_cast<float *>(tensor.ptr_to_element(id)) - _mean[id[channel_idx]];
         *reinterpret_cast<float *>(tensor.ptr_to_element(id)) = value;
     });
 }
