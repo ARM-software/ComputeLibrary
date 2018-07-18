@@ -543,13 +543,13 @@ __kernel void winograd_output_transform_4x4_3x3_nhwc(
     *((__global float *)(dst_ptr + offset.s3)) = out03;
 #elif defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL)
     // Store the 4x1 output tile
-    int  offset = dst_offset_first_element_in_bytes + x_out * sizeof(float) + y_out * dst_stride_y + z_out * dst_stride_z;
-    int4 mult_y = min(dst_size - offset, 1);
+    int offset = dst_offset_first_element_in_bytes + x_out * sizeof(float) + y_out * dst_stride_y + z_out * dst_stride_z;
+    int mult_y = min(dst_size - offset, 1);
 
-    *((__global float *)(dst_ptr + mult_y.s0 * 0 * dst_stride_y + offset)) = out00;
-    *((__global float *)(dst_ptr + mult_y.s0 * 1 * dst_stride_y + offset)) = out01;
-    *((__global float *)(dst_ptr + mult_y.s0 * 2 * dst_stride_y + offset)) = out02;
-    *((__global float *)(dst_ptr + mult_y.s0 * 3 * dst_stride_y + offset)) = out03;
+    *((__global float *)(dst_ptr + mult_y * 0 * dst_stride_y + offset)) = out00;
+    *((__global float *)(dst_ptr + mult_y * 1 * dst_stride_y + offset)) = out01;
+    *((__global float *)(dst_ptr + mult_y * 2 * dst_stride_y + offset)) = out02;
+    *((__global float *)(dst_ptr + mult_y * 3 * dst_stride_y + offset)) = out03;
 #else // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL)
     // Get output address
     int4 offset = (int4)(dst_offset_first_element_in_bytes + x_out * sizeof(float) + y_out * dst_stride_y + z_out * dst_stride_z);
@@ -681,14 +681,14 @@ __kernel void winograd_output_transform_4x4_5x5_nchw(
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 
 #else // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
-    float d10                                                              = *((__global float *)(src_addr + 8 * src_stride_z));
-    float d11                                                              = *((__global float *)(src_addr + 9 * src_stride_z));
-    float d12                                                              = *((__global float *)(src_addr + 10 * src_stride_z));
-    float d13                                                              = *((__global float *)(src_addr + 11 * src_stride_z));
-    float d14                                                              = *((__global float *)(src_addr + 12 * src_stride_z));
-    float d15                                                              = *((__global float *)(src_addr + 13 * src_stride_z));
-    float d16                                                              = *((__global float *)(src_addr + 14 * src_stride_z));
-    float d17                                                              = *((__global float *)(src_addr + 15 * src_stride_z));
+    float d10                                                           = *((__global float *)(src_addr + 8 * src_stride_z));
+    float d11                                                           = *((__global float *)(src_addr + 9 * src_stride_z));
+    float d12                                                           = *((__global float *)(src_addr + 10 * src_stride_z));
+    float d13                                                           = *((__global float *)(src_addr + 11 * src_stride_z));
+    float d14                                                           = *((__global float *)(src_addr + 12 * src_stride_z));
+    float d15                                                           = *((__global float *)(src_addr + 13 * src_stride_z));
+    float d16                                                           = *((__global float *)(src_addr + 14 * src_stride_z));
+    float d17                                                           = *((__global float *)(src_addr + 15 * src_stride_z));
 
     float d20 = *((__global float *)(src_addr + 16 * src_stride_z));
     float d21 = *((__global float *)(src_addr + 17 * src_stride_z));
@@ -998,18 +998,18 @@ __kernel void winograd_output_transform_4x4_5x5_nhwc(
     *(__global float *)(dst_ptr + mult_y.s0 * 1 * dst_stride_y + offset.s0) = out_col1.s0;
     *(__global float *)(dst_ptr + mult_y.s0 * 2 * dst_stride_y + offset.s0) = out_col2.s0;
     *(__global float *)(dst_ptr + mult_y.s0 * 3 * dst_stride_y + offset.s0) = out_col3.s0;
-    *(__global float *)(dst_ptr + mult_y.s0 * 0 * dst_stride_y + offset.s1) = out_col0.s1;
-    *(__global float *)(dst_ptr + mult_y.s0 * 1 * dst_stride_y + offset.s1) = out_col1.s1;
-    *(__global float *)(dst_ptr + mult_y.s0 * 2 * dst_stride_y + offset.s1) = out_col2.s1;
-    *(__global float *)(dst_ptr + mult_y.s0 * 3 * dst_stride_y + offset.s1) = out_col3.s1;
-    *(__global float *)(dst_ptr + mult_y.s0 * 0 * dst_stride_y + offset.s2) = out_col0.s2;
-    *(__global float *)(dst_ptr + mult_y.s0 * 1 * dst_stride_y + offset.s2) = out_col1.s2;
-    *(__global float *)(dst_ptr + mult_y.s0 * 2 * dst_stride_y + offset.s2) = out_col2.s2;
-    *(__global float *)(dst_ptr + mult_y.s0 * 3 * dst_stride_y + offset.s2) = out_col3.s2;
-    *(__global float *)(dst_ptr + mult_y.s0 * 0 * dst_stride_y + offset.s3) = out_col0.s3;
-    *(__global float *)(dst_ptr + mult_y.s0 * 1 * dst_stride_y + offset.s3) = out_col1.s3;
-    *(__global float *)(dst_ptr + mult_y.s0 * 2 * dst_stride_y + offset.s3) = out_col2.s3;
-    *(__global float *)(dst_ptr + mult_y.s0 * 3 * dst_stride_y + offset.s3) = out_col3.s3;
+    *(__global float *)(dst_ptr + mult_y.s1 * 0 * dst_stride_y + offset.s1) = out_col0.s1;
+    *(__global float *)(dst_ptr + mult_y.s1 * 1 * dst_stride_y + offset.s1) = out_col1.s1;
+    *(__global float *)(dst_ptr + mult_y.s1 * 2 * dst_stride_y + offset.s1) = out_col2.s1;
+    *(__global float *)(dst_ptr + mult_y.s1 * 3 * dst_stride_y + offset.s1) = out_col3.s1;
+    *(__global float *)(dst_ptr + mult_y.s2 * 0 * dst_stride_y + offset.s2) = out_col0.s2;
+    *(__global float *)(dst_ptr + mult_y.s2 * 1 * dst_stride_y + offset.s2) = out_col1.s2;
+    *(__global float *)(dst_ptr + mult_y.s2 * 2 * dst_stride_y + offset.s2) = out_col2.s2;
+    *(__global float *)(dst_ptr + mult_y.s2 * 3 * dst_stride_y + offset.s2) = out_col3.s2;
+    *(__global float *)(dst_ptr + mult_y.s3 * 0 * dst_stride_y + offset.s3) = out_col0.s3;
+    *(__global float *)(dst_ptr + mult_y.s3 * 1 * dst_stride_y + offset.s3) = out_col1.s3;
+    *(__global float *)(dst_ptr + mult_y.s3 * 2 * dst_stride_y + offset.s3) = out_col2.s3;
+    *(__global float *)(dst_ptr + mult_y.s3 * 3 * dst_stride_y + offset.s3) = out_col3.s3;
 #endif // defined(WINOGRAD_OUTPUT_TRANSFORM_HORIZONTAL) || defined(WINOGRAD_OUTPUT_TRANSFORM_VERTICAL)
 }
 
