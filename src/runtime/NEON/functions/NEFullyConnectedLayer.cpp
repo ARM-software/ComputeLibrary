@@ -118,7 +118,7 @@ void NEFullyConnectedLayer::configure_conv_fc(const ITensor *input, const ITenso
 
     // Configure im2col kernel
     _memory_group.manage(&_im2col_output);
-    _im2col_kernel.configure(input, &_im2col_output, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false, true);
+    _im2col_kernel.configure(input, &_im2col_output, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false, Size2D(1U, 1U), 1, true);
 
     // Configure matrix multiply kernel
     configure_mm(&_im2col_output, weights, output);
@@ -308,7 +308,7 @@ Status NEFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
         ARM_COMPUTE_RETURN_ERROR_ON((weights_to_use->dimension(1) != (input->dimension(0) * input->dimension(1) * input->dimension(2))));
 
         // Validate im2col kernel
-        ARM_COMPUTE_RETURN_ON_ERROR(NEIm2ColKernel::validate(input, &im2col_input, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false, true));
+        ARM_COMPUTE_RETURN_ON_ERROR(NEIm2ColKernel::validate(input, &im2col_input, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false, Size2D(1U, 1U), 1, true));
         input_to_use = &im2col_input;
     }
     else

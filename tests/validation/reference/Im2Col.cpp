@@ -36,7 +36,7 @@ namespace validation
 namespace reference
 {
 template <typename T>
-void im2col_nchw(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias)
+void im2col_nchw(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON(src.data_layout() != DataLayout::NCHW);
     const int stride_x      = conv_info.stride().first;
@@ -58,26 +58,32 @@ void im2col_nchw(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D 
 
     for(int b = 0; b < batches; ++b)
     {
-        for(int yo = 0; yo < dst_height; ++yo)
+        for(int g = 0; g < static_cast<int>(num_groups); ++g)
         {
-            // Compute input spatial coordinates
-            const int xi = (yo % convolved_dims.first) * stride_x;
-            const int yi = (yo / convolved_dims.first) * stride_y;
+            const int first_group_ch = g * (src_channels / num_groups);
+            const int last_group_ch  = (g + 1) * (src_channels / num_groups);
 
-            for(int ci = 0; ci < src_channels; ++ci)
+            for(int yo = 0; yo < dst_height; ++yo)
             {
-                for(int yk = 0; yk < kernel_height; ++yk)
+                // Compute input spatial coordinates
+                const int xi = (yo % convolved_dims.first) * stride_x;
+                const int yi = (yo / convolved_dims.first) * stride_y;
+
+                for(int ci = first_group_ch; ci < last_group_ch; ++ci)
                 {
-                    for(int xk = 0; xk < kernel_width; ++xk)
+                    for(int yk = 0; yk < kernel_height; ++yk)
                     {
-                        dst[dst_idx++] = tensor_elem_at(src, Coordinates(xi + xk - pad_x, yi + yk - pad_y, ci, b), BorderMode::CONSTANT, static_cast<T>(pad_val));
+                        for(int xk = 0; xk < kernel_width; ++xk)
+                        {
+                            dst[dst_idx++] = tensor_elem_at(src, Coordinates(xi + xk - pad_x, yi + yk - pad_y, ci, b), BorderMode::CONSTANT, static_cast<T>(pad_val));
+                        }
                     }
                 }
-            }
 
-            if(has_bias)
-            {
-                dst[dst_idx++] = static_cast<T>(1);
+                if(has_bias)
+                {
+                    dst[dst_idx++] = static_cast<T>(1);
+                }
             }
         }
     }
@@ -179,13 +185,13 @@ void im2col_nhwc_channel_first(const SimpleTensor<T> &src, SimpleTensor<T> &dst,
 }
 
 template <typename T>
-void im2col(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, bool channels_first_output_nhwc)
+void im2col(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const unsigned int num_groups, bool channels_first_output_nhwc)
 {
     switch(src.data_layout())
     {
         case DataLayout::NCHW:
         {
-            im2col_nchw(src, dst, kernel_dims, conv_info, has_bias);
+            im2col_nchw(src, dst, kernel_dims, conv_info, has_bias, num_groups);
             break;
         }
         case DataLayout::NHWC:
@@ -208,9 +214,12 @@ void im2col(const SimpleTensor<T> &src, SimpleTensor<T> &dst, const Size2D &kern
     }
 }
 
-template void im2col(const SimpleTensor<uint8_t> &src, SimpleTensor<uint8_t> &dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, bool channels_first_output_nhwc);
-template void im2col(const SimpleTensor<half> &src, SimpleTensor<half> &dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, bool channels_first_output_nhwc);
-template void im2col(const SimpleTensor<float> &src, SimpleTensor<float> &dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, bool channels_first_output_nhwc);
+template void im2col(const SimpleTensor<uint8_t> &src, SimpleTensor<uint8_t> &dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, unsigned int num_groups,
+                     bool channels_first_output_nhwc);
+template void im2col(const SimpleTensor<half> &src, SimpleTensor<half> &dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, unsigned int num_groups,
+                     bool channels_first_output_nhwc);
+template void im2col(const SimpleTensor<float> &src, SimpleTensor<float> &dst, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, unsigned int num_groups,
+                     bool channels_first_output_nhwc);
 } // namespace reference
 } // namespace validation
 } // namespace test

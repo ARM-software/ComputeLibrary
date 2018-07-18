@@ -53,9 +53,14 @@ const auto conv_filter_sizes = framework::dataset::make("KernelDims", { Size2D(3
 const auto padstrides        = framework::dataset::make("PadStride", { PadStrideInfo(1U, 1U, 0U, 0U),
                                                                        PadStrideInfo(1U, 1U, 1U, 1U),
                                                                        PadStrideInfo(2U, 2U, 0U, 2U) });
-const auto conv_args         = combine(combine(combine(conv_filter_sizes, padstrides),
-                                               framework::dataset::make("QuantizationInfo", QuantizationInfo(0.5f, 10))),
-                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
+const auto conv_args         = combine(combine(combine(combine(conv_filter_sizes, padstrides),
+                                                       framework::dataset::make("QuantizationInfo", QuantizationInfo(0.5f, 10))),
+                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                                       framework::dataset::make("NumGroups", { 1 }));
+const auto grouped_args      = combine(combine(combine(combine(conv_filter_sizes, padstrides),
+                                                       framework::dataset::make("QuantizationInfo", QuantizationInfo(0.5f, 10))),
+                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                                       framework::dataset::make("NumGroups", { 2, 3, 4 }));
 
 } // namespace
 TEST_SUITE(CL)
@@ -96,7 +101,6 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLIm2ColFixture<float>, framework::DatasetMode:
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-TEST_SUITE_END()
 
 FIXTURE_DATA_TEST_CASE(RunLarge, CLIm2ColFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::F32)),
                                                                                                           conv_args),
@@ -105,8 +109,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLIm2ColFixture<float>, framework::DatasetMode:
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
-
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+TEST_SUITE_END()
 
 TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLIm2ColFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(datasets::SmallShapes(), framework::dataset::make("DataType", DataType::F16)),
@@ -124,9 +127,6 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLIm2ColFixture<half>, framework::DatasetMode::
     validate(CLAccessor(_target), _reference);
 }
 TEST_SUITE_END()
-
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-
 TEST_SUITE_END()
 
 TEST_SUITE(QASYMM8)
@@ -144,6 +144,68 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLIm2ColFixture<uint8_t>, framework::DatasetMod
     // Validate output
     validate(CLAccessor(_target), _reference);
 }
+TEST_SUITE_END()
+
+TEST_SUITE(Grouped)
+TEST_SUITE(FP32)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLIm2ColFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(datasets::GroupedIm2ColSmallShapes(), framework::dataset::make("DataType",
+                                                                                                              DataType::F32)),
+                                                                                                      grouped_args),
+                                                                                              framework::dataset::make("ChannelsFirstOutputNHWC", true)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CLIm2ColFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::GroupedIm2ColLargeShapes(), framework::dataset::make("DataType",
+                                                                                                                  DataType::F32)),
+                                                                                                          grouped_args),
+                                                                                                  framework::dataset::make("ChannelsFirstOutputNHWC", true)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END()
+
+TEST_SUITE(FP16)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLIm2ColFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(datasets::GroupedIm2ColSmallShapes(), framework::dataset::make("DataType",
+                                                                                                             DataType::F16)),
+                                                                                                     grouped_args),
+                                                                                             framework::dataset::make("ChannelsFirstOutputNHWC", true)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CLIm2ColFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::GroupedIm2ColLargeShapes(), framework::dataset::make("DataType",
+                                                                                                                 DataType::F16)),
+                                                                                                         grouped_args),
+                                                                                                 framework::dataset::make("ChannelsFirstOutputNHWC", true)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END()
+
+TEST_SUITE(QASYMM8)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLIm2ColFixture<uint8_t>, framework::DatasetMode::ALL, combine(combine(combine(datasets::GroupedIm2ColSmallShapes(), framework::dataset::make("DataType",
+                                                                                                                DataType::QASYMM8)),
+                                                                                                        grouped_args),
+                                                                                                framework::dataset::make("ChannelsFirstOutputNHWC", true)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CLIm2ColFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::GroupedIm2ColLargeShapes(), framework::dataset::make("DataType",
+                                                                                                                    DataType::QASYMM8)),
+                                                                                                            grouped_args),
+                                                                                                    framework::dataset::make("ChannelsFirstOutputNHWC", true)))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END()
 TEST_SUITE_END()
 
 TEST_SUITE_END()

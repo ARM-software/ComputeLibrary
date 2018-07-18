@@ -32,6 +32,6 @@ using namespace arm_compute;
 void NEFlattenLayer::configure(const ITensor *input, ITensor *output)
 {
     auto k = arm_compute::support::cpp14::make_unique<NEIm2ColKernel>();
-    k->configure(input, output, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false, false, true);
+    k->configure(input, output, Size2D(1, 1), PadStrideInfo(1, 1, 0, 0), false, Size2D(1U, 1U), 1, false, true);
     _kernel = std::move(k);
 }

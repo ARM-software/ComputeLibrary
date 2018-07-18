@@ -635,6 +635,39 @@ public:
     }
 };
 
+/** Data set containing small grouped im2col tensor shapes. */
+class GroupedIm2ColSmallShapes final : public ShapeDataset
+{
+public:
+    GroupedIm2ColSmallShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 11U, 11U, 48U },
+                     TensorShape{ 27U, 13U, 24U },
+                     TensorShape{ 128U, 64U, 12U, 3U },
+                     TensorShape{ 11U, 11U, 48U, 4U },
+                     TensorShape{ 27U, 13U, 24U, 4U },
+                     TensorShape{ 11U, 11U, 48U, 5U }
+    })
+    {
+    }
+};
+
+/** Data set containing large grouped im2col tensor shapes. */
+class GroupedIm2ColLargeShapes final : public ShapeDataset
+{
+public:
+    GroupedIm2ColLargeShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 1921U, 1083U, 12U },
+                     TensorShape{ 641U, 485U, 24U, 3U },
+                     TensorShape{ 799U, 595U, 12U, 4U },
+    })
+    {
+    }
+};
+
 /** Data set containing small grouped weights tensor shapes. */
 class GroupedWeightsSmallShapes final : public ShapeDataset
 {

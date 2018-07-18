@@ -192,9 +192,15 @@ inline TensorShape compute_deconvolution_shape(const ITensorInfo &input, unsigne
 
     return scale_out_shape;
 }
-inline TensorShape compute_im2col_conv_shape(const ITensorInfo *input, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation, bool batch_size_on_z)
+inline TensorShape compute_im2col_conv_shape(const ITensorInfo *input, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation, bool batch_size_on_z,
+                                             unsigned int num_groups = 1)
 {
-    // The output shape will be the 2D shape used as input for GEMM [ out_channels * kernel_area, num_elems_per_out_channel ]
+    // The output shape will be the 3D shape [ out_channels * kernel_area, num_elems_per_out_channel, batches ]                           if batch_size_on_z == true
+    //                       or the 4D shape [ out_channels * kernel_area / num_groups, num_elems_per_out_channel, num_groups, batches ]  if batch_size_on_z == false
+
+    ARM_COMPUTE_ERROR_ON(num_groups == 0);
+    ARM_COMPUTE_ERROR_ON(num_groups > 1 && input->data_layout() != DataLayout::NCHW);
+    ARM_COMPUTE_ERROR_ON(num_groups > 1 && batch_size_on_z);
 
     TensorShape output_shape{ input->tensor_shape() };
 
@@ -204,7 +210,7 @@ inline TensorShape compute_im2col_conv_shape(const ITensorInfo *input, const Siz
     const int        channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
 
     std::pair<unsigned int, unsigned int> out_dims = scaled_dimensions(output_shape[width_idx], output_shape[height_idx], kernel_dims.width, kernel_dims.height, conv_info, dilation);
-    output_shape.set(0, (output_shape[channel_idx] * kernel_dims.area() + (has_bias ? 1 : 0)));
+    output_shape.set(0, (output_shape[channel_idx] / num_groups * kernel_dims.area() + (has_bias ? 1 : 0))); // NOLINT
     output_shape.set(1, (out_dims.first * out_dims.second));
     if(batch_size_on_z && output_shape.num_dimensions() >= 3)
     {
@@ -212,7 +218,7 @@ inline TensorShape compute_im2col_conv_shape(const ITensorInfo *input, const Siz
     }
     else
     {
-        output_shape.set(2, 1);
+        output_shape.set(2, num_groups);
     }
 
     return output_shape;

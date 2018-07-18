@@ -43,6 +43,7 @@
  * @note The number of input channels must be passed at compile time using -DSRC_DEPTH: e.g. -DSRC_DEPTH=3
  * @note The stride along the Y direction must be passed at compile time using -DSTRIDE_Y: e.g. -DSTRIDE_Y=1
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
+ * @note In case grouping is performed, the number of groups must be passed at compile time using -DNUM_GROUPS: e.g. -DNUM_GROUPS=4
  *
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -57,13 +58,19 @@
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes).
  * @param[in]  dst_stride_w                      Stride of the destination tensor in W dimension (in bytes).
  */
 __kernel void im2col1x1_stridex1_nchw(
     TENSOR3D_DECLARATION(src),
+#if defined(NUM_GROUPS)
+    TENSOR3D_DECLARATION(dst),
+#else  // defined(NUM_GROUPS)
     IMAGE_DECLARATION(dst),
+#endif // defined(NUM_GROUPS)
     uint src_stride_w,
     uint dst_stride_w)
 {
@@ -86,13 +93,22 @@ __kernel void im2col1x1_stridex1_nchw(
     const uint yi = yc * STRIDE_Y;
 
     // Calculate output indices
-    const uint  xo = ch;
+
+#if defined(NUM_GROUPS)
+    const uint xo = ch % (SRC_DEPTH / NUM_GROUPS);
+    const uint zo = ch / (SRC_DEPTH / NUM_GROUPS);
+#else                                                   // defined(NUM_GROUPS)
+    const uint xo              = ch;
+#endif                                                  // defined(NUM_GROUPS)
     const uint4 yo = xc_clamped + yc * CONVOLVED_WIDTH; // Index of the convolution
 
     // Get input and output address
     __global uchar *input_ptr = src_ptr + src_offset_first_element_in_bytes + xi * src_stride_x + yi * src_stride_y + ch * src_stride_z + batch * src_stride_w;
-
+#if defined(NUM_GROUPS)
+    __global uchar *output_ptr = dst_ptr + dst_offset_first_element_in_bytes + xo * dst_stride_x + zo * dst_stride_z + batch * dst_stride_w;
+#else  // defined(NUM_GROUPS)
     __global uchar *output_ptr = dst_ptr + dst_offset_first_element_in_bytes + xo * dst_stride_x + batch * dst_stride_w;
+#endif // defined(NUM_GROUPS)
 
     VEC_DATA_TYPE(DATA_TYPE, 4)
     data = vload4(0, (__global DATA_TYPE *)input_ptr);
@@ -106,7 +122,11 @@ __kernel void im2col1x1_stridex1_nchw(
     *(__global DATA_TYPE *)(output_ptr + yo.s3 * dst_stride_y) = data.s3;
 
 #ifdef HAS_BIAS
+#if defined(NUM_GROUPS)
+    if(xo == (SRC_DEPTH / NUM_GROUPS - 1))
+#else  // defined(NUM_GROUPS)
     if(ch == (SRC_DEPTH - 1))
+#endif // defined(NUM_GROUPS)
     {
         *((__global DATA_TYPE *)(output_ptr + yo.s0 * dst_stride_y) + 1) = 1.0f;
         *((__global DATA_TYPE *)(output_ptr + yo.s1 * dst_stride_y) + 1) = 1.0f;
@@ -130,6 +150,7 @@ __kernel void im2col1x1_stridex1_nchw(
  * @note The stride along the X and Y directions must be passed at compile time using -DSTRIDE_X and -DSTRIDE_Y: e.g. -DSTRIDE_X=1 and -DSTRIDE_Y=1
  * @note The dilation_x and dilation_y must be passed at compile time using -DDILATION_X and -DDILATION_Y: e.g. -DDILATION_X=1, -DDILATION_Y=1
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
+ * @note In case grouping is performed, the number of groups must be passed at compile time using -DNUM_GROUPS: e.g. -DNUM_GROUPS=4
  *
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -144,13 +165,19 @@ __kernel void im2col1x1_stridex1_nchw(
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes).
  * @param[in]  dst_stride_w                      Stride of the destination tensor in W dimension (in bytes).
  */
 __kernel void im2col_generic_nchw(
     TENSOR3D_DECLARATION(src),
+#if defined(NUM_GROUPS)
+    TENSOR3D_DECLARATION(dst),
+#else  // defined(NUM_GROUPS)
     IMAGE_DECLARATION(dst),
+#endif // defined(NUM_GROUPS)
     uint src_stride_w,
     uint dst_stride_w)
 {
@@ -164,11 +191,20 @@ __kernel void im2col_generic_nchw(
     const int yi = yc * STRIDE_Y - PAD_TOP;
 
     // Calculate output indices
-    const int xo = ch * KERNEL_WIDTH * KERNEL_HEIGHT;
+#if defined(NUM_GROUPS)
+    const int xo = (ch % (SRC_DEPTH / NUM_GROUPS)) * KERNEL_WIDTH * KERNEL_HEIGHT;
+    const int zo = ch / (SRC_DEPTH / NUM_GROUPS);
+#else                                         // defined(NUM_GROUPS)
+    const int xo                   = ch * KERNEL_WIDTH * KERNEL_HEIGHT;
+#endif                                        // defined(NUM_GROUPS)
     const int yo = xc + yc * CONVOLVED_WIDTH; // Index of the convolution
 
-    __global uchar *input_ptr      = src_ptr + src_offset_first_element_in_bytes + ch * src_stride_z + batch * src_stride_w;
+    __global uchar *input_ptr = src_ptr + src_offset_first_element_in_bytes + ch * src_stride_z + batch * src_stride_w;
+#if defined(NUM_GROUPS)
+    __global DATA_TYPE *output_ptr = ((__global DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + yo * dst_stride_y + zo * dst_stride_z + batch * dst_stride_w)) + xo;
+#else  // defined(NUM_GROUPS)
     __global DATA_TYPE *output_ptr = ((__global DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + yo * dst_stride_y + batch * dst_stride_w)) + xo;
+#endif // defined(NUM_GROUPS)
 
     // Linearize convolution elements
     for(int yk = 0; yk < KERNEL_HEIGHT; ++yk)
@@ -193,7 +229,11 @@ __kernel void im2col_generic_nchw(
     }
 
 #ifdef HAS_BIAS
+#if defined(NUM_GROUPS)
+    if((xo / (KERNEL_WIDTH * KERNEL_HEIGHT)) == (SRC_DEPTH / NUM_GROUPS - 1))
+#else  // defined(NUM_GROUPS)
     if(ch == (SRC_DEPTH - 1))
+#endif // defined(NUM_GROUPS)
     {
         *output_ptr = 1.0f;
     }
@@ -225,13 +265,19 @@ __kernel void im2col_generic_nchw(
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes).
  * @param[in]  dst_stride_w                      Stride of the destination tensor in W dimension (in bytes).
  */
 __kernel void im2col3x3_nchw(
     TENSOR3D_DECLARATION(src),
+#if defined(NUM_GROUPS)
+    TENSOR3D_DECLARATION(dst),
+#else  // defined(NUM_GROUPS)
     IMAGE_DECLARATION(dst),
+#endif // defined(NUM_GROUPS)
     uint src_stride_w,
     uint dst_stride_w)
 {
@@ -245,13 +291,21 @@ __kernel void im2col3x3_nchw(
     const int yi = yc * STRIDE_Y - PAD_TOP;
 
     // Calculate output indices
-    const int xo = ch * 9;                    // 3x3
+#if defined(NUM_GROUPS)
+    const int xo = (ch % (SRC_DEPTH / NUM_GROUPS)) * 9; // 3x3
+    const int zo = ch / (SRC_DEPTH / NUM_GROUPS);
+#else                                         // defined(NUM_GROUPS)
+    const int xo               = ch * 9; // 3x3
+#endif                                        // defined(NUM_GROUPS)
     const int yo = xc + yc * CONVOLVED_WIDTH; // Index of the convolution
 
     // Get input and output address
     __global uchar *input_ptr = src_ptr + src_offset_first_element_in_bytes + xi * (int)src_stride_x + yi * (int)src_stride_y + ch * src_stride_z + batch * src_stride_w;
-
+#if defined(NUM_GROUPS)
+    __global uchar *output_ptr = dst_ptr + dst_offset_first_element_in_bytes + xo * dst_stride_x + yo * dst_stride_y + zo * dst_stride_z + batch * dst_stride_w;
+#else  // defined(NUM_GROUPS)
     __global uchar *output_ptr = dst_ptr + dst_offset_first_element_in_bytes + xo * dst_stride_x + yo * dst_stride_y + batch * dst_stride_w;
+#endif // defined(NUM_GROUPS)
 
     VEC_DATA_TYPE(DATA_TYPE, 3)
     row0 = vload3(0, (__global DATA_TYPE *)(input_ptr + 0 * src_stride_y));
@@ -281,7 +335,11 @@ __kernel void im2col3x3_nchw(
     *((__global DATA_TYPE *)output_ptr + 8) = row2.s2;
 
 #ifdef HAS_BIAS
+#if defined(NUM_GROUPS)
+    if((xo / 9) == (SRC_DEPTH / NUM_GROUPS - 1))
+#else  // defined(NUM_GROUPS)
     if(ch == (SRC_DEPTH - 1))
+#endif // defined(NUM_GROUPS)
     {
         *((__global DATA_TYPE *)output_ptr + 9) = 1.0f;
     }
@@ -298,6 +356,7 @@ __kernel void im2col3x3_nchw(
  * @note The zero value to store in case we load values out-of-bounds must be passed at compile time using -DPAD_VALUE: e.g. -DPAD_VALUE=0.0
  * @note The stride along the X and Y directions must be passed at compile time using -DSTRIDE_X and -DSTRIDE_Y: e.g. -DSTRIDE_X=1 and -DSTRIDE_Y=1
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
+ * @note In case grouping is performed, the number of groups must be passed at compile time using -DNUM_GROUPS: e.g. -DNUM_GROUPS=4
  *
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -312,13 +371,19 @@ __kernel void im2col3x3_nchw(
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes).
  * @param[in]  dst_stride_w                      Stride of the destination tensor in W dimension (in bytes).
  */
 __kernel void im2col5x5_nchw(
     TENSOR3D_DECLARATION(src),
+#if defined(NUM_GROUPS)
+    TENSOR3D_DECLARATION(dst),
+#else  // defined(NUM_GROUPS)
     IMAGE_DECLARATION(dst),
+#endif // defined(NUM_GROUPS)
     uint src_stride_w,
     uint dst_stride_w)
 {
@@ -332,7 +397,12 @@ __kernel void im2col5x5_nchw(
     const int yi = yc * STRIDE_Y - PAD_TOP;
 
     // Calculate output indices
-    const int xo = ch * 25;                   // 5x5
+#if defined(NUM_GROUPS)
+    const int xo = (ch % (SRC_DEPTH / NUM_GROUPS)) * 25; // 5x5
+    const int zo = ch / (SRC_DEPTH / NUM_GROUPS);
+#else                                         // defined(NUM_GROUPS)
+    const int xo               = ch * 25; // 5x5
+#endif                                        // defined(NUM_GROUPS)
     const int yo = xc + yc * CONVOLVED_WIDTH; // Index of the convolution
 
 #if PAD_LEFT != 0 || PAD_TOP != 0 || PAD_RIGHT != 0 || PAD_BOTTOM != 0
@@ -353,8 +423,11 @@ __kernel void im2col5x5_nchw(
 
     // Get input and output address
     __global uchar *input_ptr = src_ptr + src_offset_first_element_in_bytes + xi * (int)src_stride_x + yi * (int)src_stride_y + ch * src_stride_z + batch * src_stride_w;
-
+#if defined(NUM_GROUPS)
+    __global uchar *output_ptr = dst_ptr + dst_offset_first_element_in_bytes + xo * dst_stride_x + yo * dst_stride_y + zo * dst_stride_z + batch * dst_stride_w;
+#else  // defined(NUM_GROUPS)
     __global uchar *output_ptr = dst_ptr + dst_offset_first_element_in_bytes + xo * dst_stride_x + yo * dst_stride_y + batch * dst_stride_w;
+#endif // defined(NUM_GROUPS)
 
     {
         VEC_DATA_TYPE(DATA_TYPE, 4)
@@ -455,7 +528,11 @@ __kernel void im2col5x5_nchw(
     }
 
 #ifdef HAS_BIAS
+#if defined(NUM_GROUPS)
+    if((xo / 25) == (SRC_DEPTH / NUM_GROUPS - 1))
+#else  // defined(NUM_GROUPS)
     if(ch == (SRC_DEPTH - 1))
+#endif // defined(NUM_GROUPS)
     {
         *((__global DATA_TYPE *)output_ptr) = 1.0f;
     }
@@ -471,6 +548,7 @@ __kernel void im2col5x5_nchw(
  * @note The number of input channels must be passed at compile time using -DSRC_DEPTH: e.g. -DSRC_DEPTH=3
  * @note The stride along the X and Y directions must be passed at compile time using -DSTRIDE_X and -DSTRIDE_Y: e.g. -DSTRIDE_X=1 and -DSTRIDE_Y=1
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
+ * @note In case grouping is performed, the number of groups must be passed at compile time using -DNUM_GROUPS: e.g. -DNUM_GROUPS=4
  *
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: QASYMM8/F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -485,13 +563,19 @@ __kernel void im2col5x5_nchw(
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes).
  * @param[in]  dst_stride_w                      Stride of the destination tensor in W dimension (in bytes).
  */
 __kernel void im2col11x11_padx0_pady0_nchw(
     TENSOR3D_DECLARATION(src),
+#if defined(NUM_GROUPS)
+    TENSOR3D_DECLARATION(dst),
+#else  // defined(NUM_GROUPS)
     IMAGE_DECLARATION(dst),
+#endif // defined(NUM_GROUPS)
     uint src_stride_w,
     uint dst_stride_w)
 {
@@ -505,13 +589,22 @@ __kernel void im2col11x11_padx0_pady0_nchw(
     const int yi = yc * STRIDE_Y;
 
     // Calculate output indices
-    const int xo = ch * 121;                  // 11x11
+#if defined(NUM_GROUPS)
+    const int xo = (ch % (SRC_DEPTH / NUM_GROUPS)) * 121; // 11x11
+    const int zo = ch / (SRC_DEPTH / NUM_GROUPS);
+#else                                         // defined(NUM_GROUPS)
+    const int xo               = ch * 121; // 11x11
+#endif                                        // defined(NUM_GROUPS)
     const int yo = xc + yc * CONVOLVED_WIDTH; // Index of the convolution
 
     // Get input and output address
     __global uchar *input_ptr = src_ptr + src_offset_first_element_in_bytes + xi * src_stride_x + yi * src_stride_y + ch * src_stride_z + batch * src_stride_w;
-
+#if defined(NUM_GROUPS)
+    __global uchar *output_ptr = dst_ptr + dst_offset_first_element_in_bytes + xo * dst_stride_x + yo * dst_stride_y + zo * dst_stride_z + batch * dst_stride_w;
+#else  // defined(NUM_GROUPS)
     __global uchar *output_ptr = dst_ptr + dst_offset_first_element_in_bytes + xo * dst_stride_x + yo * dst_stride_y + batch * dst_stride_w;
+#endif // defined(NUM_GROUPS)
+
     {
         VEC_DATA_TYPE(DATA_TYPE, 8)
         row00 = vload8(0, (__global DATA_TYPE *)(input_ptr));
@@ -655,7 +748,11 @@ __kernel void im2col11x11_padx0_pady0_nchw(
     }
 
 #ifdef HAS_BIAS
+#if defined(NUM_GROUPS)
+    if((xo / 121) == (SRC_DEPTH / NUM_GROUPS - 1))
+#else  // defined(NUM_GROUPS)
     if(ch == (SRC_DEPTH - 1))
+#endif // defined(NUM_GROUPS)
     {
         *((__global DATA_TYPE *)output_ptr) = 1.0f;
     }
@@ -671,6 +768,7 @@ __kernel void im2col11x11_padx0_pady0_nchw(
  * @note The width modulo vector size must be passed at compile time using -DWIDTH_MOD_VECTOR_SIZE e.g. -DWIDTH_MOD_VECTOR_SIZE=3.
  * @note The stride along the X and Y directions must be passed at compile time using -DSTRIDE_X and -DSTRIDE_Y: e.g. -DSTRIDE_X=1 and -DSTRIDE_Y=1
  * @note In case biases will be added to the convolution -DHAS_BIAS has to be passed to append the final matrix with 1 in each row.
+ * @note In case grouping is performed, the number of groups must be passed at compile time using -DNUM_GROUPS: e.g. -DNUM_GROUPS=4
  *
  * @param[in]  src_ptr                           Pointer to the source tensor. Supported data types: F16/F32
  * @param[in]  src_stride_x                      Stride of the source tensor in X dimension (in bytes)
@@ -685,13 +783,19 @@ __kernel void im2col11x11_padx0_pady0_nchw(
  * @param[in]  dst_step_x                        dst_stride_x * number of elements along X processed per workitem(in bytes)
  * @param[in]  dst_stride_y                      Stride of the destination tensor in Y dimension (in bytes)
  * @param[in]  dst_step_y                        dst_stride_y * number of elements along Y processed per workitem(in bytes)
+ * @param[in]  dst_stride_z                      Stride of the destination tensor in Z dimension (in bytes)
+ * @param[in]  dst_step_z                        dst_stride_z * number of elements along Z processed per workitem(in bytes)
  * @param[in]  dst_offset_first_element_in_bytes The offset of the first element in the destination tensor
  * @param[in]  src_stride_w                      Stride of the source tensor in W dimension (in bytes).
  * @param[in]  dst_stride_w                      Stride of the destination tensor in W dimension (in bytes).
  */
 __kernel void im2col_generic_padx0_pady0_nchw(
     TENSOR3D_DECLARATION(src),
+#if defined(NUM_GROUPS)
+    TENSOR3D_DECLARATION(dst),
+#else  // defined(NUM_GROUPS)
     IMAGE_DECLARATION(dst),
+#endif // defined(NUM_GROUPS)
     uint src_stride_w,
     uint dst_stride_w)
 {
@@ -703,11 +807,23 @@ __kernel void im2col_generic_padx0_pady0_nchw(
     // Calculate input indices
     const int xi = xc * STRIDE_X;
     const int yi = yc * STRIDE_Y;
+
     // Calculate output indices
+#if defined(NUM_GROUPS)
+    const int xo = (ch % (SRC_DEPTH / NUM_GROUPS)) * KERNEL_WIDTH * KERNEL_HEIGHT;
+    const int zo = ch / (SRC_DEPTH / NUM_GROUPS);
+#else                                         // defined(NUM_GROUPS)
     const int xo                   = ch * KERNEL_WIDTH * KERNEL_HEIGHT;
-    const int yo                   = xc + yc * CONVOLVED_WIDTH; // Index of the convolution
-    __global uchar *input_ptr      = src_ptr + src_offset_first_element_in_bytes + ch * src_stride_z + batch * src_stride_w;
+#endif                                        // defined(NUM_GROUPS)
+    const int yo = xc + yc * CONVOLVED_WIDTH; // Index of the convolution
+
+    __global uchar *input_ptr = src_ptr + src_offset_first_element_in_bytes + ch * src_stride_z + batch * src_stride_w;
+#if defined(NUM_GROUPS)
+    __global DATA_TYPE *output_ptr = ((__global DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + yo * dst_stride_y + zo * dst_stride_z + batch * dst_stride_w)) + xo;
+#else  // defined(NUM_GROUPS)
     __global DATA_TYPE *output_ptr = ((__global DATA_TYPE *)(dst_ptr + dst_offset_first_element_in_bytes + yo * dst_stride_y + batch * dst_stride_w)) + xo;
+#endif // defined(NUM_GROUPS)
+
     // Linearize convolution elements
     for(int y = yi, y_e = yi + KERNEL_HEIGHT; y < y_e; ++y)
     {
@@ -734,7 +850,11 @@ __kernel void im2col_generic_padx0_pady0_nchw(
     } /* End of loop over KERNEL_HEIGHT */
 
 #ifdef HAS_BIAS
+#if defined(NUM_GROUPS)
+    if((xo / (KERNEL_WIDTH * KERNEL_HEIGHT)) == (SRC_DEPTH / NUM_GROUPS - 1))
+#else  // defined(NUM_GROUPS)
     if(ch == (SRC_DEPTH - 1))
+#endif // defined(NUM_GROUPS)
     {
         *output_ptr = 1.0f;
     }

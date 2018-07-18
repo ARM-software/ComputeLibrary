@@ -181,7 +181,6 @@ Status CLGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
 
     TensorInfo tmp_a_info{};
     TensorInfo tmp_b_info{};
-    TensorInfo tmp_output_info{};
 
     // Get the GPU target
     const GPUTarget gpu_target = CLScheduler::get().target();
@@ -229,13 +228,12 @@ Status CLGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
     }
 
     // Validate matrix multiply
-    auto_init_if_empty(tmp_output_info, matrix_a_info->clone()->set_tensor_shape(compute_mm_shape(*matrix_a_info, *matrix_b_info, run_interleave_transpose, reshape_info)));
-    ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, &tmp_output_info, alpha, run_interleave_transpose, reshape_info, gpu_target));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, output, alpha, run_interleave_transpose, reshape_info, gpu_target));
 
     if(beta != 0 && c != nullptr)
     {
         // Validate matrix addition kernel
-        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMMatrixAdditionKernel::validate(c, &tmp_output_info, beta));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMMatrixAdditionKernel::validate(c, output, beta));
     }
 
     return Status{};

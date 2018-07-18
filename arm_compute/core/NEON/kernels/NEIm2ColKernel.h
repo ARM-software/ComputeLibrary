@@ -83,12 +83,13 @@ public:
      * @param[in]  kernel_dims        The kernel dimensions (width and height).
      * @param[in]  conv_info          Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  has_bias           In case biases are provided expands the matrix with 1.
+     * @param[in]  dilation           (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
+     * @param[in]  num_groups         (Optional) Number of groups when performing a grouped convolution
      * @param[in]  is_fully_connected (Optional) Determines whether this kernel will be called by @ref NEFullyConnectedLayer in order to validate the arguments
      * @param[in]  is_flatten         (Optional) Determines whether this kernel will be called by @ref NEFlattenLayer in order to validate the arguments
-     * @param[in]  dilation           (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
      */
     void configure(const ITensor *input, ITensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
-                   bool has_bias, bool is_fully_connected = false, bool is_flatten = false, const Size2D &dilation = Size2D(1U, 1U));
+                   bool has_bias, const Size2D &dilation = Size2D(1U, 1U), unsigned int num_groups = 1, bool is_fully_connected = false, bool is_flatten = false);
     /** Static function to check if given info will lead to a valid configuration of @ref NEIm2ColKernel
      *
      * @param[in] input              The input tensor to convert. 3 lower dimensions represent a single input [width, height, IFM],
@@ -98,14 +99,15 @@ public:
      * @param[in] kernel_dims        The kernel dimensions (width and height).
      * @param[in] conv_info          Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in] has_bias           In case biases are provided expands the matrix with 1.
-     * @param[in] is_fully_connected (Optional) Determines whether this kernel will be called by @ref NEFullyConnectedLayer in order to validate the arguments
-     * @param[in] is_flatten         (Optional) Determines whether this kernel will be called by @ref NEFlattenLayer in order to validate the arguments
      * @param[in] dilation           (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
+     * @param[in] num_groups         (Optional) Number of groups when performing a grouped convolution
+     * @param[in] is_fully_connected (Optional)Determines whether this kernel will be called by @ref NEFullyConnectedLayer in order to validate the arguments
+     * @param[in] is_flatten         (Optional) Determines whether this kernel will be called by @ref NEFlattenLayer in order to validate the arguments
      *
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info,
-                           bool has_bias, bool is_fully_connected = false, bool is_flatten = false, const Size2D &dilation = Size2D(1U, 1U));
+                           bool has_bias, const Size2D &dilation = Size2D(1U, 1U), unsigned int num_groups = 1, bool is_fully_connected = false, bool is_flatten = false);
 
     // Inherited methods overridden:
     void run(const Window &window, const ThreadInfo &info) override;

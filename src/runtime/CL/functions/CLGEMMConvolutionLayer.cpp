@@ -391,7 +391,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
         const Size2D kernel_dims(kernel_width, kernel_height);
 
         // Output tensor auto initialization if not yet initialized
-        TensorShape expected_output_shape = compute_im2col_conv_shape(input, kernel_dims, conv_info, append_bias, dilation, true);
+        TensorShape expected_output_shape = compute_im2col_conv_shape(input, kernel_dims, conv_info, append_bias, dilation, true /* num_groups == 1, num_groups */);
 
         auto_init_if_empty(im2col_reshaped_info, input->clone()->set_tensor_shape(expected_output_shape));
 

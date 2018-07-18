@@ -40,9 +40,10 @@ namespace validation
 namespace
 {
 const auto conv_filter_sizes = framework::dataset::make("KernelDims", { Size2D(3U, 3U), Size2D(3U, 1U), Size2D(1U, 5U), Size2D(5U, 5U), Size2D(7U, 7U) });
-const auto conv_args         = combine(combine(combine(conv_filter_sizes, framework::dataset::make("PadStride", { PadStrideInfo(1U, 1U, 0U, 0U), PadStrideInfo(1U, 1U, 1U, 1U), PadStrideInfo(2U, 2U, 0U, 2U) })),
-                                               framework::dataset::make("QuantizationInfo", QuantizationInfo(0.5f, 10))),
-                                       framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC }));
+const auto conv_args         = combine(combine(combine(combine(conv_filter_sizes, framework::dataset::make("PadStride", { PadStrideInfo(1U, 1U, 0U, 0U), PadStrideInfo(1U, 1U, 1U, 1U), PadStrideInfo(2U, 2U, 0U, 2U) })),
+                                                       framework::dataset::make("QuantizationInfo", QuantizationInfo(0.5f, 10))),
+                                               framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })),
+                                       framework::dataset::make("NumGroups", { 1 }));
 } // namespace
 TEST_SUITE(NEON)
 TEST_SUITE(Im2Col)
@@ -66,7 +67,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                framework::dataset::make("Expected", { false, false, false, false, true })),
                input_info, output_info, has_bias, expected)
 {
-    bool status = bool(NEIm2Col::validate(&input_info, &output_info, Size2D(3U, 3U), PadStrideInfo(), has_bias, false, false));
+    bool status = bool(NEIm2Col::validate(&input_info, &output_info, Size2D(3U, 3U), PadStrideInfo(), has_bias));
     ARM_COMPUTE_EXPECT(status == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on

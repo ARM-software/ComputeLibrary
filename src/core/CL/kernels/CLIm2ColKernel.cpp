@@ -54,18 +54,24 @@ struct Im2ColConfiguration
     bool                  is_padding_required_nchw{};
 };
 
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation,
+                          unsigned int num_groups)
 {
+    const unsigned int channel_idx = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::CHANNEL);
+
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_type() == DataType::QASYMM8 && has_bias);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
     ARM_COMPUTE_RETURN_ERROR_ON((dilation.x() < 1) || (dilation.y() < 1));
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
+    ARM_COMPUTE_RETURN_ERROR_ON(num_groups == 0);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::NHWC && num_groups > 1);
+    ARM_COMPUTE_RETURN_ERROR_ON((input->dimension(channel_idx) % num_groups) != 0);
 
     if(output->total_size() > 0)
     {
-        const TensorInfo tensor_info_output = output->clone()->set_tensor_shape(compute_im2col_conv_shape(input, kernel_dims, conv_info, has_bias, dilation, true));
+        const TensorInfo tensor_info_output = output->clone()->set_tensor_shape(compute_im2col_conv_shape(input, kernel_dims, conv_info, has_bias, dilation, num_groups == 1, num_groups));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &tensor_info_output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     }
@@ -74,12 +80,12 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
 }
 
 std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation,
-                                                        unsigned int num_elems_processed_per_iteration, bool is_padding_required_nchw)
+                                                        unsigned int num_elems_processed_per_iteration, bool is_padding_required_nchw, unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output tensor auto initialization if not yet initialized
-    TensorShape expected_output_shape = compute_im2col_conv_shape(input, kernel_dims, conv_info, has_bias, dilation, true);
+    TensorShape expected_output_shape = compute_im2col_conv_shape(input, kernel_dims, conv_info, has_bias, dilation, num_groups == 1, num_groups);
 
     auto_init_if_empty(*output, input->clone()->set_tensor_shape(expected_output_shape));
 
@@ -141,7 +147,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     return std::make_pair(err, win);
 }
 
-Im2ColConfiguration configure_opencl_kernel(const ITensorInfo *input, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation)
+Im2ColConfiguration configure_opencl_kernel(const ITensorInfo *input, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation, unsigned int num_groups)
 {
     const DataLayout   data_layout   = input->data_layout();
     const DataType     data_type     = input->data_type();
@@ -177,6 +183,7 @@ Im2ColConfiguration configure_opencl_kernel(const ITensorInfo *input, const Size
     build_opts.add_option("-DSRC_DEPTH=" + support::cpp11::to_string(input_channel));
     build_opts.add_option("-DDILATION_X=" + support::cpp11::to_string(dilation.x()));
     build_opts.add_option("-DDILATION_Y=" + support::cpp11::to_string(dilation.y()));
+    build_opts.add_option_if(num_groups > 1, "-DNUM_GROUPS=" + support::cpp11::to_string(num_groups));
     build_opts.add_option_if_else(is_data_type_quantized(data_type), "-DPAD_VALUE=" + support::cpp11::to_string(input->quantization_info().offset), "-DPAD_VALUE=0");
     build_opts.add_option_if(has_bias, "-DHAS_BIAS");
 
@@ -274,14 +281,15 @@ Im2ColConfiguration configure_opencl_kernel(const ITensorInfo *input, const Size
 } // namespace
 
 CLIm2ColKernel::CLIm2ColKernel()
-    : _input(nullptr), _output(nullptr), _convolved_dims(), _num_elems_processed_per_iteration(1), _kernel_dims(), _conv_info()
+    : _input(nullptr), _output(nullptr), _convolved_dims(), _num_elems_processed_per_iteration(1), _kernel_dims(), _conv_info(), _num_groups()
 {
 }
 
-void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation)
+void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation,
+                               unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), kernel_dims, conv_info, has_bias, dilation));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), kernel_dims, conv_info, has_bias, dilation, num_groups));
 
     const DataLayout   data_layout  = input->info()->data_layout();
     const unsigned int width_idx    = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
@@ -292,7 +300,7 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     // Select and configure the optimal OpenCL kernel to run.
     // This function returns the OpenCL kernel's name, the arguments to pass at compile time, the number of elements processed per iteration
     // and the padding requirement flag
-    Im2ColConfiguration im2col_config = configure_opencl_kernel(input->info(), kernel_dims, conv_info, has_bias, dilation);
+    Im2ColConfiguration im2col_config = configure_opencl_kernel(input->info(), kernel_dims, conv_info, has_bias, dilation, num_groups);
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(im2col_config.kernel_name, im2col_config.build_options));
@@ -303,10 +311,11 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     _num_elems_processed_per_iteration = im2col_config.num_elems_processed_per_iteration;
     _kernel_dims                       = kernel_dims; // Only needed by the Tuner
     _conv_info                         = conv_info;   // Only needed by the Tuner
+    _num_groups                        = num_groups;
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), output->info(), kernel_dims, conv_info, has_bias, dilation, im2col_config.num_elems_processed_per_iteration,
-                                                    im2col_config.is_padding_required_nchw);
+                                                    im2col_config.is_padding_required_nchw, num_groups);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second);
 
@@ -322,12 +331,13 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     _config_id += lower_string(string_from_data_layout(input->info()->data_layout()));
 }
 
-Status CLIm2ColKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation)
+Status CLIm2ColKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation,
+                                unsigned int num_groups)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, kernel_dims, conv_info, has_bias, dilation));
-    Im2ColConfiguration im2col_config = configure_opencl_kernel(input, kernel_dims, conv_info, has_bias, dilation);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, kernel_dims, conv_info, has_bias, dilation, num_groups));
+    Im2ColConfiguration im2col_config = configure_opencl_kernel(input, kernel_dims, conv_info, has_bias, dilation, num_groups);
     ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), kernel_dims, conv_info, has_bias, dilation, im2col_config.num_elems_processed_per_iteration,
-                                                              im2col_config.is_padding_required_nchw)
+                                                              im2col_config.is_padding_required_nchw, num_groups)
                                 .first);
     return Status{};
 }
@@ -336,8 +346,6 @@ void CLIm2ColKernel::run(const Window &window, cl::CommandQueue &queue)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_WINDOWS(ICLKernel::window(), window);
-
-    const DataLayout data_layout = _input->info()->data_layout();
 
     // Get initial windows
     // Collapse in order to have (SRC_DEPTH * BATCH_SIZE) on the 3rd dimension
@@ -353,7 +361,7 @@ void CLIm2ColKernel::run(const Window &window, cl::CommandQueue &queue)
     Window slice_in  = first_slice_3d;
     Window slice_out = window_output.first_slice_window_2D();
 
-    if(data_layout == DataLayout::NHWC)
+    if(_input->info()->data_layout() == DataLayout::NHWC)
     {
         const Window tmp_win     = window.collapse_if_possible(ICLKernel::window(), 3);
         const int    num_batches = tmp_win[3].end();
@@ -379,13 +387,21 @@ void CLIm2ColKernel::run(const Window &window, cl::CommandQueue &queue)
     slice_out.set(Window::DimX, Window::Dimension(0, 0, 0));
     slice_out.set(Window::DimY, Window::Dimension(0, 0, 0));
 
+    unsigned int idx = num_arguments_per_3D_tensor() + (_num_groups == 1 ? num_arguments_per_2D_tensor() : num_arguments_per_3D_tensor());
+    _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input->info()->strides_in_bytes()[3]));
+    _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_output->info()->strides_in_bytes()[((_num_groups == 1) ? 2 : 3)]));
     do
     {
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice_in);
-        add_2D_tensor_argument(idx, _output, slice_out);
-        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input->info()->strides_in_bytes()[3]));
-        _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_output->info()->strides_in_bytes()[2]));
+        if(_num_groups == 1)
+        {
+            add_2D_tensor_argument(idx, _output, slice_out);
+        }
+        else
+        {
+            add_3D_tensor_argument(idx, _output, slice_out);
+        }
         enqueue(queue, *this, slice, lws_hint());
     }
     while(window_collapsed.slide_window_slice_3D(slice) && window_output.slide_window_slice_2D(slice_out) && window_collapsed.slide_window_slice_3D(slice_in));
