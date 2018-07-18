@@ -126,8 +126,10 @@ private:
 
 /** Main program for LeNet
  *
+ * @note To list all the possible arguments execute the binary appended with the --help option
+ *
  * @param[in] argc Number of arguments
- * @param[in] argv Arguments ( [optional] Target (0 = NEON, 1 = OpenCL, 2 = OpenCL with Tuner), [optional] Path to the weights folder, [optional] batches, [optional] Fast math for convolution layer (0 = DISABLED, 1 = ENABLED) )
+ * @param[in] argv Arguments
  */
 int main(int argc, char **argv)
 {

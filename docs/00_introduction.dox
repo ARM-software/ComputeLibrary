@@ -831,21 +831,14 @@ or
 
 	LD_LIBRARY_PATH=build ./cl_convolution
 
-@note Examples accept different types of arguments, to find out what they are run the example without any argument and the help will be displayed at the beginning of the run.
+@note Examples accept different types of arguments, to find out what they are run the example with \a --help as an argument. If no arguments are specified then random values will be used to execute the graph.
 
 For example:
 
-	LD_LIBRARY_PATH=. ./graph_lenet
+	LD_LIBRARY_PATH=. ./graph_lenet --help
 
-	./graph_lenet
-
-	Usage: ./graph_lenet [target] [path_to_data] [batches]
-
-	No data folder provided: using random values
-
-	Test passed
-
-In this case the first argument of LeNet (like all the graph examples) is the target (i.e 0 to run on NEON, 1 to run on OpenCL if available, 2 to run on OpenCL using the CLTuner), the second argument is the path to the folder containing the npy files for the weights and finally the third argument is the number of batches to run.
+Below is a list of the common parameters among the graph examples :
+@snippet utils/CommonGraphOptions.h Common graph examples parameters
 
 @subsection S3_3_android Building for Android
 
@@ -951,18 +944,10 @@ And finally to run the example:
 	adb shell /data/local/tmp/cl_convolution_aarch64
 	adb shell /data/local/tmp/gc_absdiff_aarch64
 
-@note Examples accept different types of arguments, to find out what they are run the example without any argument and the help will be displayed at the beginning of the run.
+@note Examples accept different types of arguments, to find out what they are run the example with \a --help as an argument. If no arguments are specified then random values will be used to execute the graph.
 
 For example:
-	adb shell /data/local/tmp/graph_lenet
-
-	/data/local/tmp/graph_lenet
-
-	Usage: /data/local/tmp/graph_lenet [target] [path_to_data] [batches]
-
-	No data folder provided: using random values
-
-	Test passed
+	adb shell /data/local/tmp/graph_lenet --help
 
 In this case the first argument of LeNet (like all the graph examples) is the target (i.e 0 to run on NEON, 1 to run on OpenCL if available, 2 to run on OpenCL using the CLTuner), the second argument is the path to the folder containing the npy files for the weights and finally the third argument is the number of batches to run.
 

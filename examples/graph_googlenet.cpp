@@ -197,6 +197,8 @@ private:
 
 /** Main program for Googlenet
  *
+ * @note To list all the possible arguments execute the binary appended with the --help option
+ *
  * @param[in] argc Number of arguments
  * @param[in] argv Arguments
  */

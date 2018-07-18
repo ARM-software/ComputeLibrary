@@ -34,6 +34,56 @@ namespace arm_compute
 {
 namespace utils
 {
+/* ![Common graph examples parameters] */
+/* Common graph parameters
+ *
+ * --help             : Print the example's help message.
+ * --threads          : The number of threads to be used by the example during execution.
+ * --target           : Execution target to be used by the examples. Supported target options: NEON, CL, GC.
+ * --type             : Data type to be used by the examples. Supported data type options: QASYMM8, F16, F32.
+ * --layout           : Data layout to be used by the examples. Supported data layout options : NCHW, NHWC.
+ * --enable-tuner     : Toggle option to enable the OpenCL dynamic tuner.
+ * --fast-math        : Toggle option to enable the fast math option.
+ * --data             : Path that contains the trainable parameter files of graph layers.
+ * --image            : Image to load and operate on. Image types supported: PPM, JPEG, NPY.
+ * --labels           : File that contains the labels that classify upon.
+ * --validation-file  : File that contains a list of image names with their corresponding label id (e.g. image0.jpg 5).
+ *                      This is used to run the graph over a number of images and report top-1 and top-5 metrics.
+ * --validation-path  : The path where the validation images specified in the validation file reside.
+ * --validation-range : The range of the images to validate from the validation file (e.g 0,9).
+ *                      If not specified all the images will be validated.
+ * --tuner-file       : The file to store the OpenCL dynamic tuner tuned parameters.
+ *
+ * Note that data, image and labels options should be provided to perform an inference run on an image.
+ * Note that validation-file and validation-path should be provided to perform a graph accuracy estimation.
+ * Note GLES target is not supported for most of the networks.
+ *
+ * Example execution commands:
+ *
+ * Execute a single inference given an image and a file containing the correspondence between label ids and human readable labels:
+ * ./graph_vgg16 --data=data/ --target=cl --layout=nhwc --image=kart.jpeg --labels=imagenet1000_clsid_to_human.txt
+ *
+ * Perform a graph validation on a list of images:
+ * ./graph_vgg16 --data=data/ --target=neon --threads=4 --layout=nchw --validation-file=val.txt --validation-path=ilsvrc_test_images/
+ *
+ * File formats:
+ *
+ * Validation file should be a plain file containing the names of the images followed by the correct label id.
+ * For example:
+ *
+ * image0.jpeg 882
+ * image1.jpeg 34
+ * image2.jpeg 354
+ *
+ * Labels file should be a plain file where each line is the respective human readable label (counting starts from 0).
+ * For example:
+ *
+ * 0: label0_name            label0_name
+ * 1: label1_name     or     label1_name
+ * 2: label2_name            label2_name
+ */
+/* ![Common graph examples parameters] */
+
 /** Structure holding all the common graph parameters */
 struct CommonGraphParams
 {
@@ -111,7 +161,7 @@ public:
  *
  * @param[in] options Options to consume
  *
- * @return Structure containing the commnon graph parameters
+ * @return Structure containing the common graph parameters
  */
 CommonGraphParams consume_common_graph_parameters(CommonGraphOptions &options);
 } // namespace utils
