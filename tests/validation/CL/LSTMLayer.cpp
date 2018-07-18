@@ -141,8 +141,10 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip(zi
     ARM_COMPUTE_EXPECT(bool(CLLSTMLayer::validate(&input_info.clone()->set_is_resizable(false), &input_weights_info.clone()->set_is_resizable(false), &input_weights_info.clone()->set_is_resizable(false),
                                                   &input_weights_info.clone()->set_is_resizable(false), &recurrent_weights_info.clone()->set_is_resizable(false), &recurrent_weights_info.clone()->set_is_resizable(false),
                                                   &recurrent_weights_info.clone()->set_is_resizable(false), &cell_bias_info.clone()->set_is_resizable(false), &cell_bias_info.clone()->set_is_resizable(false),
-                                                  &cell_bias_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), &cell_state_info.clone()->set_is_resizable(false),
-                                                  &scratch_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), lstm_params_info, info, 0.05, 0.9)) == expected, framework::LogLevel::ERRORS);
+                                                  &cell_bias_info.clone()->set_is_resizable(false),
+                                                  &output_info.clone()->set_is_resizable(false), &cell_state_info.clone()->set_is_resizable(false),
+                                                  &scratch_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), &cell_state_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false),
+                                                  lstm_params_info, info, 0.05, 0.9)) == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
 // *INDENT-ON*

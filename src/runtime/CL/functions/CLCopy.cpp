@@ -41,3 +41,8 @@ void CLCopy::configure(ICLTensor *input, ICLTensor *output)
     k->configure(input, output);
     _kernel = std::move(k);
 }
+
+Status CLCopy::validate(const arm_compute::ITensorInfo *input, const arm_compute::ITensorInfo *output)
+{
+    return CLCopyKernel::validate(input, output);
+}
