@@ -69,13 +69,35 @@ namespace
 using namespace arm_compute;
 
 #if !defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__))
-struct PerCPUData
-{
-    CPUModel     model     = CPUModel::GENERIC;
-    unsigned int midr      = 0;
-    bool         model_set = false;
-};
 
+bool model_supports_dot(CPUModel model)
+{
+    switch(model)
+    {
+        case CPUModel::A55r1:
+        case CPUModel::A75r1:
+        case CPUModel::A76:
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool model_supports_fp16(CPUModel model)
+{
+    switch(model)
+    {
+        case CPUModel::A35:
+        case CPUModel::A55r0:
+        case CPUModel::A55r1:
+        case CPUModel::A75r0:
+        case CPUModel::A75r1:
+        case CPUModel::A76:
+            return true;
+        default:
+            return false;
+    }
+}
 /* Convert an MIDR register value to a CPUModel enum value. */
 CPUModel midr_to_model(const unsigned int midr)
 {
@@ -91,7 +113,9 @@ CPUModel midr_to_model(const unsigned int midr)
         case 0xd03:
             model = CPUModel::A53;
             break;
-
+        case 0xd04:
+            model = CPUModel::A35;
+            break;
         case 0xd05:
             if(variant != 0)
             {
@@ -102,7 +126,19 @@ CPUModel midr_to_model(const unsigned int midr)
                 model = CPUModel::A55r0;
             }
             break;
-
+        case 0xd0a:
+            if(variant != 0)
+            {
+                model = CPUModel::A75r1;
+            }
+            else
+            {
+                model = CPUModel::A75r0;
+            }
+            break;
+        case 0xd0b:
+            model = CPUModel::A76;
+            break;
         default:
             model = CPUModel::GENERIC;
             break;
@@ -111,7 +147,7 @@ CPUModel midr_to_model(const unsigned int midr)
     return model;
 }
 
-void populate_models_cpuid(std::vector<PerCPUData> &cpusv)
+void populate_models_cpuid(std::vector<CPUModel> &cpusv)
 {
     // If the CPUID capability is present, MIDR information is provided in /sys. Use that to populate the CPU model table.
     uint32_t i = 0;
@@ -127,15 +163,13 @@ void populate_models_cpuid(std::vector<PerCPUData> &cpusv)
             if(bool(getline(file, line)))
             {
                 const unsigned long midr = support::cpp11::stoul(line, nullptr, support::cpp11::NumericBase::BASE_16);
-                c.midr                   = (midr & 0xffffffff);
-                c.model                  = midr_to_model(c.midr);
-                c.model_set              = true;
+                c                        = midr_to_model(midr & 0xffffffff);
             }
         }
     }
 }
 
-void populate_models_cpuinfo(std::vector<PerCPUData> &cpusv)
+void populate_models_cpuinfo(std::vector<CPUModel> &cpusv)
 {
     // If "long-form" cpuinfo is present, parse that to populate models.
     std::regex proc_regex("^processor.*(\\d+)$");
@@ -170,9 +204,7 @@ void populate_models_cpuinfo(std::vector<PerCPUData> &cpusv)
 
                 if(curcpu >= 0)
                 {
-                    cpusv[curcpu].midr      = midr;
-                    cpusv[curcpu].model     = midr_to_model(midr);
-                    cpusv[curcpu].model_set = true;
+                    cpusv[curcpu] = midr_to_model(midr);
                 }
 
                 midr   = 0;
@@ -191,7 +223,7 @@ void populate_models_cpuinfo(std::vector<PerCPUData> &cpusv)
             if(std::regex_match(line, match, var_regex))
             {
                 int varv = support::cpp11::stoi(match[1], nullptr, support::cpp11::NumericBase::BASE_16);
-                midr |= (varv << 16);
+                midr |= (varv << 20);
                 continue;
             }
 
@@ -213,9 +245,7 @@ void populate_models_cpuinfo(std::vector<PerCPUData> &cpusv)
 
         if(curcpu >= 0)
         {
-            cpusv[curcpu].midr      = midr;
-            cpusv[curcpu].model     = midr_to_model(midr);
-            cpusv[curcpu].model_set = true;
+            cpusv[curcpu] = midr_to_model(midr);
         }
     }
 }
@@ -333,7 +363,7 @@ void get_cpu_configuration(CPUInfo &cpuinfo)
     cpuinfo.set_cpu_num(max_cpus);
     cpuinfo.set_fp16(fp16_support);
     cpuinfo.set_dotprod(dot_support);
-    std::vector<PerCPUData> percpu(max_cpus);
+    std::vector<CPUModel> percpu(max_cpus, CPUModel::GENERIC);
     if(cpuid)
     {
         populate_models_cpuid(percpu);
@@ -341,11 +371,22 @@ void get_cpu_configuration(CPUInfo &cpuinfo)
     else
     {
         populate_models_cpuinfo(percpu);
+
+        // Update dot product and FP16 support if all CPUs support these features:
+        bool all_support_dot  = true;
+        bool all_support_fp16 = true;
+        for(auto cpu : percpu)
+        {
+            all_support_dot &= model_supports_dot(cpu);
+            all_support_fp16 &= model_supports_fp16(cpu);
+        }
+        cpuinfo.set_dotprod(all_support_dot);
+        cpuinfo.set_fp16(all_support_fp16);
     }
     int j(0);
     for(const auto &v : percpu)
     {
-        cpuinfo.set_cpu_model(j++, v.model);
+        cpuinfo.set_cpu_model(j++, v);
     }
 #else  /* !defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__)) */
     ARM_COMPUTE_UNUSED(cpuinfo);
