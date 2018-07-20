@@ -105,6 +105,7 @@ NEFillBorderKernel::NEFillBorderKernel()
 
 void NEFillBorderKernel::configure(ITensor *tensor, BorderSize border_size, BorderMode border_mode, const PixelValue &constant_border_value)
 {
+    //Note: ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input) is not needed here as this kernel doesn't use NEON FP16 instructions.
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(tensor, 1, DataType::U8, DataType::QASYMM8,
                                                   DataType::U16, DataType::S16,
                                                   DataType::U32, DataType::S32,

@@ -43,7 +43,7 @@ class ITensor;
  * -# @ref NEWinogradLayerTransformWeightsKernel (executed only once in the first call to the run() method )
  * -# @ref NEWinogradLayerTransformInputKernel
  * -# @ref NEWinogradLayerTransformOutputKernel
- * -# @ref NEGEMMAssemblyDispatchF32
+ * -# @ref NEGEMMAssemblyDispatch
  * -# @ref CPPPermute (three times: weights, input and output)
  *
  * @note  Some Winograd configurations (i.e. F(2x2, 5x5), F(4x4, 5x5)) are supported only with enable_fast_math = true
@@ -103,7 +103,7 @@ public:
 
 private:
     MemoryGroup                _memory_group;
-    NEGEMMAssemblyDispatchF32  _asm_glue;
+    NEGEMMAssemblyDispatch     _asm_glue;
     std::unique_ptr<INEKernel> _transform_input_kernel;
     std::unique_ptr<INEKernel> _transform_output_kernel;
     std::unique_ptr<INEKernel> _transform_weights_kernel;

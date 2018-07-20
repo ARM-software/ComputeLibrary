@@ -85,7 +85,7 @@ private:
     NEGEMMInterleave4x4Kernel  _interleave_kernel;
     NEGEMMTranspose1xWKernel   _transpose_kernel;
     NEGEMMMatrixMultiplyKernel _mm_kernel;
-    NEGEMMAssemblyDispatchF32  _asm_glue;
+    NEGEMMAssemblyDispatch     _asm_glue;
     NEGEMMMatrixAdditionKernel _ma_kernel;
     Tensor                     _tmp_a;
     Tensor                     _tmp_b;

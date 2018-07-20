@@ -24,6 +24,7 @@
 #include "arm_compute/core/NEON/kernels/NESoftmaxLayerKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
+#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
@@ -320,11 +321,8 @@ namespace
 {
 Status validate_arguments_logits_1d_max(const ITensorInfo &input, const ITensorInfo &output)
 {
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
-#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::QASYMM8, DataType::F32);
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
     // Validate in case of configured output
     if(output.total_size() != 0)
@@ -486,11 +484,8 @@ Status validate_arguments_logits_softmax(const ITensorInfo &input, const ITensor
 {
     ARM_COMPUTE_UNUSED(beta);
     // Check input
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(&input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
-#else  /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(&input, 1, DataType::QASYMM8, DataType::F32);
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
     const bool is_quantized_asymmetric = is_data_type_quantized_asymmetric(input.data_type());
 

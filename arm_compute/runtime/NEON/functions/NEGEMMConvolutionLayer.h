@@ -169,7 +169,7 @@ private:
 
 private:
     MemoryGroup                                         _memory_group;
-    NEGEMMAssemblyDispatchF32                           _asm_glue;
+    NEGEMMAssemblyDispatch                              _asm_glue;
     NEIm2ColKernel                                      _input_im2col_kernel;
     NEGEMMInterleave4x4Kernel                           _input_interleave_kernel;
     NEConvolutionLayerReshapeWeights                    _reshape_weights;

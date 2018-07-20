@@ -23,6 +23,7 @@
  */
 #include "arm_compute/core/NEON/kernels/NEGEMMMatrixAdditionKernel.h"
 
+#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/NEON/NEFixedPoint.h"
@@ -100,6 +101,7 @@ NEGEMMMatrixAdditionKernel::NEGEMMMatrixAdditionKernel()
 
 void NEGEMMMatrixAdditionKernel::configure(const ITensor *input, ITensor *output, float beta)
 {
+    ARM_COMPUTE_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);

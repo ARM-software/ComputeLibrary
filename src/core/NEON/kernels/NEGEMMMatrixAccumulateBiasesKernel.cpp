@@ -24,6 +24,7 @@
 #include "arm_compute/core/NEON/kernels/NEGEMMMatrixAccumulateBiasesKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
+#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
@@ -43,6 +44,7 @@ namespace
 {
 inline Status validate_arguments(const ITensorInfo *accum, const ITensorInfo *biases)
 {
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(accum);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(accum, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(biases, accum);
     ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);

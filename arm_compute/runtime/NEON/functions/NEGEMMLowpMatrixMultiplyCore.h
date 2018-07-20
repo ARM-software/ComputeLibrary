@@ -98,8 +98,7 @@ public:
 
 private:
     MemoryGroup                        _memory_group;
-    NEGEMMAssemblyDispatchU8U32        _asm_glue_unsigned;
-    NEGEMMAssemblyDispatchS8S32        _asm_glue_signed;
+    NEGEMMAssemblyDispatch             _asm_glue;
     std::unique_ptr<INEKernel>         _mm_kernel;
     std::unique_ptr<INEKernel>         _mtx_a_reshape_kernel;
     std::unique_ptr<INEKernel>         _mtx_b_reshape_kernel;

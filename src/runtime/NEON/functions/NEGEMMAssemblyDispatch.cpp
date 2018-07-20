@@ -23,20 +23,31 @@
  */
 #include "arm_compute/runtime/NEON/functions/NEGEMMAssemblyDispatch.h"
 
+#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/NEON/kernels/assembly/NEGEMMNativeWrapperKernel.h"
 #include "arm_compute/runtime/NEON/NEScheduler.h"
 #include "arm_compute/runtime/NEON/functions/NESimpleAssemblyFunction.h"
 
+#include <arm_neon.h>
+
 namespace arm_compute
 {
-template <typename TypeInput, typename TypeOutput>
-NEGEMMAssemblyDispatch<TypeInput, TypeOutput>::NEGEMMAssemblyDispatch(std::shared_ptr<IMemoryManager> memory_manager)
-    : _function(nullptr), _arm_gemm(), _memory_group(std::move(memory_manager))
+namespace
 {
+template <typename TypeInput, typename TypeOutput>
+std::unique_ptr<IFunction> create_function(arm_gemm::GemmMethod method, const ITensor *a, const ITensor *b, ITensor *d, float alpha, float beta, bool pretranspose_hint)
+{
+    ARM_COMPUTE_UNUSED(method);
+    ARM_COMPUTE_UNUSED(a);
+    ARM_COMPUTE_UNUSED(b);
+    ARM_COMPUTE_UNUSED(d);
+    ARM_COMPUTE_UNUSED(alpha);
+    ARM_COMPUTE_UNUSED(beta);
+    ARM_COMPUTE_UNUSED(pretranspose_hint);
+    return nullptr;
 }
-
 template <>
-bool NEGEMMAssemblyDispatch<float, float>::create_function(arm_gemm::GemmMethod method, const ITensor *a, const ITensor *b, ITensor *d, float alpha, float beta, bool pretranspose_hint)
+std::unique_ptr<IFunction> create_function<float, float>(arm_gemm::GemmMethod method, const ITensor *a, const ITensor *b, ITensor *d, float alpha, float beta, bool pretranspose_hint)
 {
     ARM_COMPUTE_UNUSED(method);
     ARM_COMPUTE_UNUSED(a);
@@ -54,132 +65,59 @@ bool NEGEMMAssemblyDispatch<float, float>::create_function(arm_gemm::GemmMethod 
             kernel->configure(a, b, d, alpha, beta);
             auto function = support::cpp14::make_unique<NESimpleAssemblyFunction>();
             function->configure(std::move(kernel));
-            _function = std::move(function);
-            return true;
+            return std::move(function);
         }
 #endif /* __aarch64__ */
         default:
-            return false;
+            return nullptr;
     }
 }
 
+/** Fallback in case ACL doesn't have a function */
 template <typename TypeInput, typename TypeOutput>
-bool NEGEMMAssemblyDispatch<TypeInput, TypeOutput>::create_function(arm_gemm::GemmMethod method, const ITensor *a, const ITensor *b, ITensor *d, float alpha, float beta, bool pretranspose_hint)
+class Fallback : public NEGEMMAssemblyDispatch::IFallback
 {
-    ARM_COMPUTE_UNUSED(method);
-    ARM_COMPUTE_UNUSED(a);
-    ARM_COMPUTE_UNUSED(b);
-    ARM_COMPUTE_UNUSED(d);
-    ARM_COMPUTE_UNUSED(alpha);
-    ARM_COMPUTE_UNUSED(beta);
-    ARM_COMPUTE_UNUSED(pretranspose_hint);
-    return false;
-}
+public:
+    void configure(const ITensor *a, const ITensor *b, ITensor *d, arm_gemm::GemmArgs<TypeOutput> &args, MemoryGroup &memory_group);
+    void run() override;
+    void prepare() override;
+    bool is_configured() const override;
 
-template <typename TypeInput, typename TypeOutput>
-void NEGEMMAssemblyDispatch<TypeInput, TypeOutput>::configure(const ITensor *a, const ITensor *b, ITensor *d, float alpha, float beta, bool pretranspose_hint)
-{
-    INEGEMMWrapperKernel::Params p           = INEGEMMWrapperKernel::extract_parameters(a, b, d);
-    const CPUInfo               &ci          = NEScheduler::get().cpu_info();
-    unsigned int                 num_threads = NEScheduler::get().num_threads();
+private:
+    /** Allocate a workspace tensor.
+     *
+     * @param[in] workspace_size Size to allocate.
+     * @param[in] memory_group   Tensor memory group.
+     * @param[in] alignment      Workspace memory alignment.
+     */
+    void allocate_workspace(size_t workspace_size, MemoryGroup *memory_group, size_t alignment);
 
-    arm_gemm::GemmArgs<TypeOutput> args(&ci, p.M, p.N, p.K, p.batches, p.multis, false, false, alpha, beta, num_threads, pretranspose_hint);
-
-    //Try to create an ACL function:
-    if(!create_function(arm_gemm::get_gemm_method<TypeInput, TypeOutput>(args), a, b, d, alpha, beta, pretranspose_hint))
+    /** Assembly Gemm kernel */
+    std::unique_ptr<arm_gemm::GemmCommon<TypeInput, TypeOutput>> _gemm_kernel_asm{ nullptr };
+    /** Optimised NEON kernel */
+    std::unique_ptr<INEKernel> _optimised_kernel{ nullptr };
+    /** Input A */
+    const ITensor *_a
     {
-        //Fallback onto arm_gemm function if ACL doesn't support this method.
-        _arm_gemm.configure(a, b, d, args, _memory_group);
-    }
-}
+        nullptr
+    };
+    /** Input B */
+    const ITensor *_b
+    {
+        nullptr
+    };
+    /** Output */
+    ITensor *_d{ nullptr };
+    /** GEMM workspace */
+    Tensor _workspace{};
+    /** Pre-transpose tensor */
+    Tensor _pretranspose{};
+    /** Prepared flag */
+    bool _is_prepared{ false };
+};
 
 template <typename TypeInput, typename TypeOutput>
-void NEGEMMAssemblyDispatch<TypeInput, TypeOutput>::prepare()
-{
-    if(_function != nullptr)
-    {
-        _function->prepare();
-    }
-    else
-    {
-        _arm_gemm.prepare();
-    }
-}
-
-template <typename TypeInput, typename TypeOutput>
-bool NEGEMMAssemblyDispatch<TypeInput, TypeOutput>::is_configured() const
-{
-    return _arm_gemm.is_configured() || _function != nullptr;
-}
-
-template <typename TypeInput, typename TypeOutput>
-void NEGEMMAssemblyDispatch<TypeInput, TypeOutput>::run()
-{
-    _memory_group.acquire();
-    if(_function != nullptr)
-    {
-        _function->run();
-    }
-    else
-    {
-        _arm_gemm.run();
-    }
-    _memory_group.release();
-}
-
-#ifndef __aarch64__
-template <>
-void NEGEMMAssemblyDispatch<uint8_t, uint32_t>::configure(const ITensor *a, const ITensor *b, ITensor *d, float alpha, float beta, bool pretranspose_hint)
-{
-    // arm_gemm::gemm for 8bit only exists for aarch64
-    ARM_COMPUTE_UNUSED(a);
-    ARM_COMPUTE_UNUSED(b);
-    ARM_COMPUTE_UNUSED(d);
-    ARM_COMPUTE_UNUSED(alpha);
-    ARM_COMPUTE_UNUSED(beta);
-    ARM_COMPUTE_UNUSED(pretranspose_hint);
-    ARM_COMPUTE_ERROR("Not supported for this architecture");
-}
-
-template <>
-void NEGEMMAssemblyDispatch<int8_t, int32_t>::configure(const ITensor *a, const ITensor *b, ITensor *d, float alpha, float beta, bool pretranspose_hint)
-{
-    // arm_gemm::gemm for 8bit only exists for aarch64
-    ARM_COMPUTE_UNUSED(a);
-    ARM_COMPUTE_UNUSED(b);
-    ARM_COMPUTE_UNUSED(d);
-    ARM_COMPUTE_UNUSED(alpha);
-    ARM_COMPUTE_UNUSED(beta);
-    ARM_COMPUTE_UNUSED(pretranspose_hint);
-    ARM_COMPUTE_ERROR("Not supported for this architecture");
-}
-
-template <>
-void NEGEMMAssemblyDispatch<uint8_t, uint32_t>::Fallback::configure(const ITensor *a, const ITensor *b, ITensor *d, arm_gemm::GemmArgs<uint32_t> &args, MemoryGroup &memory_group)
-{
-    // arm_gemm::gemm for 8bit only exists for aarch64
-    ARM_COMPUTE_UNUSED(a);
-    ARM_COMPUTE_UNUSED(b);
-    ARM_COMPUTE_UNUSED(d);
-    ARM_COMPUTE_UNUSED(args);
-    ARM_COMPUTE_UNUSED(memory_group);
-    ARM_COMPUTE_ERROR("Not supported for this architecture");
-}
-
-template <>
-void NEGEMMAssemblyDispatch<int8_t, int32_t>::Fallback::configure(const ITensor *a, const ITensor *b, ITensor *d, arm_gemm::GemmArgs<int32_t> &args, MemoryGroup &memory_group)
-{
-    // arm_gemm::gemm for 8bit only exists for aarch64
-    ARM_COMPUTE_UNUSED(a);
-    ARM_COMPUTE_UNUSED(b);
-    ARM_COMPUTE_UNUSED(d);
-    ARM_COMPUTE_UNUSED(args);
-    ARM_COMPUTE_UNUSED(memory_group);
-    ARM_COMPUTE_ERROR("Not supported for this architecture");
-}
-#endif // aarch64
-template <typename TypeInput, typename TypeOutput>
-void NEGEMMAssemblyDispatch<TypeInput, TypeOutput>::Fallback::configure(const ITensor *a, const ITensor *b, ITensor *d, arm_gemm::GemmArgs<TypeOutput> &args, MemoryGroup &memory_group)
+void Fallback<TypeInput, TypeOutput>::configure(const ITensor *a, const ITensor *b, ITensor *d, arm_gemm::GemmArgs<TypeOutput> &args, MemoryGroup &memory_group)
 {
     _gemm_kernel_asm = arm_gemm::gemm<TypeInput, TypeOutput>(args, nullptr);
     if(_gemm_kernel_asm == nullptr)
@@ -228,7 +166,7 @@ void NEGEMMAssemblyDispatch<TypeInput, TypeOutput>::Fallback::configure(const IT
 }
 
 template <typename TypeInput, typename TypeOutput>
-void NEGEMMAssemblyDispatch<TypeInput, TypeOutput>::Fallback::prepare()
+void Fallback<TypeInput, TypeOutput>::prepare()
 {
     if(!_is_prepared)
     {
@@ -249,7 +187,7 @@ void NEGEMMAssemblyDispatch<TypeInput, TypeOutput>::Fallback::prepare()
 }
 
 template <typename TypeInput, typename TypeOutput>
-void NEGEMMAssemblyDispatch<TypeInput, TypeOutput>::Fallback::allocate_workspace(size_t workspace_size, MemoryGroup *memory_group, size_t alignment)
+void Fallback<TypeInput, TypeOutput>::allocate_workspace(size_t workspace_size, MemoryGroup *memory_group, size_t alignment)
 {
     ARM_COMPUTE_ERROR_ON_MSG(workspace_size == 0, "size cannot be 0");
     _workspace.allocator()->init(TensorInfo(TensorShape{ (workspace_size + alignment /* FIXME: remove alignment after COMPMID-1088 */) }, 1, DataType::S8), alignment);
@@ -261,13 +199,13 @@ void NEGEMMAssemblyDispatch<TypeInput, TypeOutput>::Fallback::allocate_workspace
 }
 
 template <typename TypeInput, typename TypeOutput>
-bool NEGEMMAssemblyDispatch<TypeInput, TypeOutput>::Fallback::is_configured() const
+bool Fallback<TypeInput, TypeOutput>::is_configured() const
 {
     return _optimised_kernel != nullptr;
 }
 
 template <typename TypeInput, typename TypeOutput>
-void NEGEMMAssemblyDispatch<TypeInput, TypeOutput>::Fallback::run()
+void Fallback<TypeInput, TypeOutput>::run()
 {
     const int lda = _a->info()->strides_in_bytes().y() / sizeof(TypeInput);
     const int ldb = _b->info()->strides_in_bytes().y() / sizeof(TypeInput);
@@ -312,7 +250,119 @@ void NEGEMMAssemblyDispatch<TypeInput, TypeOutput>::Fallback::run()
     NEScheduler::get().schedule(_optimised_kernel.get(), Window::DimX);
 }
 
-template class NEGEMMAssemblyDispatch<float, float>;
-template class NEGEMMAssemblyDispatch<uint8_t, uint32_t>;
-template class NEGEMMAssemblyDispatch<int8_t, int32_t>;
+template <typename TypeInput, typename TypeOutput>
+void create_function_or_arm_gemm(std::unique_ptr<IFunction> &acl_function, std::unique_ptr<NEGEMMAssemblyDispatch::IFallback> &arm_gemm, MemoryGroup &memory_group, const ITensor *a, const ITensor *b,
+                                 ITensor *d, float alpha, float beta, bool pretranspose_hint)
+{
+    INEGEMMWrapperKernel::Params p           = INEGEMMWrapperKernel::extract_parameters(a, b, d);
+    const CPUInfo               &ci          = NEScheduler::get().cpu_info();
+    unsigned int                 num_threads = NEScheduler::get().num_threads();
+
+    arm_gemm::GemmArgs<TypeOutput> args(&ci, p.M, p.N, p.K, p.batches, p.multis, false, false, alpha, beta, num_threads, pretranspose_hint);
+
+    //Try to create an ACL function:
+    acl_function = create_function<TypeInput, TypeOutput>(arm_gemm::get_gemm_method<TypeInput, TypeOutput>(args), a, b, d, alpha, beta, pretranspose_hint);
+    if(acl_function == nullptr)
+    {
+        //Fallback onto arm_gemm function if ACL doesn't support this method.
+        auto fallback = support::cpp14::make_unique<Fallback<TypeInput, TypeOutput>>();
+        fallback->configure(a, b, d, args, memory_group);
+        arm_gemm = std::move(fallback);
+    }
+}
+
+} //namespace
+
+NEGEMMAssemblyDispatch::NEGEMMAssemblyDispatch(std::shared_ptr<IMemoryManager> memory_manager)
+    : _function(nullptr), _arm_gemm(nullptr), _memory_group(std::move(memory_manager))
+{
+}
+
+Status NEGEMMAssemblyDispatch::validate(const ITensorInfo *a, const ITensorInfo *b, const ITensorInfo *d, float alpha, float beta, bool pretranspose_hint)
+{
+    ARM_COMPUTE_UNUSED(alpha);
+    ARM_COMPUTE_UNUSED(beta);
+    ARM_COMPUTE_UNUSED(pretranspose_hint);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(a, b, d);
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(a);
+#ifndef __aarch64__
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->data_type() == DataType::U8 || a->data_type() == DataType::S8 || a->data_type() == DataType::QASYMM8, "8bit integer types only supported for aarch64");
+#endif /* __aarch64__ */
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(a, 1, DataType::F32, DataType::U8, DataType::QASYMM8, DataType::S8, DataType::F16);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(a, b);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->data_type() == DataType::F32 && d->data_type() != DataType::F32, "Only F32 output supported for F32 input");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->data_type() == DataType::F16 && d->data_type() != DataType::F16, "Only F16 output supported for F16 input");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((a->data_type() == DataType::QASYMM8 || a->data_type() == DataType::U8) && d->data_type() != DataType::U32, "Only U32 output supported for U8 / QASYMM8 input");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(a->data_type() == DataType::S8 && d->data_type() != DataType::S32, "Only S32 output supported for S8 input");
+    return Status{};
+}
+
+void NEGEMMAssemblyDispatch::configure(const ITensor *a, const ITensor *b, ITensor *d, float alpha, float beta, bool pretranspose_hint)
+{
+    ARM_COMPUTE_ERROR_ON_NULLPTR(a);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(b);
+    ARM_COMPUTE_ERROR_ON_NULLPTR(d);
+
+    //If we don't support a combination of data types, silently return: it is the caller's responsibility to check if configure() was successful via is_configured()
+    if(!NEGEMMAssemblyDispatch::validate(a->info(), b->info(), d->info(), alpha, beta, pretranspose_hint))
+    {
+        return;
+    }
+
+    switch(a->info()->data_type())
+    {
+        case DataType::F32:
+            create_function_or_arm_gemm<float, float>(_function, _arm_gemm, _memory_group, a, b, d, alpha, beta, pretranspose_hint);
+            break;
+#ifdef __aarch64__
+        case DataType::U8:
+        case DataType::QASYMM8:
+            create_function_or_arm_gemm<uint8_t, uint32_t>(_function, _arm_gemm, _memory_group, a, b, d, alpha, beta, pretranspose_hint);
+            break;
+        case DataType::S8:
+            create_function_or_arm_gemm<int8_t, int32_t>(_function, _arm_gemm, _memory_group, a, b, d, alpha, beta, pretranspose_hint);
+            break;
+#endif /* __aarch64__ */
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+        case DataType::F16:
+            create_function_or_arm_gemm<float16_t, float16_t>(_function, _arm_gemm, _memory_group, a, b, d, alpha, beta, pretranspose_hint);
+            break;
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+        default:
+            break;
+    }
+}
+
+void NEGEMMAssemblyDispatch::prepare()
+{
+    if(_function != nullptr)
+    {
+        _function->prepare();
+    }
+    else
+    {
+        ARM_COMPUTE_ERROR_ON(_arm_gemm == nullptr);
+        _arm_gemm->prepare();
+    }
+}
+
+bool NEGEMMAssemblyDispatch::is_configured() const
+{
+    return (_arm_gemm != nullptr && _arm_gemm->is_configured()) || _function != nullptr;
+}
+
+void NEGEMMAssemblyDispatch::run()
+{
+    _memory_group.acquire();
+    if(_function != nullptr)
+    {
+        _function->run();
+    }
+    else
+    {
+        ARM_COMPUTE_ERROR_ON(_arm_gemm == nullptr);
+        _arm_gemm->run();
+    }
+    _memory_group.release();
+}
 } //namespace arm_compute

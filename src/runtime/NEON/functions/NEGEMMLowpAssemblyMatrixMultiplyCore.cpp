@@ -38,8 +38,7 @@
 using namespace arm_compute;
 
 NEGEMMLowpAssemblyMatrixMultiplyCore::NEGEMMLowpAssemblyMatrixMultiplyCore(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(memory_manager), _asm_glue_unsigned(memory_manager), _asm_glue_signed(memory_manager), _mm_kernel(nullptr), _mtx_a_reshape_kernel(nullptr), _mtx_b_reshape_kernel(nullptr), _tmp_a(),
-      _tmp_b()
+    : _memory_group(memory_manager), _asm_glue(memory_manager), _mm_kernel(nullptr), _mtx_a_reshape_kernel(nullptr), _mtx_b_reshape_kernel(nullptr), _tmp_a(), _tmp_b()
 {
 }
 
@@ -56,16 +55,11 @@ void NEGEMMLowpAssemblyMatrixMultiplyCore::configure(const ITensor *a, const ITe
     switch(a->info()->data_type())
     {
         case DataType::S8:
-        {
-            _asm_glue_signed.configure(a, b, output, 1.f, 0.f, true);
-            run_optimised = _asm_glue_unsigned.is_configured();
-            break;
-        }
         case DataType::QASYMM8:
         case DataType::U8:
         {
-            _asm_glue_unsigned.configure(a, b, output, 1.f, 0.f, true);
-            run_optimised = _asm_glue_unsigned.is_configured();
+            _asm_glue.configure(a, b, output, 1.f, 0.f, true);
+            run_optimised = _asm_glue.is_configured();
             break;
         }
         default:
@@ -133,13 +127,9 @@ void NEGEMMLowpAssemblyMatrixMultiplyCore::run()
         NEScheduler::get().schedule(_mtx_b_reshape_kernel.get(), Window::DimY);
     }
 
-    if(_asm_glue_unsigned.is_configured())
+    if(_asm_glue.is_configured())
     {
-        _asm_glue_unsigned.run();
-    }
-    else if(_asm_glue_signed.is_configured())
-    {
-        _asm_glue_signed.run();
+        _asm_glue.run();
     }
     else
     {

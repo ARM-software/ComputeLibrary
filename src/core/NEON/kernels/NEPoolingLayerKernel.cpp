@@ -24,6 +24,7 @@
 #include "arm_compute/core/NEON/kernels/NEPoolingLayerKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
+#include "arm_compute/core/CPP/Validate.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
@@ -139,6 +140,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     std::tie(pool_stride_x, pool_stride_y) = pad_stride_info.stride();
     static const std::set<int> supported_pool_sizes = { 2, 3 };
 
+    ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON(pool_type == PoolingType::L2 && is_data_type_quantized(input->data_type()));
 
