@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_DEPTH_CONCATENATE_LAYER_NODE_H__
-#define __ARM_COMPUTE_GRAPH_DEPTH_CONCATENATE_LAYER_NODE_H__
+#ifndef __ARM_COMPUTE_GRAPH_CONCATENATE_LAYER_NODE_H__
+#define __ARM_COMPUTE_GRAPH_CONCATENATE_LAYER_NODE_H__
 
 #include "arm_compute/graph/INode.h"
 
@@ -30,30 +30,31 @@ namespace arm_compute
 {
 namespace graph
 {
-/** Depth Concatenation Layer node */
-class DepthConcatenateLayerNode final : public INode
+/** Concatenation Layer node */
+class ConcatenateLayerNode final : public INode
 {
 public:
     /** Constructor
      *
      * @param[in] total_nodes Number of nodes that will get concatenated
+     * @param[in] axis        Concatenation axis
      */
-    DepthConcatenateLayerNode(unsigned int total_nodes);
-    /** Computes depth concatenations output descriptor
+    ConcatenateLayerNode(unsigned int total_nodes, DataLayoutDimension axis);
+    /** Computes concatenations output descriptor
      *
      * @param[in] input_descriptors Input descriptors
+     * @param[in] axis              Concatenation axis
      *
      * @return Expected output descriptor
      */
-    static TensorDescriptor compute_output_descriptor(const std::vector<TensorDescriptor> &input_descriptors);
+    static TensorDescriptor compute_output_descriptor(const std::vector<TensorDescriptor> &input_descriptors, DataLayoutDimension axis);
     /** Disables or not the depth concatenate node
      *
-     * @warning This is used when depth concatenate is performed with sub-tensors,
-     *          where this node is used as a placeholder.
+     * @warning This is used when concatenate is performed using sub-tensors, where this node is used as a placeholder.
      *
-     * @param[in] is_enabled If true a backend function is created to perform the depth concatenation (involves copying),
-     *                       while if false, no function is created and we assume that subtensors are properly set to simulate
-     *                       a no copy operation.
+     * @param[in] is_enabled If true a backend function is created to perform the concatenation (involves copying),
+     *                       while if false, no function is created and we assume that sub-tensors are properly set to simulate
+     *                       a zero copy operation.
      */
     void set_enabled(bool is_enabled);
     /** Enabled parameter accessor
@@ -61,6 +62,11 @@ public:
      * @return True if a backend function is to be created else false
      */
     bool is_enabled() const;
+    /** Concatenation axis parameter accessor
+     *
+     * @return Concatenation axis
+     */
+    DataLayoutDimension concatenation_axis() const;
 
     // Inherited overridden methods:
     NodeType         type() const override;
@@ -69,9 +75,10 @@ public:
     void accept(INodeVisitor &v) override;
 
 private:
-    unsigned int _total_nodes;
-    bool         _is_enabled;
+    unsigned int        _total_nodes;
+    DataLayoutDimension _axis;
+    bool                _is_enabled;
 };
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_DEPTH_CONCATENATE_LAYER_NODE_H__ */
+#endif /* __ARM_COMPUTE_GRAPH_CONCATENATE_LAYER_NODE_H__ */

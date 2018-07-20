@@ -72,7 +72,7 @@ private:
     const ICLTensor *_input;
     ICLTensor       *_output;
     BorderSize       _border_size;
-    bool             _is_in_map;
+    bool             _is_norm_across_width;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLNORMALIZATIONLAYERKERNEL_H__ */

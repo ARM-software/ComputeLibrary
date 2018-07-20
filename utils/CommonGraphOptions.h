@@ -93,7 +93,7 @@ struct CommonGraphParams
     arm_compute::DataType            data_type{ DataType::F32 };
     arm_compute::DataLayout          data_layout{ DataLayout::NCHW };
     bool                             enable_tuner{ false };
-    arm_compute::graph::FastMathHint fast_math_hint{ arm_compute::graph::FastMathHint::DISABLED };
+    arm_compute::graph::FastMathHint fast_math_hint{ arm_compute::graph::FastMathHint::Disabled };
     std::string                      data_path{};
     std::string                      image{};
     std::string                      labels{};

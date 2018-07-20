@@ -52,8 +52,8 @@ public:
     // Inherited methods overridden
     void visit(ActivationLayerNode &n) override;
     void visit(BatchNormalizationLayerNode &n) override;
+    void visit(ConcatenateLayerNode &n) override;
     void visit(ConvolutionLayerNode &n) override;
-    void visit(DepthConcatenateLayerNode &n) override;
     void visit(DepthwiseConvolutionLayerNode &n) override;
     void visit(EltwiseLayerNode &n) override;
     void visit(NormalizationLayerNode &n) override;

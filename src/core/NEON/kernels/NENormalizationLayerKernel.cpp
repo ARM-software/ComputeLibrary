@@ -43,6 +43,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *input_squ
     ARM_COMPUTE_RETURN_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
 
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_layout() == DataLayout::NHWC && norm_info.type() == NormType::IN_MAP_2D,
+                                    "Only Cross-map and 1D In-map normalization is supported for NHWC layout");
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, input_squared);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(input, input_squared);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(norm_info.norm_size() % 2), "Normalization size should be odd");
@@ -61,8 +63,9 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 {
     unsigned int       num_elems_processed_per_iteration = 16 / input->element_size();
     const unsigned int num_elems_read_per_iteration      = num_elems_processed_per_iteration + 2 * (norm_info.norm_size() / 2);
+    const unsigned int norm_idx                          = get_normalization_dimension_index(input->data_layout(), norm_info);
     const unsigned int num_rows                          = (norm_info.type() == NormType::IN_MAP_2D) ? norm_info.norm_size() : 1;
-    const unsigned int border_width                      = (norm_info.is_cross_map()) ? 0 : std::min<unsigned int>(norm_info.norm_size() / 2, 3U);
+    const unsigned int border_width                      = (norm_idx == 2) ? 0 : std::min<unsigned int>(norm_info.norm_size() / 2, 3U);
     BorderSize         border_size                       = BorderSize(0, border_width);
     bool               window_changed                    = false;
 
@@ -107,7 +110,8 @@ void NENormalizationLayerKernel::configure(const ITensor *input, const ITensor *
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), input_squared->info(), output->info(), norm_info));
 
-    const unsigned int border_width = (norm_info.is_cross_map()) ? 0 : std::min<unsigned int>(norm_info.norm_size() / 2, 3U);
+    const unsigned int norm_idx     = get_normalization_dimension_index(input->info()->data_layout(), norm_info);
+    const unsigned int border_width = (norm_idx == 2) ? 0 : std::min<unsigned int>(norm_info.norm_size() / 2, 3U);
 
     _input         = input;
     _input_squared = input_squared;
@@ -119,16 +123,21 @@ void NENormalizationLayerKernel::configure(const ITensor *input, const ITensor *
     {
         case DataType::F32:
         {
-            switch(norm_info.type())
+            switch(norm_idx)
             {
-                case NormType::IN_MAP_1D:
-                    _func = &NENormalizationLayerKernel::normalize_float<DataType::F32, 0, false>;
+                case 0:
+                {
+                    if(norm_info.type() == NormType::IN_MAP_2D)
+                    {
+                        _func = &NENormalizationLayerKernel::normalize_float<DataType::F32, 0, true>;
+                    }
+                    else
+                    {
+                        _func = &NENormalizationLayerKernel::normalize_float<DataType::F32, 0, false>;
+                    }
                     break;
-                case NormType::IN_MAP_2D:
-                    // Normalize over X and Y
-                    _func = &NENormalizationLayerKernel::normalize_float<DataType::F32, 0, true>;
-                    break;
-                case NormType::CROSS_MAP:
+                }
+                case 2:
                     _func = &NENormalizationLayerKernel::normalize_float<DataType::F32, 2, false>;
                     break;
                 default:
@@ -138,16 +147,21 @@ void NENormalizationLayerKernel::configure(const ITensor *input, const ITensor *
         }
         case DataType::F16:
         {
-            switch(norm_info.type())
+            switch(norm_idx)
             {
-                case NormType::IN_MAP_1D:
-                    _func = &NENormalizationLayerKernel::normalize_float<DataType::F16, 0, false>;
+                case 0:
+                {
+                    if(norm_info.type() == NormType::IN_MAP_2D)
+                    {
+                        _func = &NENormalizationLayerKernel::normalize_float<DataType::F16, 0, true>;
+                    }
+                    else
+                    {
+                        _func = &NENormalizationLayerKernel::normalize_float<DataType::F16, 0, false>;
+                    }
                     break;
-                case NormType::IN_MAP_2D:
-                    // Normalize over X and Y
-                    _func = &NENormalizationLayerKernel::normalize_float<DataType::F16, 0, true>;
-                    break;
-                case NormType::CROSS_MAP:
+                }
+                case 2:
                     _func = &NENormalizationLayerKernel::normalize_float<DataType::F16, 2, false>;
                     break;
                 default:

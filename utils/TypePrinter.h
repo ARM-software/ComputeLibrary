@@ -475,6 +475,35 @@ inline std::string to_string(const arm_compute::DataLayout &data_layout)
     return str.str();
 }
 
+/** Formatted output of the DataLayoutDimension type.
+ *
+ * @param[out] os              Output stream.
+ * @param[in]  data_layout_dim Data layout dimension to print.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const DataLayoutDimension &data_layout_dim)
+{
+    switch(data_layout_dim)
+    {
+        case DataLayoutDimension::WIDTH:
+            os << "WIDTH";
+            break;
+        case DataLayoutDimension::HEIGHT:
+            os << "HEIGHT";
+            break;
+        case DataLayoutDimension::CHANNEL:
+            os << "CHANNEL";
+            break;
+        case DataLayoutDimension::BATCHES:
+            os << "BATCHES";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+    return os;
+}
+
 /** Formatted output of the DataType type.
  *
  * @param[out] os        Output stream.

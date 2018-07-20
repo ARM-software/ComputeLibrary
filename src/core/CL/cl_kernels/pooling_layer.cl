@@ -549,10 +549,10 @@ __kernel void pooling_layer_MxN_nhwc(
 
     for(int y = 0; y < POOL_SIZE_Y; ++y)
     {
-        int y1 = select(y, PAD_Y - idx_height, y + idx_height < PAD_Y || y + idx_height > MAX_HEIGHT);
+        int y1 = select(y, PAD_Y - idx_height, y + idx_height - PAD_Y < 0 || y + idx_height - PAD_Y >= MAX_HEIGHT);
         for(int x = 0; x < POOL_SIZE_X; ++x)
         {
-            int x1 = select(x, PAD_X - idx_width - 1, x + idx_width < PAD_X || x + idx_width > MAX_WIDTH);
+            int x1 = select(x, PAD_X - idx_width - 1, x + idx_width - PAD_X < 0 || x + idx_width - PAD_X >= MAX_WIDTH);
             x1     = select(x1, PAD_X - idx_width - 1, y != y1);
 
             VEC_DATA_TYPE(DATA_TYPE, 8)

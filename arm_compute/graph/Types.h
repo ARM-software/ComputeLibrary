@@ -96,33 +96,33 @@ enum class Target
 /** Supported Element-wise operations */
 enum class EltwiseOperation
 {
-    ADD, /**< Arithmetic addition */
-    SUB, /**< Arithmetic subtraction */
-    MUL  /**< Arithmetic multiplication */
+    Add, /**< Arithmetic addition */
+    Sub, /**< Arithmetic subtraction */
+    Mul  /**< Arithmetic multiplication */
 };
 
 /** Supported Convolution layer methods */
 enum class ConvolutionMethod
 {
-    DEFAULT, /**< Default approach using internal heuristics */
+    Default, /**< Default approach using internal heuristics */
     GEMM,    /**< GEMM based convolution */
-    DIRECT,  /**< Deep direct convolution */
-    WINOGRAD /**< Winograd based convolution */
+    Direct,  /**< Deep direct convolution */
+    Winograd /**< Winograd based convolution */
 };
 
 /** Supported Depthwise Convolution layer methods */
 enum class DepthwiseConvolutionMethod
 {
-    DEFAULT,       /**< Default approach using internal heuristics */
-    GEMV,          /**< Generic GEMV based depthwise convolution */
-    OPTIMIZED_3x3, /**< Optimized 3x3 direct depthwise convolution */
+    Default,      /**< Default approach using internal heuristics */
+    GEMV,         /**< Generic GEMV based depthwise convolution */
+    Optimized3x3, /**< Optimized 3x3 direct depthwise convolution */
 };
 
 /** Enable or disable fast math for Convolution layer */
 enum class FastMathHint
 {
-    ENABLED,  /**< Fast math enabled for Convolution layer */
-    DISABLED, /**< Fast math disabled for Convolution layer */
+    Enabled,  /**< Fast math enabled for Convolution layer */
+    Disabled, /**< Fast math disabled for Convolution layer */
 };
 
 /** Supported nodes */
@@ -131,9 +131,9 @@ enum class NodeType
     ActivationLayer,
     BatchNormalizationLayer,
     ChannelShuffleLayer,
+    ConcatenateLayer,
     ConvolutionLayer,
     DeconvolutionLayer,
-    DepthConcatenateLayer,
     DepthwiseConvolutionLayer,
     EltwiseLayer,
     FlattenLayer,

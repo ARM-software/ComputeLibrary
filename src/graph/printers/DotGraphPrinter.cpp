@@ -47,17 +47,19 @@ void DotGraphVisitor::visit(BatchNormalizationLayerNode &n)
     _info = ss.str();
 }
 
+void DotGraphVisitor::visit(ConcatenateLayerNode &n)
+{
+    std::stringstream ss;
+    ss << "Enabled: " << n.is_enabled();
+    ss << R"( \n )";
+    ss << "Axis: " << n.concatenation_axis();
+    _info = ss.str();
+}
+
 void DotGraphVisitor::visit(ConvolutionLayerNode &n)
 {
     std::stringstream ss;
     ss << n.convolution_method();
-    _info = ss.str();
-}
-
-void DotGraphVisitor::visit(DepthConcatenateLayerNode &n)
-{
-    std::stringstream ss;
-    ss << "Enabled: " << n.is_enabled();
     _info = ss.str();
 }
 

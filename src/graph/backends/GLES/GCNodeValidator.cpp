@@ -58,7 +58,7 @@ Status validate_depthwise_convolution_layer(DepthwiseConvolutionLayerNode &node)
     // TODO (geopin01) : Switch when validation is implemented
     // Validate function
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights->tensor_shape().x() != 3 && weights->tensor_shape().y() != 3, "Unsupported depthwise convolution");
-    node.set_depthwise_convolution_method(DepthwiseConvolutionMethod::OPTIMIZED_3x3);
+    node.set_depthwise_convolution_method(DepthwiseConvolutionMethod::Optimized3x3);
 
     return Status{};
 }
@@ -80,14 +80,14 @@ Status validate_convolution_layer(ConvolutionLayerNode &node)
     const ConvolutionMethod   conv_algorithm = node.convolution_method();
 
     // Validate function
-    if(conv_algorithm == ConvolutionMethod::DIRECT)
+    if(conv_algorithm == ConvolutionMethod::Direct)
     {
         bool is_square         = weights->tensor_shape().x() == weights->tensor_shape().y();
         bool is_direct         = (weights->tensor_shape().x() == 1) || (weights->tensor_shape().x() == 3) || (weights->tensor_shape().x() == 5);
         bool is_correct_stride = (conv_info.stride().first) <= 2 && (conv_info.stride().second <= 2);
         if(!(is_square && is_direct && is_correct_stride))
         {
-            node.set_convolution_method(ConvolutionMethod::DEFAULT);
+            node.set_convolution_method(ConvolutionMethod::Default);
         }
     }
 

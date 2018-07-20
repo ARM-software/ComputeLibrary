@@ -60,7 +60,6 @@ public:
 
         // Checks
         ARM_COMPUTE_EXIT_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type), "Unsupported data type!");
-        ARM_COMPUTE_EXIT_ON_MSG(common_params.data_layout == DataLayout::NHWC, "Unsupported data layout!");
 
         // Print parameter values
         std::cout << common_params << std::endl;
@@ -72,13 +71,19 @@ public:
         const std::array<float, 3> mean_rgb{ { 122.68f, 116.67f, 104.01f } };
         std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<CaffePreproccessor>(mean_rgb);
 
+        // Create input descriptor
+        const TensorShape tensor_shape     = permute_shape(TensorShape(224U, 224U, 3U, 1U), DataLayout::NCHW, common_params.data_layout);
+        TensorDescriptor  input_descriptor = TensorDescriptor(tensor_shape, common_params.data_type).set_layout(common_params.data_layout);
+
+        // Set weights trained layout
+        const DataLayout weights_layout = DataLayout::NCHW;
+
         graph << common_params.target
               << common_params.fast_math_hint
-              << InputLayer(TensorDescriptor(TensorShape(224U, 224U, 3U, 1U), common_params.data_type),
-                            get_input_accessor(common_params, std::move(preprocessor)))
+              << InputLayer(input_descriptor, get_input_accessor(common_params, std::move(preprocessor)))
               << ConvolutionLayer(
                   7U, 7U, 64U,
-                  get_weights_accessor(data_path, "/cnn_data/googlenet_model/conv1/conv1_7x7_s2_w.npy"),
+                  get_weights_accessor(data_path, "/cnn_data/googlenet_model/conv1/conv1_7x7_s2_w.npy", weights_layout),
                   get_weights_accessor(data_path, "/cnn_data/googlenet_model/conv1/conv1_7x7_s2_b.npy"),
                   PadStrideInfo(2, 2, 3, 3))
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
@@ -86,33 +91,33 @@ public:
               << NormalizationLayer(NormalizationLayerInfo(NormType::CROSS_MAP, 5, 0.0001f, 0.75f))
               << ConvolutionLayer(
                   1U, 1U, 64U,
-                  get_weights_accessor(data_path, "/cnn_data/googlenet_model/conv2/conv2_3x3_reduce_w.npy"),
+                  get_weights_accessor(data_path, "/cnn_data/googlenet_model/conv2/conv2_3x3_reduce_w.npy", weights_layout),
                   get_weights_accessor(data_path, "/cnn_data/googlenet_model/conv2/conv2_3x3_reduce_b.npy"),
                   PadStrideInfo(1, 1, 0, 0))
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
               << ConvolutionLayer(
                   3U, 3U, 192U,
-                  get_weights_accessor(data_path, "/cnn_data/googlenet_model/conv2/conv2_3x3_w.npy"),
+                  get_weights_accessor(data_path, "/cnn_data/googlenet_model/conv2/conv2_3x3_w.npy", weights_layout),
                   get_weights_accessor(data_path, "/cnn_data/googlenet_model/conv2/conv2_3x3_b.npy"),
                   PadStrideInfo(1, 1, 1, 1))
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
               << NormalizationLayer(NormalizationLayerInfo(NormType::CROSS_MAP, 5, 0.0001f, 0.75f))
               << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
-        graph << get_inception_node(data_path, "inception_3a", 64, std::make_tuple(96U, 128U), std::make_tuple(16U, 32U), 32U);
-        graph << get_inception_node(data_path, "inception_3b", 128, std::make_tuple(128U, 192U), std::make_tuple(32U, 96U), 64U);
+        graph << get_inception_node(data_path, "inception_3a", weights_layout, 64, std::make_tuple(96U, 128U), std::make_tuple(16U, 32U), 32U);
+        graph << get_inception_node(data_path, "inception_3b", weights_layout, 128, std::make_tuple(128U, 192U), std::make_tuple(32U, 96U), 64U);
         graph << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
-        graph << get_inception_node(data_path, "inception_4a", 192, std::make_tuple(96U, 208U), std::make_tuple(16U, 48U), 64U);
-        graph << get_inception_node(data_path, "inception_4b", 160, std::make_tuple(112U, 224U), std::make_tuple(24U, 64U), 64U);
-        graph << get_inception_node(data_path, "inception_4c", 128, std::make_tuple(128U, 256U), std::make_tuple(24U, 64U), 64U);
-        graph << get_inception_node(data_path, "inception_4d", 112, std::make_tuple(144U, 288U), std::make_tuple(32U, 64U), 64U);
-        graph << get_inception_node(data_path, "inception_4e", 256, std::make_tuple(160U, 320U), std::make_tuple(32U, 128U), 128U);
+        graph << get_inception_node(data_path, "inception_4a", weights_layout, 192, std::make_tuple(96U, 208U), std::make_tuple(16U, 48U), 64U);
+        graph << get_inception_node(data_path, "inception_4b", weights_layout, 160, std::make_tuple(112U, 224U), std::make_tuple(24U, 64U), 64U);
+        graph << get_inception_node(data_path, "inception_4c", weights_layout, 128, std::make_tuple(128U, 256U), std::make_tuple(24U, 64U), 64U);
+        graph << get_inception_node(data_path, "inception_4d", weights_layout, 112, std::make_tuple(144U, 288U), std::make_tuple(32U, 64U), 64U);
+        graph << get_inception_node(data_path, "inception_4e", weights_layout, 256, std::make_tuple(160U, 320U), std::make_tuple(32U, 128U), 128U);
         graph << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)));
-        graph << get_inception_node(data_path, "inception_5a", 256, std::make_tuple(160U, 320U), std::make_tuple(32U, 128U), 128U);
-        graph << get_inception_node(data_path, "inception_5b", 384, std::make_tuple(192U, 384U), std::make_tuple(48U, 128U), 128U);
+        graph << get_inception_node(data_path, "inception_5a", weights_layout, 256, std::make_tuple(160U, 320U), std::make_tuple(32U, 128U), 128U);
+        graph << get_inception_node(data_path, "inception_5b", weights_layout, 384, std::make_tuple(192U, 384U), std::make_tuple(48U, 128U), 128U);
         graph << PoolingLayer(PoolingLayerInfo(PoolingType::AVG, 7, PadStrideInfo(1, 1, 0, 0, DimensionRoundingType::CEIL)))
               << FullyConnectedLayer(
                   1000U,
-                  get_weights_accessor(data_path, "/cnn_data/googlenet_model/loss3/loss3_classifier_w.npy"),
+                  get_weights_accessor(data_path, "/cnn_data/googlenet_model/loss3/loss3_classifier_w.npy", weights_layout),
                   get_weights_accessor(data_path, "/cnn_data/googlenet_model/loss3/loss3_classifier_b.npy"))
               << SoftmaxLayer()
               << OutputLayer(get_output_accessor(common_params, 5));
@@ -139,7 +144,7 @@ private:
     CommonGraphParams  common_params;
     Stream             graph;
 
-    BranchLayer get_inception_node(const std::string &data_path, std::string &&param_path,
+    BranchLayer get_inception_node(const std::string &data_path, std::string &&param_path, DataLayout weights_layout,
                                    unsigned int a_filt,
                                    std::tuple<unsigned int, unsigned int> b_filters,
                                    std::tuple<unsigned int, unsigned int> c_filters,
@@ -149,7 +154,7 @@ private:
         SubStream   i_a(graph);
         i_a << ConvolutionLayer(
                 1U, 1U, a_filt,
-                get_weights_accessor(data_path, total_path + "1x1_w.npy"),
+                get_weights_accessor(data_path, total_path + "1x1_w.npy", weights_layout),
                 get_weights_accessor(data_path, total_path + "1x1_b.npy"),
                 PadStrideInfo(1, 1, 0, 0))
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
@@ -157,13 +162,13 @@ private:
         SubStream i_b(graph);
         i_b << ConvolutionLayer(
                 1U, 1U, std::get<0>(b_filters),
-                get_weights_accessor(data_path, total_path + "3x3_reduce_w.npy"),
+                get_weights_accessor(data_path, total_path + "3x3_reduce_w.npy", weights_layout),
                 get_weights_accessor(data_path, total_path + "3x3_reduce_b.npy"),
                 PadStrideInfo(1, 1, 0, 0))
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
             << ConvolutionLayer(
                 3U, 3U, std::get<1>(b_filters),
-                get_weights_accessor(data_path, total_path + "3x3_w.npy"),
+                get_weights_accessor(data_path, total_path + "3x3_w.npy", weights_layout),
                 get_weights_accessor(data_path, total_path + "3x3_b.npy"),
                 PadStrideInfo(1, 1, 1, 1))
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
@@ -171,13 +176,13 @@ private:
         SubStream i_c(graph);
         i_c << ConvolutionLayer(
                 1U, 1U, std::get<0>(c_filters),
-                get_weights_accessor(data_path, total_path + "5x5_reduce_w.npy"),
+                get_weights_accessor(data_path, total_path + "5x5_reduce_w.npy", weights_layout),
                 get_weights_accessor(data_path, total_path + "5x5_reduce_b.npy"),
                 PadStrideInfo(1, 1, 0, 0))
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
             << ConvolutionLayer(
                 5U, 5U, std::get<1>(c_filters),
-                get_weights_accessor(data_path, total_path + "5x5_w.npy"),
+                get_weights_accessor(data_path, total_path + "5x5_w.npy", weights_layout),
                 get_weights_accessor(data_path, total_path + "5x5_b.npy"),
                 PadStrideInfo(1, 1, 2, 2))
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
@@ -186,7 +191,7 @@ private:
         i_d << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(1, 1, 1, 1, DimensionRoundingType::CEIL)))
             << ConvolutionLayer(
                 1U, 1U, d_filt,
-                get_weights_accessor(data_path, total_path + "pool_proj_w.npy"),
+                get_weights_accessor(data_path, total_path + "pool_proj_w.npy", weights_layout),
                 get_weights_accessor(data_path, total_path + "pool_proj_b.npy"),
                 PadStrideInfo(1, 1, 0, 0))
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));

@@ -64,9 +64,9 @@ enum class BranchMergeMethod
 struct StreamHints
 {
     Target                     target_hint                       = { Target::UNSPECIFIED };                 /**< Target execution hint */
-    ConvolutionMethod          convolution_method_hint           = { ConvolutionMethod::DEFAULT };          /**< Convolution method hint */
-    DepthwiseConvolutionMethod depthwise_convolution_method_hint = { DepthwiseConvolutionMethod::DEFAULT }; /**< Depthwise Convolution method hint */
-    FastMathHint               fast_math_hint                    = { FastMathHint::DISABLED };              /**< Fast math hint */
+    ConvolutionMethod          convolution_method_hint           = { ConvolutionMethod::Default };          /**< Convolution method hint */
+    DepthwiseConvolutionMethod depthwise_convolution_method_hint = { DepthwiseConvolutionMethod::Default }; /**< Depthwise Convolution method hint */
+    FastMathHint               fast_math_hint                    = { FastMathHint::Disabled };              /**< Fast math hint */
 };
 } // namespace frontend
 } // namespace graph

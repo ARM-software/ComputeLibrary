@@ -60,7 +60,6 @@ public:
 
         // Checks
         ARM_COMPUTE_EXIT_ON_MSG(arm_compute::is_data_type_quantized_asymmetric(common_params.data_type), "Unsupported data type!");
-        ARM_COMPUTE_EXIT_ON_MSG(common_params.data_layout == DataLayout::NHWC, "Unsupported data layout!");
 
         // Print parameter values
         std::cout << common_params << std::endl;
@@ -72,13 +71,20 @@ public:
         const std::array<float, 3> mean_rgb{ { 122.68f, 116.67f, 104.01f } };
         std::unique_ptr<IPreprocessor> preprocessor = arm_compute::support::cpp14::make_unique<CaffePreproccessor>(mean_rgb,
                                                                                                                    false /* Do not convert to BGR */);
+
+        // Create input descriptor
+        const TensorShape tensor_shape     = permute_shape(TensorShape(224U, 224U, 3U, 1U), DataLayout::NCHW, common_params.data_layout);
+        TensorDescriptor  input_descriptor = TensorDescriptor(tensor_shape, common_params.data_type).set_layout(common_params.data_layout);
+
+        // Set weights trained layout
+        const DataLayout weights_layout = DataLayout::NCHW;
+
         graph << common_params.target
               << common_params.fast_math_hint
-              << InputLayer(TensorDescriptor(TensorShape(224U, 224U, 3U, 1U), common_params.data_type),
-                            get_input_accessor(common_params, std::move(preprocessor), false /* Do not convert to BGR */))
+              << InputLayer(input_descriptor, get_input_accessor(common_params, std::move(preprocessor), false /* Do not convert to BGR */))
               << ConvolutionLayer(
                   7U, 7U, 64U,
-                  get_weights_accessor(data_path, "/cnn_data/resnet50_model/conv1_weights.npy"),
+                  get_weights_accessor(data_path, "/cnn_data/resnet50_model/conv1_weights.npy", weights_layout),
                   std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                   PadStrideInfo(2, 2, 3, 3))
               .set_name("conv1/convolution")
@@ -92,15 +98,15 @@ public:
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("conv1/Relu")
               << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR))).set_name("pool1/MaxPool");
 
-        add_residual_block(data_path, "block1", 64, 3, 2);
-        add_residual_block(data_path, "block2", 128, 4, 2);
-        add_residual_block(data_path, "block3", 256, 6, 2);
-        add_residual_block(data_path, "block4", 512, 3, 1);
+        add_residual_block(data_path, "block1", weights_layout, 64, 3, 2);
+        add_residual_block(data_path, "block2", weights_layout, 128, 4, 2);
+        add_residual_block(data_path, "block3", weights_layout, 256, 6, 2);
+        add_residual_block(data_path, "block4", weights_layout, 512, 3, 1);
 
         graph << PoolingLayer(PoolingLayerInfo(PoolingType::AVG)).set_name("pool5")
               << ConvolutionLayer(
                   1U, 1U, 1000U,
-                  get_weights_accessor(data_path, "/cnn_data/resnet50_model/logits_weights.npy"),
+                  get_weights_accessor(data_path, "/cnn_data/resnet50_model/logits_weights.npy", weights_layout),
                   get_weights_accessor(data_path, "/cnn_data/resnet50_model/logits_biases.npy"),
                   PadStrideInfo(1, 1, 0, 0))
               .set_name("logits/convolution")
@@ -129,7 +135,8 @@ private:
     CommonGraphParams  common_params;
     Stream             graph;
 
-    void add_residual_block(const std::string &data_path, const std::string &name, unsigned int base_depth, unsigned int num_units, unsigned int stride)
+    void add_residual_block(const std::string &data_path, const std::string &name, DataLayout weights_layout,
+                            unsigned int base_depth, unsigned int num_units, unsigned int stride)
     {
         for(unsigned int i = 0; i < num_units; ++i)
         {
@@ -151,7 +158,7 @@ private:
             SubStream right(graph);
             right << ConvolutionLayer(
                       1U, 1U, base_depth,
-                      get_weights_accessor(data_path, unit_path + "conv1_weights.npy"),
+                      get_weights_accessor(data_path, unit_path + "conv1_weights.npy", weights_layout),
                       std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                       PadStrideInfo(1, 1, 0, 0))
                   .set_name(unit_name + "conv1/convolution")
@@ -166,7 +173,7 @@ private:
 
                   << ConvolutionLayer(
                       3U, 3U, base_depth,
-                      get_weights_accessor(data_path, unit_path + "conv2_weights.npy"),
+                      get_weights_accessor(data_path, unit_path + "conv2_weights.npy", weights_layout),
                       std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                       PadStrideInfo(middle_stride, middle_stride, 1, 1))
                   .set_name(unit_name + "conv2/convolution")
@@ -181,7 +188,7 @@ private:
 
                   << ConvolutionLayer(
                       1U, 1U, base_depth * 4,
-                      get_weights_accessor(data_path, unit_path + "conv3_weights.npy"),
+                      get_weights_accessor(data_path, unit_path + "conv3_weights.npy", weights_layout),
                       std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                       PadStrideInfo(1, 1, 0, 0))
                   .set_name(unit_name + "conv3/convolution")
@@ -198,7 +205,7 @@ private:
                 SubStream left(graph);
                 left << ConvolutionLayer(
                          1U, 1U, base_depth * 4,
-                         get_weights_accessor(data_path, unit_path + "shortcut_weights.npy"),
+                         get_weights_accessor(data_path, unit_path + "shortcut_weights.npy", weights_layout),
                          std::unique_ptr<arm_compute::graph::ITensorAccessor>(nullptr),
                          PadStrideInfo(1, 1, 0, 0))
                      .set_name(unit_name + "shortcut/convolution")

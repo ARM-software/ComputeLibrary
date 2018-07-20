@@ -84,7 +84,7 @@ namespace utils
     os << "Data layout : " << common_params.data_layout << std::endl;
     os << "Tuner enabled? : " << (common_params.enable_tuner ? true_str : false_str) << std::endl;
     os << "Tuner file : " << common_params.tuner_file << std::endl;
-    os << "Fast math enabled? : " << (common_params.fast_math_hint == FastMathHint::ENABLED ? true_str : false_str) << std::endl;
+    os << "Fast math enabled? : " << (common_params.fast_math_hint == FastMathHint::Enabled ? true_str : false_str) << std::endl;
     if(!common_params.data_path.empty())
     {
         os << "Data path : " << common_params.data_path << std::endl;
@@ -168,7 +168,7 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
 
 CommonGraphParams consume_common_graph_parameters(CommonGraphOptions &options)
 {
-    FastMathHint fast_math_hint_value = options.fast_math_hint->value() ? FastMathHint::ENABLED : FastMathHint::DISABLED;
+    FastMathHint fast_math_hint_value = options.fast_math_hint->value() ? FastMathHint::Enabled : FastMathHint::Disabled;
     auto         validation_range     = parse_validation_range(options.validation_range->value());
 
     CommonGraphParams common_params;
@@ -178,7 +178,7 @@ CommonGraphParams consume_common_graph_parameters(CommonGraphOptions &options)
     common_params.data_type              = options.data_type->value();
     common_params.data_layout            = options.data_layout->value();
     common_params.enable_tuner           = options.enable_tuner->is_set() ? options.enable_tuner->value() : false;
-    common_params.fast_math_hint         = options.fast_math_hint->is_set() ? fast_math_hint_value : FastMathHint::DISABLED;
+    common_params.fast_math_hint         = options.fast_math_hint->is_set() ? fast_math_hint_value : FastMathHint::Disabled;
     common_params.data_path              = options.data_path->value();
     common_params.image                  = options.image->value();
     common_params.labels                 = options.labels->value();

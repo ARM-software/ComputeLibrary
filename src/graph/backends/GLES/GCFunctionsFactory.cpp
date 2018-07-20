@@ -68,6 +68,42 @@ struct GCEltwiseFunctions
 
 namespace detail
 {
+// Specialize functions
+template <>
+std::unique_ptr<IFunction> create_concatenate_layer<GCDepthConcatenateLayer, GCTargetInfo>(ConcatenateLayerNode &node)
+{
+    ARM_COMPUTE_LOG_GRAPH_VERBOSE("Creating Concatenate node with ID : " << node.id() << " and Name: " << node.name() << std::endl);
+    ARM_COMPUTE_ERROR_ON(node.num_outputs() != 1);
+
+    // Return nullptr if depth concatenate is switched off
+    if(!node.is_enabled())
+    {
+        return nullptr;
+    }
+
+    // Extract IO and info
+    std::vector<GCTargetInfo::TensorType *> inputs;
+    for(unsigned int i = 0; i < node.num_inputs(); ++i)
+    {
+        inputs.push_back(get_backing_tensor<GCTargetInfo>(node.input(i)));
+    }
+    typename GCTargetInfo::TensorType *output = get_backing_tensor<GCTargetInfo>(node.output(0));
+
+    // Create and configure function
+    auto func = support::cpp14::make_unique<GCDepthConcatenateLayer>();
+    func->configure(inputs, output);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << node.type()
+                               << " Target " << GCTargetInfo::TargetType
+                               << " Data Type: " << output->info()->data_type()
+                               << " Shape: " << output->info()->tensor_shape()
+                               << " Num Inputs: " << inputs.size()
+                               << std::endl);
+
+    return std::move(func);
+}
+
 template <>
 std::unique_ptr<IFunction> create_convolution_layer<GCConvolutionLayerFunctions, GCTargetInfo>(ConvolutionLayerNode &node, GraphContext &ctx)
 {
@@ -92,7 +128,7 @@ std::unique_ptr<IFunction> create_convolution_layer<GCConvolutionLayerFunctions,
     std::unique_ptr<IFunction>      func;
     std::string                     func_name;
 
-    if(conv_algorithm == ConvolutionMethod::DIRECT)
+    if(conv_algorithm == ConvolutionMethod::Direct)
     {
         std::tie(func, func_name) = create_named_function<GCConvolutionLayerFunctions::DirectConvolutionLayer>(
                                         std::string("DirectConvolutionLayer"),
@@ -139,7 +175,7 @@ std::unique_ptr<IFunction> create_depthwise_convolution_layer<GCDepthwiseConvolu
     // Create and configure function (we assume that functions have been validated before creation)
     std::unique_ptr<IFunction> func;
     std::string                func_name;
-    if(dwc_algorithm == DepthwiseConvolutionMethod::OPTIMIZED_3x3)
+    if(dwc_algorithm == DepthwiseConvolutionMethod::Optimized3x3)
     {
         std::tie(func, func_name) = create_named_function<GCDepthwiseConvolutionLayerFunctions::DepthwiseConvolutionLayer3x3>(
                                         std::string("DepthwiseConvolutionLayer3x3"),
@@ -183,17 +219,17 @@ std::unique_ptr<IFunction> create_eltwise_layer<GCEltwiseFunctions, GCTargetInfo
 
     std::unique_ptr<IFunction> func = nullptr;
     std::string                func_name;
-    if(eltwise_op == EltwiseOperation::ADD)
+    if(eltwise_op == EltwiseOperation::Add)
     {
         std::tie(func, func_name) = create_named_function<GCEltwiseFunctions::Addition>(
                                         std::string("GCArithmeticAddition"),
                                         input1, input2, output, convert_policy);
     }
-    else if(eltwise_op == EltwiseOperation::SUB)
+    else if(eltwise_op == EltwiseOperation::Sub)
     {
         ARM_COMPUTE_ERROR("Arithmetic subtraction is not supported in GLES backend");
     }
-    else if(eltwise_op == EltwiseOperation::MUL)
+    else if(eltwise_op == EltwiseOperation::Mul)
     {
         std::tie(func, func_name) = create_named_function<GCEltwiseFunctions::Multiplication>(
                                         std::string("PixelWiseMultiplication"),
@@ -232,8 +268,8 @@ std::unique_ptr<IFunction> GCFunctionFactory::create(INode *node, GraphContext &
             return detail::create_batch_normalization_layer<GCBatchNormalizationLayer, GCTargetInfo>(*polymorphic_downcast<BatchNormalizationLayerNode *>(node));
         case NodeType::ConvolutionLayer:
             return detail::create_convolution_layer<GCConvolutionLayerFunctions, GCTargetInfo>(*polymorphic_downcast<ConvolutionLayerNode *>(node), ctx);
-        case NodeType::DepthConcatenateLayer:
-            return detail::create_depth_concatenate_layer<GCDepthConcatenateLayer, GCTargetInfo>(*polymorphic_downcast<DepthConcatenateLayerNode *>(node));
+        case NodeType::ConcatenateLayer:
+            return detail::create_concatenate_layer<GCDepthConcatenateLayer, GCTargetInfo>(*polymorphic_downcast<ConcatenateLayerNode *>(node));
         case NodeType::DepthwiseConvolutionLayer:
             return detail::create_depthwise_convolution_layer<GCDepthwiseConvolutionLayerFunctions, GCTargetInfo>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
         case NodeType::EltwiseLayer:

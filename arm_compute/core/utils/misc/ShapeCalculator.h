@@ -201,15 +201,8 @@ inline TensorShape compute_im2col_fc_shape(const ITensorInfo *input, const int n
 inline TensorShape compute_im2col_flatten_shape(const ITensorInfo *input)
 {
     // The output shape will be the flatten version of the input (i.e. [ width * height * channels, 1, 1, ... ] ). Used for FlattenLayer.
-
-    ARM_COMPUTE_ERROR_ON(input->num_dimensions() < 3);
-
     TensorShape output_shape{ input->tensor_shape() };
-
-    const size_t flatten_shape = input->dimension(0) * input->dimension(1) * input->dimension(2);
-    output_shape.set(0, flatten_shape);
-    output_shape.remove_dimension(1);
-    output_shape.remove_dimension(1);
+    output_shape.collapse(3, 0);
 
     return output_shape;
 }
@@ -403,20 +396,25 @@ inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo
 }
 
 template <typename T>
-inline TensorShape get_shape_from_info(T *info)
+inline TensorShape extract_shape(T *data)
 {
-    return info->info()->tensor_shape();
+    return data->info()->tensor_shape();
 }
 
-inline TensorShape get_shape_from_info(ITensorInfo *info)
+inline TensorShape extract_shape(ITensorInfo *data)
 {
-    return info->tensor_shape();
+    return data->tensor_shape();
+}
+
+inline TensorShape extract_shape(const TensorShape *data)
+{
+    return *data;
 }
 
 template <typename T>
 inline TensorShape calculate_depth_concatenate_shape(const std::vector<T *> &inputs_vector)
 {
-    TensorShape out_shape = get_shape_from_info(inputs_vector[0]);
+    TensorShape out_shape = extract_shape(inputs_vector[0]);
 
     size_t max_x = 0;
     size_t max_y = 0;
@@ -425,7 +423,7 @@ inline TensorShape calculate_depth_concatenate_shape(const std::vector<T *> &inp
     for(const auto &tensor : inputs_vector)
     {
         ARM_COMPUTE_ERROR_ON(tensor == nullptr);
-        const TensorShape shape = get_shape_from_info(tensor);
+        const TensorShape shape = extract_shape(tensor);
         max_x                   = std::max(shape.x(), max_x);
         max_y                   = std::max(shape.y(), max_y);
         depth += shape.z();
@@ -441,13 +439,13 @@ inline TensorShape calculate_depth_concatenate_shape(const std::vector<T *> &inp
 template <typename T>
 inline TensorShape calculate_width_concatenate_shape(const std::vector<T *> &inputs_vector)
 {
-    TensorShape out_shape = get_shape_from_info(inputs_vector[0]);
+    TensorShape out_shape = extract_shape(inputs_vector[0]);
 
     size_t width = 0;
     for(const auto &tensor : inputs_vector)
     {
         ARM_COMPUTE_ERROR_ON(tensor == nullptr);
-        const TensorShape shape = get_shape_from_info(tensor);
+        const TensorShape shape = extract_shape(tensor);
         width += shape.x();
     }
 

@@ -71,14 +71,14 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
         case NodeType::ChannelShuffleLayer:
             os << "ChannelShuffleLayer";
             break;
+        case NodeType::ConcatenateLayer:
+            os << "ConcatenateLayer";
+            break;
         case NodeType::ConvolutionLayer:
             os << "ConvolutionLayer";
             break;
         case NodeType::DeconvolutionLayer:
             os << "DeconvolutionLayer";
-            break;
-        case NodeType::DepthConcatenateLayer:
-            os << "DepthConcatenateLayer";
             break;
         case NodeType::DepthwiseConvolutionLayer:
             os << "DepthwiseConvolutionLayer";
@@ -134,14 +134,14 @@ inline ::std::ostream &operator<<(::std::ostream &os, const EltwiseOperation &el
 {
     switch(eltwise_op)
     {
-        case EltwiseOperation::ADD:
-            os << "ADD";
+        case EltwiseOperation::Add:
+            os << "Add";
             break;
-        case EltwiseOperation::MUL:
-            os << "MUL";
+        case EltwiseOperation::Mul:
+            os << "Mul";
             break;
-        case EltwiseOperation::SUB:
-            os << "SUB";
+        case EltwiseOperation::Sub:
+            os << "Sub";
             break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
@@ -155,17 +155,17 @@ inline ::std::ostream &operator<<(::std::ostream &os, const ConvolutionMethod &m
 {
     switch(method)
     {
-        case ConvolutionMethod::DEFAULT:
-            os << "DEFAULT";
+        case ConvolutionMethod::Default:
+            os << "Default";
             break;
-        case ConvolutionMethod::DIRECT:
-            os << "DIRECT";
+        case ConvolutionMethod::Direct:
+            os << "Direct";
             break;
         case ConvolutionMethod::GEMM:
             os << "GEMM";
             break;
-        case ConvolutionMethod::WINOGRAD:
-            os << "WINOGRAD";
+        case ConvolutionMethod::Winograd:
+            os << "Winograd";
             break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
@@ -179,11 +179,11 @@ inline ::std::ostream &operator<<(::std::ostream &os, const FastMathHint &hint)
 {
     switch(hint)
     {
-        case FastMathHint::ENABLED:
-            os << "ENABLED";
+        case FastMathHint::Enabled:
+            os << "Enabled";
             break;
-        case FastMathHint::DISABLED:
-            os << "DISABLED";
+        case FastMathHint::Disabled:
+            os << "Disabled";
             break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
@@ -197,14 +197,14 @@ inline ::std::ostream &operator<<(::std::ostream &os, const DepthwiseConvolution
 {
     switch(method)
     {
-        case DepthwiseConvolutionMethod::DEFAULT:
+        case DepthwiseConvolutionMethod::Default:
             os << "DEFAULT";
             break;
         case DepthwiseConvolutionMethod::GEMV:
             os << "GEMV";
             break;
-        case DepthwiseConvolutionMethod::OPTIMIZED_3x3:
-            os << "OPTIMIZED_3x3";
+        case DepthwiseConvolutionMethod::Optimized3x3:
+            os << "Optimized3x3";
             break;
         default:
             ARM_COMPUTE_ERROR("NOT_SUPPORTED!");

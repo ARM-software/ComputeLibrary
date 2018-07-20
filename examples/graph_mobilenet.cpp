@@ -85,7 +85,7 @@ public:
 
         // Set graph hints
         graph << common_params.target
-              << DepthwiseConvolutionMethod::OPTIMIZED_3x3 // FIXME(COMPMID-1073): Add heuristics to automatically call the optimized 3x3 method
+              << DepthwiseConvolutionMethod::Optimized3x3 // FIXME(COMPMID-1073): Add heuristics to automatically call the optimized 3x3 method
               << common_params.fast_math_hint;
 
         // Create core graph

@@ -51,6 +51,11 @@ public:
      * @param[in] n Node to visit.
      */
     virtual void visit(BatchNormalizationLayerNode &n) = 0;
+    /** Visit ConcatenateLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(ConcatenateLayerNode &n) = 0;
     /** Visit ConstNode.
      *
      * @param[in] n Node to visit.
@@ -61,11 +66,6 @@ public:
      * @param[in] n Node to visit.
      */
     virtual void visit(ConvolutionLayerNode &n) = 0;
-    /** Visit DepthConcatenateLayerNode.
-     *
-     * @param[in] n Node to visit.
-     */
-    virtual void visit(DepthConcatenateLayerNode &n) = 0;
     /** Visit DepthwiseConvolutionLayerNode.
      *
      * @param[in] n Node to visit.
@@ -148,15 +148,15 @@ public:
     {
         default_visit();
     }
+    virtual void visit(ConcatenateLayerNode &n) override
+    {
+        default_visit();
+    }
     virtual void visit(ConstNode &n) override
     {
         default_visit();
     }
     virtual void visit(ConvolutionLayerNode &n) override
-    {
-        default_visit();
-    }
-    virtual void visit(DepthConcatenateLayerNode &n) override
     {
         default_visit();
     }

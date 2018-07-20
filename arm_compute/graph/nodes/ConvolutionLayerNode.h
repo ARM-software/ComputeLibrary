@@ -41,8 +41,10 @@ public:
      * @param[in] fast_math_hint (Optional) Fast math hint
      * @param[in] out_quant_info (Optional) Output quantization info
      */
-    ConvolutionLayerNode(PadStrideInfo info, ConvolutionMethod method = ConvolutionMethod::DEFAULT, FastMathHint fast_math_hint = FastMathHint::DISABLED,
-                         QuantizationInfo out_quant_info = QuantizationInfo());
+    ConvolutionLayerNode(PadStrideInfo     info,
+                         ConvolutionMethod method         = ConvolutionMethod::Default,
+                         FastMathHint      fast_math_hint = FastMathHint::Disabled,
+                         QuantizationInfo  out_quant_info = QuantizationInfo());
     /** Sets the convolution layer method to use
      *
      * @param[in] method Method to use for convolution

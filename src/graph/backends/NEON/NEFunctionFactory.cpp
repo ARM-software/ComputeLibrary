@@ -102,7 +102,7 @@ std::unique_ptr<IFunction> create_convolution_layer<NEConvolutionLayerFunctions,
     std::shared_ptr<IMemoryManager> mm = get_memory_manager(ctx, Target::NEON);
     std::unique_ptr<IFunction>      func;
     std::string                     func_name;
-    if(conv_algorithm == ConvolutionMethod::DIRECT)
+    if(conv_algorithm == ConvolutionMethod::Direct)
     {
         std::tie(func, func_name) = create_named_memory_managed_function<NEDirectConvolutionLayer>(
                                         std::string("DirectConvolutionLayer"), mm, input, weights, biases, output, conv_info);
@@ -112,7 +112,7 @@ std::unique_ptr<IFunction> create_convolution_layer<NEConvolutionLayerFunctions,
         std::tie(func, func_name) = create_named_memory_managed_function<NEGEMMConvolutionLayer>(
                                         std::string("GEMMConvolutionLayer"), mm, input, weights, biases, output, conv_info);
     }
-    else if(conv_algorithm == ConvolutionMethod::WINOGRAD)
+    else if(conv_algorithm == ConvolutionMethod::Winograd)
     {
         std::tie(func, func_name) = create_named_memory_managed_function<NEWinogradConvolutionLayer>(
                                         std::string("WinogradConvolutionLayer"), mm, input, weights, biases, output, conv_info);
@@ -183,8 +183,8 @@ std::unique_ptr<IFunction> NEFunctionFactory::create(INode *node, GraphContext &
             return detail::create_convolution_layer<NEConvolutionLayerFunctions, NETargetInfo>(*polymorphic_downcast<ConvolutionLayerNode *>(node), ctx);
         case NodeType::DeconvolutionLayer:
             return detail::create_deconvolution_layer<NEDeconvolutionLayer, NETargetInfo>(*polymorphic_downcast<DeconvolutionLayerNode *>(node), ctx);
-        case NodeType::DepthConcatenateLayer:
-            return detail::create_depth_concatenate_layer<NEDepthConcatenateLayer, NETargetInfo>(*polymorphic_downcast<DepthConcatenateLayerNode *>(node));
+        case NodeType::ConcatenateLayer:
+            return detail::create_concatenate_layer<NEConcatenateLayer, NETargetInfo>(*polymorphic_downcast<ConcatenateLayerNode *>(node));
         case NodeType::DepthwiseConvolutionLayer:
             return detail::create_depthwise_convolution_layer<NEDepthwiseConvolutionLayerFunctions, NETargetInfo>(*polymorphic_downcast<DepthwiseConvolutionLayerNode *>(node));
         case NodeType::EltwiseLayer:

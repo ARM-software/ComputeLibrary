@@ -42,6 +42,8 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, N
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
 
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_layout() == DataLayout::NHWC && norm_info.type() == NormType::IN_MAP_2D,
+                                    "Only Cross-map and 1D In-map normalization is supported for NHWC layout");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(!(norm_info.norm_size() % 2), "Normalization size should be odd");
 
     // Checks performed when output is configured
@@ -59,14 +61,15 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     // Output tensor auto initialization if not yet initialized
     auto_init_if_empty(*output, *input->clone());
 
-    const unsigned int norm_size = norm_info.norm_size();
-    bool               is_in_map = norm_info.is_in_map();
+    const unsigned int norm_idx              = get_normalization_dimension_index(input->data_layout(), norm_info);
+    const unsigned int norm_size             = norm_info.norm_size();
+    bool               is_norm_accross_width = norm_idx == 0;
 
-    const unsigned int border_width = is_in_map ? std::min(norm_size / 2, 3U) : 0;
+    const unsigned int border_width = is_norm_accross_width ? std::min(norm_size / 2, 3U) : 0;
     const BorderSize   border_size  = BorderSize(0, border_width);
 
     const unsigned int num_elems_processed_per_iteration = 4;
-    const unsigned int num_elems_read_per_iteration      = is_in_map ? (num_elems_processed_per_iteration + 2 * (norm_size / 2)) : num_elems_processed_per_iteration;
+    const unsigned int num_elems_read_per_iteration      = is_norm_accross_width ? (num_elems_processed_per_iteration + 2 * (norm_size / 2)) : num_elems_processed_per_iteration;
 
     Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
 
@@ -84,7 +87,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 } // namespace
 
 CLNormalizationLayerKernel::CLNormalizationLayerKernel()
-    : _input(nullptr), _output(nullptr), _border_size(0), _is_in_map(false)
+    : _input(nullptr), _output(nullptr), _border_size(0), _is_norm_across_width(false)
 {
 }
 
@@ -106,8 +109,9 @@ void CLNormalizationLayerKernel::configure(const ICLTensor *input, ICLTensor *ou
     _input  = input;
     _output = output;
 
-    _is_in_map                      = norm_info.is_in_map();
-    const unsigned int border_width = _is_in_map ? std::min(norm_info.norm_size() / 2, 3U) : 0;
+    const unsigned int norm_idx     = get_normalization_dimension_index(input->info()->data_layout(), norm_info);
+    _is_norm_across_width           = norm_idx == 0;
+    const unsigned int border_width = _is_norm_across_width ? std::min(norm_info.norm_size() / 2, 3U) : 0;
     _border_size                    = BorderSize(0, border_width);
 
     const unsigned int num_elems_processed_per_iteration = 4;
@@ -125,7 +129,7 @@ void CLNormalizationLayerKernel::configure(const ICLTensor *input, ICLTensor *ou
     build_opts.add_option_if(is_in_map_2D, "-DIN_MAP_2D");
 
     // Create kernel
-    std::string kernel_name = _is_in_map ? "normalization_layer_in_map" : "normalization_layer_cross_map";
+    std::string kernel_name = _is_norm_across_width ? "normalization_layer_in_map" : "normalization_layer_cross_map";
     _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
     // Configure kernel window
@@ -159,7 +163,7 @@ void CLNormalizationLayerKernel::run(const Window &window, cl::CommandQueue &que
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
     ARM_COMPUTE_ERROR_ON_INVALID_SUBWINDOW(IKernel::window(), window);
 
-    const int collapsed_dimension = _is_in_map ? Window::DimZ : 4;
+    const int collapsed_dimension = _is_norm_across_width ? Window::DimZ : 4;
     Window    window_collapsed    = window.collapse_if_possible(ICLKernel::window(), collapsed_dimension);
     Window    slice               = window_collapsed.first_slice_window_3D();
 

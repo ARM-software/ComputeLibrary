@@ -288,7 +288,6 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_ERROR_ON(input->info()->data_layout() == DataLayout::UNKNOWN);
-    ARM_COMPUTE_ERROR_ON_MSG(output->info()->data_layout() != DataLayout::NCHW, "Special case Im2Col output layout is NCHW");
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), has_bias, dilation));
 
     _input       = input;

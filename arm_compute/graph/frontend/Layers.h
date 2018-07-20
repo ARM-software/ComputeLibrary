@@ -595,7 +595,7 @@ public:
         }
         else if(_branch_merge_method == BranchMergeMethod::DEPTH_CONCATENATE)
         {
-            // Collect tail nodes and perform DepthConcatenate
+            // Collect tail nodes and concatenate
             std::vector<NodeIdxPair> nodes;
             for(auto &ss : _sub_streams)
             {
@@ -608,14 +608,14 @@ public:
                     }
                 }
             }
-            nid = GraphBuilder::add_depth_concatenate_node(s.graph(), common_params, nodes);
+            nid = GraphBuilder::add_concatenate_node(s.graph(), common_params, nodes, DataLayoutDimension::CHANNEL);
         }
         else
         {
             ARM_COMPUTE_ERROR_ON(_sub_streams.size() != 2);
             NodeIdxPair input0 = { _sub_streams[0]->tail_node(), 0 };
             NodeIdxPair input1 = { _sub_streams[1]->tail_node(), 0 };
-            nid                = GraphBuilder::add_elementwise_node(s.graph(), common_params, input0, input1, EltwiseOperation::ADD);
+            nid                = GraphBuilder::add_elementwise_node(s.graph(), common_params, input0, input1, EltwiseOperation::Add);
         }
         return nid;
     }
