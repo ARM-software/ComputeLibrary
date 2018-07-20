@@ -604,7 +604,7 @@ bool NumPyBinLoader::access_tensor(ITensor &tensor)
 
     // Open file
     std::ifstream stream(_filename, std::ios::in | std::ios::binary);
-    ARM_COMPUTE_ERROR_ON_MSG(!stream.good(), "Failed to load binary data");
+    ARM_COMPUTE_ERROR_ON_MSG(!stream.good(), "Failed to load binary data from %s", _filename.c_str());
     std::string header = npy::read_header(stream);
 
     // Parse header
