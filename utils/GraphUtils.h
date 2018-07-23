@@ -181,21 +181,23 @@ class ValidationInputAccessor final : public graph::ITensorAccessor
 public:
     /** Constructor
      *
-     * @param[in] image_list   File containing all the images to validate
-     * @param[in] images_path  Path to images.
-     * @param[in] bgr          (Optional) Fill the first plane with blue channel (default = false - RGB format)
-     * @param[in] preprocessor (Optional) Image pre-processing object  (default = nullptr)
-     * @param[in] start        (Optional) Start range
-     * @param[in] end          (Optional) End range
+     * @param[in]  image_list    File containing all the images to validate
+     * @param[in]  images_path   Path to images.
+     * @param[in]  bgr           (Optional) Fill the first plane with blue channel (default = false - RGB format)
+     * @param[in]  preprocessor  (Optional) Image pre-processing object  (default = nullptr)
+     * @param[in]  start         (Optional) Start range
+     * @param[in]  end           (Optional) End range
+     * @param[out] output_stream (Optional) Output stream
      *
      * @note Range is defined as [start, end]
      */
     ValidationInputAccessor(const std::string             &image_list,
                             std::string                    images_path,
-                            std::unique_ptr<IPreprocessor> preprocessor = nullptr,
-                            bool                           bgr          = true,
-                            unsigned int                   start        = 0,
-                            unsigned int                   end          = 0);
+                            std::unique_ptr<IPreprocessor> preprocessor  = nullptr,
+                            bool                           bgr           = true,
+                            unsigned int                   start         = 0,
+                            unsigned int                   end           = 0,
+                            std::ostream                  &output_stream = std::cout);
 
     // Inherited methods overriden:
     bool access_tensor(ITensor &tensor) override;
@@ -206,6 +208,7 @@ private:
     std::unique_ptr<IPreprocessor> _preprocessor;
     bool                           _bgr;
     size_t                         _offset;
+    std::ostream                  &_output_stream;
 };
 
 /** Output Accessor used for network validation */

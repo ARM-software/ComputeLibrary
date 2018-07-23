@@ -181,7 +181,7 @@ ImageAccessor::ImageAccessor(std::string filename, bool bgr, std::unique_ptr<IPr
 bool ImageAccessor::access_tensor(ITensor &tensor)
 {
     auto image_loader = utils::ImageLoaderFactory::create(_filename);
-    ARM_COMPUTE_ERROR_ON_MSG(image_loader == nullptr, "Unsupported image type");
+    ARM_COMPUTE_EXIT_ON_MSG(image_loader == nullptr, "Unsupported image type");
 
     // Open image file
     image_loader->open(_filename);
@@ -193,9 +193,9 @@ bool ImageAccessor::access_tensor(ITensor &tensor)
     {
         std::tie(permuted_shape, perm) = compute_permutation_paramaters(tensor.info()->tensor_shape(), tensor.info()->data_layout());
     }
-    ARM_COMPUTE_ERROR_ON_MSG(image_loader->width() != permuted_shape.x() || image_loader->height() != permuted_shape.y(),
-                             "Failed to load image file: dimensions [%d,%d] not correct, expected [%d,%d].",
-                             image_loader->width(), image_loader->height(), permuted_shape.x(), permuted_shape.y());
+    ARM_COMPUTE_EXIT_ON_MSG(image_loader->width() != permuted_shape.x() || image_loader->height() != permuted_shape.y(),
+                            "Failed to load image file: dimensions [%d,%d] not correct, expected [%d,%d].",
+                            image_loader->width(), image_loader->height(), permuted_shape.x(), permuted_shape.y());
 
     // Fill the tensor with the PPM content (BGR)
     image_loader->fill_planar_tensor(tensor, _bgr);
@@ -214,10 +214,11 @@ ValidationInputAccessor::ValidationInputAccessor(const std::string             &
                                                  std::unique_ptr<IPreprocessor> preprocessor,
                                                  bool                           bgr,
                                                  unsigned int                   start,
-                                                 unsigned int                   end)
-    : _path(std::move(images_path)), _images(), _preprocessor(std::move(preprocessor)), _bgr(bgr), _offset(0)
+                                                 unsigned int                   end,
+                                                 std::ostream                  &output_stream)
+    : _path(std::move(images_path)), _images(), _preprocessor(std::move(preprocessor)), _bgr(bgr), _offset(0), _output_stream(output_stream)
 {
-    ARM_COMPUTE_ERROR_ON_MSG(start > end, "Invalid validation range!");
+    ARM_COMPUTE_EXIT_ON_MSG(start > end, "Invalid validation range!");
 
     std::ifstream ifs;
     try
@@ -256,7 +257,7 @@ bool ValidationInputAccessor::access_tensor(arm_compute::ITensor &tensor)
         // Open JPEG file
         std::string image_name = _path + _images[_offset++];
         jpeg.open(image_name);
-        ARM_COMPUTE_LOG_GRAPH_INFO("Validating " << image_name << std::endl);
+        _output_stream << "[" << _offset << "/" << _images.size() << "] Validating " << image_name << std::endl;
 
         // Get permutated shape and permutation parameters
         TensorShape                    permuted_shape = tensor.info()->tensor_shape();
@@ -266,9 +267,9 @@ bool ValidationInputAccessor::access_tensor(arm_compute::ITensor &tensor)
             std::tie(permuted_shape, perm) = compute_permutation_paramaters(tensor.info()->tensor_shape(),
                                                                             tensor.info()->data_layout());
         }
-        ARM_COMPUTE_ERROR_ON_MSG(jpeg.width() != permuted_shape.x() || jpeg.height() != permuted_shape.y(),
-                                 "Failed to load image file: dimensions [%d,%d] not correct, expected [%d,%d].",
-                                 jpeg.width(), jpeg.height(), permuted_shape.x(), permuted_shape.y());
+        ARM_COMPUTE_EXIT_ON_MSG(jpeg.width() != permuted_shape.x() || jpeg.height() != permuted_shape.y(),
+                                "Failed to load image file: dimensions [%d,%d] not correct, expected [%d,%d].",
+                                jpeg.width(), jpeg.height(), permuted_shape.x(), permuted_shape.y());
 
         // Fill the tensor with the JPEG content (BGR)
         jpeg.fill_planar_tensor(tensor, _bgr);
@@ -289,7 +290,7 @@ ValidationOutputAccessor::ValidationOutputAccessor(const std::string &image_list
                                                    unsigned int       end)
     : _results(), _output_stream(output_stream), _offset(0), _positive_samples_top1(0), _positive_samples_top5(0)
 {
-    ARM_COMPUTE_ERROR_ON_MSG(start > end, "Invalid validation range!");
+    ARM_COMPUTE_EXIT_ON_MSG(start > end, "Invalid validation range!");
 
     std::ifstream ifs;
     try
@@ -606,7 +607,7 @@ bool NumPyBinLoader::access_tensor(ITensor &tensor)
 
     // Open file
     std::ifstream stream(_filename, std::ios::in | std::ios::binary);
-    ARM_COMPUTE_ERROR_ON_MSG(!stream.good(), "Failed to load binary data from %s", _filename.c_str());
+    ARM_COMPUTE_EXIT_ON_MSG(!stream.good(), "Failed to load binary data from %s", _filename.c_str());
     std::string header = npy::read_header(stream);
 
     // Parse header
@@ -616,7 +617,7 @@ bool NumPyBinLoader::access_tensor(ITensor &tensor)
 
     // Check if the typestring matches the given one
     std::string expect_typestr = arm_compute::utils::get_typestring(tensor.info()->data_type());
-    ARM_COMPUTE_ERROR_ON_MSG(typestr != expect_typestr, "Typestrings mismatch");
+    ARM_COMPUTE_EXIT_ON_MSG(typestr != expect_typestr, "Typestrings mismatch");
 
     // Reverse vector in case of non fortran order
     if(!fortran_order)
@@ -643,7 +644,7 @@ bool NumPyBinLoader::access_tensor(ITensor &tensor)
     bool are_layouts_different = (_file_layout != tensor.info()->data_layout());
 
     // Validate tensor ranks
-    ARM_COMPUTE_ERROR_ON_MSG(shape.size() != tensor_shape.num_dimensions(), "Tensor ranks mismatch");
+    ARM_COMPUTE_EXIT_ON_MSG(shape.size() != tensor_shape.num_dimensions(), "Tensor ranks mismatch");
 
     // Set permutation parameters if needed
     TensorShape                    permuted_shape = tensor_shape;
@@ -656,7 +657,7 @@ bool NumPyBinLoader::access_tensor(ITensor &tensor)
     // Validate shapes
     for(size_t i = 0; i < shape.size(); ++i)
     {
-        ARM_COMPUTE_ERROR_ON_MSG(permuted_shape[i] != shape[i], "Tensor dimensions mismatch");
+        ARM_COMPUTE_EXIT_ON_MSG(permuted_shape[i] != shape[i], "Tensor dimensions mismatch");
     }
 
     // Validate shapes and copy tensor
