@@ -38,11 +38,11 @@ public:
     /** Parameters defining the dimensions of the matrices being multiplied */
     struct Params
     {
-        unsigned int M;       /**< Rows in output matrix C (and input matrix A). */
-        unsigned int N;       /**< Columns in output matrix C (and input matrix B). */
-        unsigned int K;       /**< Columns of input matrix A (= rows of input matrix B). */
-        unsigned int batches; /**< Number of "batched" GEMMs (unique A and C, shared B). */
-        unsigned int multis;  /**< Number of "multi" GEMMs (unique A, B and C). */
+        unsigned int M{ 0 };       /**< Rows in output matrix C (and input matrix A). */
+        unsigned int N{ 0 };       /**< Columns in output matrix C (and input matrix B). */
+        unsigned int K{ 0 };       /**< Columns of input matrix A (= rows of input matrix B). */
+        unsigned int batches{ 0 }; /**< Number of "batched" GEMMs (unique A and C, shared B). */
+        unsigned int multis{ 0 };  /**< Number of "multi" GEMMs (unique A, B and C). */
     };
 
     static Params extract_parameters(const ITensor *a, const ITensor *b, const ITensor *c);

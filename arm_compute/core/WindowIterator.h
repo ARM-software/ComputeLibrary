@@ -110,6 +110,24 @@ public:
         return get_ptr(x, y, z, w);
     }
 
+    /** Returns a pointer to the first element of the tensor
+     *
+     * @return Pointer to the first element.
+     */
+    inline T *first_element()
+    {
+        return reinterpret_cast<T *>(_first);
+    }
+
+    /** Returns a pointer to the first element of the tensor
+     *
+     * @return Pointer to the first element.
+     */
+    inline T *operator()()
+    {
+        return first_element();
+    }
+
 private:
     uint8_t *_first;   /**< Pointer to the first element of the tensor.*/
     Strides  _strides; /**< Strides in bytes of the tensor */

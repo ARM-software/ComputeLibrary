@@ -77,8 +77,9 @@ private:
     bool create_function(arm_gemm::GemmMethod method, const ITensor *a, const ITensor *b, ITensor *d, float alpha, float beta, bool pretranspose_hint);
 
     /** Interface for the arm_gemm fallback */
-    std::unique_ptr<IFallback> _arm_gemm;
-    MemoryGroup                _memory_group; /**< Function memory group */
+    std::unique_ptr<IFallback>      _arm_gemm;
+    MemoryGroup                     _memory_group;   /**< Function memory group */
+    std::shared_ptr<IMemoryManager> _memory_manager; /**< Copy of the memory manager used to create the memory group to be used when instantiating new functions */
 public:
     /** If supported create an ACL function else fallback to the arm_gemm function.
      *

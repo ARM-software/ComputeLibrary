@@ -42,6 +42,8 @@
 
 namespace arm_compute
 {
+namespace
+{
 template <typename To, typename Tr>
 struct Kernel
 {
@@ -54,6 +56,8 @@ struct Kernel<float, float>
     using strategy = arm_gemm::sgemm_native_16x4;
 };
 #endif /* __aarch64__ */
+
+} // namespace
 
 template <typename To, typename Tr>
 Window NEGEMMNativeWrapperKernel<To, Tr>::configure_internal(float alpha, float beta)
