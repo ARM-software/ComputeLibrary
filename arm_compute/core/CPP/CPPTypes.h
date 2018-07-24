@@ -36,13 +36,11 @@ namespace arm_compute
 enum class CPUModel
 {
     GENERIC,
-    A35,
+    GENERIC_FP16,
+    GENERIC_FP16_DOT,
     A53,
     A55r0,
-    A55r1,
-    A75r0,
-    A75r1,
-    A76
+    A55r1
 };
 
 class CPUInfo final

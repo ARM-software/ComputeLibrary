@@ -74,9 +74,8 @@ bool model_supports_dot(CPUModel model)
 {
     switch(model)
     {
+        case CPUModel::GENERIC_FP16_DOT:
         case CPUModel::A55r1:
-        case CPUModel::A75r1:
-        case CPUModel::A76:
             return true;
         default:
             return false;
@@ -87,12 +86,9 @@ bool model_supports_fp16(CPUModel model)
 {
     switch(model)
     {
-        case CPUModel::A35:
-        case CPUModel::A55r0:
+        case CPUModel::GENERIC_FP16:
+        case CPUModel::GENERIC_FP16_DOT:
         case CPUModel::A55r1:
-        case CPUModel::A75r0:
-        case CPUModel::A75r1:
-        case CPUModel::A76:
             return true;
         default:
             return false;
@@ -101,47 +97,52 @@ bool model_supports_fp16(CPUModel model)
 /* Convert an MIDR register value to a CPUModel enum value. */
 CPUModel midr_to_model(const unsigned int midr)
 {
-    CPUModel model;
+    CPUModel model = CPUModel::GENERIC;
 
     // Unpack variant and CPU ID
-    const int variant = (midr >> 20) & 0xF;
-    const int cpunum  = (midr >> 4) & 0xFFF;
+    const int implementer = (midr >> 24) & 0xFF;
+    const int variant     = (midr >> 20) & 0xF;
+    const int cpunum      = (midr >> 4) & 0xFFF;
 
-    // Only CPUs we have code paths for are detected.  All other CPUs can be safely classed as "GENERIC"
-    switch(cpunum)
+    if(implementer == 0x41) // Arm CPUs
     {
-        case 0xd03:
-            model = CPUModel::A53;
-            break;
-        case 0xd04:
-            model = CPUModel::A35;
-            break;
-        case 0xd05:
-            if(variant != 0)
-            {
-                model = CPUModel::A55r1;
-            }
-            else
-            {
-                model = CPUModel::A55r0;
-            }
-            break;
-        case 0xd0a:
-            if(variant != 0)
-            {
-                model = CPUModel::A75r1;
-            }
-            else
-            {
-                model = CPUModel::A75r0;
-            }
-            break;
-        case 0xd0b:
-            model = CPUModel::A76;
-            break;
-        default:
-            model = CPUModel::GENERIC;
-            break;
+        // Only CPUs we have code paths for are detected.  All other CPUs can be safely classed as "GENERIC"
+        switch(cpunum)
+        {
+            case 0xd03: // A53
+            case 0xd04: // A35
+                model = CPUModel::A53;
+                break;
+            case 0xd05: // A55
+                if(variant != 0)
+                {
+                    model = CPUModel::A55r1;
+                }
+                else
+                {
+                    model = CPUModel::A55r0;
+                }
+                break;
+            case 0xd0a: // A75
+                if(variant != 0)
+                {
+                    model = CPUModel::GENERIC_FP16_DOT;
+                }
+                else
+                {
+                    model = CPUModel::GENERIC_FP16;
+                }
+                break;
+            case 0xd0b: // A76
+            case 0xd06: // Helios FIXME: Unreleased CPU, remove before release
+            case 0xd0c: // Ares   FIXME: Unreleased CPU, remove before release
+            case 0xd0d: // Deimos FIXME: Unreleased CPU, remove before release
+                model = CPUModel::GENERIC_FP16_DOT;
+                break;
+            default:
+                model = CPUModel::GENERIC;
+                break;
+        }
     }
 
     return model;
@@ -303,9 +304,9 @@ namespace arm_compute
 void get_cpu_configuration(CPUInfo &cpuinfo)
 {
 #if !defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__))
-    bool cpuid        = false;
-    bool fp16_support = false;
-    bool dot_support  = false;
+    bool cpuid               = false;
+    bool hwcaps_fp16_support = false;
+    bool hwcaps_dot_support  = false;
 
     const uint32_t hwcaps = getauxval(AT_HWCAP);
 
@@ -316,53 +317,16 @@ void get_cpu_configuration(CPUInfo &cpuinfo)
 
     if((hwcaps & HWCAP_ASIMDHP) != 0)
     {
-        fp16_support = true;
+        hwcaps_fp16_support = true;
     }
 
     if((hwcaps & HWCAP_ASIMDDP) != 0)
     {
-        dot_support = true;
+        hwcaps_dot_support = true;
     }
 
-#ifdef __aarch64__
-    /* Pre-4.15 kernels don't have the ASIMDDP bit.
-     *
-     * Although the CPUID bit allows us to read the feature register
-     * directly, the kernel quite sensibly masks this to only show
-     * features known by it to be safe to show to userspace.  As a
-     * result, pre-4.15 kernels won't show the relevant bit in the
-     * feature registers either.
-     *
-     * So for now, use a whitelist of CPUs known to support the feature.
-     */
-    if(!dot_support && cpuid)
-    {
-        /* List of CPUs with dot product support:         A55r1       A75r1       A75r2  */
-        const unsigned int dotprod_whitelist_masks[]  = { 0xfff0fff0, 0xfff0fff0, 0xfff0fff0, 0 };
-        const unsigned int dotprod_whitelist_values[] = { 0x4110d050, 0x4110d0a0, 0x4120d0a0, 0 };
-
-        unsigned long cpuid;
-
-        __asm __volatile(
-            "mrs %0, midr_el1\n"
-            : "=r"(cpuid)
-            :
-            : );
-
-        for(int i = 0; dotprod_whitelist_values[i] != 0; i++)
-        {
-            if((cpuid & dotprod_whitelist_masks[i]) == dotprod_whitelist_values[i])
-            {
-                dot_support = true;
-                break;
-            }
-        }
-    }
-#endif /* __aarch64__ */
     const unsigned int max_cpus = get_max_cpus();
     cpuinfo.set_cpu_num(max_cpus);
-    cpuinfo.set_fp16(fp16_support);
-    cpuinfo.set_dotprod(dot_support);
     std::vector<CPUModel> percpu(max_cpus, CPUModel::GENERIC);
     if(cpuid)
     {
@@ -371,23 +335,19 @@ void get_cpu_configuration(CPUInfo &cpuinfo)
     else
     {
         populate_models_cpuinfo(percpu);
-
-        // Update dot product and FP16 support if all CPUs support these features:
-        bool all_support_dot  = true;
-        bool all_support_fp16 = true;
-        for(auto cpu : percpu)
-        {
-            all_support_dot &= model_supports_dot(cpu);
-            all_support_fp16 &= model_supports_fp16(cpu);
-        }
-        cpuinfo.set_dotprod(all_support_dot);
-        cpuinfo.set_fp16(all_support_fp16);
     }
     int j(0);
+    // Update dot product and FP16 support if all CPUs support these features:
+    bool all_support_dot  = true;
+    bool all_support_fp16 = true;
     for(const auto &v : percpu)
     {
+        all_support_dot &= model_supports_dot(v);
+        all_support_fp16 &= model_supports_fp16(v);
         cpuinfo.set_cpu_model(j++, v);
     }
+    cpuinfo.set_dotprod(all_support_dot || hwcaps_dot_support);
+    cpuinfo.set_fp16(all_support_fp16 || hwcaps_fp16_support);
 #else  /* !defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__)) */
     ARM_COMPUTE_UNUSED(cpuinfo);
 #endif /* !defined(BARE_METAL) && (defined(__arm__) || defined(__aarch64__)) */
