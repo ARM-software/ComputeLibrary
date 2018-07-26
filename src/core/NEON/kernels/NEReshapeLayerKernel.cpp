@@ -33,7 +33,6 @@
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Validate.h"
 
-#include <arm_neon.h>
 #include <cstdint>
 
 using namespace arm_compute;
@@ -60,7 +59,6 @@ inline void reshape_tensor(const Window &window, const ITensor *input, ITensor *
 
 void NEReshapeLayerKernel::configure(const ITensor *input, ITensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_CPU_F16_UNSUPPORTED(input);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QASYMM8, DataType::U16, DataType::S16,
                                                   DataType::U32, DataType::S32, DataType::F16, DataType::F32);
     ARM_COMPUTE_ERROR_ON_NULLPTR(output);
