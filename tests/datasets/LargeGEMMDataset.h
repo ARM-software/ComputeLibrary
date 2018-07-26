@@ -48,18 +48,34 @@ public:
         add_config(TensorShape(941U, 1U), TensorShape(623U, 941U), TensorShape(623U, 1U), TensorShape(623U, 1U), 0.4f, 0.7f);
     }
 };
-class LargeGEMM3DDataset final : public GEMMDataset
+
+class LargeGEMMOutput3DDataset final : public GEMMDataset
 {
 public:
-    LargeGEMM3DDataset()
+    LargeGEMMOutput3DDataset()
     {
         add_config(TensorShape(923U, 429U), TensorShape(871U, 923U), TensorShape(871U, 143U, 3U), TensorShape(871U, 143U, 3U), 1.0f, 0.0f);
         add_config(TensorShape(681U, 1025U), TensorShape(213U, 681U), TensorShape(213U, 205U, 5U), TensorShape(213U, 205U, 5U), 1.0f, 0.0f);
-        add_config(TensorShape(364, 3025), TensorShape(96, 364), TensorShape(96, 605, 5), TensorShape(96, 605, 5), 1.0f, 0.0f);
-        add_config(TensorShape(1201, 729), TensorShape(128, 1201), TensorShape(128, 243, 3), TensorShape(128, 243, 3), 1.0f, 0.0f);
-        add_config(TensorShape(2305, 169), TensorShape(384, 2305), TensorShape(384, 13, 13), TensorShape(384, 13, 13), 1.0f, 0.0f);
-        add_config(TensorShape(1729, 170), TensorShape(192, 1729), TensorShape(192, 85, 2), TensorShape(192, 85, 2), 1.0f, 0.0f);
-        add_config(TensorShape(1729, 170), TensorShape(128, 1729), TensorShape(128, 17, 10), TensorShape(128, 17, 10), 1.0f, 0.0f);
+        add_config(TensorShape(364U, 3025U), TensorShape(96U, 364U), TensorShape(96U, 605U, 5U), TensorShape(96U, 605U, 5U), 1.0f, 0.0f);
+        add_config(TensorShape(1201U, 729U), TensorShape(128U, 1201U), TensorShape(128U, 243U, 3U), TensorShape(128U, 243U, 3U), 1.0f, 0.0f);
+        add_config(TensorShape(2305U, 169U), TensorShape(384U, 2305U), TensorShape(384U, 13U, 13U), TensorShape(384U, 13U, 13U), 1.0f, 0.0f);
+        add_config(TensorShape(1729U, 170U), TensorShape(192U, 1729U), TensorShape(192U, 85U, 2U), TensorShape(192U, 85U, 2U), 1.0f, 0.0f);
+        add_config(TensorShape(1729U, 170U), TensorShape(128U, 1729U), TensorShape(128U, 17U, 10U), TensorShape(128U, 17U, 10U), 1.0f, 0.0f);
+    }
+};
+
+class LargeGEMMInputOutput3DDataset final : public GEMMDataset
+{
+public:
+    LargeGEMMInputOutput3DDataset()
+    {
+        add_config(TensorShape(923U, 143U, 3U), TensorShape(871U, 923U), TensorShape(871U, 143U, 3U), TensorShape(871U, 143U, 3U), 1.0f, 0.0f);
+        add_config(TensorShape(681U, 205U, 5U), TensorShape(213U, 681U), TensorShape(213U, 205U, 5U), TensorShape(213U, 205U, 5U), 1.0f, 0.0f);
+        add_config(TensorShape(364U, 605U, 5U), TensorShape(96U, 364U), TensorShape(96U, 605U, 5U), TensorShape(96U, 605U, 5U), 1.0f, 0.0f);
+        add_config(TensorShape(1201U, 243U, 3U), TensorShape(128U, 1201U), TensorShape(128U, 243U, 3U), TensorShape(128U, 243U, 3U), 1.0f, 0.0f);
+        add_config(TensorShape(2305U, 13U, 13U), TensorShape(384U, 2305U), TensorShape(384U, 13U, 13U), TensorShape(384U, 13U, 13U), 1.0f, 0.0f);
+        add_config(TensorShape(1729U, 85U, 2U, 2U), TensorShape(192U, 1729U, 2U), TensorShape(192U, 85U, 2U, 2U), TensorShape(192U, 85U, 2U, 2U), 1.0f, 0.0f);
+        add_config(TensorShape(1729U, 17U, 10U, 3U), TensorShape(128U, 1729U, 3U), TensorShape(128U, 17U, 10U, 3U), TensorShape(128U, 17U, 10U, 3U), 1.0f, 0.0f);
     }
 };
 } // namespace datasets

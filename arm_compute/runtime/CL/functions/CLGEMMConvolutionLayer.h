@@ -26,8 +26,8 @@
 
 #include "arm_compute/runtime/IFunction.h"
 
+#include "arm_compute/core/CL/kernels/CLArithmeticAdditionKernel.h"
 #include "arm_compute/core/CL/kernels/CLCol2ImKernel.h"
-#include "arm_compute/core/CL/kernels/CLFillBorderKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMInterleave4x4Kernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMMatrixMultiplyKernel.h"
 #include "arm_compute/core/CL/kernels/CLGEMMTranspose1xWKernel.h"
@@ -83,18 +83,12 @@ private:
 
 /** Basic function to compute the convolution layer. This function calls the following OpenCL kernels/functions:
  *
- * Note: weights already reshaped for quantized asymmetric is not supported
- *
  * -# @ref CLIm2ColKernel
- * -# @ref CLGEMMLowpMatrixMultiplyCore (if quantized asymmetric)
- * -# @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint (if quantized asymmetric)
- * -# @ref CLCol2ImKernel
- *
- * if the weights are already reshaped:
- * -# @ref CLGEMMInterleave4x4Kernel
- * -# @ref CLGEMMMatrixMultiplyKernel
- * else
- * -# @ref CLGEMM
+ * -# @ref CLGEMM (if the data type is FP32 or FP16)
+ * -# @ref CLGEMMLowpMatrixMultiplyCore (if the data type is QASYMM8)
+ * -# @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint (if the data type is QASYMM8)
+ * -# @ref CLArithmeticAdditionKernel (if biases != nullptr and we have a 1x1 convolution with the NHWC data layout)
+ * -# @ref CLCol2ImKernel (if NCHW data layout)
  */
 class CLGEMMConvolutionLayer : public IFunction
 {
@@ -172,10 +166,11 @@ private:
      * @param[in] output        Output tensor. Data types supported: Same as @p input,
      *                          except for input of QASYMM8 type where output should be of S32 type.
      * @param[in] gemm_3d_depth (Optional) Depth of GEMM 3D (Defaults to 1)
+     * @param[in] skip_im2col   (Optional) Flag which specifies if im2col has to be skipped. i.e. 1x1 convolution with NHWC data layout. (Default to false)
      *
      * @return a status
      */
-    static Status validate_mm(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *output, int gemm_3d_depth = 1);
+    static Status validate_mm(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *output, int gemm_3d_depth = 1, bool skip_im2col = false);
 
 private:
     CLMemoryGroup                                       _memory_group;
@@ -186,6 +181,7 @@ private:
     CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint _gemmlowp_output_stage;
     CLCol2ImKernel                                      _col2im_kernel;
     CLActivationLayer                                   _activationlayer_function;
+    CLArithmeticAdditionKernel                          _add_bias_kernel;
 
     const ICLTensor *_original_weights;
 
@@ -196,6 +192,7 @@ private:
 
     DataLayout _data_layout;
 
+    bool _append_bias;
     bool _skip_im2col;
     bool _is_quantized;
     bool _is_activationlayer_enabled;

@@ -66,14 +66,24 @@ inline TensorShape compute_weights_reshaped_shape(const ITensorInfo &weights, bo
 
     return weights_reshaped;
 }
-inline TensorShape compute_interleaved_shape(const ITensorInfo &a, int mult_interleave4x4_height = 1)
+inline TensorShape compute_interleaved_shape(const ITensorInfo &a, int mult_interleave4x4_height = 1, bool reinterpret_input_as_3d = false)
 {
     // The interleaved output matrix will have the following shape: [ a_height * W, ceil(a_width / W) ] where W = 4 * mult_interleave4x4_height
     ARM_COMPUTE_ERROR_ON(mult_interleave4x4_height < 1);
     const int   interleave_width = 4 * mult_interleave4x4_height;
     TensorShape shape_interleaved_a{ a.tensor_shape() };
     shape_interleaved_a.set(0, a.dimension(0) * interleave_width);
-    shape_interleaved_a.set(1, std::ceil(a.dimension(1) / static_cast<float>(interleave_width)));
+    if(reinterpret_input_as_3d)
+    {
+        const int M      = a.dimension(1) * a.dimension(2);
+        const int height = std::ceil(M / static_cast<float>(interleave_width));
+        shape_interleaved_a.set(1, height);
+        shape_interleaved_a.remove_dimension(2);
+    }
+    else
+    {
+        shape_interleaved_a.set(1, std::ceil(a.dimension(1) / static_cast<float>(interleave_width)));
+    }
 
     return shape_interleaved_a;
 }
@@ -374,23 +384,26 @@ inline TensorShape compute_rnn_shape(const ITensorInfo *input, const unsigned in
 inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo &input1, bool is_interleaved_transposed, const GEMMReshapeInfo &reshape_info)
 {
     ARM_COMPUTE_ERROR_ON_MSG(input0.num_dimensions() > 4, "The number of dimensions for the matrix A must be <= 4");
+    ARM_COMPUTE_ERROR_ON_MSG(is_interleaved_transposed && reshape_info.reinterpret_input_as_3d(), "The first input tensor cannot be reinterpreted as 3D if is_interleaved_transposed is true");
 
-    const bool is_gemm3d = reshape_info.depth_output_gemm3d() != 1;
+    const bool reinterpret_input_as_3d  = reshape_info.reinterpret_input_as_3d();
+    const bool reinterpret_output_as_3d = reshape_info.depth_output_gemm3d() != 1;
+    const int  m                        = reshape_info.reinterpret_input_as_3d() ? input0.dimension(1) * input0.dimension(2) : input0.dimension(1);
 
     // If the output of GEMM has to be reinterpreted as 3D, the number of input0 rows (M) is obtained collapsing the second and third
     // dimension of the output tensor
     const int dim0 = is_interleaved_transposed ? reshape_info.n() : input1.dimension(0);
-    const int dim1 = is_interleaved_transposed ? reshape_info.m() / reshape_info.depth_output_gemm3d() : input0.dimension(1) / reshape_info.depth_output_gemm3d();
-    const int dim2 = input0.tensor_shape()[2];
-    const int dim3 = input0.tensor_shape()[3];
+    const int dim1 = is_interleaved_transposed ? reshape_info.m() / reshape_info.depth_output_gemm3d() : m / reshape_info.depth_output_gemm3d();
+    const int dim2 = reinterpret_input_as_3d ? input0.tensor_shape()[3] : input0.tensor_shape()[2];
+    const int dim3 = reinterpret_input_as_3d ? 1 : input0.tensor_shape()[3];
 
     TensorShape output_shape{ input0.tensor_shape() };
 
     output_shape.set(0, dim0);
     output_shape.set(1, dim1);
-    output_shape.set(2, is_gemm3d ? reshape_info.depth_output_gemm3d() : dim2);
-    output_shape.set(3, is_gemm3d ? dim2 : dim3);
-    output_shape.set(4, is_gemm3d ? dim3 : 1);
+    output_shape.set(2, reinterpret_output_as_3d ? reshape_info.depth_output_gemm3d() : dim2);
+    output_shape.set(3, reinterpret_output_as_3d ? dim2 : dim3);
+    output_shape.set(4, reinterpret_output_as_3d ? dim3 : 1);
 
     return output_shape;
 }

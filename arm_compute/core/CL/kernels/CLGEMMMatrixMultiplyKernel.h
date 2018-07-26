@@ -85,7 +85,8 @@ public:
     const ICLTensor *_input1;
     ICLTensor       *_output;
     bool             _slide_matrix_b;
-    bool             _is_gemm3d;
+    bool             _reinterpret_input_as_3d;
+    bool             _reinterpret_output_as_3d;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_CLGEMMMATRIXMULTIPLYKERNEL_H__ */
