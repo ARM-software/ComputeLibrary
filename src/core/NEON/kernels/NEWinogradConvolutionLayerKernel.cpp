@@ -343,8 +343,15 @@ void NEWinogradLayerTransformInputKernel<T, OutputTileRows, OutputTileCols, Kern
     ARM_COMPUTE_UNUSED(info);
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
 
-    InputTransform input_transform(reinterpret_cast<const T *>(_input_nhwc->buffer()), _num_batches, _num_rows, _num_cols, _num_channels, _padding, reinterpret_cast<T *>(_output->buffer()),
-                                   _matrix_stride, _num_channels);
+    const int element_size_in_bytes = _input_nhwc->info()->element_size();
+    const int input_col_stride      = _input_nhwc->info()->strides_in_bytes().y() / element_size_in_bytes;
+    const int input_row_stride      = _input_nhwc->info()->strides_in_bytes().z() / element_size_in_bytes;
+    const int input_batch_stride    = _input_nhwc->info()->strides_in_bytes()[3] / element_size_in_bytes;
+
+    InputTransform input_transform(reinterpret_cast<const T *>(_input_nhwc->buffer() + _input_nhwc->info()->offset_first_element_in_bytes()),
+                                   _num_batches, _num_rows, _num_cols, _num_channels, _padding,
+                                   reinterpret_cast<T *>(_output->buffer() + _output->info()->offset_first_element_in_bytes()),
+                                   _matrix_stride, _num_channels, input_batch_stride, input_row_stride, input_col_stride);
 
     // The code below cannot be moved to configure because biases hasn't been allocated at that point
     const size_t fst = window.x().start();
@@ -446,7 +453,8 @@ void NEWinogradLayerTransformOutputKernel<T, OutputTileRows, OutputTileCols, Ker
     ARM_COMPUTE_ERROR_ON_NULLPTR(_output_nhwc);
 
     OutputTransform output_transform(reinterpret_cast<T *>(_output_workspace->buffer()), _matrix_stride, _matrix_row_stride,
-                                     (_biases ? reinterpret_cast<T *>(_biases->buffer()) : nullptr), reinterpret_cast<T *>(_output_nhwc->buffer()),
+                                     (_biases ? reinterpret_cast<T *>(_biases->buffer() + _biases->info()->offset_first_element_in_bytes()) : nullptr),
+                                     reinterpret_cast<T *>(_output_nhwc->buffer() + _output_nhwc->info()->offset_first_element_in_bytes()),
                                      _num_batches, _num_rows, _num_cols, _num_channels, 0, _output_nhwc->info()->strides_in_bytes()[2] / sizeof(T), _output_nhwc->info()->strides_in_bytes()[1] / sizeof(T));
 
     // The code below cannot be moved to configure because biases hasn't been allocated at that point
