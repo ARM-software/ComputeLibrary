@@ -137,12 +137,12 @@ CannyEdgeParameters canny_edge_parameters()
 
     std::mt19937                           gen(library->seed());
     std::uniform_int_distribution<uint8_t> int_dist(0, 255);
-    std::uniform_int_distribution<uint8_t> threshold_dist(1, 255);
+    std::uniform_int_distribution<uint8_t> threshold_dist(2, 255);
 
     params.constant_border_value = int_dist(gen);
-    params.upper_thresh          = threshold_dist(gen); // upper_threshold >= 1
+    params.upper_thresh          = threshold_dist(gen); // upper_threshold >= 2
     threshold_dist               = std::uniform_int_distribution<uint8_t>(1, params.upper_thresh - 1);
-    params.lower_thresh          = threshold_dist(gen);
+    params.lower_thresh          = threshold_dist(gen); // lower_threshold >= 1 && lower_threshold < upper_threshold
 
     return params;
 }

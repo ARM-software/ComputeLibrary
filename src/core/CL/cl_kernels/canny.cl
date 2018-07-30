@@ -77,10 +77,10 @@ __kernel void combine_gradients_L1(
     m = CONVERT_SAT((abs(h) + abs(v)), VEC_DATA_TYPE(DATA_TYPE_OUT, 4));
 
     /* Calculate the angle */
-    float4 p = atan2pi(convert_float4(v), convert_float4(h));
+    float4 p = 180.0f * atan2pi(convert_float4(v), convert_float4(h));
 
     /* Remap angle to range [0, 256) */
-    p = select(p, p + 2, p < 0.0f) * 128.0f;
+    p = select(p, p + 180.0f, p < 0.0f);
 
     /* Store results */
     vstore4(m, 0, (__global DATA_TYPE_OUT *)grad.ptr);
@@ -138,10 +138,10 @@ __kernel void combine_gradients_L2(
     float4 m = sqrt(h * h + v * v);
 
     /* Calculate the angle */
-    float4 p = atan2pi(v, h);
+    float4 p = 180.0f * atan2pi(v, h);
 
     /* Remap angle to range [0, 256) */
-    p = select(p, p + 2, p < 0.0f) * 128.0f;
+    p = select(p, p + 180.0f, p < 0.0f);
 
     /* Store results */
     vstore4(CONVERT_SAT_ROUND(m, VEC_DATA_TYPE(DATA_TYPE_OUT, 4), rte), 0, (__global DATA_TYPE_OUT *)grad.ptr);
@@ -156,14 +156,9 @@ __kernel void combine_gradients_L2(
 __constant short4 neighbours_coords[] =
 {
     { -1, 0, 1, 0 },  // 0
-    { -1, 1, 1, -1 }, // 45
-    { 0, 1, 0, -1 },  // 90
-    { 1, 1, -1, -1 }, // 135
-    { 1, 0, -1, 0 },  // 180
-    { 1, -1, -1, 1 }, // 225
-    { 0, 1, 0, -1 },  // 270
-    { -1, -1, 1, 1 }, // 315
-    { -1, 0, 1, 0 },  // 360
+    { -1, -1, 1, 1 }, // 45
+    { 0, -1, 0, 1 },  // 90
+    { 1, -1, -1, 1 }, // 135
 };
 
 /** Perform non maximum suppression.
@@ -202,9 +197,13 @@ __kernel void suppress_non_maximum(
     Image angle   = CONVERT_TO_IMAGE_STRUCT(angle);
     Image non_max = CONVERT_TO_IMAGE_STRUCT(non_max);
 
+    // Index
+    const int x = get_global_id(0);
+    const int y = get_global_id(1);
+
     // Get gradient and angle
     DATA_TYPE_IN gradient = *((__global DATA_TYPE_IN *)grad.ptr);
-    uchar an              = convert_ushort(*angle.ptr);
+    uchar an              = *((__global uchar *)angle.ptr);
 
     // Early return if not greater than lower threshold
     if(gradient <= lower_thr)
@@ -212,9 +211,25 @@ __kernel void suppress_non_maximum(
         return;
     }
 
-    // Divide the whole round into 8 directions
-    uchar         ang  = 127 - an;
-    DATA_TYPE_OUT q_an = (ang + 16) >> 5;
+    // Divide the whole round into 4 directions
+    DATA_TYPE_OUT q_an;
+
+    if(an < 22.5f || an >= 157.5f)
+    {
+        q_an = 0;
+    }
+    else if(an < 67.5f)
+    {
+        q_an = 1;
+    }
+    else if(an < 112.5f)
+    {
+        q_an = 2;
+    }
+    else
+    {
+        q_an = 3;
+    }
 
     // Find the two pixels in the perpendicular direction
     short2       x_p = neighbours_coords[q_an].s02;
@@ -224,7 +239,8 @@ __kernel void suppress_non_maximum(
 
     if((gradient > g1) && (gradient > g2))
     {
-        *((global DATA_TYPE_OUT *)non_max.ptr) = gradient;
+        __global uchar *non_max_addr            = non_max_ptr + non_max_offset_first_element_in_bytes + x * non_max_stride_x + y * non_max_stride_y;
+        *((global DATA_TYPE_OUT *)non_max_addr) = gradient;
     }
 }
 
@@ -333,8 +349,8 @@ kernel void hysteresis(
     // Load value
     DATA_TYPE_IN val = *((__global DATA_TYPE_IN *)offset(&src, x, y));
 
-    // If less than upper threshold set to NO_EDGE and return
-    if(val <= up_thr)
+    // If the pixel has already been marked as NO_EDGE, store that value in the output and return
+    if(val == NO_EDGE)
     {
         *offset(&out, x, y) = NO_EDGE;
         return;

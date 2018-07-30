@@ -63,7 +63,7 @@ void CLCannyEdge::configure(ICLTensor *input, ICLTensor *output, int32_t upper_t
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON((1 != norm_type) && (2 != norm_type));
     ARM_COMPUTE_ERROR_ON((gradient_size != 3) && (gradient_size != 5) && (gradient_size != 7));
-    ARM_COMPUTE_ERROR_ON(lower_thr > upper_thr);
+    ARM_COMPUTE_ERROR_ON((lower_thr < 0) || (lower_thr >= upper_thr));
 
     _output = output;
 
