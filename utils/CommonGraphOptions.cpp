@@ -148,7 +148,7 @@ CommonGraphOptions::CommonGraphOptions(CommandLineParser &parser)
 
     target      = parser.add_option<EnumOption<Target>>("target", supported_targets, Target::NEON);
     data_type   = parser.add_option<EnumOption<DataType>>("type", supported_data_types, DataType::F32);
-    data_layout = parser.add_option<EnumOption<DataLayout>>("layout", supported_data_layouts, DataLayout::NCHW);
+    data_layout = parser.add_option<EnumOption<DataLayout>>("layout", supported_data_layouts);
 
     help->set_help("Show this help message");
     threads->set_help("Number of threads to use");
@@ -172,11 +172,14 @@ CommonGraphParams consume_common_graph_parameters(CommonGraphOptions &options)
     auto         validation_range     = parse_validation_range(options.validation_range->value());
 
     CommonGraphParams common_params;
-    common_params.help                   = options.help->is_set() ? options.help->value() : false;
-    common_params.threads                = options.threads->value();
-    common_params.target                 = options.target->value();
-    common_params.data_type              = options.data_type->value();
-    common_params.data_layout            = options.data_layout->value();
+    common_params.help      = options.help->is_set() ? options.help->value() : false;
+    common_params.threads   = options.threads->value();
+    common_params.target    = options.target->value();
+    common_params.data_type = options.data_type->value();
+    if(options.data_layout->is_set())
+    {
+        common_params.data_layout = options.data_layout->value();
+    }
     common_params.enable_tuner           = options.enable_tuner->is_set() ? options.enable_tuner->value() : false;
     common_params.fast_math_hint         = options.fast_math_hint->is_set() ? fast_math_hint_value : FastMathHint::Disabled;
     common_params.data_path              = options.data_path->value();

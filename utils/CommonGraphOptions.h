@@ -91,7 +91,7 @@ struct CommonGraphParams
     int                              threads{ 0 };
     arm_compute::graph::Target       target{ arm_compute::graph::Target::NEON };
     arm_compute::DataType            data_type{ DataType::F32 };
-    arm_compute::DataLayout          data_layout{ DataLayout::NCHW };
+    arm_compute::DataLayout          data_layout{ DataLayout::NHWC };
     bool                             enable_tuner{ false };
     arm_compute::graph::FastMathHint fast_math_hint{ arm_compute::graph::FastMathHint::Disabled };
     std::string                      data_path{};

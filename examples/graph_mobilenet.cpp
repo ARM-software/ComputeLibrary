@@ -43,9 +43,6 @@ public:
     GraphMobilenetExample()
         : cmd_parser(), common_opts(cmd_parser), common_params(), graph(0, "MobileNetV1")
     {
-        // Sets default layout to NHWC
-        common_opts.data_layout->parse("NHWC");
-
         // Add model id option
         model_id_opt = cmd_parser.add_option<SimpleOption<int>>("model-id", 0);
         model_id_opt->set_help("Mobilenet model id (0: 1.0_224, else: 0.75_160");
