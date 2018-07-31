@@ -423,7 +423,8 @@ NodeID GraphBuilder::add_flatten_node(Graph &g, NodeParams params, NodeIdxPair i
 }
 
 NodeID GraphBuilder::add_fully_connected_layer(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_outputs,
-                                               ITensorAccessorUPtr weights_accessor, ITensorAccessorUPtr bias_accessor)
+                                               ITensorAccessorUPtr weights_accessor, ITensorAccessorUPtr bias_accessor,
+                                               const QuantizationInfo weights_quant_info, const QuantizationInfo out_quant_info)
 {
     CHECK_NODEIDX_PAIR(input, g);
     ARM_COMPUTE_ERROR_ON(num_outputs == 0);
@@ -434,7 +435,7 @@ NodeID GraphBuilder::add_fully_connected_layer(Graph &g, NodeParams params, Node
     const TensorDescriptor input_tensor_desc = get_tensor_descriptor(g, g.node(input.node_id)->outputs()[0]);
 
     // Create weights node
-    TensorDescriptor w_desc = FullyConnectedLayerNode::compute_weights_descriptor(input_tensor_desc, num_outputs);
+    TensorDescriptor w_desc = FullyConnectedLayerNode::compute_weights_descriptor(input_tensor_desc, num_outputs, weights_quant_info);
     NodeID           w_nid  = add_const_node_with_name(g, params, "Weights", w_desc, std::move(weights_accessor));
 
     // Create bias nodes
@@ -456,7 +457,7 @@ NodeID GraphBuilder::add_fully_connected_layer(Graph &g, NodeParams params, Node
     fc_info.weights_trained_layout = DataLayout::NCHW;
 
     // Create fully connected node and connect
-    NodeID fc_nid = g.add_node<FullyConnectedLayerNode>(num_outputs, fc_info);
+    NodeID fc_nid = g.add_node<FullyConnectedLayerNode>(num_outputs, out_quant_info, fc_info);
     g.add_connection(input.node_id, input.index, fc_nid, 0);
     g.add_connection(w_nid, 0, fc_nid, 1);
     if(has_bias)

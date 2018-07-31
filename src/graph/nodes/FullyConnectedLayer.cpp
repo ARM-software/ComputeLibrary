@@ -31,15 +31,16 @@ namespace arm_compute
 {
 namespace graph
 {
-FullyConnectedLayerNode::FullyConnectedLayerNode(unsigned int num_outputs, FullyConnectedLayerInfo fc_info)
-    : _num_outputs(num_outputs), _info(fc_info)
+FullyConnectedLayerNode::FullyConnectedLayerNode(unsigned int num_outputs, QuantizationInfo out_quant_info, FullyConnectedLayerInfo fc_info)
+    : _num_outputs(num_outputs), _out_quant_info(out_quant_info), _info(fc_info)
 {
     _input_edges.resize(3, EmptyEdgeID);
     _outputs.resize(1, NullTensorID);
 }
 
 TensorDescriptor FullyConnectedLayerNode::compute_weights_descriptor(const TensorDescriptor &input_descriptor,
-                                                                     unsigned int            num_outputs)
+                                                                     unsigned int            num_outputs,
+                                                                     QuantizationInfo        weights_quant_info)
 {
     unsigned int num_weights    = 1;
     unsigned int num_dimensions = input_descriptor.shape.num_dimensions();
@@ -56,11 +57,18 @@ TensorDescriptor FullyConnectedLayerNode::compute_weights_descriptor(const Tenso
     TensorDescriptor weights_descriptor = input_descriptor;
     weights_descriptor.shape            = TensorShape(num_weights, num_outputs);
 
+    // Set quantization info if present
+    if(!weights_quant_info.empty())
+    {
+        weights_descriptor.quant_info = weights_quant_info;
+    }
+
     return weights_descriptor;
 }
 
 TensorDescriptor FullyConnectedLayerNode::compute_output_descriptor(const TensorDescriptor &input_descriptor,
-                                                                    unsigned int            num_outputs)
+                                                                    unsigned int            num_outputs,
+                                                                    QuantizationInfo        out_quant_info)
 {
     // Note: Only 1D batch space is supported at the moment
     unsigned int batches = input_descriptor.shape[1];
@@ -69,8 +77,15 @@ TensorDescriptor FullyConnectedLayerNode::compute_output_descriptor(const Tensor
         batches = input_descriptor.shape[3];
     }
 
+    // Set descriptor shape
     TensorDescriptor output_descriptor = input_descriptor;
     output_descriptor.shape            = TensorShape(num_outputs, batches);
+
+    // Set quantization info if present
+    if(!out_quant_info.empty())
+    {
+        output_descriptor.quant_info = out_quant_info;
+    }
 
     return output_descriptor;
 }
@@ -98,7 +113,7 @@ TensorDescriptor FullyConnectedLayerNode::configure_output(size_t idx) const
     const Tensor *src = input(0);
     ARM_COMPUTE_ERROR_ON(src == nullptr);
 
-    return compute_output_descriptor(src->desc(), _num_outputs);
+    return compute_output_descriptor(src->desc(), _num_outputs, _out_quant_info);
 }
 
 NodeType FullyConnectedLayerNode::type() const

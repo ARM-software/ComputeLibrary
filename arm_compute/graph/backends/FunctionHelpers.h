@@ -541,6 +541,8 @@ std::unique_ptr<IFunction> create_fully_connected_layer(FullyConnectedLayerNode 
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << node.type()
                                << " Target " << TargetInfo::TargetType
                                << " Data Type: " << input->info()->data_type()
+                               << " Input QuantInfo: " << input->info()->quantization_info()
+                               << " Weights QuantInfo: " << weights->info()->quantization_info()
                                << " Input shape: " << input->info()->tensor_shape()
                                << " Weights shape: " << weights->info()->tensor_shape()
                                << " Output shape: " << output->info()->tensor_shape()

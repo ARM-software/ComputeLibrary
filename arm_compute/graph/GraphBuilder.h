@@ -212,17 +212,21 @@ public:
     static NodeID add_flatten_node(Graph &g, NodeParams params, NodeIdxPair input);
     /** Adds a fully connected layer node to the graph
      *
-     * @param[in] g                Graph to add the layer to
-     * @param[in] params           Common node parameters
-     * @param[in] input            Input to the fully connected layer node as a NodeID-Index pair
-     * @param[in] num_outputs      Number of output neurons
-     * @param[in] weights_accessor (Optional) Accessor of the weights node data
-     * @param[in] bias_accessor    (Optional) Accessor of the bias node data
+     * @param[in] g                  Graph to add the layer to
+     * @param[in] params             Common node parameters
+     * @param[in] input              Input to the fully connected layer node as a NodeID-Index pair
+     * @param[in] num_outputs        Number of output neurons
+     * @param[in] weights_accessor   (Optional) Accessor of the weights node data
+     * @param[in] bias_accessor      (Optional) Accessor of the bias node data
+     * @param[in] weights_quant_info (Optional) Weights quantization info
+     * @param[in] out_quant_info     (Optional) Output quantization info
      *
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_fully_connected_layer(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_outputs,
-                                            ITensorAccessorUPtr weights_accessor = nullptr, ITensorAccessorUPtr bias_accessor = nullptr);
+                                            ITensorAccessorUPtr weights_accessor = nullptr, ITensorAccessorUPtr bias_accessor = nullptr,
+                                            const QuantizationInfo weights_quant_info = QuantizationInfo(),
+                                            const QuantizationInfo out_quant_info     = QuantizationInfo());
     /** Adds a normalization layer node to the graph
      *
      * @param[in] g         Graph to add the node to
