@@ -182,7 +182,7 @@ inline TensorShape compute_deconvolution_shape(const ITensorInfo &input, unsigne
 
     return scale_out_shape;
 }
-inline TensorShape compute_im2col_conv_shape(const ITensorInfo *input, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation)
+inline TensorShape compute_im2col_conv_shape(const ITensorInfo *input, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation, bool batch_size_on_z)
 {
     // The output shape will be the 2D shape used as input for GEMM [ out_channels * kernel_area, num_elems_per_out_channel ]
 
@@ -196,7 +196,14 @@ inline TensorShape compute_im2col_conv_shape(const ITensorInfo *input, const Siz
     std::pair<unsigned int, unsigned int> out_dims = scaled_dimensions(output_shape[width_idx], output_shape[height_idx], kernel_dims.width, kernel_dims.height, conv_info, dilation);
     output_shape.set(0, (output_shape[channel_idx] * kernel_dims.area() + (has_bias ? 1 : 0)));
     output_shape.set(1, (out_dims.first * out_dims.second));
-    output_shape.set(2, 1);
+    if(batch_size_on_z && output_shape.num_dimensions() >= 3)
+    {
+        output_shape.remove_dimension(2);
+    }
+    else
+    {
+        output_shape.set(2, 1);
+    }
 
     return output_shape;
 }

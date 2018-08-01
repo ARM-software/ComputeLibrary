@@ -44,6 +44,7 @@ TensorShape get_output_shape(const ITensorInfo *input, const Size2D &convolved_d
     output_shape.set(0, convolved_dims.width);
     output_shape.set(1, convolved_dims.height);
     output_shape.set(2, input->tensor_shape()[0]);
+    output_shape.set(3, input->tensor_shape()[3]); // For NEON the batch size is on the fourth dimension of the input tensor
 
     return output_shape;
 }

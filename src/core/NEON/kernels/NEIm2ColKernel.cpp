@@ -60,7 +60,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     }
     else if(!is_fully_connected) /* Called by ConvolutionLayer */
     {
-        expected_output_shape = misc::shape_calculator::compute_im2col_conv_shape(input, kernel_dims, conv_info, has_bias, dilation);
+        expected_output_shape = misc::shape_calculator::compute_im2col_conv_shape(input, kernel_dims, conv_info, has_bias, dilation, false);
     }
     else /* Called by FullyConnectedLayer */
     {

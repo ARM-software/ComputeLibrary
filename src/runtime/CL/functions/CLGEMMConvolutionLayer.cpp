@@ -224,6 +224,8 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
     if(!_skip_im2col)
     {
         // Calculate im2col shape
+        // For OpenCL the batch size is on the third dimension
+        // TODO (giaiod01): Use auto-init COMPMID-1277
         TensorShape shape_im2col = input->info()->tensor_shape();
         if(shape_im2col.num_dimensions() >= 3)
         {
@@ -399,6 +401,8 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     if(!skip_im2col)
     {
         // Create tensor info for im2col reshaped inputs
+        // For OpenCL the batch size is on the third dimension
+        // TODO (giaiod01): Use auto-init COMPMID-1277
         TensorShape shape_im2col = input->tensor_shape();
         if(input->tensor_shape().num_dimensions() >= 3)
         {

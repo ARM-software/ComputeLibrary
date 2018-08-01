@@ -73,7 +73,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
 // *INDENT-ON*
 
 template <typename T>
-using NEIm2ColFixture = Im2ColValidationFixture<Tensor, Accessor, NEIm2Col, T>;
+using NEIm2ColFixture = Im2ColValidationFixture<Tensor, Accessor, NEIm2Col, T, false>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)
