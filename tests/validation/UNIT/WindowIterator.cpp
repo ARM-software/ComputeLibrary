@@ -96,7 +96,7 @@ DATA_TEST_CASE(WholeWindow, framework::DatasetMode::ALL, zip(framework::dataset:
 }
 
 DATA_TEST_CASE(PartialWindow2D, framework::DatasetMode::ALL, zip(zip(zip(combine(framework::dataset::make("Window",
-                                                                                                          create_window(Window::Dimension(4, 20, 4), Window::Dimension(3, 18, 5), Window::Dimension(1, 2, 1))),
+                                                                                                          create_window(Window::Dimension(4, 20, 4), Window::Dimension(3, 32, 5), Window::Dimension(1, 2, 1))),
                                                                                  framework::dataset::make("Start", { 0, 1, 3, 2, 4 })),
                                                                          framework::dataset::make("End", { 0, 2, 5, 8, 7 })),
                                                                      framework::dataset::make("RowSize",

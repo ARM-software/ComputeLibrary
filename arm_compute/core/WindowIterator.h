@@ -218,7 +218,7 @@ private:
                 // Shouldn't be possible to reach that point and not have at least one entire row to process
                 ARM_COMPUTE_ERROR_ON(_w.y().end() == _position.y());
                 // No leftover: all the rows lefts to process are full width:
-                iterate_over_dim1(_w.y().end());
+                iterate_over_dim1(end_y + _w.y().step());
             }
             else
             {
@@ -229,7 +229,7 @@ private:
                     PRINTF("full rows\n");
                     //Switch to full row size:
                     on_new_row_size(_w[0].start(), _w.x().end());
-                    iterate_over_dim1(_w.y().end() - _w.y().step());
+                    iterate_over_dim1(end_y);
                 }
 
                 PRINTF("Final leftover\n");
