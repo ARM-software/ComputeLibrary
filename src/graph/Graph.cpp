@@ -43,12 +43,15 @@ bool Graph::remove_node(NodeID nid)
 
     if(node)
     {
-        // Remove node connections
+        // Remove input connections
         for(auto &input_eid : node->_input_edges)
         {
             remove_connection(input_eid);
         }
-        for(auto &outpud_eid : node->_output_edges)
+
+        // Remove output connections
+        std::set<EdgeID> output_edges_copy = node->output_edges();
+        for(auto &outpud_eid : output_edges_copy)
         {
             remove_connection(outpud_eid);
         }
