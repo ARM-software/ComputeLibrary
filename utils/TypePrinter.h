@@ -823,6 +823,20 @@ inline ::std::ostream &operator<<(::std::ostream &os, const SamplingPolicy &poli
 
 /** Formatted output of the TensorInfo type.
  *
+ * @param[out] os   Output stream.
+ * @param[in]  info Type to output.
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const TensorInfo &info)
+{
+    os << "{Shape=" << info.tensor_shape() << ","
+       << "Type=" << info.data_type() << ","
+       << "Channels=" << info.num_channels() << "}";
+    return os;
+}
+/** Formatted output of the TensorInfo type.
+ *
  * @param[in] info Type to output.
  *
  * @return Formatted string.
@@ -830,9 +844,7 @@ inline ::std::ostream &operator<<(::std::ostream &os, const SamplingPolicy &poli
 inline std::string to_string(const TensorInfo &info)
 {
     std::stringstream str;
-    str << "{Shape=" << info.tensor_shape() << ","
-        << "Type=" << info.data_type() << ","
-        << "Channels=" << info.num_channels() << "}";
+    str << info;
     return str.str();
 }
 
