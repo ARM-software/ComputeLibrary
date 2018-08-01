@@ -689,6 +689,18 @@ struct FullyConnectedLayerInfo
     bool       transpose_weights{ true };                  /**<  Transpose weights if true. */
     bool       are_weights_reshaped{ false };              /**<  Reshape the weights tensor if false. */
     bool       retain_internal_weights{ false };           /**<  Retain internal reshaped weights. */
+
+    /** Sets the weights trained data layout
+     *
+     * @param[in] layout Data layout that the weights were trained with
+     *
+     * @return Updated object
+     */
+    FullyConnectedLayerInfo &set_weights_trained_layout(DataLayout layout)
+    {
+        weights_trained_layout = layout;
+        return *this;
+    }
 };
 
 /** Pooling Layer Information class */

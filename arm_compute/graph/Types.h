@@ -48,6 +48,7 @@ using arm_compute::Size2D;
 using arm_compute::ActivationLayerInfo;
 using arm_compute::NormType;
 using arm_compute::NormalizationLayerInfo;
+using arm_compute::FullyConnectedLayerInfo;
 using arm_compute::PadStrideInfo;
 using arm_compute::PoolingLayerInfo;
 using arm_compute::PoolingType;

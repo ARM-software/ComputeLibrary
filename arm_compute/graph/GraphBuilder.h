@@ -218,6 +218,7 @@ public:
      * @param[in] num_outputs        Number of output neurons
      * @param[in] weights_accessor   (Optional) Accessor of the weights node data
      * @param[in] bias_accessor      (Optional) Accessor of the bias node data
+     * @param[in] fc_info            (Optional) Fully connected layer metadata
      * @param[in] weights_quant_info (Optional) Weights quantization info
      * @param[in] out_quant_info     (Optional) Output quantization info
      *
@@ -225,8 +226,9 @@ public:
      */
     static NodeID add_fully_connected_layer(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_outputs,
                                             ITensorAccessorUPtr weights_accessor = nullptr, ITensorAccessorUPtr bias_accessor = nullptr,
-                                            const QuantizationInfo weights_quant_info = QuantizationInfo(),
-                                            const QuantizationInfo out_quant_info     = QuantizationInfo());
+                                            const FullyConnectedLayerInfo fc_info            = FullyConnectedLayerInfo(),
+                                            const QuantizationInfo        weights_quant_info = QuantizationInfo(),
+                                            const QuantizationInfo        out_quant_info     = QuantizationInfo());
     /** Adds a normalization layer node to the graph
      *
      * @param[in] g         Graph to add the node to

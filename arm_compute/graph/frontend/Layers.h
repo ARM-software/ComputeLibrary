@@ -384,17 +384,20 @@ public:
      * @param[in] num_outputs        Number of outputs.
      * @param[in] weights            Accessor to get weights from.
      * @param[in] bias               Accessor to get bias from.
+     * @param[in] fc_info            (Optional) Fully connected layer metadata
      * @param[in] weights_quant_info (Optional) Weights quantization information
      * @param[in] out_quant_info     (Optional) Output quantization info
      */
-    FullyConnectedLayer(unsigned int           num_outputs,
-                        ITensorAccessorUPtr    weights,
-                        ITensorAccessorUPtr    bias,
-                        const QuantizationInfo weights_quant_info = QuantizationInfo(),
-                        const QuantizationInfo out_quant_info     = QuantizationInfo())
+    FullyConnectedLayer(unsigned int                  num_outputs,
+                        ITensorAccessorUPtr           weights,
+                        ITensorAccessorUPtr           bias,
+                        const FullyConnectedLayerInfo fc_info            = FullyConnectedLayerInfo(),
+                        const QuantizationInfo        weights_quant_info = QuantizationInfo(),
+                        const QuantizationInfo        out_quant_info     = QuantizationInfo())
         : _num_outputs(num_outputs),
           _weights(std::move(weights)),
           _bias(std::move(bias)),
+          _fc_info(fc_info),
           _weights_quant_info(std::move(weights_quant_info)),
           _out_quant_info(std::move(out_quant_info))
     {
@@ -405,16 +408,17 @@ public:
         NodeParams  common_params = { name(), s.hints().target_hint };
         NodeIdxPair input         = { s.tail_node(), 0 };
         return GraphBuilder::add_fully_connected_layer(s.graph(), common_params, input, _num_outputs,
-                                                       std::move(_weights), std::move(_bias),
+                                                       std::move(_weights), std::move(_bias), _fc_info,
                                                        std::move(_weights_quant_info), std::move(_out_quant_info));
     }
 
 private:
-    unsigned int           _num_outputs;
-    ITensorAccessorUPtr    _weights;
-    ITensorAccessorUPtr    _bias;
-    const QuantizationInfo _weights_quant_info;
-    const QuantizationInfo _out_quant_info;
+    unsigned int                  _num_outputs;
+    ITensorAccessorUPtr           _weights;
+    ITensorAccessorUPtr           _bias;
+    const FullyConnectedLayerInfo _fc_info;
+    const QuantizationInfo        _weights_quant_info;
+    const QuantizationInfo        _out_quant_info;
 };
 
 /** Normalization Layer */

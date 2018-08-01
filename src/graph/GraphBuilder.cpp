@@ -424,6 +424,7 @@ NodeID GraphBuilder::add_flatten_node(Graph &g, NodeParams params, NodeIdxPair i
 
 NodeID GraphBuilder::add_fully_connected_layer(Graph &g, NodeParams params, NodeIdxPair input, unsigned int num_outputs,
                                                ITensorAccessorUPtr weights_accessor, ITensorAccessorUPtr bias_accessor,
+                                               const FullyConnectedLayerInfo fc_info,
                                                const QuantizationInfo weights_quant_info, const QuantizationInfo out_quant_info)
 {
     CHECK_NODEIDX_PAIR(input, g);
@@ -450,11 +451,6 @@ NodeID GraphBuilder::add_fully_connected_layer(Graph &g, NodeParams params, Node
         }
         b_nid = add_const_node_with_name(g, params, "Bias", b_desc, std::move(bias_accessor));
     }
-
-    // Add fully connected info
-    // FIXME (COMPMID-1367) : Expose weights layout
-    FullyConnectedLayerInfo fc_info;
-    fc_info.weights_trained_layout = DataLayout::NCHW;
 
     // Create fully connected node and connect
     NodeID fc_nid = g.add_node<FullyConnectedLayerNode>(num_outputs, out_quant_info, fc_info);
