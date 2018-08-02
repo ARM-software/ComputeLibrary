@@ -159,7 +159,7 @@ private:
      * @param[in] memory_group   Tensor memory group.
      * @param[in] alignment      Workspace memory alignment.
      */
-    void allocate_workspace(size_t workspace_size, MemoryGroup *memory_group, size_t alignment);
+    void allocate_workspace(size_t workspace_size, MemoryGroup &memory_group, size_t alignment);
 
     /** Assembly Gemm kernel */
     std::unique_ptr<arm_gemm::GemmCommon<TypeInput, TypeOutput>> _gemm_kernel_asm{ nullptr };
@@ -204,8 +204,7 @@ void Fallback<TypeInput, TypeOutput>::configure(const ITensor *a, const ITensor 
     {
         // Allocate workspace
         const unsigned int alignment = 4096;
-        //FIXME: is memory_group ever null ?
-        allocate_workspace(workspace_size, &memory_group, alignment);
+        allocate_workspace(workspace_size, memory_group, alignment);
     }
 
     //if we disable this code below in brackets then ConvLayer deadlocks when threads > 1 and
@@ -256,14 +255,11 @@ void Fallback<TypeInput, TypeOutput>::prepare()
 }
 
 template <typename TypeInput, typename TypeOutput>
-void Fallback<TypeInput, TypeOutput>::allocate_workspace(size_t workspace_size, MemoryGroup *memory_group, size_t alignment)
+void Fallback<TypeInput, TypeOutput>::allocate_workspace(size_t workspace_size, MemoryGroup &memory_group, size_t alignment)
 {
     ARM_COMPUTE_ERROR_ON_MSG(workspace_size == 0, "size cannot be 0");
     _workspace.allocator()->init(TensorInfo(TensorShape{ (workspace_size + alignment /* FIXME: remove alignment after COMPMID-1088 */) }, 1, DataType::S8), alignment);
-    if(memory_group != nullptr)
-    {
-        memory_group->manage(&_workspace);
-    }
+    memory_group.manage(&_workspace);
     _workspace.allocator()->allocate();
 }
 

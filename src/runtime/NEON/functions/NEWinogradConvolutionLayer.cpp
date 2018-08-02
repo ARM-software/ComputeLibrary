@@ -263,23 +263,17 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     d_info.init(d_shape, 1, data_type, d_strides, 0, output_storage_size);
 
     _input_workspace.allocator()->init(a_info, storage_alignment);
-    _input_workspace.allocator()->allocate();
-
     _kernel_storage.allocator()->init(b_info, storage_alignment);
-    _kernel_storage.allocator()->allocate();
-
     _output_workspace.allocator()->init(d_info, storage_alignment);
-    _output_workspace.allocator()->allocate();
 
     // configure and allocate dst tensor to be used to convert from winograd domain to spatial domain when calling to reshape_output()
     TensorInfo info(TensorShape(_output->info()->dimension(2), _output->info()->dimension(0),
                                 _output->info()->dimension(1), _output->info()->dimension(3)),
                     1, _output->info()->data_type());
     _output_nhwc.allocator()->init(info);
-    _output_nhwc.allocator()->allocate();
 
     // Configure the InputTransform
-
+    _memory_group.manage(&_input_workspace);
     if(data_layout == DataLayout::NCHW)
     {
         // configure the kernel to transform the input tensor from NCHW -> NHWC
@@ -314,6 +308,7 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     // Configure OutputTransform
     //The biases tensor has not been allocated at this point in time, the output transform will add the biases to the final result in the run() method
 
+    _memory_group.manage(&_output_workspace);
     if(data_layout == DataLayout::NCHW)
     {
         transform_output_kernel->configure(biases, &_output_workspace,
@@ -328,9 +323,14 @@ void NEWinogradConvolutionLayer::configure(const ITensor *input, const ITensor *
     }
 
     _asm_glue.configure(&_input_workspace, &_kernel_storage, &_output_workspace, 1.0f, 0.f, false);
+    _input_workspace.allocator()->allocate();
+    _kernel_storage.allocator()->allocate();
+    _output_workspace.allocator()->allocate();
 
     // Reorder the convoluted output to ACL's ordering NCHW
     _permute_output.configure(&_output_nhwc, _output, PermutationVector(1U, 2U, 0U));
+
+    _output_nhwc.allocator()->allocate();
 
     _transform_input_kernel   = std::move(transform_input_kernel);
     _transform_weights_kernel = std::move(transform_weights_kernel);
