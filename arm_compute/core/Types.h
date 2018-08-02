@@ -701,6 +701,17 @@ struct FullyConnectedLayerInfo
         weights_trained_layout = layout;
         return *this;
     }
+    /** Sets the transpose weights flag
+     *
+     * @param[in] should_transpose_weights Boolean flag indicating if weights should be transposed
+     *
+     * @return Updated object
+     */
+    FullyConnectedLayerInfo &set_transpose_weights(bool should_transpose_weights)
+    {
+        transpose_weights = should_transpose_weights;
+        return *this;
+    }
 };
 
 /** Pooling Layer Information class */

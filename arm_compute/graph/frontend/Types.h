@@ -39,6 +39,7 @@ using graph::TensorShape;
 using graph::PermutationVector;
 
 using graph::ActivationLayerInfo;
+using graph::FullyConnectedLayerInfo;
 using graph::NormalizationLayerInfo;
 using graph::NormType;
 using graph::PadStrideInfo;

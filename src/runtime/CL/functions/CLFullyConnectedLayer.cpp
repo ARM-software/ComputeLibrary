@@ -256,7 +256,7 @@ Status CLFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorIn
 
     const ITensorInfo &im2col_input      = TensorInfo(input->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_im2col_fc_shape(input)).set_data_layout(DataLayout::NCHW));
     const ITensorInfo &reshaped_weights  = TensorInfo(weights->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(compute_transposed_shape(*weights)));
-    const ITensorInfo &converted_weights = TensorInfo(reshaped_weights.clone()->set_is_resizable(true).reset_padding());
+    const ITensorInfo &converted_weights = weights_reshaped ? TensorInfo(weights->clone()->set_is_resizable(true).reset_padding()) : TensorInfo(*reshaped_weights.clone());
     const ITensorInfo &gemmlowp_output   = TensorInfo(output->clone()->set_is_resizable(true).reset_padding().set_data_type(DataType::S32));
 
     // Configure accumulate biases kernel for non quantized asymmetric types

@@ -436,7 +436,7 @@ NodeID GraphBuilder::add_fully_connected_layer(Graph &g, NodeParams params, Node
     const TensorDescriptor input_tensor_desc = get_tensor_descriptor(g, g.node(input.node_id)->outputs()[0]);
 
     // Create weights node
-    TensorDescriptor w_desc = FullyConnectedLayerNode::compute_weights_descriptor(input_tensor_desc, num_outputs, weights_quant_info);
+    TensorDescriptor w_desc = FullyConnectedLayerNode::compute_weights_descriptor(input_tensor_desc, num_outputs, fc_info, weights_quant_info);
     NodeID           w_nid  = add_const_node_with_name(g, params, "Weights", w_desc, std::move(weights_accessor));
 
     // Create bias nodes

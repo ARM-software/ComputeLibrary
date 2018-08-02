@@ -49,12 +49,14 @@ public:
      *
      * @param[in] input_descriptor   Input descriptor
      * @param[in] num_outputs        Number of output neurons
+     * @param[in] fc_info            (Optional) Additional information about the fully connected layer
      * @param[in] weights_quant_info (Optional) Weights quantization info
      *
      * @return Weights descriptor
      */
     static TensorDescriptor compute_weights_descriptor(const TensorDescriptor &input_descriptor,
                                                        unsigned int            num_outputs,
+                                                       FullyConnectedLayerInfo fc_info            = FullyConnectedLayerInfo(),
                                                        QuantizationInfo        weights_quant_info = QuantizationInfo());
     /** Computes fully connected layer output descriptor
      *

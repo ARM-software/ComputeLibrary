@@ -40,6 +40,7 @@ FullyConnectedLayerNode::FullyConnectedLayerNode(unsigned int num_outputs, Quant
 
 TensorDescriptor FullyConnectedLayerNode::compute_weights_descriptor(const TensorDescriptor &input_descriptor,
                                                                      unsigned int            num_outputs,
+                                                                     FullyConnectedLayerInfo fc_info,
                                                                      QuantizationInfo        weights_quant_info)
 {
     unsigned int num_weights    = 1;
@@ -56,6 +57,12 @@ TensorDescriptor FullyConnectedLayerNode::compute_weights_descriptor(const Tenso
 
     TensorDescriptor weights_descriptor = input_descriptor;
     weights_descriptor.shape            = TensorShape(num_weights, num_outputs);
+
+    // If weights are tranposed, use tranposed shape
+    if(!fc_info.transpose_weights)
+    {
+        weights_descriptor.shape = TensorShape(num_outputs, num_weights);
+    }
 
     // Set quantization info if present
     if(!weights_quant_info.empty())
