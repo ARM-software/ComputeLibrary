@@ -36,6 +36,7 @@ namespace frontend
 using graph::DataType;
 using graph::DataLayout;
 using graph::TensorShape;
+using graph::PermutationVector;
 
 using graph::ActivationLayerInfo;
 using graph::NormalizationLayerInfo;

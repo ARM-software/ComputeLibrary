@@ -591,6 +591,43 @@ std::unique_ptr<IFunction> create_normalization_layer(NormalizationLayerNode &no
     return std::move(func);
 }
 
+/** Create a backend permute layer function
+ *
+ * @tparam PermuteLayerFunction Backend permute function
+ * @tparam TargetInfo           Target-specific information
+ *
+ * @param[in] node Node to create the backend function for
+ *
+ * @return Backend permute layer function
+ */
+template <typename PermuteLayerFunction, typename TargetInfo>
+std::unique_ptr<IFunction> create_permute_layer(PermuteLayerNode &node)
+{
+    validate_node<TargetInfo>(node, 1 /* expected inputs */, 1 /* expected outputs */);
+
+    // Extract IO and info
+    typename TargetInfo::TensorType *input  = get_backing_tensor<TargetInfo>(node.input(0));
+    typename TargetInfo::TensorType *output = get_backing_tensor<TargetInfo>(node.output(0));
+    const PermutationVector         &perm   = node.permutation_vector();
+    ARM_COMPUTE_ERROR_ON(input == nullptr);
+    ARM_COMPUTE_ERROR_ON(output == nullptr);
+
+    // Create and configure function
+    auto func = support::cpp14::make_unique<PermuteLayerFunction>();
+    func->configure(input, output, perm);
+
+    // Log info
+    ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << node.type()
+                               << " Target " << TargetInfo::TargetType
+                               << " Data Type: " << input->info()->data_type()
+                               << " Input shape: " << input->info()->tensor_shape()
+                               << " Output shape: " << output->info()->tensor_shape()
+                               << " Permutation vector: " << perm
+                               << std::endl);
+
+    return std::move(func);
+}
+
 /** Create a backend pooling layer function
  *
  * @tparam PoolingLayerFunction Backend pooling function

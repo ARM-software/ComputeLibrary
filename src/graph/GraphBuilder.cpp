@@ -471,6 +471,11 @@ NodeID GraphBuilder::add_normalization_node(Graph &g, NodeParams params, NodeIdx
     return create_simple_single_input_output_node<NormalizationLayerNode>(g, params, input, norm_info);
 }
 
+NodeID GraphBuilder::add_permute_node(Graph &g, NodeParams params, NodeIdxPair input, PermutationVector perm, DataLayout layout)
+{
+    return create_simple_single_input_output_node<PermuteLayerNode>(g, params, input, perm, layout);
+}
+
 NodeID GraphBuilder::add_pooling_node(Graph &g, NodeParams params, NodeIdxPair input, PoolingLayerInfo pool_info)
 {
     return create_simple_single_input_output_node<PoolingLayerNode>(g, params, input, pool_info);

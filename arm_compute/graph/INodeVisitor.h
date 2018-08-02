@@ -101,6 +101,11 @@ public:
      * @param[in] n Node to visit.
      */
     virtual void visit(OutputNode &n) = 0;
+    /** Visit PermuteLayerNode.
+     *
+     * @param[in] n Node to visit.
+     */
+    virtual void visit(PermuteLayerNode &n) = 0;
     /** Visit PoolingLayerNode.
      *
      * @param[in] n Node to visit.
@@ -185,6 +190,10 @@ public:
         default_visit();
     }
     virtual void visit(OutputNode &n) override
+    {
+        default_visit();
+    }
+    virtual void visit(PermuteLayerNode &n) override
     {
         default_visit();
     }

@@ -239,6 +239,18 @@ public:
      * @return Node ID of the created node, EmptyNodeID in case of error
      */
     static NodeID add_normalization_node(Graph &g, NodeParams params, NodeIdxPair input, NormalizationLayerInfo norm_info);
+    /** Adds a permute layer node to the graph
+     *
+     * @param[in] g      Graph to add the node to
+     * @param[in] params Common node parameters
+     * @param[in] input  Input to the reshape layer node as a NodeID-Index pair
+     * @param[in] perm   Permutation vector
+     * @param[in] layout (Optional) Data layout to assign to permuted tensor.
+     *                    If UNKNOWN then the input's layout will be used.
+     *
+     * @return Node ID of the created node, EmptyNodeID in case of error
+     */
+    static NodeID add_permute_node(Graph &g, NodeParams params, NodeIdxPair input, PermutationVector perm, DataLayout layout = DataLayout::UNKNOWN);
     /** Adds a pooling layer node to the graph
      *
      * @param[in] g         Graph to add the node to

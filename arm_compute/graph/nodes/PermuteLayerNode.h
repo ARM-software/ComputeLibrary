@@ -21,36 +21,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_NODES_FWD_H__
-#define __ARM_COMPUTE_GRAPH_NODES_FWD_H__
+#ifndef __ARM_COMPUTE_GRAPH_PERMUTE_LAYER_NODE_H__
+#define __ARM_COMPUTE_GRAPH_PERMUTE_LAYER_NODE_H__
+
+#include "arm_compute/graph/INode.h"
 
 namespace arm_compute
 {
 namespace graph
 {
-// Forward declarations
-class INode;
-class ActivationLayerNode;
-class BatchNormalizationLayerNode;
-class ChannelShuffleLayerNode;
-class ConcatenateLayerNode;
-class ConstNode;
-class ConvolutionLayerNode;
-class DeconvolutionLayerNode;
-class DepthwiseConvolutionLayerNode;
-class DummyNode;
-class EltwiseLayerNode;
-class FlattenLayerNode;
-class FullyConnectedLayerNode;
-class InputNode;
-class NormalizationLayerNode;
-class OutputNode;
-class PermuteLayerNode;
-class PoolingLayerNode;
-class ReshapeLayerNode;
-class ResizeLayerNode;
-class SoftmaxLayerNode;
-class SplitLayerNode;
+/** Permute Layer node */
+class PermuteLayerNode final : public INode
+{
+public:
+    /** Constructor
+     *
+     * @param[in] perm   Permutation vector
+     * @param[in] layout (Optional) Data layout to assign to permuted tensor.
+     *                   If UNKNOWN then the input's layout will be used.
+     */
+    PermuteLayerNode(PermutationVector perm, DataLayout layout = DataLayout::UNKNOWN);
+    /** Permutation vector accessor
+     *
+     * @return Permutation vector
+     */
+    const PermutationVector &permutation_vector() const;
+
+    // Inherited overridden methods:
+    NodeType         type() const override;
+    bool             forward_descriptors() override;
+    TensorDescriptor configure_output(size_t idx) const override;
+    void accept(INodeVisitor &v) override;
+
+private:
+    PermutationVector _perm;
+    DataLayout        _layout;
+};
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_NODES_FWD_H__ */
+#endif /* __ARM_COMPUTE_GRAPH_PERMUTE_LAYER_NODE_H__ */

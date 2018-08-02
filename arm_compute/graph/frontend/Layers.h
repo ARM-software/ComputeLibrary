@@ -445,6 +445,33 @@ private:
     NormalizationLayerInfo _norm_info;
 };
 
+/** Permute Layer */
+class PermuteLayer final : public ILayer
+{
+public:
+    /** Construct a permute layer.
+     *
+     * @param[in] perm   Permutation vector.
+     * @param[in] layout (Optional) Data layout to assign to permuted tensor.
+     *                   If UNKNOWN then the input's layout will be used.
+     */
+    PermuteLayer(PermutationVector perm, DataLayout layout = DataLayout::UNKNOWN)
+        : _perm(perm), _layout(layout)
+    {
+    }
+
+    NodeID create_layer(IStream &s) override
+    {
+        NodeParams  common_params = { name(), s.hints().target_hint };
+        NodeIdxPair input         = { s.tail_node(), 0 };
+        return GraphBuilder::add_permute_node(s.graph(), common_params, input, _perm, _layout);
+    }
+
+private:
+    PermutationVector _perm;
+    DataLayout        _layout;
+};
+
 /** Pooling Layer */
 class PoolingLayer final : public ILayer
 {

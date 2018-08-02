@@ -95,6 +95,9 @@ inline ::std::ostream &operator<<(::std::ostream &os, const NodeType &node_type)
         case NodeType::NormalizationLayer:
             os << "NormalizationLayer";
             break;
+        case NodeType::PermuteLayer:
+            os << "PermuteLayer";
+            break;
         case NodeType::PoolingLayer:
             os << "PoolingLayer";
             break;

@@ -44,6 +44,7 @@ using arm_compute::DataLayout;
 using arm_compute::DataLayoutDimension;
 using arm_compute::TensorShape;
 using arm_compute::Size2D;
+using arm_compute::PermutationVector;
 
 using arm_compute::ActivationLayerInfo;
 using arm_compute::NormType;
@@ -140,6 +141,7 @@ enum class NodeType
     FlattenLayer,
     FullyConnectedLayer,
     NormalizationLayer,
+    PermuteLayer,
     PoolingLayer,
     ReshapeLayer,
     ResizeLayer,
