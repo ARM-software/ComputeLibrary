@@ -60,6 +60,33 @@ SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, Con
     return result;
 }
 
+template < typename T1, typename T2, typename std::enable_if < is_floating_point<T1>::value &&is_floating_point<T2>::value &&!std::is_same<T1, T2>::value, int >::type >
+SimpleTensor<T2> depth_convert(const SimpleTensor<T1> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift)
+{
+    SimpleTensor<T2> result(src.shape(), dt_out);
+
+    const uint32_t scale = 1 << shift;
+
+    // Up-casting
+    if(src.data_type() <= dt_out)
+    {
+        for(int i = 0; i < src.num_elements(); ++i)
+        {
+            result[i] = src[i] * static_cast<T2>(scale);
+        }
+    }
+    // Down-casting
+    else
+    {
+        for(int i = 0; i < src.num_elements(); ++i)
+        {
+            T1 val    = src[i] / static_cast<T1>(scale);
+            result[i] = (policy == ConvertPolicy::SATURATE) ? saturate_cast<T2>(val) : static_cast<T2>(val);
+        }
+    }
+    return result;
+}
+
 template SimpleTensor<uint16_t> depth_convert(const SimpleTensor<uint8_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
 template SimpleTensor<int16_t> depth_convert(const SimpleTensor<uint8_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
 template SimpleTensor<int32_t> depth_convert(const SimpleTensor<uint8_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
@@ -67,6 +94,8 @@ template SimpleTensor<uint8_t> depth_convert(const SimpleTensor<uint16_t> &src, 
 template SimpleTensor<uint32_t> depth_convert(const SimpleTensor<uint16_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
 template SimpleTensor<uint8_t> depth_convert(const SimpleTensor<int16_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
 template SimpleTensor<int32_t> depth_convert(const SimpleTensor<int16_t> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
+template SimpleTensor<half> depth_convert(const SimpleTensor<float> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
+template SimpleTensor<float> depth_convert(const SimpleTensor<half> &src, DataType dt_out, ConvertPolicy policy, uint32_t shift);
 } // namespace reference
 } // namespace validation
 } // namespace test

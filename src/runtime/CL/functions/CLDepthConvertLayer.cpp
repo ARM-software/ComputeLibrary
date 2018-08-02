@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -35,4 +35,9 @@ void CLDepthConvertLayer::configure(const ICLTensor *input, ICLTensor *output, C
     auto k = arm_compute::support::cpp14::make_unique<CLDepthConvertLayerKernel>();
     k->configure(input, output, policy, shift);
     _kernel = std::move(k);
+}
+
+Status CLDepthConvertLayer::validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy, uint32_t shift)
+{
+    return CLDepthConvertLayerKernel::validate(input, output, policy, shift);
 }

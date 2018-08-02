@@ -44,15 +44,16 @@ namespace validation
 namespace
 {
 /** Input data sets **/
-const auto DepthConvertLayerU8toU16Dataset             = combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U16));
-const auto DepthConvertLayerU8toS16Dataset             = combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::S16));
-const auto DepthConvertLayerU8toS32Dataset             = combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::S32));
-const auto DepthConvertLayerU16toU8Dataset             = combine(framework::dataset::make("DataType", DataType::U16), framework::dataset::make("DataType", DataType::U8));
-const auto DepthConvertLayerU16toU32Dataset            = combine(framework::dataset::make("DataType", DataType::U16), framework::dataset::make("DataType", DataType::U32));
-const auto DepthConvertLayerS16toU8Dataset             = combine(framework::dataset::make("DataType", DataType::S16), framework::dataset::make("DataType", DataType::U8));
-const auto DepthConvertLayerS16toS32Dataset            = combine(framework::dataset::make("DataType", DataType::S16), framework::dataset::make("DataType", DataType::S32));
-const auto DepthConvertLayerShiftDataset               = framework::dataset::make("Shift", 0, 7);
-const auto DepthConvertLayerFixedPointQuantizedDataset = framework::dataset::make("FractionalBits", 1, 7);
+const auto DepthConvertLayerU8toU16Dataset  = combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::U16));
+const auto DepthConvertLayerU8toS16Dataset  = combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::S16));
+const auto DepthConvertLayerU8toS32Dataset  = combine(framework::dataset::make("DataType", DataType::U8), framework::dataset::make("DataType", DataType::S32));
+const auto DepthConvertLayerU16toU8Dataset  = combine(framework::dataset::make("DataType", DataType::U16), framework::dataset::make("DataType", DataType::U8));
+const auto DepthConvertLayerU16toU32Dataset = combine(framework::dataset::make("DataType", DataType::U16), framework::dataset::make("DataType", DataType::U32));
+const auto DepthConvertLayerS16toU8Dataset  = combine(framework::dataset::make("DataType", DataType::S16), framework::dataset::make("DataType", DataType::U8));
+const auto DepthConvertLayerS16toS32Dataset = combine(framework::dataset::make("DataType", DataType::S16), framework::dataset::make("DataType", DataType::S32));
+const auto DepthConvertLayerF16toF32Dataset = combine(framework::dataset::make("DataType", DataType::F16), framework::dataset::make("DataType", DataType::F32));
+const auto DepthConvertLayerF32toF16Dataset = combine(framework::dataset::make("DataType", DataType::F32), framework::dataset::make("DataType", DataType::F16));
+const auto DepthConvertLayerShiftDataset    = framework::dataset::make("Shift", 0, 7);
 } // namespace
 
 TEST_SUITE(CL)
@@ -67,6 +68,10 @@ template <typename T>
 using CLDepthConvertLayerToU8Fixture = DepthConvertLayerValidationFixture<CLTensor, CLAccessor, CLDepthConvertLayer, T, uint8_t>;
 template <typename T>
 using CLDepthConvertLayerToU32Fixture = DepthConvertLayerValidationFixture<CLTensor, CLAccessor, CLDepthConvertLayer, T, uint32_t>;
+template <typename T>
+using CLDepthConvertLayerToF16Fixture = DepthConvertLayerValidationFixture<CLTensor, CLAccessor, CLDepthConvertLayer, T, half>;
+template <typename T>
+using CLDepthConvertLayerToF32Fixture = DepthConvertLayerValidationFixture<CLTensor, CLAccessor, CLDepthConvertLayer, T, float>;
 
 TEST_SUITE(U8_to_U16)
 DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
@@ -337,6 +342,84 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthConvertLayerToS32Fixture<int16_t>, frame
 FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthConvertLayerToS32Fixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), DepthConvertLayerS16toS32Dataset),
                                                                                                                     framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
                                                                                                                     DepthConvertLayerShiftDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END()
+
+TEST_SUITE(F16_to_F32)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                   DepthConvertLayerShiftDataset),
+               shape, policy, shift)
+{
+    // Create tensors
+    CLTensor src = create_tensor<CLTensor>(shape, DataType::F16, 1);
+    CLTensor dst = create_tensor<CLTensor>(shape, DataType::F32, 1);
+
+    // Create and Configure function
+    CLDepthConvertLayer depth_convert;
+    depth_convert.configure(&src, &dst, policy, shift);
+
+    // Validate valid region
+    const ValidRegion valid_region = shape_to_valid_region(shape);
+    validate(dst.info()->valid_region(), valid_region);
+
+    // Validate padding
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    validate(src.info()->padding(), padding);
+    validate(dst.info()->padding(), padding);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthConvertLayerToF32Fixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), DepthConvertLayerF16toF32Dataset),
+                                                                                                                   framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                                   DepthConvertLayerShiftDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthConvertLayerToF32Fixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), DepthConvertLayerF16toF32Dataset),
+                                                                                                                 framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                                 DepthConvertLayerShiftDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+TEST_SUITE_END()
+
+TEST_SUITE(F32_to_F16)
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallShapes(), datasets::LargeShapes()), framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                   DepthConvertLayerShiftDataset),
+               shape, policy, shift)
+{
+    // Create tensors
+    CLTensor src = create_tensor<CLTensor>(shape, DataType::F32, 1);
+    CLTensor dst = create_tensor<CLTensor>(shape, DataType::F16, 1);
+
+    // Create and Configure function
+    CLDepthConvertLayer depth_convert;
+    depth_convert.configure(&src, &dst, policy, shift);
+
+    // Validate valid region
+    const ValidRegion valid_region = shape_to_valid_region(shape);
+    validate(dst.info()->valid_region(), valid_region);
+
+    // Validate padding
+    const PaddingSize padding = PaddingCalculator(shape.x(), 16).required_padding();
+    validate(src.info()->padding(), padding);
+    validate(dst.info()->padding(), padding);
+}
+
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthConvertLayerToF16Fixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallShapes(), DepthConvertLayerF32toF16Dataset),
+                                                                                                                    framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                                    DepthConvertLayerShiftDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthConvertLayerToF16Fixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), DepthConvertLayerF32toF16Dataset),
+                                                                                                                  framework::dataset::make("ConvertPolicy", { ConvertPolicy::SATURATE, ConvertPolicy::WRAP })),
+                                                                                                                  DepthConvertLayerShiftDataset))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
