@@ -209,7 +209,7 @@ Status validate_and_initialize_values(const ITensorInfo *input, const ITensorInf
     kernel_height        = (are_weights_reshaped) ? weights_info.kernel_size().second : weights->dimension(idx_height);
     mat_weights_cols     = weights->dimension(3);
     mat_weights_rows     = weights->dimension(idx_width) * weights->dimension(idx_height) * weights->dimension(idx_channel) + ((append_bias && !skip_im2col) ? 1 : 0);
-    skip_im2col          = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1);
+    skip_im2col          = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv_info.stride().first == 1 && conv_info.stride().second == 1);
 
     std::tie(conv_w, conv_h) = scaled_dimensions(input->dimension(idx_width), input->dimension(idx_height), kernel_width, kernel_height,
                                                  conv_info, dilation);

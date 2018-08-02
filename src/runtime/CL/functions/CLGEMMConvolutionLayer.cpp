@@ -181,7 +181,7 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
     _original_weights = weights;
     _is_quantized     = is_data_type_quantized_asymmetric(input->info()->data_type());
     _data_layout      = data_layout;
-    _skip_im2col      = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1) && !_is_quantized;
+    _skip_im2col      = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv_info.stride().first == 1 && conv_info.stride().second == 1) && !_is_quantized;
     _append_bias      = (biases != nullptr) && (!_is_quantized);
 
     // Set the GPU target for im2col and col2im
@@ -350,7 +350,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 
     const bool     is_nhwc      = data_layout == DataLayout::NHWC;
     const bool     is_quantized = is_data_type_quantized_asymmetric(data_type);
-    const bool     skip_im2col  = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1) && !is_quantized;
+    const bool     skip_im2col  = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv_info.stride().first == 1 && conv_info.stride().second == 1) && !is_quantized;
     const bool     append_bias  = (biases != nullptr) && (!is_quantized);
     const unsigned bias_element = (append_bias && !skip_im2col) ? 1 : 0;
 
