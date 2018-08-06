@@ -356,6 +356,12 @@ kernel void hysteresis(
         return;
     }
 
+    // Return if it is a MAYBE pixel. Such pixels will become edges if near a strong edge
+    if(val <= up_thr)
+    {
+        return;
+    }
+
     // Init local stack 2
     short2 stack_L2[hysteresis_local_stack_L2] = { 0 };
     int    L2_counter                          = 0;
