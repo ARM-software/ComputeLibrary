@@ -57,6 +57,7 @@ inline Status validate_arguments(const ITensorInfo *input0, const ITensorInfo *i
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input0->num_dimensions() > 4, "The number of dimensions for the matrix A must be <= 4");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->num_dimensions() > 3, "The number of dimensions for the matrix B must be <= 3");
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(is_interleaved_transposed && reshape_info.reinterpret_input_as_3d(), "The input tensor cannot be reinterpreted as 3D if is_interleaved_transposed is true");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input1->num_dimensions() > 2 && reshape_info.reinterpret_input_as_3d(), "The input1 tensor cannot have more than 2 dimensions if input0 has to be reinterpreted as 3D");
 
     if(!is_interleaved_transposed)
     {
@@ -109,13 +110,23 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
     const DataType data_type                           = input0->data_type();
     unsigned int &num_elems_processed_per_iteration_x = num_elements_processed[0];
     unsigned int &num_elems_processed_per_iteration_y = num_elements_processed[1];
+    bool           reinterpret_input_as_3d             = reshape_info.reinterpret_input_as_3d();
+    bool           reinterpret_output_as_3d            = (reshape_info.depth_output_gemm3d() != 1);
+
+    // In case both input and output have to be reinterpreted as 3D tensors,
+    // force reinterpret_input_as_3d and reinterpret_output_as_3d to be false.
+    if(reinterpret_input_as_3d == reinterpret_output_as_3d)
+    {
+        reinterpret_input_as_3d  = false;
+        reinterpret_output_as_3d = false;
+    }
 
     // Output tensor auto inizialitation if not yet initialized
     auto_init_if_empty(*output, input0->clone()->set_tensor_shape(compute_mm_shape(*input0, *input1, is_interleaved_transposed, reshape_info)));
 
     TensorInfo tmp_info(*output);
 
-    if(reshape_info.depth_output_gemm3d() != 1)
+    if(reinterpret_output_as_3d)
     {
         // Since the output tensor has to be reinterpreted as 3D and the execute window is based on a 2D GEMM,
         // the window needs to be constructed on the 2D collapsed version of the tensor
@@ -162,7 +173,7 @@ inline std::pair<Status, Window> validate_and_configure_window(ITensorInfo *inpu
 
         // Note: bottom paddings are calculated manually as the output can be reinterpreted as 3D tensor
         // The only way to set properly the paddings, it is to set those explicitly through the AccessWindowStatic
-        const int m          = reshape_info.reinterpret_input_as_3d() ? input0->tensor_shape()[1] * input0->tensor_shape()[2] : input0->tensor_shape()[1];
+        const int m          = reinterpret_input_as_3d ? input0->tensor_shape()[1] * input0->tensor_shape()[2] : input0->tensor_shape()[1];
         const int bottom_pad = (num_elems_processed_per_iteration_y - (m % num_elems_processed_per_iteration_y)) % num_elems_processed_per_iteration_y;
 
         // Create kernels according to the architecture, data type and input size.
@@ -218,6 +229,14 @@ void CLGEMMMatrixMultiplyKernel::configure(const ICLTensor *input0, const ICLTen
     _output                   = output;
     _reinterpret_input_as_3d  = reshape_info.reinterpret_input_as_3d();
     _reinterpret_output_as_3d = (reshape_info.depth_output_gemm3d() != 1);
+
+    // In case both input and output have to be reinterpreted as 3D tensors,
+    // force reinterpret_input_as_3d and reinterpret_output_as_3d to be false.
+    if(_reinterpret_input_as_3d == _reinterpret_output_as_3d)
+    {
+        _reinterpret_input_as_3d  = false;
+        _reinterpret_output_as_3d = false;
+    }
 
     // Check if we need to slide the matrix B
     const unsigned int num_dimensions_input0 = _reinterpret_input_as_3d ? _input0->info()->num_dimensions() - 1 : _input0->info()->num_dimensions();

@@ -87,7 +87,6 @@ public:
         graph << common_params.target
               << common_params.fast_math_hint
               << InputLayer(input_descriptor, get_input_accessor(common_params, std::move(preprocessor)))
-              << ConvolutionMethod::Direct
               << ConvolutionLayer(
                   3U, 3U, 64U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/conv1_w.npy", weights_layout),
@@ -95,7 +94,6 @@ public:
                   PadStrideInfo(2, 2, 0, 0))
               << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU))
               << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL)))
-              << ConvolutionMethod::Default
               << ConvolutionLayer(
                   1U, 1U, 16U,
                   get_weights_accessor(data_path, "/cnn_data/squeezenet_v1_1_model/fire2_squeeze1x1_w.npy", weights_layout),
