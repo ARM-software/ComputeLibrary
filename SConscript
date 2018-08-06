@@ -43,7 +43,7 @@ def build_library(name, sources, static=False, libs=[]):
             library_prefix = obj[0].path[:-(1 + len(SONAME_VERSION))]
             real_lib = "%s.%s" % (library_prefix, SONAME_VERSION)
 
-            for f in Glob("#%s*" % library_prefix):
+            for f in Glob("#%s.*" % library_prefix):
                 if str(f) != real_lib:
                     symlinks.append("%s/%s" % (directory,str(f)))
 

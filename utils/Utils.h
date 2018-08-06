@@ -281,21 +281,24 @@ class NPYLoader
 public:
     /** Default constructor */
     NPYLoader()
-        : _fs(), _shape(), _fortran_order(false), _typestring()
+        : _fs(), _shape(), _fortran_order(false), _typestring(), _file_layout(DataLayout::NCHW)
     {
     }
 
     /** Open a NPY file and reads its metadata
      *
      * @param[in] npy_filename File to open
+     * @param[in] file_layout  (Optional) Layout in which the weights are stored in the file.
      */
-    void open(const std::string &npy_filename)
+    void open(const std::string &npy_filename, DataLayout file_layout = DataLayout::NCHW)
     {
         ARM_COMPUTE_ERROR_ON(is_open());
         try
         {
-            _fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
             _fs.open(npy_filename, std::ios::in | std::ios::binary);
+            ARM_COMPUTE_EXIT_ON_MSG(!_fs.good(), "Failed to load binary data from %s", npy_filename.c_str());
+            _fs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+            _file_layout = file_layout;
 
             std::tie(_shape, _fortran_order, _typestring) = parse_npy_header(_fs);
         }
@@ -332,7 +335,12 @@ public:
         shape.set_num_dimensions(_shape.size());
         for(size_t i = 0; i < _shape.size(); ++i)
         {
-            shape.set(i, _shape.at(i));
+            size_t src = i;
+            if(_fortran_order)
+            {
+                src = _shape.size() - 1 - i;
+            }
+            shape.set(i, _shape.at(src));
         }
 
         arm_compute::TensorInfo tensor_info(shape, 1, dt);
@@ -369,9 +377,25 @@ public:
             std::string expect_typestr = get_typestring(tensor.info()->data_type());
             ARM_COMPUTE_ERROR_ON_MSG(_typestring != expect_typestr, "Typestrings mismatch");
 
+            bool are_layouts_different = (_file_layout != tensor.info()->data_layout());
+            // Correct dimensions (Needs to match TensorShape dimension corrections)
+            if(_shape.size() != tensor.info()->tensor_shape().num_dimensions())
+            {
+                for(int i = static_cast<int>(_shape.size()) - 1; i > 0; --i)
+                {
+                    if(_shape[i] == 1)
+                    {
+                        _shape.pop_back();
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
             // Validate tensor shape
             ARM_COMPUTE_ERROR_ON_MSG(_shape.size() != tensor.info()->tensor_shape().num_dimensions(), "Tensor ranks mismatch");
-            if(_fortran_order)
+            if(!_fortran_order)
             {
                 for(size_t i = 0; i < _shape.size(); ++i)
                 {
@@ -391,20 +415,63 @@ public:
                 case arm_compute::DataType::F32:
                 {
                     // Read data
-                    if(tensor.info()->padding().empty())
+                    if(!are_layouts_different && !_fortran_order && tensor.info()->padding().empty())
                     {
                         // If tensor has no padding read directly from stream.
                         _fs.read(reinterpret_cast<char *>(tensor.buffer()), tensor.info()->total_size());
                     }
                     else
                     {
-                        // If tensor has padding accessing tensor elements through execution window.
-                        Window window;
-                        window.use_tensor_dimensions(tensor.info()->tensor_shape());
+                        // If tensor has padding or is in fortran order accessing tensor elements through execution window.
+                        Window                         window;
+                        TensorShape                    permuted_shape = tensor.info()->tensor_shape();
+                        const unsigned int             num_dims       = _shape.size();
+                        arm_compute::PermutationVector perm;
+                        if(_fortran_order)
+                        {
+                            for(unsigned int dim = 0; dim < num_dims; dim++)
+                            {
+                                permuted_shape.set(dim, _shape[dim]);
+                                perm.set(dim, num_dims - dim - 1);
+                            }
+                        }
+                        else
+                        {
+                            for(unsigned int dim = 0; dim < num_dims; dim++)
+                            {
+                                perm.set(dim, dim);
+                            }
+                        }
+                        if(are_layouts_different)
+                        {
+                            // Permute only if num_dimensions greater than 2
+                            if(num_dims > 2)
+                            {
+                                if(_file_layout == DataLayout::NHWC) // i.e destination is NCHW --> permute(1,2,0)
+                                {
+                                    size_t perm_0 = perm[0];
+                                    perm[0]       = perm[1];
+                                    perm[1]       = perm[2];
+                                    perm[2]       = perm_0;
+                                }
+                                else
+                                {
+                                    // destination layout is NHWC --> permute (2,0,1)
+                                    size_t perm_0 = perm[0];
+                                    perm[0]       = perm[2];
+                                    perm[2]       = perm[1];
+                                    perm[1]       = perm_0;
+                                }
+                            }
+                        }
+
+                        window.use_tensor_dimensions(permuted_shape);
 
                         execute_window_loop(window, [&](const Coordinates & id)
                         {
-                            _fs.read(reinterpret_cast<char *>(tensor.ptr_to_element(id)), tensor.info()->element_size());
+                            Coordinates dst(id);
+                            arm_compute::permute(dst, perm);
+                            _fs.read(reinterpret_cast<char *>(tensor.ptr_to_element(dst)), tensor.info()->element_size());
                         });
                     }
 
@@ -428,6 +495,7 @@ private:
     std::vector<unsigned long> _shape;
     bool                       _fortran_order;
     std::string                _typestring;
+    DataLayout                 _file_layout;
 };
 
 /** Template helper function to save a tensor image to a PPM file.
@@ -524,26 +592,18 @@ template <typename T>
 void save_to_npy(T &tensor, const std::string &npy_filename, bool fortran_order)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_NOT_IN(&tensor, arm_compute::DataType::F32);
-    ARM_COMPUTE_ERROR_ON(tensor.info()->num_dimensions() > 2);
 
     std::ofstream fs;
-
     try
     {
         fs.exceptions(std::ofstream::failbit | std::ofstream::badbit | std::ofstream::eofbit);
         fs.open(npy_filename, std::ios::out | std::ios::binary);
 
-        const unsigned int              width  = tensor.info()->tensor_shape()[0];
-        const unsigned int              height = tensor.info()->tensor_shape()[1];
-        std::vector<npy::ndarray_len_t> shape(2);
+        std::vector<npy::ndarray_len_t> shape(tensor.info()->num_dimensions());
 
-        if(!fortran_order)
+        for(unsigned int i = 0; i < tensor.info()->num_dimensions(); ++i)
         {
-            shape[0] = height, shape[1] = width;
-        }
-        else
-        {
-            shape[0] = width, shape[1] = height;
+            shape[i] = tensor.info()->tensor_shape()[i];
         }
 
         // Map buffer if creating a CLTensor
@@ -561,8 +621,7 @@ void save_to_npy(T &tensor, const std::string &npy_filename, bool fortran_order)
                 npy::write_header(stream, typestring, fortran_order, shape);
 
                 arm_compute::Window window;
-                window.set(arm_compute::Window::DimX, arm_compute::Window::Dimension(0, width, 1));
-                window.set(arm_compute::Window::DimY, arm_compute::Window::Dimension(0, height, 1));
+                window.use_tensor_dimensions(tensor.info()->tensor_shape());
 
                 arm_compute::Iterator in(&tensor, window);
 
