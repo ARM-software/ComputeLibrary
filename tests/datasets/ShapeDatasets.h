@@ -635,6 +635,42 @@ public:
     }
 };
 
+/** Data set containing small grouped weights tensor shapes. */
+class GroupedWeightsSmallShapes final : public ShapeDataset
+{
+public:
+    GroupedWeightsSmallShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 3U, 3U, 48U, 120U },
+                     TensorShape{ 1U, 3U, 24U, 240U },
+                     TensorShape{ 3U, 1U, 12U, 480U },
+                     TensorShape{ 5U, 5U, 48U, 120U },
+                     TensorShape{ 1U, 5U, 24U, 240U },
+                     TensorShape{ 5U, 1U, 48U, 480U }
+    })
+    {
+    }
+};
+
+/** Data set containing large grouped weights tensor shapes. */
+class GroupedWeightsLargeShapes final : public ShapeDataset
+{
+public:
+    GroupedWeightsLargeShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 9U, 9U, 96U, 240U },
+                     TensorShape{ 7U, 9U, 48U, 480U },
+                     TensorShape{ 9U, 7U, 24U, 960U },
+                     TensorShape{ 13U, 13U, 96U, 240U },
+                     TensorShape{ 11U, 13U, 48U, 480U },
+                     TensorShape{ 13U, 11U, 24U, 960U }
+    })
+    {
+    }
+};
+
 /** Data set containing 2D tensor shapes for DepthConcatenateLayer. */
 class DepthConcatenateLayerShapes final : public ShapeDataset
 {

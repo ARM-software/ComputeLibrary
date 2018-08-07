@@ -38,11 +38,15 @@ using namespace arm_compute::misc::shape_calculator;
 
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output, const unsigned int num_groups)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON(num_groups == 0);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::NHWC && num_groups > 1);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->num_dimensions() > 4 && num_groups > 1);
+    ARM_COMPUTE_RETURN_ERROR_ON((input->dimension(3) % num_groups) != 0);
 
     if(biases != nullptr)
     {
@@ -57,7 +61,7 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *biases, c
     // Checks performed when output is configured
     if(output->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), compute_weights_reshaped_shape(*input, biases != nullptr));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), compute_weights_reshaped_shape(*input, biases != nullptr, num_groups));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
     }
@@ -71,7 +75,7 @@ CLWeightsReshapeKernel::CLWeightsReshapeKernel()
 {
 }
 
-void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *biases, ICLTensor *output)
+void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *biases, ICLTensor *output, const unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
@@ -81,7 +85,7 @@ void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(),
                                                   (biases != nullptr) ? biases->info() : nullptr,
-                                                  output->info()));
+                                                  output->info(), num_groups));
 
     const DataType   data_type   = input->info()->data_type();
     const DataLayout data_layout = input->info()->data_layout();
@@ -93,6 +97,7 @@ void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *
     // Create build options
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(data_type));
+    build_opts.add_option("-DNUM_GROUPS=" + support::cpp11::to_string(num_groups));
     build_opts.add_option_if(biases != nullptr, "-DHAS_BIAS");
 
     // Create kernel
@@ -106,6 +111,7 @@ void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *
     _kernel.setArg<cl_uint>(idx++, _input->info()->dimension(1));
     _kernel.setArg<cl_uint>(idx++, _input->info()->dimension(2));
     _kernel.setArg<cl_uint>(idx++, _input->info()->dimension(3));
+    _kernel.setArg<cl_uint>(idx++, _output->info()->strides_in_bytes().z());
 
     // Configure window
     Window win = calculate_max_window(*input->info(), Steps());
@@ -114,9 +120,9 @@ void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *
     ICLKernel::configure(win);
 }
 
-Status CLWeightsReshapeKernel::validate(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output)
+Status CLWeightsReshapeKernel::validate(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output, const unsigned int num_groups)
 {
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, biases, output));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, biases, output, num_groups));
     return Status{};
 }
 

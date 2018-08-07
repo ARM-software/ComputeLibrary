@@ -68,26 +68,30 @@ public:
     ~CLWeightsReshapeKernel() = default;
     /** Set the input and output of the kernel.
      *
-     * @param[in]  input  The input tensor to convert. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] if shared,
-     *                    and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM,  num_patches] if unshared. Data types supported: QASYMM8/F16/F32
-     * @param[in]  biases The shared biases tensor to append.  Bias is 1D tensor with dimensions [OFM] if shared and 2D tensor with
-     *                    dimensions [OFM, num_patches] if unshared. Data types supported: Same as @p input
-     *                    @warning Appending biases to weights reshaped matrix is not supported for quantized asymmetric types.
-     * @param[out] output The output tensor. Should be a 2D Tensor. Data types supported: Same as @p input
+     * @param[in]  input      The input tensor to convert. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] if shared,
+     *                        and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM,  num_patches] if unshared. Data types supported: QASYMM8/F16/F32
+     * @param[in]  biases     The shared biases tensor to append.  Bias is 1D tensor with dimensions [OFM] if shared and 2D tensor with
+     *                        dimensions [OFM, num_patches] if unshared. Data types supported: Same as @p input
+     *                        @warning Appending biases to weights reshaped matrix is not supported for quantized asymmetric types.
+     * @param[out] output     The output tensor. Should be a 2D Tensor if there are no groups and the weights are not shared; a 3D Tensor otherwise.
+     *                        Data types supported: Same as @p input
+     * @param[in]  num_groups (Optional) Number of groups when performing a grouped convolution
      */
-    void configure(const ICLTensor *input, const ICLTensor *biases, ICLTensor *output);
+    void configure(const ICLTensor *input, const ICLTensor *biases, ICLTensor *output, const unsigned int num_groups = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref CLWeightsReshapeKernel
      *
-     * @param[in] input  The input tensor to convert. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] if shared,
-     *                   and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM,  num_patches] if unshared. Data types supported: QASYMM8/F16/F32
-     * @param[in] biases The shared biases tensor to append.  Bias is 1D tensor with dimensions [OFM] if shared and 2D tensor with
-     *                   dimensions [OFM, num_patches] if unshared. Data types supported: Same as @p input
-     *                   @warning Appending biases to weights reshaped matrix is not supported for quantized asymmetric types.
-     * @param[in] output The output tensor. Should be a 2D Tensor. Data types supported: Same as @p input
+     * @param[in] input      The input tensor to convert. Weights are 4D tensor with dimensions [kernel_x, kernel_y, IFM, OFM] if shared,
+     *                       and 5D tensor with dimensions [kernel_x, kernel_y, IFM, OFM,  num_patches] if unshared. Data types supported: QASYMM8/F16/F32
+     * @param[in] biases     The shared biases tensor to append.  Bias is 1D tensor with dimensions [OFM] if shared and 2D tensor with
+     *                       dimensions [OFM, num_patches] if unshared. Data types supported: Same as @p input
+     *                       @warning Appending biases to weights reshaped matrix is not supported for quantized asymmetric types.
+     * @param[in] output     The output tensor. Should be a 2D Tensor if there are no groups and the weights are not shared; a 3D Tensor otherwise.
+     *                       Data types supported: Same as @p input
+     * @param[in] num_groups (Optional) Number of groups when performing a grouped convolution
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output, const unsigned int num_groups = 1);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

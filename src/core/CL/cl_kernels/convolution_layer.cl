@@ -23,10 +23,11 @@
  */
 #include "helpers.h"
 
-#if defined(DATA_TYPE)
+#if defined(DATA_TYPE) && defined(NUM_GROUPS)
 /** This kernel reshapes the tensor's low three dimensions to single column
  *
  * @note Datatype should be given as a preprocessor argument using -DDATA_TYPE=type. e.g. -DDATA_TYPE=short
+ * @note The number of groups should be given as a preprocessor argument using -DNUM_GROUPS=number. e.g. -DNUM_GROUPS=2
  *
  * @param[in]  src_ptr                            Pointer to the source tensor. Supported data types: F16/F32
  * @param[in]  src_stride_x                       Stride of the source tensor in X dimension (in bytes)
@@ -50,6 +51,7 @@
  * @param[in]  height                             The height of the input tensor
  * @param[in]  depth                              The depth of the input tensor
  * @param[in]  total_filters                      Total number of filters. 4th dimension of the weights matrix
+ * @param[in]  dst_stride_z                       Stride of the destination tensor in Z dimension (in bytes)
  */
 __kernel void reshape_to_columns_nchw(
     TENSOR3D_DECLARATION(src),
@@ -57,7 +59,7 @@ __kernel void reshape_to_columns_nchw(
 #ifdef HAS_BIAS
     VECTOR_DECLARATION(bias),
 #endif /* HAS_BIAS */
-    uint width, uint height, uint depth, uint total_filters)
+    uint width, uint height, uint depth, uint total_filters, uint dst_stride_z)
 {
     Tensor3D src            = CONVERT_TO_TENSOR3D_STRUCT(src);
     bool     is_last_thread = (get_global_id(0) == (get_global_size(0) - 1) && get_global_id(1) == (get_global_size(1) - 1) && get_global_id(2) == (get_global_size(2) - 1));
@@ -71,25 +73,39 @@ __kernel void reshape_to_columns_nchw(
 
     if(is_last_thread)
     {
-        for(uint i = 0; i < total_filters; ++i)
+        for(uint g = 0; g < NUM_GROUPS; ++g)
         {
-            *((__global DATA_TYPE *)tmp_dst_ptr) = *((__global DATA_TYPE *)tmp_src_ptr);
+            __global uchar *curr_group_dst = tmp_dst_ptr;
+
+            for(uint i = 0; i < total_filters / NUM_GROUPS; ++i)
+            {
+                *((__global DATA_TYPE *)curr_group_dst) = *((__global DATA_TYPE *)tmp_src_ptr);
 
 #ifdef HAS_BIAS
-            *((__global DATA_TYPE *)(tmp_dst_ptr + dst_stride_y)) = *((__global DATA_TYPE *)(tmp_bias_ptr));
-            tmp_bias_ptr += bias_stride_x;
+                *((__global DATA_TYPE *)(curr_group_dst + dst_stride_y)) = *((__global DATA_TYPE *)(tmp_bias_ptr));
+                tmp_bias_ptr += bias_stride_x;
 #endif /* HAS_BIAS */
-            tmp_src_ptr += depth * src_stride_z;
-            tmp_dst_ptr += dst_stride_x;
+                tmp_src_ptr += depth * src_stride_z;
+                curr_group_dst += dst_stride_x;
+            }
+
+            tmp_dst_ptr += dst_stride_z;
         }
     }
     else
     {
-        for(uint i = 0; i < total_filters; ++i)
+        for(uint g = 0; g < NUM_GROUPS; ++g)
         {
-            *((__global DATA_TYPE *)tmp_dst_ptr) = *((__global DATA_TYPE *)tmp_src_ptr);
-            tmp_src_ptr += depth * src_stride_z;
-            tmp_dst_ptr += dst_stride_x;
+            __global uchar *curr_group_dst = tmp_dst_ptr;
+
+            for(uint i = 0; i < total_filters / NUM_GROUPS; ++i)
+            {
+                *((__global DATA_TYPE *)curr_group_dst) = *((__global DATA_TYPE *)tmp_src_ptr);
+                tmp_src_ptr += depth * src_stride_z;
+                curr_group_dst += dst_stride_x;
+            }
+
+            tmp_dst_ptr += dst_stride_z;
         }
     }
 }
@@ -127,7 +143,7 @@ __kernel void reshape_to_columns_nhwc(
 #ifdef HAS_BIAS
     VECTOR_DECLARATION(bias),
 #endif /* HAS_BIAS */
-    uint depth, uint width, uint height, uint total_filters)
+    uint depth, uint width, uint height, uint total_filters, uint dst_stride_z)
 {
     Tensor3D src            = CONVERT_TO_TENSOR3D_STRUCT(src);
     bool     is_last_thread = (get_global_id(0) == (get_global_size(0) - 1) && get_global_id(1) == (get_global_size(1) - 1) && get_global_id(2) == (get_global_size(2) - 1));
@@ -163,4 +179,4 @@ __kernel void reshape_to_columns_nhwc(
         }
     }
 }
-#endif // defined(DATA_TYPE)
+#endif // defined(DATA_TYPE) && defined(NUM_GROUPS)

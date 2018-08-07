@@ -55,14 +55,22 @@ inline TensorShape compute_permutation_output_shape(const ITensorInfo &input, co
     permute(output_shape, perm);
     return output_shape;
 }
-inline TensorShape compute_weights_reshaped_shape(const ITensorInfo &weights, bool has_bias = false)
+inline TensorShape compute_weights_reshaped_shape(const ITensorInfo &weights, bool has_bias = false, const unsigned int num_groups = 1)
 {
+    ARM_COMPUTE_ERROR_ON(num_groups == 0);
+    ARM_COMPUTE_ERROR_ON((weights.dimension(3) % num_groups) != 0);
+    ARM_COMPUTE_ERROR_ON(weights.data_layout() == DataLayout::NHWC && num_groups > 1);
+
     // Calculate output shape
     TensorShape weights_reshaped{ weights.tensor_shape() };
     weights_reshaped.collapse(3);
     const size_t tmp_dim = weights_reshaped[0];
-    weights_reshaped.set(0, weights_reshaped[1]);
+    weights_reshaped.set(0, weights_reshaped[1] / num_groups);
     weights_reshaped.set(1, tmp_dim + (has_bias ? 1 : 0));
+    if(weights.num_dimensions() < 5)
+    {
+        weights_reshaped.set(2, num_groups);
+    }
 
     return weights_reshaped;
 }
