@@ -64,7 +64,7 @@ void NEGEMMInterleavedWrapper::prepare()
 
         //Maximum number of workloads to create:
         const unsigned int num_threads    = NEScheduler::get().num_threads();
-        const unsigned int max_iterations = num_threads == 1 ? 1 : num_threads * 4;
+        const unsigned int max_iterations = num_threads == 1 ? 1 : num_threads;
         //Maximum number of iterations the parameters allow:
         const unsigned int num_iterations = _batch_window.num_iterations_total();
         // Keep the smallest of the two:
