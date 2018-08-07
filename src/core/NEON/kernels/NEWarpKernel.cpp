@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -45,7 +45,7 @@ inline uint8_t nearest_interpolation(const uint8_t *in_ptr, int x, int y, size_t
 } // namespace
 
 INEWarpKernel::INEWarpKernel()
-    : _func(nullptr), _input(nullptr), _output(nullptr), _constant_border_value(0), _matrix(nullptr)
+    : _func(nullptr), _input(nullptr), _output(nullptr), _constant_border_value(0), _matrix()
 {
 }
 
@@ -64,11 +64,10 @@ void INEWarpKernel::run(const Window &window, const ThreadInfo &info)
     (this->*_func)(window);
 }
 
-void INEWarpKernel::configure(const ITensor *input, ITensor *output, const float *matrix, BorderMode border_mode, uint8_t constant_border_value)
+void INEWarpKernel::configure(const ITensor *input, ITensor *output, const std::array<float, 9> &matrix, BorderMode border_mode, uint8_t constant_border_value)
 {
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(output, 1, DataType::U8);
-    ARM_COMPUTE_ERROR_ON(nullptr == matrix);
 
     _matrix                = matrix;
     _constant_border_value = constant_border_value;

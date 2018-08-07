@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -78,7 +78,7 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(combi
 
     // Create and configure function
     CLWarpPerspective warp_perspective;
-    warp_perspective.configure(&src, &dst, matrix.data(), policy, border_mode, constant_border_value);
+    warp_perspective.configure(&src, &dst, matrix, policy, border_mode, constant_border_value);
 
     // Validate valid region
     const ValidRegion valid_region = shape_to_valid_region(shape);

@@ -54,7 +54,7 @@ public:
         dst = create_tensor<TensorType>(shape, data_type);
 
         // Create and configure function
-        warp_affine_func.configure(&src, &dst, matrix.data(), policy, border_mode, constant_border_value);
+        warp_affine_func.configure(&src, &dst, matrix, policy, border_mode, constant_border_value);
 
         // Allocate tensors
         src.allocator()->allocate();
@@ -79,7 +79,7 @@ public:
     }
 
 private:
-    const std::array<float, 6> matrix{ { -0.9f, -0.6f, -0.3f, 0.3f, 0.6f, 0.9f } };
+    const std::array<float, 9> matrix{ { -0.9f, -0.6f, -0.3f, 0.3f, 0.6f, 0.9f, /* ignored*/ 1.f, 1.f, 1.f } };
     TensorType src{};
     TensorType dst{};
     Function   warp_affine_func{};

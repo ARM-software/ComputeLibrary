@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -42,11 +42,12 @@ public:
      * @param[in,out] input                 Source temspr. Data types supported: U8. (Written to only for @p border_mode != UNDEFINED)
      * @param[out]    output                Destination tensor, Data types supported: U8.
      * @param[in]     matrix                The affine matrix. Must be 2x3 of type float.
+     *                                      The matrix argument requires 9 values, the last 3 values are ignored.
      * @param[in]     policy                The interpolation type.
      * @param[in]     border_mode           Strategy to use for borders.
      * @param[in]     constant_border_value (Optional) Constant value to use for borders if border_mode is set to CONSTANT.
      */
-    void configure(ICLTensor *input, ICLTensor *output, const float *matrix, InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value = 0);
+    void configure(ICLTensor *input, ICLTensor *output, const std::array<float, 9> &matrix, InterpolationPolicy policy, BorderMode border_mode, uint8_t constant_border_value = 0);
 };
 }
 #endif /*__ARM_COMPUTE_CLWARPAFFINE_H__ */

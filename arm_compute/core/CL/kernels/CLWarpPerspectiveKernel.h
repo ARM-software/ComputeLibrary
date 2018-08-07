@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,7 +41,7 @@ public:
      * @param[in]  matrix The perspective matrix. Must be 3x3 of type float.
      * @param[in]  policy The interpolation type.
      */
-    void configure(const ICLTensor *input, ICLTensor *output, const float *matrix, InterpolationPolicy policy);
+    void configure(const ICLTensor *input, ICLTensor *output, const std::array<float, 9> &matrix, InterpolationPolicy policy);
 
     // Inherited methods overridden:
     BorderSize border_size() const override;
