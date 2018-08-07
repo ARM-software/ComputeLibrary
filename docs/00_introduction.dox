@@ -28,8 +28,8 @@ For each release we provide some pre-built binaries of the library [here](https:
 These binaries have been built using the following toolchains:
             - Linux armv7a: gcc-linaro-arm-linux-gnueabihf-4.9-2014.07_linux
             - Linux arm64-v8a: gcc-linaro-4.9-2016.02-x86_64_aarch64-linux-gnu
-            - Android armv7a: clang++ / gnustl NDK r16b
-            - Android am64-v8a: clang++ / gnustl NDK r16b
+            - Android armv7a: clang++ / libc++ NDK r17b
+            - Android am64-v8a: clang++ / libc++ NDK r17b
 
 @warning Make sure to use a compatible toolchain to build your application or you will get some std::bad_alloc errors at runtime.
 
@@ -215,7 +215,11 @@ If there is more than one release in a month then an extra sequential number is 
 
 @subsection S2_2_changelog Changelog
 
-v18.05 Public maintenance release
+v18.08 Public major release
+ - Various bug fixes.
+ - Updated recommended NDK version to r17b.
+
+v18.05 Public major release
  - Various bug fixes.
  - Various optimisations.
  - Major redesign in the interface for the neon kernels implemented in assembly.
@@ -843,26 +847,26 @@ Below is a list of the common parameters among the graph examples :
 @subsection S3_3_android Building for Android
 
 For Android, the library was successfully built and tested using Google's standalone toolchains:
- - clang++ from NDK r16b for armv7a
- - clang++ from NDK r16b for arm64-v8a
+ - clang++ from NDK r17b for armv7a
+ - clang++ from NDK r17b for arm64-v8a
 
 Here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_toolchain.html">create your Android standalone toolchains from the NDK</a>
 
-- Download the NDK r16b from here: https://developer.android.com/ndk/downloads/index.html
+- Download the NDK r17b from here: https://developer.android.com/ndk/downloads/index.html
 - Make sure you have Python 2 installed on your machine.
 - Generate the 32 and/or 64 toolchains by running the following commands:
 <!-- Leave 2 blank lines here or the formatting of the commands below gets messed up --!>
 
 
 <!-- End of the 2 blank lines --!>
-	$NDK/build/tools/make_standalone_toolchain.py --arch arm64 --install-dir $MY_TOOLCHAINS/aarch64-linux-android-ndk-r16b --stl gnustl --api 21
-	$NDK/build/tools/make_standalone_toolchain.py --arch arm --install-dir $MY_TOOLCHAINS/arm-linux-android-ndk-r16b --stl gnustl --api 21
+	$NDK/build/tools/make_standalone_toolchain.py --arch arm64 --install-dir $MY_TOOLCHAINS/aarch64-linux-android-ndk-r17b --stl libc++ --api 21
+	$NDK/build/tools/make_standalone_toolchain.py --arch arm --install-dir $MY_TOOLCHAINS/arm-linux-android-ndk-r17b --stl libc++ --api 21
 
-@attention Due to some NDK issues make sure you use clang++ & gnustl
+@attention We used to use gnustl but as of NDK r17 it is deprecated so we switched to libc++
 
 @note Make sure to add the toolchains to your PATH:
 
-	export PATH=$PATH:$MY_TOOLCHAINS/aarch64-linux-android-ndk-r16b/bin:$MY_TOOLCHAINS/arm-linux-android-ndk-r16b/bin
+	export PATH=$PATH:$MY_TOOLCHAINS/aarch64-linux-android-ndk-r17b/bin:$MY_TOOLCHAINS/arm-linux-android-ndk-r17b/bin
 
 @subsubsection S3_3_1_library How to build the library ?
 

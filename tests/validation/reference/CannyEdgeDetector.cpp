@@ -34,6 +34,7 @@
 #include "tests/SimpleTensorPrinter.h"
 
 #include <cmath>
+#include <stack>
 
 namespace arm_compute
 {
