@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_GRAPH_UTILS_H__
 
 #include "arm_compute/core/PixelValue.h"
+#include "arm_compute/core/Utils.h"
 #include "arm_compute/core/utils/misc/Utility.h"
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/ITensorAccessor.h"
@@ -403,14 +404,15 @@ inline std::unique_ptr<graph::ITensorAccessor> get_input_accessor(const arm_comp
     }
     else
     {
-        const std::string &image_file = graph_parameters.image;
-        if(arm_compute::utility::endswith(image_file, ".npy"))
+        const std::string &image_file       = graph_parameters.image;
+        const std::string &image_file_lower = lower_string(image_file);
+        if(arm_compute::utility::endswith(image_file_lower, ".npy"))
         {
             return arm_compute::support::cpp14::make_unique<NumPyBinLoader>(image_file);
         }
-        else if(arm_compute::utility::endswith(image_file, ".jpeg")
-                || arm_compute::utility::endswith(image_file, ".jpg")
-                || arm_compute::utility::endswith(image_file, ".ppm"))
+        else if(arm_compute::utility::endswith(image_file_lower, ".jpeg")
+                || arm_compute::utility::endswith(image_file_lower, ".jpg")
+                || arm_compute::utility::endswith(image_file_lower, ".ppm"))
         {
             return arm_compute::support::cpp14::make_unique<ImageAccessor>(image_file, bgr, std::move(preprocessor));
         }

@@ -149,7 +149,7 @@ NumPyAccessor::NumPyAccessor(std::string npy_path, TensorShape shape, DataType d
 template <typename T>
 void NumPyAccessor::access_numpy_tensor(ITensor &tensor)
 {
-    const int num_elements          = tensor.info()->total_size();
+    const int num_elements          = tensor.info()->tensor_shape().total_size();
     int       num_mismatches        = utils::compare_tensor<T>(tensor, _npy_tensor);
     float     percentage_mismatches = static_cast<float>(num_mismatches) / num_elements;
 
