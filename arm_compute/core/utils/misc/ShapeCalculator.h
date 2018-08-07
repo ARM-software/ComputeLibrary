@@ -57,6 +57,8 @@ inline TensorShape compute_permutation_output_shape(const ITensorInfo &input, co
 }
 inline TensorShape compute_weights_reshaped_shape(const ITensorInfo &weights, bool has_bias = false, const unsigned int num_groups = 1)
 {
+    // Number of groups greater than one are only supported for NCHW data layout, and the number of weights must be a multiple of it.
+
     ARM_COMPUTE_ERROR_ON(num_groups == 0);
     ARM_COMPUTE_ERROR_ON((weights.dimension(3) % num_groups) != 0);
     ARM_COMPUTE_ERROR_ON(weights.data_layout() == DataLayout::NHWC && num_groups > 1);
