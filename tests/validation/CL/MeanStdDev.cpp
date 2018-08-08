@@ -39,7 +39,7 @@ namespace
 {
 RelativeTolerance<float> tolerance_rel_high_error(0.05f);
 RelativeTolerance<float> tolerance_rel_low_error(0.0005f);
-RelativeTolerance<float> tolerance_rel_high_error_f32(0.001f);
+RelativeTolerance<float> tolerance_rel_high_error_f32(0.01f);
 RelativeTolerance<float> tolerance_rel_low_error_f32(0.00001f);
 RelativeTolerance<float> tolerance_rel_high_error_f16(0.1f);
 RelativeTolerance<float> tolerance_rel_low_error_f16(0.01f);

@@ -39,6 +39,9 @@ using namespace arm_compute;
 
 namespace
 {
+// OpenCL kernel requires input width to be a power of 2.
+constexpr unsigned int border_val = 64;
+
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op)
 {
     ARM_COMPUTE_UNUSED(op);
@@ -69,7 +72,7 @@ std::tuple<Status, Window> validate_and_configure_window(ITensorInfo *input, ITe
     const unsigned int num_elems_processed_per_iteration = 16;
 
     Window             win          = calculate_max_window(*input, Steps(num_elems_processed_per_iteration));
-    const unsigned int border_width = ((input->dimension(0) % num_elems_processed_per_iteration) != 0) ? num_elems_processed_per_iteration - input->dimension(0) % num_elems_processed_per_iteration : 0;
+    const unsigned int border_width = ((input->dimension(0) % border_val) != 0) ? border_val - input->dimension(0) % border_val : 0;
 
     AccessWindowStatic     input_access(input, 0, 0, input->dimension(0) + border_width, 1);
     AccessWindowHorizontal output_access(output, 0, 1);
@@ -100,7 +103,8 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), axis, op));
 
     const unsigned int num_elems_processed_per_iteration = 16;
-    const unsigned int border_width                      = ((input->info()->dimension(0) % 16) != 0) ? 16 - input->info()->dimension(0) % 16 : 0;
+    const unsigned int width_leftover                    = input->info()->dimension(0) % border_val;
+    const unsigned int border_width                      = (width_leftover != 0) ? border_val - width_leftover : 0;
     const unsigned int num_of_threads                    = ((input->info()->dimension(0) + border_width) / 16);
 
     _input          = input;
@@ -163,7 +167,7 @@ void CLReductionOperationKernel::run(const Window &window, cl::CommandQueue &que
     Window out_slice = out_window.first_slice_window_2D();
 
     // Reshape window
-    const unsigned int border_width = ((in_slice.x().end() % 16) != 0) ? 16 - in_slice.x().end() % 16 : 0;
+    const unsigned int border_width = ((in_slice.x().end() % border_val) != 0) ? border_val - in_slice.x().end() % border_val : 0;
     in_slice.set(Window::DimX, Window::Dimension(in_slice.x().start(), in_slice.x().end() + border_width, in_slice.x().step()));
 
     // Set local sums buffer
