@@ -21,40 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLLSTMLAYER_H__
-#define __ARM_COMPUTE_CLLSTMLAYER_H__
+#ifndef __ARM_COMPUTE_NELSTMLAYER_H__
+#define __ARM_COMPUTE_NELSTMLAYER_H__
 
-#include "arm_compute/runtime/IFunction.h"
+#include "arm_compute/core/NEON/kernels/NEActivationLayerKernel.h"
+#include "arm_compute/core/NEON/kernels/NEArithmeticAdditionKernel.h"
+#include "arm_compute/core/NEON/kernels/NEArithmeticSubtractionKernel.h"
+#include "arm_compute/core/NEON/kernels/NECopyKernel.h"
+#include "arm_compute/core/NEON/kernels/NEPixelWiseMultiplicationKernel.h"
 
-#include "arm_compute/core/CL/kernels/CLActivationLayerKernel.h"
-#include "arm_compute/core/CL/kernels/CLArithmeticAdditionKernel.h"
-#include "arm_compute/core/CL/kernels/CLArithmeticSubtractionKernel.h"
-#include "arm_compute/core/CL/kernels/CLCopyKernel.h"
-#include "arm_compute/core/CL/kernels/CLPixelWiseMultiplicationKernel.h"
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/CLMemoryGroup.h"
-#include "arm_compute/runtime/CL/CLTensor.h"
-#include "arm_compute/runtime/CL/functions/CLArithmeticAddition.h"
-#include "arm_compute/runtime/CL/functions/CLFullyConnectedLayer.h"
-#include "arm_compute/runtime/CL/functions/CLGEMM.h"
-#include "arm_compute/runtime/CL/functions/CLWidthConcatenateLayer.h"
-#include "arm_compute/runtime/IMemoryManager.h"
+#include "arm_compute/runtime/NEON/INESimpleFunction.h"
+#include "arm_compute/runtime/NEON/functions/NEArithmeticAddition.h"
+#include "arm_compute/runtime/NEON/functions/NEFullyConnectedLayer.h"
+#include "arm_compute/runtime/NEON/functions/NEGEMM.h"
+#include "arm_compute/runtime/NEON/functions/NEWidthConcatenateLayer.h"
 #include "arm_compute/runtime/common/LSTMParams.h"
-
-#include <memory>
 
 namespace arm_compute
 {
-class ICLTensor;
+// Forward declarations
+class ITensor;
 
-/** This function performs a single time step in a Long Short-Term Memory (LSTM) layer.
- *
- */
-class CLLSTMLayer : public IFunction
+/** Basic function to run @ref NELSTMLayer */
+class NELSTMLayer : public IFunction
 {
 public:
     /** Default constructor */
-    CLLSTMLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
+    NELSTMLayer(std::shared_ptr<IMemoryManager> memory_manager = nullptr);
     /** Initialize function's tensors.
      *
      * @param[in]  input                       Source tensor. Input is a 2D tensor with dimensions [input_size, batch_size]. Data types supported: F16/F32.
@@ -87,15 +81,15 @@ public:
      * @param[in]  cell_threshold              The clipping threshold for the cell state, such that values are bound within [-cell_clip, cell_clip]. If set to 0.0 then clipping is disabled.
      * @param[in]  projection_threshold        The clipping threshold for the output from the projection layer, such that values are bound within [-proj_clip, proj_clip]. If set to 0.0 then clipping is disabled.
      */
-    void configure(const ICLTensor *input,
-                   const ICLTensor *input_to_forget_weights, const ICLTensor *input_to_cell_weights, const ICLTensor *input_to_output_weights,
-                   const ICLTensor *recurrent_to_forget_weights, const ICLTensor *recurrent_to_cell_weights, const ICLTensor *recurrent_to_output_weights,
-                   const ICLTensor *forget_gate_bias, const ICLTensor *cell_bias, const ICLTensor *output_gate_bias,
-                   const ICLTensor *output_state_in, const ICLTensor *cell_state_in,
-                   ICLTensor *scratch_buffer, ICLTensor *output_state_out, ICLTensor *cell_state_out, ICLTensor *output,
-                   const LSTMParams<ICLTensor> &lstm_params, const ActivationLayerInfo &activation_info, float cell_threshold = 0.f, float projection_threshold = 0.f);
+    void configure(const ITensor *input,
+                   const ITensor *input_to_forget_weights, const ITensor *input_to_cell_weights, const ITensor *input_to_output_weights,
+                   const ITensor *recurrent_to_forget_weights, const ITensor *recurrent_to_cell_weights, const ITensor *recurrent_to_output_weights,
+                   const ITensor *forget_gate_bias, const ITensor *cell_bias, const ITensor *output_gate_bias,
+                   const ITensor *output_state_in, const ITensor *cell_state_in,
+                   ITensor *scratch_buffer, ITensor *output_state_out, ITensor *cell_state_out, ITensor *output,
+                   const LSTMParams<ITensor> &lstm_params, const ActivationLayerInfo &activation_info, float cell_threshold = 0.f, float projection_threshold = 0.f);
 
-    /** Static function to check if given info will lead to a valid configuration of @ref CLLSTMLayer
+    /** Static function to check if given info will lead to a valid configuration of @ref NELSTMLayer
      *
      * @param[in] input                       Source tensor. Input is a 2D tensor with dimensions [input_size, batch_size]. Data types supported: F16/F32.
      * @param[in] input_to_forget_weights     2D weights tensor with dimensions [input_size, num_units]. Data type supported: Same as @p input.
@@ -141,76 +135,76 @@ public:
     void run() override;
 
 private:
-    CLMemoryGroup                   _memory_group;
-    CLFullyConnectedLayer           _fully_connected_input_gate;
-    CLGEMM                          _gemm_input_gate;
-    CLTransposeKernel               _transpose_input_gate;
-    CLArithmeticAdditionKernel      _accum_input_gate1;
-    CLArithmeticAddition            _accum_input_gate2;
-    CLArithmeticSubtractionKernel   _subtract_input_gate;
-    CLPixelWiseMultiplicationKernel _pixelwise_mul_input_gate;
-    CLActivationLayerKernel         _activation_input_gate;
-    CLFullyConnectedLayer           _fully_connected_forget_gate;
-    CLGEMM                          _gemm_forget_gate;
-    CLTransposeKernel               _transpose_forget_gate;
-    CLArithmeticAdditionKernel      _accum_forget_gate1;
-    CLArithmeticAddition            _accum_forget_gate2;
-    CLPixelWiseMultiplicationKernel _pixelwise_mul_forget_gate;
-    CLActivationLayerKernel         _activation_forget_gate;
-    CLFullyConnectedLayer           _fully_connected_cell_state;
-    CLGEMM                          _gemm_cell_state1;
-    CLGEMM                          _gemm_cell_state2;
-    CLTransposeKernel               _transpose_cell_state;
-    CLArithmeticAdditionKernel      _accum_cell_state1;
-    CLArithmeticAdditionKernel      _accum_cell_state2;
-    CLPixelWiseMultiplicationKernel _pixelwise_mul_cell_state1;
-    CLActivationLayerKernel         _activation_cell_state;
-    CLActivationLayerKernel         _cell_clip;
-    CLPixelWiseMultiplicationKernel _pixelwise_mul_cell_state2;
-    CLFullyConnectedLayer           _fully_connected_output;
-    CLGEMM                          _gemm_output;
-    CLPixelWiseMultiplicationKernel _pixelwise_mul_output_state1;
-    CLTransposeKernel               _transpose_output;
-    CLArithmeticAdditionKernel      _accum_output1;
-    CLArithmeticAddition            _accum_output2;
-    CLActivationLayerKernel         _activation_output;
-    CLActivationLayerKernel         _activation_output_state;
-    CLPixelWiseMultiplicationKernel _pixelwise_mul_output_state2;
-    CLFullyConnectedLayer           _fully_connected_output_state;
-    CLGEMM                          _gemm_output_state;
-    CLArithmeticAdditionKernel      _accum_output_state;
-    CLActivationLayerKernel         _projection_clip;
-    CLCopyKernel                    _copy_cell_state;
-    CLCopyKernel                    _copy_output;
-    CLWidthConcatenateLayer         _concat_scratch_buffer;
-    CLTensor                        _input_gate_out1;
-    CLTensor                        _input_gate_out2;
-    CLTensor                        _input_gate_out3;
-    CLTensor                        _input_gate_out4;
-    CLTensor                        _input_gate_out5;
-    CLTensor                        _forget_gate_out1;
-    CLTensor                        _forget_gate_out2;
-    CLTensor                        _forget_gate_out3;
-    CLTensor                        _forget_gate_out4;
-    CLTensor                        _forget_gate_out5;
-    CLTensor                        _cell_state_out1;
-    CLTensor                        _cell_state_out2;
-    CLTensor                        _cell_state_out3;
-    CLTensor                        _cell_state_out4;
-    CLTensor                        _cell_state_out5;
-    CLTensor                        _output1;
-    CLTensor                        _output2;
-    CLTensor                        _output3;
-    CLTensor                        _output4;
-    CLTensor                        _output5;
-    CLTensor                        _cell_state_activation;
-    CLTensor                        _output_state1;
-    CLTensor                        _ones;
+    MemoryGroup                     _memory_group;
+    NEFullyConnectedLayer           _fully_connected_input_gate;
+    NEGEMM                          _gemm_input_gate;
+    NETransposeKernel               _transpose_input_gate;
+    NEArithmeticAdditionKernel      _accum_input_gate1;
+    NEArithmeticAddition            _accum_input_gate2;
+    NEArithmeticSubtractionKernel   _subtract_input_gate;
+    NEPixelWiseMultiplicationKernel _pixelwise_mul_input_gate;
+    NEActivationLayerKernel         _activation_input_gate;
+    NEFullyConnectedLayer           _fully_connected_forget_gate;
+    NEGEMM                          _gemm_forget_gate;
+    NETransposeKernel               _transpose_forget_gate;
+    NEArithmeticAdditionKernel      _accum_forget_gate1;
+    NEArithmeticAddition            _accum_forget_gate2;
+    NEPixelWiseMultiplicationKernel _pixelwise_mul_forget_gate;
+    NEActivationLayerKernel         _activation_forget_gate;
+    NEFullyConnectedLayer           _fully_connected_cell_state;
+    NEGEMM                          _gemm_cell_state1;
+    NEGEMM                          _gemm_cell_state2;
+    NETransposeKernel               _transpose_cell_state;
+    NEArithmeticAdditionKernel      _accum_cell_state1;
+    NEArithmeticAdditionKernel      _accum_cell_state2;
+    NEPixelWiseMultiplicationKernel _pixelwise_mul_cell_state1;
+    NEActivationLayerKernel         _activation_cell_state;
+    NEActivationLayerKernel         _cell_clip;
+    NEPixelWiseMultiplicationKernel _pixelwise_mul_cell_state2;
+    NEFullyConnectedLayer           _fully_connected_output;
+    NEGEMM                          _gemm_output;
+    NEPixelWiseMultiplicationKernel _pixelwise_mul_output_state1;
+    NETransposeKernel               _transpose_output;
+    NEArithmeticAdditionKernel      _accum_output1;
+    NEArithmeticAddition            _accum_output2;
+    NEActivationLayerKernel         _activation_output;
+    NEActivationLayerKernel         _activation_output_state;
+    NEPixelWiseMultiplicationKernel _pixelwise_mul_output_state2;
+    NEFullyConnectedLayer           _fully_connected_output_state;
+    NEGEMM                          _gemm_output_state;
+    NEArithmeticAdditionKernel      _accum_output_state;
+    NEActivationLayerKernel         _projection_clip;
+    NECopyKernel                    _copy_cell_state;
+    NECopyKernel                    _copy_output;
+    NEWidthConcatenateLayer         _concat_scratch_buffer;
+    Tensor                          _input_gate_out1;
+    Tensor                          _input_gate_out2;
+    Tensor                          _input_gate_out3;
+    Tensor                          _input_gate_out4;
+    Tensor                          _input_gate_out5;
+    Tensor                          _forget_gate_out1;
+    Tensor                          _forget_gate_out2;
+    Tensor                          _forget_gate_out3;
+    Tensor                          _forget_gate_out4;
+    Tensor                          _forget_gate_out5;
+    Tensor                          _cell_state_out1;
+    Tensor                          _cell_state_out2;
+    Tensor                          _cell_state_out3;
+    Tensor                          _cell_state_out4;
+    Tensor                          _cell_state_out5;
+    Tensor                          _output1;
+    Tensor                          _output2;
+    Tensor                          _output3;
+    Tensor                          _output4;
+    Tensor                          _output5;
+    Tensor                          _cell_state_activation;
+    Tensor                          _output_state1;
+    Tensor                          _ones;
     bool                            _run_peephole_opt;
     bool                            _run_cifg_opt;
     bool                            _perform_cell_clipping;
     bool                            _has_projection_weights;
     bool                            _perform_projection_clipping;
 };
-}
-#endif /* __ARM_COMPUTE_CLLSTMLAYER_H__ */
+} // namespace arm_compute
+#endif /* __ARM_COMPUTE_NELSTMLAYER_H__ */
