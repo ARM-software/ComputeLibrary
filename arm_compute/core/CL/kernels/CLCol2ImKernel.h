@@ -70,18 +70,20 @@ public:
      * @param[out] output         The output tensor. 3 lower dimensions represent a single output [width, height, OFM],
      *                            while the rest represent batch of outputs. Data types supported: Same as @p input
      * @param[in]  convolved_dims Output convolved dimensions.
+     * @param[in]  num_groups     (Optional) Number of groups when performing a grouped convolution
      */
-    void configure(const ICLTensor *input, ICLTensor *output, std::pair<unsigned int, unsigned int> convolved_dims);
+    void configure(const ICLTensor *input, ICLTensor *output, std::pair<unsigned int, unsigned int> convolved_dims, unsigned int num_groups = 1);
     /** Static function to check if given info will lead to a valid configuration of @ref CLCol2ImKernel
      *
      * @param[in] input          The input tensor to convert. Data types supported: QASYMM8/F16/F32
      * @param[in] output         The output tensor. 3 lower dimensions represent a single output [width, height, OFM],
      *                           while the rest represent batch of outputs. Data types supported: Same as @p input
      * @param[in] convolved_dims Output convolved dimensions.
+     * @param[in] num_groups     (Optional) Number of groups when performing a grouped convolution
      *
      * @return a status
      */
-    static Status validate(const ITensorInfo *input, const ITensorInfo *output, std::pair<unsigned int, unsigned int> convolved_dims);
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output, std::pair<unsigned int, unsigned int> convolved_dims, unsigned int num_groups = 1);
 
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;

@@ -40,7 +40,7 @@ using namespace arm_compute::misc::shape_calculator;
 
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, std::pair<unsigned int, unsigned int> convolved_dims)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, std::pair<unsigned int, unsigned int> convolved_dims, unsigned int num_groups)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
@@ -49,19 +49,20 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, s
     // Checks performed when output is configured
     if(output->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), compute_col2im_shape(*input, convolved_dims));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), compute_col2im_shape(*input, convolved_dims, num_groups));
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
+        ARM_COMPUTE_RETURN_ERROR_ON_MSG(output->data_layout() != DataLayout::NCHW, "Col2Im output's data layout must always be NCHW");
     }
 
     return Status{};
 }
 
-std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, std::pair<unsigned int, unsigned int> convolved_dims)
+std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITensorInfo *output, std::pair<unsigned int, unsigned int> convolved_dims, unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output, input->clone()->set_tensor_shape(compute_col2im_shape(*input, convolved_dims)));
+    auto_init_if_empty(*output, input->clone()->set_tensor_shape(compute_col2im_shape(*input, convolved_dims, num_groups)).set_data_layout(DataLayout::NCHW));
 
     const unsigned int num_elems_read_per_iteration = 8;
 
@@ -86,12 +87,12 @@ CLCol2ImKernel::CLCol2ImKernel()
 {
 }
 
-void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::pair<unsigned int, unsigned int> convolved_dims)
+void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::pair<unsigned int, unsigned int> convolved_dims, unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Perform validation step
-    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), convolved_dims));
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), convolved_dims, num_groups));
 
     _input          = input;
     _output         = output;
@@ -105,11 +106,12 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
     build_opts.add_option("-DELEMENT_SIZE=" + support::cpp11::to_string(input->info()->element_size()));
     build_opts.add_option("-DWIDTH_INPUT=" + support::cpp11::to_string(input->info()->dimension(0)));
     build_opts.add_option("-DWIDTH_OUTPUT=" + support::cpp11::to_string(_convolved_dims.first));
+    build_opts.add_option_if(num_groups > 1, "-DGROUPING");
 
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("col2im", build_opts.options()));
 
     // Configure kernel window
-    auto win_config = validate_and_configure_window(input->info(), output->info(), _convolved_dims);
+    auto win_config = validate_and_configure_window(input->info(), output->info(), _convolved_dims, num_groups);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
     ICLKernel::configure_internal(win_config.second);
 
@@ -117,6 +119,7 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
     _config_id = "col2im_";
     _config_id += lower_string(string_from_data_type(input->info()->data_type()));
     _config_id += "_";
+    _config_id += (num_groups > 1) ? "grouping_" : "";
     _config_id += support::cpp11::to_string(input->info()->dimension(0));
     _config_id += "_";
     _config_id += support::cpp11::to_string(input->info()->dimension(1));
@@ -126,11 +129,11 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
     _config_id += support::cpp11::to_string(output->info()->dimension(1));
 }
 
-Status CLCol2ImKernel::validate(const ITensorInfo *input, const ITensorInfo *output, std::pair<unsigned int, unsigned int> convolved_dims)
+Status CLCol2ImKernel::validate(const ITensorInfo *input, const ITensorInfo *output, std::pair<unsigned int, unsigned int> convolved_dims, unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, convolved_dims));
-    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), convolved_dims).first);
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output, convolved_dims, num_groups));
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_and_configure_window(input->clone().get(), output->clone().get(), convolved_dims, num_groups).first);
     return Status{};
 }
 
@@ -142,21 +145,19 @@ void CLCol2ImKernel::run(const Window &window, cl::CommandQueue &queue)
     Window out_window;
     out_window.use_tensor_dimensions(_output->info()->tensor_shape());
 
-    Window collapsed_window = window.collapse_if_possible(ICLKernel::window(), Window::DimZ);
-    Window slice            = collapsed_window.first_slice_window_2D();
-    Window slice_out        = out_window.first_slice_window_3D();
+    Window slice     = window.first_slice_window_3D();
+    Window slice_out = out_window.first_slice_window_3D();
 
-    // Set static kernel arguments
-    unsigned int idx = num_arguments_per_2D_tensor() + num_arguments_per_3D_tensor();
+    unsigned int idx = 2 * num_arguments_per_3D_tensor();
     _kernel.setArg<cl_uint>(idx++, _output->info()->strides_in_bytes()[3]);
 
     do
     {
         // Set inputs
         unsigned int idx = 0;
-        add_2D_tensor_argument(idx, _input, slice);
+        add_3D_tensor_argument(idx, _input, slice);
         add_3D_tensor_argument(idx, _output, slice_out);
         enqueue(queue, *this, slice, lws_hint());
     }
-    while(collapsed_window.slide_window_slice_2D(slice) && out_window.slide_window_slice_3D(slice_out));
+    while(window.slide_window_slice_3D(slice) && out_window.slide_window_slice_3D(slice_out));
 }
