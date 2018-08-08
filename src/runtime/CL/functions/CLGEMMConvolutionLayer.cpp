@@ -214,8 +214,6 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
     // Just append biases and do not transpose 1xW as it will be reshaped in CLGEMM
     _reshape_weights.configure(weights, biases_to_use, &_weights_reshaped);
 
-    weights = &_weights_reshaped;
-
     // Create tensor to store im2col reshaped inputs
     if(!_skip_im2col)
     {
@@ -258,7 +256,7 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
     }
 
     // Configure and tune GEMM
-    configure_mm(gemm_input_to_use, weights, gemm_output_to_use, (data_layout == DataLayout::NHWC) ? conv_h : 1);
+    configure_mm(gemm_input_to_use, &_weights_reshaped, gemm_output_to_use, (data_layout == DataLayout::NHWC) ? conv_h : 1);
 
     if(!_skip_im2col)
     {
