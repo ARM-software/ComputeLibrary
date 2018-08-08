@@ -53,9 +53,14 @@ public:
     virtual void initialize_backend() = 0;
     /** Setups the given graph context
      *
-     * @param[in] ctx Graph context
+     * @param[in,out] ctx Graph context
      */
     virtual void setup_backend_context(GraphContext &ctx) = 0;
+    /** Release the backend specific resources associated to a given graph context
+     *
+     * @param[in,out] ctx Graph context
+     */
+    virtual void release_backend_context(GraphContext &ctx) = 0;
     /** Checks if an instantiated backend is actually supported
      *
      * @return True if the backend is supported else false

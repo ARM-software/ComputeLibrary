@@ -95,5 +95,5 @@ void CLWarpPerspectiveKernel::configure(const ICLTensor *input, ICLTensor *outpu
 
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }

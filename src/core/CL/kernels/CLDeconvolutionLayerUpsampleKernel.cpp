@@ -85,7 +85,7 @@ void CLDeconvolutionLayerUpsampleKernel::configure(const ICLTensor *input, ICLTe
     AccessWindowHorizontal output_access(output->info(), 0, num_elems_processed_per_iteration);
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLDeconvolutionLayerUpsampleKernel::run(const Window &window, cl::CommandQueue &queue)

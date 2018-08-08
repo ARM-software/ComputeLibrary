@@ -43,6 +43,7 @@ public:
     // Inherited overridden methods
     void initialize_backend() override;
     void setup_backend_context(GraphContext &ctx) override;
+    void release_backend_context(GraphContext &ctx) override;
     bool                           is_backend_supported() override;
     IAllocator                    *backend_allocator() override;
     std::unique_ptr<ITensorHandle> create_tensor(const Tensor &tensor) override;

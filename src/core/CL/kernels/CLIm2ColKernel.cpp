@@ -308,7 +308,7 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     auto win_config = validate_and_configure_window(input->info(), output->info(), kernel_dims, conv_info, has_bias, dilation, im2col_config.num_elems_processed_per_iteration,
                                                     im2col_config.is_padding_required_nchw);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 
     // Set config_id for enabling LWS tuning
     _config_id = im2col_config.kernel_name;
@@ -386,7 +386,7 @@ void CLIm2ColKernel::run(const Window &window, cl::CommandQueue &queue)
         add_2D_tensor_argument(idx, _output, slice_out);
         _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_input->info()->strides_in_bytes()[3]));
         _kernel.setArg<cl_uint>(idx++, static_cast<unsigned int>(_output->info()->strides_in_bytes()[2]));
-        enqueue(queue, *this, slice, _lws_hint);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window_collapsed.slide_window_slice_3D(slice) && window_output.slide_window_slice_2D(slice_out) && window_collapsed.slide_window_slice_3D(slice_in));
 }

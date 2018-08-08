@@ -69,7 +69,7 @@ std::string get_underlying_cl_type_from_data_type(const DataType &dt);
  *
  * @return the GPU target
  */
-GPUTarget get_target_from_device(cl::Device &device);
+GPUTarget get_target_from_device(const cl::Device &device);
 
 /** Helper function to get the highest OpenCL version supported
  *

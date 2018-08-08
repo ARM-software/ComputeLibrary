@@ -74,6 +74,7 @@ bool CLSymbols::load(const std::string &library)
 #define LOAD_FUNCTION_PTR(func_name, handle) \
     func_name##_ptr = reinterpret_cast<decltype(func_name) *>(dlsym(handle, #func_name));
 
+    LOAD_FUNCTION_PTR(clCreateContext, handle);
     LOAD_FUNCTION_PTR(clCreateContextFromType, handle);
     LOAD_FUNCTION_PTR(clCreateCommandQueue, handle);
     LOAD_FUNCTION_PTR(clGetContextInfo, handle);
@@ -247,6 +248,26 @@ cl_command_queue clCreateCommandQueue(cl_context                  context,
     if(func != nullptr)
     {
         return func(context, device, properties, errcode_ret);
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
+cl_context clCreateContext(
+    const cl_context_properties *properties,
+    cl_uint                      num_devices,
+    const cl_device_id          *devices,
+    void (*pfn_notify)(const char *, const void *, size_t, void *),
+    void   *user_data,
+    cl_int *errcode_ret)
+{
+    arm_compute::CLSymbols::get().load_default();
+    auto func = arm_compute::CLSymbols::get().clCreateContext_ptr;
+    if(func != nullptr)
+    {
+        return func(properties, num_devices, devices, pfn_notify, user_data, errcode_ret);
     }
     else
     {

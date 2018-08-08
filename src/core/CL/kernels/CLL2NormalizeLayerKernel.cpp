@@ -120,7 +120,7 @@ void CLL2NormalizeLayerKernel::configure(const ICLTensor *input, const ICLTensor
     auto win_config = validate_and_configure_window(_input->info(), _output->info());
     ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
-    ICLKernel::configure(std::get<1>(win_config));
+    ICLKernel::configure_internal(std::get<1>(win_config));
 }
 
 Status CLL2NormalizeLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *sum, const ITensorInfo *output, unsigned int axis, float epsilon)

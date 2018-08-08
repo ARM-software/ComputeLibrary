@@ -63,7 +63,7 @@ bool file_exists(const std::string &filename)
 static detail::BackendRegistrar<CLDeviceBackend> CLDeviceBackend_registrar(Target::CL);
 
 CLDeviceBackend::CLDeviceBackend()
-    : _initialized(false), _tuner(), _allocator(nullptr), _tuner_file()
+    : _context_count(0), _tuner(), _allocator(nullptr), _tuner_file()
 {
 }
 
@@ -90,13 +90,23 @@ void CLDeviceBackend::initialize_backend()
     _allocator = support::cpp14::make_unique<CLBufferAllocator>();
 }
 
+void CLDeviceBackend::release_backend_context(GraphContext &ctx)
+{
+    ARM_COMPUTE_UNUSED(ctx);
+    _context_count--;
+    if(_context_count == 0) // No more context using the backend: free resources
+    {
+        _allocator = nullptr;
+    }
+}
+
 void CLDeviceBackend::setup_backend_context(GraphContext &ctx)
 {
     // Force backend initialization
-    if(!_initialized)
+    _context_count++;
+    if(_context_count == 1)
     {
         initialize_backend();
-        _initialized = true;
     }
 
     // Setup tuner

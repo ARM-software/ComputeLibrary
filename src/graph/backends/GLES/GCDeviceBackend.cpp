@@ -63,6 +63,12 @@ void GCDeviceBackend::initialize_backend()
     GCScheduler::get().default_init();
 }
 
+void GCDeviceBackend::release_backend_context(GraphContext &ctx)
+{
+    //Nothing to do
+    ARM_COMPUTE_UNUSED(ctx);
+}
+
 void GCDeviceBackend::setup_backend_context(GraphContext &ctx)
 {
     // Force backend initialization

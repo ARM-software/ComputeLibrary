@@ -101,7 +101,7 @@ void CLChannelExtractKernel::configure(const ICLTensor *input, Channel channel, 
     ValidRegion input_valid_region = input->info()->valid_region();
     output_access.set_valid_region(win, ValidRegion(input_valid_region.anchor, output->info()->tensor_shape()));
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLChannelExtractKernel::configure(const ICLMultiImage *input, Channel channel, ICLImage *output)
@@ -162,7 +162,7 @@ void CLChannelExtractKernel::configure(const ICLMultiImage *input, Channel chann
 
     output_access.set_valid_region(win, input_plane->info()->valid_region());
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLChannelExtractKernel::run(const Window &window, cl::CommandQueue &queue)

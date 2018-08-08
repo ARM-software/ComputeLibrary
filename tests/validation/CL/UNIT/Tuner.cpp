@@ -57,12 +57,11 @@ TEST_CASE(BifrostTunerSimple, framework::DatasetMode::ALL)
     CLDirectConvolutionLayerKernel conv;
     conv.set_target(GPUTarget::G72);
 
-    // Hard-wire lws to kernel and validate lws
-    conv.set_lws_hint(fake_lws);
-    ARM_COMPUTE_EXPECT(conv.lws_hint()[0] == 2000, framework::LogLevel::ERRORS);
-
     // Configure
     conv.configure(&src, &weights, &bias, &dst, PadStrideInfo(1, 1, 1, 1));
+
+    // Hard-wire lws to kernel and validate lws
+    conv.set_lws_hint(fake_lws);
     ARM_COMPUTE_EXPECT(conv.lws_hint()[0] == 2000, framework::LogLevel::ERRORS);
 
     // Tune kernel and validate

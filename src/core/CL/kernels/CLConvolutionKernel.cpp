@@ -105,7 +105,7 @@ void CLConvolutionKernel<matrix_size>::configure(const ICLTensor *input, ICLTens
 
     output_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 /****************************************************************************************\
@@ -167,7 +167,7 @@ void CLSeparableConvolutionHorKernel<matrix_size>::configure(const ICLTensor *in
 
     output_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 template <unsigned int matrix_size>
@@ -226,7 +226,7 @@ void CLSeparableConvolutionVertKernel<matrix_size>::configure(const ICLTensor *i
 
     output_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 /****************************************************************************************\
@@ -298,7 +298,7 @@ void CLConvolutionRectangleKernel::configure(const ICLTensor *input, ICLTensor *
 
     output_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLConvolutionRectangleKernel::run(const Window &window, cl::CommandQueue &queue)

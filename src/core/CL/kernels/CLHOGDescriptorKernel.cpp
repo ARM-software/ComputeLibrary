@@ -91,7 +91,7 @@ void CLHOGOrientationBinningKernel::configure(const ICLTensor *input_magnitude, 
 
     output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLHOGOrientationBinningKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -174,7 +174,7 @@ void CLHOGBlockNormalizationKernel::configure(const ICLTensor *input, ICLTensor 
 
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLHOGBlockNormalizationKernel::run(const Window &window, cl::CommandQueue &queue)

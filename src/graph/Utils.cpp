@@ -89,6 +89,14 @@ PassManager create_default_pass_manager(Target target)
     return pm;
 }
 
+void release_default_graph_context(GraphContext &ctx)
+{
+    for(const auto &backend : backends::BackendRegistry::get().backends())
+    {
+        backend.second->release_backend_context(ctx);
+    }
+}
+
 void setup_default_graph_context(GraphContext &ctx)
 {
     for(const auto &backend : backends::BackendRegistry::get().backends())

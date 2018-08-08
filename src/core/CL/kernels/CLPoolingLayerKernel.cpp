@@ -269,7 +269,7 @@ void CLPoolingLayerKernel::configure(const ICLTensor *input, ICLTensor *output, 
     auto win_config = validate_and_configure_window(input->info(), output->info(), pool_info);
 
     ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
-    ICLKernel::configure(std::get<1>(win_config));
+    ICLKernel::configure_internal(std::get<1>(win_config));
 
     if(data_layout == DataLayout::NCHW)
     {
@@ -336,7 +336,7 @@ void CLPoolingLayerKernel::run(const Window &window, cl::CommandQueue &queue)
                 unsigned int idx = 0;
                 add_3D_tensor_argument(idx, _input, in_slice);
                 add_3D_tensor_argument(idx, _output, slice);
-                enqueue(queue, *this, slice, _lws_hint);
+                enqueue(queue, *this, slice, lws_hint());
             }
             while(window_collapsed.slide_window_slice_3D(slice));
             break;
@@ -355,7 +355,7 @@ void CLPoolingLayerKernel::run(const Window &window, cl::CommandQueue &queue)
                 unsigned int idx = 0;
                 add_3D_tensor_argument(idx, _input, in_slice);
                 add_3D_tensor_argument(idx, _output, slice);
-                enqueue(queue, *this, slice, _lws_hint);
+                enqueue(queue, *this, slice, lws_hint());
             }
             while(window.slide_window_slice_3D(slice) && window.slide_window_slice_3D(in_slice));
             break;

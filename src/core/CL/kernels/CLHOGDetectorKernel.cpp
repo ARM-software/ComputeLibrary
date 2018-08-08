@@ -110,7 +110,7 @@ void CLHOGDetectorKernel::configure(const ICLTensor *input, const ICLHOG *hog, I
 
     update_window_and_padding(win, AccessWindowRectangle(input->info(), 0, 0, num_elems_read_per_iteration, num_rows_read_per_iteration));
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLHOGDetectorKernel::run(const Window &window, cl::CommandQueue &queue)

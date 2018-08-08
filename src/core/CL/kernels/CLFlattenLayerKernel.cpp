@@ -101,7 +101,7 @@ void CLFlattenLayerKernel::configure(const ICLTensor *input, ICLTensor *output)
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), output->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 
     // Set config_id for enabling LWS tuning
     _config_id = "flatten";
@@ -144,7 +144,7 @@ void CLFlattenLayerKernel::run(const Window &window, cl::CommandQueue &queue)
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, in_slice);
         add_1D_tensor_argument(idx, _output, out_slice);
-        enqueue(queue, *this, in_slice, _lws_hint);
+        enqueue(queue, *this, in_slice, lws_hint());
     }
     while(window.slide_window_slice_3D(in_slice) && out_window.slide_window_slice_1D(out_slice));
 }

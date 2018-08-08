@@ -88,7 +88,7 @@ void CLGEMMMatrixAccumulateBiasesKernel::configure(ICLTensor *accum, const ICLTe
     // Configure kernel window
     auto win_config = validate_and_configure_window(accum->info(), biases->info(), gpu_target, vector_size);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 
     // Add build options
     CLBuildOptions build_opts;
@@ -126,7 +126,7 @@ void CLGEMMMatrixAccumulateBiasesKernel::run(const Window &window, cl::CommandQu
         add_2D_tensor_argument(idx, _accum, accum_slice);
         add_1D_tensor_argument(idx, _biases, biases_slice);
 
-        enqueue(queue, *this, accum_slice, _lws_hint);
+        enqueue(queue, *this, accum_slice, lws_hint());
     }
     while(window.slide_window_slice_2D(accum_slice));
 }

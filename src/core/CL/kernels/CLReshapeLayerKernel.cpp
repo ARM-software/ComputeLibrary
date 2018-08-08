@@ -92,7 +92,7 @@ void CLReshapeLayerKernel::configure(const ICLTensor *input, ICLTensor *output)
 
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLReshapeLayerKernel::run(const Window &window, cl::CommandQueue &queue)

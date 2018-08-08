@@ -22,7 +22,9 @@
  * SOFTWARE.
  */
 #include "arm_compute/graph/GraphContext.h"
-#include <arm_compute/graph.h>
+
+#include "arm_compute/graph.h"
+#include "arm_compute/graph/Utils.h"
 
 namespace arm_compute
 {
@@ -31,6 +33,12 @@ namespace graph
 GraphContext::GraphContext()
     : _config(), _memory_managers()
 {
+}
+
+GraphContext::~GraphContext()
+{
+    _memory_managers.clear();
+    release_default_graph_context(*this);
 }
 
 const GraphConfig &GraphContext::config() const

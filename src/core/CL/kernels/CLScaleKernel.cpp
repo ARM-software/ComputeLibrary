@@ -181,7 +181,7 @@ void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, Interpo
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), output->info(), policy, border_mode, sampling_policy, border);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 
     // Create kernel
     CLBuildOptions build_opts;
@@ -223,7 +223,7 @@ void CLScaleKernel::run(const Window &window, cl::CommandQueue &queue)
                 unsigned int idx = 0;
                 add_2D_tensor_argument(idx, _input, slice);
                 add_2D_tensor_argument(idx, _output, slice);
-                enqueue(queue, *this, slice, _lws_hint);
+                enqueue(queue, *this, slice, lws_hint());
             }
             while(window.slide_window_slice_2D(slice));
             break;
@@ -237,7 +237,7 @@ void CLScaleKernel::run(const Window &window, cl::CommandQueue &queue)
                 unsigned int idx = 0;
                 add_3D_tensor_argument(idx, _input, slice);
                 add_3D_tensor_argument(idx, _output, slice);
-                enqueue(queue, *this, slice, _lws_hint);
+                enqueue(queue, *this, slice, lws_hint());
             }
             while(window.slide_window_slice_3D(slice));
             break;

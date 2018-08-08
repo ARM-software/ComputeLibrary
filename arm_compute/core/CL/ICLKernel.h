@@ -61,11 +61,17 @@ private:
     {
         return 2 + 2 * dimension_size;
     }
-
+    using IKernel::configure; //Prevent children from calling IKernel::configure() directly
 public:
+    void configure_internal(const Window &window, cl::NDRange lws_hint = CLKernelLibrary::get().default_ndrange())
+    {
+        _lws_hint = lws_hint;
+        IKernel::configure(window);
+    }
+
     /** Constructor */
     ICLKernel()
-        : _kernel(nullptr), _lws_hint(CLKernelLibrary::get().default_ndrange()), _target(GPUTarget::MIDGARD), _config_id(arm_compute::default_config_id), _max_workgroup_size(0)
+        : _kernel(nullptr), _target(GPUTarget::MIDGARD), _config_id(arm_compute::default_config_id), _max_workgroup_size(0), _lws_hint()
     {
     }
     /** Returns a reference to the OpenCL kernel of this object.
@@ -196,6 +202,7 @@ public:
      */
     void set_lws_hint(const cl::NDRange &lws_hint)
     {
+        ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this); // lws_hint will be overwritten by configure()
         _lws_hint = lws_hint;
     }
 
@@ -282,10 +289,11 @@ private:
 
 protected:
     cl::Kernel  _kernel;             /**< OpenCL kernel to run */
-    cl::NDRange _lws_hint;           /**< Local workgroup size hint for the OpenCL kernel */
     GPUTarget   _target;             /**< The targeted GPU */
     std::string _config_id;          /**< Configuration ID */
     size_t      _max_workgroup_size; /**< The maximum workgroup size for this kernel */
+private:
+    cl::NDRange _lws_hint; /**< Local workgroup size hint for the OpenCL kernel */
 };
 
 /** Add the kernel to the command queue with the given window.

@@ -111,7 +111,7 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), output->info(), _convolved_dims);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 
     // Set config_id for enabling LWS tuning
     _config_id = "col2im_";
@@ -156,7 +156,7 @@ void CLCol2ImKernel::run(const Window &window, cl::CommandQueue &queue)
         unsigned int idx = 0;
         add_2D_tensor_argument(idx, _input, slice);
         add_3D_tensor_argument(idx, _output, slice_out);
-        enqueue(queue, *this, slice, _lws_hint);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(collapsed_window.slide_window_slice_2D(slice) && out_window.slide_window_slice_3D(slice_out));
 }

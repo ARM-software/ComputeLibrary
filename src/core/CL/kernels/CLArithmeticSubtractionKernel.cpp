@@ -127,7 +127,7 @@ void CLArithmeticSubtractionKernel::configure(const ICLTensor *input1, const ICL
     // Configure kernel window
     auto win_config = validate_and_configure_window(input1->info(), input2->info(), output->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 }
 
 Status CLArithmeticSubtractionKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, ConvertPolicy policy)

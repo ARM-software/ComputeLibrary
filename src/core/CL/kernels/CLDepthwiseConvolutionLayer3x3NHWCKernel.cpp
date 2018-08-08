@@ -244,7 +244,7 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), weights->info(), biases != nullptr ? biases->info() : nullptr, output->info(), conv_info);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 
     // Set config_id for enabling LWS tuning
     _config_id = kernel_name;
@@ -314,7 +314,7 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::run(const Window &window, cl::Com
         add_3D_tensor_argument(idx, _output, slice_out);
         add_3D_tensor_argument(idx, _weights, slice_out);
 
-        enqueue(queue, *this, slice_out, _lws_hint);
+        enqueue(queue, *this, slice_out, lws_hint());
     }
     while(window.slide_window_slice_3D(slice_out) && win_in.slide_window_slice_3D(slice_in));
 }

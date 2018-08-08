@@ -106,7 +106,7 @@ void CLMeanStdDevKernel::configure(const ICLImage *input, float *mean, cl::Buffe
     AccessWindowRectangle input_access(input->info(), 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
     update_window_and_padding(win, input_access);
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLMeanStdDevKernel::run(const Window &window, cl::CommandQueue &queue)

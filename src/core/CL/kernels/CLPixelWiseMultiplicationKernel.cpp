@@ -197,7 +197,7 @@ void CLPixelWiseMultiplicationKernel::configure(const ICLTensor *input1, const I
         _kernel.setArg(idx++, scale);
     }
 
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 }
 
 Status CLPixelWiseMultiplicationKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output, float scale,

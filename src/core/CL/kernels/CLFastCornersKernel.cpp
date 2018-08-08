@@ -87,7 +87,7 @@ void CLFastCornersKernel::configure(const ICLImage *input, ICLImage *output, flo
 
     output_access.set_valid_region(win, input->info()->valid_region(), border_mode == BorderMode::UNDEFINED, border_size());
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLFastCornersKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -148,7 +148,7 @@ void CLCopyToArrayKernel::configure(const ICLImage *input, bool update_number, I
     Window                 win                               = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
     update_window_and_padding(win,
                               AccessWindowHorizontal(input->info(), 0, num_elems_processed_per_iteration));
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLCopyToArrayKernel::run(const Window &window, cl::CommandQueue &queue)

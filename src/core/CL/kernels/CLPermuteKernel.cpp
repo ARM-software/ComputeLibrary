@@ -120,7 +120,7 @@ void CLPermuteKernel::configure(const ICLTensor *input, ICLTensor *output, const
     coord.set_num_dimensions(output->info()->num_dimensions());
     output->info()->set_valid_region(ValidRegion(coord, output->info()->tensor_shape()));
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 Status CLPermuteKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const PermutationVector &perm)

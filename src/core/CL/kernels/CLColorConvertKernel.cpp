@@ -120,7 +120,7 @@ void CLColorConvertKernel::configure(const ICLTensor *input, ICLTensor *output)
 
     output_access.set_valid_region(win, input->info()->valid_region());
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLColorConvertKernel::configure(const ICLMultiImage *input, ICLImage *output)
@@ -189,7 +189,7 @@ void CLColorConvertKernel::configure(const ICLMultiImage *input, ICLImage *outpu
                                                            input->plane(2)->info()->valid_region());
     output_access.set_valid_region(win, ValidRegion(intersect_region.anchor, output->info()->tensor_shape()));
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLColorConvertKernel::configure(const ICLImage *input, ICLMultiImage *output)
@@ -285,7 +285,7 @@ void CLColorConvertKernel::configure(const ICLImage *input, ICLMultiImage *outpu
     output_plane1_access.set_valid_region(win, ValidRegion(input_region.anchor, output->plane(1)->info()->tensor_shape()));
     output_plane2_access.set_valid_region(win, ValidRegion(input_region.anchor, output->plane(2)->info()->tensor_shape()));
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLColorConvertKernel::configure(const ICLMultiImage *input, ICLMultiImage *output)
@@ -369,7 +369,7 @@ void CLColorConvertKernel::configure(const ICLMultiImage *input, ICLMultiImage *
     output_plane1_access.set_valid_region(win, ValidRegion(intersect_region.anchor, output->plane(1)->info()->tensor_shape()));
     output_plane2_access.set_valid_region(win, ValidRegion(intersect_region.anchor, output->plane(2)->info()->tensor_shape()));
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLColorConvertKernel::run(const Window &window, cl::CommandQueue &queue)

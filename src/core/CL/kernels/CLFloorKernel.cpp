@@ -69,7 +69,7 @@ void CLFloorKernel::configure(const ICLTensor *input, ICLTensor *output)
     update_window_and_padding(win, input_access, output_access);
     output_access.set_valid_region(win, input->info()->valid_region());
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLFloorKernel::run(const Window &window, cl::CommandQueue &queue)

@@ -538,7 +538,7 @@ bool Framework::run()
                 auto queue_properties = CLScheduler::get().queue().getInfo<CL_QUEUE_PROPERTIES>(nullptr);
 
                 cl::Context      new_ctx   = cl::Context(CL_DEVICE_TYPE_DEFAULT, ctx_properties.data());
-                cl::CommandQueue new_queue = cl::CommandQueue(new_ctx, cl::Device::getDefault(), queue_properties);
+                cl::CommandQueue new_queue = cl::CommandQueue(new_ctx, CLKernelLibrary::get().get_device(), queue_properties);
 
                 CLKernelLibrary::get().clear_programs_cache();
                 CLScheduler::get().set_context(new_ctx);

@@ -280,7 +280,7 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::configure(const ICLTensor *input,
 
     auto win_config = validate_and_configure_window(input->info(), weights->info(), output->info(), conv_info, depth_multiplier, gpu_target, kernel_name);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts.options()));
 
@@ -345,7 +345,7 @@ void CLDepthwiseConvolutionLayer3x3NCHWKernel::run(const Window &window, cl::Com
         add_3D_tensor_argument(idx, _output, slice_out);
         add_3D_tensor_argument(idx, _weights, slice_weights);
 
-        enqueue(queue, *this, slice_out, _lws_hint);
+        enqueue(queue, *this, slice_out, lws_hint());
     }
     while(window.slide_window_slice_3D(slice_out) && win_in.slide_window_slice_3D(slice_in));
 }

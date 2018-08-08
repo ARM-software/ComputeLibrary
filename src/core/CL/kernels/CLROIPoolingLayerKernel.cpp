@@ -101,7 +101,7 @@ void CLROIPoolingLayerKernel::configure(const ICLTensor *input, const ICLROIArra
 
     update_window_and_padding(window, input_access, output_access);
     output_access.set_valid_region(window, ValidRegion(Coordinates(), output->info()->tensor_shape()));
-    ICLKernel::configure(window);
+    ICLKernel::configure_internal(window);
 }
 
 void CLROIPoolingLayerKernel::run(const Window &window, cl::CommandQueue &queue)

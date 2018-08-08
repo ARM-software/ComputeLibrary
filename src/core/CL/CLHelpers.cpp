@@ -94,7 +94,7 @@ std::string get_underlying_cl_type_from_data_type(const DataType &dt)
     return get_cl_type_from_data_type(dt);
 }
 
-GPUTarget get_target_from_device(cl::Device &device)
+GPUTarget get_target_from_device(const cl::Device &device)
 {
     // Query device name size
     std::string device_name = device.getInfo<CL_DEVICE_NAME>();

@@ -189,7 +189,7 @@ void CLBatchNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *out
                                                     (beta != nullptr) ? beta->info() : nullptr,
                                                     (gamma != nullptr) ? gamma->info() : nullptr);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 
     _config_id = "batch_normalization_layer_";
     _config_id += string_from_data_layout(input->info()->data_layout());
@@ -252,7 +252,7 @@ void CLBatchNormalizationLayerKernel::run(const Window &window, cl::CommandQueue
         {
             add_3D_tensor_argument(idx, _output, slice);
         }
-        enqueue(queue, *this, slice, _lws_hint);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_3D(slice));
 }

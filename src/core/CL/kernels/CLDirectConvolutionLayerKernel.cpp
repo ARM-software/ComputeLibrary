@@ -442,7 +442,7 @@ void CLDirectConvolutionLayerKernel::configure(const ICLTensor *input, const ICL
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), weights->info(), output->info(), conv_info, gpu_target);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 
     // Set static kernel arguments
     if(is_data_type_quantized_asymmetric(data_type))
@@ -532,7 +532,7 @@ void CLDirectConvolutionLayerKernel::run(const Window &window, cl::CommandQueue 
         unsigned int idx = 0;
         add_3D_tensor_argument(idx, _input, slice_in);
         add_3D_tensor_argument(idx, _output, slice);
-        enqueue(queue, *this, slice, _lws_hint);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_3D(slice) && win_in.slide_window_slice_3D(slice_in));
 }

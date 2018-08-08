@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -60,7 +60,7 @@ void CLIntegralImageHorKernel::configure(const ICLTensor *input, ICLTensor *outp
 
     output_access.set_valid_region(win, input->info()->valid_region());
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 CLIntegralImageVertKernel::CLIntegralImageVertKernel()
@@ -89,7 +89,7 @@ void CLIntegralImageVertKernel::configure(ICLTensor *in_out)
 
     in_out_access.set_valid_region(win, in_out->info()->valid_region());
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLIntegralImageVertKernel::run(const Window &window, cl::CommandQueue &queue)

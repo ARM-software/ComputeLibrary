@@ -117,9 +117,8 @@ void CLTransposeKernel::configure(const ICLTensor *input, ICLTensor *output)
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
 
-    _input    = input;
-    _output   = output;
-    _lws_hint = cl::NDRange(2, 8);
+    _input  = input;
+    _output = output;
 
     std::set<std::string> build_opts;
     std::ostringstream    data_type_in_bytes;
@@ -131,5 +130,5 @@ void CLTransposeKernel::configure(const ICLTensor *input, ICLTensor *output)
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), output->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second, cl::NDRange(2, 8));
 }

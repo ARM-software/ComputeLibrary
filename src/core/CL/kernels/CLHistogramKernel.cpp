@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -107,7 +107,7 @@ void CLHistogramKernel::configure(const ICLImage *input, ICLDistribution1D *outp
 
     update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, pixels_per_item));
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLHistogramKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -198,7 +198,7 @@ void CLHistogramBorderKernel::configure(const ICLImage *input, ICLDistribution1D
     win.set(0, Window::Dimension(start_position, _input->info()->dimension(0)));
     win.set(1, Window::Dimension(0, _input->info()->dimension(1)));
     update_window_and_padding(win, AccessWindowHorizontal(input->info(), 0, 1));
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLHistogramBorderKernel::run(const Window &window, cl::CommandQueue &queue)

@@ -125,7 +125,7 @@ void CLDepthConcatenateLayerKernel::configure(const ICLTensor *input, unsigned i
     auto win_config = validate_and_configure_window(input->info(), depth_offset, output->info());
     ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
-    ICLKernel::configure(std::get<1>(win_config));
+    ICLKernel::configure_internal(std::get<1>(win_config));
 }
 
 Status CLDepthConcatenateLayerKernel::validate(const arm_compute::ITensorInfo *input,

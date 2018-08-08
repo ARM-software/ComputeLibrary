@@ -73,7 +73,7 @@ void CLConvertFullyConnectedWeightsKernel::configure(const ICLTensor *input, ICL
 
     // Configure kernel window
     Window win = calculate_max_window(*input->info(), Steps());
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 Status CLConvertFullyConnectedWeightsKernel::validate(const ITensorInfo *input, const ITensorInfo *output, const TensorShape &original_input_shape,

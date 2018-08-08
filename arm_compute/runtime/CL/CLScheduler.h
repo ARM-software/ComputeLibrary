@@ -74,8 +74,8 @@ public:
      * @param[in] cl_tuner (Optional) Pointer to OpenCL tuner (default=nullptr)
      *                     Note: It is caller's responsibility to release the allocated memory for CLTuner
      */
-    void init(cl::Context context = cl::Context::getDefault(), cl::CommandQueue queue = cl::CommandQueue::getDefault(),
-              cl::Device device = cl::Device::getDefault(), ICLTuner *cl_tuner = nullptr)
+    void init(cl::Context context, cl::CommandQueue queue,
+              cl::Device device, ICLTuner *cl_tuner = nullptr)
     {
         set_context(context);
         _queue          = std::move(queue);

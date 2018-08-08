@@ -128,7 +128,7 @@ void CLChannelCombineKernel::configure(const ICLTensor *plane0, const ICLTensor 
     }
     output_access.set_valid_region(win, ValidRegion(valid_region.anchor, output->info()->tensor_shape()));
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLChannelCombineKernel::configure(const ICLImage *plane0, const ICLImage *plane1, const ICLImage *plane2, ICLMultiImage *output)
@@ -232,7 +232,7 @@ void CLChannelCombineKernel::configure(const ICLImage *plane0, const ICLImage *p
     output_plane1_access.set_valid_region(win, ValidRegion(output_plane1_region.anchor, output->plane(1)->info()->tensor_shape()));
     output_plane2_access.set_valid_region(win, ValidRegion(plane2->info()->valid_region().anchor, output->plane(2)->info()->tensor_shape()));
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLChannelCombineKernel::run(const Window &window, cl::CommandQueue &queue)

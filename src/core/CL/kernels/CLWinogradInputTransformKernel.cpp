@@ -180,8 +180,6 @@ void CLWinogradInputTransformKernel::configure(const ICLTensor *input, ICLTensor
         _step_z = (_input->info()->dimension(2) % 2) != 0 ? 1 : 2;
     }
 
-    _lws_hint = cl::NDRange(1, 1, 8);
-
     // Append stepz and data layout
     kernel_name += "_stepz";
     kernel_name += support::cpp11::to_string(_step_z);
@@ -192,7 +190,7 @@ void CLWinogradInputTransformKernel::configure(const ICLTensor *input, ICLTensor
     // Create window and update padding
     auto win_config = validate_and_configure_window(input->info(), output->info(), winograd_info);
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second, cl::NDRange(1, 1, 8));
 
     _config_id = kernel_name;
     _config_id += support::cpp11::to_string(input->info()->dimension(0));
@@ -239,7 +237,7 @@ void CLWinogradInputTransformKernel::run(const Window &window, cl::CommandQueue 
         add_3D_tensor_argument(idx, _input, slice);
         add_3D_tensor_argument(idx, _output, slice);
 
-        enqueue(queue, *this, slice, _lws_hint);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(window.slide_window_slice_3D(slice));
 }

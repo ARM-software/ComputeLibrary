@@ -121,7 +121,7 @@ void CLGEMMMatrixVectorMultiplyKernel::configure(const ICLTensor *input0, const 
 
     auto win_config = validate_and_configure_window(input0->info(), input1->info(), output->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 }
 
 Status CLGEMMMatrixVectorMultiplyKernel::validate(const ITensorInfo *input0, const ITensorInfo *input1, const ITensorInfo *output)
@@ -165,7 +165,7 @@ void CLGEMMMatrixVectorMultiplyKernel::run(const Window &window, cl::CommandQueu
         unsigned int idx_2 = num_arguments_per_3D_tensor() + num_arguments_per_2D_tensor();
         add_3D_tensor_argument(idx_0, _input0, slice_in);
         add_1D_tensor_argument(idx_2, _output, slice_out);
-        enqueue(queue, *this, slice_in, _lws_hint);
+        enqueue(queue, *this, slice_in, lws_hint());
     }
     while(window.slide_window_slice_3D(slice_in) && window.slide_window_slice_3D(slice_out));
 }

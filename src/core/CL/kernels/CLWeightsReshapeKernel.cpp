@@ -115,7 +115,7 @@ void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *
     Window win = calculate_max_window(*input->info(), Steps());
     // The CLWeightsReshapeKernel doesn't need padding so update_window_and_padding() can be skipped
     output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 Status CLWeightsReshapeKernel::validate(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output, const unsigned int num_groups)

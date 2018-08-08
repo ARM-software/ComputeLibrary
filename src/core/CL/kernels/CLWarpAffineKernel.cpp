@@ -98,5 +98,5 @@ void CLWarpAffineKernel::configure(const ICLTensor *input, ICLTensor *output, co
 
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }

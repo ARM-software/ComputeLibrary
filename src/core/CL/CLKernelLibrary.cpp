@@ -966,8 +966,7 @@ size_t CLKernelLibrary::max_local_workgroup_size(const cl::Kernel &kernel) const
 
 cl::NDRange CLKernelLibrary::default_ndrange() const
 {
-    cl::Device  device  = cl::Device::getDefault();
-    GPUTarget   _target = get_target_from_device(device);
+    GPUTarget   _target = get_target_from_device(_device);
     cl::NDRange default_range;
 
     switch(_target)

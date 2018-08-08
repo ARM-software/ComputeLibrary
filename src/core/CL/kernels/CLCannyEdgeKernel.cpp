@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -77,7 +77,7 @@ void CLGradientKernel::configure(const ICLTensor *gx, const ICLTensor *gy, ICLTe
     mag_access.set_valid_region(win, _gx->info()->valid_region());
     phase_access.set_valid_region(win, _gx->info()->valid_region());
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLGradientKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -145,7 +145,7 @@ void CLEdgeNonMaxSuppressionKernel::configure(const ICLTensor *magnitude, const 
 
     output_access.set_valid_region(win, _magnitude->info()->valid_region(), border_undefined, border_size());
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLEdgeNonMaxSuppressionKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -230,7 +230,7 @@ void CLEdgeTraceKernel::configure(const ICLTensor *input, ICLTensor *output, int
     l1_stack_access.set_valid_region(win, _input->info()->valid_region());
     l1_stack_counter_access.set_valid_region(win, _input->info()->valid_region());
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLEdgeTraceKernel::run(const Window &window, cl::CommandQueue &queue)

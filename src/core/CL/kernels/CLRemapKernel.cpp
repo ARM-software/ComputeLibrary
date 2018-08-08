@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -83,7 +83,7 @@ void CLRemapKernel::configure(const ICLTensor *input, const ICLTensor *map_x, co
 
     output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 
     // Set static arguments
     unsigned int idx = 4 * num_arguments_per_2D_tensor(); //Skip the input and output parameters

@@ -114,8 +114,8 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
 
     // Set the number of WG based on the input size. If input width is < 128
     // we can use fewer threads than 8.
-    _lws_hint    = cl::NDRange(std::min(8U, num_of_threads));
-    _border_size = BorderSize(0, border_width, 0, 0);
+    cl::NDRange lws_hint = cl::NDRange(std::min(8U, num_of_threads));
+    _border_size         = BorderSize(0, border_width, 0, 0);
 
     // Set build options
     std::set<std::string> build_opts;
@@ -142,7 +142,7 @@ void CLReductionOperationKernel::configure(const ICLTensor *input, ICLTensor *ou
 
     ARM_COMPUTE_ERROR_THROW_ON(std::get<0>(win_config));
 
-    ICLKernel::configure(std::get<1>(win_config));
+    ICLKernel::configure_internal(std::get<1>(win_config), lws_hint);
 }
 
 Status CLReductionOperationKernel::validate(const ITensorInfo *input, const ITensorInfo *output, unsigned int axis, ReductionOperation op)
@@ -171,7 +171,7 @@ void CLReductionOperationKernel::run(const Window &window, cl::CommandQueue &que
     in_slice.set(Window::DimX, Window::Dimension(in_slice.x().start(), in_slice.x().end() + border_width, in_slice.x().step()));
 
     // Set local sums buffer
-    unsigned int local_sum_size = _lws_hint[0] * _input->info()->element_size();
+    unsigned int local_sum_size = lws_hint()[0] * _input->info()->element_size();
     _kernel.setArg(num_arguments_per_2D_tensor() * 2, local_sum_size, nullptr);
 
     do
@@ -179,7 +179,7 @@ void CLReductionOperationKernel::run(const Window &window, cl::CommandQueue &que
         unsigned int idx = 0;
         add_2D_tensor_argument(idx, _input, in_slice);
         add_2D_tensor_argument(idx, _output, out_slice);
-        enqueue(queue, *this, in_slice, _lws_hint);
+        enqueue(queue, *this, in_slice, lws_hint());
     }
     while(window.slide_window_slice_2D(in_slice) && window.slide_window_slice_2D(out_slice));
 }

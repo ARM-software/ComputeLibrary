@@ -95,7 +95,7 @@ void CLGaussianPyramidHorKernel::configure(const ICLTensor *input, ICLTensor *ou
 
     output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLGaussianPyramidHorKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -177,7 +177,7 @@ void CLGaussianPyramidVertKernel::configure(const ICLTensor *input, ICLTensor *o
 
     output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLGaussianPyramidVertKernel::run(const Window &window, cl::CommandQueue &queue)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -81,7 +81,7 @@ void CLAbsoluteDifferenceKernel::configure(const ICLTensor *input1, const ICLTen
 
     output_access.set_valid_region(win, valid_region);
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLAbsoluteDifferenceKernel::run(const Window &window, cl::CommandQueue &queue)

@@ -61,6 +61,13 @@ NEDeviceBackend::NEDeviceBackend()
 
 void NEDeviceBackend::initialize_backend()
 {
+    //Nothing to do
+}
+
+void NEDeviceBackend::release_backend_context(GraphContext &ctx)
+{
+    //Nothing to do
+    ARM_COMPUTE_UNUSED(ctx);
 }
 
 void NEDeviceBackend::setup_backend_context(GraphContext &ctx)

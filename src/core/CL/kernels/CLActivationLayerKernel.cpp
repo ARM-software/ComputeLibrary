@@ -179,7 +179,7 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), (_run_in_place) ? nullptr : output->info());
     ARM_COMPUTE_ERROR_THROW_ON(win_config.first);
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 
     // Set config_id for enabling LWS tuning
     _config_id = "activation_layer_";
@@ -215,7 +215,7 @@ void CLActivationLayerKernel::run(const Window &window, cl::CommandQueue &queue)
         {
             add_3D_tensor_argument(idx, _output, slice);
         }
-        enqueue(queue, *this, slice, _lws_hint);
+        enqueue(queue, *this, slice, lws_hint());
     }
     while(collapsed.slide_window_slice_3D(slice));
 }

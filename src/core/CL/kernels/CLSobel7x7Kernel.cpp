@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -105,7 +105,7 @@ void CLSobel7x7HorKernel::configure(const ICLTensor *input, ICLTensor *output_x,
     output_x_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
     output_y_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLSobel7x7HorKernel::run(const Window &window, cl::CommandQueue &queue)
@@ -204,7 +204,7 @@ void CLSobel7x7VertKernel::configure(const ICLTensor *input_x, const ICLTensor *
     output_x_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
     output_y_access.set_valid_region(win, input->info()->valid_region(), border_undefined, border_size());
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 void CLSobel7x7VertKernel::run(const Window &window, cl::CommandQueue &queue)

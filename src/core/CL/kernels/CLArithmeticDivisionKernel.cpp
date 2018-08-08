@@ -121,7 +121,7 @@ void CLArithmeticDivisionKernel::configure(const ICLTensor *input1, const ICLTen
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("arithmetic_div", build_opts));
 
-    ICLKernel::configure(win_config.second);
+    ICLKernel::configure_internal(win_config.second);
 }
 
 Status CLArithmeticDivisionKernel::validate(const ITensorInfo *input1, const ITensorInfo *input2, const ITensorInfo *output)

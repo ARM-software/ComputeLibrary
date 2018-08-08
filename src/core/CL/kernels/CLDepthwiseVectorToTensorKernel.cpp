@@ -87,7 +87,7 @@ void CLDepthwiseVectorToTensorKernel::configure(const ICLTensor *input, ICLTenso
     // The CLDepthwisevectorToTensorKernel doesn't need padding so update_window_and_padding() can be skipped
     output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
 
-    ICLKernel::configure(win);
+    ICLKernel::configure_internal(win);
 }
 
 Status CLDepthwiseVectorToTensorKernel::validate(const ITensorInfo *input, const ITensorInfo *output, size_t conv_w, size_t conv_h)

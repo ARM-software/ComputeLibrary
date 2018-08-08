@@ -33,7 +33,7 @@ namespace graph
 namespace frontend
 {
 Stream::Stream(size_t id, std::string name)
-    : _manager(), _ctx(), _g(id, std::move(name))
+    : _ctx(), _manager(), _g(id, std::move(name))
 {
 }
 

@@ -91,9 +91,14 @@ void force_target_to_graph(Graph &g, Target target);
 PassManager create_default_pass_manager(Target target);
 /** Default setups the graph context if not done manually
  *
- * @param[in] ctx Graph Context
+ * @param[in,out] ctx Graph Context
  */
 void setup_default_graph_context(GraphContext &ctx);
+/** Default releases the graph context if not done manually
+ *
+ * @param[in,out] ctx Graph Context
+ */
+void release_default_graph_context(GraphContext &ctx);
 /** Get size of a tensor's given dimension depending on its layout
  *
  * @param[in] descriptor            Descriptor

@@ -29,15 +29,15 @@
 
 using namespace arm_compute;
 
-#if defined(ARM_COMPUTE_DEBUG_ENABLED)
 namespace
 {
+#if defined(ARM_COMPUTE_DEBUG_ENABLED)
 void printf_callback(const char *buffer, unsigned int len, size_t complete, void *user_data)
 {
     printf("%.*s", len, buffer);
 }
-} // namespace
 #endif /* defined(ARM_COMPUTE_DEBUG_ENABLED) */
+} // namespace
 
 std::once_flag CLScheduler::_initialize_symbols;
 
@@ -57,19 +57,25 @@ void CLScheduler::default_init(ICLTuner *cl_tuner)
 {
     if(!_is_initialised)
     {
-        cl::Context ctx              = cl::Context::getDefault();
-        auto        queue_properties = cl::CommandQueue::getDefault().getInfo<CL_QUEUE_PROPERTIES>(nullptr);
+        std::vector<cl::Platform> platforms;
+        cl::Platform::get(&platforms);
+        ARM_COMPUTE_ERROR_ON_MSG(platforms.size() == 0, "Couldn't find any OpenCL platform");
+        cl::Platform            p = platforms[0];
+        cl::Context             ctx;
+        cl::Device              device;
+        std::vector<cl::Device> platform_devices;
+        p.getDevices(CL_DEVICE_TYPE_DEFAULT, &platform_devices);
+        ARM_COMPUTE_ERROR_ON_MSG(platform_devices.size() == 0, "Couldn't find any OpenCL device");
+        device = platform_devices[0];
 #if defined(ARM_COMPUTE_DEBUG_ENABLED)
-        // Query devices in the context for cl_arm_printf support
-        std::vector<cl::Device> def_platform_devices;
-        cl::Platform::getDefault().getDevices(CL_DEVICE_TYPE_DEFAULT, &def_platform_devices);
 
-        if(device_supports_extension(def_platform_devices[0], "cl_arm_printf"))
+        // Query devices in the context for cl_arm_printf support
+        if(device_supports_extension(device, "cl_arm_printf"))
         {
             // Create a cl_context with a printf_callback and user specified buffer size.
             cl_context_properties properties[] =
             {
-                CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>(cl::Platform::get()()),
+                CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>(p()),
                 // Enable a printf callback function for this context.
                 CL_PRINTF_CALLBACK_ARM, reinterpret_cast<cl_context_properties>(printf_callback),
                 // Request a minimum printf buffer size of 4MB for devices in the
@@ -77,13 +83,22 @@ void CLScheduler::default_init(ICLTuner *cl_tuner)
                 CL_PRINTF_BUFFERSIZE_ARM, 0x1000,
                 0
             };
-            ctx = cl::Context(CL_DEVICE_TYPE_DEFAULT, properties);
+            ctx = cl::Context(device, properties);
         }
+        else
 #endif // defined(ARM_COMPUTE_DEBUG_ENABLED)
+        {
+            cl_context_properties properties[] =
+            {
+                CL_CONTEXT_PLATFORM, reinterpret_cast<cl_context_properties>(p()),
+                0
+            };
+            ctx = cl::Context(device, properties);
+        };
 
-        cl::CommandQueue queue = cl::CommandQueue(ctx, cl::Device::getDefault(), queue_properties);
-        CLKernelLibrary::get().init("./cl_kernels/", ctx, cl::Device::getDefault());
-        init(ctx, queue, cl::Device::getDefault(), cl_tuner);
+        cl::CommandQueue queue = cl::CommandQueue(ctx, device);
+        CLKernelLibrary::get().init("./cl_kernels/", ctx, device);
+        init(ctx, queue, device, cl_tuner);
 
         // Create a default static tuner and set if none was provided
         _cl_default_static_tuner = tuners::TunerFactory::create_tuner(_target);
