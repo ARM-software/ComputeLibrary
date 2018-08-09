@@ -40,6 +40,7 @@
 #include "arm_compute/runtime/CL/functions/CLGEMM.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpMatrixMultiplyCore.h"
 #include "arm_compute/runtime/CL/functions/CLGEMMLowpOutputStage.h"
+#include "arm_compute/runtime/CL/functions/CLReshapeLayer.h"
 #include "arm_compute/runtime/IMemoryManager.h"
 
 #include <memory>
@@ -88,7 +89,7 @@ private:
  * -# @ref CLGEMMLowpMatrixMultiplyCore (if the data type is QASYMM8)
  * -# @ref CLGEMMLowpQuantizeDownInt32ToUint8ScaleByFixedPoint (if the data type is QASYMM8)
  * -# @ref CLArithmeticAdditionKernel (if biases != nullptr and we have a 1x1 convolution with the NHWC data layout)
- * -# @ref CLCol2ImKernel (if NCHW data layout)
+ * -# @ref CLCol2ImKernel (if NCHW data layout) or @ref CLReshapeLayer (if NHWC with QASYMM8)
  */
 class CLGEMMConvolutionLayer : public IFunction
 {
@@ -182,6 +183,7 @@ private:
     CLCol2ImKernel                                      _col2im_kernel;
     CLActivationLayer                                   _activationlayer_function;
     CLArithmeticAdditionKernel                          _add_bias_kernel;
+    CLReshapeLayer                                      _reshape_layer;
 
     const ICLTensor *_original_weights;
 

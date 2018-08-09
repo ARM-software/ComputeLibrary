@@ -380,7 +380,7 @@ NodeID GraphBuilder::add_depthwise_convolution_node(Graph &g, NodeParams params,
     if(has_bias)
     {
         TensorDescriptor b_desc = input_tensor_desc;
-        b_desc.shape            = TensorShape(b_desc.shape.z());
+        b_desc.shape            = TensorShape(get_dimension_size(input_tensor_desc, DataLayoutDimension::CHANNEL));
         b_nid                   = add_const_node_with_name(g, params, "Bias", b_desc, std::move(bias_accessor));
     }
 

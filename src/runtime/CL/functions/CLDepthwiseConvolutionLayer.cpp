@@ -73,7 +73,7 @@ Status CLDepthwiseConvolutionLayer3x3::validate(const ITensorInfo *input, const 
                                                 ActivationLayerInfo act_info, GPUTarget gpu_target)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() != DataLayout::NCHW && input->data_layout() != DataLayout::NHWC);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
 
     if(input->data_layout() == DataLayout::NCHW)
     {

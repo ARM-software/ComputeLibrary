@@ -91,8 +91,8 @@ void CLConvolutionLayerReshapeWeights::run()
 
 CLGEMMConvolutionLayer::CLGEMMConvolutionLayer(std::shared_ptr<IMemoryManager> memory_manager)
     : _memory_group(memory_manager), _reshape_weights(), _im2col_kernel(), _mm_gemm(memory_manager), _mm_gemmlowp(memory_manager), _gemmlowp_output_stage(), _col2im_kernel(), _activationlayer_function(),
-      _add_bias_kernel(), _original_weights(nullptr), _im2col_output(), _weights_reshaped(), _gemm_output(), _tmp_output(), _data_layout(DataLayout::NCHW), _append_bias(false), _skip_im2col(false),
-      _is_quantized(false), _is_activationlayer_enabled(false), _is_prepared(false)
+      _add_bias_kernel(), _reshape_layer(), _original_weights(nullptr), _im2col_output(), _weights_reshaped(), _gemm_output(), _tmp_output(), _data_layout(DataLayout::NCHW), _append_bias(false),
+      _skip_im2col(false), _is_quantized(false), _is_activationlayer_enabled(false), _is_prepared(false)
 {
 }
 
@@ -143,14 +143,13 @@ Status CLGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
         weights_qa->set_quantization_info(QuantizationInfo(weights_quantization_info.scale, -weights_quantization_info.offset));
 
         // Perform validation step on GEMMLowp
-        CLGEMMLowpMatrixMultiplyCore::validate(input_qa.get(), weights_qa.get(), output, gemm_info);
+        return CLGEMMLowpMatrixMultiplyCore::validate(input_qa.get(), weights_qa.get(), output, gemm_info);
     }
     else
     {
         // Perform validation step on Matrix multiply function
-        CLGEMM::validate(input, weights, nullptr, output, 1.0f, 0.0f, gemm_info);
+        return CLGEMM::validate(input, weights, nullptr, output, 1.0f, 0.0f, gemm_info);
     }
-    return Status{};
 }
 
 void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
@@ -283,9 +282,17 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
 
     if(!is_nhwc || _is_quantized)
     {
-        // Configure and tune Col2Im
-        _col2im_kernel.configure(_is_quantized ? gemm_output_staged_to_use : gemm_output_to_use, output, std::make_pair(conv_w, conv_h));
-        CLScheduler::get().tune_kernel_static(_col2im_kernel);
+        if(input->info()->data_layout() == DataLayout::NCHW)
+        {
+            // Configure and tune Col2Im
+            _col2im_kernel.configure(_is_quantized ? gemm_output_staged_to_use : gemm_output_to_use, output, std::make_pair(conv_w, conv_h));
+            CLScheduler::get().tune_kernel_static(_col2im_kernel);
+        }
+        else
+        {
+            // Configure reshape layer
+            _reshape_layer.configure(_is_quantized ? gemm_output_staged_to_use : gemm_output_to_use, output);
+        }
     }
 
     if(!is_nhwc || _is_quantized)
@@ -316,8 +323,6 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, weights);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(input->data_type() == DataType::QASYMM8 && input->data_layout() == DataLayout::NHWC,
-                                    "NHWC is unsupported for QASYMM8!");
 
     const DataLayout data_layout = input->data_layout();
     const DataType   data_type   = input->data_type();
@@ -378,7 +383,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
 
     // Output tensor auto inizialitation if not yet initialized
     ARM_COMPUTE_RETURN_ON_ERROR(CLConvolutionLayerReshapeWeights::validate(weights, is_quantized ? nullptr : biases, nullptr));
-    weights_reshaped_info = TensorInfo(compute_weights_reshaped_shape(*weights, append_bias), 1, data_type);
+    weights_reshaped_info = TensorInfo(compute_weights_reshaped_shape(*weights, (append_bias && !skip_im2col)), 1, data_type);
     weights_to_use        = &weights_reshaped_info;
 
     if(!skip_im2col)
@@ -431,9 +436,12 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     // Validate Col2Im
     if(!is_nhwc || is_quantized)
     {
-        ARM_COMPUTE_RETURN_ON_ERROR(CLCol2ImKernel::validate(is_quantized ? gemm_output_staged_to_use : gemm_output_to_use,
-                                                             output,
-                                                             std::make_pair(conv_w, conv_h)));
+        if(input->data_layout() == DataLayout::NCHW)
+        {
+            ARM_COMPUTE_RETURN_ON_ERROR(CLCol2ImKernel::validate(is_quantized ? gemm_output_staged_to_use : gemm_output_to_use,
+                                                                 output,
+                                                                 std::make_pair(conv_w, conv_h)));
+        }
     }
 
     //Validate Activation Layer
@@ -480,7 +488,14 @@ void CLGEMMConvolutionLayer::run()
     // Reshape output matrix
     if(_data_layout == DataLayout::NCHW || _is_quantized)
     {
-        CLScheduler::get().enqueue(_col2im_kernel, false);
+        if(_data_layout == DataLayout::NCHW)
+        {
+            CLScheduler::get().enqueue(_col2im_kernel, false);
+        }
+        else
+        {
+            _reshape_layer.run();
+        }
     }
 
     //Run Activation Layer if enabled
