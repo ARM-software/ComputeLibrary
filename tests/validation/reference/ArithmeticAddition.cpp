@@ -129,16 +129,11 @@ template SimpleTensor<float> arithmetic_addition(const SimpleTensor<float> &src1
 template <typename T>
 SimpleTensor<T> arithmetic_addition(const SimpleTensor<T> &src1, const SimpleTensor<T> &src2, DataType dst_data_type, ConvertPolicy convert_policy)
 {
+    ARM_COMPUTE_ERROR_ON_MSG(dst_data_type == DataType::QASYMM8, "For QASYMM8, the quantized output tensor should be passed directly.");
+
     SimpleTensor<T> dst(TensorShape::broadcast_shape(src1.shape(), src2.shape()), dst_data_type);
     arithmetic_addition<T>(src1, src2, dst, convert_policy);
     return dst;
-}
-
-template <>
-SimpleTensor<uint8_t> arithmetic_addition(const SimpleTensor<uint8_t> &src1, const SimpleTensor<uint8_t> &src2, DataType dst_data_type, ConvertPolicy convert_policy)
-{
-    SimpleTensor<uint8_t> dst(TensorShape::broadcast_shape(src1.shape(), src2.shape()), dst_data_type);
-    return arithmetic_addition<uint8_t>(src1, src2, dst, convert_policy);
 }
 
 template SimpleTensor<int16_t> arithmetic_addition(const SimpleTensor<int16_t> &src1, const SimpleTensor<int16_t> &src2, DataType dst_data_type, ConvertPolicy convert_policy);
