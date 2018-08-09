@@ -139,7 +139,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLIm2ColFixture<uint8_t>, framework::DatasetMod
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLIm2ColFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), framework::dataset::make("DataType", DataType::QASYMM8)),
                                                                                                             conv_args),
-                                                                                                    framework::dataset::make("ChannelsFirstOutputNHWC", false)))
+                                                                                                    framework::dataset::make("ChannelsFirstOutputNHWC", true)))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
