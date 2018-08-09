@@ -850,7 +850,7 @@ __kernel void im2col3x3_nhwc(
 
 #if PAD_TOP != 0 || PAD_LEFT != 0 || PAD_BOTTOM != 0 || PAD_RIGHT != 0
     // Replace invalid values with zeros
-    y_cond  = (int)((uint)(yi - (int)PAD_TOP + 1) >= (uint)(SRC_HEIGHT));
+    y_cond  = (int)((uint)(yi - (int)PAD_TOP + 1 * DILATION_Y) >= (uint)(SRC_HEIGHT));
     values3 = select(values3, (VECTOR_N)PAD_VALUE, (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))y_cond || (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))(x_cond.s0));
     values4 = select(values4, (VECTOR_N)PAD_VALUE, (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))y_cond || (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))(x_cond.s1));
     values5 = select(values5, (VECTOR_N)PAD_VALUE, (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))y_cond || (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))(x_cond.s2));
@@ -875,7 +875,7 @@ __kernel void im2col3x3_nhwc(
 
 #if PAD_TOP != 0 || PAD_LEFT != 0 || PAD_BOTTOM != 0 || PAD_RIGHT != 0
     // Replace invalid values with PAD_VALUE
-    y_cond  = (int)((uint)(yi - (int)PAD_TOP + 2) >= (uint)(SRC_HEIGHT));
+    y_cond  = (int)((uint)(yi - (int)PAD_TOP + 2 * DILATION_Y) >= (uint)(SRC_HEIGHT));
     values6 = select(values6, (VECTOR_N)PAD_VALUE, (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))y_cond || (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))(x_cond.s0));
     values7 = select(values7, (VECTOR_N)PAD_VALUE, (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))y_cond || (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))(x_cond.s1));
     values8 = select(values8, (VECTOR_N)PAD_VALUE, (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))y_cond || (VEC_DATA_TYPE(COND_DATA_TYPE, VECTOR_SIZE))(x_cond.s2));
