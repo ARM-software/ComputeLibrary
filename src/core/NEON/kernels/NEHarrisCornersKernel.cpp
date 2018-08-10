@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -40,10 +40,6 @@
 using namespace arm_compute;
 
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-
-template class arm_compute::NEHarrisScoreFP16Kernel<3>;
-template class arm_compute::NEHarrisScoreFP16Kernel<5>;
-template class arm_compute::NEHarrisScoreFP16Kernel<7>;
 
 namespace fp16
 {
@@ -360,6 +356,10 @@ void NEHarrisScoreFP16Kernel<block_size>::configure(const IImage *input1, const 
 
     INEKernel::configure(win);
 }
+
+template class arm_compute::NEHarrisScoreFP16Kernel<3>;
+template class arm_compute::NEHarrisScoreFP16Kernel<5>;
+template class arm_compute::NEHarrisScoreFP16Kernel<7>;
 
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 

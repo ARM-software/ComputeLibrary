@@ -392,7 +392,7 @@ void logits_1d_max(const ITensor &in, ITensor &out, const Window &window)
         const auto out_ptr = reinterpret_cast<T *>(output.ptr());
 
         // Init max value
-        auto vec_max = vdup_n<vec_16_byte_t<T>>(std::numeric_limits<T>::lowest());
+        auto vec_max = vdup_n<vec_16_byte_t<T>>(support::cpp11::lowest<T>());
 
         // Loop over input row
         for(const T *it = in_ptr; it < (in_ptr + input_width); it += vec_size_of(vec_max))
@@ -694,7 +694,7 @@ void logits_1d_softmax_float(const ITensor &in, const ITensor &max, void *const 
             {
                 auto vec_elements = vld<vec_16_byte_t<T>>(in_ptr + i);
                 vec_elements      = vsub(vec_elements, vec_max);
-                vec_elements      = vexp(vmul_n(vec_elements, beta));
+                vec_elements      = vexp(vmul_n(vec_elements, static_cast<T>(beta)));
                 vec_sum           = vadd(vec_sum, vec_elements);
                 vst(tmp_ptr + i, vec_elements);
             }

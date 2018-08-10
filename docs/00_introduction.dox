@@ -849,6 +849,7 @@ Below is a list of the common parameters among the graph examples :
 For Android, the library was successfully built and tested using Google's standalone toolchains:
  - clang++ from NDK r17b for armv7a
  - clang++ from NDK r17b for arm64-v8a
+ - clang++ from NDK r18-beta1 for arm64-v8.2-a with FP16 support
 
 Here is a guide to <a href="https://developer.android.com/ndk/guides/standalone_toolchain.html">create your Android standalone toolchains from the NDK</a>
 

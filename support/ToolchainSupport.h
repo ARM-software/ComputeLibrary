@@ -315,6 +315,20 @@ inline void *align(std::size_t alignment, std::size_t size, void *&ptr, std::siz
 
     return ptr = reinterpret_cast<void *>(aligned);
 }
+// std::numeric_limits<T>::lowest
+template <typename T>
+inline T lowest()
+{
+    return std::numeric_limits<T>::lowest();
+}
+
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+template <>
+inline __fp16 lowest<__fp16>()
+{
+    return std::numeric_limits<half_float::half>::lowest();
+}
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 // std::isfinite
 template <typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value>::type>
