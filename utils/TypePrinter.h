@@ -25,6 +25,7 @@
 #define __ARM_COMPUTE_TEST_TYPE_PRINTER_H__
 
 #include "arm_compute/core/CL/CLTypes.h"
+#include "arm_compute/core/CPP/CPPTypes.h"
 #include "arm_compute/core/Dimensions.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/GPUTarget.h"
@@ -1667,6 +1668,54 @@ inline std::string to_string(const Termination &termination)
     return str.str();
 }
 
+/** Formatted output of the CPUModel type.
+ *
+ * @param[out] os        Output stream
+ * @param[in]  cpu_model Model to output
+ *
+ * @return Modified output stream.
+ */
+inline ::std::ostream &operator<<(::std::ostream &os, const CPUModel &cpu_model)
+{
+    switch(cpu_model)
+    {
+        case CPUModel::GENERIC:
+            os << "GENERIC";
+            break;
+        case CPUModel::GENERIC_FP16:
+            os << "GENERIC_FP16";
+            break;
+        case CPUModel::GENERIC_FP16_DOT:
+            os << "GENERIC_FP16_DOT";
+            break;
+        case CPUModel::A53:
+            os << "A53";
+            break;
+        case CPUModel::A55r0:
+            os << "A55r0";
+            break;
+        case CPUModel::A55r1:
+            os << "A55r1";
+            break;
+        default:
+            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
+    }
+
+    return os;
+}
+
+/** Formatted output of the CPUModel type.
+ *
+ * @param[in] cpu_model Model to output
+ *
+ * @return Formatted string.
+ */
+inline std::string to_string(const CPUModel &cpu_model)
+{
+    std::stringstream str;
+    str << cpu_model;
+    return str.str();
+}
 /** Formatted output of a vector of objects.
  *
  * @param[out] os   Output stream

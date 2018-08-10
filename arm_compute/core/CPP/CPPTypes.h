@@ -121,6 +121,12 @@ public:
      */
     void set_cpu_num(unsigned int cpu_count);
 
+    /** Return the maximum number of CPUs present
+     *
+     * @return Number of CPUs
+     */
+    unsigned int get_cpu_num() const;
+
 private:
     std::vector<CPUModel> _percpu        = {};
     bool                  _fp16          = false;
