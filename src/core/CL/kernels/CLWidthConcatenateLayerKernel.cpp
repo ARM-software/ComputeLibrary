@@ -102,14 +102,10 @@ void CLWidthConcatenateLayerKernel::configure(const ICLTensor *input, unsigned i
     CLBuildOptions build_opts;
     build_opts.add_option("-DDATA_TYPE=" + get_underlying_cl_type_from_data_type(input->info()->data_type()));
     build_opts.add_option("-DVEC_SIZE=" + support::cpp11::to_string(num_elems_processed_per_iteration));
+    build_opts.add_option("-DWIDTH_OFFSET=" + support::cpp11::to_string(_width_offset));
 
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("concatenate_width", build_opts.options()));
-
-    const int offset_to_first_elements_in_bytes = _width_offset * _output->info()->strides_in_bytes()[0];
-
-    unsigned int idx = 2 * num_arguments_per_3D_tensor(); // Skip the input and output parameters
-    _kernel.setArg<cl_int>(idx, offset_to_first_elements_in_bytes);
 
     // Configure kernel window
     auto win_config = validate_and_configure_window(input->info(), width_offset, output->info());
