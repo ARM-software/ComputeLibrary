@@ -38,7 +38,7 @@ namespace validation
 {
 namespace
 {
-const float scale_255   = 1.f / 255.f;
+const float scale_255 = 1.f / 255.f;
 
 // *INDENT-OFF*
 // clang-format off
@@ -55,20 +55,6 @@ const float scale_255   = 1.f / 255.f;
                            framework::dataset::make("RoundingPolicy", RoundingPolicy::RP)))                               \
     {                                                                                                                     \
         VALIDATE                                                                                                          \
-    }
-
-#define FP_PIXEL_WISE_MULTIPLICATION_FIXTURE_DATA_TEST_CASE(TEST_NAME, FIXTURE, MODE, SHAPES, DT1, DT2, SCALE, RP, FPP_START, FPP_END) \
-    FIXTURE_DATA_TEST_CASE(TEST_NAME, CLFixedPointPixelWiseMultiplication##FIXTURE, framework::DatasetMode::MODE,                      \
-                           combine(combine(combine(combine(combine(combine(                                                            \
-                           datasets::SHAPES,                                                                                           \
-                           framework::dataset::make("DataType1", DataType::DT1)),                                                      \
-                           framework::dataset::make("DataType2", DataType::DT2)),                                                      \
-                           framework::dataset::make("Scale", std::move(SCALE))),                                                       \
-                           datasets::ConvertPolicies()),                                                                               \
-                           framework::dataset::make("RoundingPolicy", RoundingPolicy::RP)),                                            \
-                           framework::dataset::make("FixedPointPosition", FPP_START, FPP_END)))                                        \
-    {                                                                                                                                  \
-        validate(CLAccessor(_target), _reference);                                                                                     \
     }
 // clang-format on
 // *INDENT-ON*

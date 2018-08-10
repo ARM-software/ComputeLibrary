@@ -43,7 +43,7 @@ namespace test
 namespace validation
 {
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class GEMMTranspose1xWValidationFixedPointFixture : public framework::Fixture
+class GEMMTranspose1xWValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
@@ -121,18 +121,6 @@ protected:
     SimpleTensor<T> _reference{};
     DataType        _data_type{};
 };
-
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class GEMMTranspose1xWValidationFixture : public GEMMTranspose1xWValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>
-{
-public:
-    template <typename...>
-    void setup(size_t x, size_t y, DataType data_type)
-    {
-        GEMMTranspose1xWValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(x, y, data_type);
-    }
-};
-
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

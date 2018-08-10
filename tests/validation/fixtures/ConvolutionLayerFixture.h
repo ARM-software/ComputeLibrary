@@ -193,20 +193,6 @@ public:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ConvolutionValidationFixedPointFixture : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
-{
-public:
-    template <typename...>
-    void setup(TensorShape input_shape, TensorShape weights_shape, TensorShape bias_shape, TensorShape output_shape, PadStrideInfo info, Size2D dilation, bool reshape_weights, DataType data_type,
-               ActivationLayerInfo act_info)
-    {
-        ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, weights_shape, bias_shape, output_shape, info, dilation, reshape_weights, data_type,
-                                                                                              DataLayout::NCHW,
-                                                                                              QuantizationInfo(), act_info);
-    }
-};
-
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
 class ConvolutionValidationQuantizedFixture : public ConvolutionValidationGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -43,7 +43,7 @@ namespace test
 namespace validation
 {
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class DequantizationValidationFixedPointFixture : public framework::Fixture
+class DequantizationValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
@@ -163,17 +163,6 @@ protected:
 
     TensorType          _target{};
     SimpleTensor<float> _reference{};
-};
-
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class DequantizationValidationFixture : public DequantizationValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>
-{
-public:
-    template <typename...>
-    void setup(TensorShape shape, DataType data_type)
-    {
-        DequantizationValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type);
-    }
 };
 } // namespace validation
 } // namespace test

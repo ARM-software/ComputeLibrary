@@ -215,18 +215,6 @@ public:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class DirectConvolutionValidationFixedPointTensorShiftFixture : public DirectConvolutionValidationGenericTensorShiftFixture<TensorType, AccessorType, FunctionType, T>
-{
-public:
-    template <typename...>
-    void setup(TensorShape input_shape, int stride_x, int stride_y, int pad_x, int pad_y, unsigned int kernel_size, unsigned int num_kernels, DataType data_type)
-    {
-        DirectConvolutionValidationGenericTensorShiftFixture<TensorType, AccessorType, FunctionType, T>::setup(input_shape, stride_x, stride_y, pad_x, pad_y, kernel_size, num_kernels, data_type,
-                                                                                                               QuantizationInfo());
-    }
-};
-
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
 class DirectConvolutionValidationQuantizedTensorShiftFixture : public DirectConvolutionValidationGenericTensorShiftFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:

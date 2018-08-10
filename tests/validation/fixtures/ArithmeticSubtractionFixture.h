@@ -41,7 +41,7 @@ namespace test
 namespace validation
 {
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T1, typename T2 = T1, typename T3 = T1>
-class ArithmeticSubtractionValidationFixedPointFixture : public framework::Fixture
+class ArithmeticSubtractionValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
@@ -107,16 +107,6 @@ protected:
 
     TensorType       _target{};
     SimpleTensor<T3> _reference{};
-};
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T1, typename T2 = T1, typename T3 = T1>
-class ArithmeticSubtractionValidationFixture : public ArithmeticSubtractionValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T1, T2, T3>
-{
-public:
-    template <typename...>
-    void setup(TensorShape shape, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy)
-    {
-        ArithmeticSubtractionValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T1, T2, T3>::setup(shape, data_type0, data_type1, output_data_type, convert_policy);
-    }
 };
 } // namespace validation
 } // namespace test

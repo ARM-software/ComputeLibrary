@@ -115,18 +115,6 @@ protected:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ArithmeticAdditionBroadcastValidationFixedPointFixture : public ArithmeticAdditionGenericFixture<TensorType, AccessorType, FunctionType, T>
-{
-public:
-    template <typename...>
-    void setup(const TensorShape &shape0, const TensorShape &shape1, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy)
-    {
-        ArithmeticAdditionGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape0, shape1, data_type0, data_type1,
-                                                                                           output_data_type, convert_policy, QuantizationInfo(), QuantizationInfo(), QuantizationInfo());
-    }
-};
-
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
 class ArithmeticAdditionBroadcastValidationFixture : public ArithmeticAdditionGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
@@ -139,7 +127,7 @@ public:
 };
 
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ArithmeticAdditionValidationFixedPointFixture : public ArithmeticAdditionGenericFixture<TensorType, AccessorType, FunctionType, T>
+class ArithmeticAdditionValidationFixture : public ArithmeticAdditionGenericFixture<TensorType, AccessorType, FunctionType, T>
 {
 public:
     template <typename...>
@@ -147,17 +135,6 @@ public:
     {
         ArithmeticAdditionGenericFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, shape, data_type0, data_type1,
                                                                                            output_data_type, convert_policy, QuantizationInfo(), QuantizationInfo(), QuantizationInfo());
-    }
-};
-
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class ArithmeticAdditionValidationFixture : public ArithmeticAdditionValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>
-{
-public:
-    template <typename...>
-    void setup(const TensorShape &shape, DataType data_type0, DataType data_type1, DataType output_data_type, ConvertPolicy convert_policy)
-    {
-        ArithmeticAdditionValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(shape, data_type0, data_type1, output_data_type, convert_policy);
     }
 };
 

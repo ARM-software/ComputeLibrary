@@ -41,7 +41,7 @@ namespace test
 namespace validation
 {
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T1, typename T2>
-class DepthConvertLayerValidationFixedPointFixture : public framework::Fixture
+class DepthConvertLayerValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
@@ -102,26 +102,6 @@ protected:
     TensorType       _target{};
     SimpleTensor<T2> _reference{};
     int              _shift{};
-};
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T1, typename T2>
-class DepthConvertLayerValidationFixture : public DepthConvertLayerValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T1, T2>
-{
-public:
-    template <typename...>
-    void setup(TensorShape shape, DataType dt_in, DataType dt_out, ConvertPolicy policy, uint32_t shift)
-    {
-        DepthConvertLayerValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T1, T2>::setup(shape, dt_in, dt_out, policy, shift);
-    }
-};
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T1, typename T2>
-class DepthConvertLayerValidationFractionalBitsFixture : public DepthConvertLayerValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T1, T2>
-{
-public:
-    template <typename...>
-    void setup(TensorShape shape, DataType dt_in, DataType dt_out, ConvertPolicy policy)
-    {
-        DepthConvertLayerValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T1, T2>::setup(shape, dt_in, dt_out, policy, 0);
-    }
 };
 } // namespace validation
 } // namespace test

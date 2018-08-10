@@ -41,7 +41,7 @@ namespace test
 namespace validation
 {
 template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class BatchNormalizationLayerValidationFixedPointFixture : public framework::Fixture
+class BatchNormalizationLayerValidationFixture : public framework::Fixture
 {
 public:
     template <typename...>
@@ -191,17 +191,6 @@ protected:
     DataType        _data_type{};
     bool            _use_beta{};
     bool            _use_gamma{};
-};
-
-template <typename TensorType, typename AccessorType, typename FunctionType, typename T>
-class BatchNormalizationLayerValidationFixture : public BatchNormalizationLayerValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>
-{
-public:
-    template <typename...>
-    void setup(TensorShape shape0, TensorShape shape1, float epsilon, bool use_beta, bool use_gamma, ActivationLayerInfo act_info, DataType dt, DataLayout data_layout)
-    {
-        BatchNormalizationLayerValidationFixedPointFixture<TensorType, AccessorType, FunctionType, T>::setup(shape0, shape1, epsilon, use_beta, use_gamma, act_info, dt, data_layout);
-    }
 };
 } // namespace validation
 } // namespace test
