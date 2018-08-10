@@ -75,7 +75,7 @@ public:
 
 private:
     //Important: GraphContext must be declared *before* the GraphManager because the GraphManager
-    //allocates resources from the context and therefore needs to be destroyed before the context during clean up).
+    //allocates resources from the context and therefore needs to be destroyed before the context during clean up.
     GraphContext _ctx;     /**< Graph context to use */
     GraphManager _manager; /**< Graph manager */
     Graph        _g;       /**< Internal graph representation of the stream */

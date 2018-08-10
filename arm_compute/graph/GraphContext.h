@@ -50,6 +50,7 @@ class GraphContext final
 public:
     /** Constructor */
     GraphContext();
+    /** Destructor */
     ~GraphContext();
     /** Prevent instances of this class from being copied (As this class contains pointers) */
     GraphContext(const GraphContext &) = delete;

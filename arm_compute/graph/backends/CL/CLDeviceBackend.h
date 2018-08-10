@@ -67,7 +67,7 @@ private:
     int                                _context_count; /**< Counts how many contexts are currently using the backend */
     CLTuner                            _tuner;         /**< CL kernel tuner */
     std::unique_ptr<CLBufferAllocator> _allocator;     /**< CL buffer affinity allocator */
-    std::string                        _tuner_file;    /** Filename to load/store the tuner's values from */
+    std::string                        _tuner_file;    /**< Filename to load/store the tuner's values from */
 };
 } // namespace backends
 } // namespace graph

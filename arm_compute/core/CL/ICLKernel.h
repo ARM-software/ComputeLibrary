@@ -62,13 +62,19 @@ private:
         return 2 + 2 * dimension_size;
     }
     using IKernel::configure; //Prevent children from calling IKernel::configure() directly
-public:
+protected:
+    /** Configure the kernel's window and local workgroup size hint.
+     *
+     * @param[in] window   The maximum window which will be returned by window()
+     * @param[in] lws_hint (Optional) Local-Workgroup-Size to use.
+     */
     void configure_internal(const Window &window, cl::NDRange lws_hint = CLKernelLibrary::get().default_ndrange())
     {
         _lws_hint = lws_hint;
         IKernel::configure(window);
     }
 
+public:
     /** Constructor */
     ICLKernel()
         : _kernel(nullptr), _target(GPUTarget::MIDGARD), _config_id(arm_compute::default_config_id), _max_workgroup_size(0), _lws_hint()

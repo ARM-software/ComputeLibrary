@@ -2,9 +2,18 @@
 
 set -e
 
-DIRECTORIES="./arm_compute ./src ./examples ./tests ./utils ./support"
+ALL_DIRECTORIES="./arm_compute ./src ./examples ./tests ./utils ./support"
 
-grep -HrnP --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm "/\*\*$" $DIRECTORIES | tee bad_style.log
+#If no arguments were passed: default to check all the folders:
+if [ ! -n "$1" ]
+then
+    FILES=$ALL_DIRECTORIES
+else
+    #else only check the files that were passed on the command line:
+    FILES=$@
+fi
+
+grep -HrnP --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm "/\*\*$" $FILES | tee bad_style.log
 if (( `cat bad_style.log | wc -l` > 0 ))
 then
     echo ""
@@ -12,7 +21,7 @@ then
     exit -1
 fi
 
-grep -Hnr --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm --exclude=Doxyfile "@brief" $DIRECTORIES | tee bad_style.log
+grep -Hnr --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm --exclude=Doxyfile "@brief" $FILES | tee bad_style.log
 if (( `cat bad_style.log | wc -l` > 0 ))
 then
     echo ""
@@ -20,7 +29,7 @@ then
     exit -1
 fi
 
-grep -HnRE --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm "\buint " --exclude-dir=cl_kernels --exclude-dir=cs_shaders $DIRECTORIES | tee bad_style.log
+grep -HnRE --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm "\buint " --exclude-dir=cl_kernels --exclude-dir=cs_shaders $FILES | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""
@@ -28,7 +37,7 @@ then
     exit -1
 fi
 
-grep -HnR --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm "float32_t" $DIRECTORIES | tee bad_style.log
+grep -HnR --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm "float32_t" $FILES | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""
@@ -36,7 +45,7 @@ then
     exit -1
 fi
 
-grep -Hnir --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm "arm[_ ]\?cv" $DIRECTORIES | tee bad_style.log
+grep -Hnir --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm "arm[_ ]\?cv" $FILES | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""
@@ -44,7 +53,7 @@ then
     exit -1
 fi
 
-grep -Hnir --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm "#.*if.*defined[^(]" $DIRECTORIES | tee bad_style.log
+grep -Hnir --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm "#.*if.*defined[^(]" $FILES | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""
@@ -52,7 +61,7 @@ then
     exit -1
 fi
 
-grep -Hnir --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm "#else$\|#endif$" $DIRECTORIES | tee bad_style.log
+grep -Hnir --exclude-dir=assembly --exclude-dir=convolution --exclude-dir=arm_gemm "#else$\|#endif$" $FILES | tee bad_style.log
 if [[ $(cat bad_style.log | wc -l) > 0 ]]
 then
     echo ""
@@ -69,7 +78,7 @@ then
 fi
 
 spdx_missing=0
-for f in $(find $DIRECTORIES -type f)
+for f in $(find $FILES -type f)
 do
     if [[ $(grep SPDX $f | wc -l) == 0 ]]
     then
