@@ -660,9 +660,8 @@ public:
     GroupedIm2ColLargeShapes()
         : ShapeDataset("Shape",
     {
-        TensorShape{ 1921U, 1083U, 12U },
-                     TensorShape{ 641U, 485U, 24U, 3U },
-                     TensorShape{ 799U, 595U, 12U, 4U },
+        TensorShape{ 153U, 231U, 12U },
+                     TensorShape{ 123U, 191U, 12U, 2U },
     })
     {
     }
