@@ -45,6 +45,7 @@
 #include "arm_compute/runtime/NEON/functions/NEConvertFullyConnectedWeights.h"
 #include "arm_compute/runtime/NEON/functions/NEConvolution.h"
 #include "arm_compute/runtime/NEON/functions/NEConvolutionLayer.h"
+#include "arm_compute/runtime/NEON/functions/NECopy.h"
 #include "arm_compute/runtime/NEON/functions/NEDeconvolutionLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEDepthConcatenateLayer.h"
 #include "arm_compute/runtime/NEON/functions/NEDepthConvertLayer.h"

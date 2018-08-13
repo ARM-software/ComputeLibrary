@@ -43,6 +43,7 @@
 #include "arm_compute/core/NEON/kernels/NEColorConvertKernel.h"
 #include "arm_compute/core/NEON/kernels/NEConvertFullyConnectedWeightsKernel.h"
 #include "arm_compute/core/NEON/kernels/NEConvolutionKernel.h"
+#include "arm_compute/core/NEON/kernels/NECopyKernel.h"
 #include "arm_compute/core/NEON/kernels/NECumulativeDistributionKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDepthConcatenateLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEDepthConvertLayerKernel.h"
