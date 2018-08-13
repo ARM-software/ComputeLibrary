@@ -106,9 +106,7 @@ void NERNNLayer::run()
     NEScheduler::get().schedule(&_activation_kernel, Window::DimY);
 
     // copy hidden out to output
-    Window hidden_state_window;
     Window output_window;
-    hidden_state_window.use_tensor_dimensions(_hidden_state->info()->tensor_shape(), Window::DimY);
     output_window.use_tensor_dimensions(_output->info()->tensor_shape(), Window::DimY);
 
     Iterator hidden_state_it(_hidden_state, output_window);
