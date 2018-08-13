@@ -63,12 +63,11 @@ public:
     CLCol2ImKernel &operator=(CLCol2ImKernel &&) = default;
     /** Default destructor */
     ~CLCol2ImKernel() = default;
-
     /** Set the input and output of the kernel.
      *
      * @param[in]  input          The input tensor to convert. Data types supported: QASYMM8/F16/F32
      * @param[out] output         The output tensor. 3 lower dimensions represent a single output [width, height, OFM],
-     *                            while the rest represent batch of outputs. Data types supported: Same as @p input
+     *                            while the rest represent batch of outputs. Data types supported: Same as @p input. Data layout: NCHW
      * @param[in]  convolved_dims Output convolved dimensions.
      * @param[in]  num_groups     (Optional) Number of groups when performing a grouped convolution
      */
@@ -77,7 +76,7 @@ public:
      *
      * @param[in] input          The input tensor to convert. Data types supported: QASYMM8/F16/F32
      * @param[in] output         The output tensor. 3 lower dimensions represent a single output [width, height, OFM],
-     *                           while the rest represent batch of outputs. Data types supported: Same as @p input
+     *                           while the rest represent batch of outputs. Data types supported: Same as @p input. Data layout: NCHW
      * @param[in] convolved_dims Output convolved dimensions.
      * @param[in] num_groups     (Optional) Number of groups when performing a grouped convolution
      *

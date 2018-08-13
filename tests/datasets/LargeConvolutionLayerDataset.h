@@ -166,29 +166,49 @@ public:
         // Batch size 1
         add_config(TensorShape(227U, 227U, 3U), TensorShape(11U, 11U, 3U, 96U), TensorShape(96U), TensorShape(55U, 55U, 96U), PadStrideInfo(4, 4, 0, 0));
         add_config(TensorShape(27U, 27U, 96U), TensorShape(5U, 5U, 96U, 256U), TensorShape(256U), TensorShape(27U, 27U, 256U), PadStrideInfo(1, 1, 2, 2));
-        add_config(TensorShape(13U, 13U, 256U), TensorShape(3U, 3U, 256U, 384U), TensorShape(384U), TensorShape(13U, 13U, 384U), PadStrideInfo(1, 1, 1, 1));
-        add_config(TensorShape(13U, 13U, 384U), TensorShape(3U, 3U, 384U, 384U), TensorShape(384U), TensorShape(13U, 13U, 384U), PadStrideInfo(1, 1, 1, 1));
-        add_config(TensorShape(13U, 13U, 384U), TensorShape(3U, 3U, 384U, 256U), TensorShape(256U), TensorShape(13U, 13U, 256U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(13U, 13U, 256U), TensorShape(1U, 1U, 256U, 384U), TensorShape(384U), TensorShape(13U, 13U, 384U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(13U, 13U, 384U), TensorShape(1U, 1U, 384U, 384U), TensorShape(384U), TensorShape(13U, 13U, 384U), PadStrideInfo(1, 1, 0, 0));
         add_config(TensorShape(224U, 224U, 3U), TensorShape(7U, 7U, 3U, 64U), TensorShape(64U), TensorShape(112U, 112U, 64U), PadStrideInfo(2, 2, 3, 3));
         add_config(TensorShape(28U, 28U, 256U), TensorShape(1U, 1U, 256U, 64U), TensorShape(64U), TensorShape(28U, 28U, 64U), PadStrideInfo(1, 1, 0, 0));
         // Batch size 4
         add_config(TensorShape(227U, 227U, 3U, 4U), TensorShape(11U, 11U, 3U, 96U), TensorShape(96U), TensorShape(55U, 55U, 96U, 4U), PadStrideInfo(4, 4, 0, 0));
         add_config(TensorShape(27U, 27U, 96U, 4U), TensorShape(5U, 5U, 96U, 256U), TensorShape(256U), TensorShape(27U, 27U, 256U, 4U), PadStrideInfo(1, 1, 2, 2));
-        add_config(TensorShape(13U, 13U, 256U, 4U), TensorShape(3U, 3U, 256U, 384U), TensorShape(384U), TensorShape(13U, 13U, 384U, 4U), PadStrideInfo(1, 1, 1, 1));
-        add_config(TensorShape(13U, 13U, 384U, 4U), TensorShape(3U, 3U, 384U, 384U), TensorShape(384U), TensorShape(13U, 13U, 384U, 4U), PadStrideInfo(1, 1, 1, 1));
-        add_config(TensorShape(13U, 13U, 384U, 4U), TensorShape(3U, 3U, 384U, 256U), TensorShape(256U), TensorShape(13U, 13U, 256U, 4U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(13U, 13U, 256U, 4U), TensorShape(1U, 1U, 256U, 384U), TensorShape(384U), TensorShape(13U, 13U, 384U, 4U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(13U, 13U, 384U, 4U), TensorShape(1U, 1U, 384U, 384U), TensorShape(384U), TensorShape(13U, 13U, 384U, 4U), PadStrideInfo(1, 1, 0, 0));
         add_config(TensorShape(224U, 224U, 3U, 4U), TensorShape(7U, 7U, 3U, 64U), TensorShape(64U), TensorShape(112U, 112U, 64U, 4U), PadStrideInfo(2, 2, 3, 3));
         add_config(TensorShape(28U, 28U, 256U, 4U), TensorShape(1U, 1U, 256U, 64U), TensorShape(64U), TensorShape(28U, 28U, 64U, 4U), PadStrideInfo(1, 1, 0, 0));
         // Batch size 8
         add_config(TensorShape(227U, 227U, 3U, 8U), TensorShape(11U, 11U, 3U, 96U), TensorShape(96U), TensorShape(55U, 55U, 96U, 8U), PadStrideInfo(4, 4, 0, 0));
         add_config(TensorShape(27U, 27U, 96U, 8U), TensorShape(5U, 5U, 96U, 256U), TensorShape(256U), TensorShape(27U, 27U, 256U, 8U), PadStrideInfo(1, 1, 2, 2));
-        add_config(TensorShape(13U, 13U, 256U, 8U), TensorShape(3U, 3U, 256U, 384U), TensorShape(384U), TensorShape(13U, 13U, 384U, 8U), PadStrideInfo(1, 1, 1, 1));
-        add_config(TensorShape(13U, 13U, 384U, 8U), TensorShape(3U, 3U, 384U, 384U), TensorShape(384U), TensorShape(13U, 13U, 384U, 8U), PadStrideInfo(1, 1, 1, 1));
-        add_config(TensorShape(13U, 13U, 384U, 8U), TensorShape(3U, 3U, 384U, 256U), TensorShape(256U), TensorShape(13U, 13U, 256U, 8U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(13U, 13U, 256U, 8U), TensorShape(1U, 1U, 256U, 384U), TensorShape(384U), TensorShape(13U, 13U, 384U, 8U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(13U, 13U, 384U, 8U), TensorShape(1U, 1U, 384U, 384U), TensorShape(384U), TensorShape(13U, 13U, 384U, 8U), PadStrideInfo(1, 1, 0, 0));
         add_config(TensorShape(224U, 224U, 3U, 8U), TensorShape(7U, 7U, 3U, 64U), TensorShape(64U), TensorShape(112U, 112U, 64U, 8U), PadStrideInfo(2, 2, 3, 3));
         add_config(TensorShape(28U, 28U, 256U, 8U), TensorShape(1U, 1U, 256U, 64U), TensorShape(64U), TensorShape(28U, 28U, 64U, 8U), PadStrideInfo(1, 1, 0, 0));
         // Arbitrary batch size
         add_config(TensorShape(227U, 227U, 3U, 5U), TensorShape(11U, 11U, 3U, 96U), TensorShape(96U), TensorShape(55U, 55U, 96U, 5U), PadStrideInfo(4, 4, 0, 0));
+    }
+};
+
+class LargeGroupedConvolutionLayerDataset final : public ConvolutionLayerDataset
+{
+public:
+    LargeGroupedConvolutionLayerDataset()
+    {
+        // Batch size 1
+        add_config(TensorShape(227U, 227U, 4U), TensorShape(11U, 11U, 2U, 96U), TensorShape(96U), TensorShape(55U, 55U, 96U), PadStrideInfo(4, 4, 0, 0));
+        add_config(TensorShape(27U, 27U, 96U), TensorShape(5U, 5U, 24U, 256U), TensorShape(256U), TensorShape(27U, 27U, 256U), PadStrideInfo(1, 1, 2, 2));
+        add_config(TensorShape(13U, 13U, 256U), TensorShape(1U, 1U, 128U, 384U), TensorShape(384U), TensorShape(13U, 13U, 384U), PadStrideInfo(1, 1, 0, 0));
+        add_config(TensorShape(13U, 13U, 384U), TensorShape(3U, 3U, 128U, 384U), TensorShape(384U), TensorShape(13U, 13U, 384U), PadStrideInfo(1, 1, 1, 1));
+        // Batch size 4
+        add_config(TensorShape(227U, 227U, 4U, 4U), TensorShape(11U, 11U, 2U, 96U), TensorShape(96U), TensorShape(55U, 55U, 96U, 4U), PadStrideInfo(4, 4, 0, 0));
+        add_config(TensorShape(27U, 27U, 96U, 4U), TensorShape(5U, 5U, 24U, 256U), TensorShape(256U), TensorShape(27U, 27U, 256U, 4U), PadStrideInfo(1, 1, 2, 2));
+        add_config(TensorShape(13U, 13U, 256U, 4U), TensorShape(3U, 3U, 128U, 384U), TensorShape(384U), TensorShape(13U, 13U, 384U, 4U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(13U, 13U, 384U, 4U), TensorShape(3U, 3U, 128U, 384U), TensorShape(384U), TensorShape(13U, 13U, 384U, 4U), PadStrideInfo(1, 1, 1, 1));
+        // Batch size 8
+        add_config(TensorShape(227U, 227U, 4U, 8U), TensorShape(11U, 11U, 2U, 96U), TensorShape(96U), TensorShape(55U, 55U, 96U, 8U), PadStrideInfo(4, 4, 0, 0));
+        add_config(TensorShape(27U, 27U, 96U, 8U), TensorShape(5U, 5U, 24U, 256U), TensorShape(256U), TensorShape(27U, 27U, 256U, 8U), PadStrideInfo(1, 1, 2, 2));
+        add_config(TensorShape(13U, 13U, 256U, 8U), TensorShape(3U, 3U, 128U, 384U), TensorShape(384U), TensorShape(13U, 13U, 384U, 8U), PadStrideInfo(1, 1, 1, 1));
+        add_config(TensorShape(13U, 13U, 384U, 8U), TensorShape(3U, 3U, 128U, 384U), TensorShape(384U), TensorShape(13U, 13U, 384U, 8U), PadStrideInfo(1, 1, 1, 1));
     }
 };
 } // namespace datasets

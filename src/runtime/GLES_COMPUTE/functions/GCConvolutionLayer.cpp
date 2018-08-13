@@ -88,7 +88,7 @@ Status GCConvolutionLayer::validate_mm(const ITensorInfo *input, const ITensorIn
 }
 
 void GCConvolutionLayer::configure(const IGCTensor *input, const IGCTensor *weights, const IGCTensor *biases, IGCTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
-                                   const Size2D &dilation, const ActivationLayerInfo &act_info)
+                                   const Size2D &dilation, const ActivationLayerInfo &act_info, unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights);
     ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32);
@@ -96,6 +96,8 @@ void GCConvolutionLayer::configure(const IGCTensor *input, const IGCTensor *weig
     ARM_COMPUTE_ERROR_ON_MSG(weights_info.are_reshaped(), "Weights already reshaped are not supported!");
     ARM_COMPUTE_ERROR_ON(weights->info()->dimension(2) != input->info()->dimension(2));
     ARM_COMPUTE_ERROR_ON(weights->info()->num_dimensions() > 4);
+    ARM_COMPUTE_ERROR_ON(num_groups > 1);
+    ARM_COMPUTE_UNUSED(num_groups);
 
     _is_prepared      = false;
     _original_weights = weights;

@@ -324,6 +324,8 @@ void CLIm2ColKernel::configure(const ICLTensor *input, ICLTensor *output, const 
     _config_id += "_";
     _config_id += lower_string(string_from_data_type(input->info()->data_type()));
     _config_id += "_";
+    _config_id += support::cpp11::to_string(num_groups);
+    _config_id += "_";
     _config_id += support::cpp11::to_string(output->info()->dimension(0));
     _config_id += "_";
     _config_id += support::cpp11::to_string(output->info()->dimension(1));

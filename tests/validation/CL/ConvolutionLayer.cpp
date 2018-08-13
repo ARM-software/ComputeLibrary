@@ -58,6 +58,14 @@ const auto CNNDataTypes = framework::dataset::make("DataType",
     DataType::F32,
     DataType::QASYMM8,
 });
+
+/** Grouped CNN data types */
+const auto GroupedCNNDataTypes = framework::dataset::make("DataType",
+{
+    DataType::F16,
+    DataType::F32
+});
+
 const auto ActivationFunctionsDataset = framework::dataset::make("ActivationInfo",
 {
     ActivationLayerInfo(),
@@ -219,7 +227,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMConvolutionLayerFixture<half>, framework:
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
 }
-TEST_SUITE_END()
+TEST_SUITE_END() // FP16
 
 TEST_SUITE(FP32)
 
@@ -244,8 +252,8 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMConvolutionLayerFixture<float>, framework
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32, 0.f, absolute_tolerance_float);
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // FP32
+TEST_SUITE_END() // Float
 
 template <typename T>
 using CLGEMMConvolutionLayerQuantizedFixture = ConvolutionValidationQuantizedFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T>;
@@ -280,11 +288,106 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMConvolutionLayerQuantizedFixture<uint8_t>
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // QASYMM8
+TEST_SUITE_END() // Quantized
 
-TEST_SUITE_END()
-TEST_SUITE_END()
+TEST_SUITE_END() // GEMMConvolutionLayer
+
+template <typename T>
+using CLGEMMGroupedConvolutionLayerFixture = ConvolutionValidationFixture<CLTensor, CLAccessor, CLGEMMConvolutionLayer, T>;
+
+TEST_SUITE(GroupedGEMMConvolutionLayer)
+
+DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(framework::dataset::concat(datasets::SmallGroupedConvolutionLayerDataset(), datasets::LargeGroupedConvolutionLayerDataset()),
+                                                                           GroupedCNNDataTypes),
+                                                                   ActivationFunctionsDataset),
+               input_shape, weights_shape, bias_shape, output_shape, info, dilation, data_type, act_info)
+{
+    ARM_COMPUTE_ERROR_ON((input_shape[2] % weights_shape[2]) != 0);
+
+    // The number of groups is calculated dividing the number of input channels of the input tensor by the number of input channels of the weights shape
+    const int num_groups = input_shape[2] / weights_shape[2];
+
+    // Create tensors
+    CLTensor src     = create_tensor<CLTensor>(input_shape, data_type);
+    CLTensor weights = create_tensor<CLTensor>(weights_shape, data_type, 1);
+    CLTensor bias    = create_tensor<CLTensor>(bias_shape, data_type, 1);
+    CLTensor dst     = create_tensor<CLTensor>(output_shape, data_type, 1);
+
+    ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(weights.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(bias.info()->is_resizable(), framework::LogLevel::ERRORS);
+    ARM_COMPUTE_EXPECT(dst.info()->is_resizable(), framework::LogLevel::ERRORS);
+
+    // Create and configure function
+    CLGEMMConvolutionLayer conv;
+    conv.configure(&src, &weights, &bias, &dst, info, WeightsInfo(), dilation, act_info, num_groups);
+
+    // Validate valid region
+    const ValidRegion src_valid_region     = shape_to_valid_region(input_shape);
+    const ValidRegion weights_valid_region = shape_to_valid_region(weights_shape);
+    const ValidRegion bias_valid_region    = shape_to_valid_region(bias_shape);
+    const ValidRegion dst_valid_region     = shape_to_valid_region(output_shape);
+
+    validate(src.info()->valid_region(), src_valid_region);
+    validate(weights.info()->valid_region(), weights_valid_region);
+    validate(bias.info()->valid_region(), bias_valid_region);
+    validate(dst.info()->valid_region(), dst_valid_region);
+
+    // Validate padding
+    //TODO(COMPMID-415) Need to validate padding?
+}
+
+TEST_SUITE(Float)
+TEST_SUITE(FP32)
+
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMGroupedConvolutionLayerFixture<float>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallGroupedConvolutionLayerDataset(),
+                       framework::dataset::make("ReshapeWeights", { true })),
+                       framework::dataset::make("DataType", DataType::F32)),
+                       framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                       ActivationFunctionsDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMGroupedConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeGroupedConvolutionLayerDataset(),
+                                                                                                                       framework::dataset::make("ReshapeWeights", { true })),
+                                                                                                                       framework::dataset::make("DataType", DataType::F32)),
+                                                                                                                       framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                                                                                                       ActivationFunctionsDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num);
+}
+TEST_SUITE_END() // FP32
+
+TEST_SUITE(FP16)
+
+FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMGroupedConvolutionLayerFixture<half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(combine(datasets::SmallGroupedConvolutionLayerDataset(),
+                                                                                                                        framework::dataset::make("ReshapeWeights", { true })),
+                                                                                                                        framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                                                                                                        ActivationFunctionsDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num);
+}
+
+FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMGroupedConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeGroupedConvolutionLayerDataset(),
+                                                                                                                      framework::dataset::make("ReshapeWeights", { true })),
+                                                                                                                      framework::dataset::make("DataType", DataType::F16)),
+                                                                                                                      framework::dataset::make("DataLayout", { DataLayout::NCHW })),
+                                                                                                                      ActivationFunctionsDataset))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f32, tolerance_num);
+}
+TEST_SUITE_END() // FP16
+TEST_SUITE_END() // Float
+
+TEST_SUITE_END() // GroupedGEMMConvolutionLayer
+TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

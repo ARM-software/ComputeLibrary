@@ -119,7 +119,8 @@ void CLCol2ImKernel::configure(const ICLTensor *input, ICLTensor *output, std::p
     _config_id = "col2im_";
     _config_id += lower_string(string_from_data_type(input->info()->data_type()));
     _config_id += "_";
-    _config_id += (num_groups > 1) ? "grouping_" : "";
+    _config_id += support::cpp11::to_string(num_groups);
+    _config_id += "_";
     _config_id += support::cpp11::to_string(input->info()->dimension(0));
     _config_id += "_";
     _config_id += support::cpp11::to_string(input->info()->dimension(1));

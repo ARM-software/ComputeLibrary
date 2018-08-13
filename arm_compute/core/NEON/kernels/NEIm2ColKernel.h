@@ -84,7 +84,7 @@ public:
      * @param[in]  conv_info          Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  has_bias           In case biases are provided expands the matrix with 1.
      * @param[in]  dilation           (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
-     * @param[in]  num_groups         (Optional) Number of groups when performing a grouped convolution
+     * @param[in]  num_groups         (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is not supported
      * @param[in]  is_fully_connected (Optional) Determines whether this kernel will be called by @ref NEFullyConnectedLayer in order to validate the arguments
      * @param[in]  is_flatten         (Optional) Determines whether this kernel will be called by @ref NEFlattenLayer in order to validate the arguments
      */
@@ -100,7 +100,7 @@ public:
      * @param[in] conv_info          Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in] has_bias           In case biases are provided expands the matrix with 1.
      * @param[in] dilation           (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
-     * @param[in] num_groups         (Optional) Number of groups when performing a grouped convolution
+     * @param[in] num_groups         (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is not supported
      * @param[in] is_fully_connected (Optional)Determines whether this kernel will be called by @ref NEFullyConnectedLayer in order to validate the arguments
      * @param[in] is_flatten         (Optional) Determines whether this kernel will be called by @ref NEFlattenLayer in order to validate the arguments
      *

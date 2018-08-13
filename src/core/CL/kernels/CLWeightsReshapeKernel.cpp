@@ -38,7 +38,7 @@ using namespace arm_compute::misc::shape_calculator;
 
 namespace
 {
-Status validate_arguments(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output, const unsigned int num_groups)
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output, unsigned int num_groups)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, output);
     ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
@@ -75,12 +75,12 @@ CLWeightsReshapeKernel::CLWeightsReshapeKernel()
 {
 }
 
-void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *biases, ICLTensor *output, const unsigned int num_groups)
+void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *biases, ICLTensor *output, unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
 
     // Output tensor auto inizialitation if not yet initialized
-    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(compute_weights_reshaped_shape(*input->info(), (biases != nullptr))));
+    auto_init_if_empty(*output->info(), input->info()->clone()->set_tensor_shape(compute_weights_reshaped_shape(*input->info(), (biases != nullptr), num_groups)));
 
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(),
@@ -102,15 +102,6 @@ void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *
     // Create kernel
     _kernel = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel("reshape_to_columns", build_opts.options()));
 
-    // Set static arguments
-    unsigned int idx = num_arguments_per_3D_tensor() + num_arguments_per_2D_tensor();
-    idx += (biases != nullptr) ? num_arguments_per_1D_tensor() : 0;
-    _kernel.setArg<cl_uint>(idx++, _input->info()->dimension(0));
-    _kernel.setArg<cl_uint>(idx++, _input->info()->dimension(1));
-    _kernel.setArg<cl_uint>(idx++, _input->info()->dimension(2));
-    _kernel.setArg<cl_uint>(idx++, _input->info()->dimension(3));
-    _kernel.setArg<cl_uint>(idx++, _output->info()->strides_in_bytes().z());
-
     // Configure window
     Window win = calculate_max_window(*input->info(), Steps());
     // The CLWeightsReshapeKernel doesn't need padding so update_window_and_padding() can be skipped
@@ -118,7 +109,7 @@ void CLWeightsReshapeKernel::configure(const ICLTensor *input, const ICLTensor *
     ICLKernel::configure_internal(win);
 }
 
-Status CLWeightsReshapeKernel::validate(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output, const unsigned int num_groups)
+Status CLWeightsReshapeKernel::validate(const ITensorInfo *input, const ITensorInfo *biases, const ITensorInfo *output, unsigned int num_groups)
 {
     ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, biases, output, num_groups));
     return Status{};
@@ -137,6 +128,14 @@ void CLWeightsReshapeKernel::run(const Window &window, cl::CommandQueue &queue)
 
     Window biases_window;
     Window biases_slice;
+
+    unsigned int idx = num_arguments_per_3D_tensor() + num_arguments_per_2D_tensor();
+    idx += (_biases != nullptr) ? num_arguments_per_1D_tensor() : 0;
+    _kernel.setArg<cl_uint>(idx++, _input->info()->dimension(0));
+    _kernel.setArg<cl_uint>(idx++, _input->info()->dimension(1));
+    _kernel.setArg<cl_uint>(idx++, _input->info()->dimension(2));
+    _kernel.setArg<cl_uint>(idx++, _input->info()->dimension(3));
+    _kernel.setArg<cl_uint>(idx++, _output->info()->strides_in_bytes().z());
 
     if(_biases != nullptr)
     {

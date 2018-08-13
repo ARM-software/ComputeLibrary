@@ -43,23 +43,24 @@ CLConvolutionLayerReshapeWeights::CLConvolutionLayerReshapeWeights()
 {
 }
 
-void CLConvolutionLayerReshapeWeights::configure(const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output)
+void CLConvolutionLayerReshapeWeights::configure(const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, unsigned int num_groups)
 {
     // Perform validation step
     ARM_COMPUTE_ERROR_ON_NULLPTR(weights, output);
     ARM_COMPUTE_ERROR_THROW_ON(CLConvolutionLayerReshapeWeights::validate(weights->info(),
                                                                           (biases != nullptr) ? biases->info() : nullptr,
-                                                                          output->info()));
+                                                                          output->info(),
+                                                                          num_groups));
 
     const bool       append_biases = (biases != nullptr) && !is_data_type_quantized_asymmetric(weights->info()->data_type());
     const ICLTensor *biases_to_use = (append_biases) ? biases : nullptr;
 
-    _weights_reshape_kernel.configure(weights, biases_to_use, output);
+    _weights_reshape_kernel.configure(weights, biases_to_use, output, num_groups);
 
     output->info()->set_quantization_info(weights->info()->quantization_info());
 }
 
-Status CLConvolutionLayerReshapeWeights::validate(const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output)
+Status CLConvolutionLayerReshapeWeights::validate(const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, unsigned int num_groups)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(weights);
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(weights, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
@@ -78,7 +79,7 @@ Status CLConvolutionLayerReshapeWeights::validate(const ITensorInfo *weights, co
     {
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(weights, output);
 
-        CLWeightsReshapeKernel::validate(weights, biases, output);
+        CLWeightsReshapeKernel::validate(weights, biases, output, num_groups);
     }
 
     return Status{};
@@ -153,7 +154,7 @@ Status CLGEMMConvolutionLayer::validate_mm(const ITensorInfo *input, const ITens
 }
 
 void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
-                                       const Size2D &dilation, const ActivationLayerInfo &act_info)
+                                       const Size2D &dilation, const ActivationLayerInfo &act_info, unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
 
@@ -164,7 +165,8 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
                                                                 conv_info,
                                                                 weights_info,
                                                                 dilation,
-                                                                act_info));
+                                                                act_info,
+                                                                num_groups));
 
     const DataType   data_type   = input->info()->data_type();
     const DataLayout data_layout = input->info()->data_layout();
@@ -208,11 +210,11 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
                                                  conv_info,
                                                  dilation);
 
-    unsigned int mat_weights_cols = weights->info()->dimension(idx_kernels);
+    unsigned int mat_weights_cols = weights->info()->dimension(idx_kernels) / num_groups;
 
     // _weights_reshaped will be auto configured in the kernel.
     // Just append biases and do not transpose 1xW as it will be reshaped in CLGEMM
-    _reshape_weights.configure(weights, biases_to_use, &_weights_reshaped);
+    _reshape_weights.configure(weights, biases_to_use, &_weights_reshaped, num_groups);
 
     // Create tensor to store im2col reshaped inputs
     if(!_skip_im2col)
@@ -220,7 +222,7 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
         _memory_group.manage(&_im2col_output);
 
         // Configure and tune im2col. im2col output shape is auto-initialized
-        _im2col_kernel.configure(input, &_im2col_output, Size2D(kernel_width, kernel_height), conv_info, _append_bias, dilation);
+        _im2col_kernel.configure(input, &_im2col_output, Size2D(kernel_width, kernel_height), conv_info, _append_bias, dilation, num_groups);
 
         // Set quantization info
         _im2col_output.info()->set_quantization_info(input->info()->quantization_info());
@@ -283,7 +285,7 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
         if(input->info()->data_layout() == DataLayout::NCHW)
         {
             // Configure and tune Col2Im
-            _col2im_kernel.configure(_is_quantized ? gemm_output_staged_to_use : gemm_output_to_use, output, std::make_pair(conv_w, conv_h));
+            _col2im_kernel.configure(_is_quantized ? gemm_output_staged_to_use : gemm_output_to_use, output, std::make_pair(conv_w, conv_h), num_groups);
             CLScheduler::get().tune_kernel_static(_col2im_kernel);
         }
         else
@@ -314,13 +316,16 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
 }
 
 Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                        const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info)
+                                        const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info, unsigned int num_groups)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG(weights_info.are_reshaped(), "Weights already reshaped are not supported!");
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_LAYOUT(input, weights);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((num_groups != 1) && (input->data_layout() != DataLayout::NCHW), "Grouping (num_groups != 1) with NHWC data layout is not supported");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((num_groups != 1) && (input->data_type() == DataType::QASYMM8), "Grouping (num_groups != 1) is not supported with QASYMM8");
+    ARM_COMPUTE_RETURN_ERROR_ON(((input->dimension(2) / weights->dimension(2)) != num_groups) && (input->data_layout() == DataLayout::NCHW));
 
     const DataLayout data_layout = input->data_layout();
     const DataType   data_type   = input->data_type();
@@ -343,7 +348,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
     const bool skip_im2col  = (data_layout == DataLayout::NHWC && kernel_width == 1 && kernel_height == 1 && conv_info.stride().first == 1 && conv_info.stride().second == 1) && !is_quantized;
     const bool append_bias  = (biases != nullptr) && (!is_quantized);
 
-    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(idx_channel) != input->dimension(idx_channel));
+    ARM_COMPUTE_RETURN_ERROR_ON((weights->dimension(idx_channel) * num_groups) != input->dimension(idx_channel));
     ARM_COMPUTE_RETURN_ERROR_ON(weights->num_dimensions() > 4);
 
     // Validate biases
@@ -377,11 +382,11 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
                                                  conv_info,
                                                  dilation);
 
-    unsigned int mat_weights_cols = weights->dimension(idx_kernels);
+    unsigned int mat_weights_cols = weights->dimension(idx_kernels) / num_groups;
 
     // Output tensor auto inizialitation if not yet initialized
-    ARM_COMPUTE_RETURN_ON_ERROR(CLConvolutionLayerReshapeWeights::validate(weights, is_quantized ? nullptr : biases, nullptr));
-    weights_reshaped_info = TensorInfo(compute_weights_reshaped_shape(*weights, (append_bias && !skip_im2col)), 1, data_type);
+    ARM_COMPUTE_RETURN_ON_ERROR(CLConvolutionLayerReshapeWeights::validate(weights, is_quantized ? nullptr : biases, nullptr, num_groups));
+    weights_reshaped_info = TensorInfo(compute_weights_reshaped_shape(*weights, (append_bias && !skip_im2col), num_groups), 1, data_type);
     weights_to_use        = &weights_reshaped_info;
 
     if(!skip_im2col)
@@ -389,11 +394,11 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
         const Size2D kernel_dims(kernel_width, kernel_height);
 
         // Output tensor auto initialization if not yet initialized
-        TensorShape expected_output_shape = compute_im2col_conv_shape(input, kernel_dims, conv_info, append_bias, dilation, true /* num_groups == 1, num_groups */);
+        TensorShape expected_output_shape = compute_im2col_conv_shape(input, kernel_dims, conv_info, append_bias, dilation, num_groups == 1, num_groups);
 
         auto_init_if_empty(im2col_reshaped_info, input->clone()->set_tensor_shape(expected_output_shape));
 
-        ARM_COMPUTE_RETURN_ON_ERROR(CLIm2ColKernel::validate(input, &im2col_reshaped_info, kernel_dims, conv_info, append_bias, dilation));
+        ARM_COMPUTE_RETURN_ON_ERROR(CLIm2ColKernel::validate(input, &im2col_reshaped_info, kernel_dims, conv_info, append_bias, dilation, num_groups));
         gemm_input_to_use = &im2col_reshaped_info;
     }
     else if(append_bias)
@@ -438,7 +443,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
         {
             ARM_COMPUTE_RETURN_ON_ERROR(CLCol2ImKernel::validate(is_quantized ? gemm_output_staged_to_use : gemm_output_to_use,
                                                                  output,
-                                                                 std::make_pair(conv_w, conv_h)));
+                                                                 std::make_pair(conv_w, conv_h), num_groups));
         }
     }
 

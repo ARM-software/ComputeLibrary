@@ -146,6 +146,41 @@ public:
         add_config(TensorShape(33U, 27U, 7U, 5U), TensorShape(5U, 7U, 7U, 16U), TensorShape(16U), TensorShape(10U, 11U, 16U, 5U), PadStrideInfo(3, 2, 0, 1, 0, 1, DimensionRoundingType::FLOOR));
     }
 };
+
+class SmallGroupedConvolutionLayerDataset final : public ConvolutionLayerDataset
+{
+public:
+    SmallGroupedConvolutionLayerDataset()
+    {
+        // Batch size 1
+        // Number of groups = 2
+        add_config(TensorShape(23U, 27U, 8U), TensorShape(1U, 1U, 4U, 24U), TensorShape(24U), TensorShape(12U, 27U, 24U), PadStrideInfo(2, 1, 0, 0));
+        add_config(TensorShape(33U, 27U, 12U), TensorShape(5U, 5U, 6U, 16U), TensorShape(16U), TensorShape(11U, 12U, 16U), PadStrideInfo(3, 2, 1, 0));
+        // Number of groups = 4
+        add_config(TensorShape(23U, 27U, 8U), TensorShape(1U, 1U, 2U, 24U), TensorShape(24U), TensorShape(12U, 27U, 24U), PadStrideInfo(2, 1, 0, 0));
+        add_config(TensorShape(33U, 27U, 12U), TensorShape(5U, 5U, 4U, 15U), TensorShape(15U), TensorShape(11U, 12U, 15U), PadStrideInfo(3, 2, 1, 0));
+
+        // Batch size 4
+        // Number of groups = 2
+        add_config(TensorShape(23U, 27U, 8U, 4U), TensorShape(1U, 1U, 4U, 24U), TensorShape(24U), TensorShape(12U, 27U, 24U, 4U), PadStrideInfo(2, 1, 0, 0));
+        add_config(TensorShape(33U, 27U, 12U, 4U), TensorShape(5U, 5U, 6U, 16U), TensorShape(16U), TensorShape(11U, 12U, 16U, 4U), PadStrideInfo(3, 2, 1, 0));
+        // Number of groups = 4
+        add_config(TensorShape(23U, 27U, 8U, 4U), TensorShape(1U, 1U, 2U, 24U), TensorShape(24U), TensorShape(12U, 27U, 24U, 4U), PadStrideInfo(2, 1, 0, 0));
+        add_config(TensorShape(33U, 27U, 12U, 4U), TensorShape(5U, 5U, 4U, 15U), TensorShape(15U), TensorShape(11U, 12U, 15U, 4U), PadStrideInfo(3, 2, 1, 0));
+
+        // Arbitrary batch size
+        add_config(TensorShape(23U, 27U, 8U, 5U), TensorShape(1U, 1U, 4U, 24U), TensorShape(24U), TensorShape(12U, 27U, 24U, 5U), PadStrideInfo(2, 1, 0, 0));
+        add_config(TensorShape(33U, 27U, 12U, 3U), TensorShape(5U, 5U, 6U, 16U), TensorShape(16U), TensorShape(11U, 12U, 16U, 3U), PadStrideInfo(3, 2, 1, 0));
+        // Number of groups = 4
+        add_config(TensorShape(23U, 27U, 8U, 2U), TensorShape(1U, 1U, 2U, 24U), TensorShape(24U), TensorShape(12U, 27U, 24U, 2U), PadStrideInfo(2, 1, 0, 0));
+        add_config(TensorShape(33U, 27U, 12U, 5U), TensorShape(5U, 5U, 4U, 15U), TensorShape(15U), TensorShape(11U, 12U, 15U, 5U), PadStrideInfo(3, 2, 1, 0));
+
+        // Asymmetric padding
+        add_config(TensorShape(33U, 27U, 8U, 5U), TensorShape(5U, 7U, 2U, 16U), TensorShape(16U), TensorShape(11U, 12U, 16U, 5U), PadStrideInfo(3, 2, 1, 1, 2, 0, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 8U, 5U), TensorShape(5U, 7U, 4U, 16U), TensorShape(16U), TensorShape(11U, 12U, 16U, 5U), PadStrideInfo(3, 2, 1, 1, 0, 2, DimensionRoundingType::FLOOR));
+        add_config(TensorShape(33U, 27U, 6U, 5U), TensorShape(5U, 7U, 3U, 16U), TensorShape(16U), TensorShape(11U, 12U, 16U, 5U), PadStrideInfo(3, 2, 2, 1, 2, 0, DimensionRoundingType::FLOOR));
+    }
+};
 } // namespace datasets
 } // namespace test
 } // namespace arm_compute

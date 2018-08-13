@@ -79,7 +79,7 @@ TEST_SUITE(FP32)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLWeightsReshapeFixture<float>, framework::DatasetMode::ALL, combine(combine(combine(datasets::GroupedWeightsSmallShapes(), framework::dataset::make("DataType",
                                                                                                                       DataType::F32)),
                                                                                                               framework::dataset::make("HasBias", { true, false })),
-                                                                                                      framework::dataset::make("NumGroups", { 1, 2, 3 })))
+                                                                                                      framework::dataset::make("NumGroups", { 1, 2, 3, 4 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);
@@ -87,7 +87,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLWeightsReshapeFixture<float>, framework::Data
 FIXTURE_DATA_TEST_CASE(RunLarge, CLWeightsReshapeFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::GroupedWeightsLargeShapes(), framework::dataset::make("DataType",
                                                                                                                   DataType::F32)),
                                                                                                                   framework::dataset::make("HasBias", { true, false })),
-                                                                                                          framework::dataset::make("NumGroups", { 1, 2, 3 })))
+                                                                                                          framework::dataset::make("NumGroups", { 1, 2, 3, 4 })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference);

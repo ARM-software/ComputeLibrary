@@ -76,7 +76,7 @@ public:
      * @param[in]  conv_info   Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in]  has_bias    In case biases are provided expands the matrix with 1.
      * @param[in]  dilation    (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
-     * @param[in]  num_groups  (Optional) Number of groups when performing a grouped convolution
+     * @param[in]  num_groups  (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is only supported for NCHW data layout
      */
     void configure(const ICLTensor *input, ICLTensor *output, const Size2D &kernel_dims, const PadStrideInfo &conv_info, bool has_bias, const Size2D &dilation = Size2D(1U, 1U),
                    unsigned int num_groups = 1);
@@ -90,7 +90,7 @@ public:
      * @param[in] conv_info   Contains padding and stride information described in @ref PadStrideInfo.
      * @param[in] has_bias    In case biases are provided expands the matrix with 1.
      * @param[in] dilation    (Optional) Dilation, in elements, across x and y. Defaults to (1, 1).
-     * @param[in] num_groups  (Optional) Number of groups when performing a grouped convolution
+     * @param[in] num_groups  (Optional) Number of groups when performing a grouped convolution. num_groups != 1 is only supported for NCHW data layout
      *
      * @return a status
      */

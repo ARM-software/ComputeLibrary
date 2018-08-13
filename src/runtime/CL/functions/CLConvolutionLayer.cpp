@@ -43,17 +43,18 @@ CLConvolutionLayer::CLConvolutionLayer(std::shared_ptr<IMemoryManager> memory_ma
 }
 
 void CLConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output, const PadStrideInfo &conv_info, const WeightsInfo &weights_info,
-                                   const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math)
+                                   const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math, unsigned int num_groups)
 {
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_ERROR_THROW_ON(CLConvolutionLayer::validate(input->info(), weights->info(), ((biases != nullptr) ? biases->info() : nullptr), output->info(), conv_info, weights_info, dilation, act_info,
-                                                            enable_fast_math));
+                                                            enable_fast_math, num_groups));
 
     switch(CLConvolutionLayer::get_convolution_method(input->info(), weights->info(), output->info(), conv_info,
                                                       weights_info, act_info, CLScheduler::get().target(), dilation, enable_fast_math))
     {
         case ConvolutionMethod::WINOGRAD:
         {
+            ARM_COMPUTE_ERROR_ON(num_groups != 1);
             auto f = arm_compute::support::cpp14::make_unique<CLWinogradConvolutionLayer>(_memory_manager);
             f->configure(input, weights, biases, output, conv_info, act_info, enable_fast_math);
             _function = std::move(f);
@@ -61,6 +62,7 @@ void CLConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, c
         }
         case ConvolutionMethod::DIRECT:
         {
+            ARM_COMPUTE_ERROR_ON(num_groups != 1);
             auto f = arm_compute::support::cpp14::make_unique<CLDirectConvolutionLayer>();
             f->configure(input, weights, biases, output, conv_info, act_info);
             _function = std::move(f);
@@ -69,7 +71,7 @@ void CLConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, c
         case ConvolutionMethod::GEMM:
         {
             auto f = arm_compute::support::cpp14::make_unique<CLGEMMConvolutionLayer>(_memory_manager);
-            f->configure(input, weights, biases, output, conv_info, weights_info, dilation, act_info);
+            f->configure(input, weights, biases, output, conv_info, weights_info, dilation, act_info, num_groups);
             _function = std::move(f);
             break;
         }
@@ -80,9 +82,10 @@ void CLConvolutionLayer::configure(ICLTensor *input, const ICLTensor *weights, c
 }
 
 Status CLConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
-                                    const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math)
+                                    const WeightsInfo &weights_info, const Size2D &dilation, const ActivationLayerInfo &act_info, bool enable_fast_math, unsigned int num_groups)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((num_groups != 1) && (input->data_layout() != DataLayout::NCHW), "Grouping (num_groups != 1) with NHWC data layout is not supported");
 
     const GPUTarget gpu_target = CLScheduler::get().target();
 
@@ -91,19 +94,21 @@ Status CLConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo 
         case ConvolutionMethod::WINOGRAD:
         {
             //Validate Winograd
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(num_groups != 1, "Grouping (num_groups != 1) with CLWinogradConvolutionLayer is not supported");
             ARM_COMPUTE_RETURN_ON_ERROR(CLWinogradConvolutionLayer::validate(input, weights, biases, output, conv_info, act_info, enable_fast_math));
             break;
         }
         case ConvolutionMethod::DIRECT:
         {
             // Validate direct convolution layer
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(num_groups != 1, "Grouping (num_groups != 1) with CLDirectConvolutionLayer is not supported");
             ARM_COMPUTE_RETURN_ON_ERROR(CLDirectConvolutionLayer::validate(input, weights, biases, output, conv_info, act_info));
             break;
         }
         case ConvolutionMethod::GEMM:
         {
             // Validate gemm-based convolution layer
-            ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMConvolutionLayer::validate(input, weights, biases, output, conv_info, weights_info, dilation, act_info));
+            ARM_COMPUTE_RETURN_ON_ERROR(CLGEMMConvolutionLayer::validate(input, weights, biases, output, conv_info, weights_info, dilation, act_info, num_groups));
             break;
         }
         default:
