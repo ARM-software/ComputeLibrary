@@ -74,8 +74,7 @@ public:
      * @param[in] cl_tuner (Optional) Pointer to OpenCL tuner (default=nullptr)
      *                     Note: It is caller's responsibility to release the allocated memory for CLTuner
      */
-    void init(cl::Context context, cl::CommandQueue queue,
-              cl::Device device, ICLTuner *cl_tuner = nullptr)
+    void init(cl::Context context, cl::CommandQueue queue, cl::Device device, ICLTuner *cl_tuner = nullptr)
     {
         set_context(context);
         _queue          = std::move(queue);
@@ -91,7 +90,8 @@ public:
     cl::Context &context()
     {
         ARM_COMPUTE_ERROR_ON(!_is_initialised);
-        return CLKernelLibrary::get().context();
+        _context = CLKernelLibrary::get().context();
+        return _context;
     }
 
     /** Accessor for the associated CL command queue.
@@ -119,7 +119,8 @@ public:
      */
     void set_context(cl::Context context)
     {
-        CLKernelLibrary::get().set_context(context);
+        _context = std::move(context);
+        CLKernelLibrary::get().set_context(_context);
     }
 
     /** Accessor to set the CL command queue to be used by the scheduler.
@@ -188,6 +189,7 @@ private:
     /** Flag to ensure symbols initialisation is happening before Scheduler creation */
     static std::once_flag _initialize_symbols;
 
+    cl::Context               _context;
     cl::CommandQueue          _queue;
     GPUTarget                 _target;
     bool                      _is_initialised;
