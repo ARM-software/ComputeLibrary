@@ -64,8 +64,8 @@ public:
         // Print parameter values
         std::cout << common_params << std::endl;
 
-        // Create core of graph
-        std::string model_path = "/mobilenet_v2_1.0_224_model/";
+        // Create model path
+        std::string model_path = "/cnn_data/mobilenet_v2_1.0_224_model/";
 
         // Create input descriptor
         const TensorShape tensor_shape     = permute_shape(TensorShape(224U, 224U, 3U, 1U), DataLayout::NCHW, common_params.data_layout);

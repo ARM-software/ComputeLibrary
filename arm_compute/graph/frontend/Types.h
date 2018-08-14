@@ -35,6 +35,7 @@ namespace frontend
 // Import types for graph
 using graph::DataType;
 using graph::DataLayout;
+using graph::DataLayoutDimension;
 using graph::TensorShape;
 using graph::PermutationVector;
 
