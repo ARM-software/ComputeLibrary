@@ -223,10 +223,7 @@ std::tuple<std::vector<unsigned long>, bool, std::string> parse_npy_header(std::
     std::string typestr;
     npy::parse_header(header, typestr, fortran_order, shape);
 
-    if(!fortran_order)
-    {
-        std::reverse(shape.begin(), shape.end());
-    }
+    std::reverse(shape.begin(), shape.end());
 
     return std::make_tuple(shape, fortran_order, typestr);
 }
