@@ -45,7 +45,7 @@ namespace
 {
 constexpr AbsoluteTolerance<float>  tolerance_fp32(0.001f);               /**< Tolerance for floating point tests */
 RelativeTolerance<half_float::half> tolerance_f16(half_float::half(0.2)); /**< Tolerance value for comparing reference's for DataType::F16 */
-constexpr AbsoluteTolerance<float>  tolerance_qasymm8(1.0);               /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
+constexpr AbsoluteTolerance<float>  tolerance_qasymm8(2.0);               /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
 constexpr float                     tolerance_num = 0.07f;                /**< Tolerance number */
 
 const auto data4x4 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 3)
