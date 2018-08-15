@@ -25,7 +25,7 @@
 
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/Utils.h"
-#include "arm_compute/graph/algorithms/BFS.h"
+#include "arm_compute/graph/algorithms/TopologicalSort.h"
 #include "arm_compute/graph/nodes/Nodes.h"
 
 #include "support/ToolchainSupport.h"
@@ -80,53 +80,6 @@ NodeID create_simple_single_input_output_node(Graph &g, NodeParams &params, Node
     set_node_params(g, nid, params);
 
     return nid;
-}
-
-NodeID create_grouped_convolution(Graph &g, const NodeParams &params, NodeIdxPair input, NodeID weights, NodeID bias,
-                                  PadStrideInfo conv_info, ConvolutionMethod method, FastMathHint fast_math_hint, unsigned int num_groups)
-{
-    bool has_bias = (bias != EmptyNodeID);
-
-    // Split input
-    const TensorDescriptor input_tensor_desc = get_tensor_descriptor(g, g.node(input.node_id)->outputs()[0]);
-    const unsigned int     input_idx         = get_dimension_idx(input_tensor_desc, DataLayoutDimension::CHANNEL);
-    NodeID                 input_split       = GraphBuilder::add_split_node(g, params, input, num_groups, input_idx);
-
-    // Split weights
-    const TensorDescriptor weights_tensor_desc = get_tensor_descriptor(g, g.node(weights)->outputs()[0]);
-    const unsigned int     batch_idx           = get_dimension_idx(weights_tensor_desc, DataLayoutDimension::BATCHES);
-    NodeID                 weights_split       = GraphBuilder::add_split_node(g, params, { weights, 0 }, num_groups, batch_idx);
-
-    // Split bias
-    NodeID bias_split = EmptyNodeID;
-    if(has_bias)
-    {
-        // Split bias
-        bias_split = GraphBuilder::add_split_node(g, params, { bias, 0 }, num_groups, 0);
-    }
-
-    std::vector<NodeIdxPair> convolution_outputs;
-    for(unsigned int i = 0; i < num_groups; ++i)
-    {
-        NodeParams group_params = params;
-        NodeID     conv_nid     = g.add_node<ConvolutionLayerNode>(conv_info, method, fast_math_hint);
-        g.add_connection(input_split, i, conv_nid, 0);
-        g.add_connection(weights_split, i, conv_nid, 1);
-        if(has_bias)
-        {
-            g.add_connection(bias_split, i, conv_nid, 2);
-        }
-        // Add group name
-        if(!group_params.name.empty())
-        {
-            group_params.name.append("_g" + arm_compute::support::cpp11::to_string(i));
-        }
-        set_node_params(g, conv_nid, group_params);
-        convolution_outputs.push_back({ conv_nid, 0 });
-    }
-
-    // Depth concatenate output
-    return GraphBuilder::add_concatenate_node(g, params, convolution_outputs, DataLayoutDimension::CHANNEL);
 }
 } // namespace
 
@@ -263,24 +216,17 @@ NodeID GraphBuilder::add_convolution_node(Graph &g, NodeParams params, NodeIdxPa
         b_nid = add_const_node_with_name(g, params, "Bias", b_desc, std::move(bias_accessor));
     }
 
-    if(num_groups == 1)
+    // Create convolution node and connect
+    NodeID conv_nid = g.add_node<ConvolutionLayerNode>(conv_info, num_groups, method, fast_math_hint, out_quant_info);
+    g.add_connection(input.node_id, input.index, conv_nid, 0);
+    g.add_connection(w_nid, 0, conv_nid, 1);
+    if(has_bias)
     {
-        // Create convolution node and connect
-        NodeID conv_nid = g.add_node<ConvolutionLayerNode>(conv_info, method, fast_math_hint, out_quant_info);
-        g.add_connection(input.node_id, input.index, conv_nid, 0);
-        g.add_connection(w_nid, 0, conv_nid, 1);
-        if(has_bias)
-        {
-            g.add_connection(b_nid, 0, conv_nid, 2);
-        }
-        set_node_params(g, conv_nid, params);
+        g.add_connection(b_nid, 0, conv_nid, 2);
+    }
+    set_node_params(g, conv_nid, params);
 
-        return conv_nid;
-    }
-    else
-    {
-        return create_grouped_convolution(g, params, input, w_nid, b_nid, conv_info, method, fast_math_hint, num_groups);
-    }
+    return conv_nid;
 }
 
 NodeID GraphBuilder::add_deconvolution_node(Graph &g, NodeParams params, NodeIdxPair input,

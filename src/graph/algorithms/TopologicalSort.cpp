@@ -21,13 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_ALGORITHM_BFS_H__
-#define __ARM_COMPUTE_GRAPH_ALGORITHM_BFS_H__
+#include "arm_compute/graph/algorithms/TopologicalSort.h"
 
 #include "arm_compute/graph/Graph.h"
 
+#include "arm_compute/core/utils/misc/Iterable.h"
+
 #include <list>
-#include <vector>
+#include <stack>
 
 namespace arm_compute
 {
@@ -68,13 +69,7 @@ inline bool all_inputs_are_visited(const INode *node, const std::vector<bool> &v
 }
 } // namespace detail
 
-/** Breadth first search traversal
- *
- * @param g Graph to traverse
- *
- * @return A vector with the node id traversal order
- */
-inline std::vector<NodeID> bfs(Graph &g)
+std::vector<NodeID> bfs(Graph &g)
 {
     std::vector<NodeID> bfs_order_vector;
 
@@ -91,6 +86,16 @@ inline std::vector<NodeID> bfs(Graph &g)
         {
             visited[input] = true;
             queue.push_back(input);
+        }
+    }
+
+    // Push const nodes and mark as visited
+    for(auto &const_node : g.nodes(NodeType::Const))
+    {
+        if(const_node != EmptyNodeID)
+        {
+            visited[const_node] = true;
+            queue.push_back(const_node);
         }
     }
 
@@ -118,6 +123,66 @@ inline std::vector<NodeID> bfs(Graph &g)
 
     return bfs_order_vector;
 }
+
+std::vector<NodeID> dfs(Graph &g)
+{
+    std::vector<NodeID> dfs_order_vector;
+
+    // Created visited vector
+    std::vector<bool> visited(g.nodes().size(), false);
+
+    // Create DFS stack
+    std::stack<NodeID> stack;
+
+    // Push inputs and mark as visited
+    for(auto &input : g.nodes(NodeType::Input))
+    {
+        if(input != EmptyNodeID)
+        {
+            visited[input] = true;
+            stack.push(input);
+        }
+    }
+
+    // Push const nodes and mark as visited
+    for(auto &const_node : g.nodes(NodeType::Const))
+    {
+        if(const_node != EmptyNodeID)
+        {
+            visited[const_node] = true;
+            stack.push(const_node);
+        }
+    }
+
+    // Iterate over vector and edges
+    while(!stack.empty())
+    {
+        // Pop a node from stack and process
+        NodeID n = stack.top();
+        dfs_order_vector.push_back(n);
+        stack.pop();
+
+        // Mark node as visited
+        if(!visited[n])
+        {
+            visited[n] = true;
+        }
+
+        const INode *node = g.node(n);
+        ARM_COMPUTE_ERROR_ON(node == nullptr);
+        // Reverse iterate to push branches from right to left and pop on the opposite order
+        for(const auto &eid : arm_compute::utils::iterable::reverse_iterate(node->output_edges()))
+        {
+            const Edge *e = g.edge(eid);
+            ARM_COMPUTE_ERROR_ON(e == nullptr);
+            if(!visited[e->consumer_id()] && detail::all_inputs_are_visited(e->consumer(), visited))
+            {
+                stack.push(e->consumer_id());
+            }
+        }
+    }
+
+    return dfs_order_vector;
+}
 } // namespace graph
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_GRAPH_ALGORITHM_BFS_H__ */

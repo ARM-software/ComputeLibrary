@@ -59,7 +59,7 @@ void configure_all_tensors(Graph &g)
 
     for(auto &tensor : tensors)
     {
-        if(tensor)
+        if(tensor && tensor->handle() == nullptr)
         {
             Target target  = tensor->desc().target;
             auto   backend = backends::BackendRegistry::get().find_backend(target);
@@ -131,17 +131,16 @@ void allocate_all_tensors(Graph &g)
     }
 }
 
-ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx)
+ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx, const std::vector<NodeID> &node_order)
 {
     ExecutionWorkload workload;
     workload.graph = &g;
     workload.ctx   = &ctx;
 
-    auto &nodes = g.nodes();
-
     // Create tasks
-    for(auto &node : nodes)
+    for(auto &node_id : node_order)
     {
+        auto node = g.node(node_id);
         if(node != nullptr)
         {
             Target assigned_target = node->assigned_target();
@@ -152,14 +151,14 @@ ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx)
             {
                 ExecutionTask task;
                 task.task = std::move(func);
-                task.node = node.get();
+                task.node = node;
                 workload.tasks.push_back(std::move(task));
             }
         }
     }
 
     // Add inputs and outputs
-    for(auto &node : nodes)
+    for(auto &node : g.nodes())
     {
         if(node != nullptr && node->type() == NodeType::Input)
         {

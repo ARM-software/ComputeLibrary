@@ -74,13 +74,13 @@ public:
     void clear();
     /** Runs all the mutation passes on a given graph
      *
-     * @param[in] g Graph to run the mutations on
+     * @param[in, out] g Graph to run the mutations on
      */
     void run_all(Graph &g);
     /** Runs a specific mutation pass on a given graph
      *
-     * @param[in] g     Graph to run the mutation on
-     * @param[in] index Index of the mutation to execute
+     * @param[in, out] g     Graph to run the mutation on
+     * @param[in]      index Index of the mutation to execute
      */
     void run(Graph &g, size_t index);
 

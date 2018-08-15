@@ -185,6 +185,11 @@ size_t INode::num_outputs() const
     return _outputs.size();
 }
 
+NodeParams INode::common_node_params() const
+{
+    return _common_params;
+}
+
 Target INode::requested_target() const
 {
     return _common_params.target;

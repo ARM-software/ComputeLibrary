@@ -21,14 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_GRAPH_MUTATORS_H__
-#define __ARM_COMPUTE_GRAPH_GRAPH_MUTATORS_H__
+#ifndef __ARM_COMPUTE_GRAPH_GROUPED_CONVOLUTION_MUTATOR_H__
+#define __ARM_COMPUTE_GRAPH_GROUPED_CONVOLUTION_MUTATOR_H__
 
-#include "arm_compute/graph/mutators/DepthConcatSubTensorMutator.h"
-#include "arm_compute/graph/mutators/GroupedConvolutionMutator.h"
-#include "arm_compute/graph/mutators/InPlaceOperationMutator.h"
-#include "arm_compute/graph/mutators/NodeExecutionMethodMutator.h"
-#include "arm_compute/graph/mutators/NodeFusionMutator.h"
-#include "arm_compute/graph/mutators/SplitLayerSubTensorMutator.h"
+#include "arm_compute/graph/IGraphMutator.h"
 
-#endif /* __ARM_COMPUTE_GRAPH_GRAPH_MUTATORS_H__ */
+namespace arm_compute
+{
+namespace graph
+{
+/** Mutation pass to implement/optimize grouped convolutions
+ *
+ * @warning This is compulsory to run in case of grouped convolutions
+ **/
+class GroupedConvolutionMutator final : public IGraphMutator
+{
+public:
+    // Inherited methods overridden
+    virtual void mutate(Graph &g) override;
+    const char *name() override;
+};
+} // namespace graph
+} // namespace arm_compute
+#endif /* __ARM_COMPUTE_GRAPH_GROUPED_CONVOLUTION_MUTATOR_H__ */

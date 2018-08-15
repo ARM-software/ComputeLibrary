@@ -107,37 +107,30 @@ Status validate_convolution_layer(ConvolutionLayerNode &node)
     const PadStrideInfo     conv_info      = node.convolution_info();
     const ConvolutionMethod conv_algorithm = node.convolution_method();
     const bool              fast_math      = node.fast_math_hint() == FastMathHint::Enabled;
+    const unsigned int      num_groups     = node.num_groups();
 
     // Validate function
     Status status{};
     switch(conv_algorithm)
     {
         case ConvolutionMethod::Direct:
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(num_groups != 1, "DirectConvolutionLayer does not support grouping!");
             status = DirectConvolutionLayer::validate(input, weights, biases, output, conv_info);
             break;
         case ConvolutionMethod::GEMM:
-            status = GEMMConvolutionLayer::validate(input, weights, biases, output, conv_info);
+            status = GEMMConvolutionLayer::validate(input, weights, biases, output, conv_info,
+                                                    WeightsInfo(), Size2D(1, 1), ActivationLayerInfo(), num_groups);
             break;
         case ConvolutionMethod::Winograd:
+            ARM_COMPUTE_RETURN_ERROR_ON_MSG(num_groups != 1, "WinogradConvolutionLayer does not support grouping!");
             status = WinogradConvolutionLayer::validate(input, weights, biases, output, conv_info, ActivationLayerInfo(), fast_math);
             break;
         case ConvolutionMethod::Default:
-            status = ConvolutionLayer::validate(input, weights, biases, output, conv_info);
+            status = ConvolutionLayer::validate(input, weights, biases, output, conv_info,
+                                                WeightsInfo(), Size2D(1, 1), ActivationLayerInfo(), fast_math, num_groups);
             break;
         default:
-            break;
-    }
-
-    // If validation fails try the Default approach
-    if(!bool(status))
-    {
-        status = ConvolutionLayer::validate(input, weights, biases, output, conv_info /*, fast_math*/);
-        if(bool(status))
-        {
-            ARM_COMPUTE_LOG_GRAPH_INFO("Switched ConvolutionLayer method of node with ID : "
-                                       << node.id() << " and Name: " << node.name() << std::endl);
-            node.set_convolution_method(ConvolutionMethod::Default);
-        }
+            ARM_COMPUTE_RETURN_ERROR_MSG("Unsupported convolution method");
     }
 
     return status;
@@ -160,20 +153,30 @@ Status validate_depthwise_convolution_layer(DepthwiseConvolutionLayerNode &node)
     ARM_COMPUTE_RETURN_ERROR_ON(node.num_outputs() != 1);
 
     // Extract IO and info
-    arm_compute::ITensorInfo        *weights       = detail::get_backing_tensor_info(node.input(1));
-    const DepthwiseConvolutionMethod dwc_algorithm = node.depthwise_convolution_method();
-    ARM_COMPUTE_ERROR_ON(weights == nullptr);
+    arm_compute::ITensorInfo *input   = detail::get_backing_tensor_info(node.input(0));
+    arm_compute::ITensorInfo *weights = detail::get_backing_tensor_info(node.input(1));
+    arm_compute::ITensorInfo *biases  = get_backing_tensor_info(node.input(2));
+    arm_compute::ITensorInfo *output  = get_backing_tensor_info(node.output(0));
 
-    // TODO (geopin01) : Switch when validation is implemented
+    const PadStrideInfo              conv_info     = node.convolution_info();
+    const DepthwiseConvolutionMethod dwc_algorithm = node.depthwise_convolution_method();
+
     // Validate function
-    if((dwc_algorithm == DepthwiseConvolutionMethod::Optimized3x3) && (weights->tensor_shape()[get_data_layout_dimension_index(weights->data_layout(), DataLayoutDimension::WIDTH)] != 3))
+    Status status{};
+    switch(dwc_algorithm)
     {
-        ARM_COMPUTE_LOG_GRAPH_INFO("Switched DepthwiseConvolutionLayer method of node with ID : "
-                                   << node.id() << " and Name: " << node.name() << std::endl);
-        node.set_depthwise_convolution_method(DepthwiseConvolutionMethod::Default);
+        case DepthwiseConvolutionMethod::Default:
+        case DepthwiseConvolutionMethod::GEMV:
+            status = DepthwiseConvolutionLayer::validate(input, weights, biases, output, conv_info);
+            break;
+        case DepthwiseConvolutionMethod::Optimized3x3:
+            status = DepthwiseConvolutionLayer3x3::validate(input, weights, biases, output, conv_info);
+            break;
+        default:
+            ARM_COMPUTE_RETURN_ERROR_MSG("Unsupported depthwise convolution method");
     }
 
-    return Status{};
+    return status;
 }
 
 /** Validates a permute layer node

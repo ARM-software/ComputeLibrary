@@ -115,6 +115,18 @@ size_t get_dimension_size(const TensorDescriptor &descriptor, const DataLayoutDi
  * @return Idx of given dimension
  */
 size_t get_dimension_idx(const TensorDescriptor &descriptor, const DataLayoutDimension data_layout_dimension);
+/** Get the list of driving nodes of a given node
+ *
+ * @param[in] node Node to find the driving node of
+ *
+ * @return A list with the driving node of a given node
+ */
+std::vector<NodeIdxPair> get_driving_nodes(const INode &node);
+/** Configures tensor
+ *
+ * @param[in, out] tensor Tensor to configure
+ */
+void configure_tensor(Tensor *tensor);
 } // namespace graph
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_GRAPH_UTILS_H__ */

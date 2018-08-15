@@ -32,6 +32,8 @@
 #include "arm_compute/graph/detail/CrossLayerMemoryManagerHelpers.h"
 #include "arm_compute/graph/detail/ExecutionHelpers.h"
 
+#include "arm_compute/graph/algorithms/TopologicalSort.h"
+
 namespace arm_compute
 {
 namespace graph
@@ -69,13 +71,13 @@ void GraphManager::finalize_graph(Graph &graph, GraphContext &ctx, PassManager &
     pm.run_all(graph);
 
     // Perform topological sort
-    // FIXME : Sort nodes and pass sorted indices in configure all nodes
+    std::vector<NodeID> topological_sorted_nodes = dfs(graph);
 
     // Validate all nodes
     detail::validate_all_nodes(graph);
 
     // Configure all nodes
-    auto workload = detail::configure_all_nodes(graph, ctx);
+    auto workload = detail::configure_all_nodes(graph, ctx, topological_sorted_nodes);
     ARM_COMPUTE_ERROR_ON_MSG(workload.tasks.empty(), "Could not configure all nodes!");
 
     // Allocate const tensors and call accessors

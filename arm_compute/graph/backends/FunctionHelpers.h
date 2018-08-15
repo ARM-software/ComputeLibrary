@@ -265,6 +265,7 @@ std::unique_ptr<IFunction> create_convolution_layer(ConvolutionLayerNode &node, 
     }
 
     const PadStrideInfo     conv_info      = node.convolution_info();
+    const unsigned int      num_groups     = node.num_groups();
     const ConvolutionMethod conv_algorithm = node.convolution_method();
     const bool              fast_math      = node.fast_math_hint() == FastMathHint::Enabled;
 
@@ -275,12 +276,14 @@ std::unique_ptr<IFunction> create_convolution_layer(ConvolutionLayerNode &node, 
 
     if(conv_algorithm == ConvolutionMethod::Winograd)
     {
+        ARM_COMPUTE_ERROR_ON_MSG(num_groups != 1, "WinogradConvolutionLayer does not support grouping!");
         std::tie(func, func_name) = create_named_memory_managed_function<typename ConvolutionLayerFunctions::WinogradConvolutionLayer>(
                                         std::string("WinogradConvolutionLayer"), mm,
                                         input, weights, biases, output, conv_info, ActivationLayerInfo(), fast_math);
     }
     else if(conv_algorithm == ConvolutionMethod::Direct)
     {
+        ARM_COMPUTE_ERROR_ON_MSG(num_groups != 1, "DirectConvolutionLayer does not support grouping!");
         std::tie(func, func_name) = create_named_function<typename ConvolutionLayerFunctions::DirectConvolutionLayer>(
                                         std::string("DirectConvolutionLayer"),
                                         input, weights, biases, output, conv_info);
@@ -289,19 +292,22 @@ std::unique_ptr<IFunction> create_convolution_layer(ConvolutionLayerNode &node, 
     {
         std::tie(func, func_name) = create_named_memory_managed_function<typename ConvolutionLayerFunctions::GEMMConvolutionLayer>(
                                         std::string("GEMMConvolutionLayer"), mm,
-                                        input, weights, biases, output, conv_info);
+                                        input, weights, biases, output, conv_info,
+                                        WeightsInfo(), Size2D(1U, 1U), ActivationLayerInfo(), num_groups);
     }
     else
     {
         std::tie(func, func_name) = create_named_memory_managed_function<typename ConvolutionLayerFunctions::GenericConvolutionLayer>(
                                         std::string("GenericConvolutionLayer"), mm,
-                                        input, weights, biases, output, conv_info, WeightsInfo(), Size2D(1U, 1U), ActivationLayerInfo(), fast_math);
+                                        input, weights, biases, output, conv_info,
+                                        WeightsInfo(), Size2D(1U, 1U), ActivationLayerInfo(), fast_math, num_groups);
     }
 
     // Log info
     ARM_COMPUTE_LOG_GRAPH_INFO("Instantiated " << func_name
                                << " Target " << TargetInfo::TargetType
                                << " Data Type: " << input->info()->data_type()
+                               << " Groups: " << num_groups
                                << " Input QuantInfo: " << input->info()->quantization_info()
                                << " Weights QuantInfo: " << weights->info()->quantization_info()
                                << " Input shape: " << input->info()->tensor_shape()

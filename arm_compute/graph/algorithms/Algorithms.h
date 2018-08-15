@@ -24,6 +24,6 @@
 #ifndef __ARM_COMPUTE_GRAPH_ALGORITHMS_H__
 #define __ARM_COMPUTE_GRAPH_ALGORITHMS_H__
 
-#include "arm_compute/graph/algorithms/BFS.h"
+#include "arm_compute/graph/algorithms/TopologicalSort.h"
 
 #endif /* __ARM_COMPUTE_GRAPH_ALGORITHMS_H__ */

@@ -21,14 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_GRAPH_MUTATORS_H__
-#define __ARM_COMPUTE_GRAPH_GRAPH_MUTATORS_H__
+#ifndef __ARM_COMPUTE_GRAPH_NODE_EXECUTION_METHOD_MUTATOR_H__
+#define __ARM_COMPUTE_GRAPH_NODE_EXECUTION_METHOD_MUTATOR_H__
 
-#include "arm_compute/graph/mutators/DepthConcatSubTensorMutator.h"
-#include "arm_compute/graph/mutators/GroupedConvolutionMutator.h"
-#include "arm_compute/graph/mutators/InPlaceOperationMutator.h"
-#include "arm_compute/graph/mutators/NodeExecutionMethodMutator.h"
-#include "arm_compute/graph/mutators/NodeFusionMutator.h"
-#include "arm_compute/graph/mutators/SplitLayerSubTensorMutator.h"
+#include "arm_compute/graph/IGraphMutator.h"
 
-#endif /* __ARM_COMPUTE_GRAPH_GRAPH_MUTATORS_H__ */
+namespace arm_compute
+{
+namespace graph
+{
+/** Mutation pass to fall-back to default execution method
+ *
+ * @note This operates on nodes that support multiple execution methods (e.g. ConvolutionLayerNode)
+ *       and in case the requested execution method is not supported for a given configuration.
+ *       Thus this is a fall-back mechanism to ensure graph execution.
+ */
+class NodeExecutionMethodMutator final : public IGraphMutator
+{
+public:
+    // Inherited methods overridden
+    virtual void mutate(Graph &g) override;
+    const char *name() override;
+};
+} // namespace graph
+} // namespace arm_compute
+#endif /* __ARM_COMPUTE_GRAPH_NODE_EXECUTION_METHOD_MUTATOR_H__ */

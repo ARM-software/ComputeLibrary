@@ -78,13 +78,21 @@ PassManager create_default_pass_manager(Target target)
 {
     PassManager pm;
 
+    // Passes that mutate graph IR
+    pm.append(support::cpp14::make_unique<GroupedConvolutionMutator>());
     if(target != Target::GC)
     {
         pm.append(support::cpp14::make_unique<NodeFusionMutator>());
         pm.append(support::cpp14::make_unique<InPlaceOperationMutator>());
+    }
+
+    // Passes that mutate backend information
+    if(target != Target::GC)
+    {
         pm.append(support::cpp14::make_unique<DepthConcatSubTensorMutator>());
         pm.append(support::cpp14::make_unique<SplitLayerSubTensorMutator>());
     }
+    pm.append(support::cpp14::make_unique<NodeExecutionMethodMutator>());
 
     return pm;
 }
@@ -137,6 +145,39 @@ size_t get_dimension_idx(const TensorDescriptor &descriptor, const DataLayoutDim
         default:
             ARM_COMPUTE_ERROR("Data layout index not supported!");
             break;
+    }
+}
+
+std::vector<NodeIdxPair> get_driving_nodes(const INode &node)
+{
+    std::vector<NodeIdxPair> driving_nodes;
+
+    const Graph *g = node.graph();
+    ARM_COMPUTE_ERROR_ON(g == nullptr);
+
+    for(auto &output_edge_id : node.output_edges())
+    {
+        auto output_edge = g->edge(output_edge_id);
+        if(output_edge != nullptr)
+        {
+            ARM_COMPUTE_ERROR_ON(output_edge->consumer() == nullptr);
+            driving_nodes.push_back({ output_edge->consumer_id(), output_edge->consumer_idx() });
+        }
+    }
+
+    return driving_nodes;
+}
+
+void configure_tensor(Tensor *tensor)
+{
+    if(tensor != nullptr && tensor->handle() == nullptr)
+    {
+        Target target  = tensor->desc().target;
+        auto   backend = backends::BackendRegistry::get().find_backend(target);
+        ARM_COMPUTE_ERROR_ON_MSG(!backend, "Requested backend doesn't exist!");
+        auto handle = backend->create_tensor(*tensor);
+        ARM_COMPUTE_ERROR_ON_MSG(!backend, "Couldn't create backend handle!");
+        tensor->set_handle(std::move(handle));
     }
 }
 } // namespace graph

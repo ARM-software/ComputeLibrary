@@ -224,6 +224,11 @@ public:
      * @return Number of outputs
      */
     size_t num_outputs() const;
+    /** Returns common node parameters
+     *
+     * @return Common node parameters
+     */
+    NodeParams common_node_params() const;
     /** Returns requested target for this node
      *
      * @return Requested execution target

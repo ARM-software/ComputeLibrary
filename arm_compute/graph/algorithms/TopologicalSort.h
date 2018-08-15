@@ -21,14 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_GRAPH_GRAPH_MUTATORS_H__
-#define __ARM_COMPUTE_GRAPH_GRAPH_MUTATORS_H__
+#ifndef __ARM_COMPUTE_GRAPH_ALGORITHM_TOPOLOGICAL_SORT_H__
+#define __ARM_COMPUTE_GRAPH_ALGORITHM_TOPOLOGICAL_SORT_H__
 
-#include "arm_compute/graph/mutators/DepthConcatSubTensorMutator.h"
-#include "arm_compute/graph/mutators/GroupedConvolutionMutator.h"
-#include "arm_compute/graph/mutators/InPlaceOperationMutator.h"
-#include "arm_compute/graph/mutators/NodeExecutionMethodMutator.h"
-#include "arm_compute/graph/mutators/NodeFusionMutator.h"
-#include "arm_compute/graph/mutators/SplitLayerSubTensorMutator.h"
+#include "arm_compute/graph/Types.h"
 
-#endif /* __ARM_COMPUTE_GRAPH_GRAPH_MUTATORS_H__ */
+#include <vector>
+
+namespace arm_compute
+{
+namespace graph
+{
+// Forward declarations
+class Graph;
+
+/** Breadth first search traversal
+ *
+ * @param g Graph to traverse
+ *
+ * @return A vector with the node id traversal order
+ */
+std::vector<NodeID> bfs(Graph &g);
+/** Depth first search traversal
+ *
+ * @param g Graph to traverse
+ *
+ * @return A vector with the node id traversal order
+ */
+std::vector<NodeID> dfs(Graph &g);
+} // namespace graph
+} // namespace arm_compute
+#endif /* __ARM_COMPUTE_GRAPH_ALGORITHM_TOPOLOGICAL_SORT_H__ */
