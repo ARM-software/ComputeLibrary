@@ -175,7 +175,7 @@ void CLWinogradInputTransformKernel::configure(const ICLTensor *input, ICLTensor
     const unsigned int tile_max_dim = std::max(output_tile_size.width, output_tile_size.height);
 
     // Check optimized kernel if output_dims == 2x2
-    if(tile_max_dim == 2)
+    if((tile_max_dim == 2) && (input->info()->data_layout() == DataLayout::NCHW))
     {
         _step_z = (_input->info()->dimension(2) % 2) != 0 ? 1 : 2;
     }
