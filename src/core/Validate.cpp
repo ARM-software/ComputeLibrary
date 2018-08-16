@@ -179,7 +179,7 @@ arm_compute::Status arm_compute::error_on_invalid_subtensor(const char *function
     // Subtensor should not index in x, y dimensions.
     ARM_COMPUTE_RETURN_ERROR_ON_LOC(((coords.x() != 0) || (coords.y() != 0)), function, file, line);
     // Subtensor shape should match parent tensor in x, y dimensions.
-    ARM_COMPUTE_RETURN_ERROR_ON_LOC(((parent_shape.x() != shape.x()) || (parent_shape.y() != parent_shape.y())), function, file, line);
+    ARM_COMPUTE_RETURN_ERROR_ON_LOC(((parent_shape.x() != shape.x()) || (parent_shape.y() != shape.y())), function, file, line);
 
     // Check dimensions
     for(unsigned int i = 0; i < TensorShape::num_max_dimensions; ++i)
