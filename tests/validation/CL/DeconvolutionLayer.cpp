@@ -45,7 +45,7 @@ namespace
 {
 constexpr AbsoluteTolerance<float>  tolerance_fp32(0.001f);               /**< Tolerance for floating point tests */
 RelativeTolerance<half_float::half> tolerance_f16(half_float::half(0.2)); /**< Tolerance value for comparing reference's for DataType::F16 */
-constexpr AbsoluteTolerance<float>  tolerance_qasymm8(2.0);               /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
+constexpr AbsoluteTolerance<float>  tolerance_qasymm8(1.0);               /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
 constexpr float                     tolerance_num = 0.07f;                /**< Tolerance number */
 
 const auto data4x4 = datasets::SmallDeconvolutionShapes() * framework::dataset::make("StrideX", 1, 4) * framework::dataset::make("StrideY", 1, 4) * framework::dataset::make("PadX", 0, 3)
@@ -237,7 +237,7 @@ TEST_SUITE(QASYMM8)
 
 TEST_SUITE(W4x4)
 FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture4x4<uint8_t>, framework::DatasetMode::ALL, combine(combine(data4x4, framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                   framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 127))))
+                                                                                                                   framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
@@ -246,7 +246,7 @@ TEST_SUITE_END()
 
 TEST_SUITE(W3x3)
 FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture3x3<uint8_t>, framework::DatasetMode::ALL, combine(combine(data3x3, framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                   framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 127))))
+                                                                                                                   framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);
@@ -255,7 +255,7 @@ TEST_SUITE_END()
 
 TEST_SUITE(W1x1)
 FIXTURE_DATA_TEST_CASE(Run, CLDeconvolutionLayerQuantizedFixture1x1<uint8_t>, framework::DatasetMode::ALL, combine(combine(data1x1, framework::dataset::make("DataType", DataType::QASYMM8)),
-                                                                                                                   framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 127))))
+                                                                                                                   framework::dataset::make("QuantizationInfo", QuantizationInfo(2.f / 255.f, 0))))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8, tolerance_num);

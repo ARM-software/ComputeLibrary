@@ -64,7 +64,7 @@ protected:
         {
             case DataType::QASYMM8:
             {
-                std::uniform_int_distribution<uint8_t> distribution(0, 255);
+                std::uniform_int_distribution<uint8_t> distribution(0, 3);
                 library->fill(tensor, distribution, i);
                 break;
             }
