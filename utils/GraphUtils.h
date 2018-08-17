@@ -77,7 +77,19 @@ private:
 class TFPreproccessor : public IPreprocessor
 {
 public:
+    /** Constructor
+     *
+     * @param[in] min_range Min normalization range. (Defaults to -1.f)
+     * @param[in] max_range Max normalization range. (Defaults to 1.f)
+     */
+    TFPreproccessor(float min_range = -1.f, float max_range = 1.f);
+
+    // Inherited overriden methods
     void preprocess(ITensor &tensor) override;
+
+private:
+    float _min_range;
+    float _max_range;
 };
 
 /** PPM writer class */

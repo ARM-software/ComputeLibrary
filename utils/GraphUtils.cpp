@@ -57,16 +57,22 @@ std::pair<arm_compute::TensorShape, arm_compute::PermutationVector> compute_perm
 }
 } // namespace
 
+TFPreproccessor::TFPreproccessor(float min_range, float max_range)
+    : _min_range(min_range), _max_range(max_range)
+{
+}
 void TFPreproccessor::preprocess(ITensor &tensor)
 {
     Window window;
     window.use_tensor_dimensions(tensor.info()->tensor_shape());
 
+    const float range = _max_range - _min_range;
+
     execute_window_loop(window, [&](const Coordinates & id)
     {
         const float value                                     = *reinterpret_cast<float *>(tensor.ptr_to_element(id));
-        float       res                                       = value / 255.f;      // Normalize to [0, 1]
-        res                                                   = (res - 0.5f) * 2.f; // Map to [-1, 1]
+        float       res                                       = value / 255.f;            // Normalize to [0, 1]
+        res                                                   = res * range + _min_range; // Map to [min_range, max_range]
         *reinterpret_cast<float *>(tensor.ptr_to_element(id)) = res;
     });
 }
