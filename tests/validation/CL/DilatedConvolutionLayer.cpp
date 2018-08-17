@@ -43,10 +43,11 @@ namespace validation
 {
 namespace
 {
-RelativeTolerance<float>            tolerance_f32(0.05f);                 /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-RelativeTolerance<half_float::half> tolerance_f16(half_float::half(0.2)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-constexpr AbsoluteTolerance<float>  tolerance_qasymm8(0.0);               /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
-constexpr float                     tolerance_num = 0.07f;                /**< Tolerance number */
+RelativeTolerance<float>            rel_tolerance_f32(0.05f);                 /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+RelativeTolerance<half_float::half> rel_tolerance_f16(half_float::half(0.2)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+constexpr AbsoluteTolerance<float>  abs_tolerance_qasymm8(0.0);               /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
+constexpr float                     abs_tolerance_f32 = 0.001f;               /**< Tolerance number */
+constexpr float                     abs_tolerance_f16 = 0.07f;                /**< Tolerance number */
 
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
@@ -106,6 +107,7 @@ DATA_TEST_CASE(ValidateConvolutionMethod, framework::DatasetMode::ALL, zip(zip(z
                                                                             &output_info.clone()->set_is_resizable(true), conv_info, WeightsInfo(), ActivationLayerInfo(), gpu_target, dilation);
     ARM_COMPUTE_EXPECT(is_valid == expected, framework::LogLevel::ERRORS);
 }
+
 TEST_SUITE_END()
 
 TEST_SUITE(GEMMDilatedConvolutionLayer)
@@ -165,8 +167,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMDilatedConvolutionLayerFixture<half>, fra
                                                                                                                         framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
+    validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.0f, abs_tolerance_f16);
 }
+
 FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMDilatedConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeDilatedConvolutionLayerDataset(),
                                                                                                                       framework::dataset::make("ReshapeWeights", { true })),
                                                                                                                       framework::dataset::make("DataType", DataType::F16)),
@@ -174,8 +177,9 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMDilatedConvolutionLayerFixture<half>, fra
                                                                                                                       framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f16, tolerance_num);
+    validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.0f, abs_tolerance_f16);
 }
+
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
@@ -186,8 +190,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMDilatedConvolutionLayerFixture<float>, fr
                        framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32);
+    validate(CLAccessor(_target), _reference, rel_tolerance_f32);
 }
+
 FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMDilatedConvolutionLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeDilatedConvolutionLayerDataset(),
                                                                                                                        framework::dataset::make("ReshapeWeights", { true })),
                                                                                                                        framework::dataset::make("DataType", DataType::F32)),
@@ -195,7 +200,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMDilatedConvolutionLayerFixture<float>, fr
                                                                                                                        framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32, 0.00002);
+    validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0.f, abs_tolerance_f32);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
@@ -214,8 +219,9 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLGEMMDilatedConvolutionLayerQuantizedFixture<u
                                framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+    validate(CLAccessor(_target), _reference, abs_tolerance_qasymm8);
 }
+
 FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMDilatedConvolutionLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY,
                        combine(combine(combine(combine(combine(datasets::LargeDilatedConvolutionLayerDataset(),
                                                                framework::dataset::make("ReshapeWeights", { true })),
@@ -225,7 +231,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMDilatedConvolutionLayerQuantizedFixture<u
                                framework::dataset::make("ActivationLayerInfo", { ActivationLayerInfo() })))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+    validate(CLAccessor(_target), _reference, abs_tolerance_qasymm8);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
