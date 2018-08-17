@@ -350,15 +350,18 @@ void NEDepthwiseConvolutionLayer::configure(ITensor *input, const ITensor *weigh
     _v2mm_output.allocator()->allocate();
 }
 
-Status NEDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, ITensorInfo *output, const PadStrideInfo &conv_info,
+Status NEDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info,
                                              unsigned int depth_multiplier)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() != DataLayout::NCHW && input->data_layout() != DataLayout::NHWC);
 
+    // Clone output to use auto init
+    auto output_clone = output->clone();
+
     const ITensorInfo *input_to_use   = input;
     const ITensorInfo *weights_to_use = weights;
-    const ITensorInfo *output_to_use  = output;
+    const ITensorInfo *output_to_use  = output_clone.get();
 
     TensorShape permuted_input_shape   = input->tensor_shape();
     TensorShape permuted_weights_shape = weights->tensor_shape();
@@ -389,14 +392,14 @@ Status NEDepthwiseConvolutionLayer::validate(const ITensorInfo *input, const ITe
     const size_t       conv_size    = conv_w * conv_h;
 
     // Output auto inizialitation if not yet initialized
-    auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape));
+    auto_init_if_empty(*output_clone, input->clone()->set_tensor_shape(output_shape));
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
 
     TensorInfo permuted_output;
     if(input->data_layout() == DataLayout::NHWC)
     {
         permute(output_shape, PermutationVector(1U, 2U, 0U));
-        permuted_output = TensorInfo(output->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape).set_data_layout(DataLayout::NCHW));
+        permuted_output = TensorInfo(output_clone->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(output_shape).set_data_layout(DataLayout::NCHW));
         output_to_use   = &permuted_output;
     }
 
