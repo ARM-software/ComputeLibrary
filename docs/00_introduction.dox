@@ -217,7 +217,27 @@ If there is more than one release in a month then an extra sequential number is 
 
 v18.08 Public major release
  - Various bug fixes.
+ - Various optimisations.
  - Updated recommended NDK version to r17b.
+ - Removed support for QS8/QS16 data types.
+ - Added support for grouped convolution in @ref CLConvolutionLayer.
+ - Added NHWC data layout support to:
+    - @ref NEDepthConcatenateLayer / @ref CLDepthConcatenateLayer
+    - @ref NEWinogradConvolutionLayer / @ref CLWinogradConvolutionLayer
+    - @ref CLDepthwiseConvolutionLayer
+    - @ref CLDirectConvolutionLayer
+    - @ref CLConvolutionLayer
+    - @ref CLScale
+    - @ref CLIm2ColKernel
+ - New Neon kernels / functions:
+    - @ref NERNNLayer
+ - New OpenCL kernels / functions:
+    - @ref CLArithmeticDivision
+ - Introduced prepare() stage support in the graph API for GLES.
+ - Added support for memory reusage when trying to allocate smaller CLTensors.
+ - Enabled NHWC execution on graph examples.
+ - Added JPEG accessor for validation purposes.
+ - Added validate methods to some kernels / functions.
 
 v18.05 Public major release
  - Various bug fixes.
@@ -249,7 +269,6 @@ v18.05 Public major release
     - @ref CLWinogradFilterTransformKernel / @ref CLWinogradInputTransformKernel / @ref CLWinogradConvolutionLayer
     - @ref CLWinogradInputTransformKernel / @ref CLWinogradInputTransform
  - New Neon kernels / functions:
-    - @ref CLRNNLayer
     - @ref NEConvertFullyConnectedWeightsKernel / @ref NEConvertFullyConnectedWeights.
  - Created the validate method in @ref CLDepthwiseConvolutionLayer.
  - Beta and gamma are no longer mandatory arguments in @ref NEBatchNormalizationLayer and @ref CLBatchNormalizationLayer.
