@@ -58,10 +58,23 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy = SamplingPolicy::CENTER);
+    /** Input tensor accessor.
+     *
+     * @return Pointer to input tensor.
+     */
+    const ICLTensor *input() const;
+    /** Output tensor accessor.
+     *
+     * @return Pointer to output tensor.
+     */
+    const ICLTensor *output() const;
 
     // Inherited methods overridden:
     BorderSize border_size() const override;
     void run(const Window &window, cl::CommandQueue &queue) override;
+
+public:
+    InterpolationPolicy _interpolationPolicy = InterpolationPolicy::BILINEAR;
 };
 } // namespace arm_compute
 #endif /*__ARM_COMPUTE_CLSCALEKERNEL_H__ */

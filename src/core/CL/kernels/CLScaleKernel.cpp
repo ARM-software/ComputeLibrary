@@ -148,10 +148,21 @@ Status CLScaleKernel::validate(const ITensorInfo *input, const ITensorInfo *outp
     return Status{};
 }
 
+const ICLTensor *CLScaleKernel::input() const
+{
+    return _input;
+}
+
+const ICLTensor *CLScaleKernel::output() const
+{
+    return _output;
+}
+
 void CLScaleKernel::configure(const ICLTensor *input, ICLTensor *output, InterpolationPolicy policy, BorderMode border_mode, SamplingPolicy sampling_policy)
 {
-    _input  = input;
-    _output = output;
+    _input               = input;
+    _output              = output;
+    _interpolationPolicy = policy;
 
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), policy));
 

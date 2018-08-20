@@ -249,6 +249,34 @@ void tune_pooling_kernel(CLPoolingLayerKernel &k)
 
     k.set_lws_hint(lws_hint);
 }
+
+void tune_scale_kernel(CLScaleKernel &k)
+{
+    cl::NDRange               lws_hint      = k.lws_hint();
+    const GPUTarget           gpu_target    = k.get_target();
+    const DataType            dt            = k.input()->info()->data_type();
+    const InterpolationPolicy interpolation = k._interpolationPolicy;
+
+    // Configure the local work size for Bifrost, interpolation (bilinear) and datatype F32.
+    // The value are obtained via exhaustive autotuning.
+    if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72) && (dt == DataType::F32) && (interpolation == InterpolationPolicy::BILINEAR))
+    {
+        auto dim_0 = k.output()->info()->dimension(0);
+        if(dim_0 == 480)
+        {
+            lws_hint = cl::NDRange(2, 1);
+        }
+        else if(dim_0 == 3120)
+        {
+            lws_hint = cl::NDRange(2, 8);
+        }
+        else if(dim_0 == 4160)
+        {
+            lws_hint = cl::NDRange(4, 8);
+        }
+        k.set_lws_hint(lws_hint);
+    }
+}
 } // namespace
 
 void BifrostTuner::tune_kernel_static(ICLKernel &kernel)
@@ -280,6 +308,10 @@ void BifrostTuner::tune_kernel_static(ICLKernel &kernel)
     else if(dynamic_cast<CLPoolingLayerKernel *>(&kernel) != nullptr)
     {
         tune_pooling_kernel(*utils::cast::polymorphic_downcast<CLPoolingLayerKernel *>(&kernel));
+    }
+    else if(dynamic_cast<CLScaleKernel *>(&kernel) != nullptr)
+    {
+        tune_scale_kernel(*utils::cast::polymorphic_downcast<CLScaleKernel *>(&kernel));
     }
 }
 
