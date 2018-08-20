@@ -109,11 +109,11 @@ public:
     void run(const Window &window, const ThreadInfo &info) override;
 
 private:
-    /** Template function to run the im2col
+    /** Template function to run im2col
      *
      * @param[in] window Region on which to execute the kernel. (Must be a valid region of the window returned by window()).
      */
-    template <typename T, bool has_pads>
+    template <typename T, bool has_pads, bool is_nchw>
     void run_im2col(const Window &window);
 
     /** Common signature for all the specialised im2col functions

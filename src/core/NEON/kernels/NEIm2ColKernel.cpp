@@ -90,22 +90,22 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 }
 
 template <typename T, bool has_pads>
-inline void linearize_volume(const uint8_t *const in_ptr,
-                             T                   *out_ptr,
-                             bool                 has_bias,
-                             int                  top_left_x,
-                             int                  top_left_y,
-                             int                  kernel_width,
-                             int                  kernel_height,
-                             int                  kernel_depth,
-                             int                  input_w,
-                             int                  input_h,
-                             int                  input_stride_x,
-                             int                  input_stride_y,
-                             int                  input_stride_z,
-                             int                  pad_value,
-                             int                  dilation_x,
-                             int                  dilation_y)
+inline void linearize_volume_nchw(const uint8_t *const in_ptr,
+                                  T                   *out_ptr,
+                                  bool                 has_bias,
+                                  int                  top_left_x,
+                                  int                  top_left_y,
+                                  int                  kernel_width,
+                                  int                  kernel_height,
+                                  int                  kernel_depth,
+                                  int                  input_w,
+                                  int                  input_h,
+                                  int                  input_stride_x,
+                                  int                  input_stride_y,
+                                  int                  input_stride_z,
+                                  int                  pad_value,
+                                  int                  dilation_x,
+                                  int                  dilation_y)
 {
     const int kernel_size2 = kernel_width * kernel_height;
     const int x_e          = top_left_x + kernel_width * dilation_x;
@@ -186,9 +186,62 @@ inline void linearize_volume(const uint8_t *const in_ptr,
         *out_ptr = static_cast<T>(1);
     }
 }
-} // namespace
 
 template <typename T, bool has_pads>
+inline void linearize_volume_nhwc(const uint8_t *const in_ptr,
+                                  T                   *out_ptr,
+                                  bool                 has_bias,
+                                  int                  start_x,
+                                  int                  start_y,
+                                  int                  kernel_width,
+                                  int                  kernel_height,
+                                  int                  input_w,
+                                  int                  input_h,
+                                  int                  input_c,
+                                  int                  input_stride_y,
+                                  int                  input_stride_z,
+                                  int                  pad_value,
+                                  int                  dilation_x,
+                                  int                  dilation_y)
+{
+    const int end_x     = start_x + kernel_width * dilation_x;
+    const int end_y     = start_y + kernel_height * dilation_y;
+    const int pad_quant = kernel_width * input_c;
+
+    for(int y = start_y; y < end_y; y += dilation_y)
+    {
+        if(y < 0 || y >= input_h)
+        {
+            memset(out_ptr, pad_value, pad_quant * sizeof(T));
+            out_ptr += pad_quant;
+        }
+        else
+        {
+            for(int x = start_x; x < end_x; x += dilation_x)
+            {
+                if(x < 0 || x >= input_w)
+                {
+                    memset(out_ptr, pad_value, input_c * sizeof(T));
+                    out_ptr += input_c;
+                }
+                else
+                {
+                    memcpy(out_ptr, reinterpret_cast<const T *>(in_ptr + (y * input_stride_z + x * input_stride_y)), input_c * sizeof(T));
+                    out_ptr += input_c;
+                }
+            }
+        }
+    }
+
+    // Append 1 if the convolution layer has biases
+    if(has_bias)
+    {
+        *out_ptr = static_cast<T>(1);
+    }
+}
+} // namespace
+
+template <typename T, bool has_pads, bool is_nchw>
 void NEIm2ColKernel::run_im2col(const Window &window)
 {
     ARM_COMPUTE_ERROR_ON_UNCONFIGURED_KERNEL(this);
@@ -199,25 +252,17 @@ void NEIm2ColKernel::run_im2col(const Window &window)
     const unsigned int height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
     const unsigned int channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
 
-    const int kernel_depth   = _input->info()->dimension(channel_idx);
     const int input_w        = _input->info()->dimension(width_idx);
     const int input_h        = _input->info()->dimension(height_idx);
-    const int input_stride_x = _input->info()->strides_in_bytes()[width_idx];
-    const int input_stride_y = _input->info()->strides_in_bytes()[height_idx];
-    const int input_stride_z = _input->info()->strides_in_bytes()[channel_idx];
-    const int offset         = is_data_type_quantized(_input->info()->data_type()) ? _input->info()->quantization_info().offset : 0;
-
-    int pad_left = 0;
-    int pad_top  = 0;
-    int stride_x = 0;
-    int stride_y = 0;
-    pad_left     = _conv_info.pad_left();
-    pad_top      = _conv_info.pad_top();
-    std::tie(stride_x, stride_y) = _conv_info.stride();
-
-    // Setup input window
-    const int start_x = -pad_left;
-    const int start_y = -pad_top;
+    const int input_c        = _input->info()->dimension(channel_idx);
+    const int input_stride_x = _input->info()->strides_in_bytes().x();
+    const int input_stride_y = _input->info()->strides_in_bytes().y();
+    const int input_stride_z = _input->info()->strides_in_bytes().z();
+    const int pad_left       = _conv_info.pad_left();
+    const int pad_top        = _conv_info.pad_top();
+    const int stride_x       = _conv_info.stride().first;
+    const int stride_y       = _conv_info.stride().second;
+    const int pad_value      = is_data_type_quantized(_input->info()->data_type()) ? _input->info()->quantization_info().offset : 0;
 
     Window window_in_out(window);
     // The first three dimensions of the input and output are increased by the inner loops
@@ -231,30 +276,51 @@ void NEIm2ColKernel::run_im2col(const Window &window)
 
     execute_window_loop(window, [&](const Coordinates & id)
     {
-        const int top_left_x = id[width_idx] * stride_x + start_x;
-        const int top_left_y = id[height_idx] * stride_y + start_y;
+        const int start_w = id[width_idx] * stride_x - pad_left;
+        const int start_h = id[height_idx] * stride_y - pad_top;
 
         // Get pointers
         const uint8_t *const input_ptr  = in.ptr();
         auto                 output_ptr = reinterpret_cast<T *>(out.ptr() + (id[width_idx] + id[height_idx] * _convolved_dims.first) * _output->info()->strides_in_bytes().y());
 
         // Linearize volume
-        linearize_volume<T, has_pads>(input_ptr,
-                                      output_ptr,
-                                      _has_bias,
-                                      top_left_x,
-                                      top_left_y,
-                                      static_cast<int>(_kernel_width),
-                                      static_cast<int>(_kernel_height),
-                                      kernel_depth,
-                                      input_w,
-                                      input_h,
-                                      input_stride_x,
-                                      input_stride_y,
-                                      input_stride_z,
-                                      offset,
-                                      _dilation.x(),
-                                      _dilation.y());
+        if(is_nchw)
+        {
+            linearize_volume_nchw<T, has_pads>(input_ptr,
+                                               output_ptr,
+                                               _has_bias,
+                                               start_w,
+                                               start_h,
+                                               _kernel_width,
+                                               _kernel_height,
+                                               input_c,
+                                               input_w,
+                                               input_h,
+                                               input_stride_x,
+                                               input_stride_y,
+                                               input_stride_z,
+                                               pad_value,
+                                               _dilation.x(),
+                                               _dilation.y());
+        }
+        else
+        {
+            linearize_volume_nhwc<T, has_pads>(input_ptr,
+                                               output_ptr,
+                                               _has_bias,
+                                               start_w,
+                                               start_h,
+                                               _kernel_width,
+                                               _kernel_height,
+                                               input_w,
+                                               input_h,
+                                               input_c,
+                                               input_stride_y,
+                                               input_stride_z,
+                                               pad_value,
+                                               _dilation.x(),
+                                               _dilation.y());
+        }
     },
     in, out);
 }
@@ -286,22 +352,45 @@ void NEIm2ColKernel::configure(const ITensor *input, ITensor *output, const Size
                                         _conv_info, _dilation);
     _has_bias = has_bias;
 
-    switch(_input->info()->data_type())
+    if(data_layout == DataLayout::NCHW)
     {
-        case DataType::F32:
-            _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<float, false> : &NEIm2ColKernel::run_im2col<float, true>;
-            break;
+        switch(_input->info()->data_type())
+        {
+            case DataType::F32:
+                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<float, false, true> : &NEIm2ColKernel::run_im2col<float, true, true>;
+                break;
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-        case DataType::F16:
-            _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<float16_t, false> : &NEIm2ColKernel::run_im2col<float16_t, true>;
-            break;
+            case DataType::F16:
+                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<float16_t, false, true> : &NEIm2ColKernel::run_im2col<float16_t, true, true>;
+                break;
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-        case DataType::QASYMM8:
-            _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<qasymm8_t, false> : &NEIm2ColKernel::run_im2col<qasymm8_t, true>;
-            break;
-        default:
-            ARM_COMPUTE_ERROR("Data type not supported");
-            break;
+            case DataType::QASYMM8:
+                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<qasymm8_t, false, true> : &NEIm2ColKernel::run_im2col<qasymm8_t, true, true>;
+                break;
+            default:
+                ARM_COMPUTE_ERROR("Data type not supported");
+                break;
+        }
+    }
+    else
+    {
+        switch(_input->info()->data_type())
+        {
+            case DataType::F32:
+                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<float, false, false> : &NEIm2ColKernel::run_im2col<float, true, false>;
+                break;
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+            case DataType::F16:
+                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<float16_t, false, false> : &NEIm2ColKernel::run_im2col<float16_t, true, false>;
+                break;
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+            case DataType::QASYMM8:
+                _func = (!conv_info.has_padding()) ? &NEIm2ColKernel::run_im2col<qasymm8_t, false, false> : &NEIm2ColKernel::run_im2col<qasymm8_t, true, false>;
+                break;
+            default:
+                ARM_COMPUTE_ERROR("Data type not supported");
+                break;
+        }
     }
 
     // Configure kernel window

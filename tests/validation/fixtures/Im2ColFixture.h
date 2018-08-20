@@ -50,7 +50,7 @@ class Im2ColValidationFixture : public framework::Fixture
 public:
     template <typename...>
     void setup(TensorShape input_shape, DataType data_type, const Size2D &kernel_dims, const PadStrideInfo &conv_info, const QuantizationInfo &quant_info, const DataLayout &data_layout,
-               unsigned int num_groups, bool channels_first_output_nhwc)
+               unsigned int num_groups)
     {
         _kernel_dims = kernel_dims;
         _conv_info   = conv_info;
@@ -70,7 +70,7 @@ public:
         const TensorShape output_shape = compute_im2col_conv_shape(&input_info, _kernel_dims, _conv_info, _has_bias, Size2D(1U, 1U), batch_size_on_z && _num_groups == 1, _num_groups);
         _target                        = compute_target(input_shape, output_shape, data_type);
 
-        compute_reference(input_shape, output_shape, data_type, channels_first_output_nhwc);
+        compute_reference(input_shape, output_shape, data_type);
     }
 
 protected:
@@ -109,7 +109,7 @@ protected:
         return dst;
     }
 
-    void compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, DataType data_type, bool channels_first_output_nhwc)
+    void compute_reference(const TensorShape &input_shape, const TensorShape &output_shape, DataType data_type)
     {
         // Create reference
         SimpleTensor<T> src{ input_shape, data_type, 1, _quant_info, _data_layout };
@@ -118,7 +118,7 @@ protected:
         // Fill reference
         fill(src);
 
-        reference::im2col<T>(src, _reference, _kernel_dims, _conv_info, _has_bias, _num_groups, channels_first_output_nhwc);
+        reference::im2col<T>(src, _reference, _kernel_dims, _conv_info, _has_bias, _num_groups);
     }
     TensorType       _target{};
     SimpleTensor<T>  _reference{};
