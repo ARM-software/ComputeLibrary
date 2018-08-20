@@ -55,7 +55,7 @@ vars.AddVariables(
     BoolVariable("cppthreads", "Enable C++11 threads backend", True),
     PathVariable("build_dir", "Specify sub-folder for the build", ".", PathVariable.PathAccept),
     #FIXME Remove before release (And remove all references to INTERNAL_ONLY)
-    BoolVariable("internal_only", "Enable ARM internal only tests", True),
+    BoolVariable("internal_only", "Enable ARM internal only tests", False),
     ("extra_cxx_flags", "Extra CXX flags to be appended to the build command", ""),
     ("compiler_cache", "Command to prefix to the C and C++ compiler (e.g ccache)", "")
 )
