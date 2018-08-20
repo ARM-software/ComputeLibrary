@@ -61,6 +61,7 @@
 #include "arm_compute/core/NEON/kernels/NEFillArrayKernel.h"
 #include "arm_compute/core/NEON/kernels/NEFillBorderKernel.h"
 #include "arm_compute/core/NEON/kernels/NEFillInnerBorderKernel.h"
+#include "arm_compute/core/NEON/kernels/NEFlattenLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEFloorKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMAssemblyBaseKernel.h"
 #include "arm_compute/core/NEON/kernels/NEGEMMInterleave4x4Kernel.h"

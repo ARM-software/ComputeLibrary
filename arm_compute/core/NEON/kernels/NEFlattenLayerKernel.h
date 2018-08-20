@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 ARM Limited.
+ * Copyright (c) 2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -21,33 +21,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_CLFLATTENLAYER_H__
-#define __ARM_COMPUTE_CLFLATTENLAYER_H__
+#ifndef __ARM_COMPUTE_NEFLATTENLAYERKERNEL_H__
+#define __ARM_COMPUTE_NEFLATTENLAYERKERNEL_H__
 
-#include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/CL/ICLSimpleFunction.h"
+#include "arm_compute/core/NEON/INEKernel.h"
 
 namespace arm_compute
 {
-class ICLTensor;
+class ITensor;
 
-/** Basic function to execute flatten. This function calls the following OpenCL kernel:
-*
-* -# @ref CLFlattenLayerKernel
-*
-*/
-class CLFlattenLayer : public ICLSimpleFunction
+/** Interface for the flatten layer kernel. */
+class NEFlattenLayerKernel : public INEKernel
 {
 public:
-    /** Initialise the kernel's input and output.
+    const char *name() const override
+    {
+        return "NEFlattenLayerKernel";
+    }
+    /** Default constructor */
+    NEFlattenLayerKernel();
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEFlattenLayerKernel(const NEFlattenLayerKernel &) = delete;
+    /** Prevent instances of this class from being copied (As this class contains pointers) */
+    NEFlattenLayerKernel &operator=(const NEFlattenLayerKernel &) = delete;
+    /** Allow instances of this class to be moved */
+    NEFlattenLayerKernel(NEFlattenLayerKernel &&) = default;
+    /** Allow instances of this class to be moved */
+    NEFlattenLayerKernel &operator=(NEFlattenLayerKernel &&) = default;
+    /** Default destructor */
+    ~NEFlattenLayerKernel() = default;
+
+    /** Set the input and output of the kernel.
      *
      * @param[in]  input  First input tensor to flatten with at least 3 dimensions.
      *                    The dimensions above the third will be interpreted as batches. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
      * @param[out] output Output tensor with shape [w*h*d, input_batches] where:
      *                    w = width input tensor, h = height input tensor and d = depth input tensor. Data type supported: same as @p input
      */
-    void configure(const ICLTensor *input, ICLTensor *output);
-    /** Static function to check if given info will lead to a valid configuration of @ref CLFlattenLayer
+    void configure(const ITensor *input, ITensor *output);
+    /** Static function to check if given info will lead to a valid configuration of @ref NEFlattenLayerKernel
      *
      * @param[in]  input  First input tensor to flatten with at least 3 dimensions.
      *                    The dimensions above the third will be interpreted as batches. Data types supported: U8/S8/QASYMM8/U16/S16/F16/U32/S32/F32
@@ -57,7 +69,13 @@ public:
      * @return a status
      */
     static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+
+    // Inherited methods overridden:
+    void run(const Window &window, const ThreadInfo &info) override;
+
+private:
+    const ITensor *_input;
+    ITensor       *_output;
 };
 } // namespace arm_compute
-
-#endif /* __ARM_COMPUTE_CLFLATTENLAYER_H__ */
+#endif /*__ARM_COMPUTE_NEFLATTENLAYERKERNEL_H__ */
