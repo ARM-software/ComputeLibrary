@@ -128,7 +128,7 @@ DummyAccessor::DummyAccessor(unsigned int maximum)
 bool DummyAccessor::access_tensor(ITensor &tensor)
 {
     ARM_COMPUTE_UNUSED(tensor);
-    bool ret = _iterator < _maximum;
+    bool ret = _maximum == 0 || _iterator < _maximum;
     if(_iterator == _maximum)
     {
         _iterator = 0;
@@ -180,39 +180,43 @@ bool NumPyAccessor::access_tensor(ITensor &tensor)
 }
 
 ImageAccessor::ImageAccessor(std::string filename, bool bgr, std::unique_ptr<IPreprocessor> preprocessor)
-    : _filename(std::move(filename)), _bgr(bgr), _preprocessor(std::move(preprocessor))
+    : _already_loaded(false), _filename(std::move(filename)), _bgr(bgr), _preprocessor(std::move(preprocessor))
 {
 }
 
 bool ImageAccessor::access_tensor(ITensor &tensor)
 {
-    auto image_loader = utils::ImageLoaderFactory::create(_filename);
-    ARM_COMPUTE_EXIT_ON_MSG(image_loader == nullptr, "Unsupported image type");
-
-    // Open image file
-    image_loader->open(_filename);
-
-    // Get permutated shape and permutation parameters
-    TensorShape                    permuted_shape = tensor.info()->tensor_shape();
-    arm_compute::PermutationVector perm;
-    if(tensor.info()->data_layout() != DataLayout::NCHW)
+    if(!_already_loaded)
     {
-        std::tie(permuted_shape, perm) = compute_permutation_parameters(tensor.info()->tensor_shape(), tensor.info()->data_layout());
+        auto image_loader = utils::ImageLoaderFactory::create(_filename);
+        ARM_COMPUTE_EXIT_ON_MSG(image_loader == nullptr, "Unsupported image type");
+
+        // Open image file
+        image_loader->open(_filename);
+
+        // Get permutated shape and permutation parameters
+        TensorShape                    permuted_shape = tensor.info()->tensor_shape();
+        arm_compute::PermutationVector perm;
+        if(tensor.info()->data_layout() != DataLayout::NCHW)
+        {
+            std::tie(permuted_shape, perm) = compute_permutation_parameters(tensor.info()->tensor_shape(), tensor.info()->data_layout());
+        }
+        ARM_COMPUTE_EXIT_ON_MSG(image_loader->width() != permuted_shape.x() || image_loader->height() != permuted_shape.y(),
+                                "Failed to load image file: dimensions [%d,%d] not correct, expected [%d,%d].",
+                                image_loader->width(), image_loader->height(), permuted_shape.x(), permuted_shape.y());
+
+        // Fill the tensor with the PPM content (BGR)
+        image_loader->fill_planar_tensor(tensor, _bgr);
+
+        // Preprocess tensor
+        if(_preprocessor)
+        {
+            _preprocessor->preprocess(tensor);
+        }
     }
-    ARM_COMPUTE_EXIT_ON_MSG(image_loader->width() != permuted_shape.x() || image_loader->height() != permuted_shape.y(),
-                            "Failed to load image file: dimensions [%d,%d] not correct, expected [%d,%d].",
-                            image_loader->width(), image_loader->height(), permuted_shape.x(), permuted_shape.y());
 
-    // Fill the tensor with the PPM content (BGR)
-    image_loader->fill_planar_tensor(tensor, _bgr);
-
-    // Preprocess tensor
-    if(_preprocessor)
-    {
-        _preprocessor->preprocess(tensor);
-    }
-
-    return true;
+    _already_loaded = !_already_loaded;
+    return _already_loaded;
 }
 
 ValidationInputAccessor::ValidationInputAccessor(const std::string             &image_list,
@@ -602,15 +606,19 @@ bool RandomAccessor::access_tensor(ITensor &tensor)
 }
 
 NumPyBinLoader::NumPyBinLoader(std::string filename, DataLayout file_layout)
-    : _filename(std::move(filename)), _file_layout(file_layout)
+    : _already_loaded(false), _filename(std::move(filename)), _file_layout(file_layout)
 {
 }
 
 bool NumPyBinLoader::access_tensor(ITensor &tensor)
 {
-    utils::NPYLoader loader;
-    loader.open(_filename, _file_layout);
-    loader.fill_tensor(tensor);
+    if(!_already_loaded)
+    {
+        utils::NPYLoader loader;
+        loader.open(_filename, _file_layout);
+        loader.fill_tensor(tensor);
+    }
 
-    return true;
+    _already_loaded = !_already_loaded;
+    return _already_loaded;
 }

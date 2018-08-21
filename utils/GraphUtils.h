@@ -183,6 +183,7 @@ public:
     bool access_tensor(ITensor &tensor) override;
 
 private:
+    bool                           _already_loaded;
     const std::string              _filename;
     const bool                     _bgr;
     std::unique_ptr<IPreprocessor> _preprocessor;
@@ -352,6 +353,7 @@ public:
     bool access_tensor(ITensor &tensor) override;
 
 private:
+    bool              _already_loaded;
     const std::string _filename;
     const DataLayout  _file_layout;
 };
