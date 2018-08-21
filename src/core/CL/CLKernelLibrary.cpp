@@ -364,6 +364,8 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "softmax_layer_max_shift_exp_sum_quantized_serial", "softmax_layer_quantized.cl" },
     { "softmax_layer_max_shift_exp_sum_quantized_parallel", "softmax_layer_quantized.cl" },
     { "softmax_layer_max_shift_exp_sum_serial", "softmax_layer.cl" },
+    { "space_to_batch", "space_to_batch.cl" },
+    { "space_to_batch_static", "space_to_batch.cl" },
     { "softmax_layer_max_shift_exp_sum_parallel", "softmax_layer.cl" },
     { "strided_slice", "slice_ops.cl" },
     { "suppress_non_maximum", "canny.cl" },
@@ -758,6 +760,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "slice_ops.cl",
 #include "./cl_kernels/slice_ops.clembed"
+    },
+    {
+        "space_to_batch.cl",
+#include "./cl_kernels/space_to_batch.clembed"
     },
     {
         "tablelookup.cl",
