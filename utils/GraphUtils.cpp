@@ -128,7 +128,7 @@ DummyAccessor::DummyAccessor(unsigned int maximum)
 bool DummyAccessor::access_tensor(ITensor &tensor)
 {
     ARM_COMPUTE_UNUSED(tensor);
-    bool ret = _maximum == 0 || _iterator < _maximum;
+    bool ret = _iterator < _maximum;
     if(_iterator == _maximum)
     {
         _iterator = 0;
