@@ -43,11 +43,12 @@ namespace validation
 {
 namespace
 {
-RelativeTolerance<float>            rel_tolerance_f32(0.05f);                 /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
-RelativeTolerance<half_float::half> rel_tolerance_f16(half_float::half(0.2)); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-constexpr AbsoluteTolerance<float>  abs_tolerance_qasymm8(0.0);               /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
-constexpr float                     abs_tolerance_f32 = 0.001f;               /**< Tolerance number */
-constexpr float                     abs_tolerance_f16 = 0.07f;                /**< Tolerance number */
+RelativeTolerance<float>            rel_tolerance_f32(0.05f);                 /**< Relative tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+RelativeTolerance<half_float::half> rel_tolerance_f16(half_float::half(0.2)); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+constexpr AbsoluteTolerance<float>  abs_tolerance_qasymm8(0.0);               /**< Relative tolerance value for comparing reference's output against implementation's output for quantized data types */
+constexpr float                     abs_tolerance_f32 = 0.001f;               /**< Absolute tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+constexpr float                     abs_tolerance_f16 = 0.3f;                 /**< Absolute tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+constexpr float                     tolerance_num_f16 = 0.07f;                /**< Tolerance number for FP16 */
 
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
@@ -177,7 +178,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLGEMMDilatedConvolutionLayerFixture<half>, fra
                                                                                                                       framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, rel_tolerance_f16, 0.0f, abs_tolerance_f16);
+    validate(CLAccessor(_target), _reference, rel_tolerance_f16, tolerance_num_f16);
 }
 
 TEST_SUITE_END()
