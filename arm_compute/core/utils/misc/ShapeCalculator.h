@@ -28,6 +28,8 @@
 #include "arm_compute/core/ITensorInfo.h"
 #include "arm_compute/core/Utils.h"
 
+#include "arm_compute/core/utils/helpers/tensor_transform.h"
+
 #include <cmath>
 
 namespace arm_compute
@@ -430,6 +432,22 @@ inline TensorShape compute_mm_shape(const ITensorInfo &input0, const ITensorInfo
     output_shape.set(4, reinterpret_output_as_3d ? dim3 : 1);
 
     return output_shape;
+}
+
+inline TensorShape compute_strided_slice_shape(const ITensorInfo &input,
+                                               const Coordinates &starts, const Coordinates &ends, const Coordinates &strides,
+                                               int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
+{
+    using namespace arm_compute::helpers::tensor_transform;
+
+    const TensorShape &input_shape = input.tensor_shape();
+
+    // Get actual start, end coordinates and strides
+    const Coordinates final_strides = strided_slice_strides(input_shape, strides);
+    const Coordinates starts_abs    = strided_slice_absolute_start_coords(input_shape, starts, final_strides, begin_mask);
+    const Coordinates ends_abs      = strided_slice_absolute_end_coords(input_shape, starts_abs, ends, final_strides, end_mask, shrink_axis_mask);
+
+    return compute_strided_slice_output_shape(input_shape, starts_abs, ends_abs, final_strides);
 }
 
 template <typename T>

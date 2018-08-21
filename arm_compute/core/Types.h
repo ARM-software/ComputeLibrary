@@ -45,6 +45,8 @@ using half = half_float::half;
 
 /** Permutation vector */
 using PermutationVector = Strides;
+/** Bidirectional strides */
+using BiStrides = Coordinates;
 
 /** Image colour formats */
 enum class Format

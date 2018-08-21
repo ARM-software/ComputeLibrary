@@ -109,6 +109,7 @@
 #include "arm_compute/core/CL/kernels/CLSobel5x5Kernel.h"
 #include "arm_compute/core/CL/kernels/CLSobel7x7Kernel.h"
 #include "arm_compute/core/CL/kernels/CLSoftmaxLayerKernel.h"
+#include "arm_compute/core/CL/kernels/CLStridedSliceKernel.h"
 #include "arm_compute/core/CL/kernels/CLTableLookupKernel.h"
 #include "arm_compute/core/CL/kernels/CLThresholdKernel.h"
 #include "arm_compute/core/CL/kernels/CLTransposeKernel.h"
