@@ -22,11 +22,9 @@
  * SOFTWARE.
  */
 #include "arm_compute/core/Types.h"
-#include "arm_compute/runtime/NEON/functions/NEReorgLayer.h"
-#include "arm_compute/runtime/Tensor.h"
-#include "arm_compute/runtime/TensorAllocator.h"
-
-#include "tests/NEON/Accessor.h"
+#include "arm_compute/runtime/CL/functions/CLReorgLayer.h"
+#include "tests/CL/CLAccessor.h"
+#include "tests/CL/Helper.h"
 #include "tests/PaddingCalculator.h"
 #include "tests/datasets/ReorgLayerDataset.h"
 #include "tests/framework/Asserts.h"
@@ -41,7 +39,7 @@ namespace test
 {
 namespace validation
 {
-TEST_SUITE(NEON)
+TEST_SUITE(CL)
 TEST_SUITE(ReorgLayer)
 
 // *INDENT-OFF*
@@ -63,7 +61,7 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(
                framework::dataset::make("Expected", { false, true, false, true, false })),
                input_info, output_info, stride, expected)
 {
-    bool status = bool(NEReorgLayer::validate(&input_info, &output_info, stride));
+    bool status = bool(CLReorgLayer::validate(&input_info, &output_info, stride));
     ARM_COMPUTE_EXPECT(status == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
@@ -82,13 +80,13 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
     }
 
     // Create tensors
-    Tensor src = create_tensor<Tensor>(shape_to_use, data_type, 1, QuantizationInfo(), data_layout);
-    Tensor dst;
+    CLTensor src = create_tensor<CLTensor>(shape_to_use, data_type, 1, QuantizationInfo(), data_layout);
+    CLTensor dst;
 
     ARM_COMPUTE_EXPECT(src.info()->is_resizable(), framework::LogLevel::ERRORS);
 
     // Create and configure function
-    NEReorgLayer reorg_layer;
+    CLReorgLayer reorg_layer;
 
     // Auto-initialize the output within the function
     reorg_layer.configure(&src, &dst, stride);
@@ -108,63 +106,63 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(combine(frame
 }
 
 template <typename T>
-using NEReorgLayerFixture = ReorgLayerValidationFixture<Tensor, Accessor, NEReorgLayer, T>;
+using CLReorgLayerFixture = ReorgLayerValidationFixture<CLTensor, CLAccessor, CLReorgLayer, T>;
 
 TEST_SUITE(S32)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEReorgLayerFixture<int32_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallReorgLayerDataset(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLReorgLayerFixture<int32_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallReorgLayerDataset(), framework::dataset::make("DataType",
                                                                                                                   DataType::S32)),
                                                                                                           framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
-    validate(Accessor(_target), _reference);
+    validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEReorgLayerFixture<int32_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeReorgLayerDataset(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, CLReorgLayerFixture<int32_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeReorgLayerDataset(), framework::dataset::make("DataType",
                                                                                                                 DataType::S32)),
                                                                                                         framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
-    validate(Accessor(_target), _reference);
+    validate(CLAccessor(_target), _reference);
 }
 TEST_SUITE_END() // S32
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEReorgLayerFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallReorgLayerDataset(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLReorgLayerFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallReorgLayerDataset(), framework::dataset::make("DataType",
                                                                                                                   DataType::S16)),
                                                                                                           framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
-    validate(Accessor(_target), _reference);
+    validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEReorgLayerFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeReorgLayerDataset(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunLarge, CLReorgLayerFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeReorgLayerDataset(), framework::dataset::make("DataType",
                                                                                                                 DataType::S16)),
                                                                                                         framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
-    validate(Accessor(_target), _reference);
+    validate(CLAccessor(_target), _reference);
 }
 TEST_SUITE_END() // S16
 
 TEST_SUITE(S8)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEReorgLayerFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallReorgLayerDataset(), framework::dataset::make("DataType",
+FIXTURE_DATA_TEST_CASE(RunSmall, CLReorgLayerFixture<int8_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallReorgLayerDataset(), framework::dataset::make("DataType",
                                                                                                                  DataType::S8)),
                                                                                                          framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
-    validate(Accessor(_target), _reference);
+    validate(CLAccessor(_target), _reference);
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEReorgLayerFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeReorgLayerDataset(), framework::dataset::make("DataType", DataType::S8)),
+FIXTURE_DATA_TEST_CASE(RunLarge, CLReorgLayerFixture<int8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeReorgLayerDataset(), framework::dataset::make("DataType", DataType::S8)),
                                                                                                        framework::dataset::make("DataLayout", { DataLayout::NCHW, DataLayout::NHWC })))
 {
     // Validate output
-    validate(Accessor(_target), _reference);
+    validate(CLAccessor(_target), _reference);
 }
 TEST_SUITE_END() // S8
 
 TEST_SUITE_END() // ReorgLayer
-TEST_SUITE_END() // NEON
+TEST_SUITE_END() // CL
 } // namespace validation
 } // namespace test
 } // namespace arm_compute

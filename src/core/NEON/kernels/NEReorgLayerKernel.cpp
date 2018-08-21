@@ -46,14 +46,20 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, i
                                                          DataType::U16, DataType::S16,
                                                          DataType::U32, DataType::S32,
                                                          DataType::F16, DataType::F32);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG(stride <= 0, "Stride should be a positive number");
+    ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() == DataLayout::UNKNOWN);
 
-    const TensorShape output_shape = misc::shape_calculator::compute_reorg_output_shape(*input, stride);
+    const size_t idx_width  = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH);
+    const size_t idx_height = get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT);
 
-    // Validate configured output
+    ARM_COMPUTE_RETURN_ERROR_ON(stride <= 0);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->tensor_shape()[idx_width] % stride) != 0, "The width of the input tensor must be a multiple of stride");
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->tensor_shape()[idx_height] % stride) != 0, "The height of the input tensor must be a multiple of stride");
+
+    // Validate output if initialized
     if(output->total_size() != 0)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DIMENSIONS(output->tensor_shape(), output_shape);
+        const TensorInfo tensor_info_output = output->clone()->set_tensor_shape(misc::shape_calculator::compute_reorg_output_shape(*input, stride));
+        ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_SHAPES(output, &tensor_info_output);
         ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
     }
 

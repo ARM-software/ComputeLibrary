@@ -55,7 +55,8 @@ public:
      *
      * @param[in]  input  Source tensor. Data type supported: U8/S8/U16/S16/QASYMM8/U32/S32/F16/F32
      * @param[out] output Destination tensor. Data type supported: Same as @p input
-     * @param[in]  stride Stride to be used during data re-organization
+     * @param[in]  stride Stride to be used during data re-organization.
+     *                    It defines the spatial distance between 2 consecutive pixels in the x and y direction
      */
     void configure(const ITensor *input, ITensor *output, int32_t stride);
 
@@ -64,6 +65,7 @@ public:
      * @param[in] input  Source tensor info. Data type supported: U8/S8/U16/S16/QASYMM8/U32/S32/F16/F32
      * @param[in] output Destination tensor info. Data type supported: Same as @p input
      * @param[in] stride Stride to be used during data re-organization
+     *                   It defines the spatial distance between 2 consecutive pixels in the x and y direction
      *
      * @return a status
      */

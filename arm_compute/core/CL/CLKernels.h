@@ -104,6 +104,7 @@
 #include "arm_compute/core/CL/kernels/CLROIPoolingLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLReductionOperationKernel.h"
 #include "arm_compute/core/CL/kernels/CLRemapKernel.h"
+#include "arm_compute/core/CL/kernels/CLReorgLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLReshapeLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLScaleKernel.h"
 #include "arm_compute/core/CL/kernels/CLScharr3x3Kernel.h"

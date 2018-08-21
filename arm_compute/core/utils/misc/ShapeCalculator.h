@@ -61,17 +61,19 @@ inline TensorShape compute_permutation_output_shape(const ITensorInfo &input, co
 
 inline TensorShape compute_reorg_output_shape(const ITensorInfo &input, int32_t stride)
 {
-    ARM_COMPUTE_ERROR_ON(stride <= 0);
+    const size_t idx_width   = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::WIDTH);
+    const size_t idx_height  = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::HEIGHT);
+    const size_t idx_channel = get_data_layout_dimension_index(input.data_layout(), DataLayoutDimension::CHANNEL);
 
-    const DataLayout   data_layout = input.data_layout();
-    const unsigned int width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
-    const unsigned int height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-    const unsigned int channel_idx = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
+    ARM_COMPUTE_ERROR_ON(stride <= 0);
+    ARM_COMPUTE_ERROR_ON_MSG((input.tensor_shape()[idx_width] % stride != 0), "The width of the input tensor must be a multiple of stride");
+    ARM_COMPUTE_ERROR_ON_MSG((input.tensor_shape()[idx_height] % stride != 0), "The height of the input tensor must be a multiple of stride");
 
     TensorShape output_shape{ input.tensor_shape() };
-    output_shape.set(width_idx, input.tensor_shape()[width_idx] / stride);
-    output_shape.set(height_idx, input.tensor_shape()[height_idx] / stride);
-    output_shape.set(channel_idx, input.tensor_shape()[channel_idx] * stride * stride);
+
+    output_shape.set(idx_width, output_shape[idx_width] / stride);
+    output_shape.set(idx_height, output_shape[idx_height] / stride);
+    output_shape.set(idx_channel, output_shape[idx_channel] * stride * stride);
 
     return output_shape;
 }

@@ -336,6 +336,8 @@ const std::map<std::string, std::string> CLKernelLibrary::_kernel_program_map =
     { "reduction_operation", "reduction_operation.cl" },
     { "remap_nearest_neighbour", "remap.cl" },
     { "remap_bilinear", "remap.cl" },
+    { "reorg_layer_nchw", "reorg_layer.cl" },
+    { "reorg_layer_nhwc", "reorg_layer.cl" },
     { "reshape_layer", "reshape_layer.cl" },
     { "reshape_to_columns", "convolution_layer.cl" },
     { "RGB888_to_IYUV_bt709", "color_convert.cl" },
@@ -718,6 +720,10 @@ const std::map<std::string, std::string> CLKernelLibrary::_program_source_map =
     {
         "remap.cl",
 #include "./cl_kernels/remap.clembed"
+    },
+    {
+        "reorg_layer.cl",
+#include "./cl_kernels/reorg_layer.clembed"
     },
     {
         "reshape_layer.cl",

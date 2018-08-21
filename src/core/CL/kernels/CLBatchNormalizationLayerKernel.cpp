@@ -192,8 +192,6 @@ void CLBatchNormalizationLayerKernel::configure(ICLTensor *input, ICLTensor *out
     ICLKernel::configure_internal(win_config.second);
 
     _config_id = "batch_normalization_layer_";
-    _config_id += string_from_data_layout(input->info()->data_layout());
-    _config_id += "_";
     _config_id += string_from_data_type(input->info()->data_type());
     _config_id += "_";
     _config_id += support::cpp11::to_string(input->info()->dimension(0));

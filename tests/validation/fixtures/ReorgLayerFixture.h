@@ -59,9 +59,7 @@ protected:
 
     TensorType compute_target(TensorShape input_shape, int32_t stride, DataType data_type, DataLayout data_layout)
     {
-        // Check if indeed the input shape can be reshape to the output one
-        ARM_COMPUTE_EXPECT(stride >= 0, framework::LogLevel::ERRORS);
-
+        // Note: The input shape passed to the function is always in NCHW
         if(data_layout == DataLayout::NHWC)
         {
             permute(input_shape, PermutationVector(2U, 0U, 1U));
