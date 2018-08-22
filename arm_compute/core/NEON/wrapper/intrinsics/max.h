@@ -43,6 +43,9 @@ VMAX_IMPL(int16_t, int16x4_t, vmax, s16)
 VMAX_IMPL(uint32_t, uint32x2_t, vmax, u32)
 VMAX_IMPL(int32_t, int32x2_t, vmax, s32)
 VMAX_IMPL(float, float32x2_t, vmax, f32)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VMAX_IMPL(float16_t, float16x4_t, vmax, f16)
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 VMAX_IMPL(uint8_t, uint8x16_t, vmaxq, u8)
 VMAX_IMPL(int8_t, int8x16_t, vmaxq, s8)
@@ -51,6 +54,9 @@ VMAX_IMPL(int16_t, int16x8_t, vmaxq, s16)
 VMAX_IMPL(uint32_t, uint32x4_t, vmaxq, u32)
 VMAX_IMPL(int32_t, int32x4_t, vmaxq, s32)
 VMAX_IMPL(float, float32x4_t, vmaxq, f32)
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+VMAX_IMPL(float16_t, float16x8_t, vmaxq, f16)
+#endif // __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 
 #undef VMAX_IMPL
 } // namespace wrapper
