@@ -35,6 +35,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/misc/ShapeCalculator.h"
 
 #include "support/ToolchainSupport.h"
 
@@ -47,18 +48,10 @@
 #include <tuple>
 
 using namespace arm_compute;
+using namespace misc::shape_calculator;
 
 namespace
 {
-void auto_init(const ITensorInfo *input, ITensorInfo *output, unsigned int pooled_w, unsigned int pooled_h)
-{
-    TensorShape output_shape{ input->tensor_shape() };
-    output_shape.set(get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::WIDTH), pooled_w);
-    output_shape.set(get_data_layout_dimension_index(input->data_layout(), DataLayoutDimension::HEIGHT), pooled_h);
-
-    auto_init_if_empty(*output, input->clone()->set_tensor_shape(output_shape));
-}
-
 template <bool exclude_padding, DataLayout data_layout>
 inline float calculate_avg_scale(const Coordinates &id, const int pool_size_x, const int pool_size_y, const int upper_bound_w, const int upper_bound_h,
                                  const int pad_x, const int pad_y, const int stride_x, const int stride_y)
@@ -166,7 +159,9 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
                                                         BorderSize &border_size,
                                                         unsigned int pooled_w, unsigned int pooled_h, int pool_size_x, int pool_size_y)
 {
-    // Get data layout
+    // Output auto inizialitation if not yet initialized
+    auto_init_if_empty(*output, input->clone()->set_tensor_shape(compute_pool_shape(*input, pool_info)));
+
     DataLayout          data_layout                  = input->data_layout();
     unsigned int        num_elems_read_per_iteration = 0;
     unsigned int        num_elems_horizontal_window  = 0;
@@ -190,7 +185,6 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
                                                      pool_size_x,
                                                      pool_size_y,
                                                      pad_stride_info);
-    auto_init(input, output, pooled_w, pooled_h);
 
     //If it's not squared and optimized will be executed the MxN
     num_elems_read_per_iteration      = 1;
@@ -248,7 +242,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
             case DataType::F32:
                 if(is_nhwc)
                 {
-                    num_elems_processed_per_iteration = 4;
+                    num_elems_processed_per_iteration = std::max(4, ceil_to_multiple<int>(input->dimension(0), 2));
                     break;
                 }
                 switch(pool_size_x)
@@ -370,9 +364,6 @@ void NEPoolingLayerKernel::configure(const ITensor *input, ITensor *output, cons
                                                      pool_size_x,
                                                      pool_size_y,
                                                      pad_stride_info);
-
-    // Output auto initialization if not yet initialized
-    auto_init(input->info(), output->info(), pooled_w, pooled_h);
 
     // Perform validation step
     ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info(), pool_info, pooled_w, pooled_h));
