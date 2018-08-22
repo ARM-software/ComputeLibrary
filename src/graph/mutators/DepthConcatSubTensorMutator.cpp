@@ -77,7 +77,7 @@ void DepthConcatSubTensorMutator::mutate(Graph &g)
             });
 
             // Create subtensors
-            if(is_valid && backends::BackendRegistry::get().find_backend(output_tensor->desc().target) != nullptr)
+            if(is_valid && is_target_supported(output_tensor->desc().target))
             {
                 ARM_COMPUTE_LOG_GRAPH_VERBOSE("Using sub-tensors for the node with ID : "
                                               << node->id() << " and name : " << node->name() << std::endl);
@@ -88,8 +88,8 @@ void DepthConcatSubTensorMutator::mutate(Graph &g)
                     auto       input_tensor = node->input(i);
                     const auto input_shape  = input_tensor->desc().shape;
 
-                    auto backend = backends::BackendRegistry::get().find_backend(input_tensor->desc().target);
-                    auto handle  = backend->create_subtensor(output_tensor->handle(), input_shape, Coordinates(0, 0, depth), false);
+                    backends::IDeviceBackend      &backend = backends::BackendRegistry::get().get_backend(input_tensor->desc().target);
+                    std::unique_ptr<ITensorHandle> handle  = backend.create_subtensor(output_tensor->handle(), input_shape, Coordinates(0, 0, depth), false);
                     input_tensor->set_handle(std::move(handle));
 
                     depth += input_shape.z();

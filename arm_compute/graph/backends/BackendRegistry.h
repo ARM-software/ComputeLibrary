@@ -53,6 +53,16 @@ public:
      * @return Pointer to the backend interface if found, else nullptr
      */
     IDeviceBackend *find_backend(Target target);
+
+    /** Get a backend from the registry
+     *
+     * The backend must be present and supported.
+     *
+     * @param[in] target Backend target
+     *
+     * @return Reference to the backend interface
+     */
+    IDeviceBackend &get_backend(Target target);
     /** Checks if a backend for a given target exists
      *
      * @param[in] target Execution target

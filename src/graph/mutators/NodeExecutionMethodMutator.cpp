@@ -55,8 +55,8 @@ void set_default_on_invalid_method(Graph &g, NodeType node_type, Setter &&setter
         if(node != nullptr)
         {
             // Validate node
-            backends::IDeviceBackend *backend = backends::BackendRegistry::get().find_backend(node->assigned_target());
-            Status                    status  = backend->validate_node(*node);
+            backends::IDeviceBackend &backend = backends::BackendRegistry::get().get_backend(node->assigned_target());
+            Status                    status  = backend.validate_node(*node);
 
             // Set default execution method in case of failure
             if(!bool(status))

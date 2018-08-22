@@ -76,7 +76,10 @@ int main(int argc, char **argv)
 {
 #ifdef ARM_COMPUTE_CL
     CLTuner cl_tuner(false);
-    CLScheduler::get().default_init(&cl_tuner);
+    if(opencl_is_available())
+    {
+        CLScheduler::get().default_init(&cl_tuner);
+    }
 #endif /* ARM_COMPUTE_CL */
 
 #ifdef ARM_COMPUTE_GC

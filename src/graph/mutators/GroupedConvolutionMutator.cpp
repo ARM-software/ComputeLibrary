@@ -117,8 +117,8 @@ void GroupedConvolutionMutator::mutate(Graph &g)
         if(node != nullptr && node->type() == NodeType::ConvolutionLayer && arm_compute::utils::cast::polymorphic_downcast<ConvolutionLayerNode *>(node)->num_groups() != 1)
         {
             // Validate node
-            backends::IDeviceBackend *backend = backends::BackendRegistry::get().find_backend(node->assigned_target());
-            Status                    status  = backend->validate_node(*node);
+            backends::IDeviceBackend &backend = backends::BackendRegistry::get().get_backend(node->assigned_target());
+            Status                    status  = backend.validate_node(*node);
 
             // If grouped convolution is not supported
             if(!bool(status))

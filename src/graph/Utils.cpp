@@ -101,7 +101,10 @@ void release_default_graph_context(GraphContext &ctx)
 {
     for(const auto &backend : backends::BackendRegistry::get().backends())
     {
-        backend.second->release_backend_context(ctx);
+        if(backend.second->is_backend_supported())
+        {
+            backend.second->release_backend_context(ctx);
+        }
     }
 }
 
@@ -109,7 +112,10 @@ void setup_default_graph_context(GraphContext &ctx)
 {
     for(const auto &backend : backends::BackendRegistry::get().backends())
     {
-        backend.second->setup_backend_context(ctx);
+        if(backend.second->is_backend_supported())
+        {
+            backend.second->setup_backend_context(ctx);
+        }
     }
 }
 
@@ -172,11 +178,10 @@ void configure_tensor(Tensor *tensor)
 {
     if(tensor != nullptr && tensor->handle() == nullptr)
     {
-        Target target  = tensor->desc().target;
-        auto   backend = backends::BackendRegistry::get().find_backend(target);
-        ARM_COMPUTE_ERROR_ON_MSG(!backend, "Requested backend doesn't exist!");
-        auto handle = backend->create_tensor(*tensor);
-        ARM_COMPUTE_ERROR_ON_MSG(!backend, "Couldn't create backend handle!");
+        Target                         target  = tensor->desc().target;
+        backends::IDeviceBackend      &backend = backends::BackendRegistry::get().get_backend(target);
+        std::unique_ptr<ITensorHandle> handle  = backend.create_tensor(*tensor);
+        ARM_COMPUTE_ERROR_ON_MSG(!handle, "Couldn't create backend handle!");
         tensor->set_handle(std::move(handle));
     }
 }

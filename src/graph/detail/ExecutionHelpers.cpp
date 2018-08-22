@@ -44,10 +44,9 @@ void validate_all_nodes(Graph &g)
     {
         if(node != nullptr)
         {
-            Target assigned_target = node->assigned_target();
-            auto   backend         = backends::BackendRegistry::get().find_backend(assigned_target);
-            ARM_COMPUTE_ERROR_ON_MSG(!backend, "Requested backend doesn't exist!");
-            Status status = backend->validate_node(*node);
+            Target                    assigned_target = node->assigned_target();
+            backends::IDeviceBackend &backend         = backends::BackendRegistry::get().get_backend(assigned_target);
+            Status                    status          = backend.validate_node(*node);
             ARM_COMPUTE_ERROR_ON_MSG(!bool(status), status.error_description().c_str());
         }
     }
@@ -61,11 +60,10 @@ void configure_all_tensors(Graph &g)
     {
         if(tensor && tensor->handle() == nullptr)
         {
-            Target target  = tensor->desc().target;
-            auto   backend = backends::BackendRegistry::get().find_backend(target);
-            ARM_COMPUTE_ERROR_ON_MSG(!backend, "Requested backend doesn't exist!");
-            auto handle = backend->create_tensor(*tensor);
-            ARM_COMPUTE_ERROR_ON_MSG(!backend, "Couldn't create backend handle!");
+            Target                         target  = tensor->desc().target;
+            backends::IDeviceBackend      &backend = backends::BackendRegistry::get().get_backend(target);
+            std::unique_ptr<ITensorHandle> handle  = backend.create_tensor(*tensor);
+            ARM_COMPUTE_ERROR_ON_MSG(!handle, "Couldn't create backend handle!");
             tensor->set_handle(std::move(handle));
         }
     }
@@ -143,10 +141,9 @@ ExecutionWorkload configure_all_nodes(Graph &g, GraphContext &ctx, const std::ve
         auto node = g.node(node_id);
         if(node != nullptr)
         {
-            Target assigned_target = node->assigned_target();
-            auto   backend         = backends::BackendRegistry::get().find_backend(assigned_target);
-            ARM_COMPUTE_ERROR_ON_MSG(!backend, "Requested backend doesn't exist!");
-            auto func = backend->configure_node(*node, ctx);
+            Target                     assigned_target = node->assigned_target();
+            backends::IDeviceBackend &backend         = backends::BackendRegistry::get().get_backend(assigned_target);
+            std::unique_ptr<IFunction> func            = backend.configure_node(*node, ctx);
             if(func != nullptr)
             {
                 ExecutionTask task;

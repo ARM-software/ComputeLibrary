@@ -25,6 +25,7 @@
 
 #include "arm_compute/graph/Graph.h"
 #include "arm_compute/graph/Logger.h"
+#include "arm_compute/graph/Utils.h"
 #include "arm_compute/graph/algorithms/TopologicalSort.h"
 #include "arm_compute/graph/backends/BackendRegistry.h"
 #include "arm_compute/graph/nodes/SplitLayerNode.h"
@@ -69,7 +70,7 @@ void SplitLayerSubTensorMutator::mutate(Graph &g)
             });
 
             // Create subtensors
-            if(is_valid && backends::BackendRegistry::get().find_backend(input_tensor->desc().target) != nullptr)
+            if(is_valid && is_target_supported(input_tensor->desc().target))
             {
                 ARM_COMPUTE_LOG_GRAPH_VERBOSE("Using sub-tensors for the node with ID : "
                                               << node->id() << " and name : " << node->name() << std::endl);
@@ -88,8 +89,8 @@ void SplitLayerSubTensorMutator::mutate(Graph &g)
                     Coordinates       coords;
                     std::tie(std::ignore, coords) = SplitLayerNode::compute_output_descriptor(input_tensor->desc(), num_splits, axis, i);
 
-                    backends::IDeviceBackend      *backend = backends::BackendRegistry::get().find_backend(output_tensor->desc().target);
-                    std::unique_ptr<ITensorHandle> handle  = backend->create_subtensor(input_tensor->handle(), output_shape, coords, extend_parent);
+                    backends::IDeviceBackend      &backend = backends::BackendRegistry::get().get_backend(output_tensor->desc().target);
+                    std::unique_ptr<ITensorHandle> handle  = backend.create_subtensor(input_tensor->handle(), output_shape, coords, extend_parent);
                     output_tensor->set_handle(std::move(handle));
                 }
             }
