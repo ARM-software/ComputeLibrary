@@ -50,6 +50,22 @@ namespace winograd
     const int matrix_row_stride  /** Stride within matrices. */
   )
   {
+    // If an Nx1 kernel then transpose and redirect to the 1xN implementation
+    if (kernel_cols == 1)
+    {
+      WinogradGEMM<output_tile_cols, output_tile_rows, kernel_cols, kernel_rows>::
+        template InputTransform<T>::execute(
+          input,
+          n_batches, in_batch_stride,
+          n_cols, in_col_stride,
+          n_rows, in_row_stride,
+          n_channels, padding,
+          tile_N, tile_M,
+          output, matrix_stride, matrix_batch_stride, matrix_row_stride
+        );
+      return;
+    }
+
     // Compute the padding required on each edge of the image
     const int pad_top = (padding == PADDING_SAME) ? (kernel_rows - 1) / 2 : 0;
     const int pad_left = (padding == PADDING_SAME) ? (kernel_cols - 1) / 2 : 0;
@@ -111,6 +127,12 @@ namespace winograd
     const int n_cols
   )
   {
+    if (kernel_cols == 1)
+    {
+      // If an Nx1 implementation then this should never be reached.
+      return;
+    }
+
     constexpr int tile_overlap = kernel_cols - 1;
 
     // Loop over columns of tiles

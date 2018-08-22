@@ -45,6 +45,22 @@ namespace winograd
     T* const output
   )
   {
+    // If an Nx1 kernel then transpose and redirect to the 1xN implementation.
+    if (kernel_cols == 1)
+    {
+      WinogradGEMM<output_tile_cols, output_tile_rows, kernel_cols, kernel_rows>::
+        template OutputTransform<T>::execute(
+          n_batches,
+          output_batch_stride,
+          n_cols, output_col_stride,
+          n_rows, output_row_stride,
+          n_channels,
+          matrix_base, matrix_stride, matrix_row_stride,
+          biases, output
+        );
+      return;
+    }
+
     // Compute the number of tiles and hence the padding required on the bottom
     // and right of the image.
     const int tile_M = iceildiv(n_rows, output_tile_rows);
@@ -98,6 +114,12 @@ namespace winograd
     const int row_pad_right
   )
   {
+    if (kernel_cols == 1)
+    {
+      // If an Nx1 implementation then this should never be reached.
+      return;
+    }
+
     // Loop over columns of tiles
     for (int tile_j = 0; tile_j < tile_N; tile_j++)
     {

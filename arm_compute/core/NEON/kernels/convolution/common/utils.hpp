@@ -26,7 +26,7 @@
 
 void PrintMatrix(const float *const m, const int M, const int N, const int row_stride);
 
-inline int iceildiv(const int a, const int b)
+constexpr inline int iceildiv(const int a, const int b)
 {
     return (a + b - 1) / b;
 }

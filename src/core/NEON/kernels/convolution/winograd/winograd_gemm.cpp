@@ -225,4 +225,7 @@ int WinogradGEMM<kernel_rows, kernel_cols, output_tile_rows, output_tile_cols>::
 template class WinogradGEMM<2, 2, 3, 3>::Convolution<float, float>;
 template class WinogradGEMM<4, 4, 3, 3>::Convolution<float, float>;
 
+template class WinogradGEMM<1, 6, 1, 3>::Convolution<float, float>;
+template class WinogradGEMM<6, 1, 3, 1>::Convolution<float, float>;
+
 template class WinogradGEMM<2, 2, 5, 5>::Convolution<float, float>;

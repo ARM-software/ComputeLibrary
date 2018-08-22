@@ -298,7 +298,7 @@ void Transform::process_tile(
 
 template <>
 template <>
-const Transform::TileFn Transform::tile_fns[2][2][max_pad_bottom][max_pad_right] =
+const Transform::TileFn Transform::tile_fns[n_pad_top][n_pad_left][n_pad_bottom][n_pad_right] =
 {
   {
     {
