@@ -78,7 +78,7 @@ CLFullyConnectedLayer::CLFullyConnectedLayer(std::shared_ptr<IMemoryManager> mem
       _is_fc_after_conv(true), _accumulate_biases(false), _is_quantized(false), _is_prepared(false), _original_weights(nullptr)
 {
 }
-void CLFullyConnectedLayer::configure_mm(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output)
+void CLFullyConnectedLayer::configure_mm(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, bool retain_internal_weights)
 {
     if(_is_quantized)
     {
@@ -100,11 +100,11 @@ void CLFullyConnectedLayer::configure_mm(const ICLTensor *input, const ICLTensor
     else
     {
         // Configure matrix multiply kernel
-        _mm_gemm.configure(input, weights, nullptr, output, 1.f, 0.0f, GEMMInfo(false, false, true /* Reshape weights only for the first run */));
+        _mm_gemm.configure(input, weights, nullptr, output, 1.f, 0.0f, GEMMInfo(false, false, true /* Reshape weights only for the first run */, 1, false, retain_internal_weights));
     }
 }
 
-void CLFullyConnectedLayer::configure_conv_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output)
+void CLFullyConnectedLayer::configure_conv_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, bool retain_internal_weights)
 {
     ARM_COMPUTE_ERROR_ON((weights->info()->dimension(1) != (input->info()->dimension(0) * input->info()->dimension(1) * input->info()->dimension(2))));
 
@@ -119,18 +119,18 @@ void CLFullyConnectedLayer::configure_conv_fc(const ICLTensor *input, const ICLT
     _flatten_layer.configure(input, &_flatten_output);
 
     // Configure matrix multiply kernel
-    configure_mm(&_flatten_output, weights, output);
+    configure_mm(&_flatten_output, weights, output, retain_internal_weights);
 
     // Allocate the output tensor for flatten once all the configure methods have been called
     _flatten_output.allocator()->allocate();
 }
 
-void CLFullyConnectedLayer::configure_fc_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output)
+void CLFullyConnectedLayer::configure_fc_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, bool retain_internal_weights)
 {
     ARM_COMPUTE_ERROR_ON(input->info()->dimension(0) != weights->info()->dimension(1));
 
     // Configure matrix multiply kernel
-    configure_mm(input, weights, output);
+    configure_mm(input, weights, output, retain_internal_weights);
 }
 
 void CLFullyConnectedLayer::configure(const ICLTensor *input, const ICLTensor *weights, const ICLTensor *biases, ICLTensor *output,
@@ -150,7 +150,7 @@ void CLFullyConnectedLayer::configure(const ICLTensor *input, const ICLTensor *w
     _is_fc_after_conv      = true;
     _accumulate_biases     = false;
     _is_quantized          = is_data_type_quantized_asymmetric(input->info()->data_type());
-    _is_prepared           = false;
+    _is_prepared           = fc_info.retain_internal_weights;
     _original_weights      = weights;
 
     // Configure gemmlowp output
@@ -218,12 +218,12 @@ void CLFullyConnectedLayer::configure(const ICLTensor *input, const ICLTensor *w
     if(_is_fc_after_conv)
     {
         // Fully Connected layer after a Convolution Layer without batches
-        configure_conv_fc(input, weights_to_use, tmp_output);
+        configure_conv_fc(input, weights_to_use, tmp_output, fc_info.retain_internal_weights);
     }
     else
     {
         // Fully Connected layer after a Fully Connected Layer without batches
-        configure_fc_fc(input, weights_to_use, tmp_output);
+        configure_fc_fc(input, weights_to_use, tmp_output, fc_info.retain_internal_weights);
     }
 
     // Configure output stage for asymmetric quantized types
@@ -235,8 +235,6 @@ void CLFullyConnectedLayer::configure(const ICLTensor *input, const ICLTensor *w
         _gemmlowp_output_stage.configure(&_gemmlowp_output, biases, output, output_multiplier, output_shift, output->info()->quantization_info().offset);
         _gemmlowp_output.allocator()->allocate();
     }
-
-    _are_weights_reshaped = _are_weights_reshaped || fc_info.retain_internal_weights;
 }
 
 Status CLFullyConnectedLayer::validate(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output,

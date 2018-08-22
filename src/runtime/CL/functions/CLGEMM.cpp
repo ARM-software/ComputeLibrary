@@ -86,7 +86,7 @@ void CLGEMM::configure(const ICLTensor *a, const ICLTensor *b, const ICLTensor *
 
     // Check if we need to reshape the matrix B only on the first run
     _reshape_b_only_on_first_run = gemm_info.reshape_b_only_on_first_run();
-    _is_prepared                 = false;
+    _is_prepared                 = gemm_info.retain_internal_weights();
     _original_b                  = b;
 
     const ICLTensor *matrix_a = a;

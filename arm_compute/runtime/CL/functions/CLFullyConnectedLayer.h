@@ -125,9 +125,9 @@ public:
     void prepare() override;
 
 private:
-    void configure_fc_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);
-    void configure_conv_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);
-    void configure_mm(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output);
+    void configure_fc_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, bool retain_internal_weights);
+    void configure_conv_fc(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, bool retain_internal_weights);
+    void configure_mm(const ICLTensor *input, const ICLTensor *weights, ICLTensor *output, bool retain_internal_weights);
 
     CLMemoryGroup                                       _memory_group;
     CLConvertFullyConnectedWeights                      _convert_weights;
