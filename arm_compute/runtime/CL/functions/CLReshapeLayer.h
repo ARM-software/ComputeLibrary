@@ -40,6 +40,15 @@ public:
      * @param[out] output Output tensor. Data type supported: Same as @p input
      */
     void configure(const ICLTensor *input, ICLTensor *output);
+
+    /** Static function to check if given info will lead to a valid configuration of @ref CLReshapeLayer
+     *
+     * @param[in] input  First tensor info. Data type supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
+     * @param[in] output Output tensor info. Data type supported: Same as @p input
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
 };
 }
 #endif /*__ARM_COMPUTE_CLRESHAPELAYER_H__ */

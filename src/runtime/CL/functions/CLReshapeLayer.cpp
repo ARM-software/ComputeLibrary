@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -34,4 +34,9 @@ void CLReshapeLayer::configure(const ICLTensor *input, ICLTensor *output)
     auto k = arm_compute::support::cpp14::make_unique<CLReshapeLayerKernel>();
     k->configure(input, output);
     _kernel = std::move(k);
+}
+
+Status CLReshapeLayer::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    return CLReshapeLayerKernel::validate(input, output);
 }

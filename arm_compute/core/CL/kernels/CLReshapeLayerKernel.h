@@ -54,6 +54,15 @@ public:
      */
     void configure(const ICLTensor *input, ICLTensor *output);
 
+    /** Static function to check if given info will lead to a valid configuration of @ref CLReshapeLayerKernel
+     *
+     * @param[in] input  Source tensor info. Data type supported: U8/S8/QASYMM8/U16/S16/U32/S32/F16/F32
+     * @param[in] output Destination tensor info. Data type supported: Same as @p input
+     *
+     * @return a status
+     */
+    static Status validate(const ITensorInfo *input, const ITensorInfo *output);
+
     // Inherited methods overridden:
     void run(const Window &window, cl::CommandQueue &queue) override;
 

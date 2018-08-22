@@ -39,6 +39,25 @@
 
 using namespace arm_compute;
 
+namespace
+{
+Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QASYMM8,
+                                                         DataType::U16, DataType::S16,
+                                                         DataType::U32, DataType::S32, DataType::F16, DataType::F32);
+    ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(output);
+
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
+    ARM_COMPUTE_RETURN_ERROR_ON(input->tensor_shape().total_size() != output->tensor_shape().total_size());
+
+    return Status{};
+}
+
+} // namespace
+
 CLReshapeLayerKernel::CLReshapeLayerKernel()
     : _input(nullptr), _output(nullptr)
 {
@@ -46,19 +65,11 @@ CLReshapeLayerKernel::CLReshapeLayerKernel()
 
 void CLReshapeLayerKernel::configure(const ICLTensor *input, ICLTensor *output)
 {
-    ARM_COMPUTE_ERROR_ON_F16_UNSUPPORTED(input);
-    ARM_COMPUTE_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::S8, DataType::QASYMM8,
-                                                  DataType::U16, DataType::S16,
-                                                  DataType::U32, DataType::S32, DataType::F16, DataType::F32);
-    ARM_COMPUTE_ERROR_ON_NULLPTR(output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_DATA_TYPES(input, output);
-    ARM_COMPUTE_ERROR_ON_MISMATCHING_QUANTIZATION_INFO(input, output);
-    ARM_COMPUTE_ERROR_ON(input->info()->tensor_shape().total_size() != output->info()->tensor_shape().total_size());
+    ARM_COMPUTE_ERROR_ON_NULLPTR(input, output);
+    ARM_COMPUTE_ERROR_THROW_ON(validate_arguments(input->info(), output->info()));
 
     _input  = input;
     _output = output;
-
-    constexpr unsigned int num_elems_processed_per_iteration = 1;
 
     // Create kernel
     std::set<std::string> build_opts = { "-DDATA_TYPE=" + get_cl_type_from_data_type(input->info()->data_type()) };
@@ -84,15 +95,18 @@ void CLReshapeLayerKernel::configure(const ICLTensor *input, ICLTensor *output)
     _kernel.setArg<cl_int2>(idx++, output_shape);
 
     // Configure kernel window
-    Window win = calculate_max_window(*input->info(), Steps(num_elems_processed_per_iteration));
+    Window win = calculate_max_window(*input->info());
 
-    AccessWindowHorizontal input_access(input->info(), 0, num_elems_processed_per_iteration);
-    AccessWindowStatic     output_access(output->info(), 0, 0, output->info()->tensor_shape().x(), output->info()->tensor_shape().y());
-    update_window_and_padding(win, input_access, output_access);
-
-    output_access.set_valid_region(win, ValidRegion(Coordinates(), output->info()->tensor_shape()));
-
+    // Set the output valid region
+    output->info()->set_valid_region(ValidRegion(Coordinates(), output->info()->tensor_shape()));
     ICLKernel::configure_internal(win);
+}
+
+Status CLReshapeLayerKernel::validate(const ITensorInfo *input, const ITensorInfo *output)
+{
+    ARM_COMPUTE_RETURN_ON_ERROR(validate_arguments(input, output));
+
+    return Status{};
 }
 
 void CLReshapeLayerKernel::run(const Window &window, cl::CommandQueue &queue)
