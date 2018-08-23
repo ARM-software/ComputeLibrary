@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -44,15 +44,6 @@ AbsoluteTolerance<T> tolerance(MagnitudeType magnitude_type)
 {
     return AbsoluteTolerance<T>((MagnitudeType::L1NORM == magnitude_type) ? 0 : 1);
 }
-
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-template <>
-AbsoluteTolerance<half_float::half> tolerance(MagnitudeType magnitude_type)
-{
-    return AbsoluteTolerance<half_float::half>((MagnitudeType::L1NORM == magnitude_type) ? half(0.0) : half(1.0));
-}
-#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-
 } // namespace
 
 TEST_SUITE(NEON)
@@ -88,35 +79,21 @@ template <typename T>
 using NEMagnitudeFixture = MagnitudeValidationFixture<Tensor, Accessor, NEMagnitude, T>;
 
 TEST_SUITE(S16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEMagnitudeFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(), framework::dataset::make("Format", Format::S16)),
-                                                                                                                 framework::dataset::make("MagnitudeType", { MagnitudeType::L1NORM, MagnitudeType::L2NORM })),
-                                                                                                         framework::dataset::make("UseFP16", false)))
+FIXTURE_DATA_TEST_CASE(RunSmall, NEMagnitudeFixture<int16_t>, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::Small2DShapes(), framework::dataset::make("Format", Format::S16)),
+                                                                                                         framework::dataset::make("MagnitudeType", { MagnitudeType::L1NORM, MagnitudeType::L2NORM })))
+
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance<int16_t>(_magnitude_type));
 }
 
-FIXTURE_DATA_TEST_CASE(RunLarge, NEMagnitudeFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::Large2DShapes(), framework::dataset::make("Format", Format::S16)),
-                                                                                                               framework::dataset::make("MagnitudeType", { MagnitudeType::L1NORM, MagnitudeType::L2NORM })),
-                                                                                                       framework::dataset::make("UseFP16", false)))
+FIXTURE_DATA_TEST_CASE(RunLarge, NEMagnitudeFixture<int16_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::Large2DShapes(), framework::dataset::make("Format", Format::S16)),
+                                                                                                       framework::dataset::make("MagnitudeType", { MagnitudeType::L1NORM, MagnitudeType::L2NORM })))
 {
     // Validate output
     validate(Accessor(_target), _reference, tolerance<int16_t>(_magnitude_type));
 }
 TEST_SUITE_END() // S16
-
-#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-TEST_SUITE(F16)
-FIXTURE_DATA_TEST_CASE(RunSmall, NEMagnitudeFixture<half_float::half>, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::Small2DShapes(), framework::dataset::make("Format",
-                                                                                                                  Format::S16)),
-                                                                                                                  framework::dataset::make("MagnitudeType", { MagnitudeType::L1NORM, MagnitudeType::L2NORM })),
-                                                                                                                  framework::dataset::make("UseFP16", true)))
-{
-    // Validate output
-    validate(Accessor(_target), _reference, tolerance<half_float::half>(_magnitude_type));
-}
-TEST_SUITE_END() // F16
-#endif           /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 TEST_SUITE_END()
 TEST_SUITE_END()

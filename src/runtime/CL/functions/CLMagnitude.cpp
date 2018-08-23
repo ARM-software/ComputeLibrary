@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,10 +30,8 @@
 
 using namespace arm_compute;
 
-void CLMagnitude::configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, MagnitudeType mag_type, bool use_fp16)
+void CLMagnitude::configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, MagnitudeType mag_type)
 {
-    ARM_COMPUTE_UNUSED(use_fp16); //TODO(COMPMID-644): Add half float support
-
     auto k = arm_compute::support::cpp14::make_unique<CLMagnitudePhaseKernel>();
     k->configure(input1, input2, output, nullptr, mag_type);
     _kernel = std::move(k);

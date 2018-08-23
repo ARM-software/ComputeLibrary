@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -41,9 +41,8 @@ public:
      * @param[in]  input2   Second tensor input. Data types supported: S16.
      * @param[out] output   Output tensor. Data types supported: S16.
      * @param[in]  mag_type (Optional) Magnitude calculation type. Default: L2NORM.
-     * @param[in]  use_fp16 (Optional) If true the FP16 kernels will be used. If false F32 kernels are used.
      */
-    void configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, MagnitudeType mag_type = MagnitudeType::L2NORM, bool use_fp16 = false);
+    void configure(const ICLTensor *input1, const ICLTensor *input2, ICLTensor *output, MagnitudeType mag_type = MagnitudeType::L2NORM);
 };
 }
 #endif /*__ARM_COMPUTE_CLMAGNITUDE_H__ */

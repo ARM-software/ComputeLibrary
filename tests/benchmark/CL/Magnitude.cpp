@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 ARM Limited.
+ * Copyright (c) 2017-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -47,12 +47,10 @@ using CLMagnitudeFixture = MagnitudeFixture<CLTensor, CLMagnitude, CLAccessor>;
 
 TEST_SUITE(CL)
 TEST_SUITE(Magnitude)
-REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, CLMagnitudeFixture, framework::DatasetMode::PRECOMMIT, combine(combine(combine(datasets::SmallImageShapes(), framework::dataset::make("Format", { Format::S16, Format::S32 })),
-                                                                                                                 magnitude_types),
-                                                                                                         framework::dataset::make("UseFP16", { false })));
-REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, CLMagnitudeFixture, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeImageShapes(), framework::dataset::make("Format", { Format::S16, Format::S32 })),
-                                                                                                               magnitude_types),
-                                                                                                       framework::dataset::make("UseFP16", { false })));
+REGISTER_FIXTURE_DATA_TEST_CASE(RunSmall, CLMagnitudeFixture, framework::DatasetMode::PRECOMMIT, combine(combine(datasets::SmallImageShapes(), framework::dataset::make("Format", { Format::S16, Format::S32 })),
+                                                                                                         magnitude_types));
+REGISTER_FIXTURE_DATA_TEST_CASE(RunLarge, CLMagnitudeFixture, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeImageShapes(), framework::dataset::make("Format", { Format::S16, Format::S32 })),
+                                                                                                       magnitude_types));
 TEST_SUITE_END() // Magnitude
 TEST_SUITE_END() // CL
 } // namespace benchmark

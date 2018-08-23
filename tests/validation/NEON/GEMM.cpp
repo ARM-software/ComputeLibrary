@@ -49,8 +49,12 @@ namespace validation
 {
 namespace
 {
-constexpr AbsoluteTolerance<float> tolerance_f(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for floating point data types */
-
+constexpr AbsoluteTolerance<float> tolerance_f(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for FP32 data types */
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+RelativeTolerance<half_float::half> rel_tolerance_f16(half(0.2)); /**< Relative tolerance value for comparing reference's output against implementation's output for FP16 data types */
+const AbsoluteTolerance<float>      abs_tolerance_f16(0.2f);      /**< Absolute tolerance value for comparing reference's output against implementation's output for FP16 data types */
+constexpr float                     tolerance_num = 0.07f;        /**< Tolerance number for FP16 data types */
+#endif                                                            /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
 {
@@ -125,13 +129,13 @@ TEST_SUITE(FP16)
 FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMFixture<half>, framework::DatasetMode::PRECOMMIT, combine(datasets::SmallGEMMDataset(), framework::dataset::make("DataType", DataType::F16)))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f);
+    validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_f16);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMFixture<half>, framework::DatasetMode::NIGHTLY, combine(datasets::LargeGEMMDataset(), framework::dataset::make("DataType",
                                                                                                DataType::F16)))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f);
+    validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_f16);
 }
 TEST_SUITE_END()
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
