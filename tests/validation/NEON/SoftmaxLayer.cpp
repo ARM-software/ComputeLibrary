@@ -45,7 +45,8 @@ namespace
 /** Tolerance for float operations */
 constexpr AbsoluteTolerance<float> tolerance_f32(0.000001f);
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-constexpr AbsoluteTolerance<float> tolerance_f16(0.0001f);
+constexpr RelativeTolerance<float> rel_tolerance_f16(0.1f);
+constexpr AbsoluteTolerance<float> abs_tolerance_f16(0.01f);
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC*/
 
 /** Tolerance for quantized operations */
@@ -122,14 +123,14 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NESoftmaxLayerFixture<half>, framework::Dataset
                                                                                                          framework::dataset::make("Beta", { 1.0f, 2.0f })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f16);
+    validate(Accessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NESoftmaxLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SoftmaxLayerSmallShapes(),
                                                                                                                framework::dataset::make("DataType", DataType::F16)),
                                                                                                        framework::dataset::make("Beta", { 1.0f, 2.0f })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f16);
+    validate(Accessor(_target), _reference, rel_tolerance_f16, 0.f, abs_tolerance_f16);
 }
 TEST_SUITE_END()
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */

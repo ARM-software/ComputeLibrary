@@ -210,10 +210,6 @@ T sqmul(T a, T b);
     {                                                                             \
         return vsubq_##TAG(a, b);                                                 \
     }                                                                             \
-    inline vec_16_byte_t<TYPE> vexp(vec_16_byte_t<TYPE> vec)                      \
-    {                                                                             \
-        return vexpq_##TAG(vec);                                                  \
-    }                                                                             \
     inline vec_16_byte_t<TYPE> vmul_n(vec_16_byte_t<TYPE> vec, TYPE val)          \
     {                                                                             \
         return vmulq_n_##TAG(vec, val);                                           \
@@ -279,6 +275,26 @@ float32x4x4_t vexp(float32x4x4_t vec)
     };
     return res;
 }
+
+float32x4_t vexp(const float32x4_t &vec)
+{
+    return vexpq_f32(vec);
+}
+
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+// TODO (COMPMID-1535) : Revisit FP16 approximations
+float16x8_t vexp(const float16x8_t &vec)
+{
+    float16x4x2_t res =
+    {
+        {
+            vcvt_f16_f32(vexpq_f32(vcvt_f32_f16(vget_low_f16(vec)))),
+            vcvt_f16_f32(vexpq_f32(vcvt_f32_f16(vget_high_f16(vec))))
+        }
+    };
+    return vcombine_f16(res.val[0], res.val[1]);
+}
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 
 template <>
 float32x4x4_t vdup_n<float32x4x4_t>(float val)
