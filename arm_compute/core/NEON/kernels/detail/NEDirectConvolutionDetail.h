@@ -460,8 +460,12 @@ inline float16x8x2_t convolve_3x3<2>(const float16_t *in_top, const float16_t *i
 {
     float16x8x2_t out = convolve_3x3<1>(in_top, in_mid, in_low, m0, m1, m2);
     out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[0], 2), out.val[0], 1);
-    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[1], 0), out.val[0], 2);
-    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[1], 2), out.val[0], 3);
+    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[0], 4), out.val[0], 2);
+    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[0], 6), out.val[0], 3);
+    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[1], 0), out.val[0], 4);
+    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[1], 2), out.val[0], 5);
+    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[1], 4), out.val[0], 6);
+    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[1], 6), out.val[0], 7);
     return out;
 }
 
@@ -470,6 +474,8 @@ inline float16x8x2_t convolve_3x3<3>(const float16_t *in_top, const float16_t *i
 {
     float16x8x2_t out = convolve_3x3<1>(in_top, in_mid, in_low, m0, m1, m2);
     out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[0], 3), out.val[0], 1);
+    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[0], 6), out.val[0], 2);
+    out.val[0]        = vsetq_lane_f16(vgetq_lane_f16(out.val[1], 1), out.val[0], 3);
     return out;
 }
 

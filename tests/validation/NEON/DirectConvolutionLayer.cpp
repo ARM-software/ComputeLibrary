@@ -43,11 +43,13 @@ namespace validation
 namespace
 {
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-constexpr AbsoluteTolerance<float> tolerance_fp16(0.01f);  /**< Tolerance for half precision floating point tests */
-#endif                                                     /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-constexpr AbsoluteTolerance<float> tolerance_fp32(0.001f); /**< Tolerance for floating point tests */
+const RelativeTolerance<half_float::half> rel_tolerance_f16(half_float::half(0.2f)); /**< Relative tolerance value for FP16 types */
+const AbsoluteTolerance<float>            abs_tolerance_f16(0.2f);                   /**< Absolute tolerance for FP16 types */
+constexpr float                           tolerance_num = 0.07f;                     /**< Tolerance number for the FP16 implementation */
+#endif                                                                               /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+constexpr AbsoluteTolerance<float> tolerance_fp32(0.001f);                           /**< Tolerance for floating point tests */
 
-/** Direct convolution data set. */
+/** Direct convolution data set.for FP32 */
 const auto data_pad_f32 = concat(concat(combine(framework::dataset::make("PadX", { 0, 1 }),
                                                 combine(framework::dataset::make("PadY", { 0, 1 }),
                                                         framework::dataset::make("KernelSize", 3))),
@@ -58,10 +60,24 @@ const auto data_pad_f32 = concat(concat(combine(framework::dataset::make("PadX",
                                          combine(framework::dataset::make("PadY", { 0, 3 }),
                                                  framework::dataset::make("KernelSize", 5))));
 
+/** Direct convolution data set.for FP16 */
+const auto data_pad_f16 = concat(combine(framework::dataset::make("PadX", { 0, 1 }),
+                                         combine(framework::dataset::make("PadY", { 0, 1 }),
+                                                 framework::dataset::make("KernelSize", 3))),
+                                 combine(framework::dataset::make("PadX", { 0 }),
+                                         combine(framework::dataset::make("PadY", { 0 }),
+                                                 framework::dataset::make("KernelSize", 1))));
+
 const auto data_f32 = combine(datasets::SmallDirectConvolutionShapes(),
-                              combine(framework::dataset::make("StrideX", { 1, 3 }),
-                                      combine(framework::dataset::make("StrideY", { 1, 3 }),
+                              combine(framework::dataset::make("StrideX", { 1, 2, 3 }),
+                                      combine(framework::dataset::make("StrideY", { 1, 2, 3 }),
                                               combine(data_pad_f32,
+                                                      framework::dataset::make("NumKernels", { 1, 4, 8, 16 })))));
+
+const auto data_f16 = combine(datasets::SmallDirectConvolutionShapes(),
+                              combine(framework::dataset::make("StrideX", { 1, 2, 3 }),
+                                      combine(framework::dataset::make("StrideY", { 1, 2, 3 }),
+                                              combine(data_pad_f16,
                                                       framework::dataset::make("NumKernels", { 1, 4, 8, 16 })))));
 
 /** Activation function Dataset*/
@@ -152,12 +168,12 @@ using NEDirectConvolutionLayerFixture = DirectConvolutionValidationFixture<Tenso
 TEST_SUITE(Float)
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 TEST_SUITE(FP16)
-FIXTURE_DATA_TEST_CASE(Run, NEDirectConvolutionLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(data_f32, framework::dataset::make("DataType", DataType::F16)),
+FIXTURE_DATA_TEST_CASE(Run, NEDirectConvolutionLayerFixture<half>, framework::DatasetMode::ALL, combine(combine(combine(data_f16, framework::dataset::make("DataType", DataType::F16)),
                                                                                                                 ActivationFunctionsDataset),
                                                                                                         framework::dataset::make("DataLayout", DataLayout::NCHW)))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_fp16);
+    validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num, abs_tolerance_f16);
 }
 TEST_SUITE_END()
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
