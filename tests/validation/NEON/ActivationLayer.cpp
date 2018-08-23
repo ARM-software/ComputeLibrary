@@ -43,14 +43,42 @@ namespace validation
 {
 namespace
 {
-/** Define tolerance of the activation layer.
+/** Define relative tolerance of the activation layer.
  *
  * @param[in] data_type  The data type used.
  * @param[in] activation The activation function used.
  *
- * @return Tolerance depending on the activation function.
+ * @return Relative tolerance depending on the activation function.
  */
-AbsoluteTolerance<float> tolerance(DataType data_type, ActivationLayerInfo::ActivationFunction activation)
+RelativeTolerance<float> relative_tolerance(DataType data_type, ActivationLayerInfo::ActivationFunction activation)
+{
+    switch(activation)
+    {
+        case ActivationLayerInfo::ActivationFunction::LOGISTIC:
+        case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
+        case ActivationLayerInfo::ActivationFunction::SQRT:
+        case ActivationLayerInfo::ActivationFunction::TANH:
+            switch(data_type)
+            {
+                case DataType::F16:
+                    return RelativeTolerance<float>(0.1f);
+                default:
+                    return RelativeTolerance<float>(0.05f);
+            }
+            break;
+        default:
+            return RelativeTolerance<float>(0.f);
+    }
+}
+
+/** Define absolute tolerance of the activation layer.
+ *
+ * @param[in] data_type  The data type used.
+ * @param[in] activation The activation function used.
+ *
+ * @return Absolute tolerance depending on the activation function.
+ */
+AbsoluteTolerance<float> absolute_tolerance(DataType data_type, ActivationLayerInfo::ActivationFunction activation)
 {
     switch(activation)
     {
@@ -163,14 +191,14 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<half>, framework::Data
                                                                                                                     DataType::F16)))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance(_data_type, _function));
+    validate(Accessor(_target), _reference, relative_tolerance(_data_type, _function), 0.f, absolute_tolerance(_data_type, _function));
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), ActivationDataset),
                                                                                                           framework::dataset::make("DataType",
                                                                                                                   DataType::F16)))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance(_data_type, _function));
+    validate(Accessor(_target), _reference, relative_tolerance(_data_type, _function), 0.f, absolute_tolerance(_data_type, _function));
 }
 TEST_SUITE_END()
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
@@ -181,13 +209,13 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerFixture<float>, framework::Dat
 
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance(_data_type, _function));
+    validate(Accessor(_target), _reference, relative_tolerance(_data_type, _function), 0.f, absolute_tolerance(_data_type, _function));
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeShapes(), ActivationDataset),
                                                                                                            framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance(_data_type, _function));
+    validate(Accessor(_target), _reference, relative_tolerance(_data_type, _function), 0.f, absolute_tolerance(_data_type, _function));
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
@@ -211,7 +239,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEActivationLayerQuantizedFixture<uint8_t>, fra
                                                                                                                         framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance(_data_type, _function));
+    validate(Accessor(_target), _reference, relative_tolerance(_data_type, _function), 0.f, absolute_tolerance(_data_type, _function));
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeShapes(), QuantizedActivationDataset),
                                                                                                                       framework::dataset::make("DataType",
@@ -219,7 +247,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEActivationLayerQuantizedFixture<uint8_t>, fra
                                                                                                                       framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.1f, 128.0f) })))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance(_data_type, _function));
+    validate(Accessor(_target), _reference, relative_tolerance(_data_type, _function), 0.f, absolute_tolerance(_data_type, _function));
 }
 TEST_SUITE_END()
 TEST_SUITE_END()

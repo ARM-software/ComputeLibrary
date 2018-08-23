@@ -70,15 +70,16 @@ std::pair<T, T> get_activation_layer_test_bounds(ActivationLayerInfo::Activation
 
             switch(activation)
             {
+                case ActivationLayerInfo::ActivationFunction::TANH:
                 case ActivationLayerInfo::ActivationFunction::SQUARE:
                 case ActivationLayerInfo::ActivationFunction::LOGISTIC:
                 case ActivationLayerInfo::ActivationFunction::SOFT_RELU:
                     // Reduce range as exponent overflows
-                    bounds = std::make_pair(-10._h, 10._h);
+                    bounds = std::make_pair(-2._h, 2._h);
                     break;
                 case ActivationLayerInfo::ActivationFunction::SQRT:
                     // Reduce range as sqrt should take a non-negative number
-                    bounds = std::make_pair(0._h, 255._h);
+                    bounds = std::make_pair(0._h, 128._h);
                     break;
                 default:
                     bounds = std::make_pair(-255._h, 255._h);

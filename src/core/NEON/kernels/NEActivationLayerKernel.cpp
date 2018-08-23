@@ -138,6 +138,7 @@ void NEActivationLayerKernel::configure(ITensor *input, ITensor *output, Activat
         { ActivationFunction::RELU, &NEActivationLayerKernel::activation<ActivationFunction::RELU, float16_t> },
         { ActivationFunction::BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::BOUNDED_RELU, float16_t> },
         { ActivationFunction::LU_BOUNDED_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LU_BOUNDED_RELU, float16_t> },
+        { ActivationFunction::LEAKY_RELU, &NEActivationLayerKernel::activation<ActivationFunction::LEAKY_RELU, float16_t> },
         { ActivationFunction::SOFT_RELU, &NEActivationLayerKernel::activation<ActivationFunction::SOFT_RELU, float16_t> },
         { ActivationFunction::SQRT, &NEActivationLayerKernel::activation<ActivationFunction::SQRT, float16_t> },
         { ActivationFunction::SQUARE, &NEActivationLayerKernel::activation<ActivationFunction::SQUARE, float16_t> },
@@ -182,11 +183,14 @@ typename std::enable_if<std::is_same<T, float16_t>::value, void>::type NEActivat
     Iterator input(_input, window);
     Iterator output(_output, window);
 
-    static const float16x8_t CONST_0 = vdupq_n_f16(0.f);
-    static const float16x8_t CONST_1 = vdupq_n_f16(1.f);
+    static const float16x8_t CONST_0   = vdupq_n_f16(0.f);
+    static const float16x4_t CONST_1_H = vdup_n_f16(1.f);
 
-    const float16x8_t a = vdupq_n_f16(_act_info.a());
-    const float16x8_t b = vdupq_n_f16(_act_info.b());
+    static const float32x4_t CONST_1_F32 = vdupq_n_f32(1.f);
+
+    const float16x8_t a   = vdupq_n_f16(_act_info.a());
+    const float16x4_t a_h = vdup_n_f16(_act_info.a());
+    const float16x8_t b   = vdupq_n_f16(_act_info.b());
 
     execute_window_loop(window, [&](const Coordinates &)
     {
@@ -235,14 +239,29 @@ typename std::enable_if<std::is_same<T, float16_t>::value, void>::type NEActivat
                 };
                 break;
             case ActivationFunction::LOGISTIC:
+            {
+                // TODO (COMPMID-1535) : Revisit FP16 approximations
+                const float16x4x2_t in0 =
+                {
+                    vinv_f16(vadd_f16(CONST_1_H, vcvt_f16_f32(vexpq_f32(vcvt_f32_f16(vneg_f16(vget_low_f16(in.val[0]))))))),
+                    vinv_f16(vadd_f16(CONST_1_H, vcvt_f16_f32(vexpq_f32(vcvt_f32_f16(vneg_f16(vget_high_f16(in.val[0]))))))),
+                };
+
+                const float16x4x2_t in1 =
+                {
+                    vinv_f16(vadd_f16(CONST_1_H, vcvt_f16_f32(vexpq_f32(vcvt_f32_f16(vneg_f16(vget_low_f16(in.val[1]))))))),
+                    vinv_f16(vadd_f16(CONST_1_H, vcvt_f16_f32(vexpq_f32(vcvt_f32_f16(vneg_f16(vget_high_f16(in.val[1]))))))),
+                };
+
                 tmp =
                 {
                     {
-                        vinvq_f16(vaddq_f16(CONST_1, vexpq_f16(vnegq_f16(in.val[0])))),
-                        vinvq_f16(vaddq_f16(CONST_1, vexpq_f16(vnegq_f16(in.val[1])))),
+                        vcombine_f16(in0.val[0], in0.val[1]),
+                        vcombine_f16(in1.val[0], in1.val[1]),
                     }
                 };
-                break;
+            }
+            break;
             case ActivationFunction::RELU:
                 tmp =
                 {
@@ -262,14 +281,29 @@ typename std::enable_if<std::is_same<T, float16_t>::value, void>::type NEActivat
                 };
                 break;
             case ActivationFunction::SOFT_RELU:
+            {
+                // TODO (COMPMID-1535) : Revisit FP16 approximations
+                const float16x4x2_t in0 =
+                {
+                    vcvt_f16_f32(vlogq_f32(vaddq_f32(CONST_1_F32, vexpq_f32(vcvt_f32_f16(vget_low_f16(in.val[0])))))),
+                    vcvt_f16_f32(vlogq_f32(vaddq_f32(CONST_1_F32, vexpq_f32(vcvt_f32_f16(vget_high_f16(in.val[0])))))),
+                };
+
+                const float16x4x2_t in1 =
+                {
+                    vcvt_f16_f32(vlogq_f32(vaddq_f32(CONST_1_F32, vexpq_f32(vcvt_f32_f16(vget_low_f16(in.val[1])))))),
+                    vcvt_f16_f32(vlogq_f32(vaddq_f32(CONST_1_F32, vexpq_f32(vcvt_f32_f16(vget_high_f16(in.val[1])))))),
+                };
+
                 tmp =
                 {
                     {
-                        vlogq_f16(vaddq_f16(CONST_1, vexpq_f16(in.val[0]))),
-                        vlogq_f16(vaddq_f16(CONST_1, vexpq_f16(in.val[1]))),
+                        vcombine_f16(in0.val[0], in0.val[1]),
+                        vcombine_f16(in1.val[0], in1.val[1]),
                     }
                 };
-                break;
+            }
+            break;
             case ActivationFunction::SQRT:
                 tmp =
                 {
@@ -289,14 +323,34 @@ typename std::enable_if<std::is_same<T, float16_t>::value, void>::type NEActivat
                 };
                 break;
             case ActivationFunction::TANH:
+            {
+                // TODO (COMPMID-1535) : Revisit FP16 approximations
+                const float16x8x2_t mul =
+                {
+                    vmulq_f16(b, in.val[0]),
+                    vmulq_f16(b, in.val[1])
+                };
+                const float16x4x2_t in0 =
+                {
+                    vmul_f16(a_h, vcvt_f16_f32(vtanhq_f32(vcvt_f32_f16(vget_low_f16(mul.val[0]))))),
+                    vmul_f16(a_h, vcvt_f16_f32(vtanhq_f32(vcvt_f32_f16(vget_high_f16(mul.val[0]))))),
+                };
+
+                const float16x4x2_t in1 =
+                {
+                    vmul_f16(a_h, vcvt_f16_f32(vtanhq_f32(vcvt_f32_f16(vget_low_f16(mul.val[1]))))),
+                    vmul_f16(a_h, vcvt_f16_f32(vtanhq_f32(vcvt_f32_f16(vget_high_f16(mul.val[1]))))),
+                };
+
                 tmp =
                 {
                     {
-                        vmulq_f16(a, vtanhq_f16(vmulq_f16(b, in.val[0]))),
-                        vmulq_f16(a, vtanhq_f16(vmulq_f16(b, in.val[1]))),
+                        vcombine_f16(in0.val[0], in0.val[1]),
+                        vcombine_f16(in1.val[0], in1.val[1]),
                     }
                 };
-                break;
+            }
+            break;
             default:
                 ARM_COMPUTE_ERROR("Not implemented");
                 break;
