@@ -303,7 +303,16 @@ inline float16x8_t vlogq_f16(float16x8_t x)
 
 inline float16x8_t vpowq_f16(float16x8_t val, float16x8_t n)
 {
-    return vexpq_f16(vmulq_f16(n, vlogq_f16(val)));
+    // TODO (giaiod01) - COMPMID-1535
+    float32x4_t n0_f32   = vcvt_f32_f16(vget_low_f16(n));
+    float32x4_t n1_f32   = vcvt_f32_f16(vget_high_f16(n));
+    float32x4_t val0_f32 = vcvt_f32_f16(vget_low_f16(val));
+    float32x4_t val1_f32 = vcvt_f32_f16(vget_high_f16(val));
+
+    float32x4_t res0_f32 = vexpq_f32(vmulq_f32(n0_f32, vlogq_f32(val0_f32)));
+    float32x4_t res1_f32 = vexpq_f32(vmulq_f32(n1_f32, vlogq_f32(val1_f32)));
+
+    return vcombine_f16(vcvt_f16_f32(res0_f32), vcvt_f16_f32(res1_f32));
 }
 #endif /* DOXYGEN_SKIP_THIS */
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */

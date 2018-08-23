@@ -145,6 +145,7 @@ void NENormalizationLayerKernel::configure(const ITensor *input, const ITensor *
             }
             break;
         }
+#ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
         case DataType::F16:
         {
             switch(norm_idx)
@@ -169,6 +170,7 @@ void NENormalizationLayerKernel::configure(const ITensor *input, const ITensor *
             }
             break;
         }
+#endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
         default:
             ARM_COMPUTE_ERROR("NOT SUPPORTED!");
     }
