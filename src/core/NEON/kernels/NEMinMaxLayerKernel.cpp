@@ -147,7 +147,7 @@ void NEMinMaxLayerKernel::run(const Window &window, const ThreadInfo &info)
         execute_window_loop(window_input, [&](const Coordinates & id)
         {
             int        x      = x_start;
-            const auto in_ptr = reinterpret_cast<const float *const>(input.ptr() + id_batch[1] * _input->info()->strides_in_bytes()[3]);
+            const auto in_ptr = reinterpret_cast<const float *>(input.ptr() + id_batch[1] * _input->info()->strides_in_bytes()[3]);
 
             // Vector loop
             for(; x <= x_end - 8; x += 8)
@@ -181,7 +181,7 @@ void NEMinMaxLayerKernel::run(const Window &window, const ThreadInfo &info)
         const float min_i = std::min(vget_lane_f32(carry_min, 0), carry_min_scalar);
         const float max_i = std::max(vget_lane_f32(carry_max, 0), carry_max_scalar);
 
-        auto out_ptr = reinterpret_cast<float *const>(output.ptr());
+        auto out_ptr = reinterpret_cast<float *>(output.ptr());
 
         // Perform reduction of local min/max values
         update_min_max(out_ptr, min_i, max_i);
@@ -205,7 +205,7 @@ void NEMinMaxLayerKernel::reset()
 
     execute_window_loop(window_output, [&](const Coordinates & id)
     {
-        vst1_f32(reinterpret_cast<float *const>(output.ptr()), reset_values);
+        vst1_f32(reinterpret_cast<float *>(output.ptr()), reset_values);
     },
     output);
 }

@@ -37,7 +37,7 @@ inline void TransformImpl<6, 1, true, 4, 4>::Transform(
     // Redirect to a 12 x uint16_t specialisation
     TransformImpl<12, 1, true, 2, 2>::Transform(
         reinterpret_cast<uint16_t *>(out),
-        reinterpret_cast<const uint16_t *const>(in),
+        reinterpret_cast<const uint16_t *>(in),
         stride * 2, x0 * 2, xmax * 2, k0, kmax);
 }
 
@@ -51,7 +51,7 @@ inline void TransformImpl<12, 1, true, 2, 2>::Transform(
     // Redirect to a uint16_t specialisation
     Transform(
         reinterpret_cast<uint16_t *>(out),
-        reinterpret_cast<const uint16_t *const>(in),
+        reinterpret_cast<const uint16_t *>(in),
         stride, x0, xmax, k0, kmax);
 }
 
