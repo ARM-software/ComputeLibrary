@@ -241,10 +241,13 @@ int main(int argc, char **argv)
         }
 
 #ifdef ARM_COMPUTE_CL
-        CLScheduler::get().sync();
-        if(enable_tuner->is_set() && enable_tuner->value() && tuner_file->is_set())
+        if(opencl_is_available())
         {
-            cl_tuner.save_to_file(tuner_file->value());
+            CLScheduler::get().sync();
+            if(enable_tuner->is_set() && enable_tuner->value() && tuner_file->is_set())
+            {
+                cl_tuner.save_to_file(tuner_file->value());
+            }
         }
 #endif /* ARM_COMPUTE_CL */
 
