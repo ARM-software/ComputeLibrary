@@ -26,6 +26,7 @@
 #include "arm_compute/core/AccessWindowStatic.h"
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/CL/CLKernelLibrary.h"
+#include "arm_compute/core/CL/CLValidate.h"
 #include "arm_compute/core/CL/ICLKernel.h"
 #include "arm_compute/core/CL/ICLTensor.h"
 #include "arm_compute/core/Error.h"
@@ -44,11 +45,12 @@ namespace
 Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, const ITensorInfo *biases, const ITensorInfo *output, const PadStrideInfo &conv_info, unsigned int depth_multiplier,
                           const ActivationLayerInfo &act_info)
 {
-    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F32, DataType::QASYMM8);
-    ARM_COMPUTE_RETURN_ERROR_ON_MSG((act_info.enabled()) && (input->data_type() == DataType::F32 || ((act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
-                                                                                                     && (act_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
-                                                                                                     && (act_info.activation() != ActivationLayerInfo::ActivationFunction::RELU)
-                                                                                                     && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LOGISTIC))),
+    ARM_COMPUTE_RETURN_ERROR_ON_F16_UNSUPPORTED(input);
+    ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::F16, DataType::F32, DataType::QASYMM8);
+    ARM_COMPUTE_RETURN_ERROR_ON_MSG((act_info.enabled()) && ((input->data_type() != DataType::QASYMM8) || ((act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
+                                                                                                           && (act_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
+                                                                                                           && (act_info.activation() != ActivationLayerInfo::ActivationFunction::RELU)
+                                                                                                           && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LOGISTIC))),
                                     "For QASYMM8 only logistic, relu, lower bounded relu and lower-upper bounded relu are supported"); //COMPMID-1317 add fused activation for F32
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
     ARM_COMPUTE_RETURN_ERROR_ON(depth_multiplier > 1); // COMPMID-1071 Add depth multiplier support for NHWC
@@ -96,7 +98,7 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     const bool is_stride_1 = ((conv_info.stride().first == conv_info.stride().second) && (conv_info.stride().first == 1));
 
     const unsigned int num_rows_processed_per_iteration = is_stride_1 ? 2 : 1;
-    const unsigned int num_elems_accessed_per_iteration = is_qasymm ? 4 : 2;
+    const unsigned int num_elems_accessed_per_iteration = is_qasymm ? 4 : (8 / input->element_size());
     const unsigned int num_rows_read_per_iteration      = num_rows_processed_per_iteration + 2;
     const unsigned int num_rows_written_per_iteration   = std::ceil(num_rows_processed_per_iteration / static_cast<float>(conv_info.stride().first));
 
@@ -170,7 +172,8 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
     _num_planes_processed_per_iteration = is_stride_1 ? 2 : 1;
     _border_size                        = BorderSize(conv_info.pad_left(), 0, std::max(std::max(conv_info.pad_right(), conv_info.pad_bottom()), conv_info.pad_top()), 0);
 
-    const unsigned int num_elems_accessed_per_iteration = is_qasymm ? 4 : 2;
+    const unsigned int num_elems_accessed_per_iteration = is_qasymm ? 4 : (8 / input->info()->element_size());
+    ;
 
     CLBuildOptions build_opts;
     build_opts.add_option_if(_biases != nullptr, "-DHAS_BIAS");
@@ -220,6 +223,10 @@ void CLDepthwiseConvolutionLayer3x3NHWCKernel::configure(const ICLTensor *input,
                 }
             }
         }
+    }
+    else
+    {
+        build_opts.add_option("-DDATA_TYPE=" + get_cl_type_from_data_type(_input->info()->data_type()));
     }
 
     if(is_stride_1)

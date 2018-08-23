@@ -227,6 +227,7 @@ using CLDepthwiseConvolutionLayerFixture3x3 = DepthwiseConvolutionLayerValidatio
 TEST_SUITE(Float)
 TEST_SUITE(FP16)
 TEST_SUITE(W3x3)
+TEST_SUITE(NCHW)
 FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::ALL,
                        combine(combine(combine(framework::dataset::concat(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
                                                                           datasets::SmallDepthwiseConvolutionLayerDataset3x3NCHW()),
@@ -245,6 +246,27 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerFixture3x3<half>, fr
 {
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
+TEST_SUITE_END()
+
+TEST_SUITE(NHWC)
+FIXTURE_DATA_TEST_CASE(RunSmall, CLDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::ALL,
+                       combine(combine(combine(datasets::SmallDepthwiseConvolutionLayerDataset3x3(),
+                                               framework::dataset::make("DepthMultiplier", 1)), // COMPMID-1071 Add depth multiplier support for NHWC
+                                       framework::dataset::make("DataType",
+                                                                DataType::F16)),
+                               framework::dataset::make("DataLayout", DataLayout::NHWC)))
+{
+    validate(CLAccessor(_target), _reference, tolerance_f16);
+}
+FIXTURE_DATA_TEST_CASE(RunLarge, CLDepthwiseConvolutionLayerFixture3x3<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(datasets::LargeDepthwiseConvolutionLayerDataset3x3(),
+                                                                                                                       framework::dataset::make("DepthMultiplier", 1)), // COMPMID-1071 Add depth multiplier support for NHWC
+                                                                                                                       framework::dataset::make("DataType",
+                                                                                                                               DataType::F16)),
+                                                                                                                       framework::dataset::make("DataLayout", DataLayout::NHWC)))
+{
+    validate(CLAccessor(_target), _reference, tolerance_f16);
+}
+TEST_SUITE_END()
 TEST_SUITE_END()
 
 TEST_SUITE(Generic)
