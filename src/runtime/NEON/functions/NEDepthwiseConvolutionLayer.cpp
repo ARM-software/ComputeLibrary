@@ -163,8 +163,13 @@ Status NEDepthwiseConvolutionLayer3x3::validate(const ITensorInfo *input, const 
                                                 unsigned int depth_multiplier)
 {
     ARM_COMPUTE_RETURN_ERROR_ON_NULLPTR(input, weights, output);
-    ARM_COMPUTE_UNUSED(biases);
     ARM_COMPUTE_RETURN_ERROR_ON(input->data_layout() != DataLayout::NCHW && input->data_layout() != DataLayout::NHWC);
+
+    if(biases != nullptr)
+    {
+        ARM_COMPUTE_RETURN_ERROR_ON(biases->num_dimensions() > 1);
+        ARM_COMPUTE_RETURN_ERROR_ON(biases->dimension(0) != weights->dimension(3));
+    }
 
     return NEDepthwiseConvolutionLayer3x3Kernel::validate(input, weights, output, conv_info, depth_multiplier);
 }

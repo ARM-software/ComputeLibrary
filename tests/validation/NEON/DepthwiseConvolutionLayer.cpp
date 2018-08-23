@@ -61,27 +61,27 @@ DATA_TEST_CASE(Validate3x3, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip
                                                        TensorInfo(TensorShape(32U, 18U, 3U), 1, DataType::F32),     // Mismatching input feature maps
                                                        TensorInfo(TensorShape(32U, 18U, 2U), 1, DataType::F32),     // Unsupported weights dimensions
                                                        TensorInfo(TensorShape(32U, 18U, 2U), 1, DataType::F32),     // Mismatching depth multiplier
-                                                       TensorInfo(TensorShape(32U, 18U, 2U), 1, DataType::F32),     // Invalid stride
+                                                       TensorInfo(TensorShape(32U, 18U, 2U), 1, DataType::QASYMM8), // Invalid stride
                                                        TensorInfo(TensorShape(32U, 18U, 2U), 1, DataType::F32),     // Invalid biases size
                                                        TensorInfo(TensorShape(32U, 18U, 2U), 1, DataType::F32),     // Invalid biases dimensions
                                                        TensorInfo(TensorShape(32U, 18U, 2U), 1, DataType::F32),     // Invalid output size
-                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),     // Window shrink
+                                                       TensorInfo(TensorShape(27U, 13U, 2U), 1, DataType::F32),
                                                      }),
-               framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(3U, 3U, 2U), 1, DataType::F16),
-                                                         TensorInfo(TensorShape(3U, 3U, 2U), 1, DataType::F32),
-                                                         TensorInfo(TensorShape(5U, 5U, 2U), 1, DataType::F32),
-                                                         TensorInfo(TensorShape(3U, 3U, 2U), 1, DataType::F32),
-                                                         TensorInfo(TensorShape(3U, 3U, 2U), 1, DataType::F32),
-                                                         TensorInfo(TensorShape(3U, 3U, 2U), 1, DataType::F32),
-                                                         TensorInfo(TensorShape(3U, 3U, 2U), 1, DataType::F32),
-                                                         TensorInfo(TensorShape(3U, 3U, 2U), 1, DataType::F32),
-                                                         TensorInfo(TensorShape(3U, 3U, 2U), 1, DataType::F32),
+               framework::dataset::make("WeightsInfo", { TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::F16),
+                                                         TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(5U, 5U, 2U, 2U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::QASYMM8),
+                                                         TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::F32),
+                                                         TensorInfo(TensorShape(3U, 3U, 2U, 2U), 1, DataType::F32),
                                                        })),
                framework::dataset::make("BiasesInfo", { TensorInfo(TensorShape(2U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(2U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(2U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(2U), 1, DataType::F32),
-                                                        TensorInfo(TensorShape(2U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(2U), 1, DataType::S32),
                                                         TensorInfo(TensorShape(4U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(2U, 2U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(2U), 1, DataType::F32),
@@ -91,7 +91,7 @@ DATA_TEST_CASE(Validate3x3, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip
                                                         TensorInfo(TensorShape(30U, 16U, 2U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(30U, 16U, 2U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(30U, 16U, 2U), 1, DataType::F32),
-                                                        TensorInfo(TensorShape(30U, 16U, 2U), 1, DataType::F32),
+                                                        TensorInfo(TensorShape(30U, 16U, 2U), 1, DataType::QASYMM8),
                                                         TensorInfo(TensorShape(30U, 16U, 2U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(30U, 16U, 2U), 1, DataType::F32),
                                                         TensorInfo(TensorShape(32U, 18U, 2U), 1, DataType::F32),
@@ -117,7 +117,7 @@ DATA_TEST_CASE(Validate3x3, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(zip
                                                              1,
                                                              1,
                                                             })),
-               framework::dataset::make("Expected", { false, false, false, false, false, false, false, false, false })),
+               framework::dataset::make("Expected", { false, false, false, false, false, false, false, false, true })),
                input_info, weights_info, biases_info, output_info, conv_info, depth_multiplier, expected)
 {
     bool is_valid = bool(NEDepthwiseConvolutionLayer3x3::validate(&input_info.clone()->set_is_resizable(false), &weights_info.clone()->set_is_resizable(false), &biases_info.clone()->set_is_resizable(false), &output_info.clone()->set_is_resizable(false), conv_info, depth_multiplier));

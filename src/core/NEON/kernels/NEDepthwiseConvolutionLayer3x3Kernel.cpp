@@ -150,13 +150,14 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *weights, 
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::QASYMM8, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MISMATCHING_DATA_TYPES(input, weights);
 
-    if(is_optimized)
+    const DataLayout   data_layout = input->data_layout();
+    const unsigned int width_idx   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
+    const unsigned int height_idx  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
+
+    ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(width_idx) != 3 || weights->dimension(height_idx) != 3);
+
+    if(!is_optimized)
     {
-        ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(1) != 3 || weights->dimension(2) != 3);
-    }
-    else
-    {
-        ARM_COMPUTE_RETURN_ERROR_ON(weights->dimension(0) != 3 || weights->dimension(1) != 3);
         ARM_COMPUTE_RETURN_ERROR_ON(conv_info.stride().first < 1 || conv_info.stride().first > 3);
     }
 
