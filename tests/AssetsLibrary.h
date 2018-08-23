@@ -480,7 +480,7 @@ void AssetsLibrary::fill(T &&tensor, D &&distribution, std::random_device::resul
         for(int channel = 0; channel < tensor.num_channels(); ++channel)
         {
             const ResultType value        = distribution(gen);
-            ResultType      &target_value = reinterpret_cast<ResultType *const>(tensor(id))[channel];
+            ResultType      &target_value = reinterpret_cast<ResultType *>(tensor(id))[channel];
 
             store_value_with_data_type(&target_value, value, tensor.data_type());
         }
