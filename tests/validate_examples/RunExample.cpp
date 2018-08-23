@@ -60,6 +60,18 @@ namespace utils
 static std::unique_ptr<ValidateExample> g_example      = nullptr;
 static std::vector<char *>              g_example_argv = {};
 
+namespace
+{
+std::string command_line(int argc, char **argv)
+{
+    std::stringstream ss;
+    for(int i = 0; i < argc; i++)
+    {
+        ss << argv[i] << " ";
+    }
+    return ss.str();
+}
+
 template <bool validate>
 class ExampleTest : public arm_compute::test::framework::TestCase
 {
@@ -94,6 +106,7 @@ private:
     bool _is_setup{ false };
 };
 
+} // namespace
 int run_example(int argc, char **argv, std::unique_ptr<ValidateExample> example)
 {
     utils::CommandLineParser parser;
@@ -139,6 +152,7 @@ int run_example(int argc, char **argv, std::unique_ptr<ValidateExample> example)
         for(auto &p : printers)
         {
             p->print_entry("Version", build_information());
+            p->print_entry("CommandLine", command_line(argc, argv));
             p->print_entry("Seed", support::cpp11::to_string(seed->value()));
 #ifdef ARM_COMPUTE_CL
             if(opencl_is_available())

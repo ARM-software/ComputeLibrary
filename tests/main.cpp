@@ -53,6 +53,18 @@
 using namespace arm_compute;
 using namespace arm_compute::test;
 
+namespace
+{
+std::string command_line(int argc, char **argv)
+{
+    std::stringstream ss;
+    for(int i = 0; i < argc; i++)
+    {
+        ss << argv[i] << " ";
+    }
+    return ss.str();
+}
+} // namespace
 namespace arm_compute
 {
 namespace test
@@ -168,6 +180,7 @@ int main(int argc, char **argv)
             for(auto &p : printers)
             {
                 p->print_entry("Version", build_information());
+                p->print_entry("CommandLine", command_line(argc, argv));
                 p->print_entry("Seed", support::cpp11::to_string(seed->value()));
 #ifdef ARM_COMPUTE_CL
                 if(opencl_is_available())
