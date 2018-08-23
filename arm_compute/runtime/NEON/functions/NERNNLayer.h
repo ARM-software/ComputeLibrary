@@ -26,6 +26,7 @@
 
 #include "arm_compute/core/NEON/kernels/NEActivationLayerKernel.h"
 #include "arm_compute/core/NEON/kernels/NEArithmeticAdditionKernel.h"
+#include "arm_compute/core/NEON/kernels/NECopyKernel.h"
 #include "arm_compute/runtime/NEON/INESimpleFunction.h"
 
 #include "arm_compute/core/Types.h"
@@ -79,6 +80,7 @@ public:
 
     // Inherited methods overridden:
     void run() override;
+    void prepare() override;
 
 private:
     MemoryGroup                _memory_group;
@@ -86,11 +88,11 @@ private:
     NEArithmeticAdditionKernel _add_kernel;
     NEActivationLayerKernel    _activation_kernel;
     NEFullyConnectedLayer      _fully_connected_kernel;
+    NECopyKernel               _copy_kernel;
     Tensor                     _fully_connected_out;
     Tensor                     _gemm_output;
     Tensor                     _add_output;
-    ITensor                   *_hidden_state;
-    ITensor                   *_output;
+    bool                       _is_prepared;
 };
 } // namespace arm_compute
 #endif /* __ARM_COMPUTE_NERNNLAYER_H__ */

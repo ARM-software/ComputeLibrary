@@ -34,8 +34,8 @@
 namespace arm_compute
 {
 NERNNLayer::NERNNLayer(std::shared_ptr<IMemoryManager> memory_manager)
-    : _memory_group(std::move(memory_manager)), _gemm_state_f(), _add_kernel(), _activation_kernel(), _fully_connected_kernel(), _fully_connected_out(), _gemm_output(), _add_output(), _hidden_state(),
-      _output()
+    : _memory_group(std::move(memory_manager)), _gemm_state_f(), _add_kernel(), _activation_kernel(), _fully_connected_kernel(), _copy_kernel(), _fully_connected_out(), _gemm_output(), _add_output(),
+      _is_prepared(false)
 {
 }
 
@@ -70,23 +70,25 @@ void NERNNLayer::configure(const ITensor *input, const ITensor *weights, const I
     ARM_COMPUTE_ERROR_ON_NULLPTR(input, weights, recurrent_weights, bias, hidden_state, output);
     ARM_COMPUTE_ERROR_THROW_ON(NERNNLayer::validate(input->info(), weights->info(), recurrent_weights->info(), bias->info(), hidden_state->info(), output->info(), info));
 
-    _hidden_state = hidden_state;
-    _output       = output;
-
     const int   idx_height = get_data_layout_dimension_index(input->info()->data_layout(), DataLayoutDimension::HEIGHT);
     TensorShape shape      = misc::shape_calculator::compute_rnn_shape(recurrent_weights->info(), hidden_state->info()->dimension(idx_height));
 
+    _is_prepared = false;
+
     // Manage intermediate buffers and configure
     _fully_connected_out.allocator()->init(TensorInfo(shape, 1, input->info()->data_type()));
+    _gemm_output.allocator()->init(TensorInfo(shape, 1, input->info()->data_type()));
+
+    // Manage intermediate buffers and configure
     _memory_group.manage(&_fully_connected_out);
     _fully_connected_kernel.configure(input, weights, bias, &_fully_connected_out);
 
-    _gemm_output.allocator()->init(TensorInfo(shape, 1, input->info()->data_type()));
     _memory_group.manage(&_gemm_output);
     _gemm_state_f.configure(hidden_state, recurrent_weights, nullptr, &_gemm_output, 1.f, 0.f);
 
     _add_output.allocator()->init(TensorInfo(shape, 1, input->info()->data_type()));
     _memory_group.manage(&_add_output);
+
     _add_kernel.configure(&_fully_connected_out, &_gemm_output, &_add_output, ConvertPolicy::SATURATE);
 
     _fully_connected_out.allocator()->allocate();
@@ -94,30 +96,37 @@ void NERNNLayer::configure(const ITensor *input, const ITensor *weights, const I
 
     _activation_kernel.configure(&_add_output, hidden_state, info);
     _add_output.allocator()->allocate();
+
+    _copy_kernel.configure(hidden_state, output);
 }
 
 void NERNNLayer::run()
 {
+    prepare();
+
     _memory_group.acquire();
 
     _fully_connected_kernel.run();
+
     _gemm_state_f.run();
+
     NEScheduler::get().schedule(&_add_kernel, Window::DimY);
     NEScheduler::get().schedule(&_activation_kernel, Window::DimY);
 
     // copy hidden out to output
-    Window output_window;
-    output_window.use_tensor_dimensions(_output->info()->tensor_shape(), Window::DimY);
-
-    Iterator hidden_state_it(_hidden_state, output_window);
-    Iterator output_it(_output, output_window);
-
-    execute_window_loop(output_window, [&](const Coordinates & id)
-    {
-        memcpy(output_it.ptr(), hidden_state_it.ptr(), _output->info()->dimension(0) * _output->info()->element_size());
-    },
-    hidden_state_it, output_it);
+    NEScheduler::get().schedule(&_copy_kernel, Window::DimY);
 
     _memory_group.release();
+}
+
+void NERNNLayer::prepare()
+{
+    if(!_is_prepared)
+    {
+        _fully_connected_kernel.prepare();
+        _gemm_state_f.prepare();
+
+        _is_prepared = true;
+    }
 }
 } // namespace arm_compute
