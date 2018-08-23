@@ -285,7 +285,7 @@ void CLGEMMConvolutionLayer::configure(const ICLTensor *input, const ICLTensor *
         if(input->info()->data_layout() == DataLayout::NCHW)
         {
             // Configure and tune Col2Im
-            _col2im_kernel.configure(_is_quantized ? gemm_output_staged_to_use : gemm_output_to_use, output, std::make_pair(conv_w, conv_h), num_groups);
+            _col2im_kernel.configure(_is_quantized ? gemm_output_staged_to_use : gemm_output_to_use, output, Size2D(conv_w, conv_h), num_groups);
             CLScheduler::get().tune_kernel_static(_col2im_kernel);
         }
         else
@@ -443,7 +443,7 @@ Status CLGEMMConvolutionLayer::validate(const ITensorInfo *input, const ITensorI
         {
             ARM_COMPUTE_RETURN_ON_ERROR(CLCol2ImKernel::validate(is_quantized ? gemm_output_staged_to_use : gemm_output_to_use,
                                                                  output,
-                                                                 std::make_pair(conv_w, conv_h), num_groups));
+                                                                 Size2D(conv_w, conv_h), num_groups));
         }
     }
 

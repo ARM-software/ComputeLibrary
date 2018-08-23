@@ -63,14 +63,14 @@ DATA_TEST_CASE(Validate, framework::DatasetMode::ALL, zip(zip(zip(zip(zip(
                framework::dataset::make("Expected", { false, false, false, true })),
                input_info, output_info, convolved_width, convolved_height, num_groups, expected)
 {
-    bool status = bool(CLCol2Im::validate(&input_info, &output_info, std::make_pair(convolved_width, convolved_height), num_groups));
+    bool status = bool(CLCol2Im::validate(&input_info, &output_info, Size2D(convolved_width, convolved_height), num_groups));
     ARM_COMPUTE_EXPECT(status == expected, framework::LogLevel::ERRORS);
 }
 // clang-format on
 // *INDENT-ON*
 
 template <typename T>
-using CLCol2ImFixture = Col2ImValidationFixture<CLTensor, CLAccessor, CLCol2Im, T>;
+using CLCol2ImFixture = Col2ImValidationFixture<CLTensor, CLAccessor, CLCol2Im, T, true>;
 
 TEST_SUITE(Float)
 TEST_SUITE(FP32)

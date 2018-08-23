@@ -141,18 +141,18 @@ inline TensorShape compute_reductionB_shape(const ITensorInfo &a)
 
     return shape_vector_sum_row;
 }
-inline TensorShape compute_col2im_shape(const ITensorInfo &input, std::pair<unsigned int, unsigned int> convolved_dims, unsigned int num_groups = 1)
+inline TensorShape compute_col2im_shape(const ITensorInfo &input, const Size2D &convolved_dims, bool batch_size_on_z, unsigned int num_groups = 1)
 {
     ARM_COMPUTE_ERROR_ON(num_groups == 0);
-    ARM_COMPUTE_ERROR_ON(input.tensor_shape()[1] != (convolved_dims.first * convolved_dims.second));
+    ARM_COMPUTE_ERROR_ON(input.tensor_shape()[1] != (convolved_dims.area()));
     ARM_COMPUTE_ERROR_ON((num_groups > 1) && input.tensor_shape()[2] != num_groups);
 
     TensorShape col2im_shape{ input.tensor_shape() };
-    col2im_shape.set(0, convolved_dims.first);
-    col2im_shape.set(1, convolved_dims.second);
+    col2im_shape.set(0, convolved_dims.width);
+    col2im_shape.set(1, convolved_dims.height);
     col2im_shape.set(2, input.tensor_shape()[0] * num_groups);
 
-    const unsigned int batch_idx = (num_groups == 1) ? 2 : 3;
+    const unsigned int batch_idx = (batch_size_on_z && num_groups == 1) ? 2 : 3;
     col2im_shape.set(3, input.tensor_shape()[batch_idx]);
 
     return col2im_shape;

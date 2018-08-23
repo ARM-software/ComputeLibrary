@@ -122,7 +122,7 @@ Status CLLocallyConnectedLayer::validate(const ITensorInfo *input, const ITensor
     ARM_COMPUTE_RETURN_ON_ERROR(CLIm2ColKernel::validate(input, &input_im2col_reshaped_info, Size2D(kernel_width, kernel_height), conv_info, has_bias));
     ARM_COMPUTE_RETURN_ON_ERROR(CLWeightsReshapeKernel::validate(weights, biases, &weights_reshaped_info));
     ARM_COMPUTE_RETURN_ON_ERROR(CLLocallyConnectedMatrixMultiplyKernel::validate(&input_im2col_reshaped_info, &weights_reshaped_info, &gemm_output_info));
-    ARM_COMPUTE_RETURN_ON_ERROR(CLCol2ImKernel::validate(&gemm_output_info, output, std::make_pair(conv_w, conv_h)));
+    ARM_COMPUTE_RETURN_ON_ERROR(CLCol2ImKernel::validate(&gemm_output_info, output, Size2D(conv_w, conv_h)));
 
     return Status{};
 }
@@ -163,7 +163,7 @@ void CLLocallyConnectedLayer::configure(const ICLTensor *input, const ICLTensor 
     _input_im2col_kernel.configure(input, &_input_im2col_reshaped, Size2D(kernel_width, kernel_height), conv_info, _has_bias);
     _weights_reshape_kernel.configure(weights, biases, &_weights_reshaped);
     _mm_kernel.configure(&_input_im2col_reshaped, &_weights_reshaped, &_gemm_output);
-    _output_col2im_kernel.configure(&_gemm_output, output, std::make_pair(conv_w, conv_h));
+    _output_col2im_kernel.configure(&_gemm_output, output, Size2D(conv_w, conv_h));
 
     // Allocate intermediate tensors
     _input_im2col_reshaped.allocator()->allocate();

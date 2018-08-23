@@ -134,7 +134,7 @@ void tune_col2im_kernel(CLCol2ImKernel &k)
     // via exhaustive autotuning over 30 representative tensor shapes.
     if(gpu_target_is_in(gpu_target, GPUTarget::G71, GPUTarget::G72, GPUTarget::G51, GPUTarget::G51BIG, GPUTarget::G51LIT, GPUTarget::G76))
     {
-        if((k._convolved_dims.first == 7) || (k._convolved_dims.first == 14))
+        if((k._convolved_dims.width == 7) || (k._convolved_dims.width == 14))
         {
             lws_hint = cl::NDRange(1, 7, 1);
         }
