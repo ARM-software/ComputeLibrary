@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017 ARM Limited.
+ * Copyright (c) 2016-2018 ARM Limited.
  *
  * SPDX-License-Identifier: MIT
  *
@@ -30,9 +30,14 @@
 
 using namespace arm_compute;
 
-void NEDepthConvertLayer::configure(ITensor *input, ITensor *output, ConvertPolicy policy, uint32_t shift)
+void NEDepthConvertLayer::configure(const ITensor *input, ITensor *output, ConvertPolicy policy, uint32_t shift)
 {
     auto k = arm_compute::support::cpp14::make_unique<NEDepthConvertLayerKernel>();
     k->configure(input, output, policy, shift);
     _kernel = std::move(k);
+}
+
+Status NEDepthConvertLayer::validate(const ITensorInfo *input, const ITensorInfo *output, ConvertPolicy policy, uint32_t shift)
+{
+    return NEDepthConvertLayerKernel::validate(input, output, policy, shift);
 }
