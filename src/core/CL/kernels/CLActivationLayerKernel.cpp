@@ -33,6 +33,7 @@
 #include "arm_compute/core/Utils.h"
 #include "arm_compute/core/Validate.h"
 #include "arm_compute/core/Window.h"
+#include "arm_compute/core/utils/quantization/AsymmHelpers.h"
 
 #include "arm_compute/core/CL/CLHelpers.h"
 #include "arm_compute/core/Types.h"
@@ -49,8 +50,9 @@ Status validate_arguments(const ITensorInfo *input, const ITensorInfo *output, c
     ARM_COMPUTE_RETURN_ERROR_ON_DATA_TYPE_CHANNEL_NOT_IN(input, 1, DataType::U8, DataType::QASYMM8, DataType::QS8, DataType::QS16, DataType::F16, DataType::F32);
     ARM_COMPUTE_RETURN_ERROR_ON_MSG((input->data_type() == DataType::QASYMM8) && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU)
                                     && (act_info.activation() != ActivationLayerInfo::ActivationFunction::BOUNDED_RELU)
-                                    && (act_info.activation() != ActivationLayerInfo::ActivationFunction::RELU),
-                                    "For QASYMM8 only relu, lower bounded relu and lower-upper bounded relu are supported");
+                                    && (act_info.activation() != ActivationLayerInfo::ActivationFunction::RELU)
+                                    && (act_info.activation() != ActivationLayerInfo::ActivationFunction::LOGISTIC),
+                                    "For QASYMM8 only relu, lower bounded relu, lower-upper bounded relu and logistic are supported");
 
     // Checks performed when output is configured
     if((output != nullptr) && (output->total_size() != 0))
@@ -92,6 +94,43 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
 
     Status err = (window_changed) ? ARM_COMPUTE_CREATE_ERROR(ErrorCode::RUNTIME_ERROR, "Insufficient Padding!") : Status{};
     return std::make_pair(err, win);
+}
+
+inline bool is_activation_logistic(ActivationLayerInfo &act_info)
+{
+    if(act_info.activation() == ActivationLayerInfo::ActivationFunction::LOGISTIC)
+    {
+        return true;
+    }
+    return false;
+}
+
+/** Calculates logistic parameters from the quantized input scale and scaling factor for the exponent and places them as build options.
+ *
+ * Prepares these build options:
+ * -INPUT_MULTIPLIER, INPUT_LEFT_SHIFT - quantized representation of multiplier.
+ * -INPUT_RANGE_RADIUS - threshold difference between maximum value of input data and current processed value.
+ *                       it defines whether the value will be taken into account or not.
+ *
+ * @param[in] build_opts  Build options to extend
+ * @param[in] input_scale Input scaling factor
+ */
+void prepare_quantized_logistic_build_options(std::set<std::string> *build_opts, float input_scale)
+{
+    // Number of integer bits in temporary fixed-point representation of current-to-max difference
+    static const int input_integer_bits = 4;
+
+    const double input_real_multiplier = input_scale * (1ll << (31 - input_integer_bits));
+    int input_multiplier, input_left_shift;
+    quantization::calculate_quantized_multiplier_greater_than_one(input_real_multiplier, &input_multiplier, &input_left_shift);
+
+    const double max_input_rescaled = 1.0 * ((1 << input_integer_bits) - 1) * (1ll << (31 - input_integer_bits)) / (1ll << input_left_shift);
+    const int    input_range_radius = std::floor(max_input_rescaled);
+
+    build_opts->emplace(("-DINPUT_INTEGER_BITS=" + support::cpp11::to_string(input_integer_bits)));
+    build_opts->emplace(("-DINPUT_MULTIPLIER=" + support::cpp11::to_string(input_multiplier)));
+    build_opts->emplace(("-DINPUT_LEFT_SHIFT=" + support::cpp11::to_string(input_left_shift)));
+    build_opts->emplace(("-DINPUT_RANGE_RADIUS=" + support::cpp11::to_string(input_range_radius)));
 }
 } // namespace
 
@@ -181,8 +220,16 @@ void CLActivationLayerKernel::configure(ICLTensor *input, ICLTensor *output, Act
         build_opts.emplace(("-DFIXED_POINT_POSITION=" + support::cpp11::to_string(fixed_point_position)));
     }
 
+    if(is_data_type_quantized_asymmetric(dt) && is_activation_logistic(act_info))
+    {
+        prepare_quantized_logistic_build_options(&build_opts, input->info()->quantization_info().scale);
+    }
+
     // Create kernel
-    std::string kernel_name = is_data_type_quantized_asymmetric(dt) ? std::string("activation_layer_qa8") : std::string("activation_layer");
+    std::string kernel_name = is_data_type_quantized_asymmetric(dt) && is_activation_logistic(act_info) ?
+                              std::string("activation_layer_logistic_qa8") :
+                              is_data_type_quantized_asymmetric(dt) ?
+                              std::string("activation_layer_qa8") : std::string("activation_layer");
     _kernel                 = static_cast<cl::Kernel>(CLKernelLibrary::get().create_kernel(kernel_name, build_opts));
 
     // Make sure _kernel is initialized before calling the parent's configure
