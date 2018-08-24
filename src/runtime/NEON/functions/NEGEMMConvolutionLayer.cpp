@@ -185,7 +185,6 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     const DataLayout data_layout = input->info()->data_layout();
     const int        idx_width   = get_data_layout_dimension_index(data_layout, DataLayoutDimension::WIDTH);
     const int        idx_height  = get_data_layout_dimension_index(data_layout, DataLayoutDimension::HEIGHT);
-    const int        idx_channel = get_data_layout_dimension_index(data_layout, DataLayoutDimension::CHANNEL);
     const int        idx_kernels = get_data_layout_dimension_index(data_layout, DataLayoutDimension::BATCHES);
 
     const unsigned int kernel_width  = weights->info()->dimension(idx_width);
@@ -224,7 +223,6 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
         }
     }
 
-    const unsigned bias_element  = (_append_bias && !_skip_im2col) ? 1 : 0;
     const ITensor *biases_to_use = (_append_bias && !_skip_im2col) ? biases : nullptr;
 
     // Get parameters from conv_info
@@ -233,7 +231,6 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     std::tie(stride_x, stride_y) = conv_info.stride();
 
     unsigned int mat_weights_cols = weights->info()->dimension(idx_kernels);
-    unsigned int mat_weights_rows = weights->info()->dimension(idx_width) * weights->info()->dimension(idx_height) * weights->info()->dimension(idx_channel) + bias_element;
 
     // _weights_reshaped will be auto configured in the kernel.
     // Just append biases and do not transpose 1xW as it will be reshaped in NEGEMM
@@ -242,15 +239,6 @@ void NEGEMMConvolutionLayer::configure(const ITensor *input, const ITensor *weig
     // Create tensor to store im2col reshaped inputs
     if(!_skip_im2col)
     {
-        // Calculate im2col shape
-        // For NEON the batch size is on the fourth dimension
-        // TODO (giaiod01): Auto-initialize the output shape of im2col COMPMID-1482
-        TensorShape shape_im2col = input->info()->tensor_shape();
-        shape_im2col.set(0, mat_weights_rows);
-        shape_im2col.set(1, conv_w * conv_h);
-        shape_im2col.set(2, 1);
-
-        _im2col_output.allocator()->init(input->info()->clone()->set_is_resizable(true).reset_padding().set_tensor_shape(shape_im2col));
         _memory_group.manage(&_im2col_output);
 
         // Configure
