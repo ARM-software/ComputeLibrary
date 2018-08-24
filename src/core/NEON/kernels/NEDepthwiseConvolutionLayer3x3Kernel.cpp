@@ -25,7 +25,6 @@
 #include "arm_compute/core/NEON/kernels/detail/NEDirectConvolutionDetail.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
-#include "arm_compute/core/AccessWindowTranspose.h"
 #include "arm_compute/core/Coordinates.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"

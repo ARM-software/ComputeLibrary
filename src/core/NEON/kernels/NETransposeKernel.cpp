@@ -24,6 +24,7 @@
 #include "arm_compute/core/NEON/kernels/NETransposeKernel.h"
 
 #include "arm_compute/core/AccessWindowStatic.h"
+#include "arm_compute/core/AccessWindowTranspose.h"
 #include "arm_compute/core/Error.h"
 #include "arm_compute/core/Helpers.h"
 #include "arm_compute/core/ITensor.h"
@@ -101,14 +102,12 @@ std::pair<Status, Window> validate_and_configure_window(ITensorInfo *input, ITen
     // Configure kernel window
     Window win = calculate_max_window(*input, Steps(num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y));
 
-    AccessWindowStatic input_access(input, 0, 0, input->dimension(0), input->dimension(1));
-
-    bool window_changed = update_window_and_padding(win, input_access);
+    AccessWindowRectangle input_access(input, 0, 0, num_elems_processed_per_iteration_x, num_elems_processed_per_iteration_y);
+    bool                  window_changed = update_window_and_padding(win, input_access);
 
     if(output->total_size() != 0)
     {
-        // TODO (COMPMID-708): Replace AccessWindowStatic with AccessWindowTranspose
-        AccessWindowStatic output_access(output, 0, 0, output->dimension(0), output->dimension(1));
+        AccessWindowTranspose output_access(output, 0, 0, num_elems_processed_per_iteration_y, num_elems_processed_per_iteration_x);
 
         window_changed = window_changed || update_window_and_padding(win, output_access);
 

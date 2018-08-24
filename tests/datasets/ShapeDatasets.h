@@ -45,7 +45,10 @@ public:
     Small1DShapes()
         : ShapeDataset("Shape",
     {
-        TensorShape{ 256U }
+        TensorShape{ 128U },
+                     TensorShape{ 256U },
+                     TensorShape{ 512U },
+                     TensorShape{ 1024U }
     })
     {
     }
