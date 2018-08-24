@@ -794,6 +794,24 @@ public:
         TensorShape{ 1000U, 10U },
                      TensorShape{ 3989U, 10U },
                      TensorShape{ 7339U, 11U },
+
+    })
+    {
+    }
+};
+
+/** Data set containing large and small softmax layer 4D shapes. */
+class SoftmaxLayer4DShapes final : public ShapeDataset
+{
+public:
+    SoftmaxLayer4DShapes()
+        : ShapeDataset("Shape",
+    {
+        TensorShape{ 9U, 9U, 9U, 9U },
+                     TensorShape{ 256U, 10U, 1U, 9U },
+                     TensorShape{ 353U, 8U, 2U },
+                     TensorShape{ 781U, 5U, 2U, 2U },
+                     TensorShape{ 781U, 11U, 1U, 2U },
     })
     {
     }

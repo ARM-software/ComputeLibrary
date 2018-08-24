@@ -24,6 +24,8 @@
 #ifndef __ARM_COMPUTE_CLSOFTMAXLAYER_H__
 #define __ARM_COMPUTE_CLSOFTMAXLAYER_H__
 
+#include "arm_compute/core/CL/kernels/CLFlattenLayerKernel.h"
+#include "arm_compute/core/CL/kernels/CLReshapeLayerKernel.h"
 #include "arm_compute/core/CL/kernels/CLSoftmaxLayerKernel.h"
 #include "arm_compute/runtime/CL/CLMemoryGroup.h"
 #include "arm_compute/runtime/CL/CLTensor.h"
@@ -71,12 +73,29 @@ public:
     void run() override;
 
 private:
+    /** Utility method to configure the kernels needed to flatten the input
+     * tensor.
+     *
+     * @note This function changes the internal state of this class. In particular,
+     * it initializes the kernel @p _flatten_kernel and the tensors @p _input_flat and
+     * @p _output_flat
+     *
+     * @param[in] input  Original source tensor.
+     * @param[in] output Original destination tensor.
+     */
+    void configure_flatten_kernel(const ICLTensor *input, const ICLTensor *output);
+
     CLMemoryGroup                  _memory_group;
     CLLogits1DMaxShiftExpSumKernel _max_shift_exp_sum_kernel;
     CLLogits1DNormKernel           _norm_kernel;
+    CLFlattenLayerKernel           _flatten_kernel;
+    CLReshapeLayerKernel           _reshape_kernel;
     CLTensor                       _max;
     CLTensor                       _sum;
     CLTensor                       _tmp;
+    CLTensor                       _input_flat;
+    CLTensor                       _output_flat;
+    bool                           _needs_flattening;
 };
 }
 #endif /* __ARM_COMPUTE_CLSOFTMAXLAYER_H__ */

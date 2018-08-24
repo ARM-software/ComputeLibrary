@@ -82,16 +82,20 @@ DATA_TEST_CASE(Configuration, framework::DatasetMode::ALL, combine(concat(datase
     validate(src.info()->valid_region(), valid_region);
     validate(dst.info()->valid_region(), valid_region);
 
-    // Get reduction kernel info
-    CLLogits1DMaxShiftExpSumKernel::ParallelReductionInfo reduction_info = CLLogits1DMaxShiftExpSumKernel::is_parallel_reduction(shape.x());
+    // CLLogits1DMaxShiftExpSumKernel configures the paddings only in the 2D case
+    if(shape.num_dimensions() <= 2)
+    {
+        // Get reduction kernel info
+        CLLogits1DMaxShiftExpSumKernel::ParallelReductionInfo reduction_info = CLLogits1DMaxShiftExpSumKernel::is_parallel_reduction(shape.x());
 
-    // Validate src padding
-    const PaddingSize padding_src = PaddingCalculator(shape.x(), std::get<1>(reduction_info)).required_padding();
-    validate(src.info()->padding(), padding_src);
+        // Validate src padding for 2D softmax
+        const PaddingSize padding_src = PaddingCalculator(shape.x(), std::get<1>(reduction_info)).required_padding();
+        validate(src.info()->padding(), padding_src);
 
-    // Validate dst padding
-    const PaddingSize padding_dst = PaddingCalculator(shape.x(), 16).required_padding();
-    validate(dst.info()->padding(), padding_dst);
+        // Validate dst padding for 2D softmax
+        const PaddingSize padding_dst = PaddingCalculator(shape.x(), 16).required_padding();
+        validate(dst.info()->padding(), padding_dst);
+    }
 }
 
 // *INDENT-OFF*
@@ -144,6 +148,13 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLSoftmaxLayerFixture<half>, framework::Dataset
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f16);
 }
+FIXTURE_DATA_TEST_CASE(Run4D, CLSoftmaxLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SoftmaxLayer4DShapes(),
+                                                                                                            framework::dataset::make("DataType", DataType::F16)),
+                                                                                                    framework::dataset::make("Beta", { 1.0f, 2.0f })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f16);
+}
 TEST_SUITE_END()
 
 TEST_SUITE(FP32)
@@ -157,6 +168,13 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLSoftmaxLayerFixture<float>, framework::Datase
 FIXTURE_DATA_TEST_CASE(RunLarge, CLSoftmaxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SoftmaxLayerLargeShapes(),
                                                                                                                 framework::dataset::make("DataType", DataType::F32)),
                                                                                                         framework::dataset::make("Beta", { 1.0f, 2.0f })))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_f32);
+}
+FIXTURE_DATA_TEST_CASE(Run4D, CLSoftmaxLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SoftmaxLayer4DShapes(),
+                                                                                                             framework::dataset::make("DataType", DataType::F32)),
+                                                                                                     framework::dataset::make("Beta", { 1.0f, 2.0f })))
 {
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_f32);
@@ -185,6 +203,15 @@ FIXTURE_DATA_TEST_CASE(RunLarge, CLSoftmaxLayerQuantizedFixture<uint8_t>, framew
     // Validate output
     validate(CLAccessor(_target), _reference, tolerance_qasymm8);
 }
+FIXTURE_DATA_TEST_CASE(Run4D, CLSoftmaxLayerQuantizedFixture<uint8_t>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::SoftmaxLayer4DShapes(),
+                                                                                                                        framework::dataset::make("DataType", DataType::QASYMM8)),
+                                                                                                                combine(framework::dataset::make("QuantizationInfo", { QuantizationInfo(0.5f, -10) }),
+                                                                                                                        framework::dataset::make("Beta", { 1.0f, 2.0f }))))
+{
+    // Validate output
+    validate(CLAccessor(_target), _reference, tolerance_qasymm8);
+}
+
 TEST_SUITE_END()
 TEST_SUITE_END()
 
