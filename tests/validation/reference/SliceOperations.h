@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_STRIDED_SLICE_H__
-#define __ARM_COMPUTE_TEST_STRIDED_SLICE_H__
+#ifndef __ARM_COMPUTE_TEST_SLICE_OPERATIONS_H__
+#define __ARM_COMPUTE_TEST_SLICE_OPERATIONS_H__
 
 #include "tests/SimpleTensor.h"
 
@@ -35,6 +35,9 @@ namespace validation
 namespace reference
 {
 template <typename T>
+SimpleTensor<T> slice(const SimpleTensor<T> &src, Coordinates starts, Coordinates ends);
+
+template <typename T>
 SimpleTensor<T> strided_slice(const SimpleTensor<T> &src,
                               Coordinates starts, Coordinates ends, BiStrides strides,
                               int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask);
@@ -42,4 +45,4 @@ SimpleTensor<T> strided_slice(const SimpleTensor<T> &src,
 } // namespace validation
 } // namespace test
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_STRIDED_SLICE_H__ */
+#endif /* __ARM_COMPUTE_TEST_SLICE_OPERATIONS_H__ */

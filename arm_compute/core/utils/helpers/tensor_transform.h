@@ -32,12 +32,33 @@ namespace helpers
 {
 namespace tensor_transform
 {
+/** Returns the absolute ends coordinates of slice
+ *
+ * @param[in] input_shape Input tensor shape
+ * @param[in] ends        End coordinates
+ *
+ * @return Absolute end coordinate
+ */
+Coordinates slice_absolute_end_coords(TensorShape input_shape, Coordinates ends);
+
+/** Computes output shape of slice
+ *
+ * @warning Ends must be non-negative
+ *
+ * @param[in] input_shape Input tensor shape
+ * @param[in] starts      Start coordinates
+ * @param[in] ends_abs    Absolute end coordinates
+ *
+ * @return The output tensor shape
+ */
+TensorShape compute_slice_output_shape(TensorShape input_shape, Coordinates starts, Coordinates ends_abs);
+
 /** Returns the absolute start coordinates of strided slice
  *
  * @param[in] input_shape Input tensor shape
  * @param[in] starts      Start coordinates
  * @param[in] strides     Slice strides
- * @param[in] begin_mask  (Optional) If the ith bit of begin_mask is set, begin[i] is ignored and
+ * @param[in] begin_mask  (Optional) If the ith bit of begin_mask is set, starts[i] is ignored and
  *                        the fullest possible range in that dimension is used instead.
  *
  * @return Absolute start coordinates
@@ -46,6 +67,8 @@ Coordinates strided_slice_absolute_start_coords(TensorShape input_shape, Coordin
 
 /** Returns the absolute ends coordinates of strided slice
  *
+ * @warning Starts must be non-negative
+ *
  * @param[in] input_shape      Input tensor shape
  * @param[in] starts_abs       Absolute start coordinates
  * @param[in] ends             End coordinates
@@ -53,7 +76,7 @@ Coordinates strided_slice_absolute_start_coords(TensorShape input_shape, Coordin
  * @param[in] end_mask         (Optional) If the ith bit of end_mask is set, end[i] is ignored and
  *                             the fullest possible range in that dimension is used instead.
  * @param[in] shrink_axis_mask (Optional) If the ith bit of shrink_axis_mask is set, it implies that the ith specification shrinks the dimensionality by 1.
- *                             A slice of size 1 starting from begin[i] in the dimension must be preserved.
+ *                             A slice of size 1 starting from starts[i] in the dimension must be preserved.
  *
  * @return Absolute end coordinates
  */
@@ -68,7 +91,10 @@ Coordinates strided_slice_absolute_end_coords(TensorShape input_shape, Coordinat
  */
 Coordinates strided_slice_strides(TensorShape input_shape, Coordinates strides);
 
-/** Computes output shape of a strided slice
+/** Computes output shape of strided slice
+ *
+ * @warning Starts and ends must be non-negative
+ * @warning Starts, ends and final strides should have the same dimensions as the input shape
  *
  * @param[in] input_shape   Input tensor shape
  * @param[in] starts_abs    Absolute start coordinates

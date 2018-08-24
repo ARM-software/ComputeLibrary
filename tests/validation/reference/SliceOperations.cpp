@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "StridedSlice.h"
+#include "SliceOperations.h"
 
 #include "arm_compute/core/utils/helpers/tensor_transform.h"
 
@@ -34,6 +34,51 @@ namespace validation
 namespace reference
 {
 template <typename T>
+SimpleTensor<T> slice(const SimpleTensor<T> &src, Coordinates starts, Coordinates ends)
+{
+    using namespace arm_compute::helpers::tensor_transform;
+
+    // Validation checks
+    ARM_COMPUTE_ERROR_ON(src.shape().num_dimensions() > 4);
+    ARM_COMPUTE_ERROR_ON(starts.num_dimensions() > src.shape().num_dimensions());
+    ARM_COMPUTE_ERROR_ON(std::any_of(starts.cbegin(), starts.cbegin() + starts.num_dimensions(), [](int i)
+    {
+        return i < 0;
+    }));
+    ARM_COMPUTE_ERROR_ON(ends.num_dimensions() > src.shape().num_dimensions());
+
+    // Get source shape
+    const TensorShape &src_shape = src.shape();
+
+    // Get actual end
+    Coordinates ends_abs = slice_absolute_end_coords(src_shape, ends);
+
+    // Get destination shape
+    TensorShape dst_shape = compute_slice_output_shape(src_shape, starts, ends_abs);
+
+    // Create destination tensor
+    SimpleTensor<T> dst{ dst_shape, src.data_type(), 1 };
+
+    // Perform slice
+    Window win;
+    win.use_tensor_dimensions(dst_shape);
+    execute_window_loop(win, [&](const Coordinates & id)
+    {
+        Coordinates offset;
+        for(unsigned int i = 0; i < id.num_dimensions(); ++i)
+        {
+            offset.set(i, starts[i] + id[i]);
+        }
+        *reinterpret_cast<T *>(dst(id)) = *reinterpret_cast<const T *>(src(offset));
+    });
+
+    return dst;
+}
+
+template SimpleTensor<float> slice(const SimpleTensor<float> &src, Coordinates starts, Coordinates ends);
+template SimpleTensor<half_float::half> slice(const SimpleTensor<half_float::half> &src, Coordinates starts, Coordinates ends);
+
+template <typename T>
 SimpleTensor<T> strided_slice(const SimpleTensor<T> &src,
                               Coordinates starts, Coordinates ends, BiStrides strides,
                               int32_t begin_mask, int32_t end_mask, int32_t shrink_axis_mask)
@@ -45,10 +90,10 @@ SimpleTensor<T> strided_slice(const SimpleTensor<T> &src,
     ARM_COMPUTE_ERROR_ON(starts.num_dimensions() > src.shape().num_dimensions());
     ARM_COMPUTE_ERROR_ON(ends.num_dimensions() > src.shape().num_dimensions());
     ARM_COMPUTE_ERROR_ON(strides.num_dimensions() > src.shape().num_dimensions());
-    for(unsigned int i = 0; i < strides.num_dimensions(); ++i)
+    ARM_COMPUTE_ERROR_ON(std::any_of(strides.cbegin(), strides.cbegin() + strides.num_dimensions(), [](int i)
     {
-        ARM_COMPUTE_ERROR_ON(strides[i] == 0);
-    }
+        return i == 0;
+    }));
 
     // Get source shape
     const TensorShape &src_shape = src.shape();

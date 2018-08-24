@@ -29,6 +29,30 @@ namespace helpers
 {
 namespace tensor_transform
 {
+Coordinates slice_absolute_end_coords(TensorShape input_shape, Coordinates ends)
+{
+    // Create end mask
+    int32_t end_mask = 0;
+    for(unsigned int i = 0; i < ends.num_dimensions(); ++i)
+    {
+        if(ends[i] < 0)
+        {
+            end_mask |= 1 << i;
+        }
+    }
+    // Get unit strides
+    const BiStrides unit_strides = strided_slice_strides(input_shape, BiStrides());
+
+    return strided_slice_absolute_end_coords(input_shape, Coordinates(), ends, unit_strides, end_mask);
+}
+
+TensorShape compute_slice_output_shape(TensorShape input_shape, Coordinates starts, Coordinates ends_abs)
+{
+    // Get unit strides
+    const BiStrides unit_strides = strided_slice_strides(input_shape, BiStrides());
+    return compute_strided_slice_output_shape(input_shape, starts, ends_abs, unit_strides);
+}
+
 Coordinates strided_slice_absolute_start_coords(TensorShape input_shape, Coordinates starts, Coordinates strides, int32_t begin_mask)
 {
     Coordinates starts_abs;
