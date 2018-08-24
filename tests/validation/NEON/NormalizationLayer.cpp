@@ -45,7 +45,7 @@ namespace
 {
 /** Tolerance for float operations */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-constexpr AbsoluteTolerance<float> tolerance_f16(0.001f);
+constexpr AbsoluteTolerance<float> tolerance_f16(0.1f);
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
 constexpr AbsoluteTolerance<float> tolerance_f32(0.00001f);
 
