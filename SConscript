@@ -118,15 +118,16 @@ def create_version_file(target, source, env):
     except (OSError, subprocess.CalledProcessError):
         git_hash="unknown"
 
-    version_filename = "%s/arm_compute_version.embed" % Dir("src/core").path
     build_info = "\"arm_compute_version=%s Build options: %s Git hash=%s\"" % (VERSION, vars.args, git_hash.strip())
     with open(target[0].get_path(), "w") as fd:
         fd.write(build_info)
 
 arm_compute_env = env.Clone()
+version_file = arm_compute_env.Command("src/core/arm_compute_version.embed", "", action=create_version_file)
+arm_compute_env.AlwaysBuild(version_file)
 
 # Generate embed files
-generate_embed = [ arm_compute_env.Command("src/core/arm_compute_version.embed", "", action=create_version_file) ]
+generate_embed = [ version_file ]
 if env['opencl'] and env['embed_kernels']:
     cl_files = Glob('src/core/CL/cl_kernels/*.cl')
     cl_files += Glob('src/core/CL/cl_kernels/*.h')
