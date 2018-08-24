@@ -83,7 +83,7 @@ protected:
         }
         else if(is_data_type_float(_data_type))
         {
-            std::uniform_real_distribution<> distribution(0.5f, 1.f);
+            std::uniform_real_distribution<> distribution(-1.0f, 1.0f);
             library->fill(tensor, distribution, i);
         }
         else

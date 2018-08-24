@@ -45,9 +45,11 @@ namespace
 {
 const AbsoluteTolerance<float> tolerance_f32(0.001f); /**< Tolerance value for comparing reference's output against implementation's output for DataType::F32 */
 #ifdef __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
-const AbsoluteTolerance<float> tolerance_f16(0.01f);       /**< Tolerance value for comparing reference's output against implementation's output for DataType::F16 */
-#endif                                                     /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
-constexpr AbsoluteTolerance<float> tolerance_qasymm8(0.0); /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
+const AbsoluteTolerance<float>            abs_tolerance_f16(0.3f);                   /**< Absolute tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+const RelativeTolerance<half_float::half> rel_tolerance_f16(half_float::half(0.2f)); /**< Relative tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+constexpr float                           tolerance_num_f16 = 0.07f;                 /**< Tolerance number for FP16 */
+#endif                                                                               /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
+constexpr AbsoluteTolerance<float> tolerance_qasymm8(0.0);                           /**< Tolerance value for comparing reference's output against implementation's output for quantized data types */
 
 /** CNN data types */
 const auto CNNDataTypes = framework::dataset::make("DataType",
@@ -158,7 +160,7 @@ FIXTURE_DATA_TEST_CASE(RunSmall, NEGEMMDilatedConvolutionLayerFixture<half>, fra
                                                                                                                         framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f16);
+    validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num_f16, abs_tolerance_f16);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMDilatedConvolutionLayerFixture<half>, framework::DatasetMode::NIGHTLY, combine(combine(combine(combine(datasets::LargeDilatedConvolutionLayerDataset(),
                                                                                                                       framework::dataset::make("ReshapeWeights", { true })),
@@ -167,7 +169,7 @@ FIXTURE_DATA_TEST_CASE(RunLarge, NEGEMMDilatedConvolutionLayerFixture<half>, fra
                                                                                                                       framework::dataset::make("ActivationLayerInfo", ActivationLayerInfo())))
 {
     // Validate output
-    validate(Accessor(_target), _reference, tolerance_f16);
+    validate(Accessor(_target), _reference, rel_tolerance_f16, tolerance_num_f16, abs_tolerance_f16);
 }
 TEST_SUITE_END()
 #endif /* __ARM_FEATURE_FP16_VECTOR_ARITHMETIC */
