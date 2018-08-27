@@ -43,9 +43,10 @@ namespace validation
 namespace
 {
 /** Tolerance for float operations */
-RelativeTolerance<float>            tolerance_f32(0.05f);
-RelativeTolerance<half_float::half> tolerance_f16(half(0.2));
-constexpr float                     tolerance_num = 0.07f; /**< Tolerance number */
+constexpr RelativeTolerance<float>  rel_tolerance_f32(0.05f);   /**< Relative tolerance value for comparing reference's output against implementation's output for DataType:F32 */
+constexpr AbsoluteTolerance<float>  abs_tolerance_f32(0.0001f); /**< Absolute tolerance value for comparing reference's output against implementation's output for DataType::F32 */
+RelativeTolerance<half_float::half> tolerance_f16(half(0.2));   /**< Relative tolerance value for comparing reference's output against implementation's output for DataType::F16 */
+constexpr float                     tolerance_num = 0.07f;      /**< Tolerance number */
 
 /** Tolerance for quantized asymmetric operations */
 constexpr AbsoluteTolerance<uint8_t> tolerance_qasymm8(1);
@@ -187,13 +188,13 @@ FIXTURE_DATA_TEST_CASE(RunSmall, CLFullyConnectedLayerFixture<float>, framework:
                                                                                                                  framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32);
+    validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0, abs_tolerance_f32);
 }
 FIXTURE_DATA_TEST_CASE(RunLarge, CLFullyConnectedLayerFixture<float>, framework::DatasetMode::NIGHTLY, combine(combine(datasets::LargeFullyConnectedLayerDataset(), FullyConnectedParameters),
                                                                                                                framework::dataset::make("DataType", DataType::F32)))
 {
     // Validate output
-    validate(CLAccessor(_target), _reference, tolerance_f32);
+    validate(CLAccessor(_target), _reference, rel_tolerance_f32, 0, abs_tolerance_f32);
 }
 TEST_SUITE_END()
 TEST_SUITE_END()
