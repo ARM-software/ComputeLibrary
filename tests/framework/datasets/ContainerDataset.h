@@ -26,6 +26,7 @@
 
 #include "Dataset.h"
 #include "support/ToolchainSupport.h"
+#include "tests/TypePrinter.h"
 
 #include <string>
 #include <tuple>

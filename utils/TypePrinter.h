@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __ARM_COMPUTE_TEST_TYPE_PRINTER_H__
-#define __ARM_COMPUTE_TEST_TYPE_PRINTER_H__
+#ifndef __ARM_COMPUTE_TYPE_PRINTER_H__
+#define __ARM_COMPUTE_TYPE_PRINTER_H__
 
 #include "arm_compute/core/CL/CLTypes.h"
 #include "arm_compute/core/CPP/CPPTypes.h"
@@ -34,8 +34,6 @@
 #include "arm_compute/core/Strides.h"
 #include "arm_compute/core/TensorInfo.h"
 #include "arm_compute/core/Types.h"
-
-#include "tests/Types.h"
 
 #include <ostream>
 #include <sstream>
@@ -1342,46 +1340,6 @@ inline std::string to_string(const arm_compute::MagnitudeType &type)
     return str.str();
 }
 
-/** Formatted output of the GradientDimension type.
- *
- * @param[out] os  Output stream
- * @param[in]  dim Type to output
- *
- * @return Modified output stream.
- */
-inline ::std::ostream &operator<<(::std::ostream &os, const GradientDimension &dim)
-{
-    switch(dim)
-    {
-        case GradientDimension::GRAD_X:
-            os << "GRAD_X";
-            break;
-        case GradientDimension::GRAD_Y:
-            os << "GRAD_Y";
-            break;
-        case GradientDimension::GRAD_XY:
-            os << "GRAD_XY";
-            break;
-        default:
-            ARM_COMPUTE_ERROR("NOT_SUPPORTED!");
-    }
-
-    return os;
-}
-
-/** Formatted output of the GradientDimension type.
- *
- * @param[in] type Type to output
- *
- * @return Formatted string.
- */
-inline std::string to_string(const arm_compute::GradientDimension &type)
-{
-    std::stringstream str;
-    str << type;
-    return str.str();
-}
-
 /** Formatted output of the HOGNormType type.
  *
  * @param[out] os        Output stream
@@ -1789,4 +1747,5 @@ inline std::string to_string(const T &val)
 }
 
 } // namespace arm_compute
-#endif /* __ARM_COMPUTE_TEST_TYPE_PRINTER_H__ */
+
+#endif /* __ARM_COMPUTE_TYPE_PRINTER_H__ */
