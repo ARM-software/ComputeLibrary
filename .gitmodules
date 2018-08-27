@@ -1,6 +1,6 @@
 [submodule "data"]
 	path = data
-	url = http://mpd-gerrit.cambridge.arm.com/ecosystems/data
+	url = https://git.research.arm.com/ComputeLibrary/data.git
 	branch = master
 [submodule "3rdparty"]
 	path = 3rdparty
