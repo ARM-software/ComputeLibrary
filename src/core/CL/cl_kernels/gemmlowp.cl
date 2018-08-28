@@ -24,13 +24,13 @@
 #include "helpers.h"
 #include "helpers_asymm.h"
 
-#if defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED)
-#if defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED)
+#if defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
+#if defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)
 #define ARM_DOT(x0, x1, x2, x3, y0, y1, y2, y3, val) val = arm_dot_acc((uchar4)(x0, x1, x2, x3), (uchar4)(y0, y1, y2, y3), val);
-#else // defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED)
+#else // defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)
 #define ARM_DOT(x0, x1, x2, x3, y0, y1, y2, y3, val) val += arm_dot((uchar4)(x0, x1, x2, x3), (uchar4)(y0, y1, y2, y3));
-#endif // defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED)
-#endif // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED)
+#endif // defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)
+#endif // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 
 #if defined(COLS_B) && defined(MULT_INTERLEAVE4X4_HEIGHT) && defined(TRANSPOSE1XW_WIDTH_STEP)
 /** This OpenCL kernel computes the matrix multiplication between matrix A (src0) and matrix B (src1)
@@ -423,7 +423,7 @@ __kernel void gemmlowp_mm_interleaved_transposed_bifrost(IMAGE_DECLARATION(src0)
     vstore4((int4)(c30, c31, c32, c33), 0, (__global int *)(offset(&dst, 0, 3)));
 }
 
-#if ARM_COMPUTE_OPENCL_DOT8_ENABLED
+#if defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 /** This OpenCL kernel is optimized for Bifrost and computes the matrix multiplication between matrix A (src0) and matrix B (src1)
  *  Matrix A and matrix B must be reshaped respectively with @ref CLGEMMInterleave4x4Kernel and @ref CLGEMMTranspose1xWKernel before running the matrix multiplication
  *
@@ -587,7 +587,7 @@ __kernel void gemmlowp_mm_interleaved_transposed_bifrost_dot8(IMAGE_DECLARATION(
     vstore4((int4)(c20, c21, c22, c23), 0, (__global int *)(offset(&dst, 0, 2)));
     vstore4((int4)(c30, c31, c32, c33), 0, (__global int *)(offset(&dst, 0, 3)));
 }
-#endif // ARM_COMPUTE_OPENCL_DOT8_ENABLED
+#endif // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 
 #endif // defined(COLS_B) && defined(MULT_INTERLEAVE4X4_HEIGHT) && defined(TRANSPOSE1XW_WIDTH_STEP)
 
@@ -1094,7 +1094,7 @@ __kernel void gemmlowp_mm_bifrost(IMAGE_DECLARATION(src0),
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
 }
 
-#if ARM_COMPUTE_OPENCL_DOT8_ENABLED
+#if defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 /** OpenCL kernel optimized to use dot product that computes the matrix multiplication between matrix A (src0) and matrix B (src1) in case both matrices have not beed reshaped
  *
  * @attention The number of matrix A columns needs to be passed at compile time using -DCOLS_A
@@ -1339,7 +1339,7 @@ __kernel void gemmlowp_mm_bifrost_dot8(IMAGE_DECLARATION(src0),
     vstore4((int4)(acc40, acc41, acc42, acc43), 0, (__global int *)(offset(&dst, 0, 4)));
 #endif // NUM_ELEMS_PROCESSED_PER_THREAD_Y > 4
 }
-#endif // ARM_COMPUTE_OPENCL_DOT8_ENABLED
+#endif // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 
 #endif // defined(NUM_ELEMS_PROCESSED_PER_THREAD_X) && defined(NUM_ELEMS_PROCESSED_PER_THREAD_Y) && defined(COLS_A)
 

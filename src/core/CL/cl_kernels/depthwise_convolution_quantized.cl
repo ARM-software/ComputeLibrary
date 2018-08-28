@@ -37,13 +37,13 @@
 #define ACTIVATION_FUNC(x) (x)
 #endif /* defined(FUSED_ACTIVATION) */
 
-#if defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED)
-#if defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED)
+#if defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
+#if defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)
 #define ARM_DOT(x0, x1, x2, x3, y0, y1, y2, y3, val) val = arm_dot_acc((uchar4)(x0, x1, x2, x3), (uchar4)(y0, y1, y2, y3), val);
-#else // defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED)
+#else // defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)
 #define ARM_DOT(x0, x1, x2, x3, y0, y1, y2, y3, val) val += arm_dot((uchar4)(x0, x1, x2, x3), (uchar4)(y0, y1, y2, y3));
-#endif // defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED)
-#endif // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED)
+#endif // defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)
+#endif // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 
 #if defined(CONV_STRIDE_Y) && defined(CONV_STRIDE_X) && defined(DEPTH_MULTIPLIER)
 
@@ -51,7 +51,7 @@
 #error "Stride X not supported"
 #endif /* CONV_STRIDE_X > 3 */
 
-#if !defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED)
+#if !(defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8))
 
 #if CONV_STRIDE_X == 1
 #define GET_VALUES(first_value, left, middle, right)                              \
@@ -260,7 +260,7 @@ __kernel void depthwise_convolution_3x3_quantized_nchw(
 #endif /* CONV_STRIDE_Y == 1 */
 }
 
-#else // !defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED)
+#else // !(defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8))
 
 #if CONV_STRIDE_X == 1
 #define GET_VALUES(first_value, left, middle, right)                 \
@@ -499,7 +499,7 @@ __kernel void depthwise_convolution_3x3_quantized_dot8_nchw(
 #endif /* CONV_STRIDE_Y == 1 */
 }
 
-#endif // ARM_COMPUTE_OPENCL_DOT8_ENABLED
+#endif // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 
 #endif /* defined(CONV_STRIDE_Y) && defined(CONV_STRIDE_X) && defined(DEPTH_MULTIPLIER) */
 
@@ -523,7 +523,7 @@ __kernel void depthwise_convolution_3x3_quantized_dot8_nchw(
 #define MULTIPLY_ADD_ACCUMULATE(x, y, acc, sum) MULTIPLY_ADD(x, y, acc)
 #endif /* WEIGHTS_OFFSET != 0 */
 
-#if defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED)
+#if defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 #define DOT_PRODUCT(acc, val0, val1, val2, val3, val4, val5, val6, val7, val8, w0, w1, w2, w3, w4, w5, w6, w7, w8) \
     ({                                                                                                             \
         ARM_DOT(val0.s0, val1.s0, val2.s0, val3.s0, w0.s0, w1.s0, w2.s0, w3.s0, acc.s0);                           \
@@ -553,7 +553,7 @@ __kernel void depthwise_convolution_3x3_quantized_dot8_nchw(
 #define DOT_PRODUCT_ACCUMULATE(acc, sum, val0, val1, val2, val3, val4, val5, val6, val7, val8, w0, w1, w2, w3, w4, w5, w6, w7, w8) DOT_PRODUCT(acc, val0, val1, val2, val3, val4, val5, val6, val7, val8, w0, w1, w2, w3, w4, w5, w6, w7, w8)
 #endif /* WEIGHTS_OFFSET != 0 */
 
-#endif // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED)
+#endif // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 
 #if defined(CONV_STRIDE_X) && defined(CONV_STRIDE_Y)
 /** This function computes the depthwise convolution quantized for NHWC data layout when the stride along the width or height is not 1.
@@ -954,7 +954,7 @@ __kernel void depthwise_convolution_3x3_quantized_nhwc_stride1(
     }
 }
 
-#if ARM_COMPUTE_OPENCL_DOT8_ENABLED
+#if defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 /** This function computes the depthwise convolution quantized for NHWC data layout when the stride along the width and height is 1 using dot product
  *
  * @note The number of elements read per thread must be passed at compile time using -DVEC_SIZE (e.g. -DVEC_SIZE=2)
@@ -1159,7 +1159,7 @@ __kernel void depthwise_convolution_3x3_quantized_dot8_nhwc_stride1(
         (res3, 0, dst_addr + 1 * dst_stride_y + 1 * dst_stride_z);
     }
 }
-#endif // ARM_COMPUTE_OPENCL_DOT8_ENABLED
+#endif // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 
 #endif // defined(NUM_ROWS_PROCESSED) && defined(NUM_PLANES_PROCESSED)
 

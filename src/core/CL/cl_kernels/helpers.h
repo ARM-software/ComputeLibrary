@@ -24,23 +24,21 @@
 #ifndef ARM_COMPUTE_HELPER_H
 #define ARM_COMPUTE_HELPER_H
 
-#if defined(ARM_COMPUTE_OPENCL_FP16_ENABLED)
+#if defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(cl_khr_fp16)
 #pragma OPENCL EXTENSION cl_khr_fp16 : enable
-#endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED)
+#endif // defined(ARM_COMPUTE_OPENCL_FP16_ENABLED) && defined(cl_khr_fp16)
 
-#if defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED)
+#if defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 #pragma OPENCL EXTENSION cl_arm_integer_dot_product_int8 : enable
-#endif // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED)
+#endif // defined(ARM_COMPUTE_OPENCL_DOT8_ENABLED) && defined(cl_arm_integer_dot_product_int8)
 
-#if defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED)
+#if defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)
 #pragma OPENCL EXTENSION cl_arm_integer_dot_product_accumulate_int8 : enable
-#endif // defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED)
+#endif // defined(ARM_COMPUTE_OPENCL_DOT8_ACC_ENABLED) && defined(cl_arm_integer_dot_product_accumulate_int8)
 
-#if defined(ARM_COMPUTE_DEBUG_ENABLED)
-#if defined(cl_arm_printf)
+#if defined(ARM_COMPUTE_DEBUG_ENABLED) && defined(cl_arm_printf)
 #pragma OPENCL EXTENSION cl_arm_printf : enable
-#endif // defined(cl_arm_printf)
-#endif // defined(ARM_COMPUTE_DEBUG_ENABLED)
+#endif defined(ARM_COMPUTE_DEBUG_ENABLED) && defined(cl_arm_printf)
 
 #define EXPAND(x) x
 
