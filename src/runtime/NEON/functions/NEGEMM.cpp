@@ -218,6 +218,12 @@ Status NEGEMM::validate(const ITensorInfo *a, const ITensorInfo *b, const ITenso
         ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMMatrixMultiplyKernel::validate(matrix_a_info, matrix_b_info, &tmp_output_info, alpha, run_interleave_transpose, reshape_info));
     }
 
+    // Validate matrix addition kernel
+    if(beta != 0 && c != nullptr)
+    {
+        ARM_COMPUTE_RETURN_ON_ERROR(NEGEMMMatrixAdditionKernel::validate(c, output, beta));
+    }
+
     return Status{};
 }
 
