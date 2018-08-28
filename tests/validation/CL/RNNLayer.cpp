@@ -40,7 +40,7 @@ namespace validation
 namespace
 {
 RelativeTolerance<float> tolerance_f32(0.001f);
-RelativeTolerance<half>  tolerance_f16(half(0.1));
+RelativeTolerance<half>  tolerance_f16(half(0.2));
 } // namespace
 
 TEST_SUITE(CL)
