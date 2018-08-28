@@ -145,7 +145,7 @@ private:
     CommonGraphParams  common_params;
     Stream             graph;
 
-    BranchLayer get_inception_node(const std::string &data_path, std::string &&param_path, DataLayout weights_layout,
+    ConcatLayer get_inception_node(const std::string &data_path, std::string &&param_path, DataLayout weights_layout,
                                    unsigned int a_filt,
                                    std::tuple<unsigned int, unsigned int> b_filters,
                                    std::tuple<unsigned int, unsigned int> c_filters,
@@ -197,7 +197,7 @@ private:
                 PadStrideInfo(1, 1, 0, 0))
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
-        return BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_a), std::move(i_b), std::move(i_c), std::move(i_d));
+        return ConcatLayer(std::move(i_a), std::move(i_b), std::move(i_c), std::move(i_d));
     }
 };
 

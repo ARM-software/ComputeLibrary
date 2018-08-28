@@ -228,7 +228,7 @@ private:
                          PadStrideInfo(1, 1, 0, 0))
                      .set_name(unit_name + "conv3/convolution");
 
-            graph << BranchLayer(BranchMergeMethod::ADD, std::move(shortcut), std::move(residual)).set_name(unit_name + "add");
+            graph << EltwiseLayer(std::move(shortcut), std::move(residual), EltwiseOperation::Add).set_name(unit_name + "add");
         }
     }
 };

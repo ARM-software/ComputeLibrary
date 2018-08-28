@@ -226,7 +226,7 @@ private:
         {
             // Add residual node
             SubStream right(graph);
-            graph << BranchLayer(BranchMergeMethod::ADD, std::move(left), std::move(right)).set_name(param_path + "/add");
+            graph << EltwiseLayer(std::move(left), std::move(right), EltwiseOperation::Add).set_name(param_path + "/add");
         }
         else
         {

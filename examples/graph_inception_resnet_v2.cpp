@@ -316,7 +316,7 @@ private:
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name("Mixed_5b/Branch_3/Conv2d_0b_1x1/Relu");
 
         // Concatenate
-        graph << BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_a), std::move(i_b), std::move(i_c), std::move(i_d)).set_name("Mixed_5a/concat");
+        graph << ConcatLayer(std::move(i_a), std::move(i_b), std::move(i_c), std::move(i_d)).set_name("Mixed_5a/concat");
     }
 
     void block_mixed_6a(const std::string &data_path, DataLayout weights_layout)
@@ -380,7 +380,7 @@ private:
         i_c << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0), true)).set_name("Mixed_6a/Branch_2/MaxPool_1a_3x3");
 
         // Concatenate
-        graph << BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_a), std::move(i_b), std::move(i_c)).set_name("Mixed_6a/concat");
+        graph << ConcatLayer(std::move(i_a), std::move(i_b), std::move(i_c)).set_name("Mixed_6a/concat");
     }
 
     void block_mixed_7a(const std::string &data_path, DataLayout weights_layout)
@@ -483,7 +483,7 @@ private:
         i_d << PoolingLayer(PoolingLayerInfo(PoolingType::MAX, 3, PadStrideInfo(2, 2, 0, 0, DimensionRoundingType::CEIL), true)).set_name("Mixed_7a/Branch_3/MaxPool_1a_3x3");
 
         // Concatenate
-        graph << BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_a), std::move(i_b), std::move(i_c), std::move(i_d)).set_name("Mixed_7a/concat");
+        graph << ConcatLayer(std::move(i_a), std::move(i_b), std::move(i_c), std::move(i_d)).set_name("Mixed_7a/concat");
     }
 
     void block35_repeat(const std::string &data_path, DataLayout weights_layout, unsigned int num_blocks)
@@ -584,7 +584,7 @@ private:
                  << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(unit_name + "Branch_2/Conv2d_0c_3x3/Relu");
 
             // Concatenate
-            i_l << BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_la), std::move(i_lb), std::move(i_lc)).set_name(unit_name + "concat")
+            i_l << ConcatLayer(std::move(i_la), std::move(i_lb), std::move(i_lc)).set_name(unit_name + "concat")
                 << ConvolutionLayer(1U, 1U, 320U,
                                     get_weights_accessor(data_path, unit_path + "Conv2d_1x1_weights.npy", weights_layout),
                                     get_weights_accessor(data_path, unit_path + "Conv2d_1x1_biases.npy", weights_layout),
@@ -592,7 +592,7 @@ private:
                 .set_name(unit_name + "Conv2d_1x1/convolution")
                 << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LINEAR, 0.17f, 0.f)).set_name(unit_name + "mul");
 
-            graph << BranchLayer(BranchMergeMethod::ADD, std::move(i_l), std::move(i_r)).set_name(unit_name + "add")
+            graph << EltwiseLayer(std::move(i_l), std::move(i_r), EltwiseOperation::Add).set_name(unit_name + "add")
                   << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(unit_name + "Relu");
         }
     }
@@ -668,7 +668,7 @@ private:
                  << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(unit_name + "Branch_1/Conv2d_0c_7x1/Relu");
 
             // Concatenate
-            i_l << BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_la), std::move(i_lb)).set_name(unit_name + "concat")
+            i_l << ConcatLayer(std::move(i_la), std::move(i_lb)).set_name(unit_name + "concat")
                 << ConvolutionLayer(1U, 1U, 1088U,
                                     get_weights_accessor(data_path, unit_path + "Conv2d_1x1_weights.npy", weights_layout),
                                     get_weights_accessor(data_path, unit_path + "Conv2d_1x1_biases.npy", weights_layout),
@@ -676,7 +676,7 @@ private:
                 .set_name(unit_name + "Conv2d_1x1/convolution")
                 << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LINEAR, 0.10f, 0.f)).set_name(unit_name + "mul");
 
-            graph << BranchLayer(BranchMergeMethod::ADD, std::move(i_l), std::move(i_r)).set_name(unit_name + "add")
+            graph << EltwiseLayer(std::move(i_l), std::move(i_r), EltwiseOperation::Add).set_name(unit_name + "add")
                   << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(unit_name + "Relu");
         }
     }
@@ -760,7 +760,7 @@ private:
                  << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU)).set_name(unit_name + "Branch_1/Conv2d_0c_3x1/Relu");
 
             // Concatenate
-            i_l << BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_la), std::move(i_lb)).set_name(unit_name + "concat")
+            i_l << ConcatLayer(std::move(i_la), std::move(i_lb)).set_name(unit_name + "concat")
                 << ConvolutionLayer(1U, 1U, 2080U,
                                     get_weights_accessor(data_path, unit_path + "Conv2d_1x1_weights.npy", weights_layout),
                                     get_weights_accessor(data_path, unit_path + "Conv2d_1x1_biases.npy", weights_layout),
@@ -774,7 +774,7 @@ private:
             }
 
             // Residual add
-            graph << BranchLayer(BranchMergeMethod::ADD, std::move(i_l), std::move(i_r)).set_name(unit_name + "add");
+            graph << EltwiseLayer(std::move(i_l), std::move(i_r), EltwiseOperation::Add).set_name(unit_name + "add");
 
             // Apply activation if needed
             if(has_activation)

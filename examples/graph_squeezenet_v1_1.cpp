@@ -180,7 +180,7 @@ private:
     CommonGraphParams  common_params;
     Stream             graph;
 
-    BranchLayer get_expand_fire_node(const std::string &data_path, std::string &&param_path, DataLayout weights_layout,
+    ConcatLayer get_expand_fire_node(const std::string &data_path, std::string &&param_path, DataLayout weights_layout,
                                      unsigned int expand1_filt, unsigned int expand3_filt)
     {
         std::string total_path = "/cnn_data/squeezenet_v1_1_model/" + param_path + "_";
@@ -200,7 +200,7 @@ private:
                 PadStrideInfo(1, 1, 1, 1))
             << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::RELU));
 
-        return BranchLayer(BranchMergeMethod::DEPTH_CONCATENATE, std::move(i_a), std::move(i_b));
+        return ConcatLayer(std::move(i_a), std::move(i_b));
     }
 };
 

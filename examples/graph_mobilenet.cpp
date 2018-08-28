@@ -272,7 +272,7 @@ private:
                   PadStrideInfo(1U, 1U, 0U, 0U), 1, conv_weights_quant_info.at(1));
     }
 
-    BranchLayer get_dwsc_node_float(const std::string &data_path, std::string &&param_path,
+    ConcatLayer get_dwsc_node_float(const std::string &data_path, std::string &&param_path,
                                     unsigned int  conv_filt,
                                     PadStrideInfo dwc_pad_stride_info, PadStrideInfo conv_pad_stride_info)
     {
@@ -307,10 +307,10 @@ private:
            .set_name(total_path + "pointwise/BatchNorm")
            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::BOUNDED_RELU, 6.f)).set_name(total_path + "pointwise/Relu6");
 
-        return BranchLayer(std::move(sg));
+        return ConcatLayer(std::move(sg));
     }
 
-    BranchLayer get_dwsc_node_qasymm(const std::string &data_path, std::string &&param_path,
+    ConcatLayer get_dwsc_node_qasymm(const std::string &data_path, std::string &&param_path,
                                      const unsigned int conv_filt,
                                      PadStrideInfo dwc_pad_stride_info, PadStrideInfo conv_pad_stride_info,
                                      QuantizationInfo depth_weights_quant_info, QuantizationInfo point_weights_quant_info)
@@ -331,7 +331,7 @@ private:
                conv_pad_stride_info, 1, point_weights_quant_info)
            << ActivationLayer(ActivationLayerInfo(ActivationLayerInfo::ActivationFunction::LU_BOUNDED_RELU, 6.f));
 
-        return BranchLayer(std::move(sg));
+        return ConcatLayer(std::move(sg));
     }
 };
 
