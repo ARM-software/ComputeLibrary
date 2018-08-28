@@ -724,9 +724,8 @@ Example:
 
 For Linux, the library was successfully built and tested using the following Linaro GCC toolchain:
 
- - gcc-linaro-arm-linux-gnueabihf-4.9-2014.07_linux
+ - gcc-linaro-4.9-2016.02-x86_64_arm-linux-gnueabihf
  - gcc-linaro-4.9-2016.02-x86_64_aarch64-linux-gnu
- - gcc-linaro-6.3.1-2017.02-i686_aarch64-linux-gnu
 
 To cross-compile the library in debug mode, with NEON only support, for Linux 32bit:
 
